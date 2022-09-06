@@ -1,16 +1,20 @@
 -- premake5.lua
 workspace "lsfdrmfg"
     configurations { "Debug", "Release" }
-    platforms { "x64" }
-    location ""
+    platforms { "x64", "x86" }
     libdirs { "Build/%{cfg.platform}/%{cfg.buildcfg}" }
     targetdir "Build/%{cfg.platform}/%{cfg.buildcfg}"
- 
+    inheritdependencies "On"
+    allmodulespublic "On"
+
     filter "platforms:x64"
         architecture "x64"
+
+    filter "platforms:x86"
+        architecture "x86"
   
     filter "configurations:Debug"
-        defines { "DEBUG" }
+        defines { "DEBUG", "GALAXY_EXPORT" }
         flags { }
         cppdialect "C++14"
         symbols "On"
@@ -18,59 +22,117 @@ workspace "lsfdrmfg"
         optimize "Off"
         
     filter "configurations:Release"
-        defines { "NDEBUG" }
+        defines { "NDEBUG", "GALAXY_EXPORT" }
         flags { "LinkTimeOptimization" }
         staticruntime "On"
         omitframepointer "On"
         cppdialect "C++14"
         optimize "Full"
-        
+     
 project "ENet"
     kind "StaticLib"
     language "C++"
-    location ""
 
-    files { "Vendor/ENet/Source/**" }
-    includedirs { "Vendor/ENet/Source/include" }
-
-project "Common.Shared"
-    kind "StaticLib"
-    language "C++"
-    location ""
-
-    files { "Common/Common.Shared/**" }
     includedirs 
     { 
         "Vendor/ENet/Source/include",
+        "Vendor/galaxy/Include/galaxy",
+        "Vendor/cereal-1.1.2/include",
+        "Common/Common.Version",
+        "Common/Common.Shared",
+    }
+
+    files { "Vendor/ENet/Source/**" }
+
+    filter "system:windows"
+        links { "ws2_32", "Winmm" }
+
+    filter "system:unix"
+        system "linux"
+
+project "Common.Version"
+    kind "StaticLib"
+    language "C++"
+
+    includedirs 
+    { 
+        "Vendor/ENet/Source/include",
+        "Vendor/galaxy/Include/galaxy",
         "Vendor/cereal-1.1.2/include",
         "Common/Common.Version",
         "Common/Common.Shared"
     }
 
-project "Common.Version"
+    files { "Common/Common.Version/**" }
+
+project "Common.Shared"
     kind "StaticLib"
     language "C++"
-    location ""
-
-    files { "Common/Common.Version/**" }
-    includedirs { "Common/Common.Version" }
-
-project "lsfdrmfg-svr"
-    kind "ConsoleApp"
-    language "C++"
-    location ""
-   
-    files { "Server/Server.Application/**" }
-    removefiles { "**.vcxproj", "**.filters", "**.user", "**.rc" }
 
     includedirs 
     { 
         "Vendor/ENet/Source/include",
+        "Vendor/galaxy/Include/galaxy",
         "Vendor/cereal-1.1.2/include",
-        "Common/Common.Shared",
-        "Server/Server.Application"     
+        "Common/Common.Version",
+        "Common/Common.Shared"
     }
+
+    links { "ENet", "Common.Version" }
+    files { "Common/Common.Shared/**" }
+
+
+project "lsfdrmfg-client"
+    kind "SharedLib"
+    language "C++"
+
+    includedirs 
+    { 
+        "Vendor/ENet/Source/include",
+        "Vendor/galaxy/Include/galaxy",
+        "Vendor/cereal-1.1.2/include",
+        "Common/Common.Version",
+        "Common/Common.Shared"
+    }
+
+    files { "Client/**" }
+    removefiles { "**.vcxproj", "**.filters", "**.user", "**.rc" }
     
-    links { "ENet" }
     links { "Common.Shared" }
-    links { "Common.Version" }
+    
+    filter "platforms:x64"
+        files { "Galaxy64.def" }
+        targetname ("Galaxy64")
+
+    filter "platforms:x86"
+        files { "Galaxy.def" }
+        targetname ("Galaxy")
+
+
+
+project "lsfdrmfg-svr"
+    kind "ConsoleApp"
+    language "C++"
+
+    includedirs 
+    { 
+        "Vendor/ENet/Source/include",
+        "Vendor/galaxy/Include/galaxy",
+        "Vendor/cereal-1.1.2/include",
+        "Common/Common.Version",
+        "Common/Common.Shared"
+    }
+
+    files { "Server/**" }
+    removefiles { "**.vcxproj", "**.filters", "**.user", "**.rc" }
+
+    links { "Common.Shared" }
+
+    filter "platforms:x64"
+        targetname ("GalaxyServer64")
+
+    filter "platforms:x86"
+        targetname ("GalaxyServer")
+
+
+

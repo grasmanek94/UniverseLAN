@@ -44,16 +44,6 @@ const uint32_t PlayerSpawn::GetModelHash() const
 	return model_hash;
 }
 
-void PlayerSpawn::GetPosition(Vector3& _position) const
-{
-	_position = position;
-}
-
-void PlayerSpawn::GetRotation(Vector3& _rotation) const
-{
-	_rotation = rotation;
-}
-
 const size_t PlayerSpawn::GetSender() const
 {
 	return sender;
@@ -62,16 +52,6 @@ const size_t PlayerSpawn::GetSender() const
 void PlayerSpawn::SetModelHash(uint32_t hash)
 {
 	model_hash = hash;
-}
-
-void PlayerSpawn::SetPosition(const Vector3& _position)
-{
-	position = _position;
-}
-
-void PlayerSpawn::SetRotation(const Vector3& _rotation)
-{
-	rotation = _rotation;
 }
 
 void PlayerSpawn::SetSender(size_t id)

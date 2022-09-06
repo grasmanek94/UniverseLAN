@@ -19,33 +19,33 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{C20F5DAA-AEDD-50B0-9771-C1D683DE2C15}</ProjectGuid>
+    <ProjectGuid>{06E0B2E2-726B-20A7-7B7C-A39BE7867CA7}</ProjectGuid>
     <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Common.Version</RootNamespace>
+    <RootNamespace>lsfdrmfg-client</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
@@ -68,31 +68,35 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
     <OutDir>Build\x64\Debug\</OutDir>
-    <IntDir>obj\x64\Debug\Common.Version\</IntDir>
-    <TargetName>Common.Version</TargetName>
-    <TargetExt>.lib</TargetExt>
+    <IntDir>obj\x64\Debug\lsfdrmfg-client\</IntDir>
+    <TargetName>Galaxy64</TargetName>
+    <TargetExt>.dll</TargetExt>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
     <OutDir>Build\x86\Debug\</OutDir>
-    <IntDir>obj\x86\Debug\Common.Version\</IntDir>
-    <TargetName>Common.Version</TargetName>
-    <TargetExt>.lib</TargetExt>
+    <IntDir>obj\x86\Debug\lsfdrmfg-client\</IntDir>
+    <TargetName>Galaxy</TargetName>
+    <TargetExt>.dll</TargetExt>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
     <OutDir>Build\x64\Release\</OutDir>
-    <IntDir>obj\x64\Release\Common.Version\</IntDir>
-    <TargetName>Common.Version</TargetName>
-    <TargetExt>.lib</TargetExt>
+    <IntDir>obj\x64\Release\lsfdrmfg-client\</IntDir>
+    <TargetName>Galaxy64</TargetName>
+    <TargetExt>.dll</TargetExt>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
     <OutDir>Build\x86\Release\</OutDir>
-    <IntDir>obj\x86\Release\Common.Version\</IntDir>
-    <TargetName>Common.Version</TargetName>
-    <TargetExt>.lib</TargetExt>
+    <IntDir>obj\x86\Release\lsfdrmfg-client\</IntDir>
+    <TargetName>Galaxy</TargetName>
+    <TargetExt>.dll</TargetExt>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -110,10 +114,10 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-    <Lib>
       <AdditionalLibraryDirectories>Build\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Lib>
+      <ImportLibrary>Build\x64\Debug\Galaxy64.lib</ImportLibrary>
+      <ModuleDefinitionFile>Galaxy64.def</ModuleDefinitionFile>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -130,10 +134,10 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-    <Lib>
       <AdditionalLibraryDirectories>Build\x86\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Lib>
+      <ImportLibrary>Build\x86\Debug\Galaxy.lib</ImportLibrary>
+      <ModuleDefinitionFile>Galaxy.def</ModuleDefinitionFile>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -155,10 +159,10 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-    </Link>
-    <Lib>
       <AdditionalLibraryDirectories>Build\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Lib>
+      <ImportLibrary>Build\x64\Release\Galaxy64.lib</ImportLibrary>
+      <ModuleDefinitionFile>Galaxy64.def</ModuleDefinitionFile>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -180,23 +184,26 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-    </Link>
-    <Lib>
       <AdditionalLibraryDirectories>Build\x86\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Lib>
+      <ImportLibrary>Build\x86\Release\Galaxy.lib</ImportLibrary>
+      <ModuleDefinitionFile>Galaxy.def</ModuleDefinitionFile>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Common\Common.Version\Version.hxx" />
-    <ClInclude Include="Common\Common.Version\auto_version.h" />
-    <ClInclude Include="Common\Common.Version\resource.h" />
-    <ClInclude Include="Common\Common.Version\stringize.h" />
+    <ClCompile Include="Client\Errors.cxx" />
+    <ClCompile Include="Client\GalaxyApi.cxx" />
+    <ClCompile Include="Client\GalaxyGameServerApi.cxx" />
+    <ClCompile Include="Client\IListenerRegistrar.cxx" />
+    <ClCompile Include="Client\Main.cxx" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Common\Common.Version\Version.cxx" />
+    <None Include="Galaxy.def" />
+    <None Include="Galaxy64.def" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Common\Common.Version\Common.Version.vcxproj" />
-    <None Include="Common\Common.Version\Common.Version.vcxproj.filters" />
+    <ProjectReference Include="Common.Shared.vcxproj">
+      <Project>{33EDBB91-9FAD-37C8-68E8-8045D4677CA4}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

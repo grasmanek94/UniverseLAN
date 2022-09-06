@@ -1,7 +1,6 @@
 #pragma once
 #include <cstdlib>
 #include <enet/enetpp.hxx>
-#include <Math/Math.hxx>
 
 class NetPlayer
 {
@@ -11,6 +10,4 @@ public:
 	std::wstring name;
 	bool spawned;
 	uint32_t model_hash;
-	Vector3 position;
-	Vector3 rotation;
 };

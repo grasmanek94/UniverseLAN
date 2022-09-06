@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Math">
-      <UniqueIdentifier>{AFF4887C-9B2B-8A0D-4418-7010302E060F}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Networking">
       <UniqueIdentifier>{6D615D47-5919-9F94-C220-78F0AEF73985}</UniqueIdentifier>
     </Filter>
@@ -14,15 +11,6 @@
   <ItemGroup>
     <ClInclude Include="Common\Common.Shared\Common.hxx" />
     <ClInclude Include="Common\Common.Shared\IdCounter.hxx" />
-    <ClInclude Include="Common\Common.Shared\Math\Math.hxx">
-      <Filter>Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\Common.Shared\Math\Vector2.hxx">
-      <Filter>Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\Common.Shared\Math\Vector3.hxx">
-      <Filter>Math</Filter>
-    </ClInclude>
     <ClInclude Include="Common\Common.Shared\NetPlayer.hxx" />
     <ClInclude Include="Common\Common.Shared\Networking\Link.hxx">
       <Filter>Networking</Filter>

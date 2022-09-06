@@ -3,21 +3,6 @@
 OnFootSync::OnFootSync()
 { }
 
-void OnFootSync::GetPosition(Vector3& _position) const
-{
-	_position = position;
-}
-
-void OnFootSync::GetRotation(Vector3& _rotation) const
-{
-	_rotation = rotation;
-}
-
-void OnFootSync::GetVelocity(Vector3& _velocity) const
-{
-	_velocity = velocity;
-}
-
 const float OnFootSync::GetCurrentMoveBlendRatio() const
 {
 	return current_move_blend_ratio;
@@ -41,21 +26,6 @@ const bool OnFootSync::IsJumping() const
 const size_t OnFootSync::GetSender() const
 {
 	return sender;
-}
-
-void OnFootSync::SetPosition(const Vector3& _position)
-{
-	position = _position;
-}
-
-void OnFootSync::SetRotation(const Vector3& _rotation)
-{
-	rotation = _rotation;
-}
-
-void OnFootSync::SetVelocity(const Vector3& _velocity)
-{
-	velocity = _velocity;
 }
 
 void OnFootSync::SetCurrentMoveBlendRatio(float ratio)
