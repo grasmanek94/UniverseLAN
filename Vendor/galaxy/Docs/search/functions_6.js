@@ -1,0 +1,20 @@
+var searchData=
+[
+  ['info',['Info',['../classgalaxy_1_1api_1_1ILogger.html#a48787fd7db790bcebfcb1f881a822229',1,'galaxy::api::ILogger']]],
+  ['init',['Init',['../group__Peer.html#ga7d13610789657b6aebe0ba0aa542196f',1,'galaxy::api']]],
+  ['initgameserver',['InitGameServer',['../group__GameServer.html#ga521fad9446956ce69e3d11ca4a7fbc0e',1,'galaxy::api']]],
+  ['initoptions',['InitOptions',['../structgalaxy_1_1api_1_1InitOptions.html#a9eb94ef2ab0d1efc42863fccb60ec5f5',1,'galaxy::api::InitOptions']]],
+  ['isachievementvisible',['IsAchievementVisible',['../classgalaxy_1_1api_1_1IStats.html#aca68bad66bc4e7c9d87c9984dea052eb',1,'galaxy::api::IStats']]],
+  ['isachievementvisiblewhilelocked',['IsAchievementVisibleWhileLocked',['../classgalaxy_1_1api_1_1IStats.html#a23a4ce388c7a4d5f5801225081463019',1,'galaxy::api::IStats']]],
+  ['isdlcinstalled',['IsDlcInstalled',['../classgalaxy_1_1api_1_1IApps.html#a46fbdec6ec2e1b6d1a1625ba157d3aa2',1,'galaxy::api::IApps']]],
+  ['isfriend',['IsFriend',['../classgalaxy_1_1api_1_1IFriends.html#a559f639ae99def14b9ce220464806693',1,'galaxy::api::IFriends']]],
+  ['isfriendavatarimagergbaavailable',['IsFriendAvatarImageRGBAAvailable',['../classgalaxy_1_1api_1_1IFriends.html#aa448e4ca7b496850b24a6c7b430cd78b',1,'galaxy::api::IFriends']]],
+  ['islobbyjoinable',['IsLobbyJoinable',['../classgalaxy_1_1api_1_1IMatchmaking.html#a85ad3a098cc95e8e6adeef88712cdc77',1,'galaxy::api::IMatchmaking']]],
+  ['isloggedon',['IsLoggedOn',['../classgalaxy_1_1api_1_1IUser.html#a3e373012e77fd2baf915062d9e0c05b3',1,'galaxy::api::IUser']]],
+  ['isoverlayvisible',['IsOverlayVisible',['../classgalaxy_1_1api_1_1IUtils.html#a0cbd418520fe9b68d5cfd4decd02494f',1,'galaxy::api::IUtils']]],
+  ['isp2ppacketavailable',['IsP2PPacketAvailable',['../classgalaxy_1_1api_1_1INetworking.html#aebff94c689ad6ad987b24f430a456677',1,'galaxy::api::INetworking']]],
+  ['isuserdataavailable',['IsUserDataAvailable',['../classgalaxy_1_1api_1_1IUser.html#a6cc743c75fe68939408055c980f9cce0',1,'galaxy::api::IUser']]],
+  ['isuserinformationavailable',['IsUserInformationAvailable',['../classgalaxy_1_1api_1_1IFriends.html#a0fc2d00c82e5ea7d62b45508f9c66a82',1,'galaxy::api::IFriends']]],
+  ['isuserinthesamegame',['IsUserInTheSameGame',['../classgalaxy_1_1api_1_1IFriends.html#a71854226dc4df803e73710e9d4231b69',1,'galaxy::api::IFriends']]],
+  ['isvalid',['IsValid',['../classgalaxy_1_1api_1_1GalaxyID.html#ac532c4b500b1a85ea22217f2c65a70ed',1,'galaxy::api::GalaxyID']]]
+];

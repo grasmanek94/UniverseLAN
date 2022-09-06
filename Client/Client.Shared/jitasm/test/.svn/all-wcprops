@@ -1,0 +1,71 @@
+K 25
+svn:wc:ra_dav:version-url
+V 28
+/svn/!svn/ver/260/trunk/test
+END
+nasm_x64.nas
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/249/trunk/test/nasm_x64.nas
+END
+test.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/svn/!svn/ver/259/trunk/test/test.cpp
+END
+test.vcxproj.filters
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/249/trunk/test/test.vcxproj.filters
+END
+x64.asm
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/svn/!svn/ver/260/trunk/test/x64.asm
+END
+nasm_x86.nas
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/249/trunk/test/nasm_x86.nas
+END
+x86.asm
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/svn/!svn/ver/260/trunk/test/x86.asm
+END
+test.h
+K 25
+svn:wc:ra_dav:version-url
+V 35
+/svn/!svn/ver/242/trunk/test/test.h
+END
+test_backend.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/!svn/ver/260/trunk/test/test_backend.cpp
+END
+test.vcxproj
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/249/trunk/test/test.vcxproj
+END
+test.sln
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/svn/!svn/ver/230/trunk/test/test.sln
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/svn/!svn/ver/193/trunk/test/Makefile
+END

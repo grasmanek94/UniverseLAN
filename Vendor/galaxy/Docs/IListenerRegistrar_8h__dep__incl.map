@@ -1,0 +1,16 @@
+<map id="IListenerRegistrar.h" name="IListenerRegistrar.h">
+<area shape="rect" id="node1" title="Contains data structures and interfaces related to callback listeners." alt="" coords="527,5,662,32"/>
+<area shape="rect" id="node2" href="$IUser_8h.html" title="Contains data structures and interfaces related to user account." alt="" coords="770,80,833,107"/>
+<area shape="rect" id="node5" href="$IFriends_8h.html" title="Contains data structures and interfaces related to social activities." alt="" coords="371,80,450,107"/>
+<area shape="rect" id="node6" href="$IChat_8h.html" title="Contains data structures and interfaces related to chat communication with other Galaxy Users." alt="" coords="474,80,537,107"/>
+<area shape="rect" id="node7" href="$IMatchmaking_8h.html" title="Contains data structures and interfaces related to matchmaking." alt="" coords="857,80,972,107"/>
+<area shape="rect" id="node8" href="$INetworking_8h.html" title="Contains data structures and interfaces related to communicating with other Galaxy Peers." alt="" coords="997,80,1097,107"/>
+<area shape="rect" id="node9" href="$IStats_8h.html" title="Contains data structures and interfaces related to statistics, achievements and leaderboards." alt="" coords="561,80,628,107"/>
+<area shape="rect" id="node10" href="$IUtils_8h.html" title="Contains data structures and interfaces related to common activities." alt="" coords="1121,80,1183,107"/>
+<area shape="rect" id="node11" href="$IApps_8h.html" title="Contains data structures and interfaces related to application activities." alt="" coords="5,80,72,107"/>
+<area shape="rect" id="node12" href="$IStorage_8h.html" title="Contains data structures and interfaces related to storage activities." alt="" coords="97,80,178,107"/>
+<area shape="rect" id="node13" href="$ICustomNetworking_8h.html" title="Contains data structures and interfaces related to communicating with custom endpoints." alt="" coords="202,80,347,107"/>
+<area shape="rect" id="node14" href="$ITelemetry_8h.html" title="Contains data structures and interfaces related to telemetry." alt="" coords="652,80,745,107"/>
+<area shape="rect" id="node3" href="$GalaxyApi_8h.html" title="Includes all other files that are needed to work with the Galaxy library." alt="" coords="548,155,641,181"/>
+<area shape="rect" id="node4" href="$GalaxyGameServerApi_8h.html" title="Contains the main interface for controlling the Galaxy Game Server." alt="" coords="833,155,997,181"/>
+</map>

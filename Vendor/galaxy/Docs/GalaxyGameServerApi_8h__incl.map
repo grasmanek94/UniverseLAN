@@ -1,0 +1,20 @@
+<map id="GalaxyGameServerApi.h" name="GalaxyGameServerApi.h">
+<area shape="rect" id="node1" title="Contains the main interface for controlling the Galaxy Game Server." alt="" coords="503,5,667,32"/>
+<area shape="rect" id="node2" href="$GalaxyExport_8h.html" title="Contains a macro used for DLL export." alt="" coords="765,229,877,256"/>
+<area shape="rect" id="node3" href="$InitOptions_8h.html" title="Contains class that holds Galaxy initialization parameters." alt="" coords="134,80,229,107"/>
+<area shape="rect" id="node6" title=" " alt="" coords="5,229,69,256"/>
+<area shape="rect" id="node8" href="$IUser_8h.html" title="Contains data structures and interfaces related to user account." alt="" coords="377,80,439,107"/>
+<area shape="rect" id="node13" href="$IMatchmaking_8h.html" title="Contains data structures and interfaces related to matchmaking." alt="" coords="464,80,579,107"/>
+<area shape="rect" id="node14" href="$INetworking_8h.html" title="Contains data structures and interfaces related to communicating with other Galaxy Peers." alt="" coords="253,80,353,107"/>
+<area shape="rect" id="node15" href="$IUtils_8h.html" title="Contains data structures and interfaces related to common activities." alt="" coords="721,80,783,107"/>
+<area shape="rect" id="node16" href="$ITelemetry_8h.html" title="Contains data structures and interfaces related to telemetry." alt="" coords="603,80,696,107"/>
+<area shape="rect" id="node17" href="$ILogger_8h.html" title="Contains data structures and interfaces related to logging." alt="" coords="859,80,933,107"/>
+<area shape="rect" id="node18" href="$Errors_8h.html" title="Contains classes representing exceptions." alt="" coords="787,155,855,181"/>
+<area shape="rect" id="node4" href="$GalaxyAllocator_8h.html" title="Contains definition of custom memory allocator." alt="" coords="213,155,339,181"/>
+<area shape="rect" id="node5" href="$stdint_8h_source.html" title=" " alt="" coords="343,229,409,256"/>
+<area shape="rect" id="node7" href="$GalaxyThread_8h_source.html" title=" " alt="" coords="75,155,189,181"/>
+<area shape="rect" id="node9" href="$GalaxyID_8h.html" title="Contains GalaxyID, which is the class that represents the ID of an entity used by Galaxy Peer." alt="" coords="414,155,501,181"/>
+<area shape="rect" id="node11" href="$IListenerRegistrar_8h.html" title="Contains data structures and interfaces related to callback listeners." alt="" coords="525,155,659,181"/>
+<area shape="rect" id="node10" title=" " alt="" coords="457,229,527,256"/>
+<area shape="rect" id="node12" title=" " alt="" coords="560,229,624,256"/>
+</map>

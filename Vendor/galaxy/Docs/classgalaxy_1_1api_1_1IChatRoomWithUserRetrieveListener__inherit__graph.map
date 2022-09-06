@@ -1,0 +1,5 @@
+<map id="IChatRoomWithUserRetrieveListener" name="IChatRoomWithUserRetrieveListener">
+<area shape="rect" id="node1" title="Listener for the event of retrieving a chat room with a specified user." alt="" coords="11,184,197,225"/>
+<area shape="rect" id="node2" href="$classgalaxy_1_1api_1_1GalaxyTypeAwareListener.html" title=" " alt="" coords="5,80,203,136"/>
+<area shape="rect" id="node3" href="$classgalaxy_1_1api_1_1IGalaxyListener.html" title="The interface that is implemented by all specific callback listeners." alt="" coords="48,5,160,32"/>
+</map>

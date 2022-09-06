@@ -1,0 +1,5 @@
+<map id="IUserStatsAndAchievementsRetrieveListener" name="IUserStatsAndAchievementsRetrieveListener">
+<area shape="rect" id="node1" title="Listener for the event of retrieving statistics and achievements of a specified user,..." alt="" coords="43,184,229,225"/>
+<area shape="rect" id="node2" href="$classgalaxy_1_1api_1_1GalaxyTypeAwareListener.html" title=" " alt="" coords="5,80,267,136"/>
+<area shape="rect" id="node3" href="$classgalaxy_1_1api_1_1IGalaxyListener.html" title="The interface that is implemented by all specific callback listeners." alt="" coords="80,5,192,32"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="IRuntimeError" name="IRuntimeError">
+<area shape="rect" id="node1" title="The exception thrown to report errors that can only be detected during runtime." alt="" coords="5,80,107,107"/>
+<area shape="rect" id="node2" href="$classgalaxy_1_1api_1_1IError.html" title="Base interface for exceptions." alt="" coords="29,5,83,32"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="IChat.h" name="IChat.h">
+<area shape="rect" id="node1" title="Contains data structures and interfaces related to chat communication with other Galaxy Users." alt="" coords="185,5,247,32"/>
+<area shape="rect" id="node2" href="$IListenerRegistrar_8h.html" title="Contains data structures and interfaces related to callback listeners." alt="" coords="82,80,217,107"/>
+<area shape="rect" id="node6" href="$GalaxyID_8h.html" title="Contains GalaxyID, which is the class that represents the ID of an entity used by Galaxy Peer." alt="" coords="241,80,327,107"/>
+<area shape="rect" id="node3" href="$stdint_8h_source.html" title=" " alt="" coords="230,155,295,181"/>
+<area shape="rect" id="node4" title=" " alt="" coords="5,155,69,181"/>
+<area shape="rect" id="node5" href="$GalaxyExport_8h.html" title="Contains a macro used for DLL export." alt="" coords="93,155,205,181"/>
+<area shape="rect" id="node7" title=" " alt="" coords="344,155,413,181"/>
+</map>

@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/132/trunk/samples/pixel_calc
+END
+pixel_calc_jit.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/84/trunk/samples/pixel_calc/pixel_calc_jit.h
+END
+pixel_calc.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/84/trunk/samples/pixel_calc/pixel_calc.cpp
+END
+pixel_calc.vcproj
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/84/trunk/samples/pixel_calc/pixel_calc.vcproj
+END
+pixel_calc_jit.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/132/trunk/samples/pixel_calc/pixel_calc_jit.cpp
+END

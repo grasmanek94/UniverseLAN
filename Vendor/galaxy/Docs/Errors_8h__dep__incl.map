@@ -1,0 +1,6 @@
+<map id="Errors.h" name="Errors.h">
+<area shape="rect" id="node1" title="Contains classes representing exceptions." alt="" coords="174,5,242,32"/>
+<area shape="rect" id="node2" href="$GalaxyApi_8h.html" title="Includes all other files that are needed to work with the Galaxy library." alt="" coords="5,80,99,107"/>
+<area shape="rect" id="node3" href="$GalaxyExceptionHelper_8h_source.html" title=" " alt="" coords="123,80,293,107"/>
+<area shape="rect" id="node4" href="$GalaxyGameServerApi_8h.html" title="Contains the main interface for controlling the Galaxy Game Server." alt="" coords="317,80,481,107"/>
+</map>

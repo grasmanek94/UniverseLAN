@@ -1,0 +1,4 @@
+<map id="IInvalidStateError" name="IInvalidStateError">
+<area shape="rect" id="node1" title="The exception thrown to report that a method was called while the callee is in an invalid state,..." alt="" coords="5,80,124,107"/>
+<area shape="rect" id="node2" href="$classgalaxy_1_1api_1_1IError.html" title="Base interface for exceptions." alt="" coords="38,5,91,32"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="ILeaderboardEntriesRetrieveListener" name="ILeaderboardEntriesRetrieveListener">
+<area shape="rect" id="node1" title="Listener for the event of retrieving requested entries of a leaderboard." alt="" coords="11,184,194,225"/>
+<area shape="rect" id="node2" href="$classgalaxy_1_1api_1_1GalaxyTypeAwareListener.html" title=" " alt="" coords="5,80,200,136"/>
+<area shape="rect" id="node3" href="$classgalaxy_1_1api_1_1IGalaxyListener.html" title="The interface that is implemented by all specific callback listeners." alt="" coords="47,5,159,32"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classgalaxy_1_1api_1_1IError.html" title="Base interface for exceptions." alt="" coords="5,81,59,108"/>
+<area shape="rect" id="node2" href="$classgalaxy_1_1api_1_1IInvalidArgumentError.html" title="The exception thrown to report that a method was called with an invalid argument." alt="" coords="121,5,265,32"/>
+<area shape="rect" id="node3" href="$classgalaxy_1_1api_1_1IInvalidStateError.html" title="The exception thrown to report that a method was called while the callee is in an invalid state,..." alt="" coords="134,56,253,83"/>
+<area shape="rect" id="node4" href="$classgalaxy_1_1api_1_1IRuntimeError.html" title="The exception thrown to report errors that can only be detected during runtime." alt="" coords="143,107,244,133"/>
+<area shape="rect" id="node5" href="$classgalaxy_1_1api_1_1IUnauthorizedAccessError.html" title="The exception thrown when calling Galaxy interfaces while the user is not signed in and thus not auth..." alt="" coords="107,157,280,184"/>
+</map>
