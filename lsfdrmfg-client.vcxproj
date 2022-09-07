@@ -193,7 +193,20 @@
     <ClCompile Include="Client\Errors.cxx" />
     <ClCompile Include="Client\GalaxyApi.cxx" />
     <ClCompile Include="Client\GalaxyGameServerApi.cxx" />
-    <ClCompile Include="Client\IListenerRegistrar.cxx" />
+    <ClCompile Include="Client\Impl\Apps.cxx" />
+    <ClCompile Include="Client\Impl\Chat.cxx" />
+    <ClCompile Include="Client\Impl\CustomNetworking.cxx" />
+    <ClCompile Include="Client\Impl\Errors.cxx" />
+    <ClCompile Include="Client\Impl\Friends.cxx" />
+    <ClCompile Include="Client\Impl\GalaxyThread.cxx" />
+    <ClCompile Include="Client\Impl\Logger.cxx" />
+    <ClCompile Include="Client\Impl\Matchmaking.cxx" />
+    <ClCompile Include="Client\Impl\Networking.cxx" />
+    <ClCompile Include="Client\Impl\Stats.cxx" />
+    <ClCompile Include="Client\Impl\Storage.cxx" />
+    <ClCompile Include="Client\Impl\Telemetry.cxx" />
+    <ClCompile Include="Client\Impl\User.cxx" />
+    <ClCompile Include="Client\Impl\Utils.cxx" />
     <ClCompile Include="Client\Main.cxx" />
   </ItemGroup>
   <ItemGroup>

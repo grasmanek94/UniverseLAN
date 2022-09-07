@@ -92,7 +92,8 @@ project "lsfdrmfg-client"
         "Vendor/galaxy/Include/galaxy",
         "Vendor/cereal-1.1.2/include",
         "Common/Common.Version",
-        "Common/Common.Shared"
+        "Common/Common.Shared",
+        "Client"
     }
 
     files { "Client/**" }
@@ -120,7 +121,8 @@ project "lsfdrmfg-svr"
         "Vendor/galaxy/Include/galaxy",
         "Vendor/cereal-1.1.2/include",
         "Common/Common.Version",
-        "Common/Common.Shared"
+        "Common/Common.Shared",
+        "Server"
     }
 
     files { "Server/**" }
