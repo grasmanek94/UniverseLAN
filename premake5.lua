@@ -63,6 +63,9 @@ project "Common.Version"
         "Common/Common.Shared"
     }
 
+    filter { "system:windows" }
+       prebuildcommands { "Util\\UpdateVersion.bat" }
+
     files { "Common/Common.Version/**" }
 
 project "Common.Shared"
