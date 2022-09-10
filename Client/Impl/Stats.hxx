@@ -6,9 +6,9 @@
  * Contains data structures and interfaces related to statistics, achievements and leaderboards.
  */
 
-#include "IStats.h"
-#include "IListenerRegistrar.h"
-#include "GalaxyID.h"
+#include <IStats.h>
+#include <IListenerRegistrar.h>
+#include <GalaxyID.h>
 
 namespace galaxy
 {

@@ -6,9 +6,9 @@
  * Contains data structures and interfaces related to user account.
  */
 
-#include "IUser.h"
-#include "GalaxyID.h"
-#include "IListenerRegistrar.h"
+#include <IUser.h>
+#include <GalaxyID.h>
+#include <IListenerRegistrar.h>
 
 namespace galaxy
 {

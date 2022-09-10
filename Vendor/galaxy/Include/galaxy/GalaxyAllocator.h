@@ -6,7 +6,7 @@
  * Contains definition of custom memory allocator.
  */
 
-#include "stdint.h"
+#include <stdint.h>
 #include <cstddef>
 
 namespace galaxy

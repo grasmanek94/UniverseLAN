@@ -5,7 +5,7 @@
  * @file
  * Contains data structures and interfaces related to logging.
  */
-#include "ILogger.h"
+#include <ILogger.h>
 
 namespace galaxy
 {

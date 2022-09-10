@@ -5,7 +5,7 @@
  * @file
  * Contains data structures and interfaces related to application activities.
  */
-#include "IApps.h"
+#include <IApps.h>
 
 namespace galaxy
 {

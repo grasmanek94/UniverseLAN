@@ -1,15 +1,6 @@
-/**
- * @file
- * Contains data structures and interfaces related to social activities.
- */
+#include "Friends.hxx"
 
 #include <algorithm>
-
-#include "IFriends.h"
-#include "GalaxyID.h"
-#include "IListenerRegistrar.h"
-
-#include "Friends.hxx"
 
 namespace galaxy
 {

@@ -8,7 +8,7 @@
 #include "GalaxyAllocator.h"
 #include "GalaxyThread.h"
 
-#include "stdint.h"
+#include <stdint.h>
 #include <cstddef>
 
 namespace galaxy

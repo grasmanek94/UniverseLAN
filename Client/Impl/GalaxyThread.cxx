@@ -1,9 +1,6 @@
-#include <thread>
-
-#include "GalaxyAllocator.h"
-#include "GalaxyThread.h"
-
 #include "GalaxyThread.hxx"
+
+#include <thread>
 
 namespace galaxy
 {

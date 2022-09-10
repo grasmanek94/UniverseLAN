@@ -7,9 +7,9 @@
  * Galaxy Peers.
  */
 
-#include "INetworking.h"
-#include "IListenerRegistrar.h"
-#include "GalaxyID.h"
+#include <INetworking.h>
+#include <IListenerRegistrar.h>
+#include <GalaxyID.h>
 
 namespace galaxy
 {

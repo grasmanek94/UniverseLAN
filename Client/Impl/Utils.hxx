@@ -6,8 +6,8 @@
  * Contains data structures and interfaces related to common activities.
  */
 
-#include "IUtils.h"
-#include "IListenerRegistrar.h"
+#include <IUtils.h>
+#include <IListenerRegistrar.h>
 
 namespace galaxy
 {

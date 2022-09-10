@@ -6,9 +6,9 @@
  * Contains data structures and interfaces related to storage activities.
  */
 
-#include "IStorage.h"
-#include "GalaxyID.h"
-#include "IListenerRegistrar.h"
+#include <IStorage.h>
+#include <GalaxyID.h>
+#include <IListenerRegistrar.h>
 
 namespace galaxy
 {

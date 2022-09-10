@@ -6,9 +6,9 @@
  * Contains data structures and interfaces related to matchmaking.
  */
 
-#include "IMatchmaking.h"
-#include "GalaxyID.h"
-#include "IListenerRegistrar.h"
+#include <IMatchmaking.h>
+#include <GalaxyID.h>
+#include <IListenerRegistrar.h>
 
 namespace galaxy
 {

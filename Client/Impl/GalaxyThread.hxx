@@ -3,8 +3,8 @@
 
 #include <thread>
 
-#include "GalaxyAllocator.h"
-#include "GalaxyThread.h"
+#include <GalaxyAllocator.h>
+#include <GalaxyThread.h>
 
 namespace galaxy
 {

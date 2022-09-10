@@ -6,7 +6,7 @@
  * Contains data structures and interfaces related to callback listeners.
  */
 
-#include "stdint.h"
+#include <stdint.h>
 #include <stdlib.h>
 #include "GalaxyExport.h"
 

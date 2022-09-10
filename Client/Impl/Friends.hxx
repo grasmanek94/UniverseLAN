@@ -6,11 +6,9 @@
  * Contains data structures and interfaces related to social activities.
  */
 
-#include <algorithm>
-
-#include "IFriends.h"
-#include "GalaxyID.h"
-#include "IListenerRegistrar.h"
+#include <IFriends.h>
+#include <GalaxyID.h>
+#include <IListenerRegistrar.h>
 
 namespace galaxy
 {

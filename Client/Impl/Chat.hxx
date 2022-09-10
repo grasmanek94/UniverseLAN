@@ -7,9 +7,9 @@
  * with other Galaxy Users.
  */
 
-#include "IChat.h"
-#include "IListenerRegistrar.h"
-#include "GalaxyID.h"
+#include <IChat.h>
+#include <IListenerRegistrar.h>
+#include <GalaxyID.h>
 
 namespace galaxy
 {

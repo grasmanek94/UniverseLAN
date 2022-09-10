@@ -6,8 +6,8 @@
  * Contains data structures and interfaces related to telemetry.
  */
 
-#include "ITelemetry.h"
-#include "IListenerRegistrar.h"
+#include <ITelemetry.h>
+#include <IListenerRegistrar.h>
 
 namespace galaxy
 {

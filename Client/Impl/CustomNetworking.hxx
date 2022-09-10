@@ -7,8 +7,8 @@
  * @warning This API is experimental and can be changed or removed in following releases.
  */
 
-#include "ICustomNetworking.h"
-#include "IListenerRegistrar.h"
+#include <ICustomNetworking.h>
+#include <IListenerRegistrar.h>
 
 namespace galaxy
 {

@@ -6,8 +6,8 @@
  * Contains classes representing exceptions.
  */
 
-#include "Errors.h"
-#include "GalaxyExport.h"
+#include <Errors.h>
+#include <GalaxyExport.h>
 
 namespace galaxy
 {
