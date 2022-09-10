@@ -4,6 +4,8 @@
  */
 #include "ILogger.h"
 
+#include "Logger.hxx"
+
 namespace galaxy
 {
 	namespace api
@@ -13,77 +15,73 @@ namespace galaxy
 		 * @{
 		 */
 
-		/**
-		 * The interface for logging.
-		 */
-		class Logger : public ILogger
+		 /**
+		  * The interface for logging.
+		  */
+
+		Logger::~Logger()
 		{
-		public:
+		}
 
-			virtual ~Logger()
-			{
-			}
+		/**
+		 * Creates a log entry with level TRACE.
+		 *
+		 * @param [in] format Format string.
+		 * @param [in] ... Parameters for the format string.
+		 */
+		void Logger::Trace(const char* format, ...) {
 
-			/**
-			 * Creates a log entry with level TRACE.
-			 *
-			 * @param [in] format Format string.
-			 * @param [in] ... Parameters for the format string.
-			 */
-			virtual void Trace(const char* format, ...) override {
+		}
 
-			}
+		/**
+		 * Creates a log entry with level DEBUG.
+		 *
+		 * @param [in] format Format string.
+		 * @param [in] ... Parameters for the format string.
+		 */
+		void Logger::Debug(const char* format, ...) {
 
-			/**
-			 * Creates a log entry with level DEBUG.
-			 *
-			 * @param [in] format Format string.
-			 * @param [in] ... Parameters for the format string.
-			 */
-			virtual void Debug(const char* format, ...) override {
+		}
 
-			}
+		/**
+		 * Creates a log entry with level INFO.
+		 *
+		 * @param [in] format Format string.
+		 * @param [in] ... Parameters for the format string.
+		 */
+		void Logger::Info(const char* format, ...) {
 
-			/**
-			 * Creates a log entry with level INFO.
-			 *
-			 * @param [in] format Format string.
-			 * @param [in] ... Parameters for the format string.
-			 */
-			virtual void Info(const char* format, ...) override {
+		}
 
-			}
+		/**
+		 * Creates a log entry with level WARNING.
+		 *
+		 * @param [in] format Format string.
+		 * @param [in] ... Parameters for the format string.
+		 */
+		void Logger::Warning(const char* format, ...) {
 
-			/**
-			 * Creates a log entry with level WARNING.
-			 *
-			 * @param [in] format Format string.
-			 * @param [in] ... Parameters for the format string.
-			 */
-			virtual void Warning(const char* format, ...) override {
+		}
 
-			}
+		/**
+		 * Creates a log entry with level ERROR.
+		 *
+		 * @param [in] format Format string.
+		 * @param [in] ... Parameters for the format string.
+		 */
+		void Logger::Error(const char* format, ...) {
 
-			/**
-			 * Creates a log entry with level ERROR.
-			 *
-			 * @param [in] format Format string.
-			 * @param [in] ... Parameters for the format string.
-			 */
-			virtual void Error(const char* format, ...) override {
+		}
 
-			}
+		/**
+		 * Creates a log entry with level FATAL.
+		 *
+		 * @param [in] format Format string.
+		 * @param [in] ... Parameters for the format string.
+		 */
+		void Logger::Fatal(const char* format, ...) {
 
-			/**
-			 * Creates a log entry with level FATAL.
-			 *
-			 * @param [in] format Format string.
-			 * @param [in] ... Parameters for the format string.
-			 */
-			virtual void Fatal(const char* format, ...) override {
-
-			}
-		};
+		}
 
 		/** @} */
 	}

@@ -1,4 +1,7 @@
-﻿/**
+﻿#ifndef LSFDRMFG_GALAXY_API_H
+#define LSFDRMFG_GALAXY_API_H
+
+/**
  * @file
  * Includes all other files that are needed to work with the Galaxy library.
  */
@@ -19,7 +22,20 @@
 #include "ITelemetry.h"
 #include "Errors.h"
 
-#include <cstddef>
+#include "Impl/User.hxx"
+#include "Impl/Friends.hxx"
+#include "Impl/Chat.hxx"
+#include "Impl/Matchmaking.hxx"
+#include "Impl/Networking.hxx"
+#include "Impl/Stats.hxx"
+#include "Impl/Utils.hxx"
+#include "Impl/Apps.hxx"
+#include "Impl/Storage.hxx"
+#include "Impl/CustomNetworking.hxx"
+#include "Impl/Logger.hxx"
+#include "Impl/Telemetry.hxx"
+#include "Impl/Errors.hxx"
+#include "GalaxyGameServerApi.hxx"
 
 namespace galaxy
 {
@@ -334,9 +350,7 @@ namespace galaxy
 		 *
 		 * @param [in] initOptions The group of the init options.
 		 */
-		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Init(const InitOptions& initOptions) {
-
-		}
+		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Init(const InitOptions& initOptions);
 
 		/**
 		 * Shuts down the Galaxy Peer.
@@ -346,45 +360,35 @@ namespace galaxy
 		 *
 		 * @pre Delete all self-registering listeners before calling Shutdown().
 		 */
-		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Shutdown() {
-
-		}
+		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Shutdown();
 
 		/**
 		 * Returns an instance of IUser.
 		 *
 		 * @return An instance of IUser.
 		 */
-		GALAXY_DLL_EXPORT IUser* GALAXY_CALLTYPE User() {
-			return nullptr;
-		}
+		GALAXY_DLL_EXPORT IUser* GALAXY_CALLTYPE User();
 
 		/**
 		 * Returns an instance of IFriends.
 		 *
 		 * @return An instance of IFriends.
 		 */
-		GALAXY_DLL_EXPORT IFriends* GALAXY_CALLTYPE Friends() {
-			return nullptr;
-		}
+		GALAXY_DLL_EXPORT IFriends* GALAXY_CALLTYPE Friends();
 
 		/**
 		 * Returns an instance of IChat.
 		 *
 		 * @return An instance of IChat.
 		 */
-		GALAXY_DLL_EXPORT IChat* GALAXY_CALLTYPE Chat() {
-			return nullptr;
-		}
+		GALAXY_DLL_EXPORT IChat* GALAXY_CALLTYPE Chat();
 
 		/**
 		 * Returns an instance of IMatchmaking.
 		 *
 		 * @return An instance of IMatchmaking.
 		 */
-		GALAXY_DLL_EXPORT IMatchmaking* GALAXY_CALLTYPE Matchmaking() {
-			return nullptr;
-		}
+		GALAXY_DLL_EXPORT IMatchmaking* GALAXY_CALLTYPE Matchmaking();
 
 		/**
 		 * Returns an instance of INetworking that allows to communicate
@@ -392,72 +396,56 @@ namespace galaxy
 		 *
 		 * @return An instance of INetworking.
 		 */
-		GALAXY_DLL_EXPORT INetworking* GALAXY_CALLTYPE Networking() {
-			return nullptr;
-		}
+		GALAXY_DLL_EXPORT INetworking* GALAXY_CALLTYPE Networking();
 
 		/**
 		 * Returns an instance of IStats.
 		 *
 		 * @return An instance of IStats.
 		 */
-		GALAXY_DLL_EXPORT IStats* GALAXY_CALLTYPE Stats() {
-			return nullptr;
-		}
+		GALAXY_DLL_EXPORT IStats* GALAXY_CALLTYPE Stats();
 
 		/**
 		 * Returns an instance of IUtils.
 		 *
 		 * @return An instance of IUtils.
 		 */
-		GALAXY_DLL_EXPORT IUtils* GALAXY_CALLTYPE Utils() {
-			return nullptr;
-		}
+		GALAXY_DLL_EXPORT IUtils* GALAXY_CALLTYPE Utils();
 
 		/**
 		 * Returns an instance of IApps.
 		 *
 		 * @return An instance of IApps.
 		 */
-		GALAXY_DLL_EXPORT IApps* GALAXY_CALLTYPE Apps() {
-			return nullptr;
-		}
+		GALAXY_DLL_EXPORT IApps* GALAXY_CALLTYPE Apps();
 
 		/**
 		 * Returns an instance of IStorage.
 		 *
 		 * @return An instance of IStorage.
 		 */
-		GALAXY_DLL_EXPORT IStorage* GALAXY_CALLTYPE Storage() {
-			return nullptr;
-		}
+		GALAXY_DLL_EXPORT IStorage* GALAXY_CALLTYPE Storage();
 
 		/**
 		 * Returns an instance of ICustomNetworking.
 		 *
 		 * @return An instance of ICustomNetworking.
 		 */
-		GALAXY_DLL_EXPORT ICustomNetworking* GALAXY_CALLTYPE CustomNetworking() {
-			return nullptr;
-		}
+		GALAXY_DLL_EXPORT ICustomNetworking* GALAXY_CALLTYPE CustomNetworking();
 
 		/**
 		 * Returns an instance of ILogger.
 		 *
 		 * @return An instance of ILogger.
 		 */
-		GALAXY_DLL_EXPORT ILogger* GALAXY_CALLTYPE Logger() {
-			return nullptr;
-		}
+		GALAXY_DLL_EXPORT ILogger* GALAXY_CALLTYPE Logger();
 
 		/**
 		 * Returns an instance of ITelemetry.
 		 *
 		 * @return An instance of ITelemetry.
 		 */
-		GALAXY_DLL_EXPORT ITelemetry* GALAXY_CALLTYPE Telemetry() {
-			return nullptr;
-		}
+		GALAXY_DLL_EXPORT ITelemetry* GALAXY_CALLTYPE Telemetry();
 
 		/**
 		 * Makes the Galaxy Peer process its input and output streams.
@@ -471,9 +459,7 @@ namespace galaxy
 		 * @remark When this method is not called, any asynchronous calls to Galaxy API
 		 * cannot be processed and any listeners will not be properly called.
 		 */
-		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE ProcessData() {
-
-		}
+		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE ProcessData();
 
 		/** @} */
 
@@ -489,9 +475,7 @@ namespace galaxy
 		  *
 		  * @return An instance of IListenerRegistrar.
 		  */
-		GALAXY_DLL_EXPORT IListenerRegistrar* GALAXY_CALLTYPE ListenerRegistrar() {
-			return nullptr;
-		}
+		GALAXY_DLL_EXPORT IListenerRegistrar* GALAXY_CALLTYPE ListenerRegistrar();
 
 		/** @} */
 
@@ -505,17 +489,15 @@ namespace galaxy
 		  *
 		  * @return An instance of IListenerRegistrar.
 		  */
-		GALAXY_DLL_EXPORT IListenerRegistrar* GALAXY_CALLTYPE GameServerListenerRegistrar() {
-			return nullptr;
-		}
+		GALAXY_DLL_EXPORT IListenerRegistrar* GALAXY_CALLTYPE GameServerListenerRegistrar();
 
 		/**
 		 * Retrieves error connected with the last API call on the local thread.
 		 *
 		 * @return Either the last API call error or NULL if there was no error.
 		 */
-		GALAXY_DLL_EXPORT const IError* GALAXY_CALLTYPE GetError() {
-			return nullptr;
-		}
+		GALAXY_DLL_EXPORT const IError* GALAXY_CALLTYPE GetError();
 	}
 }
+
+#endif

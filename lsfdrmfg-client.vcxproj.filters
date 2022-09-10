@@ -4,64 +4,111 @@
     <Filter Include="Client">
       <UniqueIdentifier>{644D06AC-50EF-3082-39AA-44D625EBB7D2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Impl">
-      <UniqueIdentifier>{625b5d91-deb5-480e-9bf3-31a8bf6d891d}</UniqueIdentifier>
+    <Filter Include="Client\Impl">
+      <UniqueIdentifier>{C5B1BEA9-3167-379F-BA5B-317626102EA3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Client\Errors.cxx">
+    <ClInclude Include="Client\GalaxyApi.hxx">
       <Filter>Client</Filter>
-    </ClCompile>
+    </ClInclude>
+    <ClInclude Include="Client\GalaxyGameServerApi.hxx">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Client\Impl\Apps.hxx">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Client\Impl\Chat.hxx">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Client\Impl\CustomNetworking.hxx">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Client\Impl\Errors.hxx">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Client\Impl\Friends.hxx">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Client\Impl\GalaxyThread.hxx">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Client\Impl\Logger.hxx">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Client\Impl\Matchmaking.hxx">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Client\Impl\Networking.hxx">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Client\Impl\Stats.hxx">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Client\Impl\Storage.hxx">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Client\Impl\Telemetry.hxx">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Client\Impl\User.hxx">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Client\Impl\Utils.hxx">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="Client\GalaxyApi.cxx">
       <Filter>Client</Filter>
     </ClCompile>
     <ClCompile Include="Client\GalaxyGameServerApi.cxx">
       <Filter>Client</Filter>
     </ClCompile>
-    <ClCompile Include="Client\Main.cxx">
-      <Filter>Client</Filter>
-    </ClCompile>
-    <ClCompile Include="Client\Impl\GalaxyThread.cxx">
-      <Filter>Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="Client\Impl\Logger.cxx">
-      <Filter>Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="Client\Impl\Matchmaking.cxx">
-      <Filter>Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="Client\Impl\Networking.cxx">
-      <Filter>Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="Client\Impl\Stats.cxx">
-      <Filter>Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="Client\Impl\Storage.cxx">
-      <Filter>Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="Client\Impl\Telemetry.cxx">
-      <Filter>Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="Client\Impl\User.cxx">
-      <Filter>Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="Client\Impl\Utils.cxx">
-      <Filter>Impl</Filter>
-    </ClCompile>
     <ClCompile Include="Client\Impl\Apps.cxx">
-      <Filter>Impl</Filter>
+      <Filter>Client\Impl</Filter>
     </ClCompile>
     <ClCompile Include="Client\Impl\Chat.cxx">
-      <Filter>Impl</Filter>
+      <Filter>Client\Impl</Filter>
     </ClCompile>
     <ClCompile Include="Client\Impl\CustomNetworking.cxx">
-      <Filter>Impl</Filter>
+      <Filter>Client\Impl</Filter>
     </ClCompile>
     <ClCompile Include="Client\Impl\Errors.cxx">
-      <Filter>Impl</Filter>
+      <Filter>Client\Impl</Filter>
     </ClCompile>
     <ClCompile Include="Client\Impl\Friends.cxx">
-      <Filter>Impl</Filter>
+      <Filter>Client\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Client\Impl\GalaxyThread.cxx">
+      <Filter>Client\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Client\Impl\Logger.cxx">
+      <Filter>Client\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Client\Impl\Matchmaking.cxx">
+      <Filter>Client\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Client\Impl\Networking.cxx">
+      <Filter>Client\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Client\Impl\Stats.cxx">
+      <Filter>Client\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Client\Impl\Storage.cxx">
+      <Filter>Client\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Client\Impl\Telemetry.cxx">
+      <Filter>Client\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Client\Impl\User.cxx">
+      <Filter>Client\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Client\Impl\Utils.cxx">
+      <Filter>Client\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Client\Main.cxx">
+      <Filter>Client</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

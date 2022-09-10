@@ -45,7 +45,7 @@ project "ENet"
     files { "Vendor/ENet/Source/**" }
 
     filter "system:windows"
-        links { "ws2_32", "Winmm" }
+        defines { "_WINSOCK_DEPRECATED_NO_WARNINGS" }
 
     filter "system:unix"
         system "linux"
@@ -100,7 +100,13 @@ project "lsfdrmfg-client"
     removefiles { "**.vcxproj", "**.filters", "**.user", "**.rc" }
     
     links { "Common.Shared" }
-    
+ 
+    filter "system:windows"
+        links {
+         "Winmm",
+         "ws2_32"
+        }
+   
     filter "platforms:x64"
         files { "Galaxy64.def" }
         targetname ("Galaxy64")
@@ -129,6 +135,12 @@ project "lsfdrmfg-svr"
     removefiles { "**.vcxproj", "**.filters", "**.user", "**.rc" }
 
     links { "Common.Shared" }
+ 
+    filter "system:windows"
+        links {
+         "Winmm",
+         "ws2_32"
+        }
 
     filter "platforms:x64"
         targetname ("GalaxyServer64")
