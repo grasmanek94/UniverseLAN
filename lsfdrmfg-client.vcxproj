@@ -210,6 +210,28 @@
     <ClInclude Include="Client\Impl\Telemetry.hxx" />
     <ClInclude Include="Client\Impl\User.hxx" />
     <ClInclude Include="Client\Impl\Utils.hxx" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\Errors.h" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\GalaxyAllocator.h" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\GalaxyApi.h" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\GalaxyExceptionHelper.h" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\GalaxyExport.h" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\GalaxyGameServerApi.h" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\GalaxyID.h" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\GalaxyThread.h" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\IApps.h" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\IChat.h" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\ICustomNetworking.h" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\IFriends.h" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\IListenerRegistrar.h" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\ILogger.h" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\IMatchmaking.h" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\INetworking.h" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\InitOptions.h" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\IStats.h" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\IStorage.h" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\ITelemetry.h" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\IUser.h" />
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\IUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client\GalaxyApi.cxx" />

@@ -57,6 +57,72 @@
     <ClInclude Include="Client\Impl\Utils.hxx">
       <Filter>Client\Impl</Filter>
     </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\IListenerRegistrar.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\ILogger.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\IMatchmaking.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\INetworking.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\InitOptions.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\IStats.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\IStorage.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\ITelemetry.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\IUser.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\IUtils.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\Errors.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\GalaxyAllocator.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\GalaxyApi.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\GalaxyExceptionHelper.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\GalaxyExport.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\GalaxyGameServerApi.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\GalaxyID.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\GalaxyThread.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\IApps.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\IChat.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\ICustomNetworking.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\galaxy\Include\galaxy\IFriends.h">
+      <Filter>Client\Impl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client\GalaxyApi.cxx">
