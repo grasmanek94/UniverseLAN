@@ -22,11 +22,11 @@ namespace galaxy
 		/**
 		 * The interface for managing statistics, achievements and leaderboards.
 		 */
-		class Stats : public IStats
+		class StatsImpl : public IStats
 		{
 		public:
 
-			virtual ~Stats();
+			virtual ~StatsImpl();
 
 			/**
 			 * Performs a request for statistics and achievements of a specified user.

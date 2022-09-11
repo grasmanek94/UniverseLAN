@@ -5,64 +5,116 @@
 
 #include "GalaxyApi.hxx"
 
+#include <memory>
+
 namespace galaxy
 {
 	namespace api
 	{
-		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Init(const InitOptions& initOptions) {
+		std::unique_ptr<InitOptionsModern> init_options = nullptr;
 
+		static std::unique_ptr<UserImpl> user_impl = nullptr;
+		static std::unique_ptr<FriendsImpl> friends_impl = nullptr;
+		static std::unique_ptr<ChatImpl> chat_impl = nullptr;
+		static std::unique_ptr<MatchmakingImpl> matchmaking_impl = nullptr;
+		static std::unique_ptr<NetworkingImpl> networking_impl = nullptr;
+		static std::unique_ptr<StatsImpl> stats_impl = nullptr;
+		static std::unique_ptr<UtilsImpl> utils_impl = nullptr;
+		static std::unique_ptr<AppsImpl> apps_impl = nullptr;
+		static std::unique_ptr<StorageImpl> storage_impl = nullptr;
+		static std::unique_ptr<CustomNetworkingImpl> custom_networking_impl = nullptr;
+		static std::unique_ptr<LoggerImpl> logger_impl = nullptr;
+		static std::unique_ptr<TelemetryImpl> telemetry_impl = nullptr;
+
+		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Init(const InitOptions& initOptions) {
+			init_options = std::make_unique<InitOptionsModern>(initOptions);
+			user_impl = std::make_unique<UserImpl>();
+			friends_impl = std::make_unique<FriendsImpl>();
+			chat_impl = std::make_unique<ChatImpl>();
+			matchmaking_impl = std::make_unique<MatchmakingImpl>();
+			networking_impl = std::make_unique<NetworkingImpl>();
+			stats_impl = std::make_unique<StatsImpl>();
+			utils_impl = std::make_unique<UtilsImpl>();
+			apps_impl = std::make_unique<AppsImpl>();
+			storage_impl = std::make_unique<StorageImpl>();
+			custom_networking_impl = std::make_unique<CustomNetworkingImpl>();
+			logger_impl = std::make_unique<LoggerImpl>();
+			telemetry_impl = std::make_unique<TelemetryImpl>();
 		}
 
 		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Shutdown() {
-
+			telemetry_impl = nullptr;
+			logger_impl = nullptr;
+			custom_networking_impl = nullptr;
+			storage_impl = nullptr;
+			apps_impl = nullptr;
+			utils_impl = nullptr;
+			stats_impl = nullptr;
+			networking_impl = nullptr;
+			matchmaking_impl = nullptr;
+			chat_impl = nullptr;
+			friends_impl = nullptr;
+			user_impl = nullptr;
+			init_options = nullptr;
 		}
 
 		GALAXY_DLL_EXPORT IUser* GALAXY_CALLTYPE User() {
-			return nullptr;
+			return user_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT IFriends* GALAXY_CALLTYPE Friends() {
-			return nullptr;
+
+			return friends_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT IChat* GALAXY_CALLTYPE Chat() {
-			return nullptr;
+
+			return chat_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT IMatchmaking* GALAXY_CALLTYPE Matchmaking() {
-			return nullptr;
+
+			return matchmaking_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT INetworking* GALAXY_CALLTYPE Networking() {
-			return nullptr;
+
+			return networking_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT IStats* GALAXY_CALLTYPE Stats() {
-			return nullptr;
+
+			return stats_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT IUtils* GALAXY_CALLTYPE Utils() {
-			return nullptr;
+
+			return utils_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT IApps* GALAXY_CALLTYPE Apps() {
-			return nullptr;
+
+			return apps_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT IStorage* GALAXY_CALLTYPE Storage() {
-			return nullptr;
+
+			return storage_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT ICustomNetworking* GALAXY_CALLTYPE CustomNetworking() {
-			return nullptr;
+
+			return custom_networking_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT ILogger* GALAXY_CALLTYPE Logger() {
-			return nullptr;
+
+			return logger_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT ITelemetry* GALAXY_CALLTYPE Telemetry() {
-			return nullptr;
+
+			return telemetry_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE ProcessData() {

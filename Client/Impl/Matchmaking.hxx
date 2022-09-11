@@ -22,11 +22,11 @@ namespace galaxy
 		/**
 		 * The interface for managing game lobbies.
 		 */
-		class Matchmaking : public IMatchmaking
+		class MatchmakingImpl : public IMatchmaking
 		{
 		public:
 
-			virtual ~Matchmaking();
+			virtual ~MatchmakingImpl();
 
 			/**
 			 * Creates a lobby.

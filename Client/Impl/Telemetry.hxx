@@ -21,11 +21,11 @@ namespace galaxy
 		/**
 		 * The interface for handling telemetry.
 		 */
-		class Telemetry : public ITelemetry
+		class TelemetryImpl : public ITelemetry
 		{
 		public:
 
-			virtual ~Telemetry();
+			virtual ~TelemetryImpl();
 
 			/**
 			 * Adds a string parameter to be applied next time you call SendTelemetryEvent()

@@ -27,11 +27,11 @@ namespace galaxy
 		 * @remark This interface is fully functional in any situation when
 		 * Init() reports an error.
 		 */
-		class Apps : public IApps
+		class AppsImpl : public IApps
 		{
 		public:
 
-			virtual ~Apps() override;
+			virtual ~AppsImpl() override;
 
 			/**
 			 * Checks if specified DLC is installed.

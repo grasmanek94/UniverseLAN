@@ -10,7 +10,7 @@ namespace galaxy
 		 * The interface representing a thread object.
 		 */
 
-		GalaxyThread::GalaxyThread(std::thread&& thread) :
+		GalaxyThreadImpl::GalaxyThreadImpl(std::thread&& thread) :
 			_thread(std::move(thread))
 		{
 
@@ -20,7 +20,7 @@ namespace galaxy
 		 *
 		 * Wait until IGalaxyThread execution is finished. Internal callers of this function are blocked until the function returns.
 		 */
-		void GalaxyThread::Join() {
+		void GalaxyThreadImpl::Join() {
 			_thread.join();
 		}
 
@@ -29,7 +29,7 @@ namespace galaxy
 		 *
 		 * @return true if the thread is ready to Join().
 		 */
-		bool GalaxyThread::Joinable() {
+		bool GalaxyThreadImpl::Joinable() {
 			return _thread.joinable();
 		}
 
@@ -38,11 +38,11 @@ namespace galaxy
 		 *
 		 * Separate the thread of execution from the IGalaxyThread object, allowing execution to continue independently.
 		 */
-		void GalaxyThread::Detach() {
+		void GalaxyThreadImpl::Detach() {
 			_thread.detach();
 		}
 
-		GalaxyThread::~GalaxyThread() {
+		GalaxyThreadImpl::~GalaxyThreadImpl() {
 		};
 
 		/**
@@ -63,7 +63,7 @@ namespace galaxy
 		IGalaxyThread* GalaxyThreadFactory::SpawnThread(ThreadEntryFunction const entryPoint, ThreadEntryParam param) {
 
 			// TODO: use GalaxyAllocator
-			return new GalaxyThread(std::thread(entryPoint, param));
+			return new GalaxyThreadImpl(std::thread(entryPoint, param));
 		}
 
 		GalaxyThreadFactory::~GalaxyThreadFactory() {};

@@ -23,11 +23,11 @@ namespace galaxy
 		/**
 		 * The interface for communicating with other Galaxy Peers.
 		 */
-		class Networking : public INetworking
+		class NetworkingImpl : public INetworking
 		{
 		public:
 
-			virtual ~Networking();
+			virtual ~NetworkingImpl();
 
 			/**
 			 * Sends a P2P packet to a specified user.

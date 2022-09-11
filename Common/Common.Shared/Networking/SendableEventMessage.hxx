@@ -24,15 +24,11 @@
 #include <cereal/types/valarray.hpp>
 #include <cereal/types/vector.hpp>
 
-static_assert(sizeof(size_t) == 8, "You cannot compile V-Plus for the chosen architecture");
+static_assert(sizeof(uint64_t) == 8, "You cannot compile this application for the chosen architecture");
 
-const size_t constexpr const_hash(char const *input)
-{
-	return *input ?
-		static_cast<size_t>(*input) + 33 * const_hash(input + 1) :
-		5381;
+// compile time FNV-1a
+constexpr uint32_t const_hash(const char* str, size_t n, uint32_t basis = UINT32_C(2166136261)) {
+	return n == 0 ? basis : const_hash(str + 1, n - 1, (basis ^ str[0]) * UINT32_C(16777619));
 }
 
-#define UniqueClassId_Declare(className, captureWhenInactive) static const size_t constexpr UniqueClassId() { return const_hash(#className); } static const bool constexpr CaptureWhenInactive() { return captureWhenInactive; } /* const size_t Event_Id() const*/
-#define UniqueClassId_Implement(className) /*const size_t className::Event_Id() const { return UniqueClassId(); }*/
-#define UniqueClassId_ImplementInline(className, captureWhenInactive) static const size_t constexpr UniqueClassId() { return const_hash(#className); }  static const bool constexpr CaptureWhenInactive() { return captureWhenInactive; } /* const size_t Event_Id() const { return UniqueClassId(); }*/
+#define UniqueClassId_Declare(className) static const uint64_t constexpr UniqueClassId() { return const_hash(#className, sizeof(#className)); }

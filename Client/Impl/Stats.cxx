@@ -5,99 +5,99 @@ namespace galaxy
 	namespace api
 	{
 
-		Stats::~Stats()
+		StatsImpl::~StatsImpl()
 		{
 		}
 
-		void Stats::RequestUserStatsAndAchievements(GalaxyID userID, IUserStatsAndAchievementsRetrieveListener* const listener) {
+		void StatsImpl::RequestUserStatsAndAchievements(GalaxyID userID, IUserStatsAndAchievementsRetrieveListener* const listener) {
 
 		}
 
-		int32_t Stats::GetStatInt(const char* name, GalaxyID userID) {
+		int32_t StatsImpl::GetStatInt(const char* name, GalaxyID userID) {
 			return 0;
 		}
 
-		float Stats::GetStatFloat(const char* name, GalaxyID userID) {
+		float StatsImpl::GetStatFloat(const char* name, GalaxyID userID) {
 			return 0.0f;
 		}
 
-		void Stats::SetStatInt(const char* name, int32_t value) {
+		void StatsImpl::SetStatInt(const char* name, int32_t value) {
 
 		}
 
-		void Stats::SetStatFloat(const char* name, float value) {
+		void StatsImpl::SetStatFloat(const char* name, float value) {
 
 		}
 
-		void Stats::UpdateAvgRateStat(const char* name, float countThisSession, double sessionLength) {
+		void StatsImpl::UpdateAvgRateStat(const char* name, float countThisSession, double sessionLength) {
 
 		}
 
-		void Stats::GetAchievement(const char* name, bool& unlocked, uint32_t& unlockTime, GalaxyID userID) {
+		void StatsImpl::GetAchievement(const char* name, bool& unlocked, uint32_t& unlockTime, GalaxyID userID) {
 
 		}
 
-		void Stats::SetAchievement(const char* name) {
+		void StatsImpl::SetAchievement(const char* name) {
 
 		}
 
-		void Stats::ClearAchievement(const char* name) {
+		void StatsImpl::ClearAchievement(const char* name) {
 
 		}
 
-		void Stats::StoreStatsAndAchievements(IStatsAndAchievementsStoreListener* const listener) {
+		void StatsImpl::StoreStatsAndAchievements(IStatsAndAchievementsStoreListener* const listener) {
 
 		}
 
-		void Stats::ResetStatsAndAchievements(IStatsAndAchievementsStoreListener* const listener) {
+		void StatsImpl::ResetStatsAndAchievements(IStatsAndAchievementsStoreListener* const listener) {
 
 		}
 
-		const char* Stats::GetAchievementDisplayName(const char* name) {
+		const char* StatsImpl::GetAchievementDisplayName(const char* name) {
 			return name;
 		}
 
-		void Stats::GetAchievementDisplayNameCopy(const char* name, char* buffer, uint32_t bufferLength) {
+		void StatsImpl::GetAchievementDisplayNameCopy(const char* name, char* buffer, uint32_t bufferLength) {
 
 		}
 
-		const char* Stats::GetAchievementDescription(const char* name) {
+		const char* StatsImpl::GetAchievementDescription(const char* name) {
 			return name;
 		}
 
-		void Stats::GetAchievementDescriptionCopy(const char* name, char* buffer, uint32_t bufferLength) {
+		void StatsImpl::GetAchievementDescriptionCopy(const char* name, char* buffer, uint32_t bufferLength) {
 
 		}
 
-		bool Stats::IsAchievementVisible(const char* name) {
+		bool StatsImpl::IsAchievementVisible(const char* name) {
 			return true;
 		}
 
-		bool Stats::IsAchievementVisibleWhileLocked(const char* name) {
+		bool StatsImpl::IsAchievementVisibleWhileLocked(const char* name) {
 			return true;
 		}
 
-		void Stats::RequestLeaderboards(ILeaderboardsRetrieveListener* const listener) {
+		void StatsImpl::RequestLeaderboards(ILeaderboardsRetrieveListener* const listener) {
 
 		}
 
-		const char* Stats::GetLeaderboardDisplayName(const char* name) {
+		const char* StatsImpl::GetLeaderboardDisplayName(const char* name) {
 			return name;
 		}
 
-		void Stats::GetLeaderboardDisplayNameCopy(const char* name, char* buffer, uint32_t bufferLength) {
+		void StatsImpl::GetLeaderboardDisplayNameCopy(const char* name, char* buffer, uint32_t bufferLength) {
 
 		}
 
-		LeaderboardSortMethod Stats::GetLeaderboardSortMethod(const char* name) {
+		LeaderboardSortMethod StatsImpl::GetLeaderboardSortMethod(const char* name) {
 			return LEADERBOARD_SORT_METHOD_NONE;
 		}
 
-		LeaderboardDisplayType Stats::GetLeaderboardDisplayType(const char* name) {
+		LeaderboardDisplayType StatsImpl::GetLeaderboardDisplayType(const char* name) {
 			return LEADERBOARD_DISPLAY_TYPE_NONE;
 		}
 
-		void Stats::RequestLeaderboardEntriesGlobal(
+		void StatsImpl::RequestLeaderboardEntriesGlobal(
 			const char* name,
 			uint32_t rangeStart,
 			uint32_t rangeEnd,
@@ -105,7 +105,7 @@ namespace galaxy
 
 		}
 
-		void Stats::RequestLeaderboardEntriesAroundUser(
+		void StatsImpl::RequestLeaderboardEntriesAroundUser(
 			const char* name,
 			uint32_t countBefore,
 			uint32_t countAfter,
@@ -114,7 +114,7 @@ namespace galaxy
 
 		}
 
-		void Stats::RequestLeaderboardEntriesForUsers(
+		void StatsImpl::RequestLeaderboardEntriesForUsers(
 			const char* name,
 			GalaxyID* userArray,
 			uint32_t userArraySize,
@@ -122,11 +122,11 @@ namespace galaxy
 
 		}
 
-		void Stats::GetRequestedLeaderboardEntry(uint32_t index, uint32_t& rank, int32_t& score, GalaxyID& userID) {
+		void StatsImpl::GetRequestedLeaderboardEntry(uint32_t index, uint32_t& rank, int32_t& score, GalaxyID& userID) {
 
 		}
 
-		void Stats::GetRequestedLeaderboardEntryWithDetails(
+		void StatsImpl::GetRequestedLeaderboardEntryWithDetails(
 			uint32_t index,
 			uint32_t& rank,
 			int32_t& score,
@@ -137,7 +137,7 @@ namespace galaxy
 
 		}
 
-		void Stats::SetLeaderboardScore(
+		void StatsImpl::SetLeaderboardScore(
 			const char* name,
 			int32_t score,
 			bool forceUpdate,
@@ -145,7 +145,7 @@ namespace galaxy
 
 		}
 
-		void Stats::SetLeaderboardScoreWithDetails(
+		void StatsImpl::SetLeaderboardScoreWithDetails(
 			const char* name,
 			int32_t score,
 			const void* details,
@@ -155,15 +155,15 @@ namespace galaxy
 
 		}
 
-		uint32_t Stats::GetLeaderboardEntryCount(const char* name) {
+		uint32_t StatsImpl::GetLeaderboardEntryCount(const char* name) {
 			return 0;
 		}
 
-		void Stats::FindLeaderboard(const char* name, ILeaderboardRetrieveListener* const listener) {
+		void StatsImpl::FindLeaderboard(const char* name, ILeaderboardRetrieveListener* const listener) {
 
 		}
 
-		void Stats::FindOrCreateLeaderboard(
+		void StatsImpl::FindOrCreateLeaderboard(
 			const char* name,
 			const char* displayName,
 			const LeaderboardSortMethod& sortMethod,
@@ -172,11 +172,11 @@ namespace galaxy
 
 		}
 
-		void Stats::RequestUserTimePlayed(GalaxyID userID, IUserTimePlayedRetrieveListener* const listener) {
+		void StatsImpl::RequestUserTimePlayed(GalaxyID userID, IUserTimePlayedRetrieveListener* const listener) {
 
 		}
 
-		uint32_t Stats::GetUserTimePlayed(GalaxyID userID) {
+		uint32_t StatsImpl::GetUserTimePlayed(GalaxyID userID) {
 			return 0;
 		}
 	}

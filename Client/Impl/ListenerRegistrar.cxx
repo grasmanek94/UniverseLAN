@@ -4,15 +4,15 @@ namespace galaxy
 {
 	namespace api
 	{
-		ListenerRegistrar::~ListenerRegistrar()
+		ListenerRegistrarImpl::~ListenerRegistrarImpl()
 		{
 		}
 
-		void ListenerRegistrar::Register(ListenerType listenerType, IGalaxyListener* listener) {
+		void ListenerRegistrarImpl::Register(ListenerType listenerType, IGalaxyListener* listener) {
 		}
 
 
-		void ListenerRegistrar::Unregister(ListenerType listenerType, IGalaxyListener* listener) {
+		void ListenerRegistrarImpl::Unregister(ListenerType listenerType, IGalaxyListener* listener) {
 
 		}
 

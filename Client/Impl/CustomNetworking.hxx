@@ -22,11 +22,11 @@ namespace galaxy
 		/**
 		 * The interface for communicating with a custom endpoint.
 		 */
-		class CustomNetworking : public ICustomNetworking
+		class CustomNetworkingImpl : public ICustomNetworking
 		{
 		public:
 
-			virtual ~CustomNetworking();
+			virtual ~CustomNetworkingImpl();
 
 			/**
 			 * Open a connection with a specific endpoint.

@@ -4,35 +4,35 @@ namespace galaxy
 {
 	namespace api
 	{
-		CustomNetworking::~CustomNetworking()
+		CustomNetworkingImpl::~CustomNetworkingImpl()
 		{
 		}
 
-		void CustomNetworking::OpenConnection(const char* connectionString, IConnectionOpenListener* const listener) {
+		void CustomNetworkingImpl::OpenConnection(const char* connectionString, IConnectionOpenListener* const listener) {
 
 		}
 
-		void CustomNetworking::CloseConnection(ConnectionID connectionID, IConnectionCloseListener* const listener) {
+		void CustomNetworkingImpl::CloseConnection(ConnectionID connectionID, IConnectionCloseListener* const listener) {
 
 		}
 
-		void CustomNetworking::SendData(ConnectionID connectionID, const void* data, uint32_t dataSize) {
+		void CustomNetworkingImpl::SendData(ConnectionID connectionID, const void* data, uint32_t dataSize) {
 
 		}
 
-		uint32_t CustomNetworking::GetAvailableDataSize(ConnectionID connectionID) {
+		uint32_t CustomNetworkingImpl::GetAvailableDataSize(ConnectionID connectionID) {
 			return 0;
 		}
 
-		void CustomNetworking::PeekData(ConnectionID connectionID, void* dest, uint32_t dataSize) {
+		void CustomNetworkingImpl::PeekData(ConnectionID connectionID, void* dest, uint32_t dataSize) {
 
 		}
 
-		void CustomNetworking::ReadData(ConnectionID connectionID, void* dest, uint32_t dataSize) {
+		void CustomNetworkingImpl::ReadData(ConnectionID connectionID, void* dest, uint32_t dataSize) {
 
 		}
 
-		void CustomNetworking::PopData(ConnectionID connectionID, uint32_t dataSize) {
+		void CustomNetworkingImpl::PopData(ConnectionID connectionID, uint32_t dataSize) {
 
 		}
 	}

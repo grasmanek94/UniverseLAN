@@ -6,19 +6,19 @@ namespace galaxy
 {
 	namespace api
 	{
-		Apps::~Apps()
+		AppsImpl::~AppsImpl()
 		{
 		}
 
-		bool Apps::IsDlcInstalled(ProductID productID) {
+		bool AppsImpl::IsDlcInstalled(ProductID productID) {
 			return true;
 		}
 
-		const char* Apps::GetCurrentGameLanguage(ProductID productID) {
+		const char* AppsImpl::GetCurrentGameLanguage(ProductID productID) {
 			return "english";
 		}
 
-		void Apps::GetCurrentGameLanguageCopy(char* buffer, uint32_t bufferLength, ProductID productID) {
+		void AppsImpl::GetCurrentGameLanguageCopy(char* buffer, uint32_t bufferLength, ProductID productID) {
 			std::copy_n("english", std::min((size_t)bufferLength, strlen("english")), buffer);
 		}
 	}

@@ -15,7 +15,7 @@ public:
 		ar(message, sender);
 	}
 
-	UniqueClassId_Declare(ChatMessage, true);
+	UniqueClassId_Declare(ChatMessage);
 
 	ChatMessage();
 

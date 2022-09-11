@@ -4,63 +4,63 @@ namespace galaxy
 {
 	namespace api
 	{
-		Telemetry::~Telemetry()
+		TelemetryImpl::~TelemetryImpl()
 		{
 		}
 
-		void Telemetry::AddStringParam(const char* name, const char* value) {
+		void TelemetryImpl::AddStringParam(const char* name, const char* value) {
 
 		}
 
-		void Telemetry::AddIntParam(const char* name, int32_t value) {
+		void TelemetryImpl::AddIntParam(const char* name, int32_t value) {
 
 		}
 
-		void Telemetry::AddFloatParam(const char* name, double value) {
+		void TelemetryImpl::AddFloatParam(const char* name, double value) {
 
 		}
 
-		void Telemetry::AddBoolParam(const char* name, bool value) {
+		void TelemetryImpl::AddBoolParam(const char* name, bool value) {
 
 		}
 
-		void Telemetry::AddObjectParam(const char* name) {
+		void TelemetryImpl::AddObjectParam(const char* name) {
 
 		}
 
-		void Telemetry::AddArrayParam(const char* name) {
+		void TelemetryImpl::AddArrayParam(const char* name) {
 
 		}
 
-		void Telemetry::CloseParam() {
+		void TelemetryImpl::CloseParam() {
 
 		}
 
-		void Telemetry::ClearParams() {
+		void TelemetryImpl::ClearParams() {
 
 		}
 
-		void Telemetry::SetSamplingClass(const char* name) {
+		void TelemetryImpl::SetSamplingClass(const char* name) {
 
 		}
 
-		uint32_t Telemetry::SendTelemetryEvent(const char* eventType, ITelemetryEventSendListener* const listener) {
+		uint32_t TelemetryImpl::SendTelemetryEvent(const char* eventType, ITelemetryEventSendListener* const listener) {
 			return 0;
 		}
 
-		uint32_t Telemetry::SendAnonymousTelemetryEvent(const char* eventType, ITelemetryEventSendListener* const listener) {
+		uint32_t TelemetryImpl::SendAnonymousTelemetryEvent(const char* eventType, ITelemetryEventSendListener* const listener) {
 			return 0;
 		}
 
-		const char* Telemetry::GetVisitID() {
+		const char* TelemetryImpl::GetVisitID() {
 			return "0";
 		}
 
-		void Telemetry::GetVisitIDCopy(char* buffer, uint32_t bufferLength) {
+		void TelemetryImpl::GetVisitIDCopy(char* buffer, uint32_t bufferLength) {
 
 		}
 
-		void Telemetry::ResetVisitID() {
+		void TelemetryImpl::ResetVisitID() {
 
 		}
 	}

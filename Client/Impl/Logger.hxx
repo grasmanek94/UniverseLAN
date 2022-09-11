@@ -19,11 +19,11 @@ namespace galaxy
 		/**
 		 * The interface for logging.
 		 */
-		class Logger : public ILogger
+		class LoggerImpl : public ILogger
 		{
 		public:
 
-			virtual ~Logger();
+			virtual ~LoggerImpl();
 
 			/**
 			 * Creates a log entry with level TRACE.

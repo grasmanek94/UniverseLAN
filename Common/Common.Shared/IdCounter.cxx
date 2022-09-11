@@ -1,46 +1,44 @@
 #include "IdCounter.hxx"
 
-IdCounter::IdCounter(size_t max_ids)
+IdCounter::IdCounter()
+	: max_id(0)
 {
-	free_ids.reserve(max_ids);
-	taken_ids.resize(max_ids);
-	for (size_t i = 0; i < max_ids; ++i)
-	{
-		free_ids.push_back((max_ids - 1) - i);
-	}
 }
 
-size_t IdCounter::GetId()
+size_t IdCounter::GetNewId()
 {
-	if (free_ids.size())
+	if (!free_ids.empty())
 	{
-		size_t free_id = free_ids.back();
-		taken_ids[free_id] = true;
-		free_ids.pop_back();
+		size_t free_id = *free_ids.begin();
+		free_ids.erase(free_ids.begin());
 		return free_id;
 	}
-	return (size_t)-1;
+
+	return ++max_id;
 }
 
 bool IdCounter::FreeId(size_t id)
 {
-	if (taken_ids.size() <= id)
+	if (id == 0) {
+		return false;
+	}
+
+	if (id >= max_id)
 	{
 		return false;
 	}
 
-	if (!taken_ids[id])
-	{
-		return false;
+	if (id == (max_id - 1)) {
+		--max_id;
+		return true;
 	}
 
-	taken_ids[id] = false;
-	free_ids.push_back(id);
+	free_ids.insert(id);
 
 	return true;
 }
 
-size_t IdCounter::Max()
+size_t IdCounter::GetCurrentMaxId()
 {
-	return taken_ids.size();
+	return max_id;
 }

@@ -21,11 +21,11 @@ namespace galaxy
 		/**
 		 * The interface for managing images.
 		 */
-		class Utils : public IUtils
+		class UtilsImpl : public IUtils
 		{
 		public:
 
-			virtual ~Utils();
+			virtual ~UtilsImpl();
 
 			/**
 			 * Reads width and height of the image of a specified ID.

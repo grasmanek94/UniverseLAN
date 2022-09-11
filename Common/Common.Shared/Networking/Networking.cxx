@@ -20,17 +20,14 @@ void V_Plus_NetworkClient::RunNetworking()
 			else if (!IsActive() && event.type == ENET_EVENT_TYPE_RECEIVE)
 			{
 				ENetPacket* packet = event.packet;
-				if (packet->dataLength >= sizeof(size_t))
+				if (packet->dataLength >= sizeof(uint64_t))
 				{
-					size_t unique_class_id = (*reinterpret_cast<size_t*>(packet->data));
+					uint64_t unique_class_id = (*reinterpret_cast<uint64_t*>(packet->data));
 
 					#define IMPLEMENT_CASE_FOR(class_name) \
 						case class_name::UniqueClassId(): \
 						{ \
-							if(class_name::CaptureWhenInactive()) \
-							{ \
-								received_events_to_process.push(event); \
-							} \
+							received_events_to_process.push(event); \
 						} \
 						break;
 
@@ -40,11 +37,6 @@ void V_Plus_NetworkClient::RunNetworking()
 					switch (unique_class_id)
 					{
 						IMPLEMENT_CASE_FOR(ChatMessage);
-						IMPLEMENT_CASE_FOR(PlayerJoin);
-						IMPLEMENT_CASE_FOR(PlayerQuit);
-						IMPLEMENT_CASE_FOR(PlayerSpawn);
-						IMPLEMENT_CASE_FOR(PlayerDespawn);
-						IMPLEMENT_CASE_FOR(OnFootSync);
 
 						//Because of this we need to impl in header, so, template:
 						#ifdef VPLUS_CLIENT
@@ -64,26 +56,13 @@ void V_Plus_NetworkClient::RunNetworking()
 	}
 }
 
-void V_Plus_NetworkClient::ProcessEvents(MessageReceiver* receiver, std::vector<size_t> class_list)
+void V_Plus_NetworkClient::ProcessEvents(MessageReceiver* receiver)
 {
 	ENetEvent event;
-	if (class_list.size() == 0)
+
+	while (received_events_to_process.try_pop(event))
 	{
-		while (received_events_to_process.try_pop(event))
-		{
-			receiver->ProcessEvent(event);
-		}
-	}
-	else
-	{
-		while (received_events_to_process.try_pop(event))
-		{
-			if (!receiver->ProcessEvent(event, class_list))
-			{
-				received_events_to_process.push(event);
-				break;
-			}
-		}
+		receiver->ProcessEvent(event);
 	}
 }
 

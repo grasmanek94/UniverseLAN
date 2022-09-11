@@ -22,11 +22,11 @@ namespace galaxy
 		/**
 		 * The interface for managing social info and activities.
 		 */
-		class Friends : public IFriends
+		class FriendsImpl : public IFriends
 		{
 		public:
 
-			virtual ~Friends();
+			virtual ~FriendsImpl();
 
 			/**
 			 * Returns the default avatar criteria.

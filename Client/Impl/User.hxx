@@ -22,11 +22,11 @@ namespace galaxy
 		/**
 		 * The interface for handling the user account.
 		 */
-		class User : public IUser
+		class UserImpl : public IUser
 		{
 		public:
 
-			virtual ~User();
+			virtual ~UserImpl();
 
 			/**
 			 * Checks if the user is signed in to Galaxy.

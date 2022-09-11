@@ -22,11 +22,11 @@ namespace galaxy
 		/**
 		 * The interface for managing of cloud storage files.
 		 */
-		class Storage : public IStorage
+		class StorageImpl : public IStorage
 		{
 		public:
 
-			virtual ~Storage();
+			virtual ~StorageImpl();
 
 			/**
 			 * Writes data into the file.

@@ -23,11 +23,11 @@ namespace galaxy
 		/**
 		 * The interface for chat communication with other Galaxy Users.
 		 */
-		class Chat : public IChat
+		class ChatImpl : public IChat
 		{
 		public:
 
-			virtual ~Chat();
+			virtual ~ChatImpl();
 
 			/**
 			 * Creates new, or retrieves already existing one-on-one chat room with a specified user.

@@ -13,10 +13,10 @@ namespace galaxy
 		/**
 		 * The interface representing a thread object.
 		 */
-		class GalaxyThread : public IGalaxyThread
+		class GalaxyThreadImpl : public IGalaxyThread
 		{
 		public:
-			GalaxyThread(std::thread&& thread);
+			GalaxyThreadImpl(std::thread&& thread);
 			/**
 			 * Join the thread.
 			 *
@@ -38,7 +38,7 @@ namespace galaxy
 			 */
 			virtual void Detach() override;
 
-			virtual ~GalaxyThread();
+			virtual ~GalaxyThreadImpl();
 
 		private:
 			std::thread _thread;

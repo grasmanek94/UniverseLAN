@@ -21,11 +21,11 @@ namespace galaxy
 		 * specific listeners. You can either use it explicitly, or implicitly by
 		 * inheriting from a self-registering basic listener of desired type.
 		 */
-		class ListenerRegistrar : public IListenerRegistrar
+		class ListenerRegistrarImpl : public IListenerRegistrar
 		{
 		public:
 
-			virtual ~ListenerRegistrar();
+			virtual ~ListenerRegistrarImpl();
 
 			/**
 			 * Globally registers a callback listener that inherits from IGalaxyListener

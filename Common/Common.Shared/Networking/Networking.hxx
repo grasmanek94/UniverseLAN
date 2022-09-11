@@ -16,19 +16,15 @@ public:
 	virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data) = 0;
 	virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data) = 0;
 
-	virtual void Handle(ENetPeer* peer, const std::shared_ptr<PeerConnected>& data) = 0;
-	virtual void Handle(ENetPeer* peer, const std::shared_ptr<PeerDisconnected>& data) = 0;
 	virtual void Handle(ENetPeer* peer, const std::shared_ptr<ChatMessage>& data) = 0;
-	virtual void Handle(ENetPeer* peer, const std::shared_ptr<PlayerJoin>& data) = 0;
-	virtual void Handle(ENetPeer* peer, const std::shared_ptr<PlayerQuit>& data) = 0;
-	virtual void Handle(ENetPeer* peer, const std::shared_ptr<PlayerSpawn>& data) = 0;
-	virtual void Handle(ENetPeer* peer, const std::shared_ptr<PlayerDespawn>& data) = 0;
-	virtual void Handle(ENetPeer* peer, const std::shared_ptr<OnFootSync>& data) = 0;
-	virtual void Handle(ENetPeer* peer, const std::shared_ptr<WorldUpdate>& data) = 0;
-	virtual void Handle(ENetPeer* peer, const std::shared_ptr<GameSetup>& data) = 0;
-public:
+
+	template <typename T>
+	bool ProcessEventFor(const ENetEvent& event) {
+		static_assert(T::UniqueClassId, "T must implement UniqueClassId");
+	}
+
 	template <size_t unused = 0>
-	bool ProcessEvent(const ENetEvent& event, std::vector<size_t> class_list = {})
+	bool ProcessEvent(const ENetEvent& event)
 	{
 		bool return_value = false;
 
@@ -38,10 +34,9 @@ public:
 			{
 				//Handle packet
 				ENetPacket* packet = event.packet;
-				bool processed_packet = true;
-				if (packet->dataLength >= sizeof(size_t))
+				if (packet->dataLength >= sizeof(uint64_t))
 				{
-					size_t unique_class_id = (*reinterpret_cast<size_t*>(packet->data));
+					uint64_t unique_class_id = (*reinterpret_cast<uint64_t*>(packet->data));
 
 					#define IMPLEMENT_CASE_FOR(class_name) \
 						case class_name::UniqueClassId(): \
@@ -50,9 +45,9 @@ public:
 							std::shared_ptr<class_name> var(std::make_shared<class_name>()); \
 							std::stringstream stream(std::ios::in | std::ios::out | std::ios::binary); \
 							\
-							if (packet->dataLength > sizeof(size_t)) \
+							if (packet->dataLength > sizeof(uint64_t)) \
 							{ \
-								stream.write(reinterpret_cast<char*>(packet->data + sizeof(size_t)), packet->dataLength - sizeof(size_t)); \
+								stream.write(reinterpret_cast<char*>(packet->data + sizeof(uint64_t)), packet->dataLength - sizeof(uint64_t)); \
 							} \
 							\
 							try \
@@ -76,119 +71,33 @@ public:
 					#pragma warning( push )
 					#pragma warning( disable : 4307 )
 
-					bool process_this_case;
-
-					if (class_list.size())
+					switch (unique_class_id)
 					{
-						process_this_case = false;
-						for (auto& class_id : class_list)
-						{
-							if (class_id == unique_class_id)
-							{
-								process_this_case = true;
-								break;
-							}
-						}
-					}
-					else
-					{
-						process_this_case = true;
-					}
-
-					if (process_this_case)
-					{
-						switch (unique_class_id)
-						{
-							IMPLEMENT_CASE_FOR(ChatMessage);
-							IMPLEMENT_CASE_FOR(PlayerJoin);
-							IMPLEMENT_CASE_FOR(PlayerQuit);
-							IMPLEMENT_CASE_FOR(PlayerSpawn);
-							IMPLEMENT_CASE_FOR(PlayerDespawn);
-							IMPLEMENT_CASE_FOR(OnFootSync);
-
-							//Because of this we need to impl in header, so, template:
-							#ifdef VPLUS_CLIENT
-							IMPLEMENT_CASE_FOR(PeerConnected);
-							IMPLEMENT_CASE_FOR(PeerDisconnected);
-							IMPLEMENT_CASE_FOR(GameSetup);
-							IMPLEMENT_CASE_FOR(WorldUpdate);
-							#endif
-						}
-					}
-					else
-					{
-						processed_packet = false;
+						IMPLEMENT_CASE_FOR(ChatMessage);
 					}
 
 					#pragma warning( pop )
 
 					#undef IMPLEMENT_CASE_FOR
-
 				}
 
-				if (processed_packet)
-				{
-					/* Clean up the packet now that we're done using it. */
-					enet_packet_destroy(event.packet);
-				}
+				/* Clean up the packet now that we're done using it. */
+				enet_packet_destroy(event.packet);
+
 				break;
 			}
 
 			case ENET_EVENT_TYPE_CONNECT:
 			{
-				bool process_this_case;
-
-				if (class_list.size())
-				{
-					process_this_case = false;
-					for (auto& class_id : class_list)
-					{
-						if (class_id == EventConnect::UniqueClassId())
-						{
-							process_this_case = true;
-							break;
-						}
-					}
-				}
-				else
-				{
-					process_this_case = true;
-				}
-
-				if (process_this_case)
-				{
-					Handle(event.peer, std::make_shared<EventConnect>(event.peer));
-					return_value = true;
-				}
+				Handle(event.peer, std::make_shared<EventConnect>(event.peer));
+				return_value = true;
 				break;
 			}
 				
 			case ENET_EVENT_TYPE_DISCONNECT:
 			{
-				bool process_this_case;
-
-				if (class_list.size())
-				{
-					process_this_case = false;
-					for (auto& class_id : class_list)
-					{
-						if (class_id == EventDisconnect::UniqueClassId())
-						{
-							process_this_case = true;
-							break;
-						}
-					}
-				}
-				else
-				{
-					process_this_case = true;
-				}
-
-				if (process_this_case)
-				{
-					Handle(event.peer, std::make_shared<EventDisconnect>(event.peer));
-					return_value = true;
-				}
+				Handle(event.peer, std::make_shared<EventDisconnect>(event.peer));
+				return_value = true;
 				break;
 			}
 
@@ -209,8 +118,8 @@ ENetPacket* ConvertToENetPacket(const std::shared_ptr<T>& object, _ENetPacketFla
 	Well reduced it to double-buffer, I think we're not going to get any faster with this
 	*/
 	std::stringstream ss(std::ios::in | std::ios::out | std::ios::binary);
-	size_t unique_id = object->UniqueClassId();
-	ss.write(reinterpret_cast<char*>(&unique_id), sizeof(size_t));
+	uint64_t unique_id = object->UniqueClassId();
+	ss.write(reinterpret_cast<char*>(&unique_id), sizeof(uint64_t));
 	cereal::BinaryOutputArchive oarchive(ss);
 	oarchive(*object);
 
@@ -235,8 +144,8 @@ ENetPacket* ConvertToENetPacket(const T& object, _ENetPacketFlag flags = ENET_PA
 	Well reduced it to double-buffer, I think we're not going to get any faster with this
 	*/
 	std::stringstream ss(std::ios::in | std::ios::out | std::ios::binary);
-	size_t unique_id = object.UniqueClassId();
-	ss.write(reinterpret_cast<char*>(&unique_id), sizeof(size_t));
+	uint64_t unique_id = object.UniqueClassId();
+	ss.write(reinterpret_cast<char*>(&unique_id), sizeof(uint64_t));
 	cereal::BinaryOutputArchive oarchive(ss);
 	oarchive(object);
 
@@ -290,7 +199,7 @@ public:
 	}
 
 	void RunNetworking();
-	void ProcessEvents(MessageReceiver* receiver, std::vector<size_t> class_list = {});
+	void ProcessEvents(MessageReceiver* receiver);
 private:
 	std::atomic<bool> is_active;
 public:

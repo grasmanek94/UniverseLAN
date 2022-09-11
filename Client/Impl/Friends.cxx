@@ -14,7 +14,7 @@ namespace galaxy
 		 /**
 		  * The interface for managing social info and activities.
 		  */
-		Friends::~Friends()
+		FriendsImpl::~FriendsImpl()
 		{
 		}
 
@@ -23,7 +23,7 @@ namespace galaxy
 		 *
 		 * @return The bit sum of default AvatarType.
 		 */
-		AvatarCriteria Friends::GetDefaultAvatarCriteria() {
+		AvatarCriteria FriendsImpl::GetDefaultAvatarCriteria() {
 			return 0;
 		}
 
@@ -35,7 +35,7 @@ namespace galaxy
 		 *
 		 * @param [in] defaultAvatarCriteria The bit sum of default AvatarType.
 		 */
-		void Friends::SetDefaultAvatarCriteria(AvatarCriteria defaultAvatarCriteria) {
+		void FriendsImpl::SetDefaultAvatarCriteria(AvatarCriteria defaultAvatarCriteria) {
 
 		}
 
@@ -58,7 +58,7 @@ namespace galaxy
 		 * @param [in] avatarCriteria The bit sum of the AvatarType.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		void Friends::RequestUserInformation(
+		void FriendsImpl::RequestUserInformation(
 			GalaxyID userID,
 			AvatarCriteria avatarCriteria,
 			IUserInformationRetrieveListener* const listener) {
@@ -73,7 +73,7 @@ namespace galaxy
 		 * @param [in] userID The ID of the user.
 		 * @return true if the information of the user is available, false otherwise.
 		 */
-		bool Friends::IsUserInformationAvailable(GalaxyID userID) {
+		bool FriendsImpl::IsUserInformationAvailable(GalaxyID userID) {
 			return false;
 		}
 
@@ -84,7 +84,7 @@ namespace galaxy
 		 *
 		 * @return The nickname of the user.
 		 */
-		const char* Friends::GetPersonaName() {
+		const char* FriendsImpl::GetPersonaName() {
 			return "PersonaName";
 		}
 
@@ -94,7 +94,7 @@ namespace galaxy
 		 * @param [in, out] buffer The output buffer.
 		 * @param [in] bufferLength The size of the output buffer.
 		 */
-		void Friends::GetPersonaNameCopy(char* buffer, uint32_t bufferLength) {
+		void FriendsImpl::GetPersonaNameCopy(char* buffer, uint32_t bufferLength) {
 			std::copy_n(GetPersonaName(), std::min((size_t)bufferLength, strlen(GetPersonaName())), buffer);
 		}
 
@@ -103,7 +103,7 @@ namespace galaxy
 		 *
 		 * @return The state of the user.
 		 */
-		PersonaState Friends::GetPersonaState() {
+		PersonaState FriendsImpl::GetPersonaState() {
 			return PERSONA_STATE_OFFLINE;
 		}
 
@@ -117,7 +117,7 @@ namespace galaxy
 		 * @param [in] userID The ID of the user.
 		 * @return The nickname of the user.
 		 */
-		const char* Friends::GetFriendPersonaName(GalaxyID userID) {
+		const char* FriendsImpl::GetFriendPersonaName(GalaxyID userID) {
 			return "PersonaName";
 		}
 
@@ -130,7 +130,7 @@ namespace galaxy
 		 * @param [in, out] buffer The output buffer.
 		 * @param [in] bufferLength The size of the output buffer.
 		 */
-		void Friends::GetFriendPersonaNameCopy(GalaxyID userID, char* buffer, uint32_t bufferLength) {
+		void FriendsImpl::GetFriendPersonaNameCopy(GalaxyID userID, char* buffer, uint32_t bufferLength) {
 			std::copy_n(GetFriendPersonaName(userID), std::min((size_t)bufferLength, strlen(GetFriendPersonaName(userID))), buffer);
 		}
 
@@ -142,7 +142,7 @@ namespace galaxy
 		 * @param [in] userID The ID of the user.
 		 * @return The state of the user.
 		 */
-		PersonaState Friends::GetFriendPersonaState(GalaxyID userID) {
+		PersonaState FriendsImpl::GetFriendPersonaState(GalaxyID userID) {
 			return PERSONA_STATE_OFFLINE;
 		}
 
@@ -157,7 +157,7 @@ namespace galaxy
 		 * @param [in] avatarType The type of avatar.
 		 * @return The URL of the avatar.
 		 */
-		const char* Friends::GetFriendAvatarUrl(GalaxyID userID, AvatarType avatarType) {
+		const char* FriendsImpl::GetFriendAvatarUrl(GalaxyID userID, AvatarType avatarType) {
 			return "";
 		}
 
@@ -171,7 +171,7 @@ namespace galaxy
 		 * @param [in, out] buffer The output buffer.
 		 * @param [in] bufferLength The size of the output buffer.
 		 */
-		void Friends::GetFriendAvatarUrlCopy(GalaxyID userID, AvatarType avatarType, char* buffer, uint32_t bufferLength) {
+		void FriendsImpl::GetFriendAvatarUrlCopy(GalaxyID userID, AvatarType avatarType, char* buffer, uint32_t bufferLength) {
 			std::copy_n(GetFriendAvatarUrl(userID, avatarType), std::min((size_t)bufferLength, strlen(GetFriendAvatarUrl(userID, avatarType))), buffer);
 		}
 
@@ -185,7 +185,7 @@ namespace galaxy
 		 * @param [in] avatarType The type of avatar.
 		 * @return The ID of the avatar image.
 		 */
-		uint32_t Friends::GetFriendAvatarImageID(GalaxyID userID, AvatarType avatarType) {
+		uint32_t FriendsImpl::GetFriendAvatarImageID(GalaxyID userID, AvatarType avatarType) {
 			return 0;
 		}
 
@@ -202,7 +202,7 @@ namespace galaxy
 		 * @param [in, out] buffer The output buffer.
 		 * @param [in] bufferLength The size of the output buffer.
 		 */
-		void Friends::GetFriendAvatarImageRGBA(GalaxyID userID, AvatarType avatarType, void* buffer, uint32_t bufferLength) {
+		void FriendsImpl::GetFriendAvatarImageRGBA(GalaxyID userID, AvatarType avatarType, void* buffer, uint32_t bufferLength) {
 
 		}
 
@@ -213,7 +213,7 @@ namespace galaxy
 		 * @param [in] avatarType The type of avatar.
 		 * @return true if the specified avatar image is available, false otherwise.
 		 */
-		bool Friends::IsFriendAvatarImageRGBAAvailable(GalaxyID userID, AvatarType avatarType) {
+		bool FriendsImpl::IsFriendAvatarImageRGBAAvailable(GalaxyID userID, AvatarType avatarType) {
 			return false;
 		}
 
@@ -224,7 +224,7 @@ namespace galaxy
 		 *
 		 * @param [in] listener The listener for specific operation.
 		 */
-		void Friends::RequestFriendList(IFriendListListener* const listener) {
+		void FriendsImpl::RequestFriendList(IFriendListListener* const listener) {
 
 		}
 
@@ -236,7 +236,7 @@ namespace galaxy
 		 * @param [in] userID The ID of the user.
 		 * @return true if the specified user is a friend, false otherwise.
 		 */
-		bool Friends::IsFriend(GalaxyID userID) {
+		bool FriendsImpl::IsFriend(GalaxyID userID) {
 			return true;
 		}
 
@@ -247,7 +247,7 @@ namespace galaxy
 		 *
 		 * @return The number of retrieved friends, or 0 if failed.
 		 */
-		uint32_t Friends::GetFriendCount() {
+		uint32_t FriendsImpl::GetFriendCount() {
 			return 0;
 		}
 
@@ -259,7 +259,7 @@ namespace galaxy
 		 * @param [in] index Index as an integer in the range of [0, number of friends).
 		 * @return The GalaxyID of the friend.
 		 */
-		GalaxyID Friends::GetFriendByIndex(uint32_t index) {
+		GalaxyID FriendsImpl::GetFriendByIndex(uint32_t index) {
 			return 0;
 		}
 
@@ -271,7 +271,7 @@ namespace galaxy
 		 * @param [in] userID The ID of the user.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		void Friends::SendFriendInvitation(GalaxyID userID, IFriendInvitationSendListener* const listener) {
+		void FriendsImpl::SendFriendInvitation(GalaxyID userID, IFriendInvitationSendListener* const listener) {
 
 		}
 
@@ -282,7 +282,7 @@ namespace galaxy
 		 *
 		 * @param [in] listener The listener for specific operation.
 		 */
-		void Friends::RequestFriendInvitationList(IFriendInvitationListRetrieveListener* const listener) {
+		void FriendsImpl::RequestFriendInvitationList(IFriendInvitationListRetrieveListener* const listener) {
 
 		}
 
@@ -293,7 +293,7 @@ namespace galaxy
 		 *
 		 * @param [in] listener The listener for specific operation.
 		 */
-		void Friends::RequestSentFriendInvitationList(ISentFriendInvitationListRetrieveListener* const listener) {
+		void FriendsImpl::RequestSentFriendInvitationList(ISentFriendInvitationListRetrieveListener* const listener) {
 
 		}
 
@@ -304,7 +304,7 @@ namespace galaxy
 		 *
 		 * @return The number of retrieved friend invitations, or 0 if failed.
 		 */
-		uint32_t Friends::GetFriendInvitationCount() {
+		uint32_t FriendsImpl::GetFriendInvitationCount() {
 			return 0;
 		}
 
@@ -317,7 +317,7 @@ namespace galaxy
 		 * @param [out] userID The ID of the user who sent the invitation.
 		 * @param [out] sendTime The time at which the friend invitation was sent.
 		 */
-		void Friends::GetFriendInvitationByIndex(uint32_t index, GalaxyID& userID, uint32_t& sendTime) {
+		void FriendsImpl::GetFriendInvitationByIndex(uint32_t index, GalaxyID& userID, uint32_t& sendTime) {
 
 		}
 
@@ -330,7 +330,7 @@ namespace galaxy
 		 * @param [in] accept True when accepting the invitation, false when declining.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		void Friends::RespondToFriendInvitation(GalaxyID userID, bool accept, IFriendInvitationRespondToListener* const listener) {
+		void FriendsImpl::RespondToFriendInvitation(GalaxyID userID, bool accept, IFriendInvitationRespondToListener* const listener) {
 
 		}
 
@@ -342,7 +342,7 @@ namespace galaxy
 		 * @param [in] userID The ID of the user to be removed from the friend list.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		void Friends::DeleteFriend(GalaxyID userID, IFriendDeleteListener* const listener) {
+		void FriendsImpl::DeleteFriend(GalaxyID userID, IFriendDeleteListener* const listener) {
 
 		}
 
@@ -366,7 +366,7 @@ namespace galaxy
 		 * @param [in] value The value of the property to set.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		void Friends::SetRichPresence(const char* key, const char* value, IRichPresenceChangeListener* const listener) {
+		void FriendsImpl::SetRichPresence(const char* key, const char* value, IRichPresenceChangeListener* const listener) {
 
 		}
 
@@ -380,7 +380,7 @@ namespace galaxy
 		 * @param [in] key The name of the variable to be removed.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		void Friends::DeleteRichPresence(const char* key, IRichPresenceChangeListener* const listener) {
+		void FriendsImpl::DeleteRichPresence(const char* key, IRichPresenceChangeListener* const listener) {
 
 		}
 
@@ -391,7 +391,7 @@ namespace galaxy
 		 *
 		 * @param [in] listener The listener for specific operation.
 		 */
-		void Friends::ClearRichPresence(IRichPresenceChangeListener* const listener) {
+		void FriendsImpl::ClearRichPresence(IRichPresenceChangeListener* const listener) {
 
 		}
 
@@ -404,7 +404,7 @@ namespace galaxy
 		 * @param [in] userID The ID of the user.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		void Friends::RequestRichPresence(GalaxyID userID, IRichPresenceRetrieveListener* const listener) {
+		void FriendsImpl::RequestRichPresence(GalaxyID userID, IRichPresenceRetrieveListener* const listener) {
 
 		}
 
@@ -419,7 +419,7 @@ namespace galaxy
 		 * @param [in] key The name of the property of the user's rich presence.
 		 * @return The rich presence of the user.
 		 */
-		const char* Friends::GetRichPresence(const char* key, GalaxyID userID) {
+		const char* FriendsImpl::GetRichPresence(const char* key, GalaxyID userID) {
 			return "";
 		}
 
@@ -433,7 +433,7 @@ namespace galaxy
 		 * @param [in] bufferLength The size of the output buffer.
 		 * @param [in] userID The ID of the user.
 		 */
-		void Friends::GetRichPresenceCopy(const char* key, char* buffer, uint32_t bufferLength, GalaxyID userID) {
+		void FriendsImpl::GetRichPresenceCopy(const char* key, char* buffer, uint32_t bufferLength, GalaxyID userID) {
 
 		}
 
@@ -443,7 +443,7 @@ namespace galaxy
 		 * @param [in] userID The ID of the user.
 		 * @return The number of retrieved keys, or 0 if failed.
 		 */
-		uint32_t Friends::GetRichPresenceCount(GalaxyID userID) {
+		uint32_t FriendsImpl::GetRichPresenceCount(GalaxyID userID) {
 			return 0;
 		}
 
@@ -459,7 +459,7 @@ namespace galaxy
 		 * @param [in] valueLength The length of the value of the property of the rich presence storage.
 		 * @param [in] userID The ID of the user.
 		 */
-		void Friends::GetRichPresenceByIndex(uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength, GalaxyID userID) {
+		void FriendsImpl::GetRichPresenceByIndex(uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength, GalaxyID userID) {
 
 		}
 
@@ -476,7 +476,7 @@ namespace galaxy
 		 *
 		 * @param [in] connectionString The string which contains connection info with the limit of 4095 bytes.
 		 */
-		void Friends::ShowOverlayInviteDialog(const char* connectionString) {
+		void FriendsImpl::ShowOverlayInviteDialog(const char* connectionString) {
 
 		}
 
@@ -494,7 +494,7 @@ namespace galaxy
 		 * @param [in] connectionString The string which contains connection info with the limit of 4095 bytes.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		void Friends::SendInvitation(GalaxyID userID, const char* connectionString, ISendInvitationListener* const listener) {
+		void FriendsImpl::SendInvitation(GalaxyID userID, const char* connectionString, ISendInvitationListener* const listener) {
 
 		}
 
@@ -509,7 +509,7 @@ namespace galaxy
 		 * @param [in] userSpecifier The specifier of the user.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		void Friends::FindUser(const char* userSpecifier, IUserFindListener* const listener) {
+		void FriendsImpl::FindUser(const char* userSpecifier, IUserFindListener* const listener) {
 
 		}
 
@@ -521,7 +521,7 @@ namespace galaxy
 		 * @param [in] userID The ID of the user.
 		 * @return true if the specified user is playing the same game, false otherwise.
 		 */
-		bool Friends::IsUserInTheSameGame(GalaxyID userID) const {
+		bool FriendsImpl::IsUserInTheSameGame(GalaxyID userID) const {
 			return true;
 		}
 
