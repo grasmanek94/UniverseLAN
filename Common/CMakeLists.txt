@@ -1,0 +1,2 @@
+add_subdirectory(Version)
+add_subdirectory(Shared)
