@@ -116,7 +116,7 @@ NetworkClient::~NetworkClient()
 	}
 }
 
-ENetPeer * NetworkClient::Connect(std::string hostname, unsigned short port)
+ENetPeer* NetworkClient::Connect(std::string hostname, unsigned short port)
 {
 	if (peer != nullptr)
 	{

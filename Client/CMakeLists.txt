@@ -14,10 +14,10 @@ target_link_libraries(
 
 if (MSVC)
   if("${MSVC_C_ARCHITECTURE_ID}" STREQUAL "X86")
-    list(APPEND CLIENT_SRC ../Galaxy.def)
+    list(APPEND CLIENT_SRC ../UniverseLAN.def)
     set_target_properties(lsfdrmfg-client PROPERTIES OUTPUT_NAME "Galaxy")
   elseif("${MSVC_C_ARCHITECTURE_ID}" STREQUAL "x64")
-    list(APPEND CLIENT_SRC ../Galaxy64.def)
+    list(APPEND CLIENT_SRC ../UniverseLAN64.def)
     set_target_properties(lsfdrmfg-client PROPERTIES OUTPUT_NAME "Galaxy64")
   endif()
 endif()

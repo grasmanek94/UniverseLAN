@@ -7,6 +7,5 @@ class EventDisconnect
 public:
 	UniqueClassId_Declare(EventDisconnect);
 
-	ENetPeer* peer;
-	EventDisconnect(ENetPeer* peer);
+	EventDisconnect() {}
 };

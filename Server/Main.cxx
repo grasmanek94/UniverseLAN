@@ -15,12 +15,10 @@
 #include <Networking/Networking.hxx>
 #include <Networking/Link.hxx>
 
-using Player = NetPlayer;
-
 class Server : public MessageReceiver
 {
 private:
-	V_Plus_NetworkServer connection;
+	GalaxyNetworkServer connection;
 	IdCounter id_generator;
 	const size_t max_connections;
 	std::vector<Link> peers;
@@ -41,7 +39,7 @@ private:
 
 	void Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data) override
 	{
-		Player* player = Link::GetPlayer(peer);
+		NetPlayer* player = Link::GetPlayer(peer);
 
 		//PlayerQuit player_quit;
 		//player_quit.SetSender(player->id);
@@ -57,7 +55,7 @@ private:
 
 	void Handle(ENetPeer* peer, const std::shared_ptr<ChatMessage>& message) override
 	{
-		Player* player = Link::GetPlayer(peer);
+		NetPlayer* player = Link::GetPlayer(peer);
 
 		message->SetSender(player->id);
 

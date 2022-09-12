@@ -9,7 +9,8 @@ target_include_directories(lsfdrmfg-common-shared PUBLIC ".")
 target_link_libraries(
     lsfdrmfg-common-shared
     PUBLIC
-      lsfdrmfg-all-headers
+      lsfdrmfg-galaxy
+      lsfdrmfg-cereal
       lsfdrmfg-enet
       lsfdrmfg-simpleini
       lsfdrmfg-common-version

@@ -3,7 +3,8 @@
  * Includes all other files that are needed to work with the Galaxy library.
  */
 
-#include "GalaxyApi.hxx"
+#include "UniverseLAN.hxx"
+#include "CustomConsole.hxx"
 
 #include <memory>
 
@@ -40,6 +41,8 @@ namespace galaxy
 			custom_networking_impl = std::make_unique<CustomNetworkingImpl>();
 			logger_impl = std::make_unique<LoggerImpl>();
 			telemetry_impl = std::make_unique<TelemetryImpl>();
+
+			EnableCustomConsole();
 		}
 
 		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Shutdown() {

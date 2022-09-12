@@ -20,7 +20,7 @@ private:
 	int initialisation_code;
 
 	NetworkBase();
-	~NetworkBase();
+
 public:
 	void SetHost(std::string hostname, unsigned short port);
 	const ENetAddress Address();
@@ -30,6 +30,8 @@ public:
 	int Pull(enet_uint32 timeout = 0);
 	int Send(ENetPeer* peer, const void* data, size_t bytes, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE);
 	int Send(ENetPeer* peer, ENetPacket* packet);
+
+	virtual ~NetworkBase();
 };
 
 class NetworkServer : public NetworkBase
@@ -41,6 +43,8 @@ public:
 	void Broadcast(ENetPacket* packet);
 	void Broadcast(const void* data, size_t bytes, _ENetPacketFlag flags, ENetPeer* except);
 	void Broadcast(ENetPacket* packet, ENetPeer* except);
+
+	virtual ~NetworkServer() {}
 };
 
 class NetworkClient : public NetworkBase
@@ -49,11 +53,12 @@ private:
 	ENetPeer * peer;
 public:
 	NetworkClient();
-	~NetworkClient();
 	ENetPeer * Connect(std::string hostname, unsigned short port);
 	bool Create();
 	int Send(const void* data, size_t bytes, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE);
 	int Send(ENetPacket* packet);
+
+	virtual ~NetworkClient();
 };
 
 const size_t MAX_PACKET_SIZE = 32 * 1024;//k bytes

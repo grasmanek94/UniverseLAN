@@ -15,20 +15,17 @@
 #include <Networking/Networking.hxx>
 #include <Networking/Link.hxx>
 
-#include "GalaxyApi.hxx"
+#include "UniverseLAN.hxx"
 
 extern "C" GALAXY_DLL_EXPORT uint32_t load() {
 	return 0;
 }
 
-using Player = NetPlayer;
-
-class Server: public MessageReceiver
+class Client: public MessageReceiver
 {
 private:
-	V_Plus_NetworkServer connection;
+	GalaxyNetworkClient connection;
 	IdCounter id_generator;
-	const size_t max_connections;
 	std::vector<Link> peers;
 	std::set<Link*> connected_peers;
 
@@ -47,7 +44,7 @@ private:
 
 	void Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data) override
 	{
-		Player* player = Link::GetPlayer(peer);
+		NetPlayer* player = Link::GetPlayer(peer);
 
 		//PlayerQuit player_quit;
 		//player_quit.SetSender(player->id);
@@ -63,18 +60,18 @@ private:
 
 	void Handle(ENetPeer* peer, const std::shared_ptr<ChatMessage>& message) override
 	{
-		Player* player = Link::GetPlayer(peer);
+		NetPlayer* player = Link::GetPlayer(peer);
 
 		message->SetSender(player->id);
 
 		std::wcout << "[" << message->GetSender() << "]: " << message->GetContents() << std::endl;
 
-		connection.Broadcast(message);
+		connection.SendAsync(message);
 	}
 
 public:
-	Server(const std::string bind_address, uint16_t port, size_t max_players)
-		: id_generator(), max_connections(max_players)
+	Client(const std::string address, uint16_t port)
+		: id_generator()
 	{
 		int init_code = connection.GetInitCode();
 
@@ -88,22 +85,15 @@ public:
 			);
 		}
 
-		connection.SetHost(bind_address, port);
-
-		if (!connection.Create(max_players) || !connection.Good())
+		if (!connection.Create() || !connection.Good())
 		{
 #ifdef _WIN32
 			// TODO custom exception class
 			throw std::exception("ENET host member creation failed");
 #endif
-		}		
-
-		peers.resize(max_players);
-		for (size_t i = 0; i < max_players; ++i)
-		{
-			peers[i].GetPlayer()->id = i;
 		}
-		//ready
+		//ready to ->Connect
+		connection.Connect(address, port);
 	}
 
 	void Tick()
@@ -114,7 +104,7 @@ public:
 		}
 	}
 
-	~Server()
+	virtual ~Client()
 	{
 
 	}

@@ -1,6 +1,65 @@
 #include "Networking.hxx"
 
-void V_Plus_NetworkClient::RunNetworking()
+bool MessageReceiver::ProcessEvent(const ENetEvent& event)
+{
+	bool return_value = false;
+
+	switch (event.type)
+	{
+	case ENET_EVENT_TYPE_RECEIVE:
+	{
+		//Handle packet
+		ENetPacket* packet = event.packet;
+		if (packet->dataLength >= sizeof(uint64_t))
+		{
+			uint64_t unique_class_id = (*reinterpret_cast<uint64_t*>(packet->data));
+
+			#define IMPLEMENT_CASE_FOR(class_name) \
+					case class_name::UniqueClassId(): { return_value = ProcessEventFor<class_name>(event); } break;
+
+			#pragma warning( push )
+			#pragma warning( disable : 4307 )
+
+			switch (unique_class_id)
+			{
+				IMPLEMENT_CASE_FOR(ChatMessage);
+			}
+
+			#pragma warning( pop )
+
+			#undef IMPLEMENT_CASE_FOR
+		}
+
+		/* Clean up the packet now that we're done using it. */
+		enet_packet_destroy(event.packet);
+
+		break;
+	}
+
+	case ENET_EVENT_TYPE_CONNECT:
+	{
+		Handle(event.peer, std::make_shared<EventConnect>());
+		return_value = true;
+		break;
+	}
+
+	case ENET_EVENT_TYPE_DISCONNECT:
+	{
+		Handle(event.peer, std::make_shared<EventDisconnect>());
+		return_value = true;
+		break;
+	}
+
+	case ENET_EVENT_TYPE_NONE:
+		//no warnings plz
+		return_value = true;
+		break;
+
+	}
+	return return_value;
+}
+
+void GalaxyNetworkClient::RunNetworking()
 {
 	ENetPacket* packet = nullptr;
 	while (delayed_packets_to_send.try_pop(packet))
@@ -37,14 +96,6 @@ void V_Plus_NetworkClient::RunNetworking()
 					switch (unique_class_id)
 					{
 						IMPLEMENT_CASE_FOR(ChatMessage);
-
-						//Because of this we need to impl in header, so, template:
-						#ifdef VPLUS_CLIENT
-						IMPLEMENT_CASE_FOR(PeerConnected);
-						IMPLEMENT_CASE_FOR(PeerDisconnected);
-						IMPLEMENT_CASE_FOR(GameSetup);
-						IMPLEMENT_CASE_FOR(WorldUpdate);
-						#endif
 					}
 
 					#pragma warning( pop )
@@ -56,7 +107,7 @@ void V_Plus_NetworkClient::RunNetworking()
 	}
 }
 
-void V_Plus_NetworkClient::ProcessEvents(MessageReceiver* receiver)
+void GalaxyNetworkClient::ProcessEvents(MessageReceiver* receiver)
 {
 	ENetEvent event;
 
@@ -66,16 +117,16 @@ void V_Plus_NetworkClient::ProcessEvents(MessageReceiver* receiver)
 	}
 }
 
-V_Plus_NetworkClient::V_Plus_NetworkClient()
+GalaxyNetworkClient::GalaxyNetworkClient()
 	: is_active(true)
 { }
 
-void V_Plus_NetworkClient::SetActive(bool active)
+void GalaxyNetworkClient::SetActive(bool active)
 {
 	is_active = active;
 }
 
-bool V_Plus_NetworkClient::IsActive()
+bool GalaxyNetworkClient::IsActive()
 {
 	return is_active;
 }
