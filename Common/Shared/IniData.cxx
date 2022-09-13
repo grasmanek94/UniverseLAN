@@ -1,7 +1,11 @@
 #include "IniData.hxx"
 
+#include "ConstHash.hxx"
+#include "MachineInfo.hxx"
+
 #include <exception>
 #include <filesystem>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <chrono>
@@ -145,6 +149,91 @@ ClientIniData::ClientIniData()
 		GalaxyIDOffset = ini.GetLongLongValue(UserSection.c_str(), "GalaxyIDOffset", 0);
 		Avatar = ini.GetValue(UserSection.c_str(), "Avatar", "me.png");
 		SignedIn = ini.GetBoolValue(UserSection.c_str(), "SignedIn", true);
+
+		MachineInfo machine_info;
+
+		if (const_hash(PersonaNameType) != const_hash("@Custom")) {
+
+			switch (const_hash(PersonaNameType)) {
+			case const_hash("@WindowsAccountName"):
+				if (machine_info.GetLocalMachineName().size() < 1) {
+					throw std::runtime_error("@WindowsAccountName: No username found");
+				}
+
+				CustomPersonaName = machine_info.GetLocalUserName();
+				break;
+
+			case const_hash("@WindowsAccountNameHash"):
+				if (machine_info.GetLocalMachineName().size() < 1) {
+					throw std::runtime_error("@WindowsAccountNameHash: No username found");
+				}
+
+				CustomPersonaName = std::to_string(const_hash64(machine_info.GetLocalUserName()));
+				break;
+
+			case const_hash("@ComputerName"):
+				if (machine_info.GetLocalMachineName().size() < 1) {
+					throw std::runtime_error("@ComputerName: No machine name found");
+				}
+
+				CustomPersonaName = machine_info.GetLocalMachineName();
+				break;
+
+			case const_hash("@ComputerNameHash"):
+				if (machine_info.GetLocalMachineName().size() < 1) {
+					throw std::runtime_error("@ComputerNameHash: No machine name found");
+				}
+
+				CustomPersonaName = std::to_string(const_hash64(machine_info.GetLocalMachineName()));
+				break;
+
+			case const_hash("@NetworkAdapterMACHash"):
+				if (machine_info.GetLocalMACs().size() < 1) {
+					throw std::runtime_error("@NetworkAdapterMACHash: No MAC adresses found");
+				}
+
+				CustomPersonaName = std::to_string(const_hash64(machine_info.GetLocalMACs().front()));
+				break;
+
+			default:
+				throw std::runtime_error("Incorrect PersonaNameType: " + PersonaNameType);
+			}
+		}
+
+		if (const_hash(GalaxyIDType) != const_hash("@Custom")) {
+			std::string str;
+
+			switch (const_hash(GalaxyIDType)) {
+			case const_hash("@WindowsAccountNameHash"):
+				if (machine_info.GetLocalMachineName().size() < 1) {
+					throw std::runtime_error("@WindowsAccountNameHash: No username found");
+				}
+
+				str = machine_info.GetLocalUserName();
+				break;
+
+			case const_hash("@ComputerNameHash"):
+				if (machine_info.GetLocalMachineName().size() < 1) {
+					throw std::runtime_error("@ComputerNameHash: No machine name found");
+				}
+
+				str = machine_info.GetLocalMachineName();
+				break;
+
+			case const_hash("@NetworkAdapterMACHash"):
+				if (machine_info.GetLocalMACs().size() < 1) {
+					throw std::runtime_error("@NetworkAdapterMACHash: No MAC adresses found");
+				}
+
+				str = machine_info.GetLocalMACs().front();
+				break;
+
+			default:
+				throw std::runtime_error("Incorrect GalaxyIDType: " + GalaxyIDType);
+			}
+
+			CustomGalaxyID = const_hash64(str);
+		}
 	}
 
 	// Achievements

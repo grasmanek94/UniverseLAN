@@ -57,6 +57,9 @@ namespace galaxy
 				EnableCustomConsole();
 			}
 
+			std::cout << "Using username: " << config->GetCustomPersonaName() << std::endl;
+			std::cout << "Using GalaxyID: " << config->GetCustomGalaxyID() << std::endl;
+
 			client->Start();
 		}
 

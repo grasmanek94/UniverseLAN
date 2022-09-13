@@ -1,0 +1,19 @@
+#pragma once
+
+#include <string>
+#include <vector>
+
+class MachineInfo
+{
+private:
+	std::string machine_name;
+	std::string user_name;
+	std::vector<std::string> macs;
+
+public:
+	MachineInfo();
+
+	std::string GetLocalMachineName();
+	std::string GetLocalUserName();
+	std::vector<std::string> GetLocalMACs();
+};

@@ -14,4 +14,7 @@ target_link_libraries(
       lsfdrmfg-enet
       lsfdrmfg-simpleini
       lsfdrmfg-common-version
+    PRIVATE
+      $<$<PLATFORM_ID:Windows>:IPHLPAPI>
 )
+  

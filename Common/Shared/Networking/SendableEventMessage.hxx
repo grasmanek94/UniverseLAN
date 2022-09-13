@@ -24,11 +24,6 @@
 #include <cereal/types/valarray.hpp>
 #include <cereal/types/vector.hpp>
 
-static_assert(sizeof(uint64_t) == 8, "You cannot compile this application for the chosen architecture");
-
-// compile time FNV-1a
-constexpr uint32_t const_hash(const char* str, size_t n, uint32_t basis = UINT32_C(2166136261)) {
-	return n == 0 ? basis : const_hash(str + 1, n - 1, (basis ^ str[0]) * UINT32_C(16777619));
-}
+#include "ConstHash.hxx"
 
 #define UniqueClassId_Declare(className) static const uint64_t constexpr UniqueClassId() { return const_hash(#className, sizeof(#className)); }

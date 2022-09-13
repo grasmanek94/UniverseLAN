@@ -24,14 +24,14 @@ namespace galaxy
 			 * @param [in] initOptions InitOptions passed from Init function.
 			 */
 			InitOptionsModern(const InitOptions& initOptions) :
-				clientID(initOptions.clientID),
-				clientSecret(initOptions.clientSecret),
-				configFilePath(initOptions.configFilePath),
-				storagePath(initOptions.storagePath),
-				galaxyAllocator(initOptions.galaxyAllocator),
-				galaxyThreadFactory(initOptions.galaxyThreadFactory),
-				host(initOptions.host),
-				port(initOptions.port)
+				clientID{ initOptions.clientID },
+				clientSecret{ initOptions.clientSecret },
+				configFilePath{ initOptions.configFilePath != nullptr ? initOptions.configFilePath : ""},
+				storagePath{ initOptions.storagePath != nullptr ? initOptions.storagePath : "" },
+				galaxyAllocator{ initOptions.galaxyAllocator },
+				galaxyThreadFactory{ initOptions.galaxyThreadFactory },
+				host{ initOptions.host != nullptr ? initOptions.host : "" },
+				port{ initOptions.port }
 			{ }
 
 			const std::string clientID; ///< The ID of the client.

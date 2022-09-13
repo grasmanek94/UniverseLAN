@@ -59,7 +59,7 @@ void Client::Tick()
 
 Client::~Client()
 {
-
+	Stop();
 }
 
 void Client::Start()

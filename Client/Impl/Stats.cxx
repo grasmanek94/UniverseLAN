@@ -10,7 +10,7 @@ namespace galaxy
 		}
 
 		void StatsImpl::RequestUserStatsAndAchievements(GalaxyID userID, IUserStatsAndAchievementsRetrieveListener* const listener) {
-
+			
 		}
 
 		int32_t StatsImpl::GetStatInt(const char* name, GalaxyID userID) {

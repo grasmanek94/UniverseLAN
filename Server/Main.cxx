@@ -11,10 +11,8 @@
 
 #include <IdCounter.hxx>
 #include <IniData.hxx>
-#include <NetPlayer.hxx>
 
 #include <Networking/Networking.hxx>
-#include <Networking/Link.hxx>
 
 class Server : public MessageReceiver
 {
@@ -23,17 +21,14 @@ private:
 	GalaxyNetworkServer connection;
 	IdCounter id_generator;
 	size_t max_connections;
-	std::vector<Link> peers;
-	std::set<Link*> connected_peers;
+	std::set<ENetPeer*> connected_peers;
 
 	// Handlers:
 	void Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data) override
 	{
 		size_t id = id_generator.GetNewId();
 
-		Link* link = &peers[id];
-		link->SetPeer(peer);
-		connected_peers.insert(link);
+		connected_peers.insert(peer);
 
 		//connection.Send(peer, GameSetup( id ));
 		std::cout << "Peer connected: " << peer->address.host << ":" << peer->address.port << " with ID: " << reinterpret_cast<size_t>(peer->data) << std::endl;
@@ -41,7 +36,6 @@ private:
 
 	void Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data) override
 	{
-		NetPlayer* player = Link::GetPlayer(peer);
 
 		//PlayerQuit player_quit;
 		//player_quit.SetSender(player->id);
@@ -50,20 +44,17 @@ private:
 
 		std::cout << "Peer disconnected: " << peer->address.host << ":" << peer->address.port << " with ID: " << reinterpret_cast<size_t>(peer->data) << std::endl;
 
-		peers[player->id].SetPeer(nullptr);
-		connected_peers.erase(&peers[player->id]);
-		id_generator.FreeId(player->id);
+		connected_peers.erase(peer);
+		//id_generator.FreeId(player->id);
 	}
 
 	void Handle(ENetPeer* peer, const std::shared_ptr<ChatMessage>& message) override
 	{
-		NetPlayer* player = Link::GetPlayer(peer);
+		//message->SetSender(player->id);
 
-		message->SetSender(player->id);
+		//std::wcout << "[" << message->GetSender() << "]: " << message->GetContents() << std::endl;
 
-		std::wcout << "[" << message->GetSender() << "]: " << message->GetContents() << std::endl;
-
-		connection.Broadcast(message);
+		//connection.Broadcast(message);
 	}
 
 public:
@@ -93,11 +84,6 @@ public:
 #endif
 		}
 
-		peers.resize(max_connections);
-		for (size_t i = 0; i < max_connections; ++i)
-		{
-			peers[i].GetPlayer()->id = i;
-		}
 		//ready
 	}
 
@@ -114,6 +100,8 @@ public:
 
 	}
 };
+
+#include "MachineInfo.hxx"
 
 std::unique_ptr<Server> server;
 int main()

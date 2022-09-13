@@ -14,9 +14,10 @@ target_link_libraries(
 
 if (MSVC)
   if("${MSVC_C_ARCHITECTURE_ID}" STREQUAL "X86")
-    set_target_properties(lsfdrmfg-server PROPERTIES OUTPUT_NAME "GalaxyServer")
+    set_target_properties(lsfdrmfg-server PROPERTIES OUTPUT_NAME "UniverseLANServer")
   elseif("${MSVC_C_ARCHITECTURE_ID}" STREQUAL "x64")
-    set_target_properties(lsfdrmfg-server PROPERTIES OUTPUT_NAME "GalaxyServer64")
+    set_target_properties(lsfdrmfg-server PROPERTIES OUTPUT_NAME "UniverseLANServer64")
   endif()
 endif()
 
+set_property(TARGET lsfdrmfg-server PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/Config/")
