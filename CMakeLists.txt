@@ -10,6 +10,10 @@ enable_language( C )
 set(CMAKE_CXX_STANDARD 20)
 set(CXX_STANDARD_REQUIRED ON)
 
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/)
+file(COPY Config/ DESTINATION ${CMAKE_SOURCE_DIR}/bin/Debug/)
+file(COPY Config/ DESTINATION ${CMAKE_SOURCE_DIR}/bin/Release/)
+
 add_subdirectory(Vendor)
 add_subdirectory(Common)
 add_subdirectory(Client)

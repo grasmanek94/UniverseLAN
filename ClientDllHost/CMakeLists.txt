@@ -20,4 +20,4 @@ if (MSVC)
   endif()
 endif()
 
-set_property(TARGET lsfdrmfg-dllhost PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/Config/")
+set_property(TARGET lsfdrmfg-dllhost PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/Debug/")
