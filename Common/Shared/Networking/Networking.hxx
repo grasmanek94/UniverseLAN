@@ -1,14 +1,16 @@
 #pragma once
 
+#include <enet/enetpp.hxx>
+
+#include "Messages.hxx"
+
 #ifdef _WIN32
 #include <concurrent_queue.h>
 #endif
 
 #include <cstdlib>
-#include <enet/enetpp.hxx>
 #include <memory>
 #include <atomic>
-#include "Messages.hxx"
 
 class MessageReceiver
 {
@@ -155,7 +157,7 @@ public:
 		return true;
 	}
 
-	void RunNetworking();
+	void RunNetworking(uint32_t timeout);
 	void ProcessEvents(MessageReceiver* receiver);
 private:
 	std::atomic<bool> is_active;

@@ -956,6 +956,26 @@ public:
         @return a_nDefault      Key was not found in the section
         @return other           Value of the key
      */
+    long long GetLongLongValue(
+        const SI_CHAR * a_pSection,
+        const SI_CHAR * a_pKey,
+        long long       a_nDefault     = 0,
+        bool *          a_pHasMultiple = NULL
+        ) const;
+
+    /** Retrieve a numeric value for a specific key. If multiple keys are enabled
+        (see SetMultiKey) then only the first value associated with that key
+        will be returned, see GetAllValues for getting all values with multikey.
+
+        @param a_pSection       Section to search
+        @param a_pKey           Key to search for
+        @param a_nDefault       Value to return if the key is not found
+        @param a_pHasMultiple   Optionally receive notification of if there are
+                                multiple entries for this key.
+
+        @return a_nDefault      Key was not found in the section
+        @return other           Value of the key
+     */
     double GetDoubleValue(
         const SI_CHAR * a_pSection,
         const SI_CHAR * a_pKey,
@@ -1055,6 +1075,38 @@ public:
         const SI_CHAR * a_pSection,
         const SI_CHAR * a_pKey,
         long            a_nValue,
+        const SI_CHAR * a_pComment      = NULL,
+        bool            a_bUseHex       = false,
+        bool            a_bForceReplace = false
+        );
+
+    /** Add or update a numeric value. This will always insert
+        when multiple keys are enabled.
+
+        @param a_pSection   Section to add or update
+        @param a_pKey       Key to add or update. 
+        @param a_nValue     Value to set. 
+        @param a_pComment   Comment to be associated with the key. See the 
+                            notes on SetValue() for comments.
+        @param a_bUseHex    By default the value will be written to the file 
+                            in decimal format. Set this to true to write it 
+                            as hexadecimal.
+        @param a_bForceReplace  Should all existing values in a multi-key INI
+                            file be replaced with this entry. This option has
+                            no effect if not using multi-key files. The 
+                            difference between Delete/SetLongValue and 
+                            SetLongValue with a_bForceReplace = true, is that 
+                            the load order and comment will be preserved this 
+                            way.
+
+        @return SI_Error    See error definitions
+        @return SI_UPDATED  Value was updated
+        @return SI_INSERTED Value was inserted
+     */
+    SI_Error SetLongLongValue(
+        const SI_CHAR * a_pSection,
+        const SI_CHAR * a_pKey,
+        long long       a_nValue,
         const SI_CHAR * a_pComment      = NULL,
         bool            a_bUseHex       = false,
         bool            a_bForceReplace = false
@@ -2215,6 +2267,77 @@ CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::SetLongValue(
     sprintf_s(szInput, a_bUseHex ? "0x%lx" : "%ld", a_nValue);
 #else // !__STDC_WANT_SECURE_LIB__
     sprintf(szInput, a_bUseHex ? "0x%lx" : "%ld", a_nValue);
+#endif // __STDC_WANT_SECURE_LIB__
+
+    // convert to output text
+    SI_CHAR szOutput[64];
+    SI_CONVERTER c(m_bStoreIsUtf8);
+    c.ConvertFromStore(szInput, strlen(szInput) + 1, 
+        szOutput, sizeof(szOutput) / sizeof(SI_CHAR));
+
+    // actually add it
+    return AddEntry(a_pSection, a_pKey, szOutput, a_pComment, a_bForceReplace, true);
+}
+
+template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
+long long
+CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::GetLongLongValue(
+    const SI_CHAR * a_pSection,
+    const SI_CHAR * a_pKey,
+    long long       a_nDefault,
+    bool *          a_pHasMultiple
+    ) const
+{
+    // return the default if we don't have a value
+    const SI_CHAR * pszValue = GetValue(a_pSection, a_pKey, NULL, a_pHasMultiple);
+    if (!pszValue || !*pszValue) return a_nDefault;
+
+    // convert to UTF-8/MBCS which for a numeric value will be the same as ASCII
+    char szValue[64] = { 0 };
+    SI_CONVERTER c(m_bStoreIsUtf8);
+    if (!c.ConvertToStore(pszValue, szValue, sizeof(szValue))) {
+        return a_nDefault;
+    }
+
+    // handle the value as hex if prefaced with "0x"
+    long long nValue = a_nDefault;
+    char * pszSuffix = szValue;
+    if (szValue[0] == '0' && (szValue[1] == 'x' || szValue[1] == 'X')) {
+        if (!szValue[2]) return a_nDefault;
+        nValue = strtoll(&szValue[2], &pszSuffix, 16);
+    }
+    else {
+        nValue = strtoll(szValue, &pszSuffix, 10);
+    }
+
+    // any invalid strings will return the default value
+    if (*pszSuffix) { 
+        return a_nDefault; 
+    }
+
+    return nValue;
+}
+
+template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
+SI_Error 
+CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::SetLongLongValue(
+    const SI_CHAR * a_pSection,
+    const SI_CHAR * a_pKey,
+    long long       a_nValue,
+    const SI_CHAR * a_pComment,
+    bool            a_bUseHex,
+    bool            a_bForceReplace
+    )
+{
+    // use SetValue to create sections
+    if (!a_pSection || !a_pKey) return SI_FAIL;
+
+    // convert to an ASCII string
+    char szInput[64];
+#if __STDC_WANT_SECURE_LIB__ && !_WIN32_WCE
+    sprintf_s(szInput, a_bUseHex ? "0x%I64x" : "%I64d", a_nValue);
+#else // !__STDC_WANT_SECURE_LIB__
+    sprintf(szInput, a_bUseHex ? "0x%I64x" : "%I64d", a_nValue);
 #endif // __STDC_WANT_SECURE_LIB__
 
     // convert to output text

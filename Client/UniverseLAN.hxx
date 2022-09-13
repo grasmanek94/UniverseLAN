@@ -25,12 +25,15 @@
 #include "Impl/User.hxx"
 #include "Impl/Utils.hxx"
 
+#include <IniData.hxx>
+
 #include <memory>
 
 namespace galaxy
 {
 	namespace api
 	{
+		extern std::unique_ptr <ClientIniData> config;
 		extern std::unique_ptr<InitOptionsModern> init_options;
 	}
 }

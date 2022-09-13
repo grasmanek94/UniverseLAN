@@ -59,7 +59,7 @@ bool MessageReceiver::ProcessEvent(const ENetEvent& event)
 	return return_value;
 }
 
-void GalaxyNetworkClient::RunNetworking()
+void GalaxyNetworkClient::RunNetworking(uint32_t timeout)
 {
 	ENetPacket* packet = nullptr;
 	while (delayed_packets_to_send.try_pop(packet))
@@ -67,7 +67,7 @@ void GalaxyNetworkClient::RunNetworking()
 		NetworkClient::Send(packet);
 	}
 
-	if (NetworkClient::Pull())
+	if (NetworkClient::Pull(timeout))
 	{
 		ENetEvent event = NetworkClient::Event();
 		if (event.type != ENET_EVENT_TYPE_NONE)

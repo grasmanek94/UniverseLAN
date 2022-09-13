@@ -10,6 +10,7 @@
 #include <iterator>
 
 #include <IdCounter.hxx>
+#include <IniData.hxx>
 #include <NetPlayer.hxx>
 
 #include <Networking/Networking.hxx>
@@ -18,9 +19,10 @@
 class Server : public MessageReceiver
 {
 private:
+	ServerIniData config;
 	GalaxyNetworkServer connection;
 	IdCounter id_generator;
-	const size_t max_connections;
+	size_t max_connections;
 	std::vector<Link> peers;
 	std::set<Link*> connected_peers;
 
@@ -65,8 +67,8 @@ private:
 	}
 
 public:
-	Server(const std::string bind_address, uint16_t port, size_t max_players)
-		: id_generator(), max_connections(max_players)
+	Server()
+		: id_generator()
 	{
 		int init_code = connection.GetInitCode();
 
@@ -80,9 +82,10 @@ public:
 			);
 		}
 
-		connection.SetHost(bind_address, port);
+		connection.SetHost(config.GetBindAddress(), config.GetPort());
 
-		if (!connection.Create(max_players) || !connection.Good())
+		max_connections = config.GetMaxConnections();
+		if (!connection.Create(max_connections) || !connection.Good())
 		{
 #ifdef _WIN32
 			// TODO custom exception class
@@ -90,8 +93,8 @@ public:
 #endif
 		}
 
-		peers.resize(max_players);
-		for (size_t i = 0; i < max_players; ++i)
+		peers.resize(max_connections);
+		for (size_t i = 0; i < max_connections; ++i)
 		{
 			peers[i].GetPlayer()->id = i;
 		}
@@ -115,7 +118,7 @@ public:
 std::unique_ptr<Server> server;
 int main()
 {
-	server = std::make_unique<Server>("0.0.0.0", 0x4C1E, 1024);
+	server = std::make_unique<Server>();
 	while (true)
 	{
 		server->Tick();

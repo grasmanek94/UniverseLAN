@@ -3,8 +3,11 @@
  * Includes all other files that are needed to work with the Galaxy library.
  */
 
-#include "UniverseLAN.hxx"
+#include "Client.hxx"
 #include "CustomConsole.hxx"
+#include "UniverseLAN.hxx"
+
+#include <IniData.hxx>
 
 #include <memory>
 
@@ -12,8 +15,10 @@ namespace galaxy
 {
 	namespace api
 	{
+		std::unique_ptr <ClientIniData> config = nullptr;
 		std::unique_ptr<InitOptionsModern> init_options = nullptr;
 
+		static std::unique_ptr<Client> client = nullptr;
 		static std::unique_ptr<UserImpl> user_impl = nullptr;
 		static std::unique_ptr<FriendsImpl> friends_impl = nullptr;
 		static std::unique_ptr<ChatImpl> chat_impl = nullptr;
@@ -28,7 +33,12 @@ namespace galaxy
 		static std::unique_ptr<TelemetryImpl> telemetry_impl = nullptr;
 
 		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Init(const InitOptions& initOptions) {
+			if (config == nullptr) {
+				config = std::make_unique<ClientIniData>();
+			}
+
 			init_options = std::make_unique<InitOptionsModern>(initOptions);
+			client = std::make_unique<Client>(config->GetServerAddress(), config->GetPort());
 			user_impl = std::make_unique<UserImpl>();
 			friends_impl = std::make_unique<FriendsImpl>();
 			chat_impl = std::make_unique<ChatImpl>();
@@ -42,10 +52,17 @@ namespace galaxy
 			logger_impl = std::make_unique<LoggerImpl>();
 			telemetry_impl = std::make_unique<TelemetryImpl>();
 
-			EnableCustomConsole();
+			if (config->GetEnableConsole())
+			{
+				EnableCustomConsole();
+			}
+
+			client->Start();
 		}
 
 		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Shutdown() {
+			client->Stop();
+
 			telemetry_impl = nullptr;
 			logger_impl = nullptr;
 			custom_networking_impl = nullptr;
@@ -59,6 +76,7 @@ namespace galaxy
 			friends_impl = nullptr;
 			user_impl = nullptr;
 			init_options = nullptr;
+			client = nullptr;
 		}
 
 		GALAXY_DLL_EXPORT IUser* GALAXY_CALLTYPE User() {
@@ -121,11 +139,17 @@ namespace galaxy
 		}
 
 		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE ProcessData() {
-
+			if (client != nullptr) {
+				client->ProcessEvents();
+			}
 		}
 
 		GALAXY_DLL_EXPORT const IError* GALAXY_CALLTYPE GetError() {
 			return nullptr;
 		}
 	}
+}
+
+extern "C" GALAXY_DLL_EXPORT uint32_t load() {
+	return 0;
 }

@@ -4,12 +4,13 @@ file(GLOB_RECURSE ENET_SRC CONFIGURE_DEPENDS "Source/*.*")
 
 add_library(lsfdrmfg-enet STATIC ${ENET_SRC} )
 
-target_compile_definitions(lsfdrmfg-enet PRIVATE "_WINSOCK_DEPRECATED_NO_WARNINGS" )
+target_compile_definitions(lsfdrmfg-enet PRIVATE "_WINSOCK_DEPRECATED_NO_WARNINGS")
+target_compile_definitions(lsfdrmfg-enet PUBLIC "WIN32_LEAN_AND_MEAN")
 target_include_directories(lsfdrmfg-enet PUBLIC "Source/include/")
 
 target_link_libraries(
     lsfdrmfg-enet
     PRIVATE
         $<$<PLATFORM_ID:Windows>:Winmm>
-        $<$<PLATFORM_ID:Windows>:ws2_32>
+        $<$<PLATFORM_ID:Windows>:Ws2_32>
 )

@@ -1,7 +1,7 @@
 #include <enet/enetpp.hxx>
 
 NetworkBase::NetworkBase()
-	: member(nullptr)
+	: address{}, member {nullptr}, event{}
 {
 	initialisation_code = enet_initialize();
 	atexit(enet_deinitialize);
@@ -45,7 +45,7 @@ bool NetworkBase::Good()
 
 int NetworkBase::Pull(enet_uint32 timeout)
 {
-	return enet_host_service(member, &event, 0);
+	return enet_host_service(member, &event, timeout);
 }
 
 int NetworkBase::Send(ENetPeer* peer, const void* data, size_t bytes, _ENetPacketFlag flags)
@@ -125,6 +125,25 @@ ENetPeer* NetworkClient::Connect(std::string hostname, unsigned short port)
 	SetHost(hostname, port);
 	peer = enet_host_connect(member, &address, 1, 0);
 	return peer;
+}
+
+ENetPeer* NetworkClient::Reconnect()
+{
+	if (peer != nullptr)
+	{
+		enet_peer_reset(peer);
+	}
+
+	peer = enet_host_connect(member, &address, 1, 0);
+	return peer;
+}
+
+void NetworkClient::Disconnect()
+{
+	if (peer != nullptr)
+	{
+		enet_peer_disconnect_now(peer, 0);
+	}
 }
 
 bool NetworkClient::Create()

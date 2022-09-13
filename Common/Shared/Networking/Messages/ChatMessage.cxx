@@ -1,6 +1,7 @@
 #include "ChatMessage.hxx"
 
-ChatMessage::ChatMessage()
+ChatMessage::ChatMessage() :
+	sender{}, message{}
 { }
 
 const std::wstring ChatMessage::GetContents() const

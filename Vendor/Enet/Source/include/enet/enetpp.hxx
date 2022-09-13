@@ -50,15 +50,18 @@ public:
 class NetworkClient : public NetworkBase
 {
 private:
-	ENetPeer * peer;
+	ENetPeer* peer;
 public:
 	NetworkClient();
-	ENetPeer * Connect(std::string hostname, unsigned short port);
+	virtual ~NetworkClient();
+
+	ENetPeer* Connect(std::string hostname, unsigned short port);
+	ENetPeer* Reconnect();
+	void Disconnect();
+
 	bool Create();
 	int Send(const void* data, size_t bytes, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE);
 	int Send(ENetPacket* packet);
-
-	virtual ~NetworkClient();
 };
 
 const size_t MAX_PACKET_SIZE = 32 * 1024;//k bytes

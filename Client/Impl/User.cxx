@@ -129,7 +129,7 @@ namespace galaxy
 		}
 
 		bool UserImpl::ReportInvalidAccessToken(const char* accessToken, const char* info) {
-			return false;
+			return true;
 		}
 	}
 }
