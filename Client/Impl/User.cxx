@@ -1,5 +1,7 @@
 #include "User.hxx"
 
+#include "UniverseLAN.hxx"
+
 namespace galaxy
 {
 	namespace api
@@ -9,67 +11,67 @@ namespace galaxy
 		}
 
 		bool UserImpl::SignedIn() {
-			return true;
+			return config->GetSignedIn();
 		}
 
 		GalaxyID UserImpl::GetGalaxyID() {
-			return 0;
+			return config->GetCustomGalaxyID();
 		}
 
 		void UserImpl::SignInCredentials(const char* login, const char* password, IAuthListener* const listener) {
-
+			// Empty
 		}
 
 		void UserImpl::SignInToken(const char* refreshToken, IAuthListener* const listener) {
-
+			// Empty
 		}
 
 		void UserImpl::SignInLauncher(IAuthListener* const listener) {
-
+			// Empty
 		}
 
 		void UserImpl::SignInSteam(const void* steamAppTicket, uint32_t steamAppTicketSize, const char* personaName, IAuthListener* const listener) {
-
+			// Empty
 		}
 
 		void UserImpl::SignInEpic(const char* epicAccessToken, const char* epicUsername, IAuthListener* const listener) {
-
+			// Empty
 		}
 
 		void UserImpl::SignInGalaxy(bool requireOnline, IAuthListener* const listener) {
-
+			// Empty
 		}
 
 		void UserImpl::SignInUWP(IAuthListener* const listener) {
-
+			// Empty
 		}
 
 		void UserImpl::SignInPS4(const char* ps4ClientID, IAuthListener* const listener) {
-
+			// Empty
 		}
 
 		void UserImpl::SignInXB1(const char* xboxOneUserID, IAuthListener* const listener) {
-
+			// Empty
 		}
 
 		void UserImpl::SignInXBLive(const char* token, const char* signature, const char* marketplaceID, const char* locale, IAuthListener* const listener) {
-
+			// Empty
 		}
 
 		void UserImpl::SignInAnonymous(IAuthListener* const listener) {
-
+			// Empty
 		}
 
 		void UserImpl::SignInAnonymousTelemetry(IAuthListener* const listener) {
-
+			// Empty
 		}
 
 		void UserImpl::SignInServerKey(const char* serverKey, IAuthListener* const listener) {
-
+			// Empty
 		}
 
 		void UserImpl::SignOut() {
-
+			// Empty
 		}
 
 		void UserImpl::RequestUserData(GalaxyID userID, ISpecificUserDataListener* const listener) {

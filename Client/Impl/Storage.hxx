@@ -10,6 +10,8 @@
 #include <GalaxyID.h>
 #include <IListenerRegistrar.h>
 
+#include <fstream>
+
 namespace galaxy
 {
 	namespace api
@@ -25,6 +27,8 @@ namespace galaxy
 		class StorageImpl : public IStorage
 		{
 		public:
+			
+			std::fstream open(const char* filename, std::ios::openmode mode);
 
 			virtual ~StorageImpl();
 

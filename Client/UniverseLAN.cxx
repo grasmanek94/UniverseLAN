@@ -17,22 +17,22 @@ namespace galaxy
 {
 	namespace api
 	{
-		std::unique_ptr <ClientIniData> config = nullptr;
-		std::unique_ptr<InitOptionsModern> init_options = nullptr;
+		std::unique_ptr <ClientIniData>					config = nullptr;
+		std::unique_ptr<InitOptionsModern>				init_options = nullptr;
+		std::unique_ptr<Client>							client = nullptr;
 
-		static std::unique_ptr<Client> client = nullptr;
-		static std::unique_ptr<UserImpl> user_impl = nullptr;
-		static std::unique_ptr<FriendsImpl> friends_impl = nullptr;
-		static std::unique_ptr<ChatImpl> chat_impl = nullptr;
-		static std::unique_ptr<MatchmakingImpl> matchmaking_impl = nullptr;
-		static std::unique_ptr<NetworkingImpl> networking_impl = nullptr;
-		static std::unique_ptr<StatsImpl> stats_impl = nullptr;
-		static std::unique_ptr<UtilsImpl> utils_impl = nullptr;
-		static std::unique_ptr<AppsImpl> apps_impl = nullptr;
-		static std::unique_ptr<StorageImpl> storage_impl = nullptr;
-		static std::unique_ptr<CustomNetworkingImpl> custom_networking_impl = nullptr;
-		static std::unique_ptr<LoggerImpl> logger_impl = nullptr;
-		static std::unique_ptr<TelemetryImpl> telemetry_impl = nullptr;
+		static std::unique_ptr<UserImpl>				user_impl = nullptr;
+		static std::unique_ptr<FriendsImpl>				friends_impl = nullptr;
+		static std::unique_ptr<ChatImpl>				chat_impl = nullptr;
+		static std::unique_ptr<MatchmakingImpl>			matchmaking_impl = nullptr;
+		static std::unique_ptr<NetworkingImpl>			networking_impl = nullptr;
+		static std::unique_ptr<StatsImpl>				stats_impl = nullptr;
+		static std::unique_ptr<UtilsImpl>				utils_impl = nullptr;
+		static std::unique_ptr<AppsImpl>				apps_impl = nullptr;
+		static std::unique_ptr<StorageImpl>				storage_impl = nullptr;
+		static std::unique_ptr<CustomNetworkingImpl>	custom_networking_impl = nullptr;
+		static std::unique_ptr<LoggerImpl>				logger_impl = nullptr;
+		static std::unique_ptr<TelemetryImpl>			telemetry_impl = nullptr;
 
 		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Init(const InitOptions& initOptions) {
 			if (config == nullptr) {
@@ -54,8 +54,7 @@ namespace galaxy
 			logger_impl = std::make_unique<LoggerImpl>();
 			telemetry_impl = std::make_unique<TelemetryImpl>();
 
-			if (config->GetEnableConsole())
-			{
+			if (config->GetEnableConsole()) {
 				EnableCustomConsole();
 			}
 
@@ -90,57 +89,46 @@ namespace galaxy
 		}
 
 		GALAXY_DLL_EXPORT IFriends* GALAXY_CALLTYPE Friends() {
-
 			return friends_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT IChat* GALAXY_CALLTYPE Chat() {
-
 			return chat_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT IMatchmaking* GALAXY_CALLTYPE Matchmaking() {
-
 			return matchmaking_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT INetworking* GALAXY_CALLTYPE Networking() {
-
 			return networking_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT IStats* GALAXY_CALLTYPE Stats() {
-
 			return stats_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT IUtils* GALAXY_CALLTYPE Utils() {
-
 			return utils_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT IApps* GALAXY_CALLTYPE Apps() {
-
 			return apps_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT IStorage* GALAXY_CALLTYPE Storage() {
-
 			return storage_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT ICustomNetworking* GALAXY_CALLTYPE CustomNetworking() {
-
 			return custom_networking_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT ILogger* GALAXY_CALLTYPE Logger() {
-
 			return logger_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT ITelemetry* GALAXY_CALLTYPE Telemetry() {
-
 			return telemetry_impl.get();
 		}
 

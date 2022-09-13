@@ -1,5 +1,7 @@
 #include "Friends.hxx"
 
+#include "UniverseLAN.hxx"
+
 #include <algorithm>
 
 namespace galaxy
@@ -85,7 +87,7 @@ namespace galaxy
 		 * @return The nickname of the user.
 		 */
 		const char* FriendsImpl::GetPersonaName() {
-			return "PersonaName";
+			return config->GetCustomPersonaName().c_str();
 		}
 
 		/**
@@ -95,7 +97,7 @@ namespace galaxy
 		 * @param [in] bufferLength The size of the output buffer.
 		 */
 		void FriendsImpl::GetPersonaNameCopy(char* buffer, uint32_t bufferLength) {
-			std::copy_n(GetPersonaName(), std::min((size_t)bufferLength, strlen(GetPersonaName())), buffer);
+			std::copy_n(config->GetCustomPersonaName().c_str(), std::min((size_t)bufferLength, config->GetCustomPersonaName().length()), buffer);
 		}
 
 		/**
@@ -104,7 +106,7 @@ namespace galaxy
 		 * @return The state of the user.
 		 */
 		PersonaState FriendsImpl::GetPersonaState() {
-			return PERSONA_STATE_OFFLINE;
+			return PERSONA_STATE_ONLINE;
 		}
 
 		/**

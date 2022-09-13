@@ -36,17 +36,17 @@ IniData::IniData() :
 	AuthenticationKey = ini.GetValue(AuthenticationSection.c_str(), "Key", "9g5tA53SLyiNkBTqsX3BmBgy/PPVTU6VGKWNNw3wUIY5nK1C2MOT4UsZ2pauCb8fm5UQSJRijid+w1t9WpDaKQ==");
 }
 
-std::string IniData::GetGameDataPath() const
+const std::string& IniData::GetGameDataPath() const
 {
 	return GameDataPath;
 }
 
-std::string IniData::GetServerDataPath() const
+const std::string& IniData::GetServerDataPath() const
 {
 	return ServerDataPath;
 }
 
-std::string IniData::GetAuthenticationKey() const
+const std::string& IniData::GetAuthenticationKey() const
 {
 	return AuthenticationKey;
 }
@@ -68,13 +68,11 @@ ServerIniData::ServerIniData()
 
 	AllowFileSharingDownload = ini.GetBoolValue(StoragePathSection.c_str(), "AllowFileSharingDownload", true);
 	AllowFileSharingUpload = ini.GetBoolValue(StoragePathSection.c_str(), "AllowFileSharingUpload", true);
-	Quota = ini.GetLongValue(StoragePathSection.c_str(), "Quota", 0);
-	PerUserQuota = ini.GetLongValue(StoragePathSection.c_str(), "PerUserQuota", 0);
 
 	BindAddress = ini.GetBoolValue(ServerSection.c_str(), "AllowFileSharingDownload", true);
 	Port = ini.GetBoolValue(ServerSection.c_str(), "AllowFileSharingUpload", true);
-	MaxConnections = ini.GetLongValue(ServerSection.c_str(), "Quota", 0);
-	MaxTickRate = ini.GetLongValue(ServerSection.c_str(), "PerUserQuota", 0);
+	MaxConnections = ini.GetLongValue(ServerSection.c_str(), "MaxConnections", 0);
+	MaxTickRate = ini.GetLongValue(ServerSection.c_str(), "MaxTickRate", 0);
 }
 
 ServerIniData::~ServerIniData()
@@ -89,15 +87,7 @@ bool ServerIniData::GetAllowFileSharingUpload() const {
 	return AllowFileSharingUpload;
 }
 
-uint32_t ServerIniData::GetQuota() const {
-	return Quota;
-}
-
-uint32_t ServerIniData::GetPerUserQuota() const {
-	return PerUserQuota;
-}
-
-std::string ServerIniData::GetBindAddress() const {
+const std::string& ServerIniData::GetBindAddress() const {
 	return BindAddress;
 }
 
@@ -135,7 +125,6 @@ ClientIniData::ClientIniData()
 
 		AllowFileSharingDownload = ini.GetBoolValue(StorageSection.c_str(), "AllowFileSharingDownload", true);
 		AllowFileSharingUpload = ini.GetBoolValue(StorageSection.c_str(), "AllowFileSharingUpload", false);
-		Quota = ini.GetLongValue(StorageSection.c_str(), "Quota", 0);
 
 		TelemetryStore = ini.GetBoolValue(TelemetrySection.c_str(), "Store", false);
 
@@ -325,7 +314,7 @@ ClientIniData::~ClientIniData()
 {
 }
 
-std::string ClientIniData::GetLanguage() const
+const std::string& ClientIniData::GetLanguage() const
 {
 	return Language;
 }
@@ -365,11 +354,6 @@ bool ClientIniData::GetAllowFileSharingUpload() const
 	return AllowFileSharingUpload;
 }
 
-uint32_t ClientIniData::GetQuota() const
-{
-	return Quota;
-}
-
 bool ClientIniData::GetTelemetryStore() const
 {
 	return TelemetryStore;
@@ -385,17 +369,17 @@ uint16_t ClientIniData::GetPort() const
 	return Port;
 }
 
-std::string ClientIniData::GetPersonaNameType() const
+const std::string& ClientIniData::GetPersonaNameType() const
 {
 	return PersonaNameType;
 }
 
-std::string ClientIniData::GetCustomPersonaName() const
+const std::string& ClientIniData::GetCustomPersonaName() const
 {
 	return CustomPersonaName;
 }
 
-std::string ClientIniData::GetGalaxyIDType() const
+const std::string& ClientIniData::GetGalaxyIDType() const
 {
 	return GalaxyIDType;
 }
@@ -410,7 +394,7 @@ uint64_t ClientIniData::GetGalaxyIDOffset() const
 	return GalaxyIDOffset;
 }
 
-std::string ClientIniData::GetAvatar() const
+const std::string& ClientIniData::GetAvatar() const
 {
 	return Avatar;
 }

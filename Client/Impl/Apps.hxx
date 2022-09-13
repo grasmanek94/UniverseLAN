@@ -30,7 +30,6 @@ namespace galaxy
 		class AppsImpl : public IApps
 		{
 		public:
-
 			virtual ~AppsImpl() override;
 
 			/**

@@ -4,6 +4,7 @@ namespace galaxy
 {
 	namespace api
 	{
+
 		TelemetryImpl::~TelemetryImpl()
 		{
 		}

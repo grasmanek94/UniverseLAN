@@ -8,6 +8,7 @@
 
 #include "GalaxyApi.h"
 
+#include "Client.hxx"
 #include "GalaxyGameServerApi.hxx"
 #include "Impl/Apps.hxx"
 #include "Impl/Chat.hxx"
@@ -33,8 +34,9 @@ namespace galaxy
 {
 	namespace api
 	{
-		extern std::unique_ptr <ClientIniData> config;
-		extern std::unique_ptr<InitOptionsModern> init_options;
+		extern std::unique_ptr<ClientIniData>		config;
+		extern std::unique_ptr<InitOptionsModern>	init_options;
+		extern std::unique_ptr<Client>				client;
 	}
 }
 

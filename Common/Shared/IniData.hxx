@@ -29,9 +29,9 @@ public:
 	IniData();
 	virtual ~IniData();
 
-	std::string GetGameDataPath() const;
-	std::string GetServerDataPath() const;
-	std::string GetAuthenticationKey() const;
+	const std::string& GetGameDataPath() const;
+	const std::string& GetServerDataPath() const;
+	const std::string& GetAuthenticationKey() const;
 
 	const std::chrono::system_clock::time_point BootTime;
 };
@@ -44,8 +44,6 @@ private:
 	const std::string StoragePathSection = "Storage";
 	bool AllowFileSharingDownload;
 	bool AllowFileSharingUpload;
-	uint32_t Quota;
-	uint32_t PerUserQuota;
 
 	const std::string ServerSection = "Server";
 	std::string BindAddress;
@@ -61,10 +59,8 @@ public:
 
 	bool GetAllowFileSharingDownload() const;
 	bool GetAllowFileSharingUpload() const;
-	uint32_t GetQuota() const;
-	uint32_t GetPerUserQuota() const;
 
-	std::string GetBindAddress() const;
+	const std::string& GetBindAddress() const;
 	uint16_t GetPort() const;
 	uint32_t GetMaxConnections() const;
 	uint32_t GetMaxTickRate() const;
@@ -86,7 +82,6 @@ private:
 	const std::string StorageSection = "Settings";
 	bool AllowFileSharingDownload;
 	bool AllowFileSharingUpload;
-	uint32_t Quota;
 
 	const std::string TelemetrySection = "Telemetry";
 	bool TelemetryStore;
@@ -128,7 +123,7 @@ public:
 	ClientIniData();
 	virtual ~ClientIniData();
 
-	std::string GetLanguage() const;
+	const std::string& GetLanguage() const;
 	uint16_t GetNATType() const;
 	bool GetEnableAllDLC() const;
 	bool GetSaveUnknownDLCIDs() const;
@@ -136,16 +131,15 @@ public:
 	bool GetEnableConsole() const;
 	bool GetAllowFileSharingDownload() const;
 	bool GetAllowFileSharingUpload() const;
-	uint32_t GetQuota() const;
 	bool GetTelemetryStore() const;
 	std::string GetServerAddress() const;
 	uint16_t GetPort() const;
-	std::string GetPersonaNameType() const;
-	std::string GetCustomPersonaName() const;
-	std::string GetGalaxyIDType() const;
+	const std::string& GetPersonaNameType() const;
+	const std::string& GetCustomPersonaName() const;
+	const std::string& GetGalaxyIDType() const;
 	uint64_t GetCustomGalaxyID() const;
 	uint64_t GetGalaxyIDOffset() const;
-	std::string GetAvatar() const;
+	const std::string& GetAvatar() const;
 	bool GetSignedIn() const;
 	uint32_t GetPlayTime() const;
 

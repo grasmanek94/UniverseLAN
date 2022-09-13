@@ -1,9 +1,11 @@
+#include <GalaxyApi.h>
+
+#include <windows.h>
+
 #include <chrono>
 #include <thread>
 
-#include <GalaxyApi.h>
-
-int main()
+int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
 	galaxy::api::InitOptions options("","");
 
@@ -11,6 +13,7 @@ int main()
 
 	while (true)
 	{
+		galaxy::api::ProcessData();
 		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
 

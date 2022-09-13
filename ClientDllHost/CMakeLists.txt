@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 
 file(GLOB_RECURSE DLLHOST_SRC CONFIGURE_DEPENDS "*.*")
 
-add_executable(lsfdrmfg-dllhost ${DLLHOST_SRC} )
+add_executable(lsfdrmfg-dllhost WIN32 ${DLLHOST_SRC} )
 
 target_include_directories(lsfdrmfg-dllhost PUBLIC ".")
 target_compile_definitions(lsfdrmfg-dllhost PUBLIC "DLLHOST" )

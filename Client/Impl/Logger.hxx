@@ -7,6 +7,8 @@
  */
 #include <ILogger.h>
 
+#include <fstream>
+
 namespace galaxy
 {
 	namespace api
@@ -21,9 +23,13 @@ namespace galaxy
 		 */
 		class LoggerImpl : public ILogger
 		{
-		public:
+		private:
+			std::ofstream logfile;
 
-			virtual ~LoggerImpl();
+		public:
+			LoggerImpl();
+
+			virtual ~LoggerImpl() override;
 
 			/**
 			 * Creates a log entry with level TRACE.
