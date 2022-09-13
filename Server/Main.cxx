@@ -13,6 +13,7 @@
 #include <IniData.hxx>
 
 #include <Networking/Networking.hxx>
+#include <Version.hxx>
 
 class Server : public MessageReceiver
 {
@@ -101,11 +102,11 @@ public:
 	}
 };
 
-#include "MachineInfo.hxx"
-
 std::unique_ptr<Server> server;
 int main()
 {
+	std::cout << "Version: " << Version_Number << std::endl;
+
 	server = std::make_unique<Server>();
 	while (true)
 	{

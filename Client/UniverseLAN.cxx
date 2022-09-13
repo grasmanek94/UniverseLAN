@@ -11,6 +11,8 @@
 
 #include <memory>
 
+#include <Version.hxx>
+
 namespace galaxy
 {
 	namespace api
@@ -57,6 +59,7 @@ namespace galaxy
 				EnableCustomConsole();
 			}
 
+			std::cout << "Version: " << Version_Number << std::endl;
 			std::cout << "Using username: " << config->GetCustomPersonaName() << std::endl;
 			std::cout << "Using GalaxyID: " << config->GetCustomGalaxyID() << std::endl;
 
