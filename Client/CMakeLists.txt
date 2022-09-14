@@ -9,7 +9,7 @@ target_compile_definitions(lsfdrmfg-client PUBLIC "CLIENT" )
 
 target_link_libraries(
     lsfdrmfg-client
-    PUBLIC lsfdrmfg-common-shared
+    PRIVATE lsfdrmfg-common-shared websocketpp boost
 )
 
 if (MSVC)
