@@ -1,6 +1,6 @@
 @ECHO OFF
-cd /d %~dp0
-cd ../Common/Common.Version
+cd /d "%~dp0"
+cd ../Common/Version
 copy /b Version.cxx +,,
 echo touched version.cxx ...
 for /f "delims=" %%a in ('git rev-list HEAD --count') do set _COUNT=%%a

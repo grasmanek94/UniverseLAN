@@ -43,6 +43,13 @@ namespace galaxy
 		}
 
 		GalaxyThreadImpl::~GalaxyThreadImpl() {
+			/*if (_thread.joinable()) {
+				_thread.join();
+			}*/
+
+			// !!! LEAK !!!
+			_thread.detach(); 
+			// !!! LEAK !!!
 		};
 
 		/**

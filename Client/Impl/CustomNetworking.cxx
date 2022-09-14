@@ -11,9 +11,8 @@ namespace galaxy
 {
 	namespace api
 	{
-		// TODO: add data listener event
 		CustomNetworkingImpl::Channel::Channel(CustomNetworkingImpl* custom_network)
-			: custom_network{ custom_network }, client{}, runner{}, connection{}, 
+			: custom_network{ custom_network }, client{}, runner{}, connection{},
 			listener_open{}, listener_data{}, listener_close{}, connection_string{},
 			mtx{}, buffer{}
 		{ }
@@ -59,7 +58,7 @@ namespace galaxy
 		}
 
 		CustomNetworkingImpl::CustomNetworkingImpl() :
-			channels{}
+			listeners{ dynamic_cast<ListenerRegistrarImpl*>(ListenerRegistrar()) }, channels{}
 		{ }
 
 		CustomNetworkingImpl::~CustomNetworkingImpl()
@@ -67,43 +66,84 @@ namespace galaxy
 
 		void CustomNetworkingImpl::WebSocketOnOpen(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl)
 		{
+			const char* str = channel->connection_string.c_str();
+			ConnectionID id = (ConnectionID)channel.get();
+
 			if (channel->listener_open != nullptr) {
-				channel->listener_open->OnConnectionOpenSuccess(channel->connection_string.c_str(), (ConnectionID)channel.get());
+				channel->listener_open->OnConnectionOpenSuccess(str, id);
 			}
+
+			listeners->ExecuteForListenerTypePerEntry(CUSTOM_NETWORKING_CONNECTION_OPEN, [&](IGalaxyListener* listener) {
+				IConnectionOpenListener* opener_listener = dynamic_cast<IConnectionOpenListener*>(listener);
+				if (opener_listener && opener_listener != channel->listener_open) {
+					opener_listener->OnConnectionOpenSuccess(str, id);
+				}
+				});
 		}
 
 		void CustomNetworkingImpl::WebSocketOnMessage(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl, custom_networking::message_ptr msg)
 		{
-			std::scoped_lock<std::mutex> guard(channel->mtx);
-			const std::string& data = msg->get_payload();
+			ConnectionID id = (ConnectionID)channel.get();
+			uint32_t data_size = 0;
 
-			channel->buffer.insert(channel->buffer.end(), data.c_str(), data.c_str() + data.size());
+			{
+				std::scoped_lock<std::mutex> guard(channel->mtx);
+				const std::string& data = msg->get_payload();
+
+				data_size = (uint32_t)data.size();
+				channel->buffer.insert(channel->buffer.end(), data.c_str(), data.c_str() + data.size());
+			}
+
+			listeners->ExecuteForListenerTypePerEntry(CUSTOM_NETWORKING_CONNECTION_DATA, [&](IGalaxyListener* listener) {
+				IConnectionDataListener* data_listener = dynamic_cast<IConnectionDataListener*>(listener);
+				if (data_listener) {
+					data_listener->OnConnectionDataReceived(id, data_size);
+				}
+				});
 		}
 
 		void CustomNetworkingImpl::WebSocketOnClose(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl)
 		{
+			ConnectionID id = (ConnectionID)channel.get();
+
 			if (channel->listener_close) {
-				channel->listener_close->OnConnectionClosed((ConnectionID)channel.get(), IConnectionCloseListener::CLOSE_REASON_UNDEFINED);
+				channel->listener_close->OnConnectionClosed(id, IConnectionCloseListener::CLOSE_REASON_UNDEFINED);
 			}
+
+			listeners->ExecuteForListenerTypePerEntry(CUSTOM_NETWORKING_CONNECTION_CLOSE, [&](IGalaxyListener* listener) {
+				IConnectionCloseListener* close_listener = dynamic_cast<IConnectionCloseListener*>(listener);
+				if (close_listener && close_listener != channel->listener_close) {
+					close_listener->OnConnectionClosed(id, IConnectionCloseListener::CLOSE_REASON_UNDEFINED);
+				}
+				});
 		}
 
 		void CustomNetworkingImpl::WebSocketOnFail(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl)
 		{
-			switch (channel->connection->get_state()) 
+			const char* str = channel->connection_string.c_str();
+
+			switch (channel->connection->get_state())
 			{
 			case websocketpp::session::state::connecting:
-				if (channel->listener_open) {
-					channel->listener_open->OnConnectionOpenFailure(channel->connection_string.c_str(), IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE);
+				if (channel->listener_open != nullptr) {
+					channel->listener_open->OnConnectionOpenFailure(str, IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE);
 				}
+
+				listeners->ExecuteForListenerTypePerEntry(CUSTOM_NETWORKING_CONNECTION_OPEN, [&](IGalaxyListener* listener) {
+					IConnectionOpenListener* opener_listener = dynamic_cast<IConnectionOpenListener*>(listener);
+					if (opener_listener && opener_listener != channel->listener_open) {
+						opener_listener->OnConnectionOpenFailure(str, IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE);
+					}
+					});
 				break;
+
 			case websocketpp::session::state::open:
-				
 				break;
+
 			case websocketpp::session::state::closing:
-
 				break;
-			case websocketpp::session::state::closed:
 
+			case websocketpp::session::state::closed:
 				break;
 			}
 		}

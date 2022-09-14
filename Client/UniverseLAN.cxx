@@ -33,13 +33,15 @@ namespace galaxy
 		static std::unique_ptr<CustomNetworkingImpl>	custom_networking_impl = nullptr;
 		static std::unique_ptr<LoggerImpl>				logger_impl = nullptr;
 		static std::unique_ptr<TelemetryImpl>			telemetry_impl = nullptr;
+		static std::unique_ptr<ListenerRegistrarImpl>	listener_registrar_impl = nullptr;
 
 		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Init(const InitOptions& initOptions) {
 			if (config == nullptr) {
 				config = std::make_unique<ClientIniData>();
 			}
 
-			init_options = std::make_unique<InitOptionsModern>(initOptions);
+			init_options = std::make_unique<InitOptionsModern>(initOptions);	
+			listener_registrar_impl = std::make_unique<ListenerRegistrarImpl>();
 			client = std::make_unique<Client>(config->GetServerAddress(), config->GetPort());
 			user_impl = std::make_unique<UserImpl>();
 			friends_impl = std::make_unique<FriendsImpl>();
@@ -52,7 +54,7 @@ namespace galaxy
 			storage_impl = std::make_unique<StorageImpl>();
 			custom_networking_impl = std::make_unique<CustomNetworkingImpl>();
 			logger_impl = std::make_unique<LoggerImpl>();
-			telemetry_impl = std::make_unique<TelemetryImpl>();
+			telemetry_impl = std::make_unique<TelemetryImpl>();	
 
 			if (config->GetEnableConsole()) {
 				EnableCustomConsole();
@@ -82,6 +84,7 @@ namespace galaxy
 			user_impl = nullptr;
 			init_options = nullptr;
 			client = nullptr;
+			listener_registrar_impl = nullptr;
 		}
 
 		GALAXY_DLL_EXPORT IUser* GALAXY_CALLTYPE User() {
@@ -136,6 +139,10 @@ namespace galaxy
 			if (client != nullptr) {
 				client->ProcessEvents();
 			}
+		}
+
+		GALAXY_DLL_EXPORT IListenerRegistrar* GALAXY_CALLTYPE ListenerRegistrar() {
+			return listener_registrar_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT const IError* GALAXY_CALLTYPE GetError() {

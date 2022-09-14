@@ -25,6 +25,7 @@ namespace galaxy
 			static std::unique_ptr<UtilsImpl>				utils_impl = nullptr;
 			static std::unique_ptr<LoggerImpl>				logger_impl = nullptr;
 			static std::unique_ptr<TelemetryImpl>			telemetry_impl = nullptr;
+			static std::unique_ptr<ListenerRegistrarImpl>	listener_registrar_impl = nullptr;
 		}
 
 		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE InitGameServer(const InitOptions& initOptions) {
@@ -33,6 +34,7 @@ namespace galaxy
 			}
 
 			gameserver::init_options = std::make_unique<InitOptionsModern>(initOptions);
+			gameserver::listener_registrar_impl = std::make_unique<ListenerRegistrarImpl>();
 			gameserver::client = std::make_unique<Client>(gameserver::config->GetServerAddress(), gameserver::config->GetPort());
 			gameserver::user_impl = std::make_unique<UserImpl>();
 			gameserver::matchmaking_impl = std::make_unique<MatchmakingImpl>();
@@ -63,6 +65,7 @@ namespace galaxy
 			gameserver::user_impl = nullptr;
 			gameserver::init_options = nullptr;
 			gameserver::client = nullptr;
+			gameserver::listener_registrar_impl = nullptr;
 		}
 
 		GALAXY_DLL_EXPORT IUser* GALAXY_CALLTYPE GameServerUser() {
@@ -91,6 +94,10 @@ namespace galaxy
 
 		GALAXY_DLL_EXPORT ILogger* GALAXY_CALLTYPE GameServerLogger() {
 			return gameserver::logger_impl.get();
+		}
+
+		GALAXY_DLL_EXPORT IListenerRegistrar* GALAXY_CALLTYPE GameServerListenerRegistrar() {
+			return gameserver::listener_registrar_impl.get();
 		}
 
 		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE ProcessGameServerData() {

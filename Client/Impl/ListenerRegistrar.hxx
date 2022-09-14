@@ -12,6 +12,11 @@
 
 #include <IListenerRegistrar.h>
 
+#include <functional>
+#include <mutex>
+#include <set>
+#include <vector>
+
 namespace galaxy
 {
 	namespace api
@@ -23,8 +28,22 @@ namespace galaxy
 		 */
 		class ListenerRegistrarImpl : public IListenerRegistrar
 		{
+		private:
+			using mutex_t = std::recursive_mutex;
+			using listener_set = std::set<IGalaxyListener*>;
+			struct data {
+
+				mutex_t mtx;
+				listener_set set;
+
+				data() : mtx{}, set{}
+				{}
+			};
+			data listeners[LISTENER_TYPE_END];
+
 		public:
 
+			ListenerRegistrarImpl();
 			virtual ~ListenerRegistrarImpl();
 
 			/**
@@ -49,6 +68,10 @@ namespace galaxy
 			 * @param [in] listener The specific listener of the specified type.
 			 */
 			virtual void Unregister(ListenerType listenerType, IGalaxyListener* listener) override;
+
+
+			virtual void ExecuteForListenerType(ListenerType listenerType, std::function<void(const std::set<IGalaxyListener*>& listeners)> code);
+			virtual void ExecuteForListenerTypePerEntry(ListenerType listenerType, std::function<void(IGalaxyListener* listeners)> code);
 		};
 	}
 }

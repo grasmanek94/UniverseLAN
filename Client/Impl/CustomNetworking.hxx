@@ -7,6 +7,8 @@
  * @warning This API is experimental and can be changed or removed in following releases.
  */
 
+#include "ListenerRegistrar.hxx"
+
 #include <ICustomNetworking.h>
 #include <IListenerRegistrar.h>
 
@@ -61,7 +63,7 @@ namespace galaxy
 			};
 
 		private:
-
+			ListenerRegistrarImpl* listeners;
 			std::map<ConnectionID, std::shared_ptr<Channel>> channels;
 
 			void WebSocketOnOpen(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl);
