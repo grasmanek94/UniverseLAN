@@ -11,6 +11,10 @@
 #include <IStats.h>
 #include <IListenerRegistrar.h>
 #include <GalaxyID.h>
+#include <IniData.hxx>
+
+#include <map>
+#include <string>
 
 namespace galaxy
 {
@@ -28,6 +32,14 @@ namespace galaxy
 		{
 		private:
 			ListenerRegistrarImpl* listeners;
+
+			struct RemoteStats {
+
+
+				std::map<std::string, AchievementData> achievements;
+				std::map<std::string, StatsDataContainer> stats;
+			};
+			std::map<uint64_t, RemoteStats> remote_stats;
 
 		public:
 

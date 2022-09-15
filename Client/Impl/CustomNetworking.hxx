@@ -57,7 +57,7 @@ namespace galaxy
 				IConnectionCloseListener* listener_close;
 				std::string connection_string;
 
-				mutex_t mtx;
+				mutex_t buffer_mtx;
 				std::deque<char> buffer;
 
 				Channel(CustomNetworkingImpl* custom_network);
@@ -80,7 +80,7 @@ namespace galaxy
 			void ChannelThread(std::shared_ptr<Channel> channel);
 		public:
 
-			CustomNetworkingImpl();
+			CustomNetworkingImpl(ListenerRegistrarImpl* listeners);
 			virtual ~CustomNetworkingImpl() override;
 
 			/**

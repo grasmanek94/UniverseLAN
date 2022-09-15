@@ -20,12 +20,13 @@ public:
 	void SetDescription(std::string description);
 	void SetUnlocked(bool unlocked);
 	void SetUnlockTime(uint32_t unlock_time);
+	void SetUnlockTimeNow();
 	void SetVisible(bool visible);
 	void SetVisibleWhileLocked(bool visible_while_locked);
 	void ResetDirty();
 
-	std::string GetName() const;
-	std::string GetDescription() const;
+	const std::string& GetName() const;
+	const std::string& GetDescription() const;
 	bool GetUnlocked() const;
 	uint32_t GetUnlockTime() const;
 	bool GetVisible() const;

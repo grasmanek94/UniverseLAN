@@ -52,7 +52,7 @@ namespace galaxy
 			utils_impl = std::make_unique<UtilsImpl>();
 			apps_impl = std::make_unique<AppsImpl>();
 			storage_impl = std::make_unique<StorageImpl>();
-			custom_networking_impl = std::make_unique<CustomNetworkingImpl>();
+			custom_networking_impl = std::make_unique<CustomNetworkingImpl>(listener_registrar_impl.get());
 			logger_impl = std::make_unique<LoggerImpl>();
 			telemetry_impl = std::make_unique<TelemetryImpl>();	
 

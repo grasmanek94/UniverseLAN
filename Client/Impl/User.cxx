@@ -119,7 +119,7 @@ namespace galaxy
 		}
 
 		SessionID UserImpl::GetSessionID() {
-			return 0;
+			return 1;
 		}
 
 		const char* UserImpl::GetAccessToken() {

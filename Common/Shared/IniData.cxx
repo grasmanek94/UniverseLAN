@@ -285,7 +285,8 @@ ClientIniData::ClientIniData()
 
 		for (const auto& entry : keys) {
 			if ((entry.pItem != nullptr) && (strlen(entry.pItem) > 0)) {
-				Stats.emplace(std::string(entry.pItem), std::string(ini.GetValue(StatsSection.c_str(), entry.pItem, "0")));
+				StatsDataContainer c{ .i = ini.GetLongValue(StatsSection.c_str(), entry.pItem, 0) };
+				Stats.emplace(std::string(entry.pItem), c);
 			}
 		}
 	}
@@ -426,7 +427,7 @@ bool ClientIniData::IsDLCInstalled(const std::string& name)
 	return it->second;
 }
 
-std::variant<std::string, int32_t, float> ClientIniData::GetStat(const std::string& name)
+const StatsDataContainer& ClientIniData::GetStat(const std::string& name)
 {
 	auto it = Stats.find(name);
 	if (it == Stats.end()) {
@@ -438,21 +439,21 @@ std::variant<std::string, int32_t, float> ClientIniData::GetStat(const std::stri
 void ClientIniData::SetStat(const std::string& name, int32_t value) {
 	auto it = Stats.find(name);
 	if (it == Stats.end()) {
-		Stats.emplace(name, value);
-		return;
+		StatsDataContainer c{ .i = value };
+		it = Stats.emplace(name, c).first;
 	}
 
-	it->second = value;
+	it->second.i = value;
 }
 
 void ClientIniData::SetStat(const std::string& name, float value) {
 	auto it = Stats.find(name);
 	if (it == Stats.end()) {
-		Stats.emplace(name, value);
-		return;
+		StatsDataContainer c{ .f = value };
+		it = Stats.emplace(name, c).first;
 	}
 
-	it->second = value;
+	it->second.f = value;
 }
 
 std::string ClientIniData::GetUserData(const std::string& name)
@@ -484,14 +485,17 @@ void ClientIniData::SaveStatsAndAchievements()
 
 		IniData::LoadIni(ini, GetPath(AchievementsFile));
 
-		for (const auto& achievement : Achievements) {
-			const auto data = achievement.second;
-			std::string name = data.GetName().c_str();
-			ini.SetValue(name.c_str(), "Description", data.GetDescription().c_str());
-			ini.SetBoolValue(name.c_str(), "Unlocked", data.GetUnlocked());
-			ini.SetLongValue(name.c_str(), "UnlockTime", data.GetUnlockTime());
-			ini.SetBoolValue(name.c_str(), "Visible", data.GetVisible());
-			ini.SetBoolValue(name.c_str(), "VisibleWhileLocked", data.GetVisibleWhileLocked());
+		for (auto& achievement : Achievements) {
+			auto& data = achievement.second;
+			if (data.IsDirty()) {
+				data.ResetDirty();
+				std::string name = data.GetName().c_str();
+				ini.SetValue(name.c_str(), "Description", data.GetDescription().c_str());
+				ini.SetBoolValue(name.c_str(), "Unlocked", data.GetUnlocked());
+				ini.SetLongValue(name.c_str(), "UnlockTime", data.GetUnlockTime());
+				ini.SetBoolValue(name.c_str(), "Visible", data.GetVisible());
+				ini.SetBoolValue(name.c_str(), "VisibleWhileLocked", data.GetVisibleWhileLocked());
+			}
 		}
 
 		ini.SaveFile(GetPath(AchievementsFile).c_str());
@@ -524,21 +528,7 @@ void ClientIniData::SaveStatsAndAchievements()
 		ini.SetLongValue(MetadataSection.c_str(), "PlayTime", GetPlayTime());
 
 		for (const auto& stat : Stats) {
-			std::string name = stat.first.c_str();
-
-			switch (stat.second.index()) {
-			case 0:
-				ini.SetValue(StatsSection.c_str(), name.c_str(), std::get<std::string>(stat.second).c_str());
-				break;
-
-			case 1:
-				ini.SetLongValue(StatsSection.c_str(), name.c_str(), std::get<int32_t>(stat.second));
-				break;
-
-			case 2:
-				ini.SetDoubleValue(StatsSection.c_str(), name.c_str(), (double)std::get<float>(stat.second));
-				break;
-			}
+			ini.SetLongValue(StatsSection.c_str(), stat.first.c_str(), stat.second.i);
 		}
 
 		ini.SaveFile(GetPath(StatsFile).c_str());
@@ -558,4 +548,23 @@ void ClientIniData::SaveStatsAndAchievements()
 
 		ini.SaveFile(GetPath(UserDataFile).c_str());
 	}
+}
+
+bool ClientIniData::IsSelfUserID(uint64_t userID) const
+{
+	return (userID == GetCustomGalaxyID()) || (userID == 0);
+}
+
+void ClientIniData::ResetStatsAndAchievements()
+{
+	for (auto& entry : Achievements) {
+		entry.second.SetUnlocked(false);
+		entry.second.SetUnlockTime(0);
+	}
+
+	for (auto& entry : Stats) {
+		entry.second.i = 0;
+	}
+
+	SaveStatsAndAchievements();
 }

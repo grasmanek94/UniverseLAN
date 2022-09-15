@@ -9,6 +9,11 @@
 
 #include <SimpleIni.h>
 
+union StatsDataContainer {
+	int32_t i;
+	float f;
+};
+
 class IniData
 {
 private:
@@ -110,7 +115,7 @@ private:
 	uint32_t PlayTime;
 
 	const std::string StatsSection = "Stats";
-	std::map<std::string, std::variant<std::string, int32_t, float>> Stats;
+	std::map<std::string, StatsDataContainer> Stats;
 	
 	const std::string UserDataFile = "UserData.ini";
 	const std::string UserDataSection = "UserData";
@@ -143,11 +148,15 @@ public:
 
 	AchievementData* GetAchievementData(const std::string& name);
 	bool IsDLCInstalled(const std::string& name);
-	std::variant<std::string, int32_t, float> GetStat(const std::string& name);
+	const StatsDataContainer& GetStat(const std::string& name);
 	void SetStat(const std::string& name, int32_t value);
 	void SetStat(const std::string& name, float value);
 	std::string GetUserData(const std::string& name);
 	void SetUserData(const std::string& name, const std::string& data);
 
 	void SaveStatsAndAchievements();
+
+	bool IsSelfUserID(uint64_t userID) const;
+
+	void ResetStatsAndAchievements(); 
 };

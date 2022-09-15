@@ -1,5 +1,6 @@
 #include "AchievementData.hxx"
 
+#include <chrono>
 #include <string>
 
 AchievementData::AchievementData() :
@@ -36,6 +37,14 @@ void AchievementData::SetUnlockTime(uint32_t unlock_time)
 	UnlockTime = unlock_time;
 }
 
+void AchievementData::SetUnlockTimeNow()
+{
+	using namespace std::chrono;
+
+	Dirty = true;
+	UnlockTime = (uint32_t)duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
+}
+
 void AchievementData::SetVisible(bool visible)
 {
 	Dirty = true;
@@ -53,12 +62,12 @@ void AchievementData::ResetDirty()
 	Dirty = false;
 }
 
-std::string AchievementData::GetName() const
+const std::string& AchievementData::GetName() const
 {
 	return Name;
 }
 
-std::string AchievementData::GetDescription() const
+const std::string& AchievementData::GetDescription() const
 {
 	return Description;
 }

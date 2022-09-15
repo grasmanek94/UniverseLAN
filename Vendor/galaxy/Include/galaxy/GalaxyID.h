@@ -169,7 +169,7 @@ namespace galaxy
 			 */
 			uint64_t GetRealID() const
 			{
-				return value & 0xffffffffffffff;
+				return value & 0x00ffffffffffffff;
 			}
 
 			/**

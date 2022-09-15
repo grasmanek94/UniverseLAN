@@ -14,7 +14,7 @@ namespace galaxy
 		CustomNetworkingImpl::Channel::Channel(CustomNetworkingImpl* custom_network)
 			: custom_network{ custom_network }, client{}, runner{}, connection{},
 			listener_open{}, listener_data{}, listener_close{}, connection_string{},
-			mtx{}, buffer{}
+			buffer_mtx{}, buffer{}
 		{ }
 
 		bool CustomNetworkingImpl::Channel::connect(const char* connectionString, IConnectionOpenListener* listener)
@@ -78,9 +78,8 @@ namespace galaxy
 		CustomNetworkingImpl::Channel::~Channel()
 		{ }
 
-		CustomNetworkingImpl::CustomNetworkingImpl() :
-			listeners{ ListenerRegistrarImpl::get_local() }, mtx{}, channels{}
-
+		CustomNetworkingImpl::CustomNetworkingImpl(ListenerRegistrarImpl* listeners) :
+			listeners{ listeners }, mtx{}, channels{}
 		{ }
 
 		CustomNetworkingImpl::~CustomNetworkingImpl()
@@ -96,7 +95,7 @@ namespace galaxy
 			uint32_t data_size = 0;
 
 			{
-				lock_t guard(channel->mtx);
+				lock_t guard(channel->buffer_mtx);
 				const std::string& data = msg->get_payload();
 
 				data_size = (uint32_t)data.size();
@@ -181,7 +180,7 @@ namespace galaxy
 				return;
 			}
 
-			lock_t guard(channel->mtx);
+			lock_t guard(channel->buffer_mtx);
 			std::copy_n(channel->buffer.begin(), std::min(dataSize, (uint32_t)channel->buffer.size()), (char*)dest);
 		}
 
@@ -191,7 +190,7 @@ namespace galaxy
 				return;
 			}
 
-			lock_t guard(channel->mtx);
+			lock_t guard(channel->buffer_mtx);
 			size_t size = std::min(dataSize, (uint32_t)channel->buffer.size());
 			std::copy_n(channel->buffer.begin(), size, (char*)dest);
 			channel->buffer.erase(channel->buffer.begin(), channel->buffer.begin() + size);
@@ -203,7 +202,7 @@ namespace galaxy
 				return;
 			}
 
-			lock_t guard(channel->mtx);
+			lock_t guard(channel->buffer_mtx);
 			size_t size = std::min(dataSize, (uint32_t)channel->buffer.size());
 			channel->buffer.erase(channel->buffer.begin(), channel->buffer.begin() + size);
 		}

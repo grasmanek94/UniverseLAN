@@ -7,65 +7,81 @@ namespace galaxy
 	namespace api
 	{
 		StatsImpl::StatsImpl() :
-			listeners{ ListenerRegistrarImpl::get_local() }
+			listeners{ListenerRegistrarImpl::get_local()}, remote_stats{}
 		{}
 
 		StatsImpl::~StatsImpl()
 		{}
 
 		void StatsImpl::RequestUserStatsAndAchievements(GalaxyID userID, IUserStatsAndAchievementsRetrieveListener* const listener) {
-			if ((userID == 0) || (userID == config->GetCustomGalaxyID())) {
-
-				listeners->ExecuteForListenerTypePerEntry(USER_STATS_AND_ACHIEVEMENTS_RETRIEVE, listener, [&](IGalaxyListener* listener_intf) {
-					IUserStatsAndAchievementsRetrieveListener* saarl = dynamic_cast<IUserStatsAndAchievementsRetrieveListener*>(listener_intf);
-					if (saarl) {
-						saarl->OnUserStatsAndAchievementsRetrieveSuccess(userID);
-					}
-					});
-			}
-			else {
-
+			if (config->IsSelfUserID(userID.GetRealID())) {
+				listeners->NotifyAll(listener, &IUserStatsAndAchievementsRetrieveListener::OnUserStatsAndAchievementsRetrieveSuccess, userID);
+			} else {
+				listeners->NotifyAll(listener, &IUserStatsAndAchievementsRetrieveListener::OnUserStatsAndAchievementsRetrieveFailure, userID, IUserStatsAndAchievementsRetrieveListener::FAILURE_REASON_UNDEFINED);
 			}
 		}
 
 		int32_t StatsImpl::GetStatInt(const char* name, GalaxyID userID) {
-			return 0;
+			if (config->IsSelfUserID(userID.GetRealID())) {
+				return config->GetStat(name).i;
+			} else {
+				return 0;
+			}
 		}
 
 		float StatsImpl::GetStatFloat(const char* name, GalaxyID userID) {
-			return 0.0f;
+			if (config->IsSelfUserID(userID.GetRealID())) {
+				return config->GetStat(name).f;
+			} else {
+				return 0.0f;
+			}
 		}
 
 		void StatsImpl::SetStatInt(const char* name, int32_t value) {
-
+			config->SetStat(name, value);
 		}
 
 		void StatsImpl::SetStatFloat(const char* name, float value) {
-
+			config->SetStat(name, value);
 		}
 
 		void StatsImpl::UpdateAvgRateStat(const char* name, float countThisSession, double sessionLength) {
-
+			config->SetStat(name, (float)(config->GetStat(name).f + (countThisSession / sessionLength)));
 		}
 
 		void StatsImpl::GetAchievement(const char* name, bool& unlocked, uint32_t& unlockTime, GalaxyID userID) {
-
+			if (config->IsSelfUserID(userID.GetRealID())) {
+				auto data = config->GetAchievementData(name);
+				unlocked = data->GetUnlocked();
+				unlockTime = data->GetUnlockTime();
+			} else {
+				unlocked = false;
+				unlockTime = 0;
+			}
 		}
 
 		void StatsImpl::SetAchievement(const char* name) {
-
+			auto data = config->GetAchievementData(name);
+			data->SetUnlocked(true);
+			data->SetUnlockTimeNow();
 		}
 
 		void StatsImpl::ClearAchievement(const char* name) {
-
+			auto data = config->GetAchievementData(name);
+			data->SetUnlocked(false);
+			data->SetUnlockTime(0);
 		}
 
 		void StatsImpl::StoreStatsAndAchievements(IStatsAndAchievementsStoreListener* const listener) {
+			config->SaveStatsAndAchievements();
 
+			listeners->NotifyAll(listener, &IStatsAndAchievementsStoreListener::OnUserStatsAndAchievementsStoreSuccess);
 		}
 
 		void StatsImpl::ResetStatsAndAchievements(IStatsAndAchievementsStoreListener* const listener) {
+			config->ResetStatsAndAchievements();
 
+			listeners->NotifyAll(listener, &IStatsAndAchievementsStoreListener::OnUserStatsAndAchievementsStoreSuccess);
 		}
 
 		const char* StatsImpl::GetAchievementDisplayName(const char* name) {
@@ -73,27 +89,28 @@ namespace galaxy
 		}
 
 		void StatsImpl::GetAchievementDisplayNameCopy(const char* name, char* buffer, uint32_t bufferLength) {
-
+			std::copy_n(name, std::min(bufferLength, (uint32_t)strlen(name)), buffer);
 		}
 
 		const char* StatsImpl::GetAchievementDescription(const char* name) {
-			return name;
+			return config->GetAchievementData(name)->GetDescription().c_str();
 		}
 
 		void StatsImpl::GetAchievementDescriptionCopy(const char* name, char* buffer, uint32_t bufferLength) {
-
+			const std::string& desc = config->GetAchievementData(name)->GetDescription();
+			std::copy_n(desc.c_str(), std::min(bufferLength, (uint32_t)desc.size()), buffer);
 		}
 
 		bool StatsImpl::IsAchievementVisible(const char* name) {
-			return true;
+			return config->GetAchievementData(name)->GetVisible();
 		}
 
 		bool StatsImpl::IsAchievementVisibleWhileLocked(const char* name) {
-			return true;
+			return config->GetAchievementData(name)->GetVisibleWhileLocked();
 		}
 
 		void StatsImpl::RequestLeaderboards(ILeaderboardsRetrieveListener* const listener) {
-
+			listeners->NotifyAll(listener, &ILeaderboardsRetrieveListener::OnLeaderboardsRetrieveFailure, ILeaderboardsRetrieveListener::FAILURE_REASON_UNDEFINED);
 		}
 
 		const char* StatsImpl::GetLeaderboardDisplayName(const char* name) {
@@ -101,7 +118,7 @@ namespace galaxy
 		}
 
 		void StatsImpl::GetLeaderboardDisplayNameCopy(const char* name, char* buffer, uint32_t bufferLength) {
-
+			std::copy_n(name, std::min(bufferLength, (uint32_t)strlen(name)), buffer);
 		}
 
 		LeaderboardSortMethod StatsImpl::GetLeaderboardSortMethod(const char* name) {
@@ -117,7 +134,7 @@ namespace galaxy
 			uint32_t rangeStart,
 			uint32_t rangeEnd,
 			ILeaderboardEntriesRetrieveListener* const listener) {
-
+			listeners->NotifyAll(listener, &ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
 		}
 
 		void StatsImpl::RequestLeaderboardEntriesAroundUser(
@@ -126,7 +143,7 @@ namespace galaxy
 			uint32_t countAfter,
 			GalaxyID userID,
 			ILeaderboardEntriesRetrieveListener* const listener) {
-
+			listeners->NotifyAll(listener, &ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
 		}
 
 		void StatsImpl::RequestLeaderboardEntriesForUsers(
@@ -134,12 +151,10 @@ namespace galaxy
 			GalaxyID* userArray,
 			uint32_t userArraySize,
 			ILeaderboardEntriesRetrieveListener* const listener) {
-
+			listeners->NotifyAll(listener, &ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
 		}
 
-		void StatsImpl::GetRequestedLeaderboardEntry(uint32_t index, uint32_t& rank, int32_t& score, GalaxyID& userID) {
-
-		}
+		void StatsImpl::GetRequestedLeaderboardEntry(uint32_t index, uint32_t& rank, int32_t& score, GalaxyID& userID) { }
 
 		void StatsImpl::GetRequestedLeaderboardEntryWithDetails(
 			uint32_t index,
@@ -148,16 +163,14 @@ namespace galaxy
 			void* details,
 			uint32_t detailsSize,
 			uint32_t& outDetailsSize,
-			GalaxyID& userID) {
-
-		}
+			GalaxyID& userID) { }
 
 		void StatsImpl::SetLeaderboardScore(
 			const char* name,
 			int32_t score,
 			bool forceUpdate,
 			ILeaderboardScoreUpdateListener* const listener) {
-
+			listeners->NotifyAll(listener, &ILeaderboardScoreUpdateListener::OnLeaderboardScoreUpdateFailure, name, score, ILeaderboardScoreUpdateListener::FAILURE_REASON_UNDEFINED);
 		}
 
 		void StatsImpl::SetLeaderboardScoreWithDetails(
@@ -167,7 +180,7 @@ namespace galaxy
 			uint32_t detailsSize,
 			bool forceUpdate,
 			ILeaderboardScoreUpdateListener* const listener) {
-
+			listeners->NotifyAll(listener, &ILeaderboardScoreUpdateListener::OnLeaderboardScoreUpdateFailure, name, score, ILeaderboardScoreUpdateListener::FAILURE_REASON_UNDEFINED);
 		}
 
 		uint32_t StatsImpl::GetLeaderboardEntryCount(const char* name) {
@@ -175,7 +188,7 @@ namespace galaxy
 		}
 
 		void StatsImpl::FindLeaderboard(const char* name, ILeaderboardRetrieveListener* const listener) {
-
+			listeners->NotifyAll(listener, &ILeaderboardRetrieveListener::OnLeaderboardRetrieveFailure, name, ILeaderboardRetrieveListener::FAILURE_REASON_UNDEFINED);
 		}
 
 		void StatsImpl::FindOrCreateLeaderboard(
@@ -184,17 +197,25 @@ namespace galaxy
 			const LeaderboardSortMethod& sortMethod,
 			const LeaderboardDisplayType& displayType,
 			ILeaderboardRetrieveListener* const listener) {
-
+			listeners->NotifyAll(listener, &ILeaderboardRetrieveListener::OnLeaderboardRetrieveFailure, name, ILeaderboardRetrieveListener::FAILURE_REASON_UNDEFINED);
 		}
 
 		void StatsImpl::RequestUserTimePlayed(GalaxyID userID, IUserTimePlayedRetrieveListener* const listener) {
-
+			if (config->IsSelfUserID(userID.GetRealID())) {
+				listeners->NotifyAll(listener, &IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveSuccess, userID);
+			} else {
+				// TODO implement
+				listeners->NotifyAll(listener, &IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveSuccess, userID);
+			}
 		}
 
 		uint32_t StatsImpl::GetUserTimePlayed(GalaxyID userID) {
-			return 0;
+			if (config->IsSelfUserID(userID.GetRealID())) {
+				return config->GetPlayTime();
+			} else {
+				// TODO: update
+				return config->GetPlayTime();
+			}
 		}
 	}
 }
-
-
