@@ -76,7 +76,11 @@ public:
 
 		connection.SetHost(config.GetBindAddress(), config.GetPort());
 
+		std::cout << "Binding addr: " << config.GetBindAddress() << ":" << config.GetPort() << std::endl;
+
 		max_connections = config.GetMaxConnections();
+
+		std::cout << "Max Connections: " << max_connections << std::endl;
 		if (!connection.Create(max_connections) || !connection.Good())
 		{
 #ifdef _WIN32
@@ -85,6 +89,7 @@ public:
 #endif
 		}
 
+		std::cout << "Listening..." << std::endl;
 		//ready
 	}
 

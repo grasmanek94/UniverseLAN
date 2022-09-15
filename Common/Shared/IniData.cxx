@@ -69,10 +69,10 @@ ServerIniData::ServerIniData()
 	AllowFileSharingDownload = ini.GetBoolValue(StoragePathSection.c_str(), "AllowFileSharingDownload", true);
 	AllowFileSharingUpload = ini.GetBoolValue(StoragePathSection.c_str(), "AllowFileSharingUpload", true);
 
-	BindAddress = ini.GetBoolValue(ServerSection.c_str(), "AllowFileSharingDownload", true);
-	Port = ini.GetBoolValue(ServerSection.c_str(), "AllowFileSharingUpload", true);
-	MaxConnections = ini.GetLongValue(ServerSection.c_str(), "MaxConnections", 0);
-	MaxTickRate = ini.GetLongValue(ServerSection.c_str(), "MaxTickRate", 0);
+	BindAddress = ini.GetValue(ServerSection.c_str(), "BindAddress", "0.0.0.0");
+	Port = (uint16_t)ini.GetLongValue(ServerSection.c_str(), "Port", 19486);
+	MaxConnections = ini.GetLongValue(ServerSection.c_str(), "MaxConnections", 1024);
+	MaxTickRate = ini.GetLongValue(ServerSection.c_str(), "MaxTickRate", 200);
 }
 
 ServerIniData::~ServerIniData()
