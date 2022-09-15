@@ -8,6 +8,7 @@
 #include <ILogger.h>
 
 #include <fstream>
+#include <mutex>
 
 namespace galaxy
 {
@@ -24,7 +25,13 @@ namespace galaxy
 		class LoggerImpl : public ILogger
 		{
 		private:
+			using mtx_t = std::mutex;
+			using lock_t = std::scoped_lock<mtx_t>;
+
+			mtx_t mtx;
 			std::ofstream logfile;
+
+			void Log(const char* type, const char* format, ...);
 
 		public:
 			LoggerImpl();

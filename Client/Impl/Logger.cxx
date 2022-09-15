@@ -15,12 +15,16 @@ namespace galaxy
 	namespace api
 	{
 		LoggerImpl::LoggerImpl() :
-			logfile{}
+			mtx{}, logfile{}
 		{
 			static std::atomic_int counter = 0;
 
 			auto t = std::time(nullptr);
+
+#pragma warning( push )
+#pragma warning( disable : 4996 )
 			auto tm = *std::localtime(&t);
+#pragma warning( pop )
 
 			std::ostringstream path;
 
@@ -39,134 +43,55 @@ namespace galaxy
 		LoggerImpl::~LoggerImpl()
 		{
 			if (logfile) {
+				lock_t lock(mtx);
 				logfile.flush();
 			}
 		}
 
-		void LoggerImpl::Trace(const char* format, ...) {
-			if (logfile) {
-				const char* const zcFormat = format;
-
-				va_list vaArgs;
-				va_start(vaArgs, format);
-
-				va_list vaCopy;
-				va_copy(vaCopy, vaArgs);
-				const int iLen = std::vsnprintf(NULL, 0, zcFormat, vaCopy);
-				va_end(vaCopy);
-
-				std::vector<char> zc(iLen + 1);
-				std::vsnprintf(zc.data(), zc.size(), zcFormat, vaArgs);
-				va_end(vaArgs);
-
-				std::string logstr(zc.data(), zc.size());
-				logfile << "[T] " << logstr << '\n';
+#define Log(type) \
+			if (logfile) { \
+				va_list vaArgs; \
+				va_start(vaArgs, format); \
+				\
+				va_list vaCopy; \
+				va_copy(vaCopy, vaArgs); \
+				const int iLen = std::vsnprintf(NULL, 0, format, vaCopy); \
+				va_end(vaCopy); \
+				\
+				std::vector<char> zc(iLen + 1); \
+				std::vsnprintf(zc.data(), zc.size(), format, vaArgs); \
+				va_end(vaArgs); \
+				\
+				std::string logstr(zc.data(), zc.size()); \
+				\
+				lock_t lock(mtx); \
+				logfile << type << "[" << std::this_thread::get_id() << "] " << logstr << '\n'; \
 			}
+
+		void LoggerImpl::Trace(const char* format, ...) {
+			Log("[T]");
 		}
 
 		void LoggerImpl::Debug(const char* format, ...) {
-			if (logfile) {
-				const char* const zcFormat = format;
-
-				va_list vaArgs;
-				va_start(vaArgs, format);
-
-				va_list vaCopy;
-				va_copy(vaCopy, vaArgs);
-				const int iLen = std::vsnprintf(NULL, 0, zcFormat, vaCopy);
-				va_end(vaCopy);
-
-				std::vector<char> zc(iLen + 1);
-				std::vsnprintf(zc.data(), zc.size(), zcFormat, vaArgs);
-				va_end(vaArgs);
-
-				std::string logstr(zc.data(), zc.size());
-				logfile << "[D] " << logstr << '\n';
-			}
+			Log("[D]");
 		}
 
 		void LoggerImpl::Info(const char* format, ...) {
-			if (logfile) {
-				const char* const zcFormat = format;
-
-				va_list vaArgs;
-				va_start(vaArgs, format);
-
-				va_list vaCopy;
-				va_copy(vaCopy, vaArgs);
-				const int iLen = std::vsnprintf(NULL, 0, zcFormat, vaCopy);
-				va_end(vaCopy);
-
-				std::vector<char> zc(iLen + 1);
-				std::vsnprintf(zc.data(), zc.size(), zcFormat, vaArgs);
-				va_end(vaArgs);
-
-				std::string logstr(zc.data(), zc.size());
-				logfile << "[I] " << logstr << '\n';
-			}
+			Log("[I]");
 		}
 
 		void LoggerImpl::Warning(const char* format, ...) {
-			if (logfile) {
-				const char* const zcFormat = format;
-
-				va_list vaArgs;
-				va_start(vaArgs, format);
-
-				va_list vaCopy;
-				va_copy(vaCopy, vaArgs);
-				const int iLen = std::vsnprintf(NULL, 0, zcFormat, vaCopy);
-				va_end(vaCopy);
-
-				std::vector<char> zc(iLen + 1);
-				std::vsnprintf(zc.data(), zc.size(), zcFormat, vaArgs);
-				va_end(vaArgs);
-
-				std::string logstr(zc.data(), zc.size());
-				logfile << "[W] " << logstr << '\n';
-			}
+			Log("[W]");
 		}
 
 		void LoggerImpl::Error(const char* format, ...) {
-			if (logfile) {
-				const char* const zcFormat = format;
-
-				va_list vaArgs;
-				va_start(vaArgs, format);
-
-				va_list vaCopy;
-				va_copy(vaCopy, vaArgs);
-				const int iLen = std::vsnprintf(NULL, 0, zcFormat, vaCopy);
-				va_end(vaCopy);
-
-				std::vector<char> zc(iLen + 1);
-				std::vsnprintf(zc.data(), zc.size(), zcFormat, vaArgs);
-				va_end(vaArgs);
-
-				std::string logstr(zc.data(), zc.size());
-				logfile << "[E] " << logstr << '\n';
-			}
+			Log("[E]");
 		}
 
 		void LoggerImpl::Fatal(const char* format, ...) {
-			if (logfile) {
-				const char* const zcFormat = format;
-
-				va_list vaArgs;
-				va_start(vaArgs, format);
-
-				va_list vaCopy;
-				va_copy(vaCopy, vaArgs);
-				const int iLen = std::vsnprintf(NULL, 0, zcFormat, vaCopy);
-				va_end(vaCopy);
-
-				std::vector<char> zc(iLen + 1);
-				std::vsnprintf(zc.data(), zc.size(), zcFormat, vaArgs);
-				va_end(vaArgs);
-
-				std::string logstr(zc.data(), zc.size());
-				logfile << "[F] " << logstr << '\n';
-			}
+			Log("[F]");
 		}
+
+#undef Log
 	}
 }

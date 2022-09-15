@@ -58,7 +58,7 @@ namespace galaxy
 		}
 
 		CustomNetworkingImpl::CustomNetworkingImpl() :
-			listeners{ dynamic_cast<ListenerRegistrarImpl*>(ListenerRegistrar()) }, channels{}
+			listeners{ ListenerRegistrarImpl::get_local() }, channels{}
 		{ }
 
 		CustomNetworkingImpl::~CustomNetworkingImpl()

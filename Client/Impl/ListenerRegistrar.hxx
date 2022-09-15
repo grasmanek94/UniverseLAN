@@ -28,6 +28,10 @@ namespace galaxy
 		 */
 		class ListenerRegistrarImpl : public IListenerRegistrar
 		{
+		public:
+			static ListenerRegistrarImpl* get_local();
+			static ListenerRegistrarImpl* get_game_server();
+
 		private:
 			using mutex_t = std::recursive_mutex;
 			using listener_set = std::set<IGalaxyListener*>;
