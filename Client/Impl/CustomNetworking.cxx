@@ -17,7 +17,7 @@ namespace galaxy
 			mtx{}, buffer{}
 		{ }
 
-		void CustomNetworkingImpl::Channel::connect(const char* connectionString, IConnectionOpenListener* listener)
+		bool CustomNetworkingImpl::Channel::connect(const char* connectionString, IConnectionOpenListener* listener)
 		{
 			// Initialize ASIO
 			client.init_asio();
@@ -35,30 +35,52 @@ namespace galaxy
 
 			if (ec) {
 				std::cerr << "CustomNetworking: Could not create connection because: " << ec.message() << std::endl;
-				if (listener_open) {
-					listener_open->OnConnectionOpenFailure(connectionString, IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE);
-				}
-				return;
+
+				custom_network->listeners->NotifyAll(listener, &IConnectionOpenListener::OnConnectionOpenFailure, connectionString, IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE);
+
+				return false;
 			}
 
 			client.connect(con);
 
-			runner = std::jthread(&custom_networking::client::run, &client);
+			return true;
+		}
+
+		void CustomNetworkingImpl::Channel::start()
+		{
+			runner = std::jthread(&CustomNetworkingImpl::ChannelThread, custom_network, shared_from_this());
+		}
+
+		void CustomNetworkingImpl::ChannelThread(std::shared_ptr<Channel> channel)
+		{
+			channel->client.run();
+
+			// delete
+			{
+				lock_t lock(mtx);
+				channels.erase((ConnectionID)this);
+			}
+
+			channel->custom_network = nullptr;
+			channel->connection = nullptr;
+			channel->listener_open = nullptr;
+			channel->listener_data = nullptr;
+			channel->listener_close = nullptr;
+			channel->connection_string.clear();
+			channel->buffer.clear();
+
+			channel->runner.detach();
+			channel->runner = std::jthread{};
+
+			channel = nullptr;
 		}
 
 		CustomNetworkingImpl::Channel::~Channel()
-		{
-			if (connection) {
-				connection->close(websocketpp::close::status::normal, "normal");
-				client.stop();
-				if (runner.joinable()) {
-					runner.join();
-				}
-			}
-		}
+		{ }
 
 		CustomNetworkingImpl::CustomNetworkingImpl() :
-			listeners{ ListenerRegistrarImpl::get_local() }, channels{}
+			listeners{ ListenerRegistrarImpl::get_local() }, mtx{}, channels{}
+
 		{ }
 
 		CustomNetworkingImpl::~CustomNetworkingImpl()
@@ -66,166 +88,122 @@ namespace galaxy
 
 		void CustomNetworkingImpl::WebSocketOnOpen(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl)
 		{
-			const char* str = channel->connection_string.c_str();
-			ConnectionID id = (ConnectionID)channel.get();
-
-			if (channel->listener_open != nullptr) {
-				channel->listener_open->OnConnectionOpenSuccess(str, id);
-			}
-
-			listeners->ExecuteForListenerTypePerEntry(CUSTOM_NETWORKING_CONNECTION_OPEN, [&](IGalaxyListener* listener) {
-				IConnectionOpenListener* opener_listener = dynamic_cast<IConnectionOpenListener*>(listener);
-				if (opener_listener && opener_listener != channel->listener_open) {
-					opener_listener->OnConnectionOpenSuccess(str, id);
-				}
-				});
+			listeners->NotifyAll<IConnectionOpenListener>(&IConnectionOpenListener::OnConnectionOpenSuccess, channel->connection_string.c_str(), (ConnectionID)channel.get());
 		}
 
 		void CustomNetworkingImpl::WebSocketOnMessage(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl, custom_networking::message_ptr msg)
 		{
-			ConnectionID id = (ConnectionID)channel.get();
 			uint32_t data_size = 0;
 
 			{
-				std::scoped_lock<std::mutex> guard(channel->mtx);
+				lock_t guard(channel->mtx);
 				const std::string& data = msg->get_payload();
 
 				data_size = (uint32_t)data.size();
 				channel->buffer.insert(channel->buffer.end(), data.c_str(), data.c_str() + data.size());
 			}
 
-			listeners->ExecuteForListenerTypePerEntry(CUSTOM_NETWORKING_CONNECTION_DATA, [&](IGalaxyListener* listener) {
-				IConnectionDataListener* data_listener = dynamic_cast<IConnectionDataListener*>(listener);
-				if (data_listener) {
-					data_listener->OnConnectionDataReceived(id, data_size);
-				}
-				});
+			listeners->NotifyAll<IConnectionDataListener>(&IConnectionDataListener::OnConnectionDataReceived, (ConnectionID)channel.get(), data_size);
 		}
 
 		void CustomNetworkingImpl::WebSocketOnClose(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl)
 		{
-			ConnectionID id = (ConnectionID)channel.get();
-
-			if (channel->listener_close) {
-				channel->listener_close->OnConnectionClosed(id, IConnectionCloseListener::CLOSE_REASON_UNDEFINED);
+			listeners->NotifyAll(channel->listener_close, &IConnectionCloseListener::OnConnectionClosed, (ConnectionID)this, IConnectionCloseListener::CLOSE_REASON_UNDEFINED);
+			
+			if (!channel->client.stopped()) {
+				channel->client.stop();
 			}
-
-			listeners->ExecuteForListenerTypePerEntry(CUSTOM_NETWORKING_CONNECTION_CLOSE, [&](IGalaxyListener* listener) {
-				IConnectionCloseListener* close_listener = dynamic_cast<IConnectionCloseListener*>(listener);
-				if (close_listener && close_listener != channel->listener_close) {
-					close_listener->OnConnectionClosed(id, IConnectionCloseListener::CLOSE_REASON_UNDEFINED);
-				}
-				});
 		}
 
 		void CustomNetworkingImpl::WebSocketOnFail(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl)
 		{
-			const char* str = channel->connection_string.c_str();
+			listeners->NotifyAll(channel->listener_open, &IConnectionOpenListener::OnConnectionOpenFailure, channel->connection_string.c_str(), IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE);
 
-			switch (channel->connection->get_state())
-			{
-			case websocketpp::session::state::connecting:
-				if (channel->listener_open != nullptr) {
-					channel->listener_open->OnConnectionOpenFailure(str, IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE);
-				}
-
-				listeners->ExecuteForListenerTypePerEntry(CUSTOM_NETWORKING_CONNECTION_OPEN, [&](IGalaxyListener* listener) {
-					IConnectionOpenListener* opener_listener = dynamic_cast<IConnectionOpenListener*>(listener);
-					if (opener_listener && opener_listener != channel->listener_open) {
-						opener_listener->OnConnectionOpenFailure(str, IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE);
-					}
-					});
-				break;
-
-			case websocketpp::session::state::open:
-				break;
-
-			case websocketpp::session::state::closing:
-				break;
-
-			case websocketpp::session::state::closed:
-				break;
+			if (!channel->client.stopped()) {
+				channel->client.stop();
 			}
+		}
+
+		std::shared_ptr<CustomNetworkingImpl::Channel> CustomNetworkingImpl::GetChannel(ConnectionID connectionID) const
+		{
+			lock_t lock(mtx);
+			auto entry = channels.find(connectionID);
+			if (entry == channels.end()) {
+				return std::shared_ptr<CustomNetworkingImpl::Channel>{nullptr};
+			}
+
+			return entry->second;
 		}
 
 		void CustomNetworkingImpl::OpenConnection(const char* connectionString, IConnectionOpenListener* const listener) {
 			auto channel = std::make_shared<Channel>(this);
 
-			channels.emplace((ConnectionID)channel.get(), channel);
-
-			channel->connect(connectionString, listener);
+			if(channel->connect(connectionString, listener))
+			{
+				{
+					lock_t lock(mtx);
+					channels.emplace((ConnectionID)channel.get(), channel);
+				}
+				channel->start();
+			}
 		}
 
 		void CustomNetworkingImpl::CloseConnection(ConnectionID connectionID, IConnectionCloseListener* const listener) {
-			auto entry = channels.find(connectionID);
-			if (entry == channels.end()) {
+			std::shared_ptr<Channel> channel{ GetChannel(connectionID) };
+			if (!channel) {
 				return;
 			}
 
-			auto& channel = entry->second;
-
 			channel->listener_close = listener;
-			channel->connection->close(websocketpp::close::status::normal, "normal");
+			if (channel->connection) {
+				channel->connection->close(websocketpp::close::status::normal, "normal");
+			}
 		}
 
 		void CustomNetworkingImpl::SendData(ConnectionID connectionID, const void* data, uint32_t dataSize) {
-
-			auto entry = channels.find(connectionID);
-			if (entry == channels.end()) {
-				return;
-			}
-
-			auto& channel = entry->second;
+			std::shared_ptr<Channel> channel{ GetChannel(connectionID) };
 
 			channel->connection->send(std::string((const char*)data, dataSize), websocketpp::frame::opcode::value::BINARY);
 		}
 
 		uint32_t CustomNetworkingImpl::GetAvailableDataSize(ConnectionID connectionID) {
-			auto entry = channels.find(connectionID);
-			if (entry == channels.end()) {
+			std::shared_ptr<Channel> channel{ GetChannel(connectionID) };
+			if (!channel) {
 				return 0;
 			}
-
-			auto& channel = entry->second;
 
 			return (uint32_t)channel->buffer.size();
 		}
 
 		void CustomNetworkingImpl::PeekData(ConnectionID connectionID, void* dest, uint32_t dataSize) {
-			auto entry = channels.find(connectionID);
-			if (entry == channels.end()) {
+			std::shared_ptr<Channel> channel{ GetChannel(connectionID) };
+			if (!channel) {
 				return;
 			}
 
-			auto& channel = entry->second;
-
-			std::scoped_lock<std::mutex> guard(channel->mtx);
+			lock_t guard(channel->mtx);
 			std::copy_n(channel->buffer.begin(), std::min(dataSize, (uint32_t)channel->buffer.size()), (char*)dest);
 		}
 
 		void CustomNetworkingImpl::ReadData(ConnectionID connectionID, void* dest, uint32_t dataSize) {
-			auto entry = channels.find(connectionID);
-			if (entry == channels.end()) {
+			std::shared_ptr<Channel> channel{ GetChannel(connectionID) };
+			if (!channel) {
 				return;
 			}
 
-			auto& channel = entry->second;
-
-			std::scoped_lock<std::mutex> guard(channel->mtx);
+			lock_t guard(channel->mtx);
 			size_t size = std::min(dataSize, (uint32_t)channel->buffer.size());
 			std::copy_n(channel->buffer.begin(), size, (char*)dest);
 			channel->buffer.erase(channel->buffer.begin(), channel->buffer.begin() + size);
 		}
 
 		void CustomNetworkingImpl::PopData(ConnectionID connectionID, uint32_t dataSize) {
-			auto entry = channels.find(connectionID);
-			if (entry == channels.end()) {
+			std::shared_ptr<Channel> channel{ GetChannel(connectionID) };
+			if (!channel) {
 				return;
 			}
 
-			auto& channel = entry->second;
-
-			std::scoped_lock<std::mutex> guard(channel->mtx);
+			lock_t guard(channel->mtx);
 			size_t size = std::min(dataSize, (uint32_t)channel->buffer.size());
 			channel->buffer.erase(channel->buffer.begin(), channel->buffer.begin() + size);
 		}

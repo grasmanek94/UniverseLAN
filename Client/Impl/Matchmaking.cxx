@@ -148,5 +148,3 @@ namespace galaxy
 		}
 	}
 }
-
-

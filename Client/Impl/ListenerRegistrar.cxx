@@ -54,5 +54,34 @@ namespace galaxy
 				code(entry);
 			}
 		}
+
+		void ListenerRegistrarImpl::ExecuteForListenerType(ListenerType listenerType, IGalaxyListener* extra, std::function<void(const std::set<IGalaxyListener*>& listeners)> code)
+		{
+			std::scoped_lock<mutex_t> lock(listeners[listenerType].mtx);
+
+			listener_set& set = listeners[listenerType].set;
+			auto item = set.emplace(extra);
+
+			code(set);
+
+			if (item.second) {
+				set.erase(item.first);
+			}
+		}
+
+		void ListenerRegistrarImpl::ExecuteForListenerTypePerEntry(ListenerType listenerType, IGalaxyListener* extra, std::function<void(IGalaxyListener* listeners)> code)
+		{
+			std::scoped_lock<mutex_t> lock(listeners[listenerType].mtx);
+
+			if (extra != nullptr) {
+				code(extra);
+			}
+
+			for (auto& entry : listeners[listenerType].set) {
+				if ((entry != extra) && (entry != nullptr)) {
+					code(entry);
+				}
+			}
+		}
 	}
 }

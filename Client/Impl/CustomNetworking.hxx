@@ -44,6 +44,9 @@ namespace galaxy
 		class CustomNetworkingImpl : public ICustomNetworking
 		{
 		public:
+			using mutex_t = std::recursive_mutex;
+			using lock_t = std::scoped_lock<mutex_t>;
+
 			struct Channel : public std::enable_shared_from_this<Channel> {
 				CustomNetworkingImpl* custom_network;
 				custom_networking::client client;
@@ -54,16 +57,18 @@ namespace galaxy
 				IConnectionCloseListener* listener_close;
 				std::string connection_string;
 
-				std::mutex mtx;
+				mutex_t mtx;
 				std::deque<char> buffer;
 
 				Channel(CustomNetworkingImpl* custom_network);
-				void connect(const char* connectionString, IConnectionOpenListener* listener);
+				bool connect(const char* connectionString, IConnectionOpenListener* listener);
 				virtual ~Channel();
+				void start();
 			};
 
 		private:
 			ListenerRegistrarImpl* listeners;
+			mutable mutex_t mtx;
 			std::map<ConnectionID, std::shared_ptr<Channel>> channels;
 
 			void WebSocketOnOpen(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl);
@@ -71,6 +76,8 @@ namespace galaxy
 			void WebSocketOnClose(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl);
 			void WebSocketOnFail(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl);
 
+			std::shared_ptr<Channel> GetChannel(ConnectionID connectionID) const;
+			void ChannelThread(std::shared_ptr<Channel> channel);
 		public:
 
 			CustomNetworkingImpl();

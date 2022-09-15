@@ -6,6 +6,8 @@
  * Contains data structures and interfaces related to statistics, achievements and leaderboards.
  */
 
+#include "ListenerRegistrar.hxx"
+
 #include <IStats.h>
 #include <IListenerRegistrar.h>
 #include <GalaxyID.h>
@@ -24,8 +26,12 @@ namespace galaxy
 		 */
 		class StatsImpl : public IStats
 		{
+		private:
+			ListenerRegistrarImpl* listeners;
+
 		public:
 
+			StatsImpl();
 			virtual ~StatsImpl();
 
 			/**

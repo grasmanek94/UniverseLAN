@@ -117,7 +117,6 @@ ClientIniData::ClientIniData()
 		IniData::LoadIni(ini, GetPath(ConfigFile));
 
 		Language = ini.GetValue(SettingsSection.c_str(), "Language", "english");
-		NATType = (uint16_t)ini.GetLongValue(SettingsSection.c_str(), "NATType", 0);
 		EnableAllDLC = ini.GetBoolValue(SettingsSection.c_str(), "EnableAllDLC", false);
 		SaveUnknownDLCIDs = ini.GetBoolValue(SettingsSection.c_str(), "SaveUnknownDLCIDs", true);
 		SaveAchievementsAndStats = ini.GetBoolValue(SettingsSection.c_str(), "SaveAchievementsAndStats", true);
@@ -319,11 +318,6 @@ const std::string& ClientIniData::GetLanguage() const
 	return Language;
 }
 
-uint16_t ClientIniData::GetNATType() const
-{
-	return NATType;
-}
-
 bool ClientIniData::GetEnableAllDLC() const
 {
 	return EnableAllDLC;
@@ -432,22 +426,52 @@ bool ClientIniData::IsDLCInstalled(const std::string& name)
 	return it->second;
 }
 
-std::variant<std::string, int32_t, float>* ClientIniData::GetStat(const std::string& name)
+std::variant<std::string, int32_t, float> ClientIniData::GetStat(const std::string& name)
 {
 	auto it = Stats.find(name);
 	if (it == Stats.end()) {
-		return &Stats.emplace(name, 0).first->second;
+		return Stats.emplace(name, 0).first->second;
 	}
-	return &it->second;
+	return it->second;
 }
 
-std::string* ClientIniData::GetUserData(const std::string& name)
+void ClientIniData::SetStat(const std::string& name, int32_t value) {
+	auto it = Stats.find(name);
+	if (it == Stats.end()) {
+		Stats.emplace(name, value);
+		return;
+	}
+
+	it->second = value;
+}
+
+void ClientIniData::SetStat(const std::string& name, float value) {
+	auto it = Stats.find(name);
+	if (it == Stats.end()) {
+		Stats.emplace(name, value);
+		return;
+	}
+
+	it->second = value;
+}
+
+std::string ClientIniData::GetUserData(const std::string& name)
 {
 	auto it = UserData.find(name);
 	if (it == UserData.end()) {
-		return &UserData.emplace(name, "").first->second;
+		return UserData.emplace(name, "").first->second;
 	}
-	return &it->second;
+	return it->second;
+}
+
+void ClientIniData::SetUserData(const std::string& name, const std::string& data) {
+	auto it = UserData.find(name);
+	if (it == UserData.end()) {
+		UserData.emplace(name, data);
+		return;
+	}
+
+	it->second = data;
 }
 
 void ClientIniData::SaveStatsAndAchievements()

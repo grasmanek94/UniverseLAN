@@ -2,4 +2,6 @@
 
 #include "Version.hxx"
 
-size_t Version_Number = BUILD_VERSION;
+#include <auto_version.h>
+
+const size_t Version_Number = BUILD_VERSION;

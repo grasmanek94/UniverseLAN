@@ -17,6 +17,8 @@
 #include <set>
 #include <vector>
 
+#include <GalaxyAPI.h>
+
 namespace galaxy
 {
 	namespace api
@@ -74,8 +76,32 @@ namespace galaxy
 			virtual void Unregister(ListenerType listenerType, IGalaxyListener* listener) override;
 
 
-			virtual void ExecuteForListenerType(ListenerType listenerType, std::function<void(const std::set<IGalaxyListener*>& listeners)> code);
-			virtual void ExecuteForListenerTypePerEntry(ListenerType listenerType, std::function<void(IGalaxyListener* listeners)> code);
+			void ExecuteForListenerType(ListenerType listenerType, std::function<void(const std::set<IGalaxyListener*>& listeners)> code);
+			void ExecuteForListenerTypePerEntry(ListenerType listenerType, std::function<void(IGalaxyListener* listeners)> code);
+			void ExecuteForListenerType(ListenerType listenerType, IGalaxyListener* extra, std::function<void(const std::set<IGalaxyListener*>& listeners)> code);
+			void ExecuteForListenerTypePerEntry(ListenerType listenerType, IGalaxyListener* extra, std::function<void(IGalaxyListener* listeners)> code);
+
+			// NotifyAll<IConnectionOpenListener>(&IConnectionOpenListener::OnConnectionOpenFailure, connectionString, IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE);
+			template <typename T, class _Fx, class... _Types>
+			void NotifyAll(_Fx&& _Func, _Types&&... _Args) {
+				ExecuteForListenerTypePerEntry(T::GetListenerType(), [&](IGalaxyListener* listener) {
+					T* casted_listener = dynamic_cast<T*>(listener);
+					if (casted_listener) {
+						std::invoke(std::forward<_Fx>(_Func), casted_listener, std::forward<_Types>(_Args)...);
+					}
+					});
+			}
+
+			// NotifyAll<IConnectionOpenListener>(connectionString, &IConnectionOpenListener::OnConnectionOpenFailure, connectionString, IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE);
+			template <typename T, class _Fx, class... _Types>
+			void NotifyAll(T* extra, _Fx&& _Func, _Types&&... _Args) {
+				ExecuteForListenerTypePerEntry(T::GetListenerType(), extra, [&](IGalaxyListener* listener) {
+					T* casted_listener = dynamic_cast<T*>(listener);
+					if (casted_listener) {
+						std::invoke(std::forward<_Fx>(_Func), casted_listener, std::forward<_Types>(_Args)...);
+					}
+					});
+			}
 		};
 	}
 }

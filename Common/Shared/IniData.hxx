@@ -73,7 +73,6 @@ private:
 
 	const std::string SettingsSection = "Settings";
 	std::string Language;
-	uint16_t NATType;
 	bool EnableAllDLC;
 	bool SaveUnknownDLCIDs;
 	bool SaveAchievementsAndStats;
@@ -124,7 +123,6 @@ public:
 	virtual ~ClientIniData();
 
 	const std::string& GetLanguage() const;
-	uint16_t GetNATType() const;
 	bool GetEnableAllDLC() const;
 	bool GetSaveUnknownDLCIDs() const;
 	bool GetSaveAchievementsAndStats() const;
@@ -145,8 +143,11 @@ public:
 
 	AchievementData* GetAchievementData(const std::string& name);
 	bool IsDLCInstalled(const std::string& name);
-	std::variant<std::string, int32_t, float>* GetStat(const std::string& name);
-	std::string* GetUserData(const std::string& name);
+	std::variant<std::string, int32_t, float> GetStat(const std::string& name);
+	void SetStat(const std::string& name, int32_t value);
+	void SetStat(const std::string& name, float value);
+	std::string GetUserData(const std::string& name);
+	void SetUserData(const std::string& name, const std::string& data);
 
 	void SaveStatsAndAchievements();
 };

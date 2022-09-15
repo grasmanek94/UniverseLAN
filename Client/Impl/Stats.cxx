@@ -1,16 +1,31 @@
 #include "Stats.hxx"
 
+#include "UniverseLAN.hxx"
+
 namespace galaxy
 {
 	namespace api
 	{
+		StatsImpl::StatsImpl() :
+			listeners{ ListenerRegistrarImpl::get_local() }
+		{}
 
 		StatsImpl::~StatsImpl()
-		{
-		}
+		{}
 
 		void StatsImpl::RequestUserStatsAndAchievements(GalaxyID userID, IUserStatsAndAchievementsRetrieveListener* const listener) {
-			
+			if ((userID == 0) || (userID == config->GetCustomGalaxyID())) {
+
+				listeners->ExecuteForListenerTypePerEntry(USER_STATS_AND_ACHIEVEMENTS_RETRIEVE, listener, [&](IGalaxyListener* listener_intf) {
+					IUserStatsAndAchievementsRetrieveListener* saarl = dynamic_cast<IUserStatsAndAchievementsRetrieveListener*>(listener_intf);
+					if (saarl) {
+						saarl->OnUserStatsAndAchievementsRetrieveSuccess(userID);
+					}
+					});
+			}
+			else {
+
+			}
 		}
 
 		int32_t StatsImpl::GetStatInt(const char* name, GalaxyID userID) {
