@@ -68,7 +68,9 @@ namespace galaxy
 		}
 
 		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Shutdown() {
-			client->Stop();
+			if (client) {
+				client->Stop();
+			}
 
 			telemetry_impl = nullptr;
 			logger_impl = nullptr;

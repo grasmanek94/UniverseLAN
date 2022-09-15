@@ -15,6 +15,10 @@
 #include <Networking/Networking.hxx>
 #include <Version.hxx>
 
+class PeerData {
+
+};
+
 class Server : public MessageReceiver
 {
 private:
@@ -101,6 +105,10 @@ public:
 		}
 	}
 
+	uint32_t GetMaxTickRate() const {
+		return config.GetMaxTickRate();
+	}
+
 	~Server()
 	{
 
@@ -113,10 +121,12 @@ int main()
 	std::cout << "Version: " << Version_Number << std::endl;
 
 	server = std::make_unique<Server>();
+	std::chrono::milliseconds wait_time = std::chrono::milliseconds(1000 / server->GetMaxTickRate());
+
 	while (true)
 	{
 		server->Tick();
-		std::this_thread::sleep_for(std::chrono::milliseconds(5));
+		std::this_thread::sleep_for(wait_time);
 	}
 	return 0;
 }

@@ -127,7 +127,7 @@ ClientIniData::ClientIniData()
 
 		TelemetryStore = ini.GetBoolValue(TelemetrySection.c_str(), "Store", false);
 
-		ServerAddress = ini.GetValue(ClientSection.c_str(), "ServerAddress", "192.168.1.1");
+		ServerAddress = ini.GetValue(ClientSection.c_str(), "ServerAddress", "127.0.0.1");
 		Port = (uint16_t)ini.GetLongValue(ClientSection.c_str(), "Port", 19486);
 
 		PersonaNameType = ini.GetValue(UserSection.c_str(), "PersonaNameType", "@Custom");
