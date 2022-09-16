@@ -6,6 +6,8 @@
  * Contains data structures and interfaces related to storage activities.
  */
 
+#include "ListenerRegistrar.hxx"
+
 #include <IStorage.h>
 #include <GalaxyID.h>
 #include <IListenerRegistrar.h>
@@ -26,10 +28,13 @@ namespace galaxy
 		 */
 		class StorageImpl : public IStorage
 		{
-		public:
-			
-			std::fstream open(const char* filename, std::ios::openmode mode);
+		private:
+			ListenerRegistrarImpl* listeners;
 
+			std::fstream open(const char* filename, std::ios::openmode mode);
+		public:
+
+			StorageImpl(ListenerRegistrarImpl* listeners);
 			virtual ~StorageImpl();
 
 			/**

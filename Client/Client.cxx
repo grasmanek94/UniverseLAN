@@ -27,11 +27,16 @@ void Client::Handle(ENetPeer* peer, const std::shared_ptr<KeyChallenge>& data)
 void Client::Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAccepted>& data)
 {
 	std::cout << "Connection accepted by server" << std::endl;
+
+	UserHelloDataMessage udm{ galaxy::api::config->GetApiGalaxyID() };
+	udm.asuc = galaxy::api::config->GetASUC();
+
+	connection.SendAsync(udm);
 }
 
-void Client::Handle(ENetPeer* peer, const std::shared_ptr<ChatMessage>& message)
+void Client::Handle(ENetPeer* peer, const std::shared_ptr<UserHelloDataMessage>& data)
 {
-	std::wcout << "[" << message->GetSender() << "]: " << message->GetContents() << std::endl;
+
 }
 
 Client::Client(const std::string& address, uint16_t port)

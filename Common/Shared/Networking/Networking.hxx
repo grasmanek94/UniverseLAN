@@ -18,9 +18,7 @@ public:
 	virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data) = 0;
 	virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data) = 0;
 
-	virtual void Handle(ENetPeer* peer, const std::shared_ptr<ChatMessage>& data) = 0;
-	virtual void Handle(ENetPeer* peer, const std::shared_ptr<KeyChallenge>& data) = 0;
-	virtual void Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAccepted>& data) = 0;
+	SHARED_NETWORK_DECLARE_MESSAGE_HANDLERS();
 
 	template <typename T>
 	bool ProcessEventFor(const ENetEvent& event) {

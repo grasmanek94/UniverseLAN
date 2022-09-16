@@ -14,6 +14,12 @@ private:
 	bool VisibleWhileLocked;
 
 public:
+	template<class Archive>
+	void serialize(Archive& ar)
+	{
+		ar(Name, Description, Unlocked, UnlockTime, Visible, VisibleWhileLocked);
+	}
+
 	AchievementData();
 
 	void SetName(std::string name);

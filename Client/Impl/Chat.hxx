@@ -7,6 +7,8 @@
  * with other Galaxy Users.
  */
 
+#include "ListenerRegistrar.hxx"
+
 #include <IChat.h>
 #include <IListenerRegistrar.h>
 #include <GalaxyID.h>
@@ -25,8 +27,12 @@ namespace galaxy
 		 */
 		class ChatImpl : public IChat
 		{
+		private:
+			ListenerRegistrarImpl* listeners;
+
 		public:
 
+			ChatImpl(ListenerRegistrarImpl* listeners);
 			virtual ~ChatImpl();
 
 			/**

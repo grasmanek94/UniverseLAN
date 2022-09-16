@@ -28,10 +28,12 @@ public:
 
 		Challenge() : completed{ false }, data{ 0ULL }, for_client{}, expected_response{} {}
 
-		void Prepare(uint64_t key, uint64_t rnd) {
+		KeyChallenge& Prepare(uint64_t key, uint64_t rnd) {
 			data = rnd;
 			for_client = KeyChallenge{}.challenge(key, data);
 			expected_response = KeyChallenge{}.response(key, for_client.encrypted);
+
+			return for_client;
 		}
 
 		bool Validate(const KeyChallenge& response) {
@@ -109,18 +111,26 @@ private:
 #define REQUIRES_AUTHENTICATION(peer) {if(KickUnauthenticated(peer)) { return; }}
 
 	// Handlers:
-	virtual void Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAccepted>& data) override {}
+	virtual void Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAccepted>& data) override {
+		REQUIRES_AUTHENTICATION(peer);
+	}
 
 	void Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data) override
 	{
 		PeerData* pd = PeerData::construct(peer);
 		connected_peers.insert(peer);
 
-		std::cout << "Peer connected: " << peer->address.host << ":" << peer->address.port << std::endl;
+		std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") EventConnect" << std::endl;
 
-		pd->challenge.Prepare(authentication_key, random());
+		connection.Send(peer, pd->challenge.Prepare(authentication_key, random()));
+	}
 
-		connection.Send(peer, pd->challenge.for_client);
+	void Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data) override
+	{
+		PeerData::destruct(peer);
+		connected_peers.erase(peer);
+
+		std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") EventDisconnect" << std::endl;
 	}
 
 	void Handle(ENetPeer* peer, const std::shared_ptr<KeyChallenge>& data) override
@@ -128,36 +138,18 @@ private:
 		PeerData* pd = PeerData::get(peer);
 
 		if (!pd->challenge.Validate(*data)) {
+			std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") KeyChallenge FAIL" << std::endl;
 			connection.Disconnect(peer);
 		} else {
+			std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") KeyChallenge ACCEPT" << std::endl;
 			connection.Send(peer, ConnectionAccepted{});
 		}
 	}
 
-	void Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data) override
-	{
-		PeerData::destruct(peer);
-
-		//PlayerQuit player_quit;
-		//player_quit.SetSender(player->id);
-
-		//connection.Broadcast(player_quit, peer);
-
-		std::cout << "Peer disconnected: " << peer->address.host << ":" << peer->address.port << " with ID: " << reinterpret_cast<size_t>(peer->data) << std::endl;
-
-		connected_peers.erase(peer);
-		//id_generator.FreeId(player->id);
-	}
-
-	void Handle(ENetPeer* peer, const std::shared_ptr<ChatMessage>& message) override
-	{
+	virtual void Handle(ENetPeer* peer, const std::shared_ptr<UserHelloDataMessage>& data) override {
 		REQUIRES_AUTHENTICATION(peer);
 
 		PeerData* pd = PeerData::get(peer);
-
-		//message->SetSender(player->id);
-
-		//std::wcout << "[" << message->GetSender() << "]: " << message->GetContents() << std::endl;
 
 		//connection.Broadcast(message);
 	}
@@ -180,7 +172,7 @@ public:
 
 		connection.SetHost(config.GetBindAddress(), config.GetPort());
 
-		std::cout << "Binding addr: " << config.GetBindAddress() << ":" << config.GetPort() << std::endl;
+		std::cout << "Binding address: " << config.GetBindAddress() << ":" << config.GetPort() << std::endl;
 
 		max_connections = config.GetMaxConnections();
 

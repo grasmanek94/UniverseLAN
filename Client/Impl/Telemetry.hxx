@@ -6,6 +6,8 @@
  * Contains data structures and interfaces related to telemetry.
  */
 
+#include "ListenerRegistrar.hxx"
+
 #include <ITelemetry.h>
 #include <IListenerRegistrar.h>
 
@@ -23,8 +25,12 @@ namespace galaxy
 		 */
 		class TelemetryImpl : public ITelemetry
 		{
+		private:
+			ListenerRegistrarImpl* listeners;
+
 		public:
 
+			TelemetryImpl(ListenerRegistrarImpl* listeners);
 			virtual ~TelemetryImpl();
 
 			/**

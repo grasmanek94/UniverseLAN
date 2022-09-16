@@ -23,6 +23,9 @@ namespace galaxy
 			return std::fstream{};
 		}
 
+		StorageImpl::StorageImpl(ListenerRegistrarImpl* listeners) : listeners{ listeners }
+		{}
+
 		StorageImpl::~StorageImpl()
 		{
 		}

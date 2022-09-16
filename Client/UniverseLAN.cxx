@@ -42,18 +42,18 @@ namespace galaxy
 			init_options = std::make_unique<InitOptionsModern>(initOptions);	
 			listener_registrar_impl = std::make_unique<ListenerRegistrarImpl>();
 			client = std::make_unique<Client>(config->GetServerAddress(), config->GetPort());
-			user_impl = std::make_unique<UserImpl>();
-			friends_impl = std::make_unique<FriendsImpl>();
-			chat_impl = std::make_unique<ChatImpl>();
-			matchmaking_impl = std::make_unique<MatchmakingImpl>();
-			networking_impl = std::make_unique<NetworkingImpl>();
-			stats_impl = std::make_unique<StatsImpl>();
-			utils_impl = std::make_unique<UtilsImpl>();
+			user_impl = std::make_unique<UserImpl>(listener_registrar_impl.get());
+			friends_impl = std::make_unique<FriendsImpl>(listener_registrar_impl.get());
+			chat_impl = std::make_unique<ChatImpl>(listener_registrar_impl.get());
+			matchmaking_impl = std::make_unique<MatchmakingImpl>(listener_registrar_impl.get());
+			networking_impl = std::make_unique<NetworkingImpl>(listener_registrar_impl.get());
+			stats_impl = std::make_unique<StatsImpl>(listener_registrar_impl.get());
+			utils_impl = std::make_unique<UtilsImpl>(listener_registrar_impl.get());
 			apps_impl = std::make_unique<AppsImpl>();
-			storage_impl = std::make_unique<StorageImpl>();
+			storage_impl = std::make_unique<StorageImpl>(listener_registrar_impl.get());
 			custom_networking_impl = std::make_unique<CustomNetworkingImpl>(listener_registrar_impl.get());
 			logger_impl = std::make_unique<LoggerImpl>();
-			telemetry_impl = std::make_unique<TelemetryImpl>();	
+			telemetry_impl = std::make_unique<TelemetryImpl>(listener_registrar_impl.get());
 
 			if (config->GetEnableConsole()) {
 				EnableCustomConsole();

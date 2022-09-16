@@ -4,6 +4,9 @@ namespace galaxy
 {
 	namespace api
 	{
+		NetworkingImpl::NetworkingImpl(ListenerRegistrarImpl* listeners) : listeners{ listeners }
+		{}
+
 		NetworkingImpl::~NetworkingImpl()
 		{
 		}

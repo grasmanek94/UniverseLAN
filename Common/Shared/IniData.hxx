@@ -1,18 +1,14 @@
 #pragma once
 
-#include "AchievementData.hxx"
+#include "AchievementsAndStatsContainer.hxx"
+
+#include <GalaxyID.h>
+#include <SimpleIni.h>
 
 #include <chrono>
 #include <map>
 #include <string>
 #include <variant>
-
-#include <SimpleIni.h>
-
-union StatsDataContainer {
-	int32_t i;
-	float f;
-};
 
 class IniData
 {
@@ -99,12 +95,13 @@ private:
 	std::string CustomPersonaName;
 	std::string GalaxyIDType;
 	uint64_t CustomGalaxyID;
+	galaxy::api::GalaxyID ApiGalaxyID;
 	uint64_t GalaxyIDOffset;
 	std::string Avatar;
 	bool SignedIn;
 
 	const std::string AchievementsFile = "Achievements.ini";
-	std::map<std::string, AchievementData> Achievements;
+	AchievementsAndStatsContainer achievements_stats;
 
 	const std::string DLCFile = "DLC.ini";
 	const std::string DLCSection = "DLC";
@@ -115,11 +112,11 @@ private:
 	uint32_t PlayTime;
 
 	const std::string StatsSection = "Stats";
-	std::map<std::string, StatsDataContainer> Stats;
-	
+	// container see achievements_stats
+
 	const std::string UserDataFile = "UserData.ini";
 	const std::string UserDataSection = "UserData";
-	std::map<std::string, std::string> UserData;
+	// container see achievements_stats
 
 	std::string GetPath(const std::string& filename) const;
 
@@ -141,6 +138,7 @@ public:
 	const std::string& GetCustomPersonaName() const;
 	const std::string& GetGalaxyIDType() const;
 	uint64_t GetCustomGalaxyID() const;
+	galaxy::api::GalaxyID GetApiGalaxyID() const;
 	uint64_t GetGalaxyIDOffset() const;
 	const std::string& GetAvatar() const;
 	bool GetSignedIn() const;
@@ -151,12 +149,15 @@ public:
 	const StatsDataContainer& GetStat(const std::string& name);
 	void SetStat(const std::string& name, int32_t value);
 	void SetStat(const std::string& name, float value);
-	std::string GetUserData(const std::string& name);
+	const std::string& GetUserData(const std::string& name);
 	void SetUserData(const std::string& name, const std::string& data);
 
 	void SaveStatsAndAchievements();
 
 	bool IsSelfUserID(uint64_t userID) const;
+	bool IsSelfUserID(galaxy::api::GalaxyID userID) const;
 
 	void ResetStatsAndAchievements(); 
+
+	const AchievementsAndStatsContainer& GetASUC() const;
 };

@@ -43,7 +43,7 @@ namespace galaxy
 
 		public:
 
-			StatsImpl();
+			StatsImpl(ListenerRegistrarImpl* listeners);
 			virtual ~StatsImpl();
 
 			/**

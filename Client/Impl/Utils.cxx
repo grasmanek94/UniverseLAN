@@ -4,6 +4,9 @@ namespace galaxy
 {
 	namespace api
 	{
+		UtilsImpl::UtilsImpl(ListenerRegistrarImpl* listeners) : listeners{ listeners }
+		{}
+
 		UtilsImpl::~UtilsImpl()
 		{
 		}

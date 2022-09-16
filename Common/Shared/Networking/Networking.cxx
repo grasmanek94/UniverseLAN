@@ -1,10 +1,5 @@
 #include "Networking.hxx"
 
-#define ALL_CASES \
-	IMPLEMENT_CASE_FOR(KeyChallenge); \
-	IMPLEMENT_CASE_FOR(ChatMessage); \
-	IMPLEMENT_CASE_FOR(ConnectionAccepted);
-
 bool MessageReceiver::ProcessEvent(const ENetEvent& event)
 {
 	bool return_value = false;
@@ -19,20 +14,20 @@ bool MessageReceiver::ProcessEvent(const ENetEvent& event)
 		{
 			uint64_t unique_class_id = (*reinterpret_cast<uint64_t*>(packet->data));
 
-			#define IMPLEMENT_CASE_FOR(class_name) \
-					case class_name::UniqueClassId(): { return_value = ProcessEventFor<class_name>(event); } break;
+			#define SHARED_NETWORK_IMPLEMENT_CASE_FOR(class_name) \
+					case class_name::UniqueClassId(): { return_value = ProcessEventFor<class_name>(event); } break
 
 			#pragma warning( push )
 			#pragma warning( disable : 4307 )
 
 			switch (unique_class_id)
 			{
-				ALL_CASES
+				SHARED_NETWORK_IMPLEMENT_ALL_CASES();
 			}
 
 			#pragma warning( pop )
 
-			#undef IMPLEMENT_CASE_FOR
+			#undef SHARED_NETWORK_IMPLEMENT_CASE_FOR
 		}
 
 		/* Clean up the packet now that we're done using it. */
@@ -88,7 +83,7 @@ void GalaxyNetworkClient::RunNetworking(uint32_t timeout)
 				{
 					uint64_t unique_class_id = (*reinterpret_cast<uint64_t*>(packet->data));
 
-					#define IMPLEMENT_CASE_FOR(class_name) \
+					#define SHARED_NETWORK_IMPLEMENT_CASE_FOR(class_name) \
 						case class_name::UniqueClassId(): \
 						{ \
 							received_events_to_process.push(event); \
@@ -100,12 +95,15 @@ void GalaxyNetworkClient::RunNetworking(uint32_t timeout)
 
 					switch (unique_class_id)
 					{
-						ALL_CASES
+						SHARED_NETWORK_IMPLEMENT_ALL_CASES();
+
+					default:
+						break;
 					}
 
 					#pragma warning( pop )
 
-					#undef IMPLEMENT_CASE_FOR
+					#undef SHARED_NETWORK_IMPLEMENT_CASE_FOR
 				}
 			}
 		}

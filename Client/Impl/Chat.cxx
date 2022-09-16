@@ -4,6 +4,9 @@ namespace galaxy
 {
 	namespace api
 	{
+		ChatImpl::ChatImpl(ListenerRegistrarImpl* listeners) : listeners{ listeners }
+		{}
+
 		ChatImpl::~ChatImpl()
 		{
 		}

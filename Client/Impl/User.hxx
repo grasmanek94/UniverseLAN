@@ -5,6 +5,7 @@
  * @file
  * Contains data structures and interfaces related to user account.
  */
+#include "ListenerRegistrar.hxx"
 
 #include <IUser.h>
 #include <GalaxyID.h>
@@ -24,9 +25,15 @@ namespace galaxy
 		 */
 		class UserImpl : public IUser
 		{
+		private:
+			ListenerRegistrarImpl* listeners;
+
 		public:
 
+			UserImpl(ListenerRegistrarImpl* listeners);
 			virtual ~UserImpl();
+
+			void SignIn(IAuthListener* const listener);
 
 			/**
 			 * Checks if the user is signed in to Galaxy.

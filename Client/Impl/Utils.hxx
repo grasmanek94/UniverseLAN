@@ -6,6 +6,8 @@
  * Contains data structures and interfaces related to common activities.
  */
 
+#include "ListenerRegistrar.hxx"
+
 #include <IUtils.h>
 #include <IListenerRegistrar.h>
 
@@ -23,8 +25,12 @@ namespace galaxy
 		 */
 		class UtilsImpl : public IUtils
 		{
+		private:
+			ListenerRegistrarImpl* listeners;
+
 		public:
 
+			UtilsImpl(ListenerRegistrarImpl* listeners);
 			virtual ~UtilsImpl();
 
 			/**

@@ -6,6 +6,8 @@
  * Contains data structures and interfaces related to social activities.
  */
 
+#include "ListenerRegistrar.hxx"
+
 #include <IFriends.h>
 #include <GalaxyID.h>
 #include <IListenerRegistrar.h>
@@ -24,8 +26,12 @@ namespace galaxy
 		 */
 		class FriendsImpl : public IFriends
 		{
+		private:
+			ListenerRegistrarImpl* listeners;
+
 		public:
 
+			FriendsImpl(ListenerRegistrarImpl* listeners);
 			virtual ~FriendsImpl();
 
 			/**

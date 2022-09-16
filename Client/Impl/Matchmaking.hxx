@@ -6,6 +6,8 @@
  * Contains data structures and interfaces related to matchmaking.
  */
 
+#include "ListenerRegistrar.hxx"
+
 #include <IMatchmaking.h>
 #include <GalaxyID.h>
 #include <IListenerRegistrar.h>
@@ -24,8 +26,12 @@ namespace galaxy
 		 */
 		class MatchmakingImpl : public IMatchmaking
 		{
+		private:
+			ListenerRegistrarImpl* listeners;
+
 		public:
 
+			MatchmakingImpl(ListenerRegistrarImpl* listeners);
 			virtual ~MatchmakingImpl();
 
 			/**

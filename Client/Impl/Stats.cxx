@@ -6,15 +6,15 @@ namespace galaxy
 {
 	namespace api
 	{
-		StatsImpl::StatsImpl() :
-			listeners{ListenerRegistrarImpl::get_local()}, remote_stats{}
+		StatsImpl::StatsImpl(ListenerRegistrarImpl* listeners) :
+			listeners{ listeners }, remote_stats{}
 		{}
 
 		StatsImpl::~StatsImpl()
 		{}
 
 		void StatsImpl::RequestUserStatsAndAchievements(GalaxyID userID, IUserStatsAndAchievementsRetrieveListener* const listener) {
-			if (config->IsSelfUserID(userID.GetRealID())) {
+			if (config->IsSelfUserID(userID)) {
 				listeners->NotifyAll(listener, &IUserStatsAndAchievementsRetrieveListener::OnUserStatsAndAchievementsRetrieveSuccess, userID);
 			} else {
 				listeners->NotifyAll(listener, &IUserStatsAndAchievementsRetrieveListener::OnUserStatsAndAchievementsRetrieveFailure, userID, IUserStatsAndAchievementsRetrieveListener::FAILURE_REASON_UNDEFINED);
@@ -22,7 +22,7 @@ namespace galaxy
 		}
 
 		int32_t StatsImpl::GetStatInt(const char* name, GalaxyID userID) {
-			if (config->IsSelfUserID(userID.GetRealID())) {
+			if (config->IsSelfUserID(userID)) {
 				return config->GetStat(name).i;
 			} else {
 				return 0;
@@ -30,7 +30,7 @@ namespace galaxy
 		}
 
 		float StatsImpl::GetStatFloat(const char* name, GalaxyID userID) {
-			if (config->IsSelfUserID(userID.GetRealID())) {
+			if (config->IsSelfUserID(userID)) {
 				return config->GetStat(name).f;
 			} else {
 				return 0.0f;
@@ -50,7 +50,7 @@ namespace galaxy
 		}
 
 		void StatsImpl::GetAchievement(const char* name, bool& unlocked, uint32_t& unlockTime, GalaxyID userID) {
-			if (config->IsSelfUserID(userID.GetRealID())) {
+			if (config->IsSelfUserID(userID)) {
 				auto data = config->GetAchievementData(name);
 				unlocked = data->GetUnlocked();
 				unlockTime = data->GetUnlockTime();
@@ -201,7 +201,7 @@ namespace galaxy
 		}
 
 		void StatsImpl::RequestUserTimePlayed(GalaxyID userID, IUserTimePlayedRetrieveListener* const listener) {
-			if (config->IsSelfUserID(userID.GetRealID())) {
+			if (config->IsSelfUserID(userID)) {
 				listeners->NotifyAll(listener, &IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveSuccess, userID);
 			} else {
 				// TODO implement
@@ -210,7 +210,7 @@ namespace galaxy
 		}
 
 		uint32_t StatsImpl::GetUserTimePlayed(GalaxyID userID) {
-			if (config->IsSelfUserID(userID.GetRealID())) {
+			if (config->IsSelfUserID(userID)) {
 				return config->GetPlayTime();
 			} else {
 				// TODO: update

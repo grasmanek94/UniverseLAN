@@ -15,7 +15,7 @@ namespace galaxy
 	{
 		namespace gameserver
 		{
-			std::unique_ptr <ClientIniData>					config = nullptr;
+			std::unique_ptr<ClientIniData>					config = nullptr;
 			std::unique_ptr<InitOptionsModern>				init_options = nullptr;
 			std::unique_ptr<Client>							client = nullptr;
 
@@ -36,12 +36,12 @@ namespace galaxy
 			gameserver::init_options = std::make_unique<InitOptionsModern>(initOptions);
 			gameserver::listener_registrar_impl = std::make_unique<ListenerRegistrarImpl>();
 			gameserver::client = std::make_unique<Client>(gameserver::config->GetServerAddress(), gameserver::config->GetPort());
-			gameserver::user_impl = std::make_unique<UserImpl>();
-			gameserver::matchmaking_impl = std::make_unique<MatchmakingImpl>();
-			gameserver::networking_impl = std::make_unique<NetworkingImpl>();
-			gameserver::utils_impl = std::make_unique<UtilsImpl>();
+			gameserver::user_impl = std::make_unique<UserImpl>(gameserver::listener_registrar_impl.get());
+			gameserver::matchmaking_impl = std::make_unique<MatchmakingImpl>(gameserver::listener_registrar_impl.get());
+			gameserver::networking_impl = std::make_unique<NetworkingImpl>(gameserver::listener_registrar_impl.get());
+			gameserver::utils_impl = std::make_unique<UtilsImpl>(gameserver::listener_registrar_impl.get());
 			gameserver::logger_impl = std::make_unique<LoggerImpl>();
-			gameserver::telemetry_impl = std::make_unique<TelemetryImpl>();
+			gameserver::telemetry_impl = std::make_unique<TelemetryImpl>(gameserver::listener_registrar_impl.get());
 
 			if (gameserver::config->GetEnableConsole()) {
 				EnableCustomConsole();

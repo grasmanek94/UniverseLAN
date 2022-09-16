@@ -7,6 +7,8 @@
  * Galaxy Peers.
  */
 
+#include "ListenerRegistrar.hxx"
+
 #include <INetworking.h>
 #include <IListenerRegistrar.h>
 #include <GalaxyID.h>
@@ -25,8 +27,12 @@ namespace galaxy
 		 */
 		class NetworkingImpl : public INetworking
 		{
+		private:
+			ListenerRegistrarImpl* listeners;
+
 		public:
 
+			NetworkingImpl(ListenerRegistrarImpl* listeners);
 			virtual ~NetworkingImpl();
 
 			/**

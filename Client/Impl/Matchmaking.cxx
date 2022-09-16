@@ -4,6 +4,8 @@ namespace galaxy
 {
 	namespace api
 	{
+		MatchmakingImpl::MatchmakingImpl(ListenerRegistrarImpl* listeners) : listeners{ listeners }
+		{}
 
 		MatchmakingImpl::~MatchmakingImpl()
 		{

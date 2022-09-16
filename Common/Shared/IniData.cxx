@@ -249,7 +249,7 @@ ClientIniData::ClientIniData()
 
 				data.ResetDirty();
 
-				Achievements.emplace(data.GetName(), data);
+				achievements_stats.Achievements.emplace(data.GetName(), data);
 			}
 		}
 	}
@@ -288,7 +288,7 @@ ClientIniData::ClientIniData()
 		for (const auto& entry : keys) {
 			if ((entry.pItem != nullptr) && (strlen(entry.pItem) > 0)) {
 				StatsDataContainer c{ .i = ini.GetLongValue(StatsSection.c_str(), entry.pItem, 0) };
-				Stats.emplace(std::string(entry.pItem), c);
+				achievements_stats.Stats.emplace(std::string(entry.pItem), c);
 			}
 		}
 	}
@@ -306,7 +306,7 @@ ClientIniData::ClientIniData()
 
 		for (const auto& entry : keys) {
 			if ((entry.pItem != nullptr) && (strlen(entry.pItem) > 0)) {
-				UserData.emplace(std::string(entry.pItem), std::string(ini.GetValue(UserDataSection.c_str(), entry.pItem, "")));
+				achievements_stats.UserData.emplace(std::string(entry.pItem), std::string(ini.GetValue(UserDataSection.c_str(), entry.pItem, "")));
 			}
 		}
 	}
@@ -386,6 +386,11 @@ uint64_t ClientIniData::GetCustomGalaxyID() const
 	return CustomGalaxyID;
 }
 
+galaxy::api::GalaxyID ClientIniData::GetApiGalaxyID() const
+{
+	return galaxy::api::GalaxyID::FromRealID(galaxy::api::GalaxyID::ID_TYPE_USER, CustomGalaxyID);
+}
+
 uint64_t ClientIniData::GetGalaxyIDOffset() const
 {
 	return GalaxyIDOffset;
@@ -411,9 +416,9 @@ uint32_t ClientIniData::GetPlayTime() const
 
 AchievementData* ClientIniData::GetAchievementData(const std::string& name)
 {
-	auto it = Achievements.find(name);
-	if (it == Achievements.end()) {
-		AchievementData* data = &Achievements.emplace(name, AchievementData()).first->second;
+	auto it = achievements_stats.Achievements.find(name);
+	if (it == achievements_stats.Achievements.end()) {
+		AchievementData* data = &achievements_stats.Achievements.emplace(name, AchievementData()).first->second;
 		data->SetName(name);
 		return data;
 	}
@@ -431,46 +436,46 @@ bool ClientIniData::IsDLCInstalled(const std::string& name)
 
 const StatsDataContainer& ClientIniData::GetStat(const std::string& name)
 {
-	auto it = Stats.find(name);
-	if (it == Stats.end()) {
-		return Stats.emplace(name, 0).first->second;
+	auto it = achievements_stats.Stats.find(name);
+	if (it == achievements_stats.Stats.end()) {
+		return achievements_stats.Stats.emplace(name, 0).first->second;
 	}
 	return it->second;
 }
 
 void ClientIniData::SetStat(const std::string& name, int32_t value) {
-	auto it = Stats.find(name);
-	if (it == Stats.end()) {
+	auto it = achievements_stats.Stats.find(name);
+	if (it == achievements_stats.Stats.end()) {
 		StatsDataContainer c{ .i = value };
-		it = Stats.emplace(name, c).first;
+		it = achievements_stats.Stats.emplace(name, c).first;
 	}
 
 	it->second.i = value;
 }
 
 void ClientIniData::SetStat(const std::string& name, float value) {
-	auto it = Stats.find(name);
-	if (it == Stats.end()) {
+	auto it = achievements_stats.Stats.find(name);
+	if (it == achievements_stats.Stats.end()) {
 		StatsDataContainer c{ .f = value };
-		it = Stats.emplace(name, c).first;
+		it = achievements_stats.Stats.emplace(name, c).first;
 	}
 
 	it->second.f = value;
 }
 
-std::string ClientIniData::GetUserData(const std::string& name)
+const std::string& ClientIniData::GetUserData(const std::string& name)
 {
-	auto it = UserData.find(name);
-	if (it == UserData.end()) {
-		return UserData.emplace(name, "").first->second;
+	auto it = achievements_stats.UserData.find(name);
+	if (it == achievements_stats.UserData.end()) {
+		return achievements_stats.UserData.emplace(name, "").first->second;
 	}
 	return it->second;
 }
 
 void ClientIniData::SetUserData(const std::string& name, const std::string& data) {
-	auto it = UserData.find(name);
-	if (it == UserData.end()) {
-		UserData.emplace(name, data);
+	auto it = achievements_stats.UserData.find(name);
+	if (it == achievements_stats.UserData.end()) {
+		achievements_stats.UserData.emplace(name, data);
 		return;
 	}
 
@@ -487,7 +492,7 @@ void ClientIniData::SaveStatsAndAchievements()
 
 		IniData::LoadIni(ini, GetPath(AchievementsFile));
 
-		for (auto& achievement : Achievements) {
+		for (auto& achievement : achievements_stats.Achievements) {
 			auto& data = achievement.second;
 			if (data.IsDirty()) {
 				data.ResetDirty();
@@ -529,7 +534,7 @@ void ClientIniData::SaveStatsAndAchievements()
 
 		ini.SetLongValue(MetadataSection.c_str(), "PlayTime", GetPlayTime());
 
-		for (const auto& stat : Stats) {
+		for (const auto& stat : achievements_stats.Stats) {
 			ini.SetLongValue(StatsSection.c_str(), stat.first.c_str(), stat.second.i);
 		}
 
@@ -544,7 +549,7 @@ void ClientIniData::SaveStatsAndAchievements()
 
 		IniData::LoadIni(ini, GetPath(UserDataFile));
 
-		for (const auto& user_data : UserData) {
+		for (const auto& user_data : achievements_stats.UserData) {
 			ini.SetValue(UserDataSection.c_str(), user_data.first.c_str(), user_data.second.c_str());
 		}
 
@@ -557,16 +562,26 @@ bool ClientIniData::IsSelfUserID(uint64_t userID) const
 	return (userID == GetCustomGalaxyID()) || (userID == 0);
 }
 
+bool ClientIniData::IsSelfUserID(galaxy::api::GalaxyID userID) const
+{
+	return (userID == GetApiGalaxyID()) || (userID == 0);
+}
+
 void ClientIniData::ResetStatsAndAchievements()
 {
-	for (auto& entry : Achievements) {
+	for (auto& entry : achievements_stats.Achievements) {
 		entry.second.SetUnlocked(false);
 		entry.second.SetUnlockTime(0);
 	}
 
-	for (auto& entry : Stats) {
+	for (auto& entry : achievements_stats.Stats) {
 		entry.second.i = 0;
 	}
 
 	SaveStatsAndAchievements();
+}
+
+const AchievementsAndStatsContainer& ClientIniData::GetASUC() const 
+{
+	return achievements_stats;
 }

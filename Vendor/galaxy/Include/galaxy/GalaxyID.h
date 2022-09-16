@@ -29,6 +29,11 @@ namespace galaxy
 		class GalaxyID
 		{
 		public:
+			template<class Archive>
+			void serialize(Archive& ar)
+			{
+				ar(value);
+			}
 
 			/**
 			 * The type of the ID.
