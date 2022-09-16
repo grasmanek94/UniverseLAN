@@ -3,6 +3,45 @@
 
 #include <ConstHash.hxx>
 
+/**
+* Challenge works like this:
+* 
+* - const_hash64(string) = FNV-1a
+* - const_hash64_data(bytes_ptr, size) = FNV-1a
+* - Both apps have to use uint64_t KEY = const_hash64(UniverseLAN.ini -> Authentication -> Key)
+* 
+* == SERVER ==
+* - A client connection is detected
+* - Server constructs a challenge consisting of a RANDOM_NUMBER
+* - The data is sent to the client CHALLENGE = (KEY XOR RANDOM_NUMBER)
+* 
+* == CLIENT ==
+* - Client must decode DECODED_RANDOM_NUMBER = (KEY XOR CHALLENGE)
+* - Client then sends to server the CHALLENGE_RESPONSE = const_hash64_data(DECODED_RANDOM_NUMBER)
+* 
+* == SERVER ==
+* - Server checks if CHALLENGE_RESPONSE equals to the stored const_hash64_data(RANDOM_NUMBER)
+* - If yes then server sends ConnectionAccepted packet
+* 
+* == CLIENT ==
+* - Client receives a disconnect if the challenge failed
+* - Client receives a ConnectionAccepted packet if the challenge was solved
+* 
+* 
+*                           CLIENT                         SERVER
+*                                     -----------[connect]--------->
+*                                                                     CHALLENGE = KEY ^ RAND_NUMBER
+*                                                                     EXPECTED_RESPONSE = FNV1A_HASH(RAND_NUMBER)
+*                                     <----------[CHALLENGE]--------
+* RAND_NUMBER = KEY ^ CHALLENGE
+* RESPONSE = FNV1A_HASH(RAND_NUMBER)
+*                                     -----------[RESPONSE]-------->
+*                                                                     IF(RESPONSE == EXPECTED_RESPONSE)
+* 
+* OK                                  <-----[ConnectionAccepted]----            (TRUE)
+* /
+* FAIL                                X----------[Disconnect]-------            (FALSE)
+*/
 class KeyChallenge
 {
 public:
