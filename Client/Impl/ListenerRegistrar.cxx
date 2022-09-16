@@ -8,17 +8,8 @@ namespace galaxy
 {
 	namespace api
 	{
-		ListenerRegistrarImpl* ListenerRegistrarImpl::get_local()
-		{
-			return dynamic_cast<ListenerRegistrarImpl*>(ListenerRegistrar());
-		}
-
-		ListenerRegistrarImpl* ListenerRegistrarImpl::get_game_server()
-		{
-			return dynamic_cast<ListenerRegistrarImpl*>(GameServerListenerRegistrar());
-		}
-
-		ListenerRegistrarImpl::ListenerRegistrarImpl() :
+		ListenerRegistrarImpl::ListenerRegistrarImpl(InterfaceInstances* intf) :
+			intf{ intf },
 			listeners{}
 		{ }
 

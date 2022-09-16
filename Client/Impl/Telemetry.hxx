@@ -26,11 +26,12 @@ namespace galaxy
 		class TelemetryImpl : public ITelemetry
 		{
 		private:
+			InterfaceInstances* intf;
 			ListenerRegistrarImpl* listeners;
 
 		public:
 
-			TelemetryImpl(ListenerRegistrarImpl* listeners);
+			TelemetryImpl(InterfaceInstances* intf);
 			virtual ~TelemetryImpl();
 
 			/**

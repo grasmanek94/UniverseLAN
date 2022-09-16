@@ -14,8 +14,8 @@ namespace galaxy
 {
 	namespace api
 	{
-		LoggerImpl::LoggerImpl() :
-			mtx{}, logfile{}
+		LoggerImpl::LoggerImpl(InterfaceInstances* intf) :
+			intf{ intf }, mtx{}, logfile{}
 		{
 			static std::atomic_int counter = 0;
 
@@ -30,7 +30,7 @@ namespace galaxy
 
 			int count = counter.fetch_add(1);
 
-			path << (std::filesystem::path(config->GetGameDataPath()) / "Logging" / "L")
+			path << (std::filesystem::path(intf->config->GetGameDataPath()) / "Logging" / "L")
 				<< std::put_time(&tm, "%Y-%m-%d_%H-%M-%S")
 				<< "-" << std::this_thread::get_id() << "-" << count << ".log";
 

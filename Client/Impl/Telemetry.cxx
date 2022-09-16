@@ -4,7 +4,8 @@ namespace galaxy
 {
 	namespace api
 	{
-		TelemetryImpl::TelemetryImpl(ListenerRegistrarImpl* listeners) : listeners{listeners}
+		TelemetryImpl::TelemetryImpl(InterfaceInstances* intf) :
+			intf{ intf }, listeners{ intf->listener_registrar_impl.get() }
 		{}
 
 		TelemetryImpl::~TelemetryImpl()

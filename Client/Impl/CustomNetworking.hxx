@@ -9,6 +9,8 @@
 
 #include "ListenerRegistrar.hxx"
 
+#include "InterfaceInstances.hxx"
+
 #include <ICustomNetworking.h>
 #include <IListenerRegistrar.h>
 
@@ -21,6 +23,7 @@
 #include <mutex>
 #include <set>
 #include <thread>
+#include <unordered_map>
 
 namespace galaxy
 {
@@ -69,7 +72,7 @@ namespace galaxy
 		private:
 			ListenerRegistrarImpl* listeners;
 			mutable mutex_t mtx;
-			std::map<ConnectionID, std::shared_ptr<Channel>> channels;
+			std::unordered_map<ConnectionID, std::shared_ptr<Channel>> channels;
 
 			void WebSocketOnOpen(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl);
 			void WebSocketOnMessage(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl, custom_networking::message_ptr msg);
@@ -80,7 +83,7 @@ namespace galaxy
 			void ChannelThread(std::shared_ptr<Channel> channel);
 		public:
 
-			CustomNetworkingImpl(ListenerRegistrarImpl* listeners);
+			CustomNetworkingImpl(InterfaceInstances* intf);
 			virtual ~CustomNetworkingImpl() override;
 
 			/**

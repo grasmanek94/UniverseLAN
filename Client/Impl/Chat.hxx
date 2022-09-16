@@ -13,6 +13,8 @@
 #include <IListenerRegistrar.h>
 #include <GalaxyID.h>
 
+#include "InterfaceInstances.hxx"
+
 namespace galaxy
 {
 	namespace api
@@ -28,11 +30,12 @@ namespace galaxy
 		class ChatImpl : public IChat
 		{
 		private:
+			InterfaceInstances* intf;
 			ListenerRegistrarImpl* listeners;
 
 		public:
 
-			ChatImpl(ListenerRegistrarImpl* listeners);
+			ChatImpl(InterfaceInstances* intf);
 			virtual ~ChatImpl();
 
 			/**

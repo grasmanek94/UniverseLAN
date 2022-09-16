@@ -6,9 +6,14 @@
  * Includes all other files that are needed to work with the Galaxy library.
  */
 
+#include "InterfaceInstances.hxx"
+
 #include "GalaxyApi.h"
 
+#include <IniData.hxx>
+
 #include "Client.hxx"
+
 #include "Impl/ListenerRegistrar.hxx"
 #include "Impl/Apps.hxx"
 #include "Impl/Chat.hxx"
@@ -27,17 +32,11 @@
 
 #include "GalaxyGameServerApi.hxx"
 
-#include <IniData.hxx>
-
-#include <memory>
-
 namespace galaxy
 {
 	namespace api
 	{
-		extern std::unique_ptr<ClientIniData>		config;
-		extern std::unique_ptr<InitOptionsModern>	init_options;
-		extern std::unique_ptr<Client>				client;
+		extern InterfaceInstances intf_inst;
 	}
 }
 

@@ -31,19 +31,12 @@ namespace galaxy
 		class StatsImpl : public IStats
 		{
 		private:
+			InterfaceInstances* intf;
 			ListenerRegistrarImpl* listeners;
-
-			struct RemoteStats {
-
-
-				std::map<std::string, AchievementData> achievements;
-				std::map<std::string, StatsDataContainer> stats;
-			};
-			std::map<uint64_t, RemoteStats> remote_stats;
 
 		public:
 
-			StatsImpl(ListenerRegistrarImpl* listeners);
+			StatsImpl(InterfaceInstances* intf);
 			virtual ~StatsImpl();
 
 			/**

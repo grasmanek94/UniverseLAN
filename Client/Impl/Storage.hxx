@@ -29,12 +29,13 @@ namespace galaxy
 		class StorageImpl : public IStorage
 		{
 		private:
+			InterfaceInstances* intf;
 			ListenerRegistrarImpl* listeners;
 
 			std::fstream open(const char* filename, std::ios::openmode mode);
 		public:
 
-			StorageImpl(ListenerRegistrarImpl* listeners);
+			StorageImpl(InterfaceInstances* intf);
 			virtual ~StorageImpl();
 
 			/**

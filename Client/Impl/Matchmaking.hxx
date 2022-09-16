@@ -27,11 +27,12 @@ namespace galaxy
 		class MatchmakingImpl : public IMatchmaking
 		{
 		private:
+			InterfaceInstances* intf;
 			ListenerRegistrarImpl* listeners;
 
 		public:
 
-			MatchmakingImpl(ListenerRegistrarImpl* listeners);
+			MatchmakingImpl(InterfaceInstances* intf);
 			virtual ~MatchmakingImpl();
 
 			/**

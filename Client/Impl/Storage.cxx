@@ -13,7 +13,7 @@ namespace galaxy
 	namespace api
 	{
 		std::fstream StorageImpl::open(const char* filename, std::ios::openmode mode) {
-			std::filesystem::path basepath(config->GetGameDataPath());
+			std::filesystem::path basepath(intf->config->GetGameDataPath());
 			basepath /= "Local";
 
 			if (inside_basepath(basepath, filename)) {
@@ -23,7 +23,8 @@ namespace galaxy
 			return std::fstream{};
 		}
 
-		StorageImpl::StorageImpl(ListenerRegistrarImpl* listeners) : listeners{ listeners }
+		StorageImpl::StorageImpl(InterfaceInstances* intf) :
+			intf{ intf }, listeners{ intf->listener_registrar_impl.get() }
 		{}
 
 		StorageImpl::~StorageImpl()
@@ -56,7 +57,7 @@ namespace galaxy
 			std::fstream file{ open(fileName, std::ios::in | std::ios::binary) };
 			if (file) {
 				file.close();
-				std::filesystem::remove(std::filesystem::path(config->GetGameDataPath()) / "Local" / fileName);
+				std::filesystem::remove(std::filesystem::path(intf->config->GetGameDataPath()) / "Local" / fileName);
 			}
 			else {
 				std::cerr << __FUNCTION__ << " fail: " << fileName << "\n";
@@ -64,15 +65,15 @@ namespace galaxy
 		}
 
 		bool StorageImpl::FileExists(const char* fileName) {
-			return std::filesystem::exists(std::filesystem::path(config->GetGameDataPath()) / "Local" / fileName);
+			return std::filesystem::exists(std::filesystem::path(intf->config->GetGameDataPath()) / "Local" / fileName);
 		}
 
 		uint32_t StorageImpl::GetFileSize(const char* fileName) {
-			return (uint32_t)std::filesystem::file_size(std::filesystem::path(config->GetGameDataPath()) / "Local" / fileName);
+			return (uint32_t)std::filesystem::file_size(std::filesystem::path(intf->config->GetGameDataPath()) / "Local" / fileName);
 		}
 
 		uint32_t StorageImpl::GetFileTimestamp(const char* fileName) {
-			return (uint32_t)(std::filesystem::last_write_time(std::filesystem::path(config->GetGameDataPath()) / "Local" / fileName).time_since_epoch() / std::chrono::seconds(1));
+			return (uint32_t)(std::filesystem::last_write_time(std::filesystem::path(intf->config->GetGameDataPath()) / "Local" / fileName).time_since_epoch() / std::chrono::seconds(1));
 		}
 
 		static std::size_t number_of_files_in_directory(std::filesystem::path path) {
@@ -81,7 +82,7 @@ namespace galaxy
 		}
 
 		uint32_t StorageImpl::GetFileCount() {
-			return (uint32_t)number_of_files_in_directory(std::filesystem::path(config->GetGameDataPath()) / "Local");
+			return (uint32_t)number_of_files_in_directory(std::filesystem::path(intf->config->GetGameDataPath()) / "Local");
 		}
 
 		const char* StorageImpl::GetFileNameByIndex(uint32_t index) {
@@ -95,8 +96,8 @@ namespace galaxy
 		void StorageImpl::GetFileNameCopyByIndex(uint32_t index, char* buffer, uint32_t bufferLength) {
 			using std::filesystem::directory_iterator;
 
-			directory_iterator it = directory_iterator(std::filesystem::path(config->GetGameDataPath()) / "Local");
-			while(index--)
+			directory_iterator it = directory_iterator(std::filesystem::path(intf->config->GetGameDataPath()) / "Local");
+			while (index--)
 			{
 				it++;
 			}

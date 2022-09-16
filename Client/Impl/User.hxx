@@ -7,9 +7,15 @@
  */
 #include "ListenerRegistrar.hxx"
 
+#include <Networking/Messages/RequestSpecificUserDataMessage.hxx>
+
 #include <IUser.h>
 #include <GalaxyID.h>
 #include <IListenerRegistrar.h>
+
+#include <functional>
+#include <memory>
+#include <unordered_map>
 
 namespace galaxy
 {
@@ -26,11 +32,28 @@ namespace galaxy
 		class UserImpl : public IUser
 		{
 		private:
+			InterfaceInstances* intf;
 			ListenerRegistrarImpl* listeners;
+
+			template<typename T>
+			struct AuthListenersHelper {
+				using mutex_t = std::recursive_mutex;
+				using lock_t = std::scoped_lock<mutex_t>;
+
+				mutex_t mtx;
+				std::unordered_map<uint64_t, T*> map;
+
+				void run_locked(std::function<void()> func) {
+					lock_t lock(mtx);
+					func();
+				}
+			};
+			
+			AuthListenersHelper<ISpecificUserDataListener> specific_user_data_requests;
 
 		public:
 
-			UserImpl(ListenerRegistrarImpl* listeners);
+			UserImpl(InterfaceInstances* intf);
 			virtual ~UserImpl();
 
 			void SignIn(IAuthListener* const listener);
@@ -459,6 +482,9 @@ namespace galaxy
 			 * @return true if the report was accepted, false otherwise.
 			 */
 			virtual bool ReportInvalidAccessToken(const char* accessToken, const char* info = NULL) override;
+
+			void SpecificUserDataRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
+
 		};
 
 		/** @} */

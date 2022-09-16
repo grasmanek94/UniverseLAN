@@ -2,8 +2,8 @@
 
 #include "AchievementData.hxx"
 
-#include <map>
 #include <string>
+#include <unordered_map>
 
 union StatsDataContainer {
 	int32_t i;
@@ -23,9 +23,9 @@ struct AchievementsAndStatsContainer {
 		ar(Achievements, Stats);
 	}
 
-	std::map<std::string, AchievementData> Achievements;
-	std::map<std::string, StatsDataContainer> Stats;
-	std::map<std::string, std::string> UserData;
+	std::unordered_map<std::string, AchievementData> Achievements;
+	std::unordered_map<std::string, StatsDataContainer> Stats;
+	std::unordered_map<std::string, std::string> UserData;
 
 	AchievementsAndStatsContainer() : Achievements{}, Stats{}, UserData{}
 	{}

@@ -6,15 +6,15 @@ namespace galaxy
 {
 	namespace api
 	{
-		StatsImpl::StatsImpl(ListenerRegistrarImpl* listeners) :
-			listeners{ listeners }, remote_stats{}
+		StatsImpl::StatsImpl(InterfaceInstances* intf) :
+			intf{ intf }, listeners{ intf->listener_registrar_impl.get() }
 		{}
 
 		StatsImpl::~StatsImpl()
 		{}
 
 		void StatsImpl::RequestUserStatsAndAchievements(GalaxyID userID, IUserStatsAndAchievementsRetrieveListener* const listener) {
-			if (config->IsSelfUserID(userID)) {
+			if (intf->config->IsSelfUserID(userID)) {
 				listeners->NotifyAll(listener, &IUserStatsAndAchievementsRetrieveListener::OnUserStatsAndAchievementsRetrieveSuccess, userID);
 			} else {
 				listeners->NotifyAll(listener, &IUserStatsAndAchievementsRetrieveListener::OnUserStatsAndAchievementsRetrieveFailure, userID, IUserStatsAndAchievementsRetrieveListener::FAILURE_REASON_UNDEFINED);
@@ -22,36 +22,36 @@ namespace galaxy
 		}
 
 		int32_t StatsImpl::GetStatInt(const char* name, GalaxyID userID) {
-			if (config->IsSelfUserID(userID)) {
-				return config->GetStat(name).i;
+			if (intf->config->IsSelfUserID(userID)) {
+				return intf->config->GetStat(name).i;
 			} else {
 				return 0;
 			}
 		}
 
 		float StatsImpl::GetStatFloat(const char* name, GalaxyID userID) {
-			if (config->IsSelfUserID(userID)) {
-				return config->GetStat(name).f;
+			if (intf->config->IsSelfUserID(userID)) {
+				return intf->config->GetStat(name).f;
 			} else {
 				return 0.0f;
 			}
 		}
 
 		void StatsImpl::SetStatInt(const char* name, int32_t value) {
-			config->SetStat(name, value);
+			intf->config->SetStat(name, value);
 		}
 
 		void StatsImpl::SetStatFloat(const char* name, float value) {
-			config->SetStat(name, value);
+			intf->config->SetStat(name, value);
 		}
 
 		void StatsImpl::UpdateAvgRateStat(const char* name, float countThisSession, double sessionLength) {
-			config->SetStat(name, (float)(config->GetStat(name).f + (countThisSession / sessionLength)));
+			intf->config->SetStat(name, (float)(intf->config->GetStat(name).f + (countThisSession / sessionLength)));
 		}
 
 		void StatsImpl::GetAchievement(const char* name, bool& unlocked, uint32_t& unlockTime, GalaxyID userID) {
-			if (config->IsSelfUserID(userID)) {
-				auto data = config->GetAchievementData(name);
+			if (intf->config->IsSelfUserID(userID)) {
+				auto data = intf->config->GetAchievementData(name);
 				unlocked = data->GetUnlocked();
 				unlockTime = data->GetUnlockTime();
 			} else {
@@ -61,25 +61,25 @@ namespace galaxy
 		}
 
 		void StatsImpl::SetAchievement(const char* name) {
-			auto data = config->GetAchievementData(name);
+			auto data = intf->config->GetAchievementData(name);
 			data->SetUnlocked(true);
 			data->SetUnlockTimeNow();
 		}
 
 		void StatsImpl::ClearAchievement(const char* name) {
-			auto data = config->GetAchievementData(name);
+			auto data = intf->config->GetAchievementData(name);
 			data->SetUnlocked(false);
 			data->SetUnlockTime(0);
 		}
 
 		void StatsImpl::StoreStatsAndAchievements(IStatsAndAchievementsStoreListener* const listener) {
-			config->SaveStatsAndAchievements();
+			intf->config->SaveStatsAndAchievements();
 
 			listeners->NotifyAll(listener, &IStatsAndAchievementsStoreListener::OnUserStatsAndAchievementsStoreSuccess);
 		}
 
 		void StatsImpl::ResetStatsAndAchievements(IStatsAndAchievementsStoreListener* const listener) {
-			config->ResetStatsAndAchievements();
+			intf->config->ResetStatsAndAchievements();
 
 			listeners->NotifyAll(listener, &IStatsAndAchievementsStoreListener::OnUserStatsAndAchievementsStoreSuccess);
 		}
@@ -93,20 +93,20 @@ namespace galaxy
 		}
 
 		const char* StatsImpl::GetAchievementDescription(const char* name) {
-			return config->GetAchievementData(name)->GetDescription().c_str();
+			return intf->config->GetAchievementData(name)->GetDescription().c_str();
 		}
 
 		void StatsImpl::GetAchievementDescriptionCopy(const char* name, char* buffer, uint32_t bufferLength) {
-			const std::string& desc = config->GetAchievementData(name)->GetDescription();
+			const std::string& desc = intf->config->GetAchievementData(name)->GetDescription();
 			std::copy_n(desc.c_str(), std::min(bufferLength, (uint32_t)desc.size()), buffer);
 		}
 
 		bool StatsImpl::IsAchievementVisible(const char* name) {
-			return config->GetAchievementData(name)->GetVisible();
+			return intf->config->GetAchievementData(name)->GetVisible();
 		}
 
 		bool StatsImpl::IsAchievementVisibleWhileLocked(const char* name) {
-			return config->GetAchievementData(name)->GetVisibleWhileLocked();
+			return intf->config->GetAchievementData(name)->GetVisibleWhileLocked();
 		}
 
 		void StatsImpl::RequestLeaderboards(ILeaderboardsRetrieveListener* const listener) {
@@ -201,7 +201,7 @@ namespace galaxy
 		}
 
 		void StatsImpl::RequestUserTimePlayed(GalaxyID userID, IUserTimePlayedRetrieveListener* const listener) {
-			if (config->IsSelfUserID(userID)) {
+			if (intf->config->IsSelfUserID(userID)) {
 				listeners->NotifyAll(listener, &IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveSuccess, userID);
 			} else {
 				// TODO implement
@@ -210,11 +210,11 @@ namespace galaxy
 		}
 
 		uint32_t StatsImpl::GetUserTimePlayed(GalaxyID userID) {
-			if (config->IsSelfUserID(userID)) {
-				return config->GetPlayTime();
+			if (intf->config->IsSelfUserID(userID)) {
+				return intf->config->GetPlayTime();
 			} else {
 				// TODO: update
-				return config->GetPlayTime();
+				return intf->config->GetPlayTime();
 			}
 		}
 	}

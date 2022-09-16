@@ -1,5 +1,7 @@
 #pragma once
 
+#include "GalaxyUserData.hxx"
+
 #include <IdCounter.hxx>
 #include <IniData.hxx>
 #include <Networking/Networking.hxx>
@@ -17,8 +19,13 @@ private:
 	IdCounter id_generator;
 	size_t max_connections;
 	std::set<ENetPeer*> connected_peers;
+	std::set<ENetPeer*> unauthenticated_peers;
 	uint64_t authentication_key;
 	std::mt19937_64 random;
+	size_t ticks;
+	size_t minimum_tick_wait_time;
+
+	GalaxyUserData::map_t user_data;
 
 	bool KickUnauthenticated(ENetPeer* peer);
 

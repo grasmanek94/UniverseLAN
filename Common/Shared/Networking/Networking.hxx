@@ -72,32 +72,6 @@ public:
 };
 
 template<typename T>
-ENetPacket* ConvertToENetPacket(const std::shared_ptr<T>& object, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE)
-{
-	/*
-	Well reduced it to double-buffer, I think we're not going to get any faster with this
-	*/
-	std::stringstream ss(std::ios::in | std::ios::out | std::ios::binary);
-	uint64_t unique_id = object->UniqueClassId();
-	ss.write(reinterpret_cast<char*>(&unique_id), sizeof(uint64_t));
-	cereal::BinaryOutputArchive oarchive(ss);
-	oarchive(*object);
-
-	size_t x = ss.tellp();
-
-	ENetPacket* packet = enet_packet_create(nullptr, x, flags);
-
-	if (!packet)
-	{
-		return nullptr;
-	}
-
-	ss.rdbuf()->sgetn(reinterpret_cast<char*>(packet->data), x);
-
-	return packet;
-}
-
-template<typename T>
 ENetPacket* ConvertToENetPacket(const T& object, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE)
 {
 	/*
@@ -123,14 +97,21 @@ ENetPacket* ConvertToENetPacket(const T& object, _ENetPacketFlag flags = ENET_PA
 	return packet;
 }
 
+template<typename T>
+ENetPacket* ConvertToENetPacket(const std::shared_ptr<T>& object, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE)
+{
+	return ConvertToENetPacket(*object, flags);
+}
+
 class GalaxyNetworkClient : public NetworkClient
 {
 private:
-	Concurrency::concurrent_queue<ENetPacket*> delayed_packets_to_send;
-	Concurrency::concurrent_queue<ENetEvent> received_events_to_process;
+	mutable Concurrency::concurrent_queue<ENetPacket*> delayed_packets_to_send;
+	mutable Concurrency::concurrent_queue<ENetEvent> received_events_to_process;
+
 public:
 	template<typename T>
-	bool SendAsync(const std::shared_ptr<T>& object, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE)
+	bool SendAsync(const std::shared_ptr<T>& object, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE) const
 	{
 		ENetPacket* packet = ConvertToENetPacket(*object, flags);
 
@@ -144,7 +125,7 @@ public:
 	}
 
 	template<typename T>
-	bool SendAsync(const T& object, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE)
+	bool SendAsync(const T& object, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE) const
 	{
 		ENetPacket* packet = ConvertToENetPacket(object, flags);
 
@@ -159,11 +140,13 @@ public:
 
 	void RunNetworking(uint32_t timeout);
 	void ProcessEvents(MessageReceiver* receiver);
+
 private:
 	std::atomic<bool> is_active;
+
 public:
 	void SetActive(bool active);
-	bool IsActive();
+	bool IsActive() const;
 
 	GalaxyNetworkClient();
 

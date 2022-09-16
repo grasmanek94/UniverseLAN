@@ -6,8 +6,8 @@
 #include <SimpleIni.h>
 
 #include <chrono>
-#include <map>
 #include <string>
+#include <unordered_map>
 #include <variant>
 
 class IniData
@@ -105,7 +105,7 @@ private:
 
 	const std::string DLCFile = "DLC.ini";
 	const std::string DLCSection = "DLC";
-	std::map<std::string, bool> DLCs;
+	std::unordered_map<std::string, bool> DLCs;
 
 	const std::string StatsFile = "Stats.ini";
 	const std::string MetadataSection = "Metadata";

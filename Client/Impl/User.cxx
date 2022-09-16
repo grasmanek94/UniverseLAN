@@ -8,7 +8,8 @@ namespace galaxy
 {
 	namespace api
 	{
-		UserImpl::UserImpl(ListenerRegistrarImpl* listeners) :listeners{ listeners } 
+		UserImpl::UserImpl(InterfaceInstances* intf) :
+			intf{ intf }, listeners{ intf->listener_registrar_impl.get() }, specific_user_data_requests{ {}, {} }
 		{ }
 
 		UserImpl::~UserImpl()
@@ -16,15 +17,15 @@ namespace galaxy
 		}
 
 		bool UserImpl::SignedIn() {
-			return config->GetSignedIn();
+			return intf->config->GetSignedIn();
 		}
 
 		GalaxyID UserImpl::GetGalaxyID() {
-			return config->GetCustomGalaxyID();
+			return intf->config->GetCustomGalaxyID();
 		}
 
 		void UserImpl::SignIn(IAuthListener* const listener) {
-			if (config->GetSignedIn()) {
+			if (intf->config->GetSignedIn()) {
 				listeners->NotifyAll(listener, &IAuthListener::OnAuthSuccess);
 				listeners->NotifyAll<IOperationalStateChangeListener>(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_LOGGED_ON);
 
@@ -93,16 +94,26 @@ namespace galaxy
 		}
 
 		void UserImpl::RequestUserData(GalaxyID userID, ISpecificUserDataListener* const listener) {
-			if (config->IsSelfUserID(userID)) {
+			if (intf->config->IsSelfUserID(userID)) {
 				listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, userID);
 			}
 			else {
-				// TODO
+				uint64_t request_id = MessageUniqueID::get();
+
+				specific_user_data_requests.run_locked([&] {
+					specific_user_data_requests.map.emplace(request_id, listener);
+				});
+
+				intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ request_id, userID});
 			}
 		}
 
+		void UserImpl::SpecificUserDataRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
+		
+		}
+
 		bool UserImpl::IsUserDataAvailable(GalaxyID userID) {
-			if (config->IsSelfUserID(userID)) {
+			if (intf->config->IsSelfUserID(userID)) {
 				return true;
 			}
 			else {
@@ -111,8 +122,8 @@ namespace galaxy
 		}
 
 		const char* UserImpl::GetUserData(const char* key, GalaxyID userID) {
-			if (config->IsSelfUserID(userID)) {
-				return config->GetUserData(key).c_str();
+			if (intf->config->IsSelfUserID(userID)) {
+				return intf->config->GetUserData(key).c_str();
 			}
 			else {
 				return "";
@@ -120,8 +131,8 @@ namespace galaxy
 		}
 
 		void UserImpl::GetUserDataCopy(const char* key, char* buffer, uint32_t bufferLength, GalaxyID userID) {
-			if (config->IsSelfUserID(userID)) {
-				const std::string& str = config->GetUserData(key);
+			if (intf->config->IsSelfUserID(userID)) {
+				const std::string& str = intf->config->GetUserData(key);
 				std::copy_n(str.begin(), std::min((uint32_t)str.length(), bufferLength), buffer);
 			}
 			else {
@@ -130,15 +141,15 @@ namespace galaxy
 		}
 
 		void UserImpl::SetUserData(const char* key, const char* value, ISpecificUserDataListener* const listener) {
-			config->SetUserData(key, value);
-			config->SaveStatsAndAchievements();
+			intf->config->SetUserData(key, value);
+			intf->config->SaveStatsAndAchievements();
 
-			listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, config->GetApiGalaxyID());
+			listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, intf->config->GetApiGalaxyID());
 		}
 
 		uint32_t UserImpl::GetUserDataCount(GalaxyID userID) {
-			if (config->IsSelfUserID(userID)) {
-				return (uint32_t)config->GetASUC().UserData.size();
+			if (intf->config->IsSelfUserID(userID)) {
+				return (uint32_t)intf->config->GetASUC().UserData.size();
 			}
 			else {
 				return 0;
@@ -146,8 +157,8 @@ namespace galaxy
 		}
 
 		bool UserImpl::GetUserDataByIndex(uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength, GalaxyID userID) {
-			if (config->IsSelfUserID(userID)) {
-				auto ref = container_get_by_index(config->GetASUC().UserData, index);
+			if (intf->config->IsSelfUserID(userID)) {
+				auto ref = container_get_by_index(intf->config->GetASUC().UserData, index);
 				std::copy_n(ref.first.begin(), std::min((uint32_t)ref.first.length(), keyLength), key);
 				std::copy_n(ref.second.begin(), std::min((uint32_t)ref.second.length(), valueLength), value);
 			}
@@ -158,14 +169,14 @@ namespace galaxy
 		}
 
 		void UserImpl::DeleteUserData(const char* key, ISpecificUserDataListener* const listener) {
-			config->SetUserData(key, "");
-			config->SaveStatsAndAchievements();
+			intf->config->SetUserData(key, "");
+			intf->config->SaveStatsAndAchievements();
 
-			listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, config->GetApiGalaxyID());
+			listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, intf->config->GetApiGalaxyID());
 		}
 
 		bool UserImpl::IsLoggedOn() {
-			return config->GetSignedIn();
+			return intf->config->GetSignedIn();
 		}
 
 		void UserImpl::RequestEncryptedAppTicket(const void* data, uint32_t dataSize, IEncryptedAppTicketListener* const listener) {

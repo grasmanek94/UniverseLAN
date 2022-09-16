@@ -2,8 +2,6 @@
 
 #include <Networking/Networking.hxx>
 
-#include "UniverseLAN.hxx"
-
 // Handlers:
 void Client::Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data)
 {
@@ -14,12 +12,12 @@ void Client::Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data
 {
 	std::cout << "Peer disconnected: " << peer->address.host << ":" << peer->address.port << " with ID: " << reinterpret_cast<size_t>(peer->data) << std::endl;
 
-	//connection.Reconnect();
+	connection.Reconnect();
 }
 
 void Client::Handle(ENetPeer* peer, const std::shared_ptr<KeyChallengeMessage>& data)
 {
-	KeyChallengeMessage challenge = KeyChallengeMessage{}.response(const_hash64(galaxy::api::config->GetAuthenticationKey()), data->encrypted);
+	KeyChallengeMessage challenge = KeyChallengeMessage{}.response(const_hash64(interfaces->config->GetAuthenticationKey()), data->encrypted);
 
 	connection.SendAsync(challenge);
 }
@@ -28,8 +26,8 @@ void Client::Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAcceptedMess
 {
 	std::cout << "Connection accepted by server" << std::endl;
 
-	UserHelloDataMessage udm{ galaxy::api::config->GetApiGalaxyID() };
-	udm.asuc = galaxy::api::config->GetASUC();
+	UserHelloDataMessage udm{ interfaces->config->GetApiGalaxyID() };
+	udm.asuc = interfaces->config->GetASUC();
 
 	connection.SendAsync(udm);
 }
@@ -39,13 +37,13 @@ void Client::Handle(ENetPeer* peer, const std::shared_ptr<UserHelloDataMessage>&
 
 }
 
-void Client::Handle(ENetPeer* peer, const std::shared_ptr<RequestUserDataMessage>& data)
+void Client::Handle(ENetPeer* peer, const std::shared_ptr<RequestSpecificUserDataMessage>& data)
 {
 
 }
 
-Client::Client(const std::string& address, uint16_t port)
-	: running{ false }, tick_thread{}, connection{}
+Client::Client(galaxy::api::InterfaceInstances* interfaces)
+	: interfaces{ interfaces }, running{ false }, tick_thread{}, connection{}
 {
 	int init_code = connection.GetInitCode();
 
@@ -67,7 +65,7 @@ Client::Client(const std::string& address, uint16_t port)
 #endif
 	}
 
-	connection.Connect(address, port);
+	connection.Connect(interfaces->config->GetServerAddress(), interfaces->config->GetPort());
 }
 
 void Client::Tick()
@@ -77,6 +75,11 @@ void Client::Tick()
 	}
 
 	connection.Disconnect();
+}
+
+const GalaxyNetworkClient& Client::GetConnection() const
+{
+	return connection;
 }
 
 Client::~Client()

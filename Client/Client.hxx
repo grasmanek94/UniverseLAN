@@ -1,13 +1,17 @@
 #pragma once
 
+#include "UniverseLAN.hxx"
+
 #include <Networking/Networking.hxx>
 
 #include <atomic>
 #include <thread>
 
+
 class Client: public MessageReceiver
 {
 private:
+	galaxy::api::InterfaceInstances* interfaces;
 	std::atomic_bool running;
 	std::thread tick_thread;
 	GalaxyNetworkClient connection;
@@ -21,10 +25,13 @@ private:
 	void Tick();
 
 public:
-	Client(const std::string& address, uint16_t port);
+
+	Client(galaxy::api::InterfaceInstances* interfaces);
 	virtual ~Client();
 
 	void Start();
 	void Stop();
 	void ProcessEvents();
+
+	const GalaxyNetworkClient& GetConnection() const;
 };

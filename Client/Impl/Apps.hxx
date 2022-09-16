@@ -7,6 +7,8 @@
  */
 #include <IApps.h>
 
+#include "InterfaceInstances.hxx"
+
 namespace galaxy
 {
 	namespace api
@@ -29,7 +31,12 @@ namespace galaxy
 		 */
 		class AppsImpl : public IApps
 		{
+		private:
+			InterfaceInstances* intf;
+
 		public:
+			AppsImpl(InterfaceInstances* intf);
+
 			virtual ~AppsImpl() override;
 
 			/**

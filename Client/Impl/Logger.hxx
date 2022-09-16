@@ -5,6 +5,8 @@
  * @file
  * Contains data structures and interfaces related to logging.
  */
+#include "InterfaceInstances.hxx"
+
 #include <ILogger.h>
 
 #include <fstream>
@@ -28,13 +30,14 @@ namespace galaxy
 			using mtx_t = std::mutex;
 			using lock_t = std::scoped_lock<mtx_t>;
 
+			InterfaceInstances* intf;
 			mtx_t mtx;
 			std::ofstream logfile;
 
 			void Log(const char* type, const char* format, ...);
 
 		public:
-			LoggerImpl();
+			LoggerImpl(InterfaceInstances* intf);
 
 			virtual ~LoggerImpl() override;
 

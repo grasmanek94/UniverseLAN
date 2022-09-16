@@ -4,7 +4,8 @@ namespace galaxy
 {
 	namespace api
 	{
-		NetworkingImpl::NetworkingImpl(ListenerRegistrarImpl* listeners) : listeners{ listeners }
+		NetworkingImpl::NetworkingImpl(InterfaceInstances* intf) :
+			intf{ intf }, listeners{ intf->listener_registrar_impl.get() }
 		{}
 
 		NetworkingImpl::~NetworkingImpl()

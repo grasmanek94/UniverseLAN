@@ -27,11 +27,12 @@ namespace galaxy
 		class FriendsImpl : public IFriends
 		{
 		private:
+			InterfaceInstances* intf;
 			ListenerRegistrarImpl* listeners;
 
 		public:
 
-			FriendsImpl(ListenerRegistrarImpl* listeners);
+			FriendsImpl(InterfaceInstances* intf);
 			virtual ~FriendsImpl();
 
 			/**

@@ -24,6 +24,7 @@
 #include <cereal/types/valarray.hpp>
 #include <cereal/types/vector.hpp>
 
+#include "MessageUniqueID.hxx"
 #include "ConstHash.hxx"
 
 #define UniqueClassId_Declare(className) static const uint64_t constexpr UniqueClassId() { return const_hash(#className, sizeof(#className)); }

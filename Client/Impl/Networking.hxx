@@ -28,11 +28,12 @@ namespace galaxy
 		class NetworkingImpl : public INetworking
 		{
 		private:
+			InterfaceInstances* intf;
 			ListenerRegistrarImpl* listeners;
 
 		public:
 
-			NetworkingImpl(ListenerRegistrarImpl* listeners);
+			NetworkingImpl(InterfaceInstances* intf);
 			virtual ~NetworkingImpl();
 
 			/**

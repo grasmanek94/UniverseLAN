@@ -26,11 +26,12 @@ namespace galaxy
 		class UtilsImpl : public IUtils
 		{
 		private:
+			InterfaceInstances* intf;
 			ListenerRegistrarImpl* listeners;
 
 		public:
 
-			UtilsImpl(ListenerRegistrarImpl* listeners);
+			UtilsImpl(InterfaceInstances* intf);
 			virtual ~UtilsImpl();
 
 			/**

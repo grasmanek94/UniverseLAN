@@ -24,60 +24,9 @@ bool Server::KickUnauthenticated(ENetPeer* peer) {
 	return false;
 }
 
-#define REQUIRES_AUTHENTICATION(peer) {if(KickUnauthenticated(peer)) { return; }}
-
-void Server::Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAcceptedMessage>& data) { REQUIRES_AUTHENTICATION(peer); /* Not handled in server */ }
-
-void Server::Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data)
-{
-	PeerData* pd = PeerData::construct(peer);
-	connected_peers.insert(peer);
-
-	std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") EventConnect" << std::endl;
-
-	connection.Send(peer, pd->challenge.Prepare(authentication_key, random()));
-}
-
-void Server::Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data)
-{
-	PeerData::destruct(peer);
-	connected_peers.erase(peer);
-
-	std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") EventDisconnect" << std::endl;
-}
-
-void Server::Handle(ENetPeer* peer, const std::shared_ptr<KeyChallengeMessage>& data)
-{
-	PeerData* pd = PeerData::get(peer);
-
-	if (!pd->challenge.Validate(*data)) {
-		std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") KeyChallengeMessage FAIL" << std::endl;
-		connection.Disconnect(peer);
-	}
-	else {
-		std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") KeyChallengeMessage ACCEPT" << std::endl;
-		connection.Send(peer, ConnectionAcceptedMessage{});
-	}
-}
-
-void Server::Handle(ENetPeer* peer, const std::shared_ptr<UserHelloDataMessage>& data) {
-	REQUIRES_AUTHENTICATION(peer);
-
-	PeerData* pd = PeerData::get(peer);
-
-	//connection.Broadcast(message);
-}
-
-void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestUserDataMessage>& data) {
-	REQUIRES_AUTHENTICATION(peer);
-
-	PeerData* pd = PeerData::get(peer);
-
-	//connection.Broadcast(message);
-}
-
 Server::Server()
-	: id_generator()
+	: config{}, connection{}, id_generator{}, max_connections{ 1024 },
+	connected_peers{}, authentication_key{ 0 }, random{}, ticks{ 0 }, minimum_tick_wait_time{ 0 }, user_data {}
 {
 	int init_code = connection.GetInitCode();
 
@@ -120,9 +69,26 @@ Server::Server()
 
 void Server::Tick()
 {
-	if (connection.Pull())
+	while (connection.Pull())
 	{
 		ProcessEvent(connection.Event());
+	}
+
+	if (++ticks > 50) {
+		ticks = 0;
+		auto now = std::chrono::system_clock::now();
+		for (auto& peer : unauthenticated_peers) {
+			PeerData* pd = PeerData::get(peer);
+			if (pd == nullptr) {
+				connection.Disconnect(peer);
+			}
+			else {
+				auto time = ((now - pd->connected_time) / std::chrono::milliseconds(1));
+				if (time > 2500) {
+					connection.Disconnect(peer);
+				}
+			}
+		}
 	}
 }
 

@@ -8,7 +8,8 @@ namespace galaxy
 {
 	namespace api
 	{
-		FriendsImpl::FriendsImpl(ListenerRegistrarImpl* listeners) : listeners{ listeners }
+		FriendsImpl::FriendsImpl(InterfaceInstances* intf) :
+			intf{ intf }, listeners{ intf->listener_registrar_impl.get() }
 		{}
 
 		FriendsImpl::~FriendsImpl()
@@ -35,11 +36,11 @@ namespace galaxy
 		}
 
 		const char* FriendsImpl::GetPersonaName() {
-			return config->GetCustomPersonaName().c_str();
+			return intf_inst.config->GetCustomPersonaName().c_str();
 		}
 
 		void FriendsImpl::GetPersonaNameCopy(char* buffer, uint32_t bufferLength) {
-			std::copy_n(config->GetCustomPersonaName().c_str(), std::min((size_t)bufferLength, config->GetCustomPersonaName().length()), buffer);
+			std::copy_n(intf_inst.config->GetCustomPersonaName().c_str(), std::min((size_t)bufferLength, intf_inst.config->GetCustomPersonaName().length()), buffer);
 		}
 
 		PersonaState FriendsImpl::GetPersonaState() {

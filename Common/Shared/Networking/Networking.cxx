@@ -129,7 +129,7 @@ void GalaxyNetworkClient::SetActive(bool active)
 	is_active = active;
 }
 
-bool GalaxyNetworkClient::IsActive()
+bool GalaxyNetworkClient::IsActive() const
 {
 	return is_active;
 }

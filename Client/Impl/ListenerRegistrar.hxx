@@ -5,6 +5,7 @@
  * @file
  * Contains data structures and interfaces related to callback listeners.
  */
+#include "InterfaceInstances.hxx"
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -30,10 +31,6 @@ namespace galaxy
 		 */
 		class ListenerRegistrarImpl : public IListenerRegistrar
 		{
-		public:
-			static ListenerRegistrarImpl* get_local();
-			static ListenerRegistrarImpl* get_game_server();
-
 		private:
 			using mutex_t = std::recursive_mutex;
 			using listener_set = std::set<IGalaxyListener*>;
@@ -45,11 +42,13 @@ namespace galaxy
 				data() : mtx{}, set{}
 				{}
 			};
+
+			InterfaceInstances* intf;
 			data listeners[LISTENER_TYPE_END];
 
 		public:
 
-			ListenerRegistrarImpl();
+			ListenerRegistrarImpl(InterfaceInstances* intf);
 			virtual ~ListenerRegistrarImpl();
 
 			/**
