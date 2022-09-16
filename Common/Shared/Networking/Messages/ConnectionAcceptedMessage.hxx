@@ -1,13 +1,13 @@
 #pragma once
 #include <Networking/SendableEventMessage.hxx>
 
-class ConnectionAccepted
+class ConnectionAcceptedMessage
 {
 public:
 	template<class Archive>
 	void serialize(Archive & ar){ }
 
-	UniqueClassId_Declare(ConnectionAccepted);
+	UniqueClassId_Declare(ConnectionAcceptedMessage);
 
-	ConnectionAccepted() {}
+	ConnectionAcceptedMessage() {}
 };

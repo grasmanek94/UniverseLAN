@@ -16,7 +16,7 @@ private:
 	virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data) override;
 	virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data) override;
 
-	SHARED_NETWORKOVERRIDE_MESSAGE_HANDLERS();
+	SHARED_NETWORK_OVERRIDE_MESSAGE_HANDLERS();
 
 	void Tick();
 

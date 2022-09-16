@@ -34,6 +34,7 @@ namespace galaxy
 				listeners->NotifyAll<IOperationalStateChangeListener>(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN);
 			}
 		}
+
 		void UserImpl::SignInCredentials(const char* login, const char* password, IAuthListener* const listener) {
 			SignIn(listener);
 		}
@@ -87,7 +88,8 @@ namespace galaxy
 		}
 
 		void UserImpl::SignOut() {
-			// Empty
+			listeners->NotifyAll<IAuthListener>(&IAuthListener::OnAuthLost);
+			listeners->NotifyAll<IOperationalStateChangeListener>(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN);
 		}
 
 		void UserImpl::RequestUserData(GalaxyID userID, ISpecificUserDataListener* const listener) {
