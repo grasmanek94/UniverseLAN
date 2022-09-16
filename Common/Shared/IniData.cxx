@@ -10,6 +10,8 @@
 #include <string>
 #include <chrono>
 
+static const uint64_t GalaxyIDMask = 0x00FFFFFFFFFFFFFFULL;
+
 std::string IniData::GetPath(std::string base, const std::string& filename)
 {
 	return (std::filesystem::path(base) / filename).string();
@@ -220,7 +222,7 @@ ClientIniData::ClientIniData()
 				throw std::runtime_error("Incorrect GalaxyIDType: " + GalaxyIDType);
 			}
 
-			CustomGalaxyID = const_hash64(str);
+			CustomGalaxyID = (const_hash64(str) & GalaxyIDMask);
 		}
 	}
 

@@ -8,10 +8,9 @@
 #include "UniverseLAN.hxx"
 
 #include <IniData.hxx>
+#include <Version.hxx>
 
 #include <memory>
-
-#include <Version.hxx>
 
 namespace galaxy
 {

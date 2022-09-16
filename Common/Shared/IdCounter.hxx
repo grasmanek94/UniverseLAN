@@ -1,5 +1,6 @@
 #pragma once
-#include <cstdlib>
+
+#include <cstdint>
 #include <set>
 
 /* 
@@ -7,11 +8,11 @@
  */
 class IdCounter
 {
-	size_t max_id;
-	std::set<size_t> free_ids;
+	uint64_t max_id;
+	std::set<uint64_t> free_ids;
 public:
 	IdCounter();
-	size_t GetNewId();
-	bool FreeId(size_t id);
-	size_t GetCurrentMaxId();
+	uint64_t GetNewId();
+	bool FreeId(uint64_t id);
+	uint64_t GetCurrentMaxId();
 };

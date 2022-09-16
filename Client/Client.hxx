@@ -13,9 +13,11 @@ private:
 	GalaxyNetworkClient connection;
 
 	// Handlers:
-	void Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data) override;
-	void Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data) override;
-	void Handle(ENetPeer* peer, const std::shared_ptr<ChatMessage>& message) override;
+	virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data) override;
+	virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data) override;
+	virtual void Handle(ENetPeer* peer, const std::shared_ptr<KeyChallenge>& data) override;
+	virtual void Handle(ENetPeer* peer, const std::shared_ptr<ChatMessage>& message) override;
+	virtual void Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAccepted>& data) override;
 
 	void Tick();
 

@@ -102,6 +102,10 @@ void NetworkServer::Broadcast(ENetPacket* packet, ENetPeer* except)
 	enet_host_broadcast_except(member, 0, packet, except);
 }
 
+void NetworkServer::Disconnect(ENetPeer* peer) {
+	enet_peer_disconnect_now(peer, 0);
+}
+
 NetworkClient::NetworkClient()
 	: peer(nullptr)
 {

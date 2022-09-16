@@ -14,7 +14,19 @@ void Client::Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data
 {
 	std::cout << "Peer disconnected: " << peer->address.host << ":" << peer->address.port << " with ID: " << reinterpret_cast<size_t>(peer->data) << std::endl;
 
-	connection.Reconnect();
+	//connection.Reconnect();
+}
+
+void Client::Handle(ENetPeer* peer, const std::shared_ptr<KeyChallenge>& data)
+{
+	KeyChallenge challenge = KeyChallenge{}.response(const_hash64(galaxy::api::config->GetAuthenticationKey()), data->encrypted);
+
+	connection.SendAsync(challenge);
+}
+
+void Client::Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAccepted>& data)
+{
+	std::cout << "Connection accepted by server" << std::endl;
 }
 
 void Client::Handle(ENetPeer* peer, const std::shared_ptr<ChatMessage>& message)

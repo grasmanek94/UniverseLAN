@@ -5,11 +5,11 @@ IdCounter::IdCounter()
 {
 }
 
-size_t IdCounter::GetNewId()
+uint64_t IdCounter::GetNewId()
 {
 	if (!free_ids.empty())
 	{
-		size_t free_id = *free_ids.begin();
+		uint64_t free_id = *free_ids.begin();
 		free_ids.erase(free_ids.begin());
 		return free_id;
 	}
@@ -17,7 +17,7 @@ size_t IdCounter::GetNewId()
 	return ++max_id;
 }
 
-bool IdCounter::FreeId(size_t id)
+bool IdCounter::FreeId(uint64_t id)
 {
 	if (id == 0) {
 		return false;
@@ -38,7 +38,7 @@ bool IdCounter::FreeId(size_t id)
 	return true;
 }
 
-size_t IdCounter::GetCurrentMaxId()
+uint64_t IdCounter::GetCurrentMaxId()
 {
 	return max_id;
 }

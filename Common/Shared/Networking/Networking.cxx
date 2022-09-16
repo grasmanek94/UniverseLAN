@@ -1,5 +1,10 @@
 #include "Networking.hxx"
 
+#define ALL_CASES \
+	IMPLEMENT_CASE_FOR(KeyChallenge); \
+	IMPLEMENT_CASE_FOR(ChatMessage); \
+	IMPLEMENT_CASE_FOR(ConnectionAccepted);
+
 bool MessageReceiver::ProcessEvent(const ENetEvent& event)
 {
 	bool return_value = false;
@@ -22,7 +27,7 @@ bool MessageReceiver::ProcessEvent(const ENetEvent& event)
 
 			switch (unique_class_id)
 			{
-				IMPLEMENT_CASE_FOR(ChatMessage);
+				ALL_CASES
 			}
 
 			#pragma warning( pop )
@@ -95,7 +100,7 @@ void GalaxyNetworkClient::RunNetworking(uint32_t timeout)
 
 					switch (unique_class_id)
 					{
-						IMPLEMENT_CASE_FOR(ChatMessage);
+						ALL_CASES
 					}
 
 					#pragma warning( pop )

@@ -1,22 +1,82 @@
-#include <iostream>
-#include <thread>
-#include <memory>
-#include <vector>
-#include <set>
 #include <Common.hxx>
-#include <sstream>
-#include <exception>
-#include <algorithm>
-#include <iterator>
-
 #include <IdCounter.hxx>
 #include <IniData.hxx>
-
 #include <Networking/Networking.hxx>
 #include <Version.hxx>
 
-class PeerData {
+#include <GalaxyApi.h>
 
+#include <algorithm>
+#include <chrono>
+#include <exception>
+#include <iostream>
+#include <random>
+#include <set>
+#include <thread>
+
+class PeerData {
+private:
+	PeerData() : peer{}, id{ 0ULL }, challenge{}, connected_time{ std::chrono::system_clock::now() }
+	{}
+
+public:
+	struct Challenge {
+		bool completed;
+		uint64_t data;
+		KeyChallenge for_client;
+		KeyChallenge expected_response;
+
+		Challenge() : completed{ false }, data{ 0ULL }, for_client{}, expected_response{} {}
+
+		void Prepare(uint64_t key, uint64_t rnd) {
+			data = rnd;
+			for_client = KeyChallenge{}.challenge(key, data);
+			expected_response = KeyChallenge{}.response(key, for_client.encrypted);
+		}
+
+		bool Validate(const KeyChallenge& response) {
+			completed = (response.encrypted == expected_response.encrypted);
+			return completed;
+		}
+	};
+
+	ENetPeer* peer;
+	galaxy::api::GalaxyID id;
+	Challenge challenge;
+	std::chrono::system_clock::time_point connected_time;
+
+	virtual ~PeerData() {}
+
+	static PeerData* get(ENetPeer* peer) {
+		assert(peer != nullptr);
+		assert(peer->data != nullptr);
+
+		return (PeerData*)peer->data;
+	}
+
+	static PeerData* construct(ENetPeer* peer) {
+		if (peer == nullptr) {
+			return nullptr;
+		}
+
+		PeerData* peer_data = new PeerData();
+		peer_data->peer = peer;
+		peer->data = (void*)peer_data;
+
+		return peer_data;
+	}
+
+	static void destruct(ENetPeer* peer) {
+		if (peer == nullptr) {
+			return;
+		}
+
+		PeerData* peer_data = (PeerData*)peer->data;
+		if (peer_data) {
+			peer->data = nullptr;
+			delete peer_data;
+		}
+	}
 };
 
 class Server : public MessageReceiver
@@ -27,20 +87,56 @@ private:
 	IdCounter id_generator;
 	size_t max_connections;
 	std::set<ENetPeer*> connected_peers;
+	uint64_t authentication_key;
+	std::mt19937_64 random;
+
+	bool KickUnauthenticated(ENetPeer* peer) {
+		PeerData* pd = PeerData::get(peer);
+
+		if (pd == nullptr) {
+			return false;
+		}
+
+		if (pd->challenge.completed) {
+			return true;
+		}
+
+		connection.Disconnect(peer);
+
+		return false;
+	}
+
+#define REQUIRES_AUTHENTICATION(peer) {if(KickUnauthenticated(peer)) { return; }}
 
 	// Handlers:
+	virtual void Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAccepted>& data) override {}
+
 	void Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data) override
 	{
-		size_t id = id_generator.GetNewId();
-
+		PeerData* pd = PeerData::construct(peer);
 		connected_peers.insert(peer);
 
-		//connection.Send(peer, GameSetup( id ));
-		std::cout << "Peer connected: " << peer->address.host << ":" << peer->address.port << " with ID: " << reinterpret_cast<size_t>(peer->data) << std::endl;
+		std::cout << "Peer connected: " << peer->address.host << ":" << peer->address.port << std::endl;
+
+		pd->challenge.Prepare(authentication_key, random());
+
+		connection.Send(peer, pd->challenge.for_client);
+	}
+
+	void Handle(ENetPeer* peer, const std::shared_ptr<KeyChallenge>& data) override
+	{
+		PeerData* pd = PeerData::get(peer);
+
+		if (!pd->challenge.Validate(*data)) {
+			connection.Disconnect(peer);
+		} else {
+			connection.Send(peer, ConnectionAccepted{});
+		}
 	}
 
 	void Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data) override
 	{
+		PeerData::destruct(peer);
 
 		//PlayerQuit player_quit;
 		//player_quit.SetSender(player->id);
@@ -55,6 +151,10 @@ private:
 
 	void Handle(ENetPeer* peer, const std::shared_ptr<ChatMessage>& message) override
 	{
+		REQUIRES_AUTHENTICATION(peer);
+
+		PeerData* pd = PeerData::get(peer);
+
 		//message->SetSender(player->id);
 
 		//std::wcout << "[" << message->GetSender() << "]: " << message->GetContents() << std::endl;
@@ -93,6 +193,14 @@ public:
 #endif
 		}
 
+		authentication_key = const_hash64(config.GetAuthenticationKey());
+		uint64_t milliseconds_since_epoch =
+			std::chrono::system_clock::now().time_since_epoch() /
+			std::chrono::milliseconds(1);
+
+		random.seed(authentication_key ^ milliseconds_since_epoch);
+
+		std::cout << "Using key: " << authentication_key << std::endl;
 		std::cout << "Listening..." << std::endl;
 		//ready
 	}
