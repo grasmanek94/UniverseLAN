@@ -27,4 +27,6 @@
 #include "MessageUniqueID.hxx"
 #include "ConstHash.hxx"
 
-#define UniqueClassId_Declare(className) static const uint64_t constexpr UniqueClassId() { return const_hash(#className, sizeof(#className)); }
+namespace universelan {
+	#define UniqueClassId_Declare(className) static const uint64_t constexpr UniqueClassId() { return const_hash(#className, sizeof(#className)); }
+}

@@ -10,6 +10,7 @@
 #include <memory>
 
 namespace galaxy::api {
+	using namespace universelan;
 	using namespace universelan::client;
 
 	InterfaceInstances gameserver_intf_inst;

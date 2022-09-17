@@ -5,20 +5,22 @@
 
 #include <GalaxyApi.h>
 
-class UserHelloDataMessage
-{
-public:
-	galaxy::api::GalaxyID id;
-	AchievementsAndStatsContainer asuc;
-
-	template<class Archive>
-	void serialize(Archive & ar)
+namespace universelan {
+	class UserHelloDataMessage
 	{
-		ar(id, asuc);
-	}
+	public:
+		galaxy::api::GalaxyID id;
+		AchievementsAndStatsContainer asuc;
 
-	UniqueClassId_Declare(UserHelloDataMessage);
+		template<class Archive>
+		void serialize(Archive& ar)
+		{
+			ar(id, asuc);
+		}
 
-	UserHelloDataMessage() : id{}, asuc{} {}
-	UserHelloDataMessage(const galaxy::api::GalaxyID& id) : id{ id }, asuc{} {}
-};
+		UniqueClassId_Declare(UserHelloDataMessage);
+
+		UserHelloDataMessage() : id{}, asuc{} {}
+		UserHelloDataMessage(const galaxy::api::GalaxyID& id) : id{ id }, asuc{} {}
+	};
+}

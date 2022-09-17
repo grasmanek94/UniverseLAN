@@ -8,6 +8,7 @@
 #include "Messages/UserHelloDataMessage.hxx"
 #include "Messages/RequestSpecificUserDataMessage.hxx"
 
+namespace universelan {
 #define SHARED_NETWORK_DECLARE_MESSAGE_FOR(class_name) \
 		virtual void Handle(ENetPeer* peer, const std::shared_ptr<class_name>& data) = 0
 
@@ -31,3 +32,4 @@
 	SHARED_NETWORK_OVERRIDE_MESSAGE_FOR(KeyChallengeMessage); \
 	SHARED_NETWORK_OVERRIDE_MESSAGE_FOR(RequestSpecificUserDataMessage); \
 	SHARED_NETWORK_OVERRIDE_MESSAGE_FOR(UserHelloDataMessage)
+}

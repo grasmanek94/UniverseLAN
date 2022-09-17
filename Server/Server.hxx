@@ -11,33 +11,36 @@
 #include <random>
 #include <set>
 
-class Server : public MessageReceiver
-{
-private:
-	ServerIniData config;
-	GalaxyNetworkServer connection;
-	IdCounter id_generator;
-	size_t max_connections;
-	std::set<ENetPeer*> connected_peers;
-	std::set<ENetPeer*> unauthenticated_peers;
-	uint64_t authentication_key;
-	std::mt19937_64 random;
-	size_t ticks;
-	size_t minimum_tick_wait_time;
+namespace universelan::server {
 
-	GalaxyUserData::map_t user_data;
+	class Server : public MessageReceiver
+	{
+	private:
+		ServerIniData config;
+		GalaxyNetworkServer connection;
+		IdCounter id_generator;
+		size_t max_connections;
+		std::set<ENetPeer*> connected_peers;
+		std::set<ENetPeer*> unauthenticated_peers;
+		uint64_t authentication_key;
+		std::mt19937_64 random;
+		size_t ticks;
+		size_t minimum_tick_wait_time;
 
-	bool KickUnauthenticated(ENetPeer* peer);
+		GalaxyUserData::map_t user_data;
 
-	virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data) override;
-	virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data) override;
+		bool KickUnauthenticated(ENetPeer* peer);
 
-	SHARED_NETWORK_OVERRIDE_MESSAGE_HANDLERS();
+		virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data) override;
+		virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data) override;
 
-public:
-	Server();
-	virtual ~Server();
+		SHARED_NETWORK_OVERRIDE_MESSAGE_HANDLERS();
 
-	void Tick();
-	uint32_t GetMaxTickRate() const;
-};
+	public:
+		Server();
+		virtual ~Server();
+
+		void Tick();
+		uint32_t GetMaxTickRate() const;
+	};
+}

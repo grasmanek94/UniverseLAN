@@ -1,7 +1,9 @@
 #include "GalaxyUserData.hxx"
 
-GalaxyUserData::GalaxyUserData(galaxy::api::GalaxyID id) 
-	: id{ id }, stats{}
-{
+namespace universelan {
+	GalaxyUserData::GalaxyUserData(galaxy::api::GalaxyID id)
+		: id{ id }, stats{}
+	{
 
+	}
 }

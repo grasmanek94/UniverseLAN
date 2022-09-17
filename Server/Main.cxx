@@ -7,13 +7,17 @@
 #include <memory>
 #include <thread>
 
+using namespace universelan::server;
+using namespace std::chrono;
+
 std::unique_ptr<Server> server;
+
 int main()
 {
-	std::cout << "Version: " << Version_Number << std::endl;
+	std::cout << "Version: " << universelan::Version_Number << std::endl;
 
 	server = std::make_unique<Server>();
-	std::chrono::milliseconds wait_time = std::chrono::milliseconds(1000 / server->GetMaxTickRate());
+	milliseconds wait_time = milliseconds(1000 / server->GetMaxTickRate());
 
 	while (true)
 	{

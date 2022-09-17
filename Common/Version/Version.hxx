@@ -1,3 +1,7 @@
 #pragma once
 
-extern const size_t Version_Number;
+#include <cstddef>
+
+namespace universelan {
+	extern const size_t Version_Number;
+}

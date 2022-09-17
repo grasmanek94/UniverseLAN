@@ -8,134 +8,136 @@
 #include <sstream>
 #include <string>
 
-MachineInfo::MachineInfo() :
-	machine_name{""}, user_name{""}, macs{}
-{
-}
+namespace universelan {
+	MachineInfo::MachineInfo() :
+		machine_name{ "" }, user_name{ "" }, macs{}
+	{
+	}
 
-static std::string hexStr(const uint8_t* data, int len);
-static int RetriveLocalMacAddress(ULONG ulFlags, ULONG ulFamily, unsigned char** pszAddress);
+	static std::string hexStr(const uint8_t* data, int len);
+	static int RetriveLocalMacAddress(ULONG ulFlags, ULONG ulFamily, unsigned char** pszAddress);
 
-std::string MachineInfo::GetLocalMachineName()
-{
-    if (machine_name.length() == 0) {
-        const size_t INFO_BUFFER_SIZE = 32;
-        TCHAR  infoBuf[INFO_BUFFER_SIZE];
-        DWORD  bufCharCount = INFO_BUFFER_SIZE;
+	std::string MachineInfo::GetLocalMachineName()
+	{
+		if (machine_name.length() == 0) {
+			const size_t INFO_BUFFER_SIZE = 32;
+			TCHAR  infoBuf[INFO_BUFFER_SIZE];
+			DWORD  bufCharCount = INFO_BUFFER_SIZE;
 
-        // Get and display the user name.
-        if (!GetComputerName(infoBuf, &bufCharCount)) {
-            machine_name.assign((const char* const)infoBuf, (const size_t)bufCharCount);
-        }
-    }
+			// Get and display the user name.
+			if (!GetComputerName(infoBuf, &bufCharCount)) {
+				machine_name.assign((const char* const)infoBuf, (const size_t)bufCharCount);
+			}
+		}
 
-	return machine_name;
-}
+		return machine_name;
+	}
 
-std::string MachineInfo::GetLocalUserName()
-{
-    if (user_name.length() == 0) {
-        const size_t INFO_BUFFER_SIZE = 256;
-        TCHAR  infoBuf[INFO_BUFFER_SIZE];
-        DWORD  bufCharCount = INFO_BUFFER_SIZE;
+	std::string MachineInfo::GetLocalUserName()
+	{
+		if (user_name.length() == 0) {
+			const size_t INFO_BUFFER_SIZE = 256;
+			TCHAR  infoBuf[INFO_BUFFER_SIZE];
+			DWORD  bufCharCount = INFO_BUFFER_SIZE;
 
-        // Get and display the user name.
-        if (!GetUserName(infoBuf, &bufCharCount)) {
-            user_name.assign((const char* const)infoBuf, (const size_t)bufCharCount);
-        }
-    }
+			// Get and display the user name.
+			if (!GetUserName(infoBuf, &bufCharCount)) {
+				user_name.assign((const char* const)infoBuf, (const size_t)bufCharCount);
+			}
+		}
 
-	return user_name;
-}
+		return user_name;
+	}
 
-std::vector<std::string> MachineInfo::GetLocalMACs()
-{
-    if (macs.size() == 0) {
-        unsigned char* pszBuff = NULL;
-        int nCount = 0;
-        int idx = 0;
-        int chPos = 0;
-        nCount = RetriveLocalMacAddress(GAA_FLAG_INCLUDE_ALL_COMPARTMENTS, AF_UNSPEC, &pszBuff);
+	std::vector<std::string> MachineInfo::GetLocalMACs()
+	{
+		if (macs.size() == 0) {
+			unsigned char* pszBuff = NULL;
+			int nCount = 0;
+			int idx = 0;
+			int chPos = 0;
+			nCount = RetriveLocalMacAddress(GAA_FLAG_INCLUDE_ALL_COMPARTMENTS, AF_UNSPEC, &pszBuff);
 
-        for (idx = 0; idx < nCount; ++idx)
-        {
-            chPos = MAX_ADAPTER_ADDRESS_LENGTH * idx;
-            std::string str(hexStr((pszBuff + chPos), 6));
-            if (str != "000000000000") {
-                macs.push_back(str);
-            }
-        }
+			for (idx = 0; idx < nCount; ++idx)
+			{
+				chPos = MAX_ADAPTER_ADDRESS_LENGTH * idx;
+				std::string str(hexStr((pszBuff + chPos), 6));
+				if (str != "000000000000") {
+					macs.push_back(str);
+				}
+			}
 
-        HeapFree(GetProcessHeap(), 0x00, pszBuff);
-        pszBuff = NULL;
-    }
+			HeapFree(GetProcessHeap(), 0x00, pszBuff);
+			pszBuff = NULL;
+		}
 
-	return macs;
-}
+		return macs;
+	}
 
-static std::string hexStr(const uint8_t* data, int len)
-{
-    std::stringstream ss;
-    ss << std::hex;
+	static std::string hexStr(const uint8_t* data, int len)
+	{
+		std::stringstream ss;
+		ss << std::hex;
 
-    for (int i(0); i < len; ++i)
-        ss << std::setw(2) << std::setfill('0') << (int)data[i];
+		for (int i(0); i < len; ++i)
+			ss << std::setw(2) << std::setfill('0') << (int)data[i];
 
-    return ss.str();
-}
+		return ss.str();
+	}
 
-static int RetriveLocalMacAddress(ULONG ulFlags, ULONG ulFamily, unsigned char** pszAddress)
-{
-    PIP_ADAPTER_ADDRESSES pCurrAddresses = NULL;
-    PIP_ADAPTER_ADDRESSES pAddresses = NULL;
+	static int RetriveLocalMacAddress(ULONG ulFlags, ULONG ulFamily, unsigned char** pszAddress)
+	{
+		PIP_ADAPTER_ADDRESSES pCurrAddresses = NULL;
+		PIP_ADAPTER_ADDRESSES pAddresses = NULL;
 
-    int nAddressCount = 0;
-    DWORD dwRetVal = 0;
-    ULONG ulBufLen = sizeof(IP_ADAPTER_ADDRESSES);
-    HANDLE hHeap = NULL;
+		int nAddressCount = 0;
+		DWORD dwRetVal = 0;
+		ULONG ulBufLen = sizeof(IP_ADAPTER_ADDRESSES);
+		HANDLE hHeap = NULL;
 
-    hHeap = GetProcessHeap();
-    pAddresses = (PIP_ADAPTER_ADDRESSES)HeapAlloc(hHeap, 0x00, ulBufLen);
-    if (pAddresses == NULL) {
-        return 0;
-    }
+		hHeap = GetProcessHeap();
+		pAddresses = (PIP_ADAPTER_ADDRESSES)HeapAlloc(hHeap, 0x00, ulBufLen);
+		if (pAddresses == NULL) {
+			return 0;
+		}
 
-    dwRetVal = GetAdaptersAddresses(ulFamily, ulFlags, NULL, pAddresses, &ulBufLen);
-    if (dwRetVal == ERROR_BUFFER_OVERFLOW)
-    {
-        HeapFree(hHeap, 0x00, pAddresses);
-        pAddresses = (PIP_ADAPTER_ADDRESSES)HeapAlloc(hHeap, 0x00, ulBufLen);
-    }
+		dwRetVal = GetAdaptersAddresses(ulFamily, ulFlags, NULL, pAddresses, &ulBufLen);
+		if (dwRetVal == ERROR_BUFFER_OVERFLOW)
+		{
+			HeapFree(hHeap, 0x00, pAddresses);
+			pAddresses = (PIP_ADAPTER_ADDRESSES)HeapAlloc(hHeap, 0x00, ulBufLen);
+		}
 
-    if (pAddresses == NULL) {
-        return 0;
-    }
+		if (pAddresses == NULL) {
+			return 0;
+		}
 
-    dwRetVal = GetAdaptersAddresses(ulFamily, ulFlags, NULL, pAddresses, &ulBufLen);
-    if (dwRetVal == NO_ERROR)
-    {
-        pCurrAddresses = pAddresses;
-        while (pCurrAddresses)
-        {
-            pCurrAddresses = pCurrAddresses->Next;
-            ++nAddressCount;
-        }
+		dwRetVal = GetAdaptersAddresses(ulFamily, ulFlags, NULL, pAddresses, &ulBufLen);
+		if (dwRetVal == NO_ERROR)
+		{
+			pCurrAddresses = pAddresses;
+			while (pCurrAddresses)
+			{
+				pCurrAddresses = pCurrAddresses->Next;
+				++nAddressCount;
+			}
 
-        *pszAddress = (unsigned char*)HeapAlloc(hHeap, 0x00, MAX_ADAPTER_ADDRESS_LENGTH * nAddressCount);
-        pCurrAddresses = pAddresses;
-        nAddressCount = 0;
-        while (pCurrAddresses)
-        {
-            RtlCopyMemory(*pszAddress + (MAX_ADAPTER_ADDRESS_LENGTH * nAddressCount++),
-                pCurrAddresses->PhysicalAddress,
-                MAX_ADAPTER_ADDRESS_LENGTH);
-            pCurrAddresses = pCurrAddresses->Next;
-        }
-    }
+			*pszAddress = (unsigned char*)HeapAlloc(hHeap, 0x00, MAX_ADAPTER_ADDRESS_LENGTH * nAddressCount);
+			pCurrAddresses = pAddresses;
+			nAddressCount = 0;
+			while (pCurrAddresses)
+			{
+				RtlCopyMemory(*pszAddress + (MAX_ADAPTER_ADDRESS_LENGTH * nAddressCount++),
+					pCurrAddresses->PhysicalAddress,
+					MAX_ADAPTER_ADDRESS_LENGTH);
+				pCurrAddresses = pCurrAddresses->Next;
+			}
+		}
 
-    if (pAddresses) {
-        HeapFree(hHeap, 0x00, pAddresses);
-        pAddresses = NULL;
-    }
-    return nAddressCount;
+		if (pAddresses) {
+			HeapFree(hHeap, 0x00, pAddresses);
+			pAddresses = NULL;
+		}
+		return nAddressCount;
+	}
 }

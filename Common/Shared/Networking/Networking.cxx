@@ -1,135 +1,137 @@
 #include "Networking.hxx"
 
-bool MessageReceiver::ProcessEvent(const ENetEvent& event)
-{
-	bool return_value = false;
+namespace universelan {
+	bool MessageReceiver::ProcessEvent(const ENetEvent& event)
+	{
+		bool return_value = false;
 
-	switch (event.type)
-	{
-	case ENET_EVENT_TYPE_RECEIVE:
-	{
-		//Handle packet
-		ENetPacket* packet = event.packet;
-		if (packet->dataLength >= sizeof(uint64_t))
+		switch (event.type)
 		{
-			uint64_t unique_class_id = (*reinterpret_cast<uint64_t*>(packet->data));
+		case ENET_EVENT_TYPE_RECEIVE:
+		{
+			//Handle packet
+			ENetPacket* packet = event.packet;
+			if (packet->dataLength >= sizeof(uint64_t))
+			{
+				uint64_t unique_class_id = (*reinterpret_cast<uint64_t*>(packet->data));
 
-			#define SHARED_NETWORK_IMPLEMENT_CASE_FOR(class_name) \
+#define SHARED_NETWORK_IMPLEMENT_CASE_FOR(class_name) \
 					case class_name::UniqueClassId(): { return_value = ProcessEventFor<class_name>(event); } break
 
-			#pragma warning( push )
-			#pragma warning( disable : 4307 )
+#pragma warning( push )
+#pragma warning( disable : 4307 )
 
-			switch (unique_class_id)
-			{
-				SHARED_NETWORK_IMPLEMENT_ALL_CASES();
+				switch (unique_class_id)
+				{
+					SHARED_NETWORK_IMPLEMENT_ALL_CASES();
+				}
+
+#pragma warning( pop )
+
+#undef SHARED_NETWORK_IMPLEMENT_CASE_FOR
 			}
 
-			#pragma warning( pop )
+			/* Clean up the packet now that we're done using it. */
+			enet_packet_destroy(event.packet);
 
-			#undef SHARED_NETWORK_IMPLEMENT_CASE_FOR
+			break;
 		}
 
-		/* Clean up the packet now that we're done using it. */
-		enet_packet_destroy(event.packet);
-
-		break;
-	}
-
-	case ENET_EVENT_TYPE_CONNECT:
-	{
-		Handle(event.peer, std::make_shared<EventConnect>());
-		return_value = true;
-		break;
-	}
-
-	case ENET_EVENT_TYPE_DISCONNECT:
-	{
-		Handle(event.peer, std::make_shared<EventDisconnect>());
-		return_value = true;
-		break;
-	}
-
-	case ENET_EVENT_TYPE_NONE:
-		//no warnings plz
-		return_value = true;
-		break;
-
-	}
-	return return_value;
-}
-
-void GalaxyNetworkClient::RunNetworking(uint32_t timeout)
-{
-	ENetPacket* packet = nullptr;
-	while (delayed_packets_to_send.try_pop(packet))
-	{
-		NetworkClient::Send(packet);
-	}
-
-	if (NetworkClient::Pull(timeout))
-	{
-		ENetEvent event = NetworkClient::Event();
-		if (event.type != ENET_EVENT_TYPE_NONE)
+		case ENET_EVENT_TYPE_CONNECT:
 		{
-			if (IsActive() || event.type != ENET_EVENT_TYPE_RECEIVE)
-			{
-				received_events_to_process.push(event);
-			}
-			else if (!IsActive() && event.type == ENET_EVENT_TYPE_RECEIVE)
-			{
-				ENetPacket* packet = event.packet;
-				if (packet->dataLength >= sizeof(uint64_t))
-				{
-					uint64_t unique_class_id = (*reinterpret_cast<uint64_t*>(packet->data));
+			Handle(event.peer, std::make_shared<EventConnect>());
+			return_value = true;
+			break;
+		}
 
-					#define SHARED_NETWORK_IMPLEMENT_CASE_FOR(class_name) \
+		case ENET_EVENT_TYPE_DISCONNECT:
+		{
+			Handle(event.peer, std::make_shared<EventDisconnect>());
+			return_value = true;
+			break;
+		}
+
+		case ENET_EVENT_TYPE_NONE:
+			//no warnings plz
+			return_value = true;
+			break;
+
+		}
+		return return_value;
+	}
+
+	void GalaxyNetworkClient::RunNetworking(uint32_t timeout)
+	{
+		ENetPacket* packet = nullptr;
+		while (delayed_packets_to_send.try_pop(packet))
+		{
+			NetworkClient::Send(packet);
+		}
+
+		if (NetworkClient::Pull(timeout))
+		{
+			ENetEvent event = NetworkClient::Event();
+			if (event.type != ENET_EVENT_TYPE_NONE)
+			{
+				if (IsActive() || event.type != ENET_EVENT_TYPE_RECEIVE)
+				{
+					received_events_to_process.push(event);
+				}
+				else if (!IsActive() && event.type == ENET_EVENT_TYPE_RECEIVE)
+				{
+					ENetPacket* packet = event.packet;
+					if (packet->dataLength >= sizeof(uint64_t))
+					{
+						uint64_t unique_class_id = (*reinterpret_cast<uint64_t*>(packet->data));
+
+#define SHARED_NETWORK_IMPLEMENT_CASE_FOR(class_name) \
 						case class_name::UniqueClassId(): \
 						{ \
 							received_events_to_process.push(event); \
 						} \
 						break;
 
-					#pragma warning( push )
-					#pragma warning( disable : 4307 )
+#pragma warning( push )
+#pragma warning( disable : 4307 )
 
-					switch (unique_class_id)
-					{
-						SHARED_NETWORK_IMPLEMENT_ALL_CASES();
+						switch (unique_class_id)
+						{
+							SHARED_NETWORK_IMPLEMENT_ALL_CASES();
 
-					default:
-						break;
+						default:
+							break;
+						}
+
+#pragma warning( pop )
+
+#undef SHARED_NETWORK_IMPLEMENT_CASE_FOR
 					}
-
-					#pragma warning( pop )
-
-					#undef SHARED_NETWORK_IMPLEMENT_CASE_FOR
 				}
 			}
 		}
 	}
-}
 
-void GalaxyNetworkClient::ProcessEvents(MessageReceiver* receiver)
-{
-	ENetEvent event;
-
-	while (received_events_to_process.try_pop(event))
+	void GalaxyNetworkClient::ProcessEvents(MessageReceiver* receiver)
 	{
-		receiver->ProcessEvent(event);
+		ENetEvent event;
+
+		while (received_events_to_process.try_pop(event))
+		{
+			receiver->ProcessEvent(event);
+		}
 	}
-}
 
-GalaxyNetworkClient::GalaxyNetworkClient()
-	: is_active(true)
-{ }
+	GalaxyNetworkClient::GalaxyNetworkClient()
+		: is_active(true)
+	{ }
 
-void GalaxyNetworkClient::SetActive(bool active)
-{
-	is_active = active;
-}
+	void GalaxyNetworkClient::SetActive(bool active)
+	{
+		is_active = active;
+	}
 
-bool GalaxyNetworkClient::IsActive() const
-{
-	return is_active;
+	bool GalaxyNetworkClient::IsActive() const
+	{
+		return is_active;
+	}
 }

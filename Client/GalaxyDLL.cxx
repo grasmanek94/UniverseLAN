@@ -13,7 +13,9 @@
 #include <memory>
 
 namespace galaxy::api {
+	using namespace universelan;
 	using namespace universelan::client;
+
 	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Init(const InitOptions& initOptions) {
 		intf_inst.init(initOptions);
 
