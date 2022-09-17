@@ -201,21 +201,21 @@ namespace galaxy
 		}
 
 		void StatsImpl::RequestUserTimePlayed(GalaxyID userID, IUserTimePlayedRetrieveListener* const listener) {
-			if (intf->config->IsSelfUserID(userID)) {
+			//if (intf->config->IsSelfUserID(userID)) {
 				listeners->NotifyAll(listener, &IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveSuccess, userID);
-			} else {
-				// TODO implement
-				listeners->NotifyAll(listener, &IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveSuccess, userID);
-			}
+			//} else {
+			// TODO implement
+			//	listeners->NotifyAll(listener, &IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveSuccess, userID);
+			//}
 		}
 
 		uint32_t StatsImpl::GetUserTimePlayed(GalaxyID userID) {
-			if (intf->config->IsSelfUserID(userID)) {
+			//if (intf->config->IsSelfUserID(userID)) {
 				return intf->config->GetPlayTime();
-			} else {
-				// TODO: update
-				return intf->config->GetPlayTime();
-			}
+			//} else {
+			// TODO: update
+			//	return intf->config->GetPlayTime();
+			//}
 		}
 	}
 }

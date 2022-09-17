@@ -99,6 +99,7 @@ namespace galaxy
 		void UserImpl::RequestUserData(GalaxyID userID, ISpecificUserDataListener* const listener) {
 			if (intf->config->IsSelfUserID(userID)) {
 				listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, userID);
+				listeners->NotifyAll<IUserDataListener>(&IUserDataListener::OnUserDataUpdated);
 			}
 			else {
 				uint64_t request_id = MessageUniqueID::get();
@@ -111,10 +112,15 @@ namespace galaxy
 		void UserImpl::SpecificUserDataRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
 			ISpecificUserDataListener* listener = specific_user_data_requests.pop(data->request_id);
 			
-			auto entry = GetGalaxyUserData(data->id);
-			entry->stats = data->asuc;
+			if (data->found) {
+				auto entry = GetGalaxyUserData(data->id);
+				entry->stats = data->asuc;
 
-			listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, data->id);
+				listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, data->id);
+			}
+			else {
+				listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, data->id);
+			}
 		}
 
 		bool UserImpl::IsUserDataAvailable(GalaxyID userID) {
@@ -167,6 +173,7 @@ namespace galaxy
 			intf->config->SaveStatsAndAchievements();
 
 			listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, intf->config->GetApiGalaxyID());
+			listeners->NotifyAll<IUserDataListener>(&IUserDataListener::OnUserDataUpdated);
 		}
 
 		uint32_t UserImpl::GetUserDataCount(GalaxyID userID) {
@@ -176,7 +183,7 @@ namespace galaxy
 			else {
 				auto entry = GetGalaxyUserData(userID);
 				return (uint32_t)entry->stats.UserData.size();
-			}	
+			}
 		}
 
 		bool UserImpl::GetUserDataByIndex(uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength, GalaxyID userID) {
@@ -208,10 +215,7 @@ namespace galaxy
 		}
 
 		void UserImpl::DeleteUserData(const char* key, ISpecificUserDataListener* const listener) {
-			intf->config->SetUserData(key, "");
-			intf->config->SaveStatsAndAchievements();
-
-			listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, intf->config->GetApiGalaxyID());
+			SetUserData(key, "", listener);
 		}
 
 		bool UserImpl::IsLoggedOn() {
@@ -228,19 +232,19 @@ namespace galaxy
 		}
 
 		SessionID UserImpl::GetSessionID() {
-			return 1;
+			return (uint64_t)this;
 		}
 
 		const char* UserImpl::GetAccessToken() {
-			return " ";
+			return "95959595959595959595959595";
 		}
 
 		void UserImpl::GetAccessTokenCopy(char* buffer, uint32_t bufferLength) {
-			buffer[0] = ' ';
-			buffer[1] = 0;
+			std::copy_n(GetAccessToken(), std::min((uint32_t)strlen(GetAccessToken()), bufferLength), buffer);
 		}
 
 		bool UserImpl::ReportInvalidAccessToken(const char* accessToken, const char* info) {
+			listeners->NotifyAll<IAccessTokenListener>(&IAccessTokenListener::OnAccessTokenChanged);
 			return true;
 		}
 
