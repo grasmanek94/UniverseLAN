@@ -12,86 +12,83 @@
 #include <fstream>
 #include <mutex>
 
-namespace galaxy
-{
-	namespace api
+namespace universelan::client {
+	using namespace galaxy::api;
+	/**
+	 * @addtogroup api
+	 * @{
+	 */
+
+	 /**
+	  * The interface for logging.
+	  */
+	class LoggerImpl : public ILogger
 	{
-		/**
-		 * @addtogroup api
-		 * @{
-		 */
+	private:
+		using mtx_t = std::mutex;
+		using lock_t = std::scoped_lock<mtx_t>;
+
+		InterfaceInstances* intf;
+		mtx_t mtx;
+		std::ofstream logfile;
+
+		void Log(const char* type, const char* format, ...);
+
+	public:
+		LoggerImpl(InterfaceInstances* intf);
+
+		virtual ~LoggerImpl() override;
 
 		/**
-		 * The interface for logging.
+		 * Creates a log entry with level TRACE.
+		 *
+		 * @param [in] format Format string.
+		 * @param [in] ... Parameters for the format string.
 		 */
-		class LoggerImpl : public ILogger
-		{
-		private:
-			using mtx_t = std::mutex;
-			using lock_t = std::scoped_lock<mtx_t>;
+		virtual void Trace(const char* format, ...) override;
 
-			InterfaceInstances* intf;
-			mtx_t mtx;
-			std::ofstream logfile;
+		/**
+		 * Creates a log entry with level DEBUG.
+		 *
+		 * @param [in] format Format string.
+		 * @param [in] ... Parameters for the format string.
+		 */
+		virtual void Debug(const char* format, ...) override;
 
-			void Log(const char* type, const char* format, ...);
+		/**
+		 * Creates a log entry with level INFO.
+		 *
+		 * @param [in] format Format string.
+		 * @param [in] ... Parameters for the format string.
+		 */
+		virtual void Info(const char* format, ...) override;
 
-		public:
-			LoggerImpl(InterfaceInstances* intf);
+		/**
+		 * Creates a log entry with level WARNING.
+		 *
+		 * @param [in] format Format string.
+		 * @param [in] ... Parameters for the format string.
+		 */
+		virtual void Warning(const char* format, ...) override;
 
-			virtual ~LoggerImpl() override;
+		/**
+		 * Creates a log entry with level ERROR.
+		 *
+		 * @param [in] format Format string.
+		 * @param [in] ... Parameters for the format string.
+		 */
+		virtual void Error(const char* format, ...) override;
 
-			/**
-			 * Creates a log entry with level TRACE.
-			 *
-			 * @param [in] format Format string.
-			 * @param [in] ... Parameters for the format string.
-			 */
-			virtual void Trace(const char* format, ...) override;
+		/**
+		 * Creates a log entry with level FATAL.
+		 *
+		 * @param [in] format Format string.
+		 * @param [in] ... Parameters for the format string.
+		 */
+		virtual void Fatal(const char* format, ...) override;
+	};
 
-			/**
-			 * Creates a log entry with level DEBUG.
-			 *
-			 * @param [in] format Format string.
-			 * @param [in] ... Parameters for the format string.
-			 */
-			virtual void Debug(const char* format, ...) override;
-
-			/**
-			 * Creates a log entry with level INFO.
-			 *
-			 * @param [in] format Format string.
-			 * @param [in] ... Parameters for the format string.
-			 */
-			virtual void Info(const char* format, ...) override;
-
-			/**
-			 * Creates a log entry with level WARNING.
-			 *
-			 * @param [in] format Format string.
-			 * @param [in] ... Parameters for the format string.
-			 */
-			virtual void Warning(const char* format, ...) override;
-
-			/**
-			 * Creates a log entry with level ERROR.
-			 *
-			 * @param [in] format Format string.
-			 * @param [in] ... Parameters for the format string.
-			 */
-			virtual void Error(const char* format, ...) override;
-
-			/**
-			 * Creates a log entry with level FATAL.
-			 *
-			 * @param [in] format Format string.
-			 * @param [in] ... Parameters for the format string.
-			 */
-			virtual void Fatal(const char* format, ...) override;
-		};
-
-		/** @} */
-	}
+	/** @} */
 }
 
 #endif

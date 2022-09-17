@@ -9,109 +9,106 @@
 #include <Errors.h>
 #include <GalaxyExport.h>
 
-namespace galaxy
-{
-	namespace api
+namespace universelan::client {
+	using namespace galaxy::api;
+	/**
+	 * Retrieves error connected with the last API call on the local thread.
+	 *
+	 * @return Either the last API call error or NULL if there was no error.
+	 */
+	GALAXY_DLL_EXPORT const IError* GALAXY_CALLTYPE GetError();
+
+	/**
+	 * @addtogroup api
+	 * @{
+	 */
+
+	 /**
+	  * Base interface for exceptions.
+	  */
+	class Error : public IError
+	{
+	public:
+
+		virtual ~Error();
+
+		/**
+		 * Returns the name of the error.
+		 *
+		 * @return The name of the error.
+		 */
+		virtual const char* GetName() const override;
+
+		/**
+		 * Returns the error message.
+		 *
+		 * @return The error message.
+		 */
+		virtual const char* GetMsg() const override;
+
+		/**
+		 * Returns the type of the error.
+		 *
+		 * @return The type of the error.
+		 */
+		virtual Type GetType() const override;
+	};
+
+	/**
+	 * The exception thrown when calling Galaxy interfaces while
+	 * the user is not signed in and thus not authorized for any interaction.
+	 */
+	class UnauthorizedAccessError : public Error
 	{
 		/**
-		 * Retrieves error connected with the last API call on the local thread.
+		 * Returns the type of the error.
 		 *
-		 * @return Either the last API call error or NULL if there was no error.
+		 * @return The type of the error.
 		 */
-		GALAXY_DLL_EXPORT const IError* GALAXY_CALLTYPE GetError();
+		virtual Type GetType() const override;
+	};
 
+	/**
+	 * The exception thrown to report that a method was called with an invalid argument.
+	 */
+	class InvalidArgumentError : public Error
+	{
 		/**
-		 * @addtogroup api
-		 * @{
+		 * Returns the type of the error.
+		 *
+		 * @return The type of the error.
 		 */
+		virtual Type GetType() const override;
+	};
 
-		 /**
-		  * Base interface for exceptions.
-		  */
-		class Error : public IError
-		{
-		public:
-
-			virtual ~Error();
-
-			/**
-			 * Returns the name of the error.
-			 *
-			 * @return The name of the error.
-			 */
-			virtual const char* GetName() const override;
-
-			/**
-			 * Returns the error message.
-			 *
-			 * @return The error message.
-			 */
-			virtual const char* GetMsg() const override;
-
-			/**
-			 * Returns the type of the error.
-			 *
-			 * @return The type of the error.
-			 */
-			virtual Type GetType() const override;
-		};
-
+	/**
+	 * The exception thrown to report that a method was called while the callee is in
+	 * an invalid state, i.e. should not have been called the way it was at that time.
+	 */
+	class InvalidStateError : public Error
+	{
 		/**
-		 * The exception thrown when calling Galaxy interfaces while
-		 * the user is not signed in and thus not authorized for any interaction.
+		 * Returns the type of the error.
+		 *
+		 * @return The type of the error.
 		 */
-		class UnauthorizedAccessError : public Error
-		{
-			/**
-			 * Returns the type of the error.
-			 *
-			 * @return The type of the error.
-			 */
-			virtual Type GetType() const override;
-		};
+		virtual Type GetType() const override;
+	};
 
+	/**
+	 * The exception thrown to report errors that can only be detected during runtime.
+	 */
+	class RuntimeError : public Error
+	{
 		/**
-		 * The exception thrown to report that a method was called with an invalid argument.
+		 * Returns the type of the error.
+		 *
+		 * @return The type of the error.
 		 */
-		class InvalidArgumentError : public Error
-		{
-			/**
-			 * Returns the type of the error.
-			 *
-			 * @return The type of the error.
-			 */
-			virtual Type GetType() const override;
-		};
+		virtual Type GetType() const override;
+	};
 
-		/**
-		 * The exception thrown to report that a method was called while the callee is in
-		 * an invalid state, i.e. should not have been called the way it was at that time.
-		 */
-		class InvalidStateError : public Error
-		{
-			/**
-			 * Returns the type of the error.
-			 *
-			 * @return The type of the error.
-			 */
-			virtual Type GetType() const override;
-		};
-
-		/**
-		 * The exception thrown to report errors that can only be detected during runtime.
-		 */
-		class RuntimeError : public Error
-		{
-			/**
-			 * Returns the type of the error.
-			 *
-			 * @return The type of the error.
-			 */
-			virtual Type GetType() const override;
-		};
-
-		/** @} */
-	}
+	/** @} */
 }
 
 #endif

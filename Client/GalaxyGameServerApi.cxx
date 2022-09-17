@@ -9,66 +9,64 @@
 
 #include <memory>
 
-namespace galaxy
-{
-	namespace api
-	{
-		InterfaceInstances gameserver_intf_inst;
+namespace galaxy::api {
+	using namespace universelan::client;
 
-		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE InitGameServer(const InitOptions& initOptions) {
-			gameserver_intf_inst.init(initOptions);
+	InterfaceInstances gameserver_intf_inst;
 
-			if (gameserver_intf_inst.config->GetEnableConsole()) {
-				EnableCustomConsole();
-			}
+	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE InitGameServer(const InitOptions& initOptions) {
+		gameserver_intf_inst.init(initOptions);
 
-			std::cout << "Version: " << Version_Number << std::endl;
-			std::cout << "Using username: " << gameserver_intf_inst.config->GetCustomPersonaName() << std::endl;
-			std::cout << "Using GalaxyID: " << gameserver_intf_inst.config->GetCustomGalaxyID() << std::endl;
-
-			gameserver_intf_inst.client->Start();
+		if (gameserver_intf_inst.config->GetEnableConsole()) {
+			EnableCustomConsole();
 		}
 
-		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE ShutdownGameServer() {
-			gameserver_intf_inst.reset();
-		}
+		std::cout << "Version: " << Version_Number << std::endl;
+		std::cout << "Using username: " << gameserver_intf_inst.config->GetCustomPersonaName() << std::endl;
+		std::cout << "Using GalaxyID: " << gameserver_intf_inst.config->GetCustomGalaxyID() << std::endl;
 
-		GALAXY_DLL_EXPORT IUser* GALAXY_CALLTYPE GameServerUser() {
-			return gameserver_intf_inst.user.get();
-		}
+		gameserver_intf_inst.client->Start();
+	}
 
-		GALAXY_DLL_EXPORT IMatchmaking* GALAXY_CALLTYPE GameServerMatchmaking() {
-			return gameserver_intf_inst.matchmaking.get();
-		}
+	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE ShutdownGameServer() {
+		gameserver_intf_inst.reset();
+	}
 
-		GALAXY_DLL_EXPORT INetworking* GALAXY_CALLTYPE GameServerNetworking() {
-			return gameserver_intf_inst.networking.get();
-		}
+	GALAXY_DLL_EXPORT IUser* GALAXY_CALLTYPE GameServerUser() {
+		return gameserver_intf_inst.user.get();
+	}
 
-		GALAXY_DLL_EXPORT INetworking* GALAXY_CALLTYPE ServerNetworking() {
-			return gameserver_intf_inst.networking.get();
-		}
+	GALAXY_DLL_EXPORT IMatchmaking* GALAXY_CALLTYPE GameServerMatchmaking() {
+		return gameserver_intf_inst.matchmaking.get();
+	}
 
-		GALAXY_DLL_EXPORT IUtils* GALAXY_CALLTYPE GameServerUtils() {
-			return gameserver_intf_inst.utils.get();
-		}
+	GALAXY_DLL_EXPORT INetworking* GALAXY_CALLTYPE GameServerNetworking() {
+		return gameserver_intf_inst.networking.get();
+	}
 
-		GALAXY_DLL_EXPORT ITelemetry* GALAXY_CALLTYPE GameServerTelemetry() {
-			return gameserver_intf_inst.telemetry.get();
-		}
+	GALAXY_DLL_EXPORT INetworking* GALAXY_CALLTYPE ServerNetworking() {
+		return gameserver_intf_inst.networking.get();
+	}
 
-		GALAXY_DLL_EXPORT ILogger* GALAXY_CALLTYPE GameServerLogger() {
-			return gameserver_intf_inst.logger.get();
-		}
+	GALAXY_DLL_EXPORT IUtils* GALAXY_CALLTYPE GameServerUtils() {
+		return gameserver_intf_inst.utils.get();
+	}
 
-		GALAXY_DLL_EXPORT IListenerRegistrar* GALAXY_CALLTYPE GameServerListenerRegistrar() {
-			return gameserver_intf_inst.notification.get();
-		}
+	GALAXY_DLL_EXPORT ITelemetry* GALAXY_CALLTYPE GameServerTelemetry() {
+		return gameserver_intf_inst.telemetry.get();
+	}
 
-		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE ProcessGameServerData() {
-			if (gameserver_intf_inst.client != nullptr) {
-				gameserver_intf_inst.client->ProcessEvents();
-			}
+	GALAXY_DLL_EXPORT ILogger* GALAXY_CALLTYPE GameServerLogger() {
+		return gameserver_intf_inst.logger.get();
+	}
+
+	GALAXY_DLL_EXPORT IListenerRegistrar* GALAXY_CALLTYPE GameServerListenerRegistrar() {
+		return gameserver_intf_inst.notification.get();
+	}
+
+	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE ProcessGameServerData() {
+		if (gameserver_intf_inst.client != nullptr) {
+			gameserver_intf_inst.client->ProcessEvents();
 		}
 	}
 }

@@ -7,30 +7,32 @@
 #include <atomic>
 #include <thread>
 
-class Client: public MessageReceiver
-{
-private:
-	galaxy::api::InterfaceInstances* interfaces;
-	std::atomic_bool running;
-	std::thread tick_thread;
-	GalaxyNetworkClient connection;
+namespace universelan::client {
+	class Client : public MessageReceiver
+	{
+	private:
+		InterfaceInstances* interfaces;
+		std::atomic_bool running;
+		std::thread tick_thread;
+		GalaxyNetworkClient connection;
 
-	// Handlers:
-	virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data) override;
-	virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data) override;
+		// Handlers:
+		virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data) override;
+		virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data) override;
 
-	SHARED_NETWORK_OVERRIDE_MESSAGE_HANDLERS();
+		SHARED_NETWORK_OVERRIDE_MESSAGE_HANDLERS();
 
-	void Tick();
+		void Tick();
 
-public:
+	public:
 
-	Client(galaxy::api::InterfaceInstances* interfaces);
-	virtual ~Client();
+		Client(InterfaceInstances* interfaces);
+		virtual ~Client();
 
-	void Start();
-	void Stop();
-	void ProcessEvents();
+		void Start();
+		void Stop();
+		void ProcessEvents();
 
-	const GalaxyNetworkClient& GetConnection() const;
-};
+		const GalaxyNetworkClient& GetConnection() const;
+	};
+}

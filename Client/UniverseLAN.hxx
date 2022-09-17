@@ -32,12 +32,9 @@
 
 #include "GalaxyGameServerApi.hxx"
 
-namespace galaxy
-{
-	namespace api
-	{
-		extern InterfaceInstances intf_inst;
-	}
+namespace universelan::client {
+	using namespace galaxy::api;
+	extern InterfaceInstances intf_inst;
 }
 
 #endif

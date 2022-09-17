@@ -10,43 +10,41 @@
 #include <thread>
 #include <vector>
 
-namespace galaxy
-{
-	namespace api
+namespace universelan::client {
+	using namespace galaxy::api;
+	LoggerImpl::LoggerImpl(InterfaceInstances* intf) :
+		intf{ intf }, mtx{}, logfile{}
 	{
-		LoggerImpl::LoggerImpl(InterfaceInstances* intf) :
-			intf{ intf }, mtx{}, logfile{}
-		{
-			static std::atomic_int counter = 0;
+		static std::atomic_int counter = 0;
 
-			auto t = std::time(nullptr);
+		auto t = std::time(nullptr);
 
 #pragma warning( push )
 #pragma warning( disable : 4996 )
-			auto tm = *std::localtime(&t);
+		auto tm = *std::localtime(&t);
 #pragma warning( pop )
 
-			std::ostringstream path;
+		std::ostringstream path;
 
-			int count = counter.fetch_add(1);
+		int count = counter.fetch_add(1);
 
-			path << (std::filesystem::path(intf->config->GetGameDataPath()) / "Logging" / "L")
-				<< std::put_time(&tm, "%Y-%m-%d_%H-%M-%S")
-				<< "-" << std::this_thread::get_id() << "-" << count << ".log";
+		path << (std::filesystem::path(intf->config->GetGameDataPath()) / "Logging" / "L")
+			<< std::put_time(&tm, "%Y-%m-%d_%H-%M-%S")
+			<< "-" << std::this_thread::get_id() << "-" << count << ".log";
 
-			logfile = std::ofstream{ path.str() };
-			if (!logfile) {
-				std::cerr << "Error opening for write: " << path.str() << std::endl;
-			}
+		logfile = std::ofstream{ path.str() };
+		if (!logfile) {
+			std::cerr << "Error opening for write: " << path.str() << std::endl;
 		}
+	}
 
-		LoggerImpl::~LoggerImpl()
-		{
-			if (logfile) {
-				lock_t lock(mtx);
-				logfile.flush();
-			}
+	LoggerImpl::~LoggerImpl()
+	{
+		if (logfile) {
+			lock_t lock(mtx);
+			logfile.flush();
 		}
+	}
 
 #define Log(type) \
 			if (logfile) { \
@@ -68,30 +66,29 @@ namespace galaxy
 				logfile << type << "[" << std::this_thread::get_id() << "] " << logstr << '\n'; \
 			}
 
-		void LoggerImpl::Trace(const char* format, ...) {
-			Log("[T]");
-		}
+	void LoggerImpl::Trace(const char* format, ...) {
+		Log("[T]");
+	}
 
-		void LoggerImpl::Debug(const char* format, ...) {
-			Log("[D]");
-		}
+	void LoggerImpl::Debug(const char* format, ...) {
+		Log("[D]");
+	}
 
-		void LoggerImpl::Info(const char* format, ...) {
-			Log("[I]");
-		}
+	void LoggerImpl::Info(const char* format, ...) {
+		Log("[I]");
+	}
 
-		void LoggerImpl::Warning(const char* format, ...) {
-			Log("[W]");
-		}
+	void LoggerImpl::Warning(const char* format, ...) {
+		Log("[W]");
+	}
 
-		void LoggerImpl::Error(const char* format, ...) {
-			Log("[E]");
-		}
+	void LoggerImpl::Error(const char* format, ...) {
+		Log("[E]");
+	}
 
-		void LoggerImpl::Fatal(const char* format, ...) {
-			Log("[F]");
-		}
+	void LoggerImpl::Fatal(const char* format, ...) {
+		Log("[F]");
+	}
 
 #undef Log
-	}
 }
