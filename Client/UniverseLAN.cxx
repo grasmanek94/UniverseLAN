@@ -4,11 +4,10 @@
  */
 
 #include "Client.hxx"
-#include "CustomConsole.hxx"
 #include "UniverseLAN.hxx"
+#include "InterfaceInstances.hxx"
 
 #include <IniData.hxx>
-#include <Version.hxx>
 
 #include <memory>
 

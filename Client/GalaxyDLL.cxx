@@ -3,14 +3,10 @@
  * Includes all other files that are needed to work with the Galaxy library.
  */
 
-#include "Client.hxx"
 #include "CustomConsole.hxx"
 #include "UniverseLAN.hxx"
 
-#include <IniData.hxx>
 #include <Version.hxx>
-
-#include <memory>
 
 namespace galaxy::api {
 	using namespace universelan;
