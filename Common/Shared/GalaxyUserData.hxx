@@ -8,16 +8,10 @@
 #include <unordered_map>
 
 namespace universelan {
+	using namespace galaxy::api;
 	class GalaxyUserData {
 	public:
-		struct Hash {
-			std::size_t operator()(const galaxy::api::GalaxyID& k) const
-			{
-				return std::hash<uint64_t>()(k.ToUint64());
-			}
-		};
-
-		using map_t = std::unordered_map<galaxy::api::GalaxyID, std::shared_ptr<GalaxyUserData>, Hash>;
+		using map_t = std::unordered_map<GalaxyID, std::shared_ptr<GalaxyUserData>, GalaxyID::Hash>;
 
 		GalaxyUserData(galaxy::api::GalaxyID id);
 
