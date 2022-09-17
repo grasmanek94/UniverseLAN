@@ -5,7 +5,7 @@ namespace galaxy
 	namespace api
 	{
 		UtilsImpl::UtilsImpl(InterfaceInstances* intf) :
-			intf{ intf }, listeners{ intf->listener_registrar_impl.get() }
+			intf{ intf }, listeners{ intf->notification.get() }
 		{}
 
 		UtilsImpl::~UtilsImpl()

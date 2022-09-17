@@ -79,7 +79,7 @@ namespace galaxy
 		{ }
 
 		CustomNetworkingImpl::CustomNetworkingImpl(InterfaceInstances* intf) :
-			listeners{ intf->listener_registrar_impl.get() }, mtx{}, channels{}
+			listeners{ intf->notification.get() }, mtx{}, channels{}
 		{ }
 
 		CustomNetworkingImpl::~CustomNetworkingImpl()

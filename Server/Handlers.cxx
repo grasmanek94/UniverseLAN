@@ -54,13 +54,12 @@ void Server::Handle(ENetPeer* peer, const std::shared_ptr<UserHelloDataMessage>&
 
 	pd->id = data->id;
 
-	auto entry = user_data.emplace(pd->id, std::move(GalaxyUserData{pd->id}));
+	auto entry = user_data.emplace(pd->id, std::make_shared<GalaxyUserData>(pd->id));
 	if (!entry.second) { // id already exists
 		connection.Disconnect(peer);
 	}
 	else {
-		auto& current_user_data = entry.first->second;
-		current_user_data.stats = data->asuc;
+		entry.first->second->stats = data->asuc;
 	}
 }
 
@@ -77,7 +76,7 @@ void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestSpecificUserDat
 	}
 	else {
 		response.found = true;
-		response.asuc = found->second.stats;
+		response.asuc = found->second->stats;
 	}
 
 	connection.Send(peer, response);

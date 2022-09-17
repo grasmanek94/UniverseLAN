@@ -1,9 +1,10 @@
 #pragma once
 
-#include <GalaxyApi.h>
+#include <GalaxyID.h>
 
 #include <AchievementsAndStatsContainer.hxx>
 
+#include <memory>
 #include <unordered_map>
 
 class GalaxyUserData {
@@ -15,7 +16,7 @@ public:
 		}
 	};
 
-	using map_t = std::unordered_map<galaxy::api::GalaxyID, GalaxyUserData, Hash>;
+	using map_t = std::unordered_map<galaxy::api::GalaxyID, std::shared_ptr<GalaxyUserData>, Hash>;
 
 	GalaxyUserData(galaxy::api::GalaxyID id);
 

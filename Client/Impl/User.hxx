@@ -7,6 +7,8 @@
  */
 #include "ListenerRegistrar.hxx"
 
+#include <GalaxyUserData.hxx>
+
 #include <Networking/Messages/RequestSpecificUserDataMessage.hxx>
 
 #include <IUser.h>
@@ -15,6 +17,7 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <unordered_map>
 
 namespace galaxy
@@ -26,14 +29,21 @@ namespace galaxy
 		 * @{
 		 */
 
-		/**
-		 * The interface for handling the user account.
-		 */
+		 /**
+		  * The interface for handling the user account.
+		  */
 		class UserImpl : public IUser
 		{
+		public:
+			using mutex_t = std::recursive_mutex;
+			using lock_t = std::scoped_lock<mutex_t>;
+
 		private:
+			mutex_t mtx_user_data;
+
 			InterfaceInstances* intf;
 			ListenerRegistrarImpl* listeners;
+			GalaxyUserData::map_t user_data;
 
 			template<typename T>
 			struct AuthListenersHelper {
@@ -47,8 +57,23 @@ namespace galaxy
 					lock_t lock(mtx);
 					func();
 				}
+
+				void emplace(uint64_t request_id, T* listener) {
+					lock_t lock(mtx);
+					map.emplace(request_id, listener);
+				}
+
+				T* pop(uint64_t request_id) {
+					lock_t lock(mtx);
+					auto it = map.find(request_id);
+					if (it == map.end()) {
+						return nullptr;
+					}
+					map.erase(it);
+					return it->second;
+				}
 			};
-			
+
 			AuthListenersHelper<ISpecificUserDataListener> specific_user_data_requests;
 
 		public:
@@ -484,7 +509,7 @@ namespace galaxy
 			virtual bool ReportInvalidAccessToken(const char* accessToken, const char* info = NULL) override;
 
 			void SpecificUserDataRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
-
+			std::shared_ptr<GalaxyUserData> GetGalaxyUserData(GalaxyID userID);
 		};
 
 		/** @} */

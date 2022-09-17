@@ -8,7 +8,7 @@
 class RequestSpecificUserDataMessage
 {
 public:
-	MessageUniqueID request_id;
+	uint64_t request_id;
 	galaxy::api::GalaxyID id;
 	bool found;
 	AchievementsAndStatsContainer asuc;
@@ -23,5 +23,5 @@ public:
 
 	RequestSpecificUserDataMessage() : request_id{}, id{}, found{ false }, asuc{} {}
 	RequestSpecificUserDataMessage(const galaxy::api::GalaxyID& id) : request_id{}, id{ id }, found{ false }, asuc{} {}
-	RequestSpecificUserDataMessage(MessageUniqueID request_id, const galaxy::api::GalaxyID& id) : request_id{ request_id }, id{ id }, found{ false }, asuc{} {}
+	RequestSpecificUserDataMessage(uint64_t request_id, const galaxy::api::GalaxyID& id) : request_id{ request_id }, id{ id }, found{ false }, asuc{} {}
 };

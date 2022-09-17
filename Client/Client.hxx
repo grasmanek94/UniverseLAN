@@ -7,7 +7,6 @@
 #include <atomic>
 #include <thread>
 
-
 class Client: public MessageReceiver
 {
 private:

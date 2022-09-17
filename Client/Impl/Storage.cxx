@@ -24,7 +24,7 @@ namespace galaxy
 		}
 
 		StorageImpl::StorageImpl(InterfaceInstances* intf) :
-			intf{ intf }, listeners{ intf->listener_registrar_impl.get() }
+			intf{ intf }, listeners{ intf->notification.get() }
 		{}
 
 		StorageImpl::~StorageImpl()
@@ -148,5 +148,3 @@ namespace galaxy
 		}
 	}
 }
-
-

@@ -9,7 +9,10 @@ namespace galaxy
 	namespace api
 	{
 		UserImpl::UserImpl(InterfaceInstances* intf) :
-			intf{ intf }, listeners{ intf->listener_registrar_impl.get() }, specific_user_data_requests{ {}, {} }
+			mtx_user_data{}, intf {intf}, 
+			listeners{ intf->notification.get() }, 
+			specific_user_data_requests{ {}, {} },
+			user_data{}
 		{ }
 
 		UserImpl::~UserImpl()
@@ -100,16 +103,18 @@ namespace galaxy
 			else {
 				uint64_t request_id = MessageUniqueID::get();
 
-				specific_user_data_requests.run_locked([&] {
-					specific_user_data_requests.map.emplace(request_id, listener);
-				});
-
+				specific_user_data_requests.emplace(request_id, listener);
 				intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ request_id, userID});
 			}
 		}
 
 		void UserImpl::SpecificUserDataRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
-		
+			ISpecificUserDataListener* listener = specific_user_data_requests.pop(data->request_id);
+			
+			auto entry = GetGalaxyUserData(data->id);
+			entry->stats = data->asuc;
+
+			listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, data->id);
 		}
 
 		bool UserImpl::IsUserDataAvailable(GalaxyID userID) {
@@ -117,7 +122,8 @@ namespace galaxy
 				return true;
 			}
 			else {
-				return false;
+				auto entry = GetGalaxyUserData(userID);
+				return !entry->stats.UserData.empty();
 			}
 		}
 
@@ -126,7 +132,16 @@ namespace galaxy
 				return intf->config->GetUserData(key).c_str();
 			}
 			else {
-				return "";
+				auto entry = GetGalaxyUserData(userID);
+				const char* ret = "";
+				entry->stats.run_locked_userdata([&](AchievementsAndStatsContainer::map_t<std::string>& map) {
+					auto it = map.find(key);
+					if (it != map.end()) {
+						ret = it->second.c_str();
+					}
+				});
+
+				return ret;
 			}
 		}
 
@@ -136,7 +151,14 @@ namespace galaxy
 				std::copy_n(str.begin(), std::min((uint32_t)str.length(), bufferLength), buffer);
 			}
 			else {
-				
+				auto entry = GetGalaxyUserData(userID);
+				entry->stats.run_locked_userdata([&](AchievementsAndStatsContainer::map_t<std::string>& map) {
+					auto it = map.find(key);
+					if (it != map.end()) {
+						const std::string& str = it->second;
+						std::copy_n(str.begin(), std::min((uint32_t)str.length(), bufferLength), buffer);
+					}
+				});
 			}
 		}
 
@@ -152,20 +174,37 @@ namespace galaxy
 				return (uint32_t)intf->config->GetASUC().UserData.size();
 			}
 			else {
-				return 0;
+				auto entry = GetGalaxyUserData(userID);
+				return (uint32_t)entry->stats.UserData.size();
 			}	
 		}
 
 		bool UserImpl::GetUserDataByIndex(uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength, GalaxyID userID) {
 			if (intf->config->IsSelfUserID(userID)) {
-				auto ref = container_get_by_index(intf->config->GetASUC().UserData, index);
+				auto& map = intf->config->GetASUC().UserData;
+				if (map.size() < index) {
+					return false;
+				}
+				auto ref = container_get_by_index(map, index);
 				std::copy_n(ref.first.begin(), std::min((uint32_t)ref.first.length(), keyLength), key);
 				std::copy_n(ref.second.begin(), std::min((uint32_t)ref.second.length(), valueLength), value);
-			}
-			else {
+				return true;
+			} else {
+				bool ret = false;
+				auto entry = GetGalaxyUserData(userID);
+				entry->stats.run_locked_userdata([&](AchievementsAndStatsContainer::map_t<std::string>& map) {
+					if (map.size() < index) {
+						ret = false;
+						return;
+					}
+					ret = true;
 
+					auto ref = container_get_by_index(map, index);
+					std::copy_n(ref.first.begin(), std::min((uint32_t)ref.first.length(), keyLength), key);
+					std::copy_n(ref.second.begin(), std::min((uint32_t)ref.second.length(), valueLength), value);
+				});
+				return ret;
 			}
-			return false;
 		}
 
 		void UserImpl::DeleteUserData(const char* key, ISpecificUserDataListener* const listener) {
@@ -203,6 +242,12 @@ namespace galaxy
 
 		bool UserImpl::ReportInvalidAccessToken(const char* accessToken, const char* info) {
 			return true;
+		}
+
+		std::shared_ptr<GalaxyUserData> UserImpl::GetGalaxyUserData(GalaxyID userID)
+		{
+			lock_t lock(mtx_user_data);
+			return user_data.emplace(userID, std::make_shared<GalaxyUserData>( userID )).first->second;
 		}
 	}
 }

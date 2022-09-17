@@ -24,20 +24,20 @@ namespace galaxy
 			}
 
 			init_options = std::make_unique<InitOptionsModern>(initOptions);
-			listener_registrar_impl = std::make_unique<ListenerRegistrarImpl>(this);
+			notification = std::make_unique<ListenerRegistrarImpl>(this);
 			client = std::make_unique<Client>(this);
-			user_impl = std::make_unique<UserImpl>(this);
-			friends_impl = std::make_unique<FriendsImpl>(this);
-			chat_impl = std::make_unique<ChatImpl>(this);
-			matchmaking_impl = std::make_unique<MatchmakingImpl>(this);
-			networking_impl = std::make_unique<NetworkingImpl>(this);
-			stats_impl = std::make_unique<StatsImpl>(this);
-			utils_impl = std::make_unique<UtilsImpl>(this);
-			apps_impl = std::make_unique<AppsImpl>(this);
-			storage_impl = std::make_unique<StorageImpl>(this);
-			custom_networking_impl = std::make_unique<CustomNetworkingImpl>(this);
-			logger_impl = std::make_unique<LoggerImpl>(this);
-			telemetry_impl = std::make_unique<TelemetryImpl>(this);
+			user = std::make_unique<UserImpl>(this);
+			friends = std::make_unique<FriendsImpl>(this);
+			chat = std::make_unique<ChatImpl>(this);
+			matchmaking = std::make_unique<MatchmakingImpl>(this);
+			networking = std::make_unique<NetworkingImpl>(this);
+			stats = std::make_unique<StatsImpl>(this);
+			utils = std::make_unique<UtilsImpl>(this);
+			apps = std::make_unique<AppsImpl>(this);
+			storage = std::make_unique<StorageImpl>(this);
+			custom_networking = std::make_unique<CustomNetworkingImpl>(this);
+			logger = std::make_unique<LoggerImpl>(this);
+			telemetry = std::make_unique<TelemetryImpl>(this);
 		}
 
 		void InterfaceInstances::reset() {
@@ -45,21 +45,21 @@ namespace galaxy
 				client->Stop();
 			}
 
-			telemetry_impl = nullptr;
-			logger_impl = nullptr;
-			custom_networking_impl = nullptr;
-			storage_impl = nullptr;
-			apps_impl = nullptr;
-			utils_impl = nullptr;
-			stats_impl = nullptr;
-			networking_impl = nullptr;
-			matchmaking_impl = nullptr;
-			chat_impl = nullptr;
-			friends_impl = nullptr;
-			user_impl = nullptr;
+			telemetry = nullptr;
+			logger = nullptr;
+			custom_networking = nullptr;
+			storage = nullptr;
+			apps = nullptr;
+			utils = nullptr;
+			stats = nullptr;
+			networking = nullptr;
+			matchmaking = nullptr;
+			chat = nullptr;
+			friends = nullptr;
+			user = nullptr;
 			init_options = nullptr;
 			client = nullptr;
-			listener_registrar_impl = nullptr;
+			notification = nullptr;
 		}
 
 		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Init(const InitOptions& initOptions) {
@@ -81,51 +81,51 @@ namespace galaxy
 		}
 
 		GALAXY_DLL_EXPORT IUser* GALAXY_CALLTYPE User() {
-			return intf_inst.user_impl.get();
+			return intf_inst.user.get();
 		}
 
 		GALAXY_DLL_EXPORT IFriends* GALAXY_CALLTYPE Friends() {
-			return intf_inst.friends_impl.get();
+			return intf_inst.friends.get();
 		}
 
 		GALAXY_DLL_EXPORT IChat* GALAXY_CALLTYPE Chat() {
-			return intf_inst.chat_impl.get();
+			return intf_inst.chat.get();
 		}
 
 		GALAXY_DLL_EXPORT IMatchmaking* GALAXY_CALLTYPE Matchmaking() {
-			return intf_inst.matchmaking_impl.get();
+			return intf_inst.matchmaking.get();
 		}
 
 		GALAXY_DLL_EXPORT INetworking* GALAXY_CALLTYPE Networking() {
-			return intf_inst.networking_impl.get();
+			return intf_inst.networking.get();
 		}
 
 		GALAXY_DLL_EXPORT IStats* GALAXY_CALLTYPE Stats() {
-			return intf_inst.stats_impl.get();
+			return intf_inst.stats.get();
 		}
 
 		GALAXY_DLL_EXPORT IUtils* GALAXY_CALLTYPE Utils() {
-			return intf_inst.utils_impl.get();
+			return intf_inst.utils.get();
 		}
 
 		GALAXY_DLL_EXPORT IApps* GALAXY_CALLTYPE Apps() {
-			return intf_inst.apps_impl.get();
+			return intf_inst.apps.get();
 		}
 
 		GALAXY_DLL_EXPORT IStorage* GALAXY_CALLTYPE Storage() {
-			return intf_inst.storage_impl.get();
+			return intf_inst.storage.get();
 		}
 
 		GALAXY_DLL_EXPORT ICustomNetworking* GALAXY_CALLTYPE CustomNetworking() {
-			return intf_inst.custom_networking_impl.get();
+			return intf_inst.custom_networking.get();
 		}
 
 		GALAXY_DLL_EXPORT ILogger* GALAXY_CALLTYPE Logger() {
-			return intf_inst.logger_impl.get();
+			return intf_inst.logger.get();
 		}
 
 		GALAXY_DLL_EXPORT ITelemetry* GALAXY_CALLTYPE Telemetry() {
-			return intf_inst.telemetry_impl.get();
+			return intf_inst.telemetry.get();
 		}
 
 		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE ProcessData() {
@@ -135,7 +135,7 @@ namespace galaxy
 		}
 
 		GALAXY_DLL_EXPORT IListenerRegistrar* GALAXY_CALLTYPE ListenerRegistrar() {
-			return intf_inst.listener_registrar_impl.get();
+			return intf_inst.notification.get();
 		}
 
 		GALAXY_DLL_EXPORT const IError* GALAXY_CALLTYPE GetError() {
