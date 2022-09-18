@@ -9,7 +9,7 @@ namespace universelan::client {
 	UserImpl::UserImpl(InterfaceInstances* intf) :
 		mtx_user_data{}, intf{ intf },
 		listeners{ intf->notification.get() },
-		specific_user_data_requests{ {}, {} },
+		specific_user_data_requests{},
 		user_data{}
 	{ }
 

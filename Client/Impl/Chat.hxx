@@ -30,6 +30,7 @@ namespace universelan::client {
 	private:
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
+		ListenersRequestHelper<IChatRoomWithUserRetrieveListener> request_chat_room_with_user_requests;
 
 	public:
 

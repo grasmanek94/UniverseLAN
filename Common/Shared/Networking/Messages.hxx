@@ -7,6 +7,7 @@
 #include "Messages/KeyChallengeMessage.hxx"
 #include "Messages/UserHelloDataMessage.hxx"
 #include "Messages/RequestSpecificUserDataMessage.hxx"
+#include "Messages/RequestChatRoomWithUserMessage.hxx"
 
 namespace universelan {
 #define SHARED_NETWORK_DECLARE_MESSAGE_FOR(class_name) \
@@ -19,17 +20,20 @@ namespace universelan {
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(ConnectionAcceptedMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(KeyChallengeMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(RequestSpecificUserDataMessage); \
+	SHARED_NETWORK_IMPLEMENT_CASE_FOR(RequestChatRoomWithUserMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(UserHelloDataMessage)
 
 #define SHARED_NETWORK_DECLARE_MESSAGE_HANDLERS() \
 	SHARED_NETWORK_DECLARE_MESSAGE_FOR(ConnectionAcceptedMessage); \
 	SHARED_NETWORK_DECLARE_MESSAGE_FOR(KeyChallengeMessage); \
 	SHARED_NETWORK_DECLARE_MESSAGE_FOR(RequestSpecificUserDataMessage); \
+	SHARED_NETWORK_DECLARE_MESSAGE_FOR(RequestChatRoomWithUserMessage); \
 	SHARED_NETWORK_DECLARE_MESSAGE_FOR(UserHelloDataMessage)
 
 #define SHARED_NETWORK_OVERRIDE_MESSAGE_HANDLERS() \
 	SHARED_NETWORK_OVERRIDE_MESSAGE_FOR(ConnectionAcceptedMessage); \
 	SHARED_NETWORK_OVERRIDE_MESSAGE_FOR(KeyChallengeMessage); \
 	SHARED_NETWORK_OVERRIDE_MESSAGE_FOR(RequestSpecificUserDataMessage); \
+	SHARED_NETWORK_OVERRIDE_MESSAGE_FOR(RequestChatRoomWithUserMessage); \
 	SHARED_NETWORK_OVERRIDE_MESSAGE_FOR(UserHelloDataMessage)
 }

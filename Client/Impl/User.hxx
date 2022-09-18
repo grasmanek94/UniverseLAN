@@ -43,36 +43,7 @@ namespace universelan::client {
 		ListenerRegistrarImpl* listeners;
 		GalaxyUserData::map_t user_data;
 
-		template<typename T>
-		struct AuthListenersHelper {
-			using mutex_t = std::recursive_mutex;
-			using lock_t = std::scoped_lock<mutex_t>;
-
-			mutex_t mtx;
-			std::unordered_map<uint64_t, T*> map;
-
-			void run_locked(std::function<void()> func) {
-				lock_t lock(mtx);
-				func();
-			}
-
-			void emplace(uint64_t request_id, T* listener) {
-				lock_t lock(mtx);
-				map.emplace(request_id, listener);
-			}
-
-			T* pop(uint64_t request_id) {
-				lock_t lock(mtx);
-				auto it = map.find(request_id);
-				if (it == map.end()) {
-					return nullptr;
-				}
-				map.erase(it);
-				return it->second;
-			}
-		};
-
-		AuthListenersHelper<ISpecificUserDataListener> specific_user_data_requests;
+		ListenersRequestHelper<ISpecificUserDataListener> specific_user_data_requests;
 
 	public:
 

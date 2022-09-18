@@ -1,8 +1,14 @@
 #include "Chat.hxx"
 
+#include "UniverseLAN.hxx"
+
+#include <Networking/Messages/RequestChatRoomWithUserMessage.hxx>
+
 namespace universelan::client {
 	using namespace galaxy::api;
-	ChatImpl::ChatImpl(InterfaceInstances* intf) : intf{ intf }, listeners{ intf->notification.get() }
+	ChatImpl::ChatImpl(InterfaceInstances* intf) 
+		: intf{ intf }, listeners{ intf->notification.get() },
+		request_chat_room_with_user_requests{}
 	{}
 
 	ChatImpl::~ChatImpl()
@@ -10,7 +16,10 @@ namespace universelan::client {
 	}
 
 	void ChatImpl::RequestChatRoomWithUser(GalaxyID userID, IChatRoomWithUserRetrieveListener* const listener) {
+		uint64_t request_id = MessageUniqueID::get();
 
+		request_chat_room_with_user_requests.emplace(request_id, listener);
+		intf->client->GetConnection().SendAsync(RequestChatRoomWithUserMessage{ request_id, userID });
 	}
 
 	void ChatImpl::RequestChatRoomMessages(ChatRoomID chatRoomID, uint32_t limit, ChatMessageID referenceMessageID, IChatRoomMessagesRetrieveListener* const listener) {

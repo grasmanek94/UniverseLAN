@@ -16,6 +16,7 @@
 #include <functional>
 #include <mutex>
 #include <set>
+#include <unordered_map>
 #include <vector>
 
 #include <GalaxyAPI.h>
@@ -98,6 +99,35 @@ namespace universelan::client {
 					std::invoke(std::forward<_Fx>(_Func), casted_listener, std::forward<_Types>(_Args)...);
 				}
 				});
+		}
+	};
+
+	template<typename T>
+	struct ListenersRequestHelper {
+		using mutex_t = std::recursive_mutex;
+		using lock_t = std::scoped_lock<mutex_t>;
+
+		mutex_t mtx;
+		std::unordered_map<uint64_t, T*> map;
+
+		void run_locked(std::function<void()> func) {
+			lock_t lock(mtx);
+			func();
+		}
+
+		void emplace(uint64_t request_id, T* listener) {
+			lock_t lock(mtx);
+			map.emplace(request_id, listener);
+		}
+
+		T* pop(uint64_t request_id) {
+			lock_t lock(mtx);
+			auto it = map.find(request_id);
+			if (it == map.end()) {
+				return nullptr;
+			}
+			map.erase(it);
+			return it->second;
 		}
 	};
 }
