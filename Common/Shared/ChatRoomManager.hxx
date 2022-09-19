@@ -14,6 +14,7 @@ namespace universelan {
 	public:
 		using chatroom_t = std::shared_ptr<ChatRoom>;
 		using chatrooms_t = std::unordered_map<ChatRoomID, chatroom_t>;
+		//using linkage_t = std::unordered_map<GalaxyID, std::set<ChatRoomID>>;
 
 	private:
 		chatrooms_t chatrooms;

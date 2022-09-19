@@ -1,20 +1,24 @@
 #pragma once
 
+#include "ChatRoomManager.hxx"
 #include "GalaxyUserData.hxx"
+#include "PeerData.hxx"
 
-#include <IdCounter.hxx>
-#include <IniData.hxx>
 #include <Networking/Networking.hxx>
+#include <IniData.hxx>
+#include <IdCounter.hxx>
 
 #include <GalaxyApi.h>
 
-#include <random>
 #include <set>
+#include <random>
 
 namespace universelan::server {
 
 	class Server : public MessageReceiver
 	{
+	public:
+
 	private:
 		ServerIniData config;
 		GalaxyNetworkServer connection;
@@ -28,6 +32,8 @@ namespace universelan::server {
 		size_t minimum_tick_wait_time;
 
 		GalaxyUserData::map_t user_data;
+		ChatRoomManager chat_room_manager;
+		PeerData::map_t peer_map;
 
 		bool KickUnauthenticated(ENetPeer* peer);
 

@@ -3,6 +3,7 @@
 #include <GalaxyApi.h>
 
 #include <Networking/Networking.hxx>
+#include <GalaxyUserData.hxx>
 
 #include <cstdint>
 #include <chrono>
@@ -14,6 +15,8 @@ namespace universelan::server {
 		PeerData();
 
 	public:
+		using map_t = std::unordered_map<GalaxyID, ENetPeer*, GalaxyID::Hash>;
+
 		struct Challenge {
 			bool completed;
 			uint64_t data;
@@ -30,11 +33,14 @@ namespace universelan::server {
 		GalaxyID id;
 		Challenge challenge;
 		std::chrono::system_clock::time_point connected_time;
+		GalaxyUserData::ptr_t user_data;
 
 		virtual ~PeerData();
 
 		static PeerData* get(ENetPeer* peer);
+		static PeerData* get(const GalaxyID& id, const map_t& map);
+		static bool link(ENetPeer* peer, const GalaxyID& id, map_t& map);
 		static PeerData* construct(ENetPeer* peer);
-		static void destruct(ENetPeer* peer);
+		static void destruct(ENetPeer* peer, map_t& map);
 	};
 }

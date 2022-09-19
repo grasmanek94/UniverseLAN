@@ -20,6 +20,7 @@ namespace universelan::client {
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<KeyChallengeMessage>& data)
 	{
 		KeyChallengeMessage challenge = KeyChallengeMessage{}.response(const_hash64(interfaces->config->GetAuthenticationKey()), data->encrypted);
+		challenge.id = interfaces->config->GetApiGalaxyID();
 
 		connection.SendAsync(challenge);
 	}
@@ -28,7 +29,7 @@ namespace universelan::client {
 	{
 		std::cout << "Connection accepted by server" << std::endl;
 
-		UserHelloDataMessage udm{ interfaces->config->GetApiGalaxyID() };
+		UserHelloDataMessage udm{ };
 
 		udm.asuc = interfaces->config->GetASUC();
 
@@ -42,6 +43,19 @@ namespace universelan::client {
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<RequestSpecificUserDataMessage>& data)
 	{
-		interfaces->user->SpecificUserDataRequestProcessed(data);
+		switch (data->type) {
+		case RequestSpecificUserDataMessage::RequestTypeUserData:
+			interfaces->user->SpecificUserDataRequestProcessed(data);
+			break;
+			
+		case RequestSpecificUserDataMessage::RequestTypeAchievementsAndStats:
+			interfaces->stats->SpecificUserStatsAndAchievementsRequestProcessed(data);
+			break;
+		}
+	}
+
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<RequestChatRoomWithUserMessage>& data) {
+
 	}
 }

@@ -27,7 +27,9 @@ namespace universelan::server {
 
 	Server::Server()
 		: config{}, connection{}, id_generator{}, max_connections{ 1024 },
-		connected_peers{}, authentication_key{ 0 }, random{}, ticks{ 0 }, minimum_tick_wait_time{ 0 }, user_data{}
+		connected_peers{}, authentication_key{ 0 }, random{}, ticks{ 0 }, 
+		minimum_tick_wait_time{ 0 }, user_data{}, chat_room_manager{},
+		peer_map{}
 	{
 		int init_code = connection.GetInitCode();
 

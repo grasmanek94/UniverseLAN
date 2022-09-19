@@ -27,7 +27,7 @@ namespace universelan::server {
 		PeerData* pd = PeerData::get(peer);
 		user_data.erase(pd->id);
 
-		PeerData::destruct(peer);
+		PeerData::destruct(peer, peer_map);
 		unauthenticated_peers.erase(peer);
 		connected_peers.erase(peer);
 
@@ -39,47 +39,68 @@ namespace universelan::server {
 		PeerData* pd = PeerData::get(peer);
 		if (pd->challenge.completed) { return; }
 
-		if (!pd->challenge.Validate(*data)) {
-			std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") KeyChallengeMessage FAIL" << std::endl;
-			connection.Disconnect(peer);
+		if (pd->challenge.Validate(*data)) {
+			auto entry = user_data.emplace(pd->id, std::make_shared<GalaxyUserData>(pd->id));
+			if (entry.second) {
+				if (PeerData::link(peer, data->id, peer_map)) {
+					pd->user_data = entry.first->second;
+
+					unauthenticated_peers.erase(peer);
+					connection.Send(peer, ConnectionAcceptedMessage{});
+					
+					std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") KeyChallengeMessage ACCEPT" << std::endl;
+					return;
+				}
+			}
 		}
-		else {
-			std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") KeyChallengeMessage ACCEPT" << std::endl;
-			unauthenticated_peers.erase(peer);
-			connection.Send(peer, ConnectionAcceptedMessage{});
-		}
+
+		std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") KeyChallengeMessage FAIL" << std::endl;
+		connection.Disconnect(peer);
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<UserHelloDataMessage>& data) {
 		REQUIRES_AUTHENTICATION(peer);
 
 		PeerData* pd = PeerData::get(peer);
-
-		pd->id = data->id;
-
-		auto entry = user_data.emplace(pd->id, std::make_shared<GalaxyUserData>(pd->id));
-		if (!entry.second) { // id already exists
-			connection.Disconnect(peer);
-		}
-		else {
-			entry.first->second->stats = data->asuc;
-		}
+		pd->user_data->stats = data->asuc;
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
 		REQUIRES_AUTHENTICATION(peer);
 
 		PeerData* pd = PeerData::get(peer);
+		PeerData* target = PeerData::get(data->id, peer_map);
 
-		auto found = user_data.find(data->id);
-		RequestSpecificUserDataMessage response{ data->id };
+		RequestSpecificUserDataMessage response{ data->type, data->id };
 
-		if (found == user_data.end()) {
-			response.found = false;
+		if (target) {
+			response.found = true;
+			response.asuc = target->user_data->stats;
 		}
 		else {
-			response.found = true;
-			response.asuc = found->second->stats;
+			response.found = false;
+		}
+
+		connection.Send(peer, response);
+	}
+
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestChatRoomWithUserMessage>& data) {
+		REQUIRES_AUTHENTICATION(peer);
+
+		PeerData* pd = PeerData::get(peer);
+		PeerData* target = PeerData::get(data->id, peer_map);
+
+		RequestChatRoomWithUserMessage response{ data->request_id, data->id };
+
+		if (target) {
+			response.chat_room = chat_room_manager.CreateChatRoom();
+			response.chat_room->AddMember(pd->id);
+			response.chat_room->AddMember(data->id);
+
+			connection.Send(target->peer, response);
+		}
+		else {
+			response.chat_room = nullptr;
 		}
 
 		connection.Send(peer, response);

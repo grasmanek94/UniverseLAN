@@ -16,7 +16,24 @@ namespace universelan::client {
 			listeners->NotifyAll(listener, &IUserStatsAndAchievementsRetrieveListener::OnUserStatsAndAchievementsRetrieveSuccess, userID);
 		}
 		else {
-			listeners->NotifyAll(listener, &IUserStatsAndAchievementsRetrieveListener::OnUserStatsAndAchievementsRetrieveFailure, userID, IUserStatsAndAchievementsRetrieveListener::FAILURE_REASON_UNDEFINED);
+			uint64_t request_id = MessageUniqueID::get();
+
+			specific_user_stats_and_achievements_requests.emplace(request_id, listener);
+			intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ RequestSpecificUserDataMessage::RequestTypeAchievementsAndStats, request_id, userID });
+		}
+	}
+
+	void StatsImpl::SpecificUserStatsAndAchievementsRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
+		IUserStatsAndAchievementsRetrieveListener* listener = specific_user_stats_and_achievements_requests.pop(data->request_id);
+
+		if (data->found) {
+			auto entry = intf->user->GetGalaxyUserData(data->id);
+			entry->stats = data->asuc;
+
+			listeners->NotifyAll(listener, &IUserStatsAndAchievementsRetrieveListener::OnUserStatsAndAchievementsRetrieveSuccess, data->id);
+		}
+		else {
+			listeners->NotifyAll(listener, &IUserStatsAndAchievementsRetrieveListener::OnUserStatsAndAchievementsRetrieveFailure, data->id, IUserStatsAndAchievementsRetrieveListener::FAILURE_REASON_UNDEFINED);
 		}
 	}
 
@@ -25,7 +42,14 @@ namespace universelan::client {
 			return intf->config->GetStat(name).i;
 		}
 		else {
-			return 0;
+			int32_t val = 0;
+			intf->user->GetGalaxyUserData(userID)->stats.run_locked_stats([&](AchievementsAndStatsContainer::stats_t& stats) {
+				auto it = stats.find(name);
+				if (it != stats.end()) {
+					val = it->second.i;
+				}
+				});
+			return val;
 		}
 	}
 
@@ -34,7 +58,14 @@ namespace universelan::client {
 			return intf->config->GetStat(name).f;
 		}
 		else {
-			return 0.0f;
+			float val = 0;
+			intf->user->GetGalaxyUserData(userID)->stats.run_locked_stats([&](AchievementsAndStatsContainer::stats_t& stats) {
+				auto it = stats.find(name);
+				if (it != stats.end()) {
+					val = it->second.f;
+				}
+				});
+			return val;
 		}
 	}
 
@@ -57,8 +88,13 @@ namespace universelan::client {
 			unlockTime = data->GetUnlockTime();
 		}
 		else {
-			unlocked = false;
-			unlockTime = 0;
+			intf->user->GetGalaxyUserData(userID)->stats.run_locked_achievements([&](AchievementsAndStatsContainer::achievements_t& achievements) {
+				auto it = achievements.find(name);
+				if (it != achievements.end()) {
+					unlocked = it->second.GetUnlocked();
+					unlockTime = it->second.GetUnlockTime();
+				}
+				});
 		}
 	}
 

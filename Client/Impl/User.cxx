@@ -103,7 +103,7 @@ namespace universelan::client {
 			uint64_t request_id = MessageUniqueID::get();
 
 			specific_user_data_requests.emplace(request_id, listener);
-			intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ request_id, userID });
+			intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ RequestSpecificUserDataMessage::RequestTypeUserData, request_id, userID });
 		}
 	}
 

@@ -30,6 +30,9 @@ namespace universelan {
 	public:
 		template <typename T>
 		using map_t = std::unordered_map<std::string, T>;
+		using achievements_t = map_t<AchievementData>;
+		using stats_t = map_t<StatsDataContainer>;
+		using user_data_t = map_t<std::string>;
 
 		template<class Archive>
 		void serialize(Archive& ar)
@@ -37,9 +40,9 @@ namespace universelan {
 			ar(Achievements, Stats, UserData);
 		}
 
-		map_t<AchievementData> Achievements;
-		map_t<StatsDataContainer> Stats;
-		map_t<std::string> UserData;
+		achievements_t Achievements;
+		stats_t Stats;
+		user_data_t UserData;
 
 		AchievementsAndStatsContainer()
 			: mtx_achievements{}, mtx_stats{}, mtx_userdata{},

@@ -8,6 +8,8 @@
 
 #include "ListenerRegistrar.hxx"
 
+#include <Networking/Messages/RequestSpecificUserDataMessage.hxx>
+
 #include <IStats.h>
 #include <IListenerRegistrar.h>
 #include <GalaxyID.h>
@@ -28,9 +30,15 @@ namespace universelan::client {
 	  */
 	class StatsImpl : public IStats
 	{
+	public:
+		using mutex_t = std::recursive_mutex;
+		using lock_t = std::scoped_lock<mutex_t>;
+
 	private:
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
+
+		ListenersRequestHelper<IUserStatsAndAchievementsRetrieveListener> specific_user_stats_and_achievements_requests;
 
 	public:
 
@@ -531,6 +539,8 @@ namespace universelan::client {
 		 * @return The number of seconds played by the specified user.
 		 */
 		virtual uint32_t GetUserTimePlayed(GalaxyID userID = GalaxyID()) override;
+
+		void SpecificUserStatsAndAchievementsRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
 	};
 
 	/** @} */

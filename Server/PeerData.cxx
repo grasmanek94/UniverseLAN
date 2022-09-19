@@ -33,10 +33,23 @@ namespace universelan::server {
 		return (PeerData*)peer->data;
 	}
 
-	PeerData* PeerData::construct(ENetPeer* peer) {
-		if (peer == nullptr) {
+	PeerData* PeerData::get(const GalaxyID& id, const map_t& map) {
+		auto it = map.find(id);
+		if (it == map.end()) {
 			return nullptr;
 		}
+
+		ENetPeer* peer = it->second;
+
+		assert(peer != nullptr);
+		assert(peer->data != nullptr);
+
+		return (PeerData*)peer->data;
+	}
+
+	PeerData* PeerData::construct(ENetPeer* peer) {
+		assert(peer != nullptr);
+		assert(peer->data == nullptr);
 
 		PeerData* peer_data = new PeerData();
 		peer_data->peer = peer;
@@ -45,15 +58,34 @@ namespace universelan::server {
 		return peer_data;
 	}
 
-	void PeerData::destruct(ENetPeer* peer) {
-		if (peer == nullptr) {
-			return;
+	bool PeerData::link(ENetPeer* peer, const GalaxyID& id, map_t& map) {
+		assert(peer != nullptr);
+		assert(peer->data == nullptr);
+
+		if (!id.IsValid()) {
+			return false;
 		}
 
-		PeerData* peer_data = (PeerData*)peer->data;
-		if (peer_data) {
-			peer->data = nullptr;
-			delete peer_data;
+		auto it = map.find(id);
+		if (it != map.end()) {
+			return false;
 		}
+
+		PeerData* peer_data = get(peer);
+		peer_data->id = id;
+		map.emplace(id, peer);
+
+		return true;
+	}
+
+	void PeerData::destruct(ENetPeer* peer, map_t& map) {
+		assert(peer != nullptr);
+		assert(peer->data != nullptr);
+
+		PeerData* peer_data = (PeerData*)peer->data;
+
+		map.erase(peer_data->id);
+		peer->data = nullptr;
+		delete peer_data;
 	}
 }

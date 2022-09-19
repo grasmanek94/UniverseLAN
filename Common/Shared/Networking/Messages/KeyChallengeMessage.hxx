@@ -3,7 +3,10 @@
 
 #include <ConstHash.hxx>
 
+#include <GalaxyApi.h>
+
 namespace universelan {
+	using namespace galaxy::api;
 	/**
 	* Challenge works like this:
 	*
@@ -47,11 +50,12 @@ namespace universelan {
 	{
 	public:
 		uint64_t encrypted;
+		GalaxyID id;
 
 		template<class Archive>
 		void serialize(Archive& ar)
 		{
-			ar(encrypted);
+			ar(encrypted, id);
 		}
 
 		UniqueClassId_Declare(KeyChallengeMessage);
