@@ -4,7 +4,11 @@ namespace universelan::client {
 	using namespace galaxy::api;
 	UtilsImpl::UtilsImpl(InterfaceInstances* intf) :
 		intf{ intf }, listeners{ intf->notification.get() }
-	{}
+	{
+		intf->delay_runner->Add([=] {
+			listeners->NotifyAll<IGogServicesConnectionStateListener>(&IGogServicesConnectionStateListener::OnConnectionStateChange, GOG_SERVICES_CONNECTION_STATE_CONNECTED);
+		});
+	}
 
 	UtilsImpl::~UtilsImpl()
 	{

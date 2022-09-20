@@ -102,6 +102,8 @@ namespace universelan::client {
 		auto data = intf->config->GetAchievementData(name);
 		data->SetUnlocked(true);
 		data->SetUnlockTimeNow();
+
+		listeners->NotifyAll<IAchievementChangeListener>(&IAchievementChangeListener::OnAchievementUnlocked, name);
 	}
 
 	void StatsImpl::ClearAchievement(const char* name) {
