@@ -2,8 +2,6 @@
 
 #include "UniverseLAN.hxx"
 
-#include <chrono>
-#include <filesystem>
 #include <string>
 
 namespace universelan::client {
@@ -120,7 +118,7 @@ namespace universelan::client {
 	}
 
 	void StorageImpl::SharedFileClose(SharedFileID sharedFileID) {
-		// Empty on purpose
+		sfu.UnlinkSharedFileStorage(sharedFileID);
 	}
 
 	uint32_t StorageImpl::GetDownloadedSharedFileCount() {
@@ -139,7 +137,9 @@ namespace universelan::client {
 		ISharedFileDownloadListener* listener = file_download_requests.pop(data->request_id);
 
 		if (data->data.size() > 0 && sfu.InitSharedFileStorage(data->filename, data->id)) {
-			sfu.WriteShared(data->filename, data->data.data(), data->data.size());
+			if (!sfu.WriteShared(data->filename, data->data.data(), data->data.size())) {
+				std::cerr << "FileDownloaded::WriteShared failed\n";
+			}
 
 			listeners->NotifyAll(listener, &ISharedFileDownloadListener::OnSharedFileDownloadSuccess, data->id, data->filename.c_str());
 		}
@@ -156,8 +156,13 @@ namespace universelan::client {
 		IFileShareListener* listener = file_upload_requests.pop(data->request_id);
 
 		if (data->id != 0) {
-			sfu.InitSharedFileStorage(data->filename, data->id);
-			std::filesystem::copy_file(sfu.GetPathLocal(data->filename), sfu.GetPathShared(data->filename));
+			if (!sfu.InitSharedFileStorage(data->filename, data->id)) {
+				std::cerr << "FileUploaded::InitSharedFileStorage failed\n";
+			}
+
+			if (!sfu.CopyFromLocalToShared(data->filename)) {
+				std::cerr << "FileUploaded::CopyFromLocalToShared failed\n";
+			}
 
 			listeners->NotifyAll(listener, &IFileShareListener::OnFileShareSuccess, data->filename.c_str(), data->id);
 		}
@@ -165,5 +170,4 @@ namespace universelan::client {
 			listeners->NotifyAll(listener, &IFileShareListener::OnFileShareFailure, data->filename.c_str(), IFileShareListener::FAILURE_REASON_UNDEFINED);
 		}
 	}
-
 }

@@ -49,6 +49,29 @@ namespace universelan {
 		throw std::runtime_error("Security Exception: Path traversal outside sandbox: " + filename);
 	}
 
+	bool SharedFileUtils::UnlinkSharedFileStorage(const std::string& filename, SharedFileID id) const {
+		std::error_code ec;
+
+		const std::string str_shared_file_id{ std::to_string(id) };
+
+		std::filesystem::path filename_to_id_basepath{ basepath / ROOT_SHARED / ROOT_FILENAME_TO_ID };
+		std::filesystem::path id_to_filename_basepath{ basepath / ROOT_SHARED / ROOT_ID_TO_FILENAME };
+		std::filesystem::path sharedfile_storage_basepath{ basepath / ROOT_SHARED };
+
+		if (inside_basepath(sharedfile_storage_basepath, filename) && inside_basepath(filename_to_id_basepath, filename)) {
+			std::filesystem::path id2filename_path = id_to_filename_basepath / str_shared_file_id;
+			std::filesystem::path filename2id_path = filename_to_id_basepath / filename;
+			std::filesystem::path storage_path = sharedfile_storage_basepath / filename;
+
+			std::filesystem::remove(id2filename_path);
+			std::filesystem::remove(filename2id_path);
+
+			return RemoveShared(filename);
+		}
+
+		throw std::runtime_error("Security Exception: Path traversal outside sandbox: " + filename);
+	}
+
 	SharedFileID SharedFileUtils::GetSharedFileID(const std::string& filename) const {
 		std::error_code ec;
 
@@ -114,7 +137,7 @@ namespace universelan {
 		if (!file) {
 			return false;
 		}
-		
+
 		file.write(data, data_length);
 		return true;
 	}
@@ -127,7 +150,7 @@ namespace universelan {
 
 		file.seekg(offset);
 		file.read(data, data_length);
-		return file.tellg();
+		return (uint32_t)file.tellg();
 	}
 
 	std::vector<char> SharedFileUtils::Read(const std::string& root, const std::string& file_name) const {
@@ -192,6 +215,10 @@ namespace universelan {
 		}
 
 		return ".";
+	}
+
+	bool SharedFileUtils::Copy(const std::string& root_from, const std::string& root_to, const std::string& file_name) const {
+		return std::filesystem::copy_file(GetPath(root_from, file_name), GetPath(root_to, file_name));
 	}
 
 	std::fstream SharedFileUtils::OpenShared(galaxy::api::SharedFileID id, std::ios::openmode mode) const {
@@ -362,4 +389,19 @@ namespace universelan {
 		return GetFileNameByIndex(ROOT_AVATARS, index);
 	}
 
+	bool SharedFileUtils::CopyFromLocalToShared(const std::string& file_name) const {
+		return std::filesystem::copy_file(GetPath(ROOT_LOCAL, file_name), GetPath(ROOT_SHARED, file_name));
+	}
+
+	bool SharedFileUtils::CopyFromSharedToLocal(const std::string& file_name) const {
+		return std::filesystem::copy_file(GetPath(ROOT_SHARED, file_name), GetPath(ROOT_LOCAL, file_name));
+	}
+
+	bool SharedFileUtils::UnlinkSharedFileStorage(SharedFileID id) const {
+		return UnlinkSharedFileStorage(GetSharedFileName(id), id);
+	}
+
+	bool SharedFileUtils::UnlinkSharedFileStorage(const std::string& filename) const {
+		return UnlinkSharedFileStorage(filename, GetSharedFileID(filename));
+	}
 }

@@ -29,7 +29,7 @@ namespace universelan::server {
 		: config{}, connection{}, id_generator{}, max_connections{ 1024 },
 		connected_peers{}, authentication_key{ 0 }, random{}, ticks{ 0 }, 
 		minimum_tick_wait_time{ 0 }, user_data{}, chat_room_manager{},
-		peer_map{}
+		peer_map{}, sfu{ config.GetServerDataPath() }, shared_file_counter{ 1 }
 	{
 		int init_code = connection.GetInitCode();
 
@@ -52,10 +52,12 @@ namespace universelan::server {
 		std::cout << "Max Connections: " << max_connections << std::endl;
 		if (!connection.Create(max_connections) || !connection.Good())
 		{
-#ifdef _WIN32
 			// TODO custom exception class
-			throw std::exception("ENET host member creation failed");
+			throw std::exception(
+#ifdef _WIN32
+				"ENET host member creation failed"
 #endif
+			);
 		}
 
 		authentication_key = const_hash64(config.GetAuthenticationKey());
@@ -64,6 +66,12 @@ namespace universelan::server {
 			std::chrono::milliseconds(1);
 
 		random.seed(authentication_key ^ milliseconds_since_epoch);
+
+		if (sfu.ExistsShared(shared_file_counter_file)) {
+			std::string counter_txt{};
+			sfu.OpenShared(shared_file_counter_file, std::ios::in) >> counter_txt;
+			shared_file_counter = std::stoul(counter_txt);
+		}
 
 		std::cout << "Using key: " << authentication_key << std::endl;
 		std::cout << "Listening..." << std::endl;

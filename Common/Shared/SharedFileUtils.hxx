@@ -5,6 +5,7 @@
 #include <GalaxyApi.h>
 
 #include <filesystem>
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -20,6 +21,9 @@ namespace universelan {
 
 		SharedFileUtils(const std::string& basepath);
 		bool InitSharedFileStorage(const std::string& filename, galaxy::api::SharedFileID id) const;
+		bool UnlinkSharedFileStorage(const std::string& filename, galaxy::api::SharedFileID id) const;
+		bool UnlinkSharedFileStorage(galaxy::api::SharedFileID id) const;
+		bool UnlinkSharedFileStorage(const std::string& filename) const;
 		galaxy::api::SharedFileID GetSharedFileID(const std::string& filename) const;
 		std::string GetSharedFileName(galaxy::api::SharedFileID id) const;
 
@@ -87,6 +91,10 @@ namespace universelan {
 		std::string GetFileNameByIndexLocal(uint32_t index) const;
 		std::string GetFileNameByIndexAvatar(uint32_t index) const;
 		std::string GetFileNameByIndex(const std::string& root, uint32_t index) const;
+
+		bool Copy(const std::string& root_from, const std::string& root_to, const std::string& file_name) const;
+		bool CopyFromLocalToShared(const std::string& file_name) const;
+		bool CopyFromSharedToLocal(const std::string& file_name) const;
 	};
 
 	inline bool inside_basepath(

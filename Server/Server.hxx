@@ -3,6 +3,7 @@
 #include "ChatRoomManager.hxx"
 #include "GalaxyUserData.hxx"
 #include "PeerData.hxx"
+#include "SharedFileUtils.hxx"
 
 #include <Networking/Networking.hxx>
 #include <IniData.hxx>
@@ -33,6 +34,10 @@ namespace universelan::server {
 		GalaxyUserData::map_t user_data;
 		ChatRoomManager chat_room_manager;
 		PeerData::map_t peer_map;
+
+		SharedFileUtils sfu;
+		uint32_t shared_file_counter;
+		const std::string shared_file_counter_file{ "shared-id.counter" };
 
 		bool KickUnauthenticated(ENetPeer* peer);
 

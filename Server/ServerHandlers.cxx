@@ -169,11 +169,30 @@ namespace universelan::server {
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<FileShareMessage>& data) {
 		REQUIRES_AUTHENTICATION(peer);
 
-		PeerData* pd = PeerData::get(peer);
+		FileShareResponseMessage fsrm{ data->request_id, ++shared_file_counter, data->filename };
+		sfu.OpenShared(shared_file_counter_file, std::ios::trunc) << fsrm.id;
+		if (!sfu.InitSharedFileStorage(fsrm.filename, fsrm.id)) {
+			std::cerr << "FileShareMessage::InitSharedFileStorage FAIL\n";
+		}
+		
+		if (!sfu.WriteShared(fsrm.filename, data->data.data(), data->data.size())) {
+			std::cerr << "FileShareMessage::WriteShared FAIL\n";
+		}
 
+		connection.Send(peer, fsrm);
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<FileRequestMessage>& data) {
 		REQUIRES_AUTHENTICATION(peer);
+
+		data->data = sfu.ReadShared(data->id);
+		if (data->data.size() == 0) {
+			data->data = sfu.ReadShared(data->filename);
+			if (data->data.size() == 0) {
+				std::cerr << "FileShareMessage::ReadShared FAIL\n";
+			}
+		}
+
+		connection.Send(peer, data);
 	}
 }
