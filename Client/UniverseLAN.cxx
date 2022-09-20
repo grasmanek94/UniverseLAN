@@ -23,6 +23,7 @@ namespace universelan::client {
 		init_options = std::make_unique<InitOptionsModern>(initOptions);
 		notification = std::make_unique<ListenerRegistrarImpl>(this);
 		client = std::make_unique<Client>(this);
+		delay_runner = std::make_unique<DelayRunner>(); // No 'this' on purpose
 		user = std::make_unique<UserImpl>(this);
 		friends = std::make_unique<FriendsImpl>(this);
 		chat = std::make_unique<ChatImpl>(this);
@@ -55,6 +56,7 @@ namespace universelan::client {
 		friends = nullptr;
 		user = nullptr;
 		init_options = nullptr;
+		delay_runner = nullptr;
 		client = nullptr;
 		notification = nullptr;
 	}

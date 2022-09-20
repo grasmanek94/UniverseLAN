@@ -18,6 +18,8 @@ namespace universelan {
 	const std::string SharedFileUtils::ROOT_LOCAL = "Local";
 	const std::string SharedFileUtils::ROOT_SHARED = "Shared";
 	const std::string SharedFileUtils::ROOT_AVATARS = "Avatars";
+	const std::string SharedFileUtils::ROOT_LOGGING = "Logging";
+	const std::string SharedFileUtils::ROOT_TELEMETRY = "Telemetry";
 	const std::string SharedFileUtils::ROOT_FILENAME_TO_ID = "/mapper/__filename_to_id__";
 	const std::string SharedFileUtils::ROOT_ID_TO_FILENAME = "/mapper/__id_to_filename__";
 

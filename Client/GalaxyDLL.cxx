@@ -82,6 +82,10 @@ namespace galaxy::api {
 		if (intf_inst.client != nullptr) {
 			intf_inst.client->ProcessEvents();
 		}
+
+		if (intf_inst.delay_runner != nullptr) {
+			intf_inst.delay_runner->Run();
+		}
 	}
 
 	GALAXY_DLL_EXPORT IListenerRegistrar* GALAXY_CALLTYPE ListenerRegistrar() {

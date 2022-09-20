@@ -24,10 +24,11 @@ namespace universelan::client {
 	  */
 	class LoggerImpl : public ILogger
 	{
-	private:
-		using mtx_t = std::mutex;
+	public:
+		using mtx_t = std::recursive_mutex;
 		using lock_t = std::scoped_lock<mtx_t>;
 
+	private:
 		InterfaceInstances* intf;
 		mtx_t mtx;
 		std::ofstream logfile;

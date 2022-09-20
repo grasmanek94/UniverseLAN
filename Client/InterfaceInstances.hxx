@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Impl/InitOptionsModern.hxx"
+#include "Impl/DelayRunner.hxx"
 
 #include <IniData.hxx>
 
@@ -42,6 +43,7 @@ namespace universelan::client {
 		std::unique_ptr<LoggerImpl>				logger = nullptr;
 		std::unique_ptr<TelemetryImpl>			telemetry = nullptr;
 		std::unique_ptr<ListenerRegistrarImpl>	notification = nullptr;
+		std::unique_ptr<DelayRunner>			delay_runner = nullptr;
 
 		void init(const InitOptions& initOptions);
 		void reset();

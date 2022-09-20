@@ -15,6 +15,7 @@
 #include "Client.hxx"
 
 #include "Impl/ListenerRegistrar.hxx"
+#include "Impl/DelayRunner.hxx"
 #include "Impl/Apps.hxx"
 #include "Impl/Chat.hxx"
 #include "Impl/CustomNetworking.hxx"
