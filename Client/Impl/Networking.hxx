@@ -41,11 +41,12 @@ namespace universelan::client {
 		using packet_vector_t = std::queue<packet_t>;
 
 		struct ProtectedChannel {
+			static const int32_t NO_PACKETS = -1;
 			mutex_t mtx;
-			std::atomic_uint32_t count;
+			std::atomic_int32_t front_size;
 			packet_vector_t packets;
 
-			ProtectedChannel() : mtx{}, count{ 0 }, packets{} {}
+			ProtectedChannel() : mtx{}, front_size{ 0 }, packets{} {}
 		};
 
 		using channels_array = std::array<ProtectedChannel, std::numeric_limits<uint8_t>::max()>;
