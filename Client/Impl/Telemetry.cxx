@@ -12,6 +12,10 @@ namespace universelan::client {
 		intf{ intf }, listeners{ intf->notification.get() },
 		mtx{}, telemetry_file{}, counter{ 1 }, visit_id{ "1337" }
 	{
+		if (!intf->config->GetTelemetryStore()) {
+			return;
+		}
+
 		auto t = std::time(nullptr);
 
 #pragma warning( push )
