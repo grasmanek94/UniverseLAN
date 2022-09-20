@@ -6,6 +6,8 @@
 #include <chrono>
 
 namespace universelan::server {
+	using namespace galaxy::api;
+
 	PeerData::PeerData() : peer{}, id{ 0ULL }, challenge{}, connected_time{ std::chrono::system_clock::now() }
 	{}
 

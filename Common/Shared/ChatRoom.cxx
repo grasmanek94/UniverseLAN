@@ -10,11 +10,12 @@ namespace universelan {
 	using namespace galaxy::api;
 
 	ChatRoom::ChatRoom()
-		: id{ GlobalUniqueID::get() }, messages{}, members{}, longest_message{ 0 }
+		: id{ GlobalUniqueID::get() }, messages{}, members{}, longest_message{ 0 }, read_messages{ 0 }
 	{}
 
-	ChatRoom::ChatRoom(const ChatRoom & chat_room)
-		: id{ chat_room.id }, messages{ chat_room.messages }, members{ chat_room.members }, longest_message{ chat_room.longest_message }
+	ChatRoom::ChatRoom(const ChatRoom& chat_room)
+		: id{ chat_room.id }, messages{ chat_room.messages }, members{ chat_room.members },
+		longest_message{ chat_room.longest_message }, read_messages{ chat_room.read_messages }
 	{}
 
 	ChatRoomID ChatRoom::GetID() const
@@ -27,7 +28,26 @@ namespace universelan {
 		return messages;
 	}
 
-	const ChatRoom::message_t& ChatRoom::GetMessageByIndex(size_t index) const
+	ChatRoom::messages_t ChatRoom::GetMessages(ChatMessageID exclusive_from) const
+	{
+		ChatRoom::messages_t container{};
+		if ((messages.size() == 0) || (messages.back()->GetID() == exclusive_from)) {
+			return container;
+		}
+
+		bool adding = false;
+		for (const auto& message : messages) {
+			if (adding) {
+				container.push_back(message);
+			}
+			else if (message->GetID() == exclusive_from) {
+				adding = true;
+			}
+		}
+		return container;
+	}
+
+	const ChatRoom::message_t& ChatRoom::GetMessageByIndex(uint32_t index) const
 	{
 		return messages.at(index);
 	}
@@ -58,7 +78,7 @@ namespace universelan {
 		message_t message = std::make_shared<ChatMessage>(type, id, sender, send_time, contents);
 
 		if (contents.size() > longest_message) {
-			longest_message = contents.size();
+			longest_message = (uint32_t)contents.size();
 		}
 
 		messages.push_back(message);
@@ -71,7 +91,7 @@ namespace universelan {
 		message_t message_ptr = std::make_shared<ChatMessage>(message);
 
 		if (message.GetContents().size() > longest_message) {
-			longest_message = message.GetContents().size();
+			longest_message = (uint32_t)message.GetContents().size();
 		}
 
 		messages.push_back(message_ptr);
@@ -79,18 +99,34 @@ namespace universelan {
 		return message_ptr;
 	}
 
-	size_t ChatRoom::GetMemberCount() const
+	uint32_t ChatRoom::GetMemberCount() const
 	{
-		return members.size();
+		return (uint32_t)members.size();
 	}
 
-	size_t ChatRoom::GetMessageCount() const
+	uint32_t ChatRoom::GetMessageCount() const
 	{
-		return messages.size();
+		return (uint32_t)messages.size();
 	}
 
-	size_t ChatRoom::GetLongestMessage() const
+	uint32_t ChatRoom::GetLongestMessage() const
 	{
 		return longest_message;
+	}
+
+	void ChatRoom::MarkAsRead() {
+		read_messages = (uint32_t)messages.size();
+	}
+
+	void ChatRoom::MarkAsUnread() {
+		read_messages = 0;
+	}
+
+	bool ChatRoom::IsRead() const {
+		return (read_messages == (uint32_t)messages.size());
+	}
+
+	uint32_t ChatRoom::GetUnreadCount() const {
+		return (uint32_t)(messages.size() - read_messages);
 	}
 }

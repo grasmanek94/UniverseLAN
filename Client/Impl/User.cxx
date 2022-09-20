@@ -29,7 +29,6 @@ namespace universelan::client {
 		if (intf->config->GetSignedIn()) {
 			listeners->NotifyAll(listener, &IAuthListener::OnAuthSuccess);
 			listeners->NotifyAll<IOperationalStateChangeListener>(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_LOGGED_ON);
-
 		}
 		else {
 			listeners->NotifyAll(listener, &IAuthListener::OnAuthFailure, IAuthListener::FAILURE_REASON_EXTERNAL_SERVICE_FAILURE);

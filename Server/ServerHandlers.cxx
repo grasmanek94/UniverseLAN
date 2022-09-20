@@ -105,4 +105,51 @@ namespace universelan::server {
 
 		connection.Send(peer, response);
 	}
+
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestChatRoomMessagesMessage>& data) {
+		REQUIRES_AUTHENTICATION(peer);
+
+		PeerData* pd = PeerData::get(peer);
+
+		auto chat_room = chat_room_manager.GetChatRoom(data->id);
+
+		ChatRoom::messages_t messages{};
+		if (chat_room && chat_room->IsMember(pd->id)) {
+			messages = chat_room->GetMessages(data->oldest_message);
+		}
+		RequestChatRoomMessagesMessage response{ data->request_id, data->id, data->oldest_message, messages };
+
+		connection.Send(peer, response);
+	}
+
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<SendToChatRoomMessage>& data) {
+		REQUIRES_AUTHENTICATION(peer);
+
+		PeerData* pd = PeerData::get(peer);
+
+		auto chat_room = chat_room_manager.GetChatRoom(data->id);
+
+		if (chat_room && chat_room->IsMember(pd->id) && data->message) {
+			ChatMessageID oldest_message{ 0 };
+			if (chat_room->GetMessageCount() > 0) {
+				oldest_message = chat_room->GetMessages().back()->GetID();
+			}
+
+			auto message = chat_room->AddMessage(pd->id, CHAT_MESSAGE_TYPE_CHAT_MESSAGE, data->message->GetContents());
+
+			connection.Send(peer, SendToChatRoomMessage{ data->request_id, data->id, nullptr });
+
+			ChatRoom::messages_t messages{};
+			messages.push_back(message);
+			RequestChatRoomMessagesMessage notification{ data->request_id, data->id, oldest_message, messages };
+
+			for (const auto& member : chat_room->GetMembers()) {
+				PeerData* member_peer = PeerData::get(member, peer_map);
+				connection.Send(member_peer->peer, notification);
+			}
+		}
+		else {
+			connection.Send(peer, SendToChatRoomMessage{ data->request_id, data->id, nullptr });
+		}
+	}
 }

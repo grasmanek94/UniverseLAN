@@ -14,7 +14,6 @@
 #include <random>
 
 namespace universelan::server {
-
 	class Server : public MessageReceiver
 	{
 	public:

@@ -7,7 +7,7 @@
 #include <atomic>
 
 namespace {
-	std::atomic_uint64_t unique_message_counter{ 0 };
+	std::atomic_uint64_t unique_message_counter{ 1 };
 }
 
 namespace universelan {

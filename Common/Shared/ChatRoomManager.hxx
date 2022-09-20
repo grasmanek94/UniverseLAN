@@ -8,12 +8,10 @@
 #include <unordered_map>
 
 namespace universelan {
-	using namespace galaxy::api;
-
 	class ChatRoomManager {
 	public:
 		using chatroom_t = std::shared_ptr<ChatRoom>;
-		using chatrooms_t = std::unordered_map<ChatRoomID, chatroom_t>;
+		using chatrooms_t = std::unordered_map<galaxy::api::ChatRoomID, chatroom_t>;
 		//using linkage_t = std::unordered_map<GalaxyID, std::set<ChatRoomID>>;
 
 	private:
@@ -24,8 +22,8 @@ namespace universelan {
 
 		// Server func
 		chatroom_t CreateChatRoom();
-		bool RemoveChatRoom(ChatRoomID id);
-		chatroom_t GetChatRoom(ChatRoomID id);
+		bool RemoveChatRoom(galaxy::api::ChatRoomID id);
+		chatroom_t GetChatRoom(galaxy::api::ChatRoomID id);
 
 		// Client func
 		bool AddChatRoom(const ChatRoom& chat_room); 

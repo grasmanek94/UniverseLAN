@@ -6,7 +6,6 @@
 #include <GalaxyApi.h>
 
 namespace universelan {
-	using namespace galaxy::api;
 	/**
 	* Challenge works like this:
 	*
@@ -50,7 +49,7 @@ namespace universelan {
 	{
 	public:
 		uint64_t encrypted;
-		GalaxyID id;
+		galaxy::api::GalaxyID id;
 
 		template<class Archive>
 		void serialize(Archive& ar)

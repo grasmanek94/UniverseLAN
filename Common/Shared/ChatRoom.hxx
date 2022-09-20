@@ -10,43 +10,48 @@
 #include <vector>
 
 namespace universelan {
-	using namespace galaxy::api;
-
 	class ChatRoom {
 	public:
 		using message_t = std::shared_ptr<ChatMessage>;
 		using messages_t = std::vector<message_t>;
-		using members_t = std::set<GalaxyID>;
+		using members_t = std::set<galaxy::api::GalaxyID>;
 
 	private:
-		ChatRoomID id;
+		galaxy::api::ChatRoomID id;
 		messages_t messages;
 		members_t members;
-		size_t longest_message;
+		uint32_t longest_message;
+		uint32_t read_messages;
 
 	public:
 		ChatRoom();
 		ChatRoom(const ChatRoom& chat_room);
 
-		ChatRoomID GetID() const;
+		galaxy::api::ChatRoomID GetID() const;
 
 		const members_t& GetMembers() const;
-		bool AddMember(GalaxyID id);
-		bool RemoveMember(GalaxyID id);
-		bool IsMember(GalaxyID id);
-		size_t GetMemberCount() const;
+		bool AddMember(galaxy::api::GalaxyID id);
+		bool RemoveMember(galaxy::api::GalaxyID id);
+		bool IsMember(galaxy::api::GalaxyID id);
+		uint32_t GetMemberCount() const;
 
 		const messages_t& GetMessages() const;
-		const message_t& GetMessageByIndex(size_t index) const;
-		message_t AddMessage(GalaxyID sender, ChatMessageType type, const std::string& contents);
+		messages_t GetMessages(galaxy::api::ChatMessageID exclusive_from) const;
+		const message_t& GetMessageByIndex(uint32_t index) const;
+		message_t AddMessage(galaxy::api::GalaxyID sender, galaxy::api::ChatMessageType type, const std::string& contents);
 		message_t AddMessage(const ChatMessage& message);
-		size_t GetMessageCount() const;
-		size_t GetLongestMessage() const;
+		uint32_t GetMessageCount() const;
+		uint32_t GetLongestMessage() const;
+
+		void MarkAsRead();
+		void MarkAsUnread();
+		bool IsRead() const;
+		uint32_t GetUnreadCount() const;
 
 		template<class Archive>
 		void serialize(Archive& ar)
 		{
-			ar(id, messages, members, longest_message);
+			ar(id, messages, members, longest_message, read_messages);
 		}
 	};
 }

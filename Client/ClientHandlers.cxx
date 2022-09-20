@@ -56,6 +56,14 @@ namespace universelan::client {
 
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<RequestChatRoomWithUserMessage>& data) {
+		interfaces->chat->RequestChatRoomWithUserProcessed(data);
+	}
+	
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<RequestChatRoomMessagesMessage>& data) {
+		interfaces->chat->RequestChatRoomMessagesProcessed(data);
+	}
 
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<SendToChatRoomMessage>& data) {
+		interfaces->chat->SendChatRoomMessageProcessed(data);
 	}
 }

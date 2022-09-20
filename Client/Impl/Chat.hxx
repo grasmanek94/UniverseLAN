@@ -9,6 +9,12 @@
 
 #include "ListenerRegistrar.hxx"
 
+#include <ChatRoomManager.hxx>
+
+#include <Networking/Messages/RequestChatRoomWithUserMessage.hxx>
+#include <Networking/Messages/RequestChatRoomMessagesMessage.hxx>
+#include <Networking/Messages/SendToChatRoomMessage.hxx>
+
 #include <IChat.h>
 #include <IListenerRegistrar.h>
 #include <GalaxyID.h>
@@ -27,11 +33,22 @@ namespace universelan::client {
 	  */
 	class ChatImpl : public IChat
 	{
+	public:
+		using mutex_t = std::recursive_mutex;
+		using lock_t = std::scoped_lock<mutex_t>;
+
 	private:
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
-		ListenersRequestHelper<IChatRoomWithUserRetrieveListener> request_chat_room_with_user_requests;
 
+		ChatRoomManager chatroom_manager;
+		ChatRoom::messages_t* incomming_messages_buffer;
+
+		ListenersRequestHelper<IChatRoomWithUserRetrieveListener> request_chat_room_with_user_requests;
+		ListenersRequestHelper<IChatRoomMessagesRetrieveListener> request_chat_room_messages_requests;
+		ListenersRequestHelper<IChatRoomMessageSendListener> send_to_chat_room_requests;
+
+		mutex_t mtx;
 	public:
 
 		ChatImpl(InterfaceInstances* intf);
@@ -149,6 +166,10 @@ namespace universelan::client {
 		 * @param [in] chatRoomID The ID of the chat room.
 		 */
 		virtual void MarkChatRoomAsRead(ChatRoomID chatRoomID) override;
+
+		void RequestChatRoomWithUserProcessed(const std::shared_ptr<RequestChatRoomWithUserMessage>& data);
+		void RequestChatRoomMessagesProcessed(const std::shared_ptr<RequestChatRoomMessagesMessage>& data);
+		void SendChatRoomMessageProcessed(const std::shared_ptr<SendToChatRoomMessage>& data);
 	};
 
 	/** @} */

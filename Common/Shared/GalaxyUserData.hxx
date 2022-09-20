@@ -8,11 +8,10 @@
 #include <unordered_map>
 
 namespace universelan {
-	using namespace galaxy::api;
 	class GalaxyUserData {
 	public:
 		using ptr_t = std::shared_ptr<GalaxyUserData>;
-		using map_t = std::unordered_map<GalaxyID, ptr_t, GalaxyID::Hash>;
+		using map_t = std::unordered_map<galaxy::api::GalaxyID, ptr_t, galaxy::api::GalaxyID::Hash>;
 
 		GalaxyUserData(galaxy::api::GalaxyID id);
 
