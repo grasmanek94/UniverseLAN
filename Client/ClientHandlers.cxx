@@ -66,4 +66,9 @@ namespace universelan::client {
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<SendToChatRoomMessage>& data) {
 		interfaces->chat->SendChatRoomMessageProcessed(data);
 	}
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<P2PNetworkPacketMessage>& data) {
+		GalaxyID target = data->id;
+		
+	}
 }

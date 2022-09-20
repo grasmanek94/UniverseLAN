@@ -152,4 +152,18 @@ namespace universelan::server {
 			connection.Send(peer, SendToChatRoomMessage{ data->request_id, data->id, nullptr });
 		}
 	}
+
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<P2PNetworkPacketMessage>& data) {
+		REQUIRES_AUTHENTICATION(peer);
+
+		PeerData* pd = PeerData::get(peer);
+
+		GalaxyID target = data->id;
+		PeerData* target_pd = PeerData::get(target, peer_map);
+
+		if (target_pd) {
+			data->id = pd->id;
+			connection.Send(peer, *data);
+		}
+	}
 }
