@@ -21,55 +21,86 @@ namespace universelan::client {
 	}
 
 	void ListenerRegistrarImpl::Register(ListenerType listenerType, IGalaxyListener* listener) {
-		std::scoped_lock<mutex_t> lock(listeners[listenerType].mtx);
+		lock_t lock{ listeners[listenerType].mtx };
 		listeners[listenerType].set.insert(listener);
 	}
 
 	void ListenerRegistrarImpl::Unregister(ListenerType listenerType, IGalaxyListener* listener) {
-		std::scoped_lock<mutex_t> lock(listeners[listenerType].mtx);
+		lock_t lock{ listeners[listenerType].mtx };
 		listeners[listenerType].set.erase(listener);
 	}
 
-	void ListenerRegistrarImpl::ExecuteForListenerType(ListenerType listenerType, std::function<void(const std::set<IGalaxyListener*>& listeners)> code)
+	bool ListenerRegistrarImpl::ExecuteForListenerType(ListenerType listenerType, std::function<void(const std::set<IGalaxyListener*>& listeners)> code)
 	{
-		std::scoped_lock<mutex_t> lock(listeners[listenerType].mtx);
-		code(listeners[listenerType].set);
-	}
-
-	void ListenerRegistrarImpl::ExecuteForListenerTypePerEntry(ListenerType listenerType, std::function<void(IGalaxyListener* listeners)> code)
-	{
-		std::scoped_lock<mutex_t> lock(listeners[listenerType].mtx);
-		for (auto& entry : listeners[listenerType].set) {
-			code(entry);
-		}
-	}
-
-	void ListenerRegistrarImpl::ExecuteForListenerType(ListenerType listenerType, IGalaxyListener* extra, std::function<void(const std::set<IGalaxyListener*>& listeners)> code)
-	{
-		std::scoped_lock<mutex_t> lock(listeners[listenerType].mtx);
+		lock_t lock{ listeners[listenerType].mtx };
 
 		listener_set& set = listeners[listenerType].set;
-		auto item = set.emplace(extra);
+		if (set.size() == 0) {
+			return false;
+		}
 
 		code(set);
 
-		if (item.second) {
-			set.erase(item.first);
-		}
+		return true;
 	}
 
-	void ListenerRegistrarImpl::ExecuteForListenerTypePerEntry(ListenerType listenerType, IGalaxyListener* extra, std::function<void(IGalaxyListener* listeners)> code)
+	bool ListenerRegistrarImpl::ExecuteForListenerTypePerEntry(ListenerType listenerType, std::function<void(IGalaxyListener* listeners)> code)
 	{
-		std::scoped_lock<mutex_t> lock(listeners[listenerType].mtx);
+		lock_t lock{ listeners[listenerType].mtx };
+
+		listener_set& set = listeners[listenerType].set;
+		if (set.size() == 0) {
+			return false;
+		}
+
+		for (auto& entry : set) {
+			code(entry);
+		}
+
+		return true;
+	}
+
+	bool ListenerRegistrarImpl::ExecuteForListenerType(ListenerType listenerType, IGalaxyListener* extra, std::function<void(const std::set<IGalaxyListener*>& listeners)> code)
+	{
+		lock_t lock{ listeners[listenerType].mtx };
+
+		listener_set& set = listeners[listenerType].set;
+		bool added = false;
+		if (extra != nullptr) {
+			added = set.emplace(extra).second;
+		}
+
+		if (set.size() == 0) {
+			assert(added == false);
+
+			return false;
+		}
+
+		code(set);
+
+		if (added) {
+			set.erase(extra);
+		}
+
+		return true;
+	}
+
+	bool ListenerRegistrarImpl::ExecuteForListenerTypePerEntry(ListenerType listenerType, IGalaxyListener* extra, std::function<void(IGalaxyListener* listeners)> code)
+	{
+		lock_t lock{ listeners[listenerType].mtx };
+
+		listener_set& set = listeners[listenerType].set;
 
 		if (extra != nullptr) {
 			code(extra);
 		}
 
-		for (auto& entry : listeners[listenerType].set) {
+		for (auto& entry : set) {
 			if ((entry != extra) && (entry != nullptr)) {
 				code(entry);
 			}
 		}
+
+		return (set.size() > 0) || (extra != nullptr);
 	}
 }

@@ -10,7 +10,8 @@ namespace universelan::server {
 	using namespace galaxy::api;
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAcceptedMessage>& data) { REQUIRES_AUTHENTICATION(peer); /* Not handled in server */ }
-
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<FileShareResponseMessage>& data) { REQUIRES_AUTHENTICATION(peer); }
+	
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data)
 	{
 		PeerData* pd = PeerData::construct(peer);
@@ -157,13 +158,22 @@ namespace universelan::server {
 		REQUIRES_AUTHENTICATION(peer);
 
 		PeerData* pd = PeerData::get(peer);
-
-		GalaxyID target = data->id;
-		PeerData* target_pd = PeerData::get(target, peer_map);
+		PeerData* target_pd = PeerData::get(data->id, peer_map);
 
 		if (target_pd) {
 			data->id = pd->id;
 			connection.Send(peer, *data);
 		}
+	}
+
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<FileShareMessage>& data) {
+		REQUIRES_AUTHENTICATION(peer);
+
+		PeerData* pd = PeerData::get(peer);
+
+	}
+
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<FileRequestMessage>& data) {
+		REQUIRES_AUTHENTICATION(peer);
 	}
 }

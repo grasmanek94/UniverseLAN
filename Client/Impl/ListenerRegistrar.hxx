@@ -13,11 +13,11 @@
 
 #include <IListenerRegistrar.h>
 
+#include <array>
 #include <functional>
 #include <mutex>
 #include <set>
 #include <unordered_map>
-#include <vector>
 
 #include <GalaxyAPI.h>
 
@@ -32,7 +32,9 @@ namespace universelan::client {
 	{
 	private:
 		using mutex_t = std::recursive_mutex;
+		using lock_t = std::scoped_lock<mutex_t>;
 		using listener_set = std::set<IGalaxyListener*>;
+
 		struct data {
 
 			mutex_t mtx;
@@ -43,7 +45,7 @@ namespace universelan::client {
 		};
 
 		InterfaceInstances* intf;
-		data listeners[LISTENER_TYPE_END];
+		std::array<data, LISTENER_TYPE_END> listeners;
 
 	public:
 
@@ -74,15 +76,15 @@ namespace universelan::client {
 		virtual void Unregister(ListenerType listenerType, IGalaxyListener* listener) override;
 
 
-		void ExecuteForListenerType(ListenerType listenerType, std::function<void(const std::set<IGalaxyListener*>& listeners)> code);
-		void ExecuteForListenerTypePerEntry(ListenerType listenerType, std::function<void(IGalaxyListener* listeners)> code);
-		void ExecuteForListenerType(ListenerType listenerType, IGalaxyListener* extra, std::function<void(const std::set<IGalaxyListener*>& listeners)> code);
-		void ExecuteForListenerTypePerEntry(ListenerType listenerType, IGalaxyListener* extra, std::function<void(IGalaxyListener* listeners)> code);
+		bool ExecuteForListenerType(ListenerType listenerType, std::function<void(const std::set<IGalaxyListener*>& listeners)> code);
+		bool ExecuteForListenerTypePerEntry(ListenerType listenerType, std::function<void(IGalaxyListener* listeners)> code);
+		bool ExecuteForListenerType(ListenerType listenerType, IGalaxyListener* extra, std::function<void(const std::set<IGalaxyListener*>& listeners)> code);
+		bool ExecuteForListenerTypePerEntry(ListenerType listenerType, IGalaxyListener* extra, std::function<void(IGalaxyListener* listeners)> code);
 
 		// NotifyAll<IConnectionOpenListener>(&IConnectionOpenListener::OnConnectionOpenFailure, connectionString, IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE);
 		template <typename T, class _Fx, class... _Types>
-		void NotifyAll(_Fx&& _Func, _Types&&... _Args) {
-			ExecuteForListenerTypePerEntry(T::GetListenerType(), [&](IGalaxyListener* listener) {
+		bool NotifyAll(_Fx&& _Func, _Types&&... _Args) {	
+			return ExecuteForListenerTypePerEntry(T::GetListenerType(), [&](IGalaxyListener* listener) {
 				T* casted_listener = dynamic_cast<T*>(listener);
 				if (casted_listener) {
 					std::invoke(std::forward<_Fx>(_Func), casted_listener, std::forward<_Types>(_Args)...);
@@ -92,8 +94,8 @@ namespace universelan::client {
 
 		// NotifyAll<IConnectionOpenListener>(connectionString, &IConnectionOpenListener::OnConnectionOpenFailure, connectionString, IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE);
 		template <typename T, class _Fx, class... _Types>
-		void NotifyAll(T* extra, _Fx&& _Func, _Types&&... _Args) {
-			ExecuteForListenerTypePerEntry(T::GetListenerType(), extra, [&](IGalaxyListener* listener) {
+		bool NotifyAll(T* extra, _Fx&& _Func, _Types&&... _Args) {
+			return ExecuteForListenerTypePerEntry(T::GetListenerType(), extra, [&](IGalaxyListener* listener) {
 				T* casted_listener = dynamic_cast<T*>(listener);
 				if (casted_listener) {
 					std::invoke(std::forward<_Fx>(_Func), casted_listener, std::forward<_Types>(_Args)...);

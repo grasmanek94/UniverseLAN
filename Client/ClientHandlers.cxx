@@ -4,6 +4,10 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<FileShareMessage>& data) {}
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<UserHelloDataMessage>& data){}
+
 	// Handlers:
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data)
 	{
@@ -36,11 +40,6 @@ namespace universelan::client {
 		connection.SendAsync(udm);
 	}
 
-	void Client::Handle(ENetPeer* peer, const std::shared_ptr<UserHelloDataMessage>& data)
-	{
-
-	}
-
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<RequestSpecificUserDataMessage>& data)
 	{
 		switch (data->type) {
@@ -68,7 +67,14 @@ namespace universelan::client {
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<P2PNetworkPacketMessage>& data) {
-		GalaxyID target = data->id;
-		
+		interfaces->networking->AddPacket(data);
+	}
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<FileShareResponseMessage>& data) {
+		interfaces->storage->FileUploaded(data);
+	}
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<FileRequestMessage>& data) {
+		interfaces->storage->FileDownloaded(data);
 	}
 }

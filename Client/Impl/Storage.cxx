@@ -2,146 +2,168 @@
 
 #include "UniverseLAN.hxx"
 
-#include <PathSecurity.hxx>
-
 #include <chrono>
 #include <filesystem>
-#include <fstream>
+#include <string>
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	std::fstream StorageImpl::open(const char* filename, std::ios::openmode mode) {
-		std::filesystem::path basepath(intf->config->GetGameDataPath());
-		basepath /= "Local";
-
-		if (inside_basepath(basepath, filename)) {
-			return std::fstream{ (basepath / filename).string(), mode };
-		}
-
-		return std::fstream{};
-	}
 
 	StorageImpl::StorageImpl(InterfaceInstances* intf) :
-		intf{ intf }, listeners{ intf->notification.get() }
+		intf{ intf }, listeners{ intf->notification.get() },
+		file_upload_requests{}, file_download_requests{},
+		sfu(intf->config->GetGameDataPath())
 	{}
 
-	StorageImpl::~StorageImpl()
-	{
-	}
+	StorageImpl::~StorageImpl() {}
 
 	void StorageImpl::FileWrite(const char* fileName, const void* data, uint32_t dataSize) {
-		std::fstream file{ open(fileName, std::ios::app | std::ios::binary) };
-		if (file) {
-			file.write((const char*)data, dataSize);
-		}
-		else {
+		if (!sfu.WriteLocal(fileName, (const char*)data, dataSize)) {
 			std::cerr << __FUNCTION__ << " fail: " << fileName << "\n";
 		}
 	}
 
 	uint32_t StorageImpl::FileRead(const char* fileName, void* data, uint32_t dataSize) {
-		std::fstream file{ open(fileName, std::ios::in | std::ios::binary) };
-		if (file) {
-			file.read((char*)data, dataSize);
-			return (uint32_t)file.tellg();
-		}
-		else {
-			std::cerr << __FUNCTION__ << " fail: " << fileName << "\n";
-			return 0;
-		}
+		return sfu.ReadLocal(fileName, (char*)data, dataSize);
 	}
 
 	void StorageImpl::FileDelete(const char* fileName) {
-		std::fstream file{ open(fileName, std::ios::in | std::ios::binary) };
-		if (file) {
-			file.close();
-			std::filesystem::remove(std::filesystem::path(intf->config->GetGameDataPath()) / "Local" / fileName);
-		}
-		else {
+		if (!sfu.RemoveLocal(fileName)) {
 			std::cerr << __FUNCTION__ << " fail: " << fileName << "\n";
 		}
 	}
 
 	bool StorageImpl::FileExists(const char* fileName) {
-		return std::filesystem::exists(std::filesystem::path(intf->config->GetGameDataPath()) / "Local" / fileName);
+		return sfu.ExistsLocal(fileName);
 	}
 
 	uint32_t StorageImpl::GetFileSize(const char* fileName) {
-		return (uint32_t)std::filesystem::file_size(std::filesystem::path(intf->config->GetGameDataPath()) / "Local" / fileName);
+		return sfu.GetSizeLocal(fileName);
 	}
 
 	uint32_t StorageImpl::GetFileTimestamp(const char* fileName) {
-		return (uint32_t)(std::filesystem::last_write_time(std::filesystem::path(intf->config->GetGameDataPath()) / "Local" / fileName).time_since_epoch() / std::chrono::seconds(1));
-	}
-
-	static std::size_t number_of_files_in_directory(std::filesystem::path path) {
-		using std::filesystem::directory_iterator;
-		return std::distance(directory_iterator(path), directory_iterator{});
+		return sfu.GetTimestampLocal(fileName);
 	}
 
 	uint32_t StorageImpl::GetFileCount() {
-		return (uint32_t)number_of_files_in_directory(std::filesystem::path(intf->config->GetGameDataPath()) / "Local");
+		return sfu.GetFileCountLocal();
 	}
 
 	const char* StorageImpl::GetFileNameByIndex(uint32_t index) {
 		static thread_local char buffer[256];
-
 		GetFileNameCopyByIndex(index, buffer, sizeof(buffer));
-
 		return buffer;
 	}
 
 	void StorageImpl::GetFileNameCopyByIndex(uint32_t index, char* buffer, uint32_t bufferLength) {
-		using std::filesystem::directory_iterator;
-
-		directory_iterator it = directory_iterator(std::filesystem::path(intf->config->GetGameDataPath()) / "Local");
-		while (index--)
-		{
-			it++;
-		}
-
-		std::string path = it->path().string();
-
+		std::string path = sfu.GetFileNameByIndexLocal(index);
 		std::copy_n(path.c_str(), std::min((size_t)bufferLength, path.length()), buffer);
 	}
 
 	void StorageImpl::FileShare(const char* fileName, IFileShareListener* const listener) {
+		if (!intf->config->GetAllowFileSharingUpload()) {
+			listeners->NotifyAll(listener, &IFileShareListener::OnFileShareFailure, fileName, IFileShareListener::FAILURE_REASON_UNDEFINED);
+			return;
+		}
 
+		std::string str_file_name{ fileName };
+
+		if (!sfu.OpenLocal(str_file_name, std::ios::in | std::ios::binary)) {
+			std::cerr << __FUNCTION__ << " fail: " << fileName << "\n";
+
+			listeners->NotifyAll(listener, &IFileShareListener::OnFileShareFailure, fileName, IFileShareListener::FAILURE_REASON_UNDEFINED);
+			return;
+		}
+
+		// !!! LEAK !!! (albeit temporary when thread exits)
+		std::thread([=] {
+			uint64_t request_id = MessageUniqueID::get();
+
+			file_upload_requests.emplace(request_id, listener);
+			intf->client->GetConnection().SendAsync(FileShareMessage{ request_id, fileName, sfu.ReadLocal(str_file_name) });
+			}).detach();
 	}
 
 	void StorageImpl::DownloadSharedFile(SharedFileID sharedFileID, ISharedFileDownloadListener* const listener) {
+		if (!intf->config->GetAllowFileSharingDownload()) {
+			listeners->NotifyAll(listener, &ISharedFileDownloadListener::OnSharedFileDownloadFailure, sharedFileID, ISharedFileDownloadListener::FAILURE_REASON_UNDEFINED);
+			return;
+		}
 
+		uint64_t request_id = MessageUniqueID::get();
+
+		file_download_requests.emplace(request_id, listener);
+		intf->client->GetConnection().SendAsync(FileRequestMessage{ request_id, sharedFileID });
 	}
 
 	const char* StorageImpl::GetSharedFileName(SharedFileID sharedFileID) {
-		return "";
+		static thread_local char buffer[256];
+		GetSharedFileNameCopy(sharedFileID, buffer, sizeof(buffer));
+		return buffer;
 	}
 
 	void StorageImpl::GetSharedFileNameCopy(SharedFileID sharedFileID, char* buffer, uint32_t bufferLength) {
-
+		std::string name = sfu.GetSharedFileName(sharedFileID);
+		std::copy_n(name.c_str(), std::min((size_t)bufferLength, name.length()), buffer);
 	}
 
 	uint32_t StorageImpl::GetSharedFileSize(SharedFileID sharedFileID) {
-		return 0;
+		return sfu.GetSizeShared(sharedFileID);
 	}
 
 	GalaxyID StorageImpl::GetSharedFileOwner(SharedFileID sharedFileID) {
-		return 0;
+		return intf->config->GetApiGalaxyID();
 	}
 
 	uint32_t StorageImpl::SharedFileRead(SharedFileID sharedFileID, void* data, uint32_t dataSize, uint32_t offset) {
-		return 0;
+		return sfu.ReadShared(sharedFileID, (char*)data, dataSize, offset);
 	}
 
 	void StorageImpl::SharedFileClose(SharedFileID sharedFileID) {
-
+		// Empty on purpose
 	}
 
 	uint32_t StorageImpl::GetDownloadedSharedFileCount() {
-		return 0;
+		return sfu.GetFileCountShared();
 	}
 
 	SharedFileID StorageImpl::GetDownloadedSharedFileByIndex(uint32_t index) {
-		return 0;
+		return sfu.GetSharedIDByIndex(index);
 	}
+
+	void StorageImpl::FileDownloaded(const std::shared_ptr<FileRequestMessage>& data) {
+		if (!intf->config->GetAllowFileSharingDownload()) {
+			return;
+		}
+
+		ISharedFileDownloadListener* listener = file_download_requests.pop(data->request_id);
+
+		if (data->data.size() > 0 && sfu.InitSharedFileStorage(data->filename, data->id)) {
+			sfu.WriteShared(data->filename, data->data.data(), data->data.size());
+
+			listeners->NotifyAll(listener, &ISharedFileDownloadListener::OnSharedFileDownloadSuccess, data->id, data->filename.c_str());
+		}
+		else {
+			listeners->NotifyAll(listener, &ISharedFileDownloadListener::OnSharedFileDownloadFailure, data->id, ISharedFileDownloadListener::FAILURE_REASON_UNDEFINED);
+		}
+	}
+
+	void StorageImpl::FileUploaded(const std::shared_ptr<FileShareResponseMessage>& data) {
+		if (!intf->config->GetAllowFileSharingUpload()) {
+			return;
+		}
+
+		IFileShareListener* listener = file_upload_requests.pop(data->request_id);
+
+		if (data->id != 0) {
+			sfu.InitSharedFileStorage(data->filename, data->id);
+			std::filesystem::copy_file(sfu.GetPathLocal(data->filename), sfu.GetPathShared(data->filename));
+
+			listeners->NotifyAll(listener, &IFileShareListener::OnFileShareSuccess, data->filename.c_str(), data->id);
+		}
+		else {
+			listeners->NotifyAll(listener, &IFileShareListener::OnFileShareFailure, data->filename.c_str(), IFileShareListener::FAILURE_REASON_UNDEFINED);
+		}
+	}
+
 }

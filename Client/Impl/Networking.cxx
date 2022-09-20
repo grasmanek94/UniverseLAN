@@ -47,7 +47,7 @@ namespace universelan::client {
 			}
 		}
 
-		assert(packet);
+		assert(packet != nullptr);
 
 		outGalaxyID = packet->id;
 		*outMsgSize = std::min((uint32_t)packet->data.size(), destSize);
@@ -111,12 +111,19 @@ namespace universelan::client {
 			return;
 		}
 
-		channels_array::value_type& channel_var = buffer[packet->channel];
+		// locked operation
+		{
+			channels_array::value_type& channel_var = buffer[packet->channel];
 
-		lock_t lock{ channel_var.mtx };
-		if (channel_var.packets.empty()) {
-			channel_var.front_size.store((int32_t)packet->data.size());
+			lock_t lock{ channel_var.mtx };
+			if (channel_var.packets.empty()) {
+				channel_var.front_size.store((int32_t)packet->data.size());
+			}
+			channel_var.packets.push(packet);
 		}
-		channel_var.packets.push(packet);
+
+		if (listeners->NotifyAll<INetworkingListener>(&INetworkingListener::OnP2PPacketAvailable, (uint32_t)packet->data.size(), packet->channel)) {
+			PopP2PPacket(packet->channel);
+		}
 	}
 }

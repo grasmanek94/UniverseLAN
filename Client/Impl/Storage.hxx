@@ -8,11 +8,14 @@
 
 #include "ListenerRegistrar.hxx"
 
+#include <Networking/Messages/FileRequestMessage.hxx>
+#include <Networking/Messages/FileShareMessage.hxx>
+#include <Networking/Messages/FileShareResponseMessage.hxx>
+#include <SharedFileUtils.hxx>
+
 #include <IStorage.h>
 #include <GalaxyID.h>
 #include <IListenerRegistrar.h>
-
-#include <fstream>
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -30,9 +33,11 @@ namespace universelan::client {
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
 
-		std::fstream open(const char* filename, std::ios::openmode mode);
-	public:
+		ListenersRequestHelper<IFileShareListener> file_upload_requests;
+		ListenersRequestHelper<ISharedFileDownloadListener> file_download_requests;
 
+		SharedFileUtils sfu;
+	public:
 		StorageImpl(InterfaceInstances* intf);
 		virtual ~StorageImpl();
 
@@ -215,6 +220,9 @@ namespace universelan::client {
 		 * @return The ID of the shared file.
 		 */
 		virtual SharedFileID GetDownloadedSharedFileByIndex(uint32_t index) override;
+
+		virtual void FileDownloaded(const std::shared_ptr<FileRequestMessage>& data);
+		virtual void FileUploaded(const std::shared_ptr<FileShareResponseMessage>& data);
 	};
 
 	/** @} */
