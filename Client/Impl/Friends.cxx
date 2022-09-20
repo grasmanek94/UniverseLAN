@@ -46,7 +46,7 @@ namespace universelan::client {
 	}
 
 	const char* FriendsImpl::GetFriendPersonaName(GalaxyID userID) {
-		return "PersonaName";
+		return "GetFriendPersonaName";
 	}
 
 	void FriendsImpl::GetFriendPersonaNameCopy(GalaxyID userID, char* buffer, uint32_t bufferLength) {
@@ -82,7 +82,7 @@ namespace universelan::client {
 	}
 
 	bool FriendsImpl::IsFriend(GalaxyID userID) {
-		return true;
+		return false;
 	}
 
 	uint32_t FriendsImpl::GetFriendCount() {

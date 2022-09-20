@@ -69,5 +69,9 @@ namespace galaxy::api {
 		if (gameserver_intf_inst.client != nullptr) {
 			gameserver_intf_inst.client->ProcessEvents();
 		}
+
+		if (gameserver_intf_inst.delay_runner != nullptr) {
+			gameserver_intf_inst.delay_runner->Run();
+		}
 	}
 }
