@@ -11,7 +11,7 @@ namespace universelan::server {
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAcceptedMessage>& data) { REQUIRES_AUTHENTICATION(peer); /* Not handled in server */ }
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<FileShareResponseMessage>& data) { REQUIRES_AUTHENTICATION(peer); }
-	
+
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data)
 	{
 		PeerData* pd = PeerData::construct(peer);
@@ -48,7 +48,7 @@ namespace universelan::server {
 
 					unauthenticated_peers.erase(peer);
 					connection.Send(peer, ConnectionAcceptedMessage{});
-					
+
 					std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") KeyChallengeMessage ACCEPT" << std::endl;
 					return;
 				}
@@ -174,7 +174,7 @@ namespace universelan::server {
 		if (!sfu.InitSharedFileStorage(fsrm.filename, fsrm.id)) {
 			std::cerr << "FileShareMessage::InitSharedFileStorage FAIL\n";
 		}
-		
+
 		if (!sfu.WriteShared(fsrm.filename, data->data.data(), data->data.size())) {
 			std::cerr << "FileShareMessage::WriteShared FAIL\n";
 		}
@@ -185,12 +185,16 @@ namespace universelan::server {
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<FileRequestMessage>& data) {
 		REQUIRES_AUTHENTICATION(peer);
 
-		data->data = sfu.ReadShared(data->id);
-		if (data->data.size() == 0) {
+		if (data->id != 0) {
+			data->data = sfu.ReadShared(data->id);
+			data->filename = sfu.GetSharedFileName(data->id);
+		} else if(data->filename.size() != 0) {
 			data->data = sfu.ReadShared(data->filename);
-			if (data->data.size() == 0) {
-				std::cerr << "FileShareMessage::ReadShared FAIL\n";
-			}
+			data->id = sfu.GetSharedFileID(data->filename);
+		}
+
+		if (data->data.size() == 0) {
+			std::cerr << "FileShareMessage::ReadShared FAIL\n";
 		}
 
 		connection.Send(peer, data);
