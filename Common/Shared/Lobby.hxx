@@ -31,6 +31,8 @@ namespace universelan {
 			0Ui64
 		>;
 
+		using data_by_index_t = std::pair<std::string, std::string>;
+
 	private:
 		galaxy::api::GalaxyID id;
 		galaxy::api::GalaxyID owner_id;
@@ -60,7 +62,7 @@ namespace universelan {
 
 	private:
 		static const char* GetData(const data_t& data, const char* key);
-		static const char* GetDataByIndex(const data_t& data, size_t index);
+		static data_by_index_t GetDataByIndex(const data_t& data, size_t index);
 		static void SetData(data_t& data, const char* key, const char* value);
 
 	public:
@@ -89,18 +91,18 @@ namespace universelan {
 		const char* GetData(const char* key) const;
 		void SetData(const char* key, const char* value);
 		uint32_t GetDataCount() const;
-		const char* GetDataByIndex(size_t index) const;
+		data_by_index_t GetDataByIndex(size_t index) const;
 		void DeleteData(const char* key);
 
 		const char* GetMemberData(galaxy::api::GalaxyID id, const char* key) const;
 		void SetMemberData(galaxy::api::GalaxyID id, const char* key, const char* value);
 		uint32_t GetMemberDataCount(galaxy::api::GalaxyID id) const;
-		const char* GetMemberDataByIndex(galaxy::api::GalaxyID id, size_t index) const;
+		data_by_index_t GetMemberDataByIndex(galaxy::api::GalaxyID id, size_t index) const;
 		void DeleteMemberData(galaxy::api::GalaxyID id, const char* key, const char* value);
 
 		galaxy::api::GalaxyID GetOwner() const;
 
-		bool SendMessage(galaxy::api::GalaxyID sender, const std::string data);
-		uint32_t GetMessage(uint32_t messageID, galaxy::api::GalaxyID& senderID, char* msg, uint32_t msgLength);
+		bool SendMsg(galaxy::api::GalaxyID sender, const std::string data);
+		uint32_t GetMsg(uint32_t messageID, galaxy::api::GalaxyID& senderID, char* msg, uint32_t msgLength);
 	};
 }

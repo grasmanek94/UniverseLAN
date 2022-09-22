@@ -17,12 +17,12 @@ namespace universelan {
 	using namespace galaxy::api;
 
 	Lobby::Lobby() :
-		id{ GlobalUniqueID::get() }, owner_id{}, max_members{}, joinable{}, topology_type{}, type{}, 
+		id{ GlobalUniqueID::get() }, owner_id{}, max_members{}, joinable{}, topology_type{}, type{},
 		current_message_id{ 1 }, data{}, user_data{}, messages{} {}
 
-	Lobby::Lobby(GalaxyID owner_id, LobbyType type, uint32_t max_members, bool joinable, 
+	Lobby::Lobby(GalaxyID owner_id, LobbyType type, uint32_t max_members, bool joinable,
 		LobbyTopologyType lobby_topology_type) :
-		id{ GlobalUniqueID::get() }, owner_id{ owner_id }, max_members{ max_members }, joinable{ joinable }, 
+		id{ GlobalUniqueID::get() }, owner_id{ owner_id }, max_members{ max_members }, joinable{ joinable },
 		topology_type{ lobby_topology_type }, type{ type }, current_message_id{ 1 }, data{}, user_data{}, messages{} {
 		AddMember(owner_id);
 	}
@@ -42,12 +42,14 @@ namespace universelan {
 		return entry->second.c_str();
 	}
 
-	const char* Lobby::GetDataByIndex(const data_t& data, size_t index) {
+	Lobby::data_by_index_t Lobby::GetDataByIndex(const data_t& data, size_t index) {
 		if (data.size() < index) {
-			return "";
+			return data_by_index_t{ {},{} };
 		}
 
-		return container_get_by_index(data, index).second.c_str();
+		auto entry = container_get_by_index(data, index);
+
+		return data_by_index_t{ entry.first, entry.second };
 	}
 
 	void Lobby::SetData(data_t& data, const char* key, const char* value) {
@@ -148,7 +150,7 @@ namespace universelan {
 		return (uint32_t)data.size();
 	}
 
-	const char* Lobby::GetDataByIndex(size_t index) const {
+	Lobby::data_by_index_t Lobby::GetDataByIndex(size_t index) const {
 		return GetDataByIndex(data, index);
 	}
 
@@ -183,10 +185,10 @@ namespace universelan {
 		return (uint32_t)user->second.size();
 	}
 
-	const char* Lobby::GetMemberDataByIndex(GalaxyID id, size_t index) const {
+	Lobby::data_by_index_t Lobby::GetMemberDataByIndex(GalaxyID id, size_t index) const {
 		auto user = user_data.find(id);
 		if (user == user_data.end()) {
-			return "";
+			return data_by_index_t{ {},{} };
 		}
 
 		return GetDataByIndex(user->second, index);
@@ -200,7 +202,7 @@ namespace universelan {
 		return owner_id;
 	}
 
-	bool Lobby::SendMessage(GalaxyID sender, const std::string data) {
+	bool Lobby::SendMsg(GalaxyID sender, const std::string data) {
 		if (!IsMember(sender)) {
 			return false;
 		}
@@ -212,7 +214,7 @@ namespace universelan {
 		return messages.emplace(message.message_id, message).second;
 	}
 
-	uint32_t Lobby::GetMessage(uint32_t messageID, GalaxyID& senderID, char* msg, uint32_t msgLength) {
+	uint32_t Lobby::GetMsg(uint32_t messageID, GalaxyID& senderID, char* msg, uint32_t msgLength) {
 		auto message = messages.find(messageID);
 		if (message == messages.end()) {
 			return 0;

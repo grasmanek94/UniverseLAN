@@ -2,6 +2,7 @@
 
 #include "UniverseLAN.hxx"
 
+#include <ContainerGetByIndex.hxx>
 #include <Networking/Messages/CreateLobbyMessage.hxx>
 
 namespace universelan::client {
@@ -231,103 +232,213 @@ namespace universelan::client {
 	}
 
 	GalaxyID MatchmakingImpl::GetLobbyByIndex(uint32_t index) {
-		return 0;
+		lock_t lock{ lobby_list_filtered_mtx };
+
+		if (lobby_list_filtered.size() < index) {
+			return 0;
+		}
+
+		return container_get_by_index(lobby_list_filtered, index).first;
 	}
 
 	void MatchmakingImpl::JoinLobby(GalaxyID lobbyID, ILobbyEnteredListener* const listener) {
-
+		// TODO : define msg
 	}
 
 	void MatchmakingImpl::LeaveLobby(GalaxyID lobbyID, ILobbyLeftListener* const listener) {
-
+		// TODO : define msg
 	}
 
 	void MatchmakingImpl::SetMaxNumLobbyMembers(GalaxyID lobbyID, uint32_t maxNumLobbyMembers, ILobbyDataUpdateListener* const listener) {
-
+		// TODO : define msg
 	}
 
 	uint32_t MatchmakingImpl::GetMaxNumLobbyMembers(GalaxyID lobbyID) {
-		return 0;
+		lock_t lock{ lobby_list_filtered_mtx };
+
+		auto lobby = lobby_list_filtered.find(lobbyID);
+		if (lobby == lobby_list_filtered.end()) {
+			return 0;
+		}
+
+		return lobby->second->GetMaxMembers();
 	}
 
 	uint32_t MatchmakingImpl::GetNumLobbyMembers(GalaxyID lobbyID) {
-		return 0;
+		lock_t lock{ lobby_list_filtered_mtx };
+
+		auto lobby = lobby_list_filtered.find(lobbyID);
+		if (lobby == lobby_list_filtered.end()) {
+			return 0;
+		}
+
+		return lobby->second->GetMemberCount();
 	}
 
 	GalaxyID MatchmakingImpl::GetLobbyMemberByIndex(GalaxyID lobbyID, uint32_t index) {
-		return 0;
+		lock_t lock{ lobby_list_filtered_mtx };
+
+		auto lobby = lobby_list_filtered.find(lobbyID);
+		if (lobby == lobby_list_filtered.end()) {
+			return 0;
+		}
+
+		return lobby->second->GetMemberByIndex(index);
 	}
 
 	void MatchmakingImpl::SetLobbyType(GalaxyID lobbyID, LobbyType lobbyType, ILobbyDataUpdateListener* const listener) {
-
+		// TODO : define msg
 	}
 
 	LobbyType MatchmakingImpl::GetLobbyType(GalaxyID lobbyID) {
-		return LOBBY_TYPE_PUBLIC;
+		lock_t lock{ lobby_list_filtered_mtx };
+
+		auto lobby = lobby_list_filtered.find(lobbyID);
+		if (lobby == lobby_list_filtered.end()) {
+			return LOBBY_TYPE_PRIVATE;
+		}
+
+		return lobby->second->GetType();
 	}
 
 	void MatchmakingImpl::SetLobbyJoinable(GalaxyID lobbyID, bool joinable, ILobbyDataUpdateListener* const listener) {
-
+		// TODO : define msg
 	}
 
 	bool MatchmakingImpl::IsLobbyJoinable(GalaxyID lobbyID) {
-		return true;
+		auto lobby = lobby_list_filtered.find(lobbyID);
+		if (lobby == lobby_list_filtered.end()) {
+			return false;
+		}
+
+		return lobby->second->IsJoinable();
 	}
 
 	void MatchmakingImpl::RequestLobbyData(GalaxyID lobbyID, ILobbyDataRetrieveListener* const listener) {
-
+		// TODO : define msg
 	}
 
 	const char* MatchmakingImpl::GetLobbyData(GalaxyID lobbyID, const char* key) {
-		return "";
+		auto lobby = lobby_list_filtered.find(lobbyID);
+		if (lobby == lobby_list_filtered.end()) {
+			return "";
+		}
+
+		return lobby->second->GetData(key);
 	}
 
 	void MatchmakingImpl::GetLobbyDataCopy(GalaxyID lobbyID, const char* key, char* buffer, uint32_t bufferLength) {
+		auto lobby = lobby_list_filtered.find(lobbyID);
+		if (lobby == lobby_list_filtered.end()) {
+			return;
+		}
 
+		const char* data = lobby->second->GetData(key);
+		uint32_t min_size = std::min(bufferLength, (uint32_t)strlen(data));
+		std::copy_n(data, min_size, buffer);
 	}
 
 	void MatchmakingImpl::SetLobbyData(GalaxyID lobbyID, const char* key, const char* value, ILobbyDataUpdateListener* const listener) {
-
+		// TODO : define msg
 	}
 
 	uint32_t MatchmakingImpl::GetLobbyDataCount(GalaxyID lobbyID) {
-		return 0;
+		auto lobby = lobby_list_filtered.find(lobbyID);
+		if (lobby == lobby_list_filtered.end()) {
+			return 0;
+		}
+
+		return lobby->second->GetDataCount();
 	}
 
 	bool MatchmakingImpl::GetLobbyDataByIndex(GalaxyID lobbyID, uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength) {
-		return false;
+		auto lobby = lobby_list_filtered.find(lobbyID);
+		if (lobby == lobby_list_filtered.end()) {
+			return false;
+		}
+
+		auto data = lobby->second->GetDataByIndex(index);
+		if ((data.first.size() == 0) && (data.second.size() == 0)) {
+			return false;
+		}
+
+		uint32_t min_key_size = std::min(keyLength, (uint32_t)data.first.size());
+		uint32_t min_value_size = std::min(valueLength, (uint32_t)data.second.size());
+
+		std::copy_n(data.first.c_str(), min_key_size, key);
+		std::copy_n(data.second.c_str(), min_value_size, value);
+
+		return true;
 	}
 
 	void MatchmakingImpl::DeleteLobbyData(GalaxyID lobbyID, const char* key, ILobbyDataUpdateListener* const listener) {
-
+		SetLobbyData(lobbyID, key, "", listener);
 	}
 
 	const char* MatchmakingImpl::GetLobbyMemberData(GalaxyID lobbyID, GalaxyID memberID, const char* key) {
-		return "";
+		auto lobby = lobby_list_filtered.find(lobbyID);
+		if (lobby == lobby_list_filtered.end()) {
+			return "";
+		}
+
+		return lobby->second->GetMemberData(memberID, key);
 	}
 
 	void MatchmakingImpl::GetLobbyMemberDataCopy(GalaxyID lobbyID, GalaxyID memberID, const char* key, char* buffer, uint32_t bufferLength) {
+		auto lobby = lobby_list_filtered.find(lobbyID);
+		if (lobby == lobby_list_filtered.end()) {
+			return;
+		}
 
+		const char* data = lobby->second->GetMemberData(memberID, key);
+		uint32_t min_size = std::min(bufferLength, (uint32_t)strlen(data));
+		std::copy_n(data, min_size, buffer);
 	}
 
 	void MatchmakingImpl::SetLobbyMemberData(GalaxyID lobbyID, const char* key, const char* value, ILobbyMemberDataUpdateListener* const listener) {
-
+		// TODO : define msg
 	}
 
 	uint32_t MatchmakingImpl::GetLobbyMemberDataCount(GalaxyID lobbyID, GalaxyID memberID) {
-		return 0;
+		auto lobby = lobby_list_filtered.find(lobbyID);
+		if (lobby == lobby_list_filtered.end()) {
+			return 0;
+		}
+
+		return lobby->second->GetMemberDataCount(memberID);
 	}
 
 	bool MatchmakingImpl::GetLobbyMemberDataByIndex(GalaxyID lobbyID, GalaxyID memberID, uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength) {
-		return false;
+		auto lobby = lobby_list_filtered.find(lobbyID);
+		if (lobby == lobby_list_filtered.end()) {
+			return false;
+		}
+
+		auto data = lobby->second->GetMemberDataByIndex(memberID, index);
+		if ((data.first.size() == 0) && (data.second.size() == 0)) {
+			return false;
+		}
+
+		uint32_t min_key_size = std::min(keyLength, (uint32_t)data.first.size());
+		uint32_t min_value_size = std::min(valueLength, (uint32_t)data.second.size());
+
+		std::copy_n(data.first.c_str(), min_key_size, key);
+		std::copy_n(data.second.c_str(), min_value_size, value);
+
+		return true;
 	}
 
 	void MatchmakingImpl::DeleteLobbyMemberData(GalaxyID lobbyID, const char* key, ILobbyMemberDataUpdateListener* const listener) {
-
+		SetLobbyMemberData(lobbyID, key, "", listener);
 	}
 
 	GalaxyID MatchmakingImpl::GetLobbyOwner(GalaxyID lobbyID) {
-		return 0;
+		auto lobby = lobby_list_filtered.find(lobbyID);
+		if (lobby == lobby_list_filtered.end()) {
+			return 0;
+		}
+
+		return lobby->second->GetOwner();
 	}
 
 	bool MatchmakingImpl::SendLobbyMessage(GalaxyID lobbyID, const void* data, uint32_t dataSize) {
@@ -335,6 +446,11 @@ namespace universelan::client {
 	}
 
 	uint32_t MatchmakingImpl::GetLobbyMessage(GalaxyID lobbyID, uint32_t messageID, GalaxyID& senderID, char* msg, uint32_t msgLength) {
-		return 0;
+		auto lobby = lobby_list_filtered.find(lobbyID);
+		if (lobby == lobby_list_filtered.end()) {
+			return 0;
+		}
+
+		return lobby->second->GetMsg(messageID, senderID, msg, msgLength);
 	}
 }
