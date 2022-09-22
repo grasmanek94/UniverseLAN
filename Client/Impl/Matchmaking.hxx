@@ -8,11 +8,20 @@
 
 #include "ListenerRegistrar.hxx"
 
+#include <LobbyManager.hxx>
+#include <Networking/Messages/CreateLobbyMessage.hxx>
+#include <Networking/Messages/CreateLobbyResponseMessage.hxx>
+#include <Networking/Messages/RequestLobbyListMessage.hxx>
+
 #include <IMatchmaking.h>
 #include <GalaxyID.h>
 #include <IListenerRegistrar.h>
 
+#include <memory>
 #include <mutex>
+#include <string>
+#include <variant>
+#include <vector>
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -32,21 +41,56 @@ namespace universelan::client {
 		using mutex_t = std::recursive_mutex;
 		using lock_t = std::scoped_lock<mutex_t>;
 
+		using filter_value_t = std::variant<int32_t, std::string>;
+
+		struct filter_entry_t {
+			filter_value_t value;
+			LobbyComparisonType comparison_type;
+		};
+
+		struct filter_combined_t {
+			std::string key;
+			filter_entry_t filter;
+		};
+
+		using filter_container_t = std::vector<filter_combined_t>;
+
+		struct LobbyFilters {
+			filter_container_t filters;
+			uint32_t max_entries;
+			bool allow_full;
+		};
+
+		using lobby_filters_ptr = std::shared_ptr<LobbyFilters>;
+
 	private:
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
 
-		ListenersRequestHelper<ILobbyCreatedListener> create_lobby_requests;
-		ListenersRequestHelper<ILobbyEnteredListener> create_lobby_entered_requests;
-		ListenersRequestHelper<ILobbyListListener> list_lobbies_requests;
-		ListenersRequestHelper<ILobbyEnteredListener> join_lobby_requests;
-		ListenersRequestHelper<ILobbyLeftListener> leave_lobby_requests;
-		ListenersRequestHelper<ILobbyDataUpdateListener> set_max_lobby_members_requests;
-		ListenersRequestHelper<ILobbyDataUpdateListener> set_lobby_type_requests;
-		ListenersRequestHelper<ILobbyDataUpdateListener> set_lobby_joinable_requests;
-		ListenersRequestHelper<ILobbyDataUpdateListener> get_lobby_data_requests;
-		ListenersRequestHelper<ILobbyDataUpdateListener> set_lobby_data_requests;
-		ListenersRequestHelper<ILobbyMemberDataUpdateListener> set_lobby_member_data_requests;
+		ListenersRequestHelper<ILobbyCreatedListener*> create_lobby_requests;
+		ListenersRequestHelper<ILobbyEnteredListener*> create_lobby_entered_requests;
+		ListenersRequestHelper<ILobbyListListener*> list_lobbies_requests;
+		ListenersRequestHelper<ILobbyEnteredListener*> join_lobby_requests;
+		ListenersRequestHelper<ILobbyLeftListener*> leave_lobby_requests;
+		ListenersRequestHelper<ILobbyDataUpdateListener*> set_max_lobby_members_requests;
+		ListenersRequestHelper<ILobbyDataUpdateListener*> set_lobby_type_requests;
+		ListenersRequestHelper<ILobbyDataUpdateListener*> set_lobby_joinable_requests;
+		ListenersRequestHelper<ILobbyDataUpdateListener*> get_lobby_data_requests;
+		ListenersRequestHelper<ILobbyDataUpdateListener*> set_lobby_data_requests;
+		ListenersRequestHelper<ILobbyMemberDataUpdateListener*> set_lobby_member_data_requests;
+		
+		mutex_t lobby_list_mtx;
+		LobbyManager::lobbies_t lobby_list;
+
+		mutex_t lobby_list_filtered_mtx;
+		LobbyFilters lobby_list_filters;
+		LobbyManager::lobbies_t lobby_list_filtered;
+
+		mutex_t joined_lobby_mtx;
+		LobbyManager::lobby_t joined_lobby;
+
+		ListenersRequestHelper<lobby_filters_ptr> lobby_list_filtered_requests;
+		ListenersRequestHelper<ILobbyListListener*> lobby_list_requests;
 
 	public:
 
@@ -516,6 +560,9 @@ namespace universelan::client {
 		 * @return The number of bytes written to the buffer.
 		 */
 		virtual uint32_t GetLobbyMessage(GalaxyID lobbyID, uint32_t messageID, GalaxyID& senderID, char* msg, uint32_t msgLength) override;
+
+		virtual void CreateLobbyProcessed(const std::shared_ptr<CreateLobbyResponseMessage>& data);
+		virtual void RequestLobbyListProcessed(const std::shared_ptr<RequestLobbyListMessage>& data);
 	};
 
 	/** @} */

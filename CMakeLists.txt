@@ -7,6 +7,10 @@ project( lsfdrmfg )
 enable_language( CXX )
 enable_language( C )
 
+if(MSVC)
+  add_definitions(/MP)
+endif()
+
 set(CMAKE_CXX_STANDARD 20)
 set(CXX_STANDARD_REQUIRED ON)
 

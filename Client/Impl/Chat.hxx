@@ -44,9 +44,9 @@ namespace universelan::client {
 		ChatRoomManager chatroom_manager;
 		ChatRoom::messages_t* incomming_messages_buffer;
 
-		ListenersRequestHelper<IChatRoomWithUserRetrieveListener> request_chat_room_with_user_requests;
-		ListenersRequestHelper<IChatRoomMessagesRetrieveListener> request_chat_room_messages_requests;
-		ListenersRequestHelper<IChatRoomMessageSendListener> send_to_chat_room_requests;
+		ListenersRequestHelper<IChatRoomWithUserRetrieveListener*> request_chat_room_with_user_requests;
+		ListenersRequestHelper<IChatRoomMessagesRetrieveListener*> request_chat_room_messages_requests;
+		ListenersRequestHelper<IChatRoomMessageSendListener*> send_to_chat_room_requests;
 
 		mutex_t mtx;
 	public:

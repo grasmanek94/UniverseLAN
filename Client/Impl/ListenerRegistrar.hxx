@@ -110,19 +110,19 @@ namespace universelan::client {
 		using lock_t = std::scoped_lock<mutex_t>;
 
 		mutex_t mtx;
-		std::unordered_map<uint64_t, T*> map;
+		std::unordered_map<uint64_t, T> map;
 
 		void run_locked(std::function<void()> func) {
 			lock_t lock(mtx);
 			func();
 		}
 
-		void emplace(uint64_t request_id, T* listener) {
+		void emplace(uint64_t request_id, T listener) {
 			lock_t lock(mtx);
 			map.emplace(request_id, listener);
 		}
 
-		T* pop(uint64_t request_id) {
+		T pop(uint64_t request_id) {
 			lock_t lock(mtx);
 			auto it = map.find(request_id);
 			if (it == map.end()) {

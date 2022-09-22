@@ -35,8 +35,8 @@ namespace universelan::client {
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
 
-		ListenersRequestHelper<IFileShareListener> file_upload_requests;
-		ListenersRequestHelper<ISharedFileDownloadListener> file_download_requests;
+		ListenersRequestHelper<IFileShareListener*> file_upload_requests;
+		ListenersRequestHelper<ISharedFileDownloadListener*> file_download_requests;
 
 		SharedFileUtils sfu;
 	public:

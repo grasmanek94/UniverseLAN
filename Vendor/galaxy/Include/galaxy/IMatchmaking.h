@@ -64,7 +64,8 @@ namespace galaxy
 			LOBBY_COMPARISON_TYPE_GREATER, ///< The lobby should have a property of a value that is greater than the one specified.
 			LOBBY_COMPARISON_TYPE_GREATER_OR_EQUAL, ///< The lobby should have a property of a value that is greater than or equal to the one specified.
 			LOBBY_COMPARISON_TYPE_LOWER, ///< The lobby should have a property of a value that is lower than the one specified.
-			LOBBY_COMPARISON_TYPE_LOWER_OR_EQUAL ///< The lobby should have a property of a value that is lower than or equal to the one specified.
+			LOBBY_COMPARISON_TYPE_LOWER_OR_EQUAL, ///< The lobby should have a property of a value that is lower than or equal to the one specified.
+			LOBBY_COMPARISON_TYPE_NEAR ///< The lobby should have a property of a value that is near the one specified
 		};
 
 		/**

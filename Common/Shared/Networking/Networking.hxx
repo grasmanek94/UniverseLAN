@@ -19,7 +19,7 @@ namespace universelan {
 		virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data) = 0;
 		virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data) = 0;
 
-		SHARED_NETWORK_DECLARE_MESSAGE_HANDLERS();
+#include <Networking/MessageHandlersDeclarePureVirtual.hxx>
 
 		template <typename T>
 		bool ProcessEventFor(const ENetEvent& event) {

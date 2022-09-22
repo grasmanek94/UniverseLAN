@@ -23,5 +23,6 @@ namespace universelan {
 		lobby_t CreateLobby(galaxy::api::GalaxyID owner, galaxy::api::LobbyType lobby_type, uint32_t max_members, bool joinable, galaxy::api::LobbyTopologyType lobby_topology_type);
 		lobby_t GetLobby(galaxy::api::GalaxyID lobby_id) const;
 		const lobbies_t& GetLobbies() const;
+		bool RemoveLobby(galaxy::api::GalaxyID lobby_id);
 	};
 }

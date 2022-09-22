@@ -40,7 +40,7 @@ namespace universelan::client {
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
 
-		ListenersRequestHelper<IUserStatsAndAchievementsRetrieveListener> specific_user_stats_and_achievements_requests;
+		ListenersRequestHelper<IUserStatsAndAchievementsRetrieveListener*> specific_user_stats_and_achievements_requests;
 
 	public:
 

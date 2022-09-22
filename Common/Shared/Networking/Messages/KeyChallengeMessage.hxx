@@ -59,7 +59,9 @@ namespace universelan {
 
 		UniqueClassId_Declare(KeyChallengeMessage);
 
-		KeyChallengeMessage() : encrypted{ 0ULL } {}
+		KeyChallengeMessage() : encrypted{ 0ULL }, id{ 0 } {}
+		KeyChallengeMessage(galaxy::api::GalaxyID id) : encrypted{ 0ULL }, id{ id } {}
+
 		inline KeyChallengeMessage& challenge(uint64_t key, uint64_t data) {
 			encrypted = key ^ data;
 			return *this;

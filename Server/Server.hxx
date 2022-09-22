@@ -42,8 +42,12 @@ namespace universelan::server {
 		virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data) override;
 		virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data) override;
 
-		SHARED_NETWORK_OVERRIDE_MESSAGE_HANDLERS();
+#include <Networking/MessageHandlersDeclareOverride.hxx>
 
+		bool HandleMemberLobbyLeave(ENetPeer* peer);
+
+		bool HandleMemberChatLeave(ENetPeer* peer);
+		bool HandleMemberChatLeave(ENetPeer* peer, galaxy::api::ChatRoomID chat_room_id);
 	public:
 		Server();
 		virtual ~Server();

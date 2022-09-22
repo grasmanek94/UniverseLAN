@@ -11,6 +11,7 @@ namespace universelan::server {
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAcceptedMessage>& data) { REQUIRES_AUTHENTICATION(peer); /* Not handled in server */ }
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<FileShareResponseMessage>& data) { REQUIRES_AUTHENTICATION(peer); }
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<CreateLobbyResponseMessage>& data) { REQUIRES_AUTHENTICATION(peer); }
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data)
 	{
@@ -27,6 +28,9 @@ namespace universelan::server {
 		std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") EventDisconnect" << std::endl;
 
 		peer::ptr pd = peer_mapper.Get(peer);
+
+		HandleMemberLobbyLeave(peer);
+		HandleMemberChatLeave(peer);
 
 		user_data.erase(pd->id);
 		unauthenticated_peers.erase(peer);
@@ -93,18 +97,19 @@ namespace universelan::server {
 
 		RequestChatRoomWithUserMessage response{ data->request_id, data->id };
 
-		if (target) {
-			response.chat_room = chat_room_manager.CreateChatRoom();
-			response.chat_room->AddMember(pd->id);
-			response.chat_room->AddMember(data->id);
-
-			connection.Send(target->peer, response);
-		}
-		else {
+		if (!target) {
 			response.chat_room = nullptr;
+			connection.Send(peer, response);
+			return;
 		}
 
-		connection.Send(peer, response);
+		response.chat_room = chat_room_manager.CreateChatRoom();
+
+		for (auto& i : { pd, target }) {
+			response.chat_room->AddMember(i->id);
+			i->chat_rooms.emplace(response.chat_room->GetID(), response.chat_room);
+			connection.Send(i->peer, response);
+		}
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestChatRoomMessagesMessage>& data) {
@@ -158,7 +163,17 @@ namespace universelan::server {
 		REQUIRES_AUTHENTICATION(peer);
 
 		peer::ptr pd = peer_mapper.Get(peer);
-		peer::ptr target_pd = peer_mapper.Get(data->id);
+		peer::ptr target_pd{ nullptr };
+
+		if (data->id.GetIDType() == GalaxyID::ID_TYPE_LOBBY) {
+			auto lobby = lobby_manager.GetLobby(data->id);
+			if (lobby) {
+				target_pd = peer_mapper.Get(lobby->GetOwner());
+			}
+		}
+		else {
+			target_pd = peer_mapper.Get(data->id);
+		}
 
 		if (target_pd) {
 			data->id = pd->id;
@@ -188,7 +203,8 @@ namespace universelan::server {
 		if (data->id != 0) {
 			data->data = sfu.ReadShared(data->id);
 			data->filename = sfu.GetSharedFileName(data->id);
-		} else if(data->filename.size() != 0) {
+		}
+		else if (data->filename.size() != 0) {
 			data->data = sfu.ReadShared(data->filename);
 			data->id = sfu.GetSharedFileID(data->filename);
 		}
@@ -204,12 +220,132 @@ namespace universelan::server {
 		REQUIRES_AUTHENTICATION(peer);
 
 		peer::ptr pd = peer_mapper.Get(peer);
+		LobbyManager::lobby_t lobby{ nullptr };
 
-		auto lobby = lobby_manager.CreateLobby(pd->id, data->type, data->max_members, data->joinable, data->topology_type);
-		
+		if (pd->lobby == nullptr) {
+			lobby = lobby_manager.CreateLobby(pd->id, data->type, data->max_members, data->joinable, data->topology_type);
+			pd->lobby = lobby;
+		}
+
+		connection.Send(peer, CreateLobbyResponseMessage{ data->request_id,lobby });
 	}
 
-	void Server::Handle(ENetPeer* peer, const std::shared_ptr<CreateLobbyResponseMessage>& data) {
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestLobbyListMessage>& data) {
 		REQUIRES_AUTHENTICATION(peer);
+
+		data->lobby_list = lobby_manager.GetLobbies();
+		data->error = false;
+
+		connection.Send(peer, data);
+	}
+
+	bool Server::HandleMemberLobbyLeave(ENetPeer* peer) {
+		peer::ptr pd = peer_mapper.Get(peer);
+
+		LobbyManager::lobby_t lobby{ pd->lobby };
+		if (!lobby) {
+			return false;
+		}
+
+		pd->lobby = nullptr;
+		lobby->RemoveMember(pd->id);
+
+		if (lobby->GetMemberCount() == 0) {
+			lobby_manager.RemoveLobby(lobby->GetID());
+			return true;
+		}
+
+		bool close{
+			(lobby->GetTopology() == LOBBY_TOPOLOGY_TYPE_FCM) ||
+			(lobby->GetTopology() == LOBBY_TOPOLOGY_TYPE_STAR)
+		};
+
+		if (close) {
+			lobby_manager.RemoveLobby(lobby->GetID());
+
+			for (auto& member : lobby->GetMembers()) {
+				auto member_peer = peer_mapper.Get(member);
+
+				member_peer->lobby = nullptr;
+
+				// TODO: Send here lobby close
+			}
+		}
+		else {
+			bool new_owner{ false };
+			GalaxyID new_owner_id{ 0 };
+
+			if (lobby->GetOwner() == pd->id) {
+				new_owner = true;
+				new_owner_id = lobby->ChooseNewOwner();
+			}
+
+			for (auto& member : lobby->GetMembers()) {
+				auto member_peer = peer_mapper.Get(member);
+
+				if (new_owner) {
+					// TODO: Send here new owner change info
+				}
+
+				// TODO: Send here member leave info
+			}
+		}
+
+		return true;
+	}
+
+	bool Server::HandleMemberChatLeave(ENetPeer* peer) {
+		peer::ptr pd = peer_mapper.Get(peer);
+
+		bool success = true;
+
+		ChatRoomManager::chatrooms_t chat_rooms_copy = pd->chat_rooms;
+
+		for (auto& entry : chat_rooms_copy) {
+			if (!HandleMemberChatLeave(peer, entry.first)) {
+				success = false;
+			}
+		}
+
+		return success;
+	}
+
+	bool Server::HandleMemberChatLeave(ENetPeer* peer, galaxy::api::ChatRoomID chat_room_id) 
+	{
+		peer::ptr pd = peer_mapper.Get(peer);
+
+		auto& chat_rooms = pd->chat_rooms;
+
+		auto chat_room_it = chat_rooms.find(chat_room_id);
+		if (chat_room_it == chat_rooms.end()) {
+			return false;
+		}
+
+		auto chat_room = chat_room_it->second;
+		chat_rooms.erase(chat_room_id);
+
+		chat_room->RemoveMember(pd->id);
+
+		if (chat_room->GetMemberCount() == 0) {
+			chat_room_manager.RemoveChatRoom(chat_room_id);
+			return true;
+		}
+
+		if (chat_room->GetMemberCount() == 1) {
+			auto member_peer = peer_mapper.Get(*chat_room->GetMembers().begin());
+
+			// TODO: let member know chatroom is closing
+			// A: No mechanism for that?
+		}
+		else {
+			for (auto& member : chat_room->GetMembers()) {
+				auto member_peer = peer_mapper.Get(member);
+
+				// TODO: let member know participant has left
+				// A: No mechanism for that?
+			}
+		}
+
+		return true;
 	}
 }

@@ -32,4 +32,8 @@ namespace universelan {
 	const LobbyManager::lobbies_t& LobbyManager::GetLobbies() const {
 		return lobbies;
 	}
+
+	bool LobbyManager::RemoveLobby(galaxy::api::GalaxyID lobby_id) {
+		return lobbies.erase(lobby_id) > 0;
+	}
 }

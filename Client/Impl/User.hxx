@@ -45,7 +45,7 @@ namespace universelan::client {
 		ListenerRegistrarImpl* listeners;
 		GalaxyUserData::map_t user_data;
 
-		ListenersRequestHelper<ISpecificUserDataListener> specific_user_data_requests;
+		ListenersRequestHelper<ISpecificUserDataListener*> specific_user_data_requests;
 
 	public:
 

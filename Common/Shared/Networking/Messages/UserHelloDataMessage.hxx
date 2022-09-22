@@ -18,5 +18,6 @@ namespace universelan {
 		UniqueClassId_Declare(UserHelloDataMessage);
 
 		UserHelloDataMessage() : asuc{} {}
+		UserHelloDataMessage(const AchievementsAndStatsContainer& p_asuc) : asuc{} { asuc = p_asuc; }
 	};
 }
