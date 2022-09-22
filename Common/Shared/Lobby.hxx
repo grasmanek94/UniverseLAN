@@ -15,6 +15,12 @@ namespace universelan {
 			uint32_t message_id;
 			galaxy::api::GalaxyID sender;
 			std::string data;
+
+			template<class Archive>
+			void serialize(Archive& ar)
+			{
+				ar(message_id, sender, data);
+			}
 		};
 
 		using data_t = std::unordered_map<std::string, std::string>;

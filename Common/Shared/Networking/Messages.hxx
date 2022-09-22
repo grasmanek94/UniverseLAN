@@ -5,6 +5,7 @@
 
 #include "Messages/ConnectionAcceptedMessage.hxx"
 #include "Messages/CreateLobbyMessage.hxx"
+#include "Messages/CreateLobbyResponseMessage.hxx"
 #include "Messages/FileRequestMessage.hxx"
 #include "Messages/FileShareMessage.hxx"
 #include "Messages/FileShareResponseMessage.hxx"
@@ -26,6 +27,7 @@ namespace universelan {
 #define SHARED_NETWORK_IMPLEMENT_ALL_CASES() \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(ConnectionAcceptedMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(CreateLobbyMessage); \
+	SHARED_NETWORK_IMPLEMENT_CASE_FOR(CreateLobbyResponseMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(FileRequestMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(FileShareMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(FileShareResponseMessage); \
@@ -40,6 +42,7 @@ namespace universelan {
 #define SHARED_NETWORK_DECLARE_MESSAGE_HANDLERS() \
 	SHARED_NETWORK_DECLARE_MESSAGE_FOR(ConnectionAcceptedMessage); \
 	SHARED_NETWORK_DECLARE_MESSAGE_FOR(CreateLobbyMessage); \
+	SHARED_NETWORK_DECLARE_MESSAGE_FOR(CreateLobbyResponseMessage); \
 	SHARED_NETWORK_DECLARE_MESSAGE_FOR(FileRequestMessage); \
 	SHARED_NETWORK_DECLARE_MESSAGE_FOR(FileShareMessage); \
 	SHARED_NETWORK_DECLARE_MESSAGE_FOR(FileShareResponseMessage); \
@@ -54,6 +57,7 @@ namespace universelan {
 #define SHARED_NETWORK_OVERRIDE_MESSAGE_HANDLERS() \
 	SHARED_NETWORK_OVERRIDE_MESSAGE_FOR(ConnectionAcceptedMessage); \
 	SHARED_NETWORK_OVERRIDE_MESSAGE_FOR(CreateLobbyMessage); \
+	SHARED_NETWORK_OVERRIDE_MESSAGE_FOR(CreateLobbyResponseMessage); \
 	SHARED_NETWORK_OVERRIDE_MESSAGE_FOR(FileRequestMessage); \
 	SHARED_NETWORK_OVERRIDE_MESSAGE_FOR(FileShareMessage); \
 	SHARED_NETWORK_OVERRIDE_MESSAGE_FOR(FileShareResponseMessage); \

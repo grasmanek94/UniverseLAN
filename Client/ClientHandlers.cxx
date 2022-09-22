@@ -81,4 +81,8 @@ namespace universelan::client {
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<CreateLobbyMessage>& data) {
 	
 	}
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<CreateLobbyResponseMessage>& data) {
+
+	}
 }

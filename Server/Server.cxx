@@ -1,6 +1,6 @@
 #include "Server.hxx"
 
-#include "PeerData.hxx"
+#include "Peer.hxx"
 
 #include <Networking/Networking.hxx>
 
@@ -10,7 +10,7 @@
 
 namespace universelan::server {
 	bool Server::KickUnauthenticated(ENetPeer* peer) {
-		PeerData* pd = PeerData::get(peer);
+		peer::ptr pd = peer_mapper.Get(peer);
 
 		if (pd == nullptr) {
 			return false;
@@ -27,9 +27,9 @@ namespace universelan::server {
 
 	Server::Server()
 		: config{}, connection{}, max_connections{ 1024 },
-		connected_peers{}, authentication_key{ 0 }, random{}, ticks{ 0 }, 
+		connected_peers{}, authentication_key{ 0 }, random{}, ticks{ 0 },
 		minimum_tick_wait_time{ 0 }, user_data{}, chat_room_manager{},
-		lobby_manager{}, peer_map {}, sfu{ config.GetServerDataPath() },
+		lobby_manager{}, peer_mapper{}, sfu{ config.GetServerDataPath() },
 		shared_file_counter{ 1 }
 	{
 		int init_code = connection.GetInitCode();
@@ -90,7 +90,7 @@ namespace universelan::server {
 			ticks = 0;
 			auto now = std::chrono::system_clock::now();
 			for (auto& peer : unauthenticated_peers) {
-				PeerData* pd = PeerData::get(peer);
+				peer::ptr pd = peer_mapper.Get(peer);
 				if (pd == nullptr) {
 					connection.Disconnect(peer);
 				}

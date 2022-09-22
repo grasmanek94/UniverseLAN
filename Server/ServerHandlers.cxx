@@ -1,6 +1,6 @@
 #include "Server.hxx"
 
-#include "PeerData.hxx"
+#include "Peer.hxx"
 
 #include <Networking/Networking.hxx>
 
@@ -14,36 +14,36 @@ namespace universelan::server {
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data)
 	{
-		PeerData* pd = PeerData::construct(peer);
-		connected_peers.insert(peer);
-		unauthenticated_peers.insert(peer);
-
 		std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") EventConnect" << std::endl;
+
+		peer::ptr pd = peer_mapper.Connect(peer);
+		unauthenticated_peers.insert(peer);
 
 		connection.Send(peer, pd->challenge.Prepare(authentication_key, random()));
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data)
 	{
-		PeerData* pd = PeerData::get(peer);
-		user_data.erase(pd->id);
-
-		PeerData::destruct(peer, peer_map);
-		unauthenticated_peers.erase(peer);
-		connected_peers.erase(peer);
-
 		std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") EventDisconnect" << std::endl;
+
+		peer::ptr pd = peer_mapper.Get(peer);
+
+		user_data.erase(pd->id);
+		unauthenticated_peers.erase(peer);
+
+		peer_mapper.Disconnect(peer);
+		pd = nullptr;
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<KeyChallengeMessage>& data)
 	{
-		PeerData* pd = PeerData::get(peer);
+		peer::ptr pd = peer_mapper.Get(peer);
 		if (pd->challenge.completed) { return; }
 
 		if (pd->challenge.Validate(*data)) {
 			auto entry = user_data.emplace(pd->id, std::make_shared<GalaxyUserData>(pd->id));
 			if (entry.second) {
-				if (PeerData::link(peer, data->id, peer_map)) {
+				if (pd->link(data->id)) {
 					pd->user_data = entry.first->second;
 
 					unauthenticated_peers.erase(peer);
@@ -62,15 +62,15 @@ namespace universelan::server {
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<UserHelloDataMessage>& data) {
 		REQUIRES_AUTHENTICATION(peer);
 
-		PeerData* pd = PeerData::get(peer);
+		peer::ptr pd = peer_mapper.Get(peer);
 		pd->user_data->stats = data->asuc;
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
 		REQUIRES_AUTHENTICATION(peer);
 
-		PeerData* pd = PeerData::get(peer);
-		PeerData* target = PeerData::get(data->id, peer_map);
+		peer::ptr pd = peer_mapper.Get(peer);
+		peer::ptr target = peer_mapper.Get(data->id);
 
 		RequestSpecificUserDataMessage response{ data->type, data->id };
 
@@ -88,8 +88,8 @@ namespace universelan::server {
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestChatRoomWithUserMessage>& data) {
 		REQUIRES_AUTHENTICATION(peer);
 
-		PeerData* pd = PeerData::get(peer);
-		PeerData* target = PeerData::get(data->id, peer_map);
+		peer::ptr pd = peer_mapper.Get(peer);
+		peer::ptr target = peer_mapper.Get(data->id);
 
 		RequestChatRoomWithUserMessage response{ data->request_id, data->id };
 
@@ -110,7 +110,7 @@ namespace universelan::server {
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestChatRoomMessagesMessage>& data) {
 		REQUIRES_AUTHENTICATION(peer);
 
-		PeerData* pd = PeerData::get(peer);
+		peer::ptr pd = peer_mapper.Get(peer);
 
 		auto chat_room = chat_room_manager.GetChatRoom(data->id);
 
@@ -126,7 +126,7 @@ namespace universelan::server {
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<SendToChatRoomMessage>& data) {
 		REQUIRES_AUTHENTICATION(peer);
 
-		PeerData* pd = PeerData::get(peer);
+		peer::ptr pd = peer_mapper.Get(peer);
 
 		auto chat_room = chat_room_manager.GetChatRoom(data->id);
 
@@ -145,7 +145,7 @@ namespace universelan::server {
 			RequestChatRoomMessagesMessage notification{ data->request_id, data->id, oldest_message, messages };
 
 			for (const auto& member : chat_room->GetMembers()) {
-				PeerData* member_peer = PeerData::get(member, peer_map);
+				peer::ptr member_peer = peer_mapper.Get(member);
 				connection.Send(member_peer->peer, notification);
 			}
 		}
@@ -157,8 +157,8 @@ namespace universelan::server {
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<P2PNetworkPacketMessage>& data) {
 		REQUIRES_AUTHENTICATION(peer);
 
-		PeerData* pd = PeerData::get(peer);
-		PeerData* target_pd = PeerData::get(data->id, peer_map);
+		peer::ptr pd = peer_mapper.Get(peer);
+		peer::ptr target_pd = peer_mapper.Get(data->id);
 
 		if (target_pd) {
 			data->id = pd->id;
@@ -201,6 +201,15 @@ namespace universelan::server {
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<CreateLobbyMessage>& data) {
+		REQUIRES_AUTHENTICATION(peer);
+
+		peer::ptr pd = peer_mapper.Get(peer);
+
+		auto lobby = lobby_manager.CreateLobby(pd->id, data->type, data->max_members, data->joinable, data->topology_type);
+		
+	}
+
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<CreateLobbyResponseMessage>& data) {
 		REQUIRES_AUTHENTICATION(peer);
 	}
 }
