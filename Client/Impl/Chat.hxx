@@ -19,10 +19,10 @@
 #include <IListenerRegistrar.h>
 #include <GalaxyID.h>
 
-#include "InterfaceInstances.hxx"
-
 namespace universelan::client {
 	using namespace galaxy::api;
+	struct InterfaceInstances;
+
 	/**
 	 * @addtogroup api
 	 * @{

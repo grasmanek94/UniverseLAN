@@ -199,4 +199,8 @@ namespace universelan::server {
 
 		connection.Send(peer, data);
 	}
+
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<CreateLobbyMessage>& data) {
+		REQUIRES_AUTHENTICATION(peer);
+	}
 }

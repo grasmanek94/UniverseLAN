@@ -12,8 +12,12 @@
 #include <GalaxyID.h>
 #include <IListenerRegistrar.h>
 
+#include <mutex>
+
 namespace universelan::client {
 	using namespace galaxy::api;
+	struct InterfaceInstances;
+
 	/**
 	 * @addtogroup api
 	 * @{
@@ -24,9 +28,25 @@ namespace universelan::client {
 	  */
 	class MatchmakingImpl : public IMatchmaking
 	{
+	public:
+		using mutex_t = std::recursive_mutex;
+		using lock_t = std::scoped_lock<mutex_t>;
+
 	private:
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
+
+		ListenersRequestHelper<ILobbyCreatedListener> create_lobby_requests;
+		ListenersRequestHelper<ILobbyEnteredListener> create_lobby_entered_requests;
+		ListenersRequestHelper<ILobbyListListener> list_lobbies_requests;
+		ListenersRequestHelper<ILobbyEnteredListener> join_lobby_requests;
+		ListenersRequestHelper<ILobbyLeftListener> leave_lobby_requests;
+		ListenersRequestHelper<ILobbyDataUpdateListener> set_max_lobby_members_requests;
+		ListenersRequestHelper<ILobbyDataUpdateListener> set_lobby_type_requests;
+		ListenersRequestHelper<ILobbyDataUpdateListener> set_lobby_joinable_requests;
+		ListenersRequestHelper<ILobbyDataUpdateListener> get_lobby_data_requests;
+		ListenersRequestHelper<ILobbyDataUpdateListener> set_lobby_data_requests;
+		ListenersRequestHelper<ILobbyMemberDataUpdateListener> set_lobby_member_data_requests;
 
 	public:
 

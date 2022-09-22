@@ -193,7 +193,7 @@ namespace galaxy
 			struct Hash {
 				std::size_t operator()(const GalaxyID& k) const
 				{
-					return std::hash<uint64_t>()(k.ToUint64());
+					return std::hash<uint64_t>()(k.GetRealID());
 				}
 			};
 

@@ -8,6 +8,7 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
+
 	/**
 	 * The interface representing a thread object.
 	 */

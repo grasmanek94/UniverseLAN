@@ -1,11 +1,6 @@
-﻿/**
- * @file
- * Includes all other files that are needed to work with the Galaxy library.
- */
+﻿#include "UniverseLAN.hxx"
 
 #include "Client.hxx"
-#include "UniverseLAN.hxx"
-#include "InterfaceInstances.hxx"
 
 #include <IniData.hxx>
 

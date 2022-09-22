@@ -5,8 +5,6 @@
  * @file
  * Contains data structures and interfaces related to callback listeners.
  */
-#include "InterfaceInstances.hxx"
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <GalaxyExport.h>
@@ -23,6 +21,8 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
+	struct InterfaceInstances;
+
 	/**
 	 * The class that enables and disables global registration of the instances of
 	 * specific listeners. You can either use it explicitly, or implicitly by

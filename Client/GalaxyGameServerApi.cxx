@@ -1,5 +1,3 @@
-#include "GalaxyGameServerApi.hxx"
-
 #include "CustomConsole.hxx"
 #include "UniverseLAN.hxx"
 

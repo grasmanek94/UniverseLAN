@@ -169,6 +169,8 @@ namespace universelan::client {
 		intf->config->SetUserData(key, value);
 		intf->config->SaveStatsAndAchievements();
 
+		// TODO: send data to server
+
 		listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, intf->config->GetApiGalaxyID());
 		listeners->NotifyAll<IUserDataListener>(&IUserDataListener::OnUserDataUpdated);
 	}
@@ -249,6 +251,11 @@ namespace universelan::client {
 	std::shared_ptr<GalaxyUserData> UserImpl::GetGalaxyUserData(GalaxyID userID)
 	{
 		lock_t lock(mtx_user_data);
-		return user_data.emplace(userID, std::make_shared<GalaxyUserData>(userID)).first->second;
+		auto user = user_data.find(userID);
+		if (user == user_data.end()) {
+			user = user_data.emplace(userID, std::make_shared<GalaxyUserData>(userID)).first;
+		}
+
+		return user->second;
 	}
 }

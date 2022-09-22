@@ -1,14 +1,20 @@
 #include "Matchmaking.hxx"
 
+#include "UniverseLAN.hxx"
+
+#include <Networking/Messages/CreateLobbyMessage.hxx>
+
 namespace universelan::client {
 	using namespace galaxy::api;
 	MatchmakingImpl::MatchmakingImpl(InterfaceInstances* intf) :
-		intf{ intf }, listeners{ intf->notification.get() }
+		intf{ intf }, listeners{ intf->notification.get() },
+		create_lobby_requests{}, create_lobby_entered_requests{}, list_lobbies_requests{},
+		join_lobby_requests{}, leave_lobby_requests{}, set_max_lobby_members_requests{},
+		set_lobby_type_requests{}, set_lobby_joinable_requests{}, get_lobby_data_requests{},
+		set_lobby_data_requests{}, set_lobby_member_data_requests{}
 	{}
 
-	MatchmakingImpl::~MatchmakingImpl()
-	{
-	}
+	MatchmakingImpl::~MatchmakingImpl() {}
 
 	void MatchmakingImpl::CreateLobby(
 		LobbyType lobbyType,
@@ -18,6 +24,12 @@ namespace universelan::client {
 		ILobbyCreatedListener* const lobbyCreatedListener,
 		ILobbyEnteredListener* const lobbyEnteredListener) {
 
+		uint64_t request_id = MessageUniqueID::get();
+
+		create_lobby_requests.emplace(request_id, lobbyCreatedListener);
+		create_lobby_entered_requests.emplace(request_id, lobbyEnteredListener);
+
+		intf->client->GetConnection().SendAsync(CreateLobbyMessage{ request_id, lobbyType, maxMembers, joinable, lobbyTopologyType });
 	}
 
 	void MatchmakingImpl::RequestLobbyList(bool allowFullLobbies, ILobbyListListener* const listener) {

@@ -1,4 +1,5 @@
 #include "Utils.hxx"
+#include "UniverseLAN.hxx"
 
 namespace universelan::client {
 	using namespace galaxy::api;

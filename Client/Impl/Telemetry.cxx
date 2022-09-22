@@ -1,4 +1,5 @@
 #include "Telemetry.hxx"
+#include "UniverseLAN.hxx"
 
 #include <algorithm>
 #include <filesystem>

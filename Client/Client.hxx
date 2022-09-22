@@ -8,6 +8,8 @@
 #include <thread>
 
 namespace universelan::client {
+	struct InterfaceInstances;
+
 	class Client : public MessageReceiver
 	{
 	private:

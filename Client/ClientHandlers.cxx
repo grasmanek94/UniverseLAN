@@ -77,4 +77,8 @@ namespace universelan::client {
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<FileRequestMessage>& data) {
 		interfaces->storage->FileDownloaded(data);
 	}
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<CreateLobbyMessage>& data) {
+	
+	}
 }

@@ -2,17 +2,17 @@
 
 #include "ChatRoomManager.hxx"
 #include "GalaxyUserData.hxx"
+#include "LobbyManager.hxx"
 #include "PeerData.hxx"
 #include "SharedFileUtils.hxx"
 
-#include <Networking/Networking.hxx>
 #include <IniData.hxx>
-#include <IdCounter.hxx>
+#include <Networking/Networking.hxx>
 
 #include <GalaxyApi.h>
 
-#include <set>
 #include <random>
+#include <set>
 
 namespace universelan::server {
 	class Server : public MessageReceiver
@@ -22,7 +22,6 @@ namespace universelan::server {
 	private:
 		ServerIniData config;
 		GalaxyNetworkServer connection;
-		IdCounter id_generator;
 		size_t max_connections;
 		std::set<ENetPeer*> connected_peers;
 		std::set<ENetPeer*> unauthenticated_peers;
@@ -33,6 +32,7 @@ namespace universelan::server {
 
 		GalaxyUserData::map_t user_data;
 		ChatRoomManager chat_room_manager;
+		LobbyManager lobby_manager;
 		PeerData::map_t peer_map;
 
 		SharedFileUtils sfu;

@@ -7,10 +7,10 @@
  */
 #include <IApps.h>
 
-#include "InterfaceInstances.hxx"
-
 namespace universelan::client {
 	using namespace galaxy::api;
+	struct InterfaceInstances;
+
 	/**
 	 * @addtogroup api
 	 * @{

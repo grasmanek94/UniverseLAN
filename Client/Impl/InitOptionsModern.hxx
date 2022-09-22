@@ -6,6 +6,7 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
+
 	/**
 	 * @addtogroup api
 	 * @{

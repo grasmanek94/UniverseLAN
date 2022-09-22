@@ -8,8 +8,6 @@
 
 #include "ListenerRegistrar.hxx"
 
-#include "InterfaceInstances.hxx"
-
 #include <ITelemetry.h>
 #include <IListenerRegistrar.h>
 
@@ -20,6 +18,8 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
+	struct InterfaceInstances;
+
 	/**
 	 * @addtogroup api
 	 * @{

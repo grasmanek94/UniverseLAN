@@ -5,8 +5,6 @@
  * @file
  * Contains data structures and interfaces related to logging.
  */
-#include "InterfaceInstances.hxx"
-
 #include <ILogger.h>
 
 #include <fstream>
@@ -14,6 +12,8 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
+	struct InterfaceInstances;
+
 	/**
 	 * @addtogroup api
 	 * @{
