@@ -10,14 +10,14 @@ namespace universelan::server::peer {
 
 	Mapper::Mapper() : map{}, connected_peers{} {}
 
-	Data* Mapper::Get(ENetPeer* peer) {
+	ptr Mapper::Get(ENetPeer* peer) {
 		assert(peer != nullptr);
 		assert(peer->data != nullptr);
 
-		return (Data*)peer->data;
+		return static_cast<ptr>(peer->data);
 	}
 
-	Data* Mapper::Get(const galaxy::api::GalaxyID& id) {
+	ptr Mapper::Get(const galaxy::api::GalaxyID& id) {
 		auto it = map.find(id);
 		if (it == map.end()) {
 			return nullptr;
@@ -26,7 +26,7 @@ namespace universelan::server::peer {
 		return Get(it->second);
 	}
 
-	Data* Mapper::Connect(ENetPeer* peer) {
+	ptr Mapper::Connect(ENetPeer* peer) {
 		assert(peer != nullptr);
 		assert(peer->data == nullptr);
 
@@ -37,7 +37,7 @@ namespace universelan::server::peer {
 	void Mapper::Disconnect(ENetPeer* peer) {
 		assert(peer != nullptr);
 
-		delete (Data*)peer->data;
+		delete static_cast<ptr>(peer->data);
 		connected_peers.erase(peer);
 	}
 
@@ -46,7 +46,7 @@ namespace universelan::server::peer {
 		connected_time{ std::chrono::system_clock::now() },
 		chat_rooms{}, lobby{nullptr}
 	{
-		peer->data = (void*)this;
+		peer->data = static_cast<void*>(this);
 	}
 
 	Data::~Data() {
