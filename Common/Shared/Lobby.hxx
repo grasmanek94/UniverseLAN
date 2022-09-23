@@ -4,6 +4,7 @@
 #include <IMatchMaking.h>
 
 #include <map>
+#include <memory>
 #include <ranges>
 #include <string>
 #include <unordered_map>
@@ -80,6 +81,7 @@ namespace universelan {
 		void SetMaxMembers(uint32_t value);
 		uint32_t GetMaxMembers() const;
 		uint32_t GetMemberCount() const;
+		bool IsFull() const;
 		galaxy::api::GalaxyID GetMemberByIndex(size_t index) const;
 
 		void SetType(galaxy::api::LobbyType value);
@@ -95,14 +97,23 @@ namespace universelan {
 		void DeleteData(const char* key);
 
 		const char* GetMemberData(galaxy::api::GalaxyID id, const char* key) const;
-		void SetMemberData(galaxy::api::GalaxyID id, const char* key, const char* value);
+		bool SetMemberData(galaxy::api::GalaxyID id, const char* key, const char* value);
 		uint32_t GetMemberDataCount(galaxy::api::GalaxyID id) const;
 		data_by_index_t GetMemberDataByIndex(galaxy::api::GalaxyID id, size_t index) const;
 		void DeleteMemberData(galaxy::api::GalaxyID id, const char* key, const char* value);
 
 		galaxy::api::GalaxyID GetOwner() const;
 
-		bool SendMsg(galaxy::api::GalaxyID sender, const std::string data);
+		uint32_t SendMsg(galaxy::api::GalaxyID sender, const std::string data);
+		bool AddMsg(const Message& message);
 		uint32_t GetMsg(uint32_t messageID, galaxy::api::GalaxyID& senderID, char* msg, uint32_t msgLength);
+
+		data_t GetAllData() const;
+		user_data_t GetAllMemberData() const;
+		data_t GetAllMemberData(galaxy::api::GalaxyID id) const;
+
+		void SetAllData(const data_t& in_data);
+		void SetAllMemberData(const user_data_t& in_data);
+		bool SetAllMemberData(galaxy::api::GalaxyID id, const data_t& in_data);
 	};
 }

@@ -239,6 +239,221 @@ namespace universelan::server {
 		connection.Send(peer, data);
 	}
 
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<JoinLobbyMessage>& data) {
+		REQUIRES_AUTHENTICATION(peer);
+
+		peer::ptr pd = peer_mapper.Get(peer);
+
+		if (pd->lobby) {
+			data->result = LOBBY_ENTER_RESULT_ERROR;
+			connection.Send(peer, data);
+			return;
+		}
+
+		auto lobby = lobby_manager.GetLobby(data->lobby_id);
+		if (!lobby) {
+			data->result = LOBBY_ENTER_RESULT_LOBBY_DOES_NOT_EXIST;
+			connection.Send(peer, data);
+			return;
+		}
+
+		if (lobby->IsFull()) {
+			data->result = LOBBY_ENTER_RESULT_LOBBY_IS_FULL;
+			connection.Send(peer, data);
+			return;
+		}
+
+		if (!lobby->AddMember(pd->id)) {
+			data->result = LOBBY_ENTER_RESULT_ERROR;
+			connection.Send(peer, data);
+			return;
+		}
+
+		pd->lobby = lobby;
+		data->result = LOBBY_ENTER_RESULT_SUCCESS;
+		connection.Send(peer, data);
+	}
+
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<LeaveLobbyMessage>& data) {
+		REQUIRES_AUTHENTICATION(peer);
+
+		peer::ptr pd = peer_mapper.Get(peer);
+		data->reason = ILobbyLeftListener::LOBBY_LEAVE_REASON_USER_LEFT;
+
+		HandleMemberLobbyLeave(peer);
+
+		connection.Send(peer, data);
+	}
+
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestLobbyDataMessage>& data) {
+		REQUIRES_AUTHENTICATION(peer);
+
+		peer::ptr pd = peer_mapper.Get(peer);
+
+		auto lobby = lobby_manager.GetLobby(data->lobby_id);
+		if (!lobby) {
+			data->data = nullptr;
+			data->fail_reason = ILobbyDataRetrieveListener::FAILURE_REASON_LOBBY_DOES_NOT_EXIST;
+			connection.Send(peer, data);
+			return;
+		}
+
+		data->data = lobby;
+		
+		connection.Send(peer, data);
+	}
+
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<SendToLobbyMessage>& data) {
+		REQUIRES_AUTHENTICATION(peer);
+
+		peer::ptr pd = peer_mapper.Get(peer);
+
+		auto lobby = lobby_manager.GetLobby(data->lobby_id);
+		if (!lobby) {
+			return;
+		}
+
+		data->message.sender = pd->id;
+		data->message.message_id = lobby->SendMsg(data->message.sender, data->message.data);
+
+		if (data->message.message_id != 0) {
+			for (auto& member : pd->lobby->GetMembers()) {
+				auto member_peer = peer_mapper.Get(member);
+				if (member_peer) {
+					connection.Send(member_peer->peer, data);
+				}
+			}
+		}
+	}
+
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyDataMessage>& data) {
+		REQUIRES_AUTHENTICATION(peer);
+
+		peer::ptr pd = peer_mapper.Get(peer);
+
+		auto lobby = lobby_manager.GetLobby(data->lobby_id);
+		if (!lobby) {
+			data->success = false;
+			data->fail_reason = ILobbyDataUpdateListener::FAILURE_REASON_LOBBY_DOES_NOT_EXIST;
+			connection.Send(peer, data);
+			return;
+		}
+
+		if (lobby->GetOwner() != pd->id) {
+			data->success = false;
+			data->fail_reason = ILobbyDataUpdateListener::FAILURE_REASON_UNDEFINED;
+			connection.Send(peer, data);
+			return;
+		}
+
+		lobby->SetData(data->key.c_str(), data->value.c_str());
+		data->success = true;
+		connection.Send(peer, data);
+
+		SetLobbyDataMessage notification{ 0, data->lobby_id, data->key, data->value };
+		for (auto& member : pd->lobby->GetMembers()) {
+			auto member_peer = peer_mapper.Get(member);
+			if (member_peer && (member_peer->peer != peer)) {
+				connection.Send(member_peer->peer, notification);
+			}
+		}
+	}
+
+	template<typename T, typename U> bool BoilerplateHandleLobbyDataUpdate(peer::Mapper& peer_mapper, GalaxyNetworkServer& connection, ENetPeer* peer, const T& data, const U& notification, std::function<bool(peer::ptr pd)> func) {
+		peer::ptr pd = peer_mapper.Get(peer);
+
+		data->fail_reason = ILobbyDataUpdateListener::FAILURE_REASON_UNDEFINED;
+		data->success = false;
+
+		if ((!pd->lobby) || 
+			(pd->lobby->GetID() != data->lobby_id) ||
+			(pd->lobby->GetOwner() != pd->id)) {
+			connection.Send(peer, data);
+			return false;
+		}
+
+		if (!func(pd)) {
+			connection.Send(peer, data);
+			return false;
+		}
+
+		data->success = true;
+		connection.Send(peer, data);
+
+		for (auto& member : pd->lobby->GetMembers()) {
+			auto member_peer = peer_mapper.Get(member);
+			if (member_peer && (member_peer->peer != peer)) {
+				connection.Send(member_peer->peer, notification);
+			}
+		}
+
+		return true;
+	}
+
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyJoinableMessage>& data) {
+		REQUIRES_AUTHENTICATION(peer);
+
+		SetLobbyJoinableMessage notification{ 0, data->lobby_id, data->joinable };
+
+		BoilerplateHandleLobbyDataUpdate(peer_mapper, connection, peer, data, notification, [&](peer::ptr pd) -> bool {
+			pd->lobby->SetJoinable(data->joinable);
+			return true;
+			});
+	}
+
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyMaxMembersMessage>& data) {
+		REQUIRES_AUTHENTICATION(peer);
+
+		SetLobbyMaxMembersMessage notification{ 0, data->lobby_id, data->max_members };
+		BoilerplateHandleLobbyDataUpdate(peer_mapper, connection, peer, data, notification, [&](peer::ptr pd) -> bool {
+			pd->lobby->SetMaxMembers(data->max_members);
+			return true;
+			});
+	}
+
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyTypeMessage>& data) {
+		REQUIRES_AUTHENTICATION(peer);
+
+		SetLobbyTypeMessage notification{ 0, data->lobby_id, data->type };
+		BoilerplateHandleLobbyDataUpdate(peer_mapper, connection, peer, data, notification, [&](peer::ptr pd) -> bool {
+			pd->lobby->SetType(data->type);
+			return true;
+			});
+	}
+
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyMemberDataMessage>& data) {
+		REQUIRES_AUTHENTICATION(peer);
+		peer::ptr pd = peer_mapper.Get(peer);
+
+		auto lobby = lobby_manager.GetLobby(data->lobby_id);
+		if (!lobby) {
+			data->success = false;
+			data->fail_reason = ILobbyMemberDataUpdateListener::FAILURE_REASON_LOBBY_DOES_NOT_EXIST;
+			connection.Send(peer, data);
+			return;
+		}
+
+		data->member_id = pd->id;
+
+		if (!lobby->SetMemberData(data->member_id, data->key.c_str(), data->value.c_str())) {
+			data->success = false;
+			data->fail_reason = ILobbyMemberDataUpdateListener::FAILURE_REASON_UNDEFINED;
+			connection.Send(peer, data);
+			return;
+		}
+
+		data->success = true;
+		connection.Send(peer, data);
+
+		SetLobbyMemberDataMessage notification{ 0, data->lobby_id, data->member_id, data->key, data->value };
+		for (auto& member : pd->lobby->GetMembers()) {
+			auto member_peer = peer_mapper.Get(member);
+			if (member_peer && (member_peer->peer != peer)) {
+				connection.Send(member_peer->peer, notification);
+			}
+		}
+	}
+
 	bool Server::HandleMemberLobbyLeave(ENetPeer* peer) {
 		peer::ptr pd = peer_mapper.Get(peer);
 
@@ -261,15 +476,21 @@ namespace universelan::server {
 		};
 
 		if (close) {
-			lobby_manager.RemoveLobby(lobby->GetID());
+			LeaveLobbyMessage leave_message{
+				0,
+				lobby->GetID(),
+				ILobbyLeftListener::LOBBY_LEAVE_REASON_LOBBY_CLOSED
+			};
 
 			for (auto& member : lobby->GetMembers()) {
 				auto member_peer = peer_mapper.Get(member);
 
 				member_peer->lobby = nullptr;
 
-				// TODO: Send here lobby close
+				connection.Send(member_peer->peer, leave_message);
 			}
+
+			lobby_manager.RemoveLobby(lobby->GetID());
 		}
 		else {
 			bool new_owner{ false };
@@ -284,10 +505,12 @@ namespace universelan::server {
 				auto member_peer = peer_mapper.Get(member);
 
 				if (new_owner) {
-					// TODO: Send here new owner change info
+					// TODO: Send migration info
+					// A: No mechanism for this?
 				}
 
 				// TODO: Send here member leave info
+				// A: No mechanism for this?
 			}
 		}
 
@@ -310,7 +533,7 @@ namespace universelan::server {
 		return success;
 	}
 
-	bool Server::HandleMemberChatLeave(ENetPeer* peer, galaxy::api::ChatRoomID chat_room_id) 
+	bool Server::HandleMemberChatLeave(ENetPeer* peer, galaxy::api::ChatRoomID chat_room_id)
 	{
 		peer::ptr pd = peer_mapper.Get(peer);
 

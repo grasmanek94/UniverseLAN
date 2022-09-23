@@ -9,9 +9,7 @@
 #include "ListenerRegistrar.hxx"
 
 #include <LobbyManager.hxx>
-#include <Networking/Messages/CreateLobbyMessage.hxx>
-#include <Networking/Messages/CreateLobbyResponseMessage.hxx>
-#include <Networking/Messages/RequestLobbyListMessage.hxx>
+#include <Networking/Messages.hxx>
 
 #include <IMatchmaking.h>
 #include <GalaxyID.h>
@@ -75,22 +73,17 @@ namespace universelan::client {
 		ListenersRequestHelper<ILobbyDataUpdateListener*> set_max_lobby_members_requests;
 		ListenersRequestHelper<ILobbyDataUpdateListener*> set_lobby_type_requests;
 		ListenersRequestHelper<ILobbyDataUpdateListener*> set_lobby_joinable_requests;
-		ListenersRequestHelper<ILobbyDataUpdateListener*> get_lobby_data_requests;
+		ListenersRequestHelper<ILobbyDataRetrieveListener*> get_lobby_data_requests;
 		ListenersRequestHelper<ILobbyDataUpdateListener*> set_lobby_data_requests;
 		ListenersRequestHelper<ILobbyMemberDataUpdateListener*> set_lobby_member_data_requests;
 		
-		mutex_t lobby_list_mtx;
+		mutex_t mtx;
 		LobbyManager::lobbies_t lobby_list;
-
-		mutex_t lobby_list_filtered_mtx;
 		LobbyFilters lobby_list_filters;
 		LobbyManager::lobbies_t lobby_list_filtered;
-
-		mutex_t joined_lobby_mtx;
 		LobbyManager::lobby_t joined_lobby;
 
 		ListenersRequestHelper<lobby_filters_ptr> lobby_list_filtered_requests;
-		ListenersRequestHelper<ILobbyListListener*> lobby_list_requests;
 
 	public:
 
@@ -563,6 +556,16 @@ namespace universelan::client {
 
 		virtual void CreateLobbyProcessed(const std::shared_ptr<CreateLobbyResponseMessage>& data);
 		virtual void RequestLobbyListProcessed(const std::shared_ptr<RequestLobbyListMessage>& data);
+		virtual void JoinLobbyProcessed(const std::shared_ptr<JoinLobbyMessage>& data);
+		virtual void LeaveLobbyProcessed(const std::shared_ptr<LeaveLobbyMessage>& data);
+		virtual void SetLobbyMaxMembersProcessed(const std::shared_ptr<SetLobbyMaxMembersMessage>& data);
+		virtual void SetLobbyTypeProcessed(const std::shared_ptr<SetLobbyTypeMessage>& data);
+		virtual void SetLobbyJoinableProcessed(const std::shared_ptr<SetLobbyJoinableMessage>& data);
+		virtual void RequestLobbyDataProcessed(const std::shared_ptr<RequestLobbyDataMessage>& data);
+		virtual void SetLobbyDataProcessed(const std::shared_ptr<SetLobbyDataMessage>& data);
+		virtual void SetLobbyMemberDataProcessed(const std::shared_ptr<SetLobbyMemberDataMessage>& data);
+		virtual void SendLobbyMessageProcessed(const std::shared_ptr<SendToLobbyMessage>& data);
+
 	};
 
 	/** @} */

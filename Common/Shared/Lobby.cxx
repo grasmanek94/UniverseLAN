@@ -114,6 +114,10 @@ namespace universelan {
 		return (uint32_t)user_data.size();
 	}
 
+	bool Lobby::IsFull() const {
+		return user_data.size() >= max_members;
+	}
+
 	GalaxyID Lobby::GetMemberByIndex(size_t index) const {
 		if (user_data.size() < index) {
 			return 0;
@@ -167,13 +171,14 @@ namespace universelan {
 		return GetData(user->second, key);
 	}
 
-	void Lobby::SetMemberData(GalaxyID id, const char* key, const char* value) {
+	bool Lobby::SetMemberData(GalaxyID id, const char* key, const char* value) {
 		auto user = user_data.find(id);
 		if (user == user_data.end()) {
-			return;
+			return false;
 		}
 
 		SetData(user->second, key, value);
+		return true;
 	}
 
 	uint32_t Lobby::GetMemberDataCount(GalaxyID id) const {
@@ -202,15 +207,23 @@ namespace universelan {
 		return owner_id;
 	}
 
-	bool Lobby::SendMsg(GalaxyID sender, const std::string data) {
+	uint32_t Lobby::SendMsg(GalaxyID sender, const std::string data) {
 		if (!IsMember(sender)) {
 			return false;
 		}
 
 		Message message{ current_message_id, sender, data };
 
+		if (!messages.emplace(message.message_id, message).second) {
+			return 0;
+		}
+
 		++current_message_id;
 
+		return message.message_id;
+	}
+
+	bool Lobby::AddMsg(const Message& message) {
 		return messages.emplace(message.message_id, message).second;
 	}
 
@@ -228,4 +241,41 @@ namespace universelan {
 
 		return min_size;
 	}
+
+	Lobby::data_t Lobby::GetAllData() const {
+		return data;
+	}
+
+	Lobby::data_t Lobby::GetAllMemberData(galaxy::api::GalaxyID id) const {
+		auto entry = user_data.find(id);
+		if (entry == user_data.end()) {
+			return {};
+		}
+
+		return entry->second;
+	}
+
+	Lobby::user_data_t Lobby::GetAllMemberData() const {
+		return user_data;
+	}
+
+	void Lobby::SetAllData(const data_t& in_data) {
+		data = in_data;
+	}
+
+	void Lobby::SetAllMemberData(const user_data_t& in_data) {
+		user_data = in_data;
+	}
+
+	bool Lobby::SetAllMemberData(galaxy::api::GalaxyID id, const data_t& in_data) {
+		auto entry = user_data.find(id);
+		if (entry == user_data.end()) {
+			return false;
+		}
+
+		entry->second = in_data;
+
+		return true;
+	}
+	
 }

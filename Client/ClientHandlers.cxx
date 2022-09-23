@@ -81,6 +81,42 @@ namespace universelan::client {
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<RequestLobbyListMessage>& data) {
+		interfaces->matchmaking->RequestLobbyListProcessed(data);
+	}
 
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<JoinLobbyMessage>& data) {
+		interfaces->matchmaking->JoinLobbyProcessed(data);
+	}
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<LeaveLobbyMessage>& data) {
+		interfaces->matchmaking->LeaveLobbyProcessed(data);
+	}
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<RequestLobbyDataMessage>& data) {
+		interfaces->matchmaking->RequestLobbyDataProcessed(data);
+	}
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<SendToLobbyMessage>& data) {
+		interfaces->matchmaking->SendLobbyMessageProcessed(data);
+	}
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyDataMessage>& data) {
+		interfaces->matchmaking->SetLobbyDataProcessed(data);
+	}
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyJoinableMessage>& data) {
+		interfaces->matchmaking->SetLobbyJoinableProcessed(data);
+	}
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyMaxMembersMessage>& data) {
+		interfaces->matchmaking->SetLobbyMaxMembersProcessed(data);
+	}
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyMemberDataMessage>& data) {
+		interfaces->matchmaking->SetLobbyMemberDataProcessed(data);
+	}
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyTypeMessage>& data) {
+		interfaces->matchmaking->SetLobbyTypeProcessed(data);
 	}
 }
