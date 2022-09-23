@@ -287,6 +287,7 @@ namespace universelan::client {
 				lobby->SetMaxMembers(data->max_members);
 			}
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
+			listeners->NotifyAll<ILobbyDataListener>(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
 		}
 		else {
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateFailure, data->lobby_id, data->fail_reason);
@@ -347,6 +348,7 @@ namespace universelan::client {
 				lobby->SetType(data->type);
 			}
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
+			listeners->NotifyAll<ILobbyDataListener>(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
 		}
 		else {
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateFailure, data->lobby_id, data->fail_reason);
@@ -385,6 +387,7 @@ namespace universelan::client {
 				lobby->SetJoinable(data->joinable);
 			}
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
+			listeners->NotifyAll<ILobbyDataListener>(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
 		}
 		else {
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateFailure, data->lobby_id, data->fail_reason);
@@ -640,10 +643,10 @@ namespace universelan::client {
 			lock_t lock{ mtx };
 
 			auto lobby_entry = lobby_list.find(data->lobby_id);
-			assert(lobby_entry != lobby_list.end());
-
-			auto lobby = lobby_entry->second;
-			lobby->AddMsg(data->message);
+			if (lobby_entry != lobby_list.end()) {
+				auto lobby = lobby_entry->second;
+				lobby->AddMsg(data->message);
+			}
 		}
 
 		listeners->NotifyAll<ILobbyMessageListener>(&ILobbyMessageListener::OnLobbyMessageReceived, data->lobby_id, data->message.sender, data->message.message_id, (uint32_t)data->message.data.size());	
@@ -656,7 +659,48 @@ namespace universelan::client {
 		if (lobby == lobby_list.end()) {
 			return 0;
 		}
-
+		
 		return lobby->second->GetMsg(messageID, senderID, msg, msgLength);
 	}
+
+	void MatchmakingImpl::LobbyMemberStateChange(const std::shared_ptr<LobbyMemberStateChangeMessage>& data) {
+		{
+			lock_t lock{ mtx };
+
+			auto lobby_entry = lobby_list.find(data->lobby_id);
+			if (lobby_entry != lobby_list.end()) {
+				auto lobby = lobby_entry->second;
+
+				switch (data->state) {
+				case LOBBY_MEMBER_STATE_CHANGED_ENTERED:
+					lobby->AddMember(data->member_id);
+					break;
+
+				case LOBBY_MEMBER_STATE_CHANGED_DISCONNECTED:
+				case LOBBY_MEMBER_STATE_CHANGED_BANNED:
+				case LOBBY_MEMBER_STATE_CHANGED_KICKED:
+				case LOBBY_MEMBER_STATE_CHANGED_LEFT:
+					lobby->RemoveMember(data->member_id);
+					break;
+				}
+			}
+		}
+
+		listeners->NotifyAll<ILobbyMemberStateListener>(&ILobbyMemberStateListener::OnLobbyMemberStateChanged, data->lobby_id, data->member_id, data->state);
+	}
+
+	void MatchmakingImpl::LobbyOwnerChange(const std::shared_ptr<LobbyOwnerChangeMessage>& data) {
+		{
+			lock_t lock{ mtx };
+
+			auto lobby_entry = lobby_list.find(data->lobby_id);
+			if (lobby_entry != lobby_list.end()) {
+				auto lobby = lobby_entry->second;
+				lobby->SetOwner(data->member_id);
+			}
+		}
+
+		listeners->NotifyAll<ILobbyOwnerChangeListener>(&ILobbyOwnerChangeListener::OnLobbyOwnerChanged, data->lobby_id, data->member_id);
+	}
+
 }

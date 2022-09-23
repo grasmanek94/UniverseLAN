@@ -12,6 +12,8 @@
 #include "Messages/JoinLobbyMessage.hxx"
 #include "Messages/KeyChallengeMessage.hxx"
 #include "Messages/LeaveLobbyMessage.hxx"
+#include "Messages/LobbyMemberStateChangeMessage.hxx"
+#include "Messages/LobbyOwnerChangeMessage.hxx"
 #include "Messages/P2PNetworkPacketMessage.hxx"
 #include "Messages/RequestChatRoomMessagesMessage.hxx"
 #include "Messages/RequestChatRoomWithUserMessage.hxx"
@@ -39,6 +41,8 @@ namespace universelan {
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(JoinLobbyMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(KeyChallengeMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(LeaveLobbyMessage); \
+	SHARED_NETWORK_IMPLEMENT_CASE_FOR(LobbyMemberStateChangeMessage); \
+	SHARED_NETWORK_IMPLEMENT_CASE_FOR(LobbyOwnerChangeMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(P2PNetworkPacketMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(RequestChatRoomMessagesMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(RequestChatRoomWithUserMessage); \

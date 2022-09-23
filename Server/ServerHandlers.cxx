@@ -12,6 +12,8 @@ namespace universelan::server {
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAcceptedMessage>& data) { REQUIRES_AUTHENTICATION(peer); /* Not handled in server */ }
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<FileShareResponseMessage>& data) { REQUIRES_AUTHENTICATION(peer); }
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<CreateLobbyResponseMessage>& data) { REQUIRES_AUTHENTICATION(peer); }
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<LobbyMemberStateChangeMessage>& data) { REQUIRES_AUTHENTICATION(peer); }
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<LobbyOwnerChangeMessage>& data) { REQUIRES_AUTHENTICATION(peer); }
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data)
 	{
@@ -29,7 +31,7 @@ namespace universelan::server {
 
 		peer::ptr pd = peer_mapper.Get(peer);
 
-		HandleMemberLobbyLeave(peer);
+		HandleMemberLobbyLeave(peer, true);
 		HandleMemberChatLeave(peer);
 
 		user_data.erase(pd->id);
@@ -280,7 +282,7 @@ namespace universelan::server {
 		peer::ptr pd = peer_mapper.Get(peer);
 		data->reason = ILobbyLeftListener::LOBBY_LEAVE_REASON_USER_LEFT;
 
-		HandleMemberLobbyLeave(peer);
+		HandleMemberLobbyLeave(peer, false);
 
 		connection.Send(peer, data);
 	}
@@ -299,7 +301,7 @@ namespace universelan::server {
 		}
 
 		data->data = lobby;
-		
+
 		connection.Send(peer, data);
 	}
 
@@ -365,7 +367,7 @@ namespace universelan::server {
 		data->fail_reason = ILobbyDataUpdateListener::FAILURE_REASON_UNDEFINED;
 		data->success = false;
 
-		if ((!pd->lobby) || 
+		if ((!pd->lobby) ||
 			(pd->lobby->GetID() != data->lobby_id) ||
 			(pd->lobby->GetOwner() != pd->id)) {
 			connection.Send(peer, data);
@@ -454,7 +456,7 @@ namespace universelan::server {
 		}
 	}
 
-	bool Server::HandleMemberLobbyLeave(ENetPeer* peer) {
+	bool Server::HandleMemberLobbyLeave(ENetPeer* peer, bool disconnected) {
 		peer::ptr pd = peer_mapper.Get(peer);
 
 		LobbyManager::lobby_t lobby{ pd->lobby };
@@ -475,43 +477,35 @@ namespace universelan::server {
 			(lobby->GetTopology() == LOBBY_TOPOLOGY_TYPE_STAR)
 		};
 
-		if (close) {
-			LeaveLobbyMessage leave_message{
-				0,
-				lobby->GetID(),
-				ILobbyLeftListener::LOBBY_LEAVE_REASON_LOBBY_CLOSED
-			};
+		LobbyMemberStateChangeMessage leave_notification{ lobby->GetID(), pd->id, (disconnected ? LOBBY_MEMBER_STATE_CHANGED_DISCONNECTED : LOBBY_MEMBER_STATE_CHANGED_LEFT) };
+		LeaveLobbyMessage close_message{ 0, lobby->GetID(), ILobbyLeftListener::LOBBY_LEAVE_REASON_LOBBY_CLOSED };
 
-			for (auto& member : lobby->GetMembers()) {
-				auto member_peer = peer_mapper.Get(member);
+		bool new_owner{ false };
+		GalaxyID new_owner_id{ 0 };
 
-				member_peer->lobby = nullptr;
-
-				connection.Send(member_peer->peer, leave_message);
-			}
-
-			lobby_manager.RemoveLobby(lobby->GetID());
+		if (lobby->GetOwner() == pd->id) {
+			new_owner = true;
+			new_owner_id = lobby->ChooseNewOwner();
 		}
-		else {
-			bool new_owner{ false };
-			GalaxyID new_owner_id{ 0 };
 
-			if (lobby->GetOwner() == pd->id) {
-				new_owner = true;
-				new_owner_id = lobby->ChooseNewOwner();
+		LobbyOwnerChangeMessage owner_change_message{ lobby->GetID(), new_owner_id };
+
+		for (auto& member : lobby->GetMembers()) {
+			auto member_peer = peer_mapper.Get(member);
+
+			if (!close && new_owner) {
+				connection.Send(member_peer->peer, owner_change_message);
+				connection.Send(member_peer->peer, leave_notification);
 			}
-
-			for (auto& member : lobby->GetMembers()) {
-				auto member_peer = peer_mapper.Get(member);
-
-				if (new_owner) {
-					// TODO: Send migration info
-					// A: No mechanism for this?
-				}
-
-				// TODO: Send here member leave info
-				// A: No mechanism for this?
+			else if (close) {
+				member_peer->lobby = nullptr;
+				connection.Send(member_peer->peer, leave_notification);
+				connection.Send(member_peer->peer, close_message);
 			}
+		}
+
+		if (close) {
+			lobby_manager.RemoveLobby(lobby->GetID());
 		}
 
 		return true;

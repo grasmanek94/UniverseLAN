@@ -119,4 +119,13 @@ namespace universelan::client {
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyTypeMessage>& data) {
 		interfaces->matchmaking->SetLobbyTypeProcessed(data);
 	}
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<LobbyMemberStateChangeMessage>& data) {
+
+	}
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<LobbyOwnerChangeMessage>& data) {
+
+	}
+
 }

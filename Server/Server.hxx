@@ -44,7 +44,7 @@ namespace universelan::server {
 
 #include <Networking/MessageHandlersDeclareOverride.hxx>
 
-		bool HandleMemberLobbyLeave(ENetPeer* peer);
+		bool HandleMemberLobbyLeave(ENetPeer* peer, bool disconnected);
 
 		bool HandleMemberChatLeave(ENetPeer* peer);
 		bool HandleMemberChatLeave(ENetPeer* peer, galaxy::api::ChatRoomID chat_room_id);

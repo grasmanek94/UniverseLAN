@@ -565,7 +565,8 @@ namespace universelan::client {
 		virtual void SetLobbyDataProcessed(const std::shared_ptr<SetLobbyDataMessage>& data);
 		virtual void SetLobbyMemberDataProcessed(const std::shared_ptr<SetLobbyMemberDataMessage>& data);
 		virtual void SendLobbyMessageProcessed(const std::shared_ptr<SendToLobbyMessage>& data);
-
+		virtual void LobbyMemberStateChange(const std::shared_ptr<LobbyMemberStateChangeMessage>& data);
+		virtual void LobbyOwnerChange(const std::shared_ptr<LobbyOwnerChangeMessage>& data);
 	};
 
 	/** @} */
