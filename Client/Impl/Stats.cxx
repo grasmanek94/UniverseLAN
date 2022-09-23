@@ -115,11 +115,15 @@ namespace universelan::client {
 	void StatsImpl::StoreStatsAndAchievements(IStatsAndAchievementsStoreListener* const listener) {
 		intf->config->SaveStatsAndAchievements();
 
+		intf->client->GetConnection().SendAsync(UserHelloDataMessage{intf->config->GetASUC()});
+		
 		listeners->NotifyAll(listener, &IStatsAndAchievementsStoreListener::OnUserStatsAndAchievementsStoreSuccess);
 	}
 
 	void StatsImpl::ResetStatsAndAchievements(IStatsAndAchievementsStoreListener* const listener) {
 		intf->config->ResetStatsAndAchievements();
+
+		intf->client->GetConnection().SendAsync(UserHelloDataMessage{ intf->config->GetASUC() });
 
 		listeners->NotifyAll(listener, &IStatsAndAchievementsStoreListener::OnUserStatsAndAchievementsStoreSuccess);
 	}

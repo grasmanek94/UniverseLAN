@@ -3,21 +3,25 @@
 
 #include <AchievementsAndStatsContainer.hxx>
 
+#include <GalaxyID.h>
+
 namespace universelan {
 	class UserHelloDataMessage
 	{
 	public:
+		galaxy::api::GalaxyID id;
 		AchievementsAndStatsContainer asuc;
 
 		template<class Archive>
 		void serialize(Archive& ar)
 		{
-			ar(asuc);
+			ar(id, asuc);
 		}
 
 		UniqueClassId_Declare(UserHelloDataMessage);
 
-		UserHelloDataMessage() : asuc{} {}
-		UserHelloDataMessage(const AchievementsAndStatsContainer& p_asuc) : asuc{} { asuc = p_asuc; }
+		UserHelloDataMessage() : id{ 0 }, asuc {} {}
+		UserHelloDataMessage(const AchievementsAndStatsContainer& asuc) : id{ 0 }, asuc{ asuc } { }
+		UserHelloDataMessage(galaxy::api::GalaxyID id, const AchievementsAndStatsContainer& asuc) : id{ id }, asuc { asuc } { }
 	};
 }

@@ -548,20 +548,22 @@ namespace universelan::server {
 			return true;
 		}
 
-		if (chat_room->GetMemberCount() == 1) {
+		/*if (chat_room->GetMemberCount() == 1) {
 			auto member_peer = peer_mapper.Get(*chat_room->GetMembers().begin());
 
 			// TODO: let member know chatroom is closing
-			// A: No mechanism for that?
+			// A: No mechanism for that? Perhaps because chats are kept saved on the server
+			// ^ but we don't care about that
 		}
 		else {
 			for (auto& member : chat_room->GetMembers()) {
 				auto member_peer = peer_mapper.Get(member);
 
 				// TODO: let member know participant has left
-				// A: No mechanism for that?
+				// A: No mechanism for that? Perhaps because chats are kept saved on the server
+				// ^ but we don't care about that
 			}
-		}
+		}*/
 
 		return true;
 	}

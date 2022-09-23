@@ -49,6 +49,11 @@ namespace universelan {
 			Achievements{}, Stats{}, UserData{}
 		{}
 
+		AchievementsAndStatsContainer(const AchievementsAndStatsContainer& other)
+			: mtx_achievements{}, mtx_stats{}, mtx_userdata{},
+			Achievements{ other.Achievements }, Stats{ other.Stats }, UserData{ other.UserData }
+		{}
+
 		inline void run_locked_achievements(std::function<void(map_t<AchievementData>&)> func) {
 			lock_t lock(mtx_achievements);
 			func(Achievements);
