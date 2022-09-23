@@ -384,12 +384,12 @@ namespace universelan {
 
 	uint64_t ClientIniData::GetCustomGalaxyID() const
 	{
-		return CustomGalaxyID;
+		return CustomGalaxyID + GalaxyIDOffset;
 	}
 
 	galaxy::api::GalaxyID ClientIniData::GetApiGalaxyID() const
 	{
-		return galaxy::api::GalaxyID::FromRealID(galaxy::api::GalaxyID::ID_TYPE_USER, CustomGalaxyID);
+		return galaxy::api::GalaxyID::FromRealID(galaxy::api::GalaxyID::ID_TYPE_USER, GetCustomGalaxyID());
 	}
 
 	uint64_t ClientIniData::GetGalaxyIDOffset() const

@@ -1,101 +1,106 @@
+#include <UniverseLAN.hxx>
+
 #define IErrorManager void
 
-#include <GalaxyFactory.h>
-#include <IGalaxy.h>
+#undef GALAXY_CALLTYPE
+#undef GALAXY_DLL_EXPORT
 
-#include <UniverseLAN.hxx>
+#define GALAXY_DLL_EXPORT __declspec(dllexport)
+#define GALAXY_CALLTYPE __cdecl
+
+#include <GalaxyFactory.h>
 
 namespace galaxy::api
 {
-	class GALAXY_DLL_EXPORT GalaxyImpl : public IGalaxy
+	class GalaxyImpl : public IGalaxy
 	{
 	public:
 		GalaxyImpl() {}
 
 		virtual ~GalaxyImpl() {}
 
-		virtual void Init(const char* clientID, const char* clientSecret, bool throwExceptions = true) {
+		virtual void Init(const char* clientID, const char* clientSecret, bool throwExceptions = true) override {
 			InitOptions options{ clientID, clientSecret };
 			galaxy::api::Init(options);
 		}
 
-		virtual void InitLocal(const char* clientID, const char* clientSecret, const char* galaxyPeerPath = ".", bool throwExceptions = true) {
+		virtual void InitLocal(const char* clientID, const char* clientSecret, const char* galaxyPeerPath = ".", bool throwExceptions = true) override {
 			InitOptions options{ clientID, clientSecret };
 			galaxy::api::Init(options);
 		}
 
-		virtual void Shutdown() {
+		virtual void Shutdown() override {
 			galaxy::api::Shutdown();
 		}
 
-		virtual IUser* GetUser() const {
+		virtual IUser* GetUser() const override {
 			return galaxy::api::User();
 		}
 
-		virtual IFriends* GetFriends() const {
+		virtual IFriends* GetFriends() const override {
 			return galaxy::api::Friends();
 		}
 
-		virtual IMatchmaking* GetMatchmaking() const {
+		virtual IMatchmaking* GetMatchmaking() const override {
 			return galaxy::api::Matchmaking();
 		}
 
-		virtual INetworking* GetNetworking() const {
+		virtual INetworking* GetNetworking() const override {
 			return galaxy::api::Networking();
 		}
 
-		virtual INetworking* GetServerNetworking() const {
+		virtual INetworking* GetServerNetworking() const override {
 			return galaxy::api::GameServerNetworking();
 		}
 
-		virtual IStats* GetStats() const {
+		virtual IStats* GetStats() const override {
 			return galaxy::api::Stats();
 		}
 
-		virtual IUtils* GetUtils() const {
+		virtual IUtils* GetUtils() const override {
 			return galaxy::api::Utils();
 		}
 
-		virtual IApps* GetApps() const {
+		virtual IApps* GetApps() const override {
 			return galaxy::api::Apps();
 		}
 
-		virtual IListenerRegistrar* GetListenerRegistrar() const {
+		virtual IListenerRegistrar* GetListenerRegistrar() const override {
 			return galaxy::api::ListenerRegistrar();
 		}
 
-		virtual ILogger* GetLogger() const {
+		virtual ILogger* GetLogger() const override {
 			return galaxy::api::Logger();
 		}
 
-		virtual void ProcessData() {
+		virtual void ProcessData() override {
 			galaxy::api::ProcessData();
 		}
 
-		virtual const IError* GetError() const {
+		virtual const IError* GetError() const override {
 			return galaxy::api::GetError();
 		}
 	};
-
+	 
 	IGalaxy* GalaxyFactory::instance{nullptr}; 
 	IErrorManager* GalaxyFactory::errorManager{ nullptr };
 
-	IGalaxy* GALAXY_CALLTYPE GalaxyFactory::GetInstance() {
-		return instance;
+	IGalaxy* GalaxyFactory::GetInstance() {
+		return CreateInstance();
 	}
 
-	IErrorManager* GALAXY_CALLTYPE GalaxyFactory::GetErrorManager() {
-		return nullptr;
+	IErrorManager* GalaxyFactory::GetErrorManager() {
+		return (IErrorManager*)1;
 	}
 
-	void GALAXY_CALLTYPE GalaxyFactory::ResetInstance() {
+	void GalaxyFactory::ResetInstance() {
 		if (instance != nullptr) {
 			delete instance;
 			instance = nullptr;
 		}
 	}
 
-	IGalaxy* GALAXY_CALLTYPE GalaxyFactory::CreateInstance() {
+	IGalaxy* GalaxyFactory::CreateInstance() {
 		if (instance == nullptr) {
 			instance = new GalaxyImpl();
 		}

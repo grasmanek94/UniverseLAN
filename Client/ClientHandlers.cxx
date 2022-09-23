@@ -12,12 +12,12 @@ namespace universelan::client {
 	// Handlers:
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data)
 	{
-		std::cout << "Peer connected: " << peer->address.host << ":" << peer->address.port << " with ID: " << reinterpret_cast<size_t>(peer->data) << std::endl;
+		std::cout << "Peer connected: " << peer->address.host << ":" << peer->address.port << std::endl;
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data)
 	{
-		std::cout << "Peer disconnected: " << peer->address.host << ":" << peer->address.port << " with ID: " << reinterpret_cast<size_t>(peer->data) << std::endl;
+		std::cout << "Peer disconnected: " << peer->address.host << ":" << peer->address.port << std::endl;
 
 		connection.Reconnect();
 	}
@@ -27,9 +27,11 @@ namespace universelan::client {
 		auto& config = interfaces->config;
 		const uint64_t key = const_hash64(config->GetAuthenticationKey());
 
-		connection.SendAsync(
-			KeyChallengeMessage{ config->GetApiGalaxyID() }.response(key, data->encrypted)
-		);
+		KeyChallengeMessage message{ KeyChallengeMessage{ config->GetApiGalaxyID() }.response(key, data->encrypted) };
+		
+		std::cout << "Replying to challenge with ID " << message.id.ToUint64() << "\n";
+
+		connection.SendAsync(message);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAcceptedMessage>& data)

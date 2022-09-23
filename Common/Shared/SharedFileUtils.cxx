@@ -173,7 +173,7 @@ namespace universelan {
 
 		// reserve capacity
 		std::vector<char> vec;
-		vec.reserve(fileSize);
+		vec.reserve((size_t)fileSize);
 
 		// read the data:
 		vec.insert(vec.begin(),

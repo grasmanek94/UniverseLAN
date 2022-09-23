@@ -1,21 +1,53 @@
+#ifdef WIN32
+
+#define IErrorManager void
+#include <GalaxyFactory.h>
+
+#else
+
 #include <GalaxyApi.h>
+
+#endif
 
 #include <windows.h>
 
 #include <chrono>
 #include <thread>
 
-int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
-{
-	galaxy::api::InitOptions options("","");
+using namespace galaxy::api;
+using namespace std::chrono;
 
-	galaxy::api::Init(options);
+int Run()
+{
+#ifdef WIN32
+	auto galaxy = GalaxyFactory::GetInstance();
+
+	galaxy->Init("","");
 
 	while (true)
 	{
-		galaxy::api::ProcessData();
-		std::this_thread::sleep_for(std::chrono::milliseconds(5));
+		galaxy->ProcessData();
+		std::this_thread::sleep_for(milliseconds(5));
 	}
+#else
+	InitOptions options("", "");
 
+	Init(options);
+
+	while (true)
+	{
+		ProcessData();
+		std::this_thread::sleep_for(milliseconds(5));
+	}
+#endif
 	return 0;
+}
+
+int 
+#if WIN32
+__stdcall 
+#endif
+WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
+{
+	return Run();
 }

@@ -28,7 +28,7 @@ namespace universelan::client {
 
 		int count = counter.fetch_add(1);
 
-		path << (std::filesystem::path(intf->config->GetGameDataPath()) / "Logging" / "L")
+		path << (std::filesystem::path(intf->config->GetGameDataPath()) / "Logging" / "L").string()
 			<< std::put_time(&tm, "%Y-%m-%d_%H-%M-%S")
 			<< "-" << std::this_thread::get_id() << "-" << count << ".log";
 

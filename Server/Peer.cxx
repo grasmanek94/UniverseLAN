@@ -28,6 +28,7 @@ namespace universelan::server::peer {
 
 	ptr Mapper::Connect(ENetPeer* peer) {
 		assert(peer != nullptr);
+		ptr x = (ptr)peer->data;
 		assert(peer->data == nullptr);
 
 		connected_peers.insert(peer);
@@ -46,6 +47,8 @@ namespace universelan::server::peer {
 		connected_time{ std::chrono::system_clock::now() },
 		chat_rooms{}, lobby{nullptr}
 	{
+		assert(peer != nullptr);
+		assert(peer->data == nullptr);
 		peer->data = static_cast<void*>(this);
 	}
 
@@ -55,8 +58,9 @@ namespace universelan::server::peer {
 	}
 
 	bool Data::link(const GalaxyID& id) {
-		assert(peer != nullptr);
-		assert(peer->data == nullptr);
+		if (peer->data == nullptr) {
+			return false;
+		}
 
 		if (!id.IsValid()) {
 			return false;

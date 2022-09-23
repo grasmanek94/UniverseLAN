@@ -85,7 +85,7 @@ namespace universelan {
 		cereal::BinaryOutputArchive oarchive(ss);
 		oarchive(object);
 
-		size_t x = ss.tellp();
+		size_t x = (size_t)ss.tellp();
 
 		ENetPacket* packet = enet_packet_create(nullptr, x, flags);
 

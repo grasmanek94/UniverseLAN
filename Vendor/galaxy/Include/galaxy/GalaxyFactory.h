@@ -36,14 +36,14 @@ namespace galaxy
 			 *
 			 * @return The instance of IGalaxy or NULL if it has not been created yet.
 			 */
-			static IGalaxy* GALAXY_CALLTYPE GetInstance();
+			static IGalaxy* GALAXY_CALLTYPE GetInstance(void);
 
 			/**
 			 * Returns the instance of error manager. Creates it if it does not exists yet.
 			 *
 			 * @return instance of error manager.
 			 */
-			static IErrorManager* GALAXY_CALLTYPE GetErrorManager();
+			static IErrorManager* GALAXY_CALLTYPE GetErrorManager(void);
 
 			/**
 			 * Removes the created instance of IGalaxy.
@@ -51,7 +51,7 @@ namespace galaxy
 			 * @remark Instead of using this method directly, you probably should use
 			 * the Shutdown() method defined in GalaxyApi.h.
 			 */
-			static void GALAXY_CALLTYPE ResetInstance();
+			static void GALAXY_CALLTYPE ResetInstance(void);
 
 			/**
 			 * Returns the instance of IGalaxy. Creates it if it does not exist yet.
@@ -61,7 +61,7 @@ namespace galaxy
 			 *
 			 * @return The instance of IGalaxy.
 			 */
-			static IGalaxy* GALAXY_CALLTYPE CreateInstance();
+			static IGalaxy* GALAXY_CALLTYPE CreateInstance(void);
 
 		private:
 

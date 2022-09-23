@@ -103,9 +103,10 @@ namespace universelan {
 		const std::filesystem::path& basepath,
 		const std::filesystem::path& relpath) {
 
+		const auto baseabspath = std::filesystem::weakly_canonical(basepath);
 		const auto abspath = std::filesystem::weakly_canonical(basepath / relpath);
 
-		const auto index = abspath.string().rfind(basepath.string(), 0);
+		const auto index = abspath.string().rfind(baseabspath.string(), 0);
 		if (index != 0) {
 			return false;
 		}

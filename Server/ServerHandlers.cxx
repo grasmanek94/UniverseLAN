@@ -17,6 +17,7 @@ namespace universelan::server {
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data)
 	{
+		peer->data = nullptr;
 		std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") EventConnect" << std::endl;
 
 		peer::ptr pd = peer_mapper.Connect(peer);
@@ -39,6 +40,7 @@ namespace universelan::server {
 
 		peer_mapper.Disconnect(peer);
 		pd = nullptr;
+		peer->data = nullptr;
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<KeyChallengeMessage>& data)
@@ -47,8 +49,9 @@ namespace universelan::server {
 		if (pd->challenge.completed) { return; }
 
 		if (pd->challenge.Validate(*data)) {
-			auto entry = user_data.emplace(pd->id, std::make_shared<GalaxyUserData>(pd->id));
+			auto entry = user_data.emplace(data->id, std::make_shared<GalaxyUserData>(data->id));
 			if (entry.second) {
+				pd->id = data->id;
 				if (pd->link(data->id)) {
 					pd->user_data = entry.first->second;
 
