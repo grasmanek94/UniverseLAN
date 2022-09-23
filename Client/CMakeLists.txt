@@ -22,3 +22,4 @@ if (MSVC)
   endif()
 endif()
 
+include(static_lib.cmake)
