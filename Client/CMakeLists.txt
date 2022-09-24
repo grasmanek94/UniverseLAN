@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 if (MSVC)
-  if("${MSVC_C_ARCHITECTURE_ID}" STREQUAL "X64")
+  if("${MSVC_C_ARCHITECTURE_ID}" STREQUAL "x64")
     message(AUTHOR_WARNING "Choosing Galaxy64.dll (x64, Native Mode)")
 
     file(GLOB_RECURSE CLIENT_SRC CONFIGURE_DEPENDS "*.*")
