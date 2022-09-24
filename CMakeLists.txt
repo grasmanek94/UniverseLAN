@@ -9,6 +9,8 @@ enable_language( C )
 
 if(MSVC)
   add_definitions(/MP)
+  # Enable EHa 
+  #string(REGEX REPLACE "/EHsc" "/EHa" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 endif()
 
 set(CMAKE_CXX_STANDARD 20)

@@ -1,4 +1,4 @@
-#ifdef WIN32
+#ifndef _WIN64
 
 #define IErrorManager void
 #include <GalaxyFactory.h>
@@ -19,7 +19,7 @@ using namespace std::chrono;
 
 int Run()
 {
-#ifdef WIN32
+#ifndef _WIN64
 	auto galaxy = GalaxyFactory::GetInstance();
 
 	galaxy->Init("","");
@@ -44,7 +44,7 @@ int Run()
 }
 
 int 
-#if WIN32
+#ifndef _WIN64
 __stdcall 
 #endif
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
