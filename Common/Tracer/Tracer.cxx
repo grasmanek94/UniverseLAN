@@ -47,13 +47,17 @@ namespace universelan::tracer {
 	}
 
 	Trace::Trace(const char* const func) :
-		func{ func }, return_address{ nullptr } {
+		tracer_ptr{ Tracer::GetInstance() }, func{ func }, return_address{ nullptr } {
 		return_address = _ReturnAddress();
-		Tracer::GetInstance()->Enter(func, return_address);
+		if (tracer_ptr) {
+			tracer_ptr->Enter(func, return_address);
+		}
 	}
 
 	Trace::~Trace() {
-		Tracer::GetInstance()->Exit(func, return_address);
+		if (tracer_ptr) {
+			tracer_ptr->Exit(func, return_address);
+		}
 	}
 
 	Tracer::Tracer(const char* const log_directory) {
