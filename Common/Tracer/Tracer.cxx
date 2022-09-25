@@ -1,245 +1,123 @@
 #include "Tracer.hxx"
 
-#include <windows.h>
-#include <stdio.h>
-#include <eh.h>
+#include <intrin.h>
+#include <Windows.h>
 
+#include <filesystem>
+#include <format>
+#include <fstream>
 #include <iostream>
-#include <thread>
 #include <mutex>
-#include <future>
-#include <regex>
+#include <string>
+#include <syncstream>
 
-#include <detours.h>
-#include <StackWalker.h>
+namespace universelan::tracer {
+	namespace fs = std::filesystem;
 
-using mutex_t = std::recursive_mutex;
-using lock_t = std::lock_guard<mutex_t>;
+	namespace {
+		fs::path trace_log_directory;
+		Tracer* tracer{nullptr};
+		std::ofstream global_trace_file;
 
-Tracer::Tracer() {
-	//SetUnhandledExceptionFilter();
-}
+		class ThreadTracer {
+		public:
+			std::ofstream log_file;
+			size_t depth;
+			DWORD thread_id;
 
-mutex_t mtx;
-
-static void MyStrCpy(char* szDest, size_t nMaxDestSize, const char* szSrc)
-{
-	if (nMaxDestSize <= 0)
-		return;
-	strncpy_s(szDest, nMaxDestSize, szSrc, _TRUNCATE);
-	// INFO: _TRUNCATE will ensure that it is null-terminated;
-	// but with older compilers (<1400) it uses "strncpy" and this does not!)
-	szDest[nMaxDestSize - 1] = 0;
-} // MyStrCpy
-
-
-class MyStackWalker : public StackWalker
-{
-public:
-	MyStackWalker() : StackWalker() {}
-protected:
-	virtual void OnOutput(LPCSTR szText) override {}
-
-	virtual void OnCallstackEntry(CallstackEntryType eType, CallstackEntry& entry) override {
-		CHAR   buffer[STACKWALK_MAX_NAMELEN];
-		size_t maxLen = STACKWALK_MAX_NAMELEN;
-#if _MSC_VER >= 1400
-		maxLen = _TRUNCATE;
-#endif
-		if ((eType != lastEntry) && (entry.offset != 0))
-		{
-			if (entry.name[0] == 0)
-				MyStrCpy(entry.name, STACKWALK_MAX_NAMELEN, "(function-name not available)");
-			if (entry.undName[0] != 0)
-				MyStrCpy(entry.name, STACKWALK_MAX_NAMELEN, entry.undName);
-			if (entry.undFullName[0] != 0)
-				MyStrCpy(entry.name, STACKWALK_MAX_NAMELEN, entry.undFullName);
-
-			if (!strncmp("ucrtbase", entry.moduleName, strlen("ucrtbase")) ||
-				!strcmp("ntdll", entry.moduleName) ||
-				!strcmp("KERNELBASE", entry.moduleName) ||
-				!strncmp("VCRUNTIME", entry.moduleName, strlen("VCRUNTIME")) ||
-				!strcmp("KERNEL32", entry.moduleName) ||
-				!strcmp("StackWalker::ShowCallstack", entry.name) ||
-				!strcmp("TTH_CXX_UEH", entry.name)
-				) {
-				return;
-			}
-
-			if (entry.lineFileName[0] == 0)
+			ThreadTracer() 
+				: log_file{}, depth{ 0 }, thread_id{ 0 }
 			{
-				MyStrCpy(entry.lineFileName, STACKWALK_MAX_NAMELEN, "(filename not available)");
-				if (entry.moduleName[0] == 0)
-					MyStrCpy(entry.moduleName, STACKWALK_MAX_NAMELEN, "(module-name not available)");
-				_snprintf_s(buffer, maxLen, "%p (%s): %s: %s\n", (LPVOID)entry.offset, entry.moduleName,
-					entry.lineFileName, entry.name);
+				thread_id = GetCurrentThreadId();
+				std::string filename = std::format("{:08x}", thread_id);
+				std::string path{ (trace_log_directory / (filename + ".trace")).string() };
+
+				log_file = std::ofstream{ path, std::ios::app | std::ios::out};
+				if (log_file) {
+					log_file << "+\n\n\n";
+				}
+				else {
+					std::osyncstream sync_stream(std::cerr);
+					sync_stream << "Error opening tracer for thread " << filename << " for write: " << path << std::endl;
+				}
 			}
-			else
-				_snprintf_s(buffer, maxLen, "%s (%d): %s\n", entry.lineFileName, entry.lineNumber,
-					entry.name);
-			buffer[STACKWALK_MAX_NAMELEN - 1] = 0;
-			std::cout << buffer;
+		};
 
-			/*if (entry.moduleName[0] == 0) {
-				std::cout << "?";
-			}
-			else {
-				std::cout << entry.moduleName;
-			}
-
-			std::cout << "::";
-
-			if (entry.undFullName[0] != 0) {
-				std::cout << entry.undFullName;
-			}
-			else if (entry.undName[0] != 0) {
-				std::cout << entry.undName;
-			}
-			else if (entry.name[0] != 0) {
-				std::cout << entry.name;
-			}
-			else {
-				std::cout << "?";
-			}
-			std::cout << "\n";*/
-
-
-			/*if (entry.lineFileName[0] == 0)
-			{
-				MyStrCpy(entry.lineFileName, STACKWALK_MAX_NAMELEN, "(filename not available)");
-				if (entry.moduleName[0] == 0)
-					MyStrCpy(entry.moduleName, STACKWALK_MAX_NAMELEN, "(module-name not available)");
-				_snprintf_s(buffer, maxLen, "%p (%s): %s: %s\n", (LPVOID)entry.offset, entry.moduleName,
-					entry.lineFileName, entry.name);
-			}
-			else
-				_snprintf_s(buffer, maxLen, "%s (%d): %s\n", entry.lineFileName, entry.lineNumber,
-					entry.name);
-			buffer[STACKWALK_MAX_NAMELEN - 1] = 0;
-			OnOutput(buffer);*/
-		}
-	}
-};
-
-#define HANDLE_TTH_CXX_UEH(T) catch(const T& _Xe) { std::cout << #T << " " << _Xe.what() << "\n"; }
-
-void TTH_CXX_UEH() {
-	auto const ex = std::current_exception();
-	{
-		lock_t lock{ mtx };
-		std::cout << "[" << std::this_thread::get_id() << "] " << __FUNCTION__ << std::endl;
-
-		try
-		{
-			if (ex) { std::rethrow_exception(ex); }
-		}
-
-		HANDLE_TTH_CXX_UEH(std::bad_array_new_length)
-			HANDLE_TTH_CXX_UEH(std::bad_cast)
-			HANDLE_TTH_CXX_UEH(std::bad_exception)
-			HANDLE_TTH_CXX_UEH(std::bad_function_call)
-			HANDLE_TTH_CXX_UEH(std::bad_typeid)
-			HANDLE_TTH_CXX_UEH(std::bad_weak_ptr)
-			HANDLE_TTH_CXX_UEH(std::domain_error)
-			HANDLE_TTH_CXX_UEH(std::future_error)
-			HANDLE_TTH_CXX_UEH(std::invalid_argument)
-			HANDLE_TTH_CXX_UEH(std::length_error)
-			HANDLE_TTH_CXX_UEH(std::out_of_range)
-			HANDLE_TTH_CXX_UEH(std::overflow_error)
-			HANDLE_TTH_CXX_UEH(std::underflow_error)
-			HANDLE_TTH_CXX_UEH(std::range_error)
-			HANDLE_TTH_CXX_UEH(std::regex_error)
-			HANDLE_TTH_CXX_UEH(std::ios_base::failure)
-			HANDLE_TTH_CXX_UEH(std::system_error)
-			HANDLE_TTH_CXX_UEH(std::runtime_error)
-			HANDLE_TTH_CXX_UEH(std::logic_error)
-			HANDLE_TTH_CXX_UEH(std::bad_alloc)
-			HANDLE_TTH_CXX_UEH(std::exception)
-			catch (...)
-		{
-			std::cout << "Unknown exception type/message\n";
-		}
-
-		MyStackWalker sw;
-
-		if (!sw.ShowCallstack()) {
-			std::cout << "ShowCallstack FAIL" << std::endl;
-		}
-	}
-}
-
-static void(__cdecl* Real_terminate)(void) = terminate;
-void __cdecl HOOK_terminate() throw() {
-	TTH_CXX_UEH();
-	Real_terminate();
-}
-
-void doStupidshit(int a) {
-	{
-		lock_t lock{ mtx };
-		std::cout << "[" << std::this_thread::get_id() << "] " << __FUNCTION__ << std::endl;
+		static thread_local ThreadTracer thread_tracer;
 	}
 
-	//set_terminate(TTH_CXX_UEH);
-
-	try {
-		throw std::exception();
+	Trace::Trace(const char* const func) :
+		func{ func }, return_address{ nullptr } {
+		return_address = _ReturnAddress();
+		Tracer::GetInstance()->Enter(func, return_address);
 	}
-	catch (...) {
-		{
-			lock_t lock{ mtx };
-			std::cout << "[" << std::this_thread::get_id() << "] catched" << std::endl;
+
+	Trace::~Trace() {
+		Tracer::GetInstance()->Exit(func, return_address);
+	}
+
+	Tracer::Tracer(const char* const log_directory) {
+		auto t = std::time(nullptr);
+
+#pragma warning( push )
+#pragma warning( disable : 4996 )
+		auto tm = *std::localtime(&t);
+#pragma warning( pop )
+
+		std::ostringstream path;
+
+		path << std::put_time(&tm, "%Y-%m-%d_%H-%M-%S") << "/";
+
+		trace_log_directory = fs::path(log_directory) / path.str();
+
+		if (!fs::create_directories(trace_log_directory)) {
+			std::cerr << "Failed to create tracing directory: " << trace_log_directory << std::endl;
+		}
+		else {
+			global_trace_file = std::ofstream{ (trace_log_directory / "all.trace").string(), std::ios::trunc | std::ios::out};
+			if (!global_trace_file) {
+				std::cerr << "Error opening for write: " << (trace_log_directory / "all.trace") << std::endl;
+			}
 		}
 	}
 
-	try {
-		throw std::exception();
+	Tracer::~Tracer() {
 	}
-	catch (...) {
-		{
-			lock_t lock{ mtx };
-			std::cout << "[" << std::this_thread::get_id() << "] catched" << std::endl;
+
+	void Tracer::Enter(const char* const func, const void* const return_address) {
+		if (thread_tracer.log_file) {
+			thread_tracer.log_file << std::string(thread_tracer.depth, ' ') << '+' << func << "@" << std::hex << ((size_t)return_address) << '\n';
+		}
+		++thread_tracer.depth;
+
+		if (global_trace_file) {
+			std::osyncstream sync_stream(global_trace_file);
+			sync_stream << '[' << thread_tracer.thread_id << "] " << '+' << func << "@" << std::hex << ((size_t)return_address) << '\n';
 		}
 	}
 
-	if (a >= 5) {
-		{
-			lock_t lock{ mtx };
-			std::cout << "[" << std::this_thread::get_id() << "] throw" << std::endl;
+	void Tracer::Exit(const char* const func, const void* const return_address) {
+		--thread_tracer.depth;
+		if (thread_tracer.log_file) {
+			thread_tracer.log_file << std::string(thread_tracer.depth, ' ') << '-' << func << "@" << std::hex << ((size_t)return_address) << '\n';
 		}
-		throw std::runtime_error("uu");
-	}
-}
 
-int main() {
-	{
-		lock_t lock{ mtx };
-		std::cout << "[" << std::this_thread::get_id() << "] " << __FUNCTION__ << std::endl;
+		if (global_trace_file) {
+			std::osyncstream sync_stream(global_trace_file);
+			sync_stream << '[' << thread_tracer.thread_id << "] " << '-' << func << "@" << std::hex << ((size_t)return_address) << '\n';
+		}
 	}
 
-	if (DetourIsHelperProcess()) {
-		return TRUE;
+	Tracer* Tracer::GetInstance() {
+		return tracer;
 	}
 
-	DetourRestoreAfterWith();
-	DetourTransactionBegin();
-	DetourUpdateThread(GetCurrentThread());
-	DetourAttach(&(PVOID&)Real_terminate, HOOK_terminate);
-	LONG error = DetourTransactionCommit();
+	Tracer* Tracer::InitInstance(const char* const log_directory) {
+		if (tracer == nullptr) {
+			tracer = new Tracer(log_directory);
+		}
 
-	if (error == NO_ERROR) {
-		printf("Detoured terminate\n");
-	}
-	else {
-		printf("Error detouring terminate: %ld\n", error);
+		return tracer;
 	}
 
-	std::jthread t1(doStupidshit, 1);
-	std::jthread t2(doStupidshit, 10);
-	std::jthread t3(doStupidshit, 2);
-	std::jthread t4(doStupidshit, 11);
-	doStupidshit(1);
-	doStupidshit(10);
-
-	return 0;
 }
