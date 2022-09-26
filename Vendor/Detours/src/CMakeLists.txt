@@ -8,7 +8,7 @@ if (MSVC)
       detours.cpp
       detours.h
       detver.h
-      disasm.cpp
+      disasm.hpp
       image.cpp
       modules.cpp
     )
@@ -27,7 +27,7 @@ if (MSVC)
       detours.cpp
       detours.h
       detver.h
-      disasm.cpp
+      disasm.hpp
       image.cpp
       modules.cpp
     )

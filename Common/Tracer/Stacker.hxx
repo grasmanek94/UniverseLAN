@@ -6,6 +6,9 @@
 #include <vector>
 
 namespace universelan::tracer {
+	extern bool create_minidump_on_unhandles_exception;
+	extern int minidump_verbosity_level;
+
 	struct CallEntryFile {
 		boost::static_string<260> path;
 		size_t line_number;

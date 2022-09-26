@@ -3,9 +3,11 @@
 #include "Peer.hxx"
 
 #include <Networking/Networking.hxx>
+#include <Tracer.hxx>
 
 #include <chrono>
 #include <exception>
+#include <filesystem>
 #include <iostream>
 
 namespace universelan::server {
@@ -32,6 +34,16 @@ namespace universelan::server {
 		lobby_manager{}, peer_mapper{}, sfu{ config.GetServerDataPath() },
 		shared_file_counter{ 1 }
 	{
+		tracer::Trace::InitTracing(
+			(std::filesystem::path(config.GetServerDataPath()) / "Tracing").string().c_str(),
+			config.IsUnhandledExceptionLoggingEnabled(),
+			config.IsCallTracingEnabled(),
+			config.CreateMiniDumpOnUnhandledException(),
+			config.GetMiniDumpVerbosityLevel()
+		);
+
+		tracer::Trace server_constructor{ __FUNCTION__ };
+
 		int init_code = connection.GetInitCode();
 
 		if (init_code)
@@ -87,8 +99,10 @@ namespace universelan::server {
 		}
 
 		if (++ticks > 50) {
+			tracer::Trace trace_peer_cleanup{ "Server::Tick::PeerCleanup"};
 			ticks = 0;
 			auto now = std::chrono::system_clock::now();
+
 			for (auto& peer : unauthenticated_peers) {
 				peer::ptr pd = peer_mapper.Get(peer);
 				if (pd == nullptr) {
@@ -110,6 +124,6 @@ namespace universelan::server {
 
 	Server::~Server()
 	{
-
+		tracer::Trace destructor{ __FUNCTION__ };
 	}
 }

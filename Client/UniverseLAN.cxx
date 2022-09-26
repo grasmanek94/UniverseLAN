@@ -3,17 +3,28 @@
 #include "Client.hxx"
 
 #include <IniData.hxx>
+#include <Tracer.hxx>
 
+#include <filesystem>
 #include <memory>
 
 namespace universelan::client {
 	using namespace galaxy::api;
+	namespace fs = std::filesystem;
 	InterfaceInstances intf_inst;
 
 	void InterfaceInstances::init(const InitOptions& initOptions) {
 		if (config == nullptr) {
 			config = std::make_unique<ClientIniData>();
 		}
+
+		tracer::Trace::InitTracing(
+			(fs::path(config->GetGameDataPath()) / "Tracing").string().c_str(),
+			config->IsUnhandledExceptionLoggingEnabled(),
+			config->IsCallTracingEnabled(),
+			config->CreateMiniDumpOnUnhandledException(),
+			config->GetMiniDumpVerbosityLevel()
+		);
 
 		init_options = std::make_unique<InitOptionsModern>(initOptions);
 		notification = std::make_unique<ListenerRegistrarImpl>(this);

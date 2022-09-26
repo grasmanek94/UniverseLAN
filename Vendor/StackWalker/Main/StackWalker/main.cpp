@@ -81,7 +81,7 @@ void GlobalFunctionPointerTest()
 // "SetUnhandledExceptionFilter" and VC8
 // http://blog.kalmbachnet.de/?postid=75
 // and
-// Unhandled exceptions in VC8 and above… for x86 and x64
+// Unhandled exceptions in VC8 and aboveï¿½ for x86 and x64
 // http://blog.kalmbach-software.de/2008/04/02/unhandled-exceptions-in-vc8-and-above-for-x86-and-x64/
 // Even better: http://blog.kalmbach-software.de/2013/05/23/improvedpreventsetunhandledexceptionfilter/
 
@@ -135,6 +135,7 @@ static TCHAR s_szExceptionLogFileName[_MAX_PATH] = _T("\\exceptions.log"); // de
 static BOOL  s_bUnhandledExeptionFilterSet = FALSE;
 static LONG __stdcall CrashHandlerExceptionFilter(EXCEPTION_POINTERS* pExPtrs)
 {
+  (void)pExPtrs;
 #ifdef _M_IX86
   if (pExPtrs->ExceptionRecord->ExceptionCode == EXCEPTION_STACK_OVERFLOW)
   {
@@ -163,7 +164,7 @@ static LONG __stdcall CrashHandlerExceptionFilter(EXCEPTION_POINTERS* pExPtrs)
               _T("   Please report!"),
               pExPtrs->ExceptionRecord->ExceptionCode, pExPtrs->ExceptionRecord->ExceptionFlags,
               pExPtrs->ExceptionRecord->ExceptionAddress);
-  FatalAppExit(-1, lString);
+  FatalAppExit((UINT)-1, lString);
   return EXCEPTION_CONTINUE_SEARCH;
 }
 
@@ -190,6 +191,7 @@ static void InitUnhandledExceptionFilter()
 #ifdef EXCEPTION_FILTER_TEST
 LONG WINAPI ExpFilter(EXCEPTION_POINTERS* pExp, DWORD dwExpCode)
 {
+  (void)dwExpCode;
   //StackWalker sw;  // output to default (Debug-Window)
   StackWalkerToConsole sw; // output to the console
   sw.ShowCallstack(GetCurrentThread(), pExp->ContextRecord);
@@ -239,6 +241,9 @@ int f(int i)
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+  (void)argc;
+  (void)argv;
+
   printf("\n\n\nShow an object:\n\n\n");
   GlobalIntTest();
 

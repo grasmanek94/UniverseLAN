@@ -36,7 +36,28 @@ namespace universelan {
 
 		GameDataPath = ini.GetValue(StoragePathSection.c_str(), "GameDataPath", "UniverseLAN");
 		ServerDataPath = ini.GetValue(StoragePathSection.c_str(), "ServerDataPath", "UniverseLANServer");
+		CallTracing = ini.GetBoolValue(TracingSection.c_str(), "CallTracing", true);
+		UnhandledExceptionLogging = ini.GetBoolValue(TracingSection.c_str(), "UnhandledExceptionLogging", true);
+		MiniDumpOnUnhandledException = ini.GetBoolValue(TracingSection.c_str(), "MiniDumpOnUnhandledException", true);
+		MiniDumpVerbosityLevel = ini.GetLongValue(TracingSection.c_str(), "MiniDumpVerbosityLevel", 2);
+
 		AuthenticationKey = ini.GetValue(AuthenticationSection.c_str(), "Key", "9g5tA53SLyiNkBTqsX3BmBgy/PPVTU6VGKWNNw3wUIY5nK1C2MOT4UsZ2pauCb8fm5UQSJRijid+w1t9WpDaKQ==");
+	}
+
+	bool IniData::IsCallTracingEnabled() const {
+		return CallTracing;
+	}
+
+	bool IniData::IsUnhandledExceptionLoggingEnabled() const {
+		return UnhandledExceptionLogging;
+	}
+
+	bool IniData::CreateMiniDumpOnUnhandledException() const {
+		return MiniDumpOnUnhandledException;
+	}
+
+	int IniData::GetMiniDumpVerbosityLevel() const {
+		return MiniDumpVerbosityLevel;
 	}
 
 	const std::string& IniData::GetGameDataPath() const

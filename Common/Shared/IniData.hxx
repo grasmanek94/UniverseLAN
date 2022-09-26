@@ -20,6 +20,12 @@ namespace universelan {
 		std::string GameDataPath;
 		std::string ServerDataPath;
 
+		const std::string TracingSection = "Tracing";
+		bool CallTracing;
+		bool UnhandledExceptionLogging;
+		bool MiniDumpOnUnhandledException;
+		int MiniDumpVerbosityLevel;
+
 		const std::string AuthenticationSection = "Authentication";
 		std::string AuthenticationKey;
 
@@ -34,6 +40,11 @@ namespace universelan {
 		const std::string& GetGameDataPath() const;
 		const std::string& GetServerDataPath() const;
 		const std::string& GetAuthenticationKey() const;
+
+		bool IsCallTracingEnabled() const;
+		bool IsUnhandledExceptionLoggingEnabled() const;
+		bool CreateMiniDumpOnUnhandledException() const;
+		int GetMiniDumpVerbosityLevel() const;
 
 		const std::chrono::system_clock::time_point BootTime;
 	};

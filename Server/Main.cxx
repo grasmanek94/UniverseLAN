@@ -1,5 +1,6 @@
 #include "Server.hxx"
 
+#include <Tracer.hxx>
 #include <Version.hxx>
 
 #include <chrono>
@@ -7,6 +8,7 @@
 #include <memory>
 #include <thread>
 
+using namespace universelan::tracer;
 using namespace universelan::server;
 using namespace std::chrono;
 
@@ -14,6 +16,8 @@ std::unique_ptr<Server> server;
 
 int main()
 {
+	Trace trace_main{ __FUNCTION__ };
+
 	std::cout << "Version: " << universelan::Version_Number << std::endl;
 
 	server = std::make_unique<Server>();

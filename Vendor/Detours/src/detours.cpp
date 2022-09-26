@@ -56,6 +56,8 @@ C_ASSERT(sizeof(_DETOUR_ALIGN) == 1);
 static PVOID    s_pSystemRegionLowerBound   = (PVOID)(ULONG_PTR)0x70000000;
 static PVOID    s_pSystemRegionUpperBound   = (PVOID)(ULONG_PTR)0x80000000;
 
+#include "disasm.hpp"
+
 //////////////////////////////////////////////////////////////////////////////
 //
 static bool detour_is_imported(PBYTE pbCode, PBYTE pbAddress)

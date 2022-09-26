@@ -1,5 +1,7 @@
 #include "Peer.hxx"
 
+#include <Tracer.hxx>
+
 #include <GalaxyApi.h>
 
 #include <cstdint>
@@ -27,6 +29,8 @@ namespace universelan::server::peer {
 	}
 
 	ptr Mapper::Connect(ENetPeer* peer) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		assert(peer != nullptr);
 		ptr x = (ptr)peer->data;
 		assert(peer->data == nullptr);
@@ -36,6 +40,8 @@ namespace universelan::server::peer {
 	}
 
 	void Mapper::Disconnect(ENetPeer* peer) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		assert(peer != nullptr);
 
 		delete static_cast<ptr>(peer->data);
@@ -58,6 +64,8 @@ namespace universelan::server::peer {
 	}
 
 	bool Data::link(const GalaxyID& id) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (peer->data == nullptr) {
 			return false;
 		}

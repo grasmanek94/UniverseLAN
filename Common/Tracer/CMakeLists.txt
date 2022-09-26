@@ -10,8 +10,8 @@ target_link_libraries(
     lsfdrmfg-common-tracer
     PUBLIC
       boost
-    PRIVATE
       detours
       StackWalker
+    PRIVATE
       $<$<PLATFORM_ID:Windows>:Imagehlp>
 )

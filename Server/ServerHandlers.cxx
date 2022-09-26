@@ -3,20 +3,23 @@
 #include "Peer.hxx"
 
 #include <Networking/Networking.hxx>
+#include <Tracer.hxx>
 
 #define REQUIRES_AUTHENTICATION(peer) {if(KickUnauthenticated(peer)) { return; }}
 
 namespace universelan::server {
 	using namespace galaxy::api;
 
-	void Server::Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAcceptedMessage>& data) { REQUIRES_AUTHENTICATION(peer); /* Not handled in server */ }
-	void Server::Handle(ENetPeer* peer, const std::shared_ptr<FileShareResponseMessage>& data) { REQUIRES_AUTHENTICATION(peer); }
-	void Server::Handle(ENetPeer* peer, const std::shared_ptr<CreateLobbyResponseMessage>& data) { REQUIRES_AUTHENTICATION(peer); }
-	void Server::Handle(ENetPeer* peer, const std::shared_ptr<LobbyMemberStateChangeMessage>& data) { REQUIRES_AUTHENTICATION(peer); }
-	void Server::Handle(ENetPeer* peer, const std::shared_ptr<LobbyOwnerChangeMessage>& data) { REQUIRES_AUTHENTICATION(peer); }
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAcceptedMessage>& data) { tracer::Trace trace{ __FUNCTION__"::ConnectionAcceptedMessage" }; REQUIRES_AUTHENTICATION(peer); /* Not handled in server */ }
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<FileShareResponseMessage>& data) { tracer::Trace trace{ __FUNCTION__"::FileShareResponseMessage" }; REQUIRES_AUTHENTICATION(peer); }
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<CreateLobbyResponseMessage>& data) { tracer::Trace trace{ __FUNCTION__"::CreateLobbyResponseMessage" }; REQUIRES_AUTHENTICATION(peer); }
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<LobbyMemberStateChangeMessage>& data) { tracer::Trace trace{ __FUNCTION__"::LobbyMemberStateChangeMessage" }; REQUIRES_AUTHENTICATION(peer); }
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<LobbyOwnerChangeMessage>& data) { tracer::Trace trace{ __FUNCTION__"::LobbyOwnerChangeMessage" }; REQUIRES_AUTHENTICATION(peer); }
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data)
 	{
+		tracer::Trace trace{ __FUNCTION__"::EventConnect" };
+
 		peer->data = nullptr;
 		std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") EventConnect" << std::endl;
 
@@ -28,6 +31,8 @@ namespace universelan::server {
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data)
 	{
+		tracer::Trace trace{ __FUNCTION__"::EventDisconnect" };
+
 		std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") EventDisconnect" << std::endl;
 
 		peer::ptr pd = peer_mapper.Get(peer);
@@ -45,6 +50,8 @@ namespace universelan::server {
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<KeyChallengeMessage>& data)
 	{
+		tracer::Trace trace{ __FUNCTION__"::KeyChallengeMessage"};
+
 		peer::ptr pd = peer_mapper.Get(peer);
 		if (pd->challenge.completed) { return; }
 
@@ -53,6 +60,8 @@ namespace universelan::server {
 			if (entry.second) {
 				pd->id = data->id;
 				if (pd->link(data->id)) {
+					tracer::Trace validated{ __FUNCTION__"::challenge.Validate" };
+
 					pd->user_data = entry.first->second;
 
 					unauthenticated_peers.erase(peer);
@@ -69,6 +78,8 @@ namespace universelan::server {
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<UserHelloDataMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__"::UserHelloDataMessage" };
+
 		REQUIRES_AUTHENTICATION(peer);
 
 		peer::ptr pd = peer_mapper.Get(peer);
@@ -76,6 +87,8 @@ namespace universelan::server {
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__"::RequestSpecificUserDataMessage" };
+
 		REQUIRES_AUTHENTICATION(peer);
 
 		peer::ptr pd = peer_mapper.Get(peer);
@@ -95,6 +108,8 @@ namespace universelan::server {
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestChatRoomWithUserMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__"::RequestChatRoomWithUserMessage" };
+
 		REQUIRES_AUTHENTICATION(peer);
 
 		peer::ptr pd = peer_mapper.Get(peer);
@@ -118,6 +133,8 @@ namespace universelan::server {
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestChatRoomMessagesMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__"::RequestChatRoomMessagesMessage" };
+
 		REQUIRES_AUTHENTICATION(peer);
 
 		peer::ptr pd = peer_mapper.Get(peer);
@@ -134,6 +151,8 @@ namespace universelan::server {
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<SendToChatRoomMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__"::SendToChatRoomMessage" };
+
 		REQUIRES_AUTHENTICATION(peer);
 
 		peer::ptr pd = peer_mapper.Get(peer);
@@ -187,6 +206,8 @@ namespace universelan::server {
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<FileShareMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__"::FileShareMessage" };
+
 		REQUIRES_AUTHENTICATION(peer);
 
 		FileShareResponseMessage fsrm{ data->request_id, ++shared_file_counter, data->filename };
@@ -203,6 +224,8 @@ namespace universelan::server {
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<FileRequestMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__"::FileRequestMessage" };
+
 		REQUIRES_AUTHENTICATION(peer);
 
 		if (data->id != 0) {
@@ -222,6 +245,8 @@ namespace universelan::server {
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<CreateLobbyMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__"::CreateLobbyMessage" };
+
 		REQUIRES_AUTHENTICATION(peer);
 
 		peer::ptr pd = peer_mapper.Get(peer);
@@ -236,6 +261,8 @@ namespace universelan::server {
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestLobbyListMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__"::RequestLobbyListMessage" };
+
 		REQUIRES_AUTHENTICATION(peer);
 
 		data->lobby_list = lobby_manager.GetLobbies();
@@ -245,6 +272,8 @@ namespace universelan::server {
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<JoinLobbyMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__"::JoinLobbyMessage" };
+
 		REQUIRES_AUTHENTICATION(peer);
 
 		peer::ptr pd = peer_mapper.Get(peer);
@@ -280,6 +309,8 @@ namespace universelan::server {
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<LeaveLobbyMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__"::LeaveLobbyMessage" };
+
 		REQUIRES_AUTHENTICATION(peer);
 
 		peer::ptr pd = peer_mapper.Get(peer);
@@ -291,6 +322,8 @@ namespace universelan::server {
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestLobbyDataMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__"::RequestLobbyDataMessage" };
+
 		REQUIRES_AUTHENTICATION(peer);
 
 		peer::ptr pd = peer_mapper.Get(peer);
@@ -309,6 +342,8 @@ namespace universelan::server {
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<SendToLobbyMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__"::SendToLobbyMessage" };
+
 		REQUIRES_AUTHENTICATION(peer);
 
 		peer::ptr pd = peer_mapper.Get(peer);
@@ -332,6 +367,8 @@ namespace universelan::server {
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyDataMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__"::SetLobbyDataMessage" };
+
 		REQUIRES_AUTHENTICATION(peer);
 
 		peer::ptr pd = peer_mapper.Get(peer);
@@ -365,6 +402,8 @@ namespace universelan::server {
 	}
 
 	template<typename T, typename U> bool BoilerplateHandleLobbyDataUpdate(peer::Mapper& peer_mapper, GalaxyNetworkServer& connection, ENetPeer* peer, const T& data, const U& notification, std::function<bool(peer::ptr pd)> func) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		peer::ptr pd = peer_mapper.Get(peer);
 
 		data->fail_reason = ILobbyDataUpdateListener::FAILURE_REASON_UNDEFINED;
@@ -396,6 +435,8 @@ namespace universelan::server {
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyJoinableMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__"::SetLobbyJoinableMessage" };
+
 		REQUIRES_AUTHENTICATION(peer);
 
 		SetLobbyJoinableMessage notification{ 0, data->lobby_id, data->joinable };
@@ -407,6 +448,8 @@ namespace universelan::server {
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyMaxMembersMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__"::SetLobbyMaxMembersMessage" };
+
 		REQUIRES_AUTHENTICATION(peer);
 
 		SetLobbyMaxMembersMessage notification{ 0, data->lobby_id, data->max_members };
@@ -417,6 +460,8 @@ namespace universelan::server {
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyTypeMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__"::SetLobbyTypeMessage" };
+
 		REQUIRES_AUTHENTICATION(peer);
 
 		SetLobbyTypeMessage notification{ 0, data->lobby_id, data->type };
@@ -427,6 +472,8 @@ namespace universelan::server {
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyMemberDataMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__"::SetLobbyMemberDataMessage" };
+
 		REQUIRES_AUTHENTICATION(peer);
 		peer::ptr pd = peer_mapper.Get(peer);
 
@@ -460,6 +507,8 @@ namespace universelan::server {
 	}
 
 	bool Server::HandleMemberLobbyLeave(ENetPeer* peer, bool disconnected) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		peer::ptr pd = peer_mapper.Get(peer);
 
 		LobbyManager::lobby_t lobby{ pd->lobby };
@@ -515,6 +564,8 @@ namespace universelan::server {
 	}
 
 	bool Server::HandleMemberChatLeave(ENetPeer* peer) {
+		tracer::Trace trace{ __FUNCTION__"1"};
+
 		peer::ptr pd = peer_mapper.Get(peer);
 
 		bool success = true;
@@ -530,8 +581,9 @@ namespace universelan::server {
 		return success;
 	}
 
-	bool Server::HandleMemberChatLeave(ENetPeer* peer, galaxy::api::ChatRoomID chat_room_id)
-	{
+	bool Server::HandleMemberChatLeave(ENetPeer* peer, galaxy::api::ChatRoomID chat_room_id) {
+		tracer::Trace trace{ __FUNCTION__"2"};
+
 		peer::ptr pd = peer_mapper.Get(peer);
 
 		auto& chat_rooms = pd->chat_rooms;
