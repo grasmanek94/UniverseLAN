@@ -1,5 +1,7 @@
 #include <UniverseLAN.hxx>
 
+#include <Tracer.hxx>
+
 #define IErrorManager void
 
 #undef GALAXY_CALLTYPE
@@ -10,14 +12,19 @@
 
 #include <GalaxyFactory.h>
 
+using namespace universelan::tracer;
 namespace galaxy::api
 {
 	class GalaxyImpl : public IGalaxy
 	{
 	public:
-		GalaxyImpl() {}
+		GalaxyImpl() {
+			Trace trace{ __FUNCTION__ };
+		}
 
-		virtual ~GalaxyImpl() {}
+		virtual ~GalaxyImpl() {
+			Trace trace{ __FUNCTION__ };
+		}
 
 		virtual void Init(const char* clientID, const char* clientSecret, bool throwExceptions = true) override {
 			InitOptions options{ clientID, clientSecret };
@@ -86,14 +93,24 @@ namespace galaxy::api
 	IErrorManager* GalaxyFactory::errorManager{ nullptr };
 
 	IGalaxy* GalaxyFactory::GetInstance() {
-		return CreateInstance();
+		Trace trace{ __FUNCTION__ };
+
+		if (instance == nullptr) {
+			instance = new GalaxyImpl();
+		}
+
+		return instance;
 	}
 
 	IErrorManager* GalaxyFactory::GetErrorManager() {
+		Trace trace{ __FUNCTION__ };
+
 		return (IErrorManager*)1;
 	}
 
 	void GalaxyFactory::ResetInstance() {
+		Trace trace{ __FUNCTION__ };
+
 		if (instance != nullptr) {
 			delete instance;
 			instance = nullptr;
@@ -101,6 +118,8 @@ namespace galaxy::api
 	}
 
 	IGalaxy* GalaxyFactory::CreateInstance() {
+		Trace trace{ __FUNCTION__ };
+
 		if (instance == nullptr) {
 			instance = new GalaxyImpl();
 		}

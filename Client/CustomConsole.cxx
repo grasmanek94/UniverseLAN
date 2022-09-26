@@ -1,3 +1,7 @@
+#include "CustomConsole.hxx"
+
+#include <Tracer.hxx>
+
 #include <Windows.h>
 #include <io.h>
 #include <fcntl.h>
@@ -5,14 +9,14 @@
 #include <fstream>
 #include <iostream>
 
-#include "CustomConsole.hxx"
-
 namespace universelan::client {
 	static WNDPROC ConsoleWndProc = NULL;
 	static HWND	ConsoleWndHandle = NULL;
 
 	void BindStdHandlesToConsole()
 	{
+		tracer::Trace trace{ __FUNCTION__ };
+
 		FILE* fDummy;
 		freopen_s(&fDummy, "CONIN$", "r", stdin);
 		freopen_s(&fDummy, "CONOUT$", "w", stderr);
@@ -33,6 +37,8 @@ namespace universelan::client {
 
 	void EnableCustomConsole()
 	{
+		tracer::Trace trace{ __FUNCTION__ };
+
 		static bool CustomConsoleEnabled = false;
 
 		if (CustomConsoleEnabled)

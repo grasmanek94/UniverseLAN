@@ -26,6 +26,8 @@ namespace universelan::client {
 			config->GetMiniDumpVerbosityLevel()
 		);
 
+		tracer::Trace trace{ __FUNCTION__ };
+
 		init_options = std::make_unique<InitOptionsModern>(initOptions);
 		notification = std::make_unique<ListenerRegistrarImpl>(this);
 		client = std::make_unique<Client>(this);
@@ -45,6 +47,20 @@ namespace universelan::client {
 	}
 
 	void InterfaceInstances::reset() {
+		if (config == nullptr) {
+			config = std::make_unique<ClientIniData>();
+		}
+
+		tracer::Trace::InitTracing(
+			(fs::path(config->GetGameDataPath()) / "Tracing").string().c_str(),
+			config->IsUnhandledExceptionLoggingEnabled(),
+			config->IsCallTracingEnabled(),
+			config->CreateMiniDumpOnUnhandledException(),
+			config->GetMiniDumpVerbosityLevel()
+		);
+
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (client) {
 			client->Stop();
 		}

@@ -20,6 +20,8 @@ namespace universelan::client {
 	}
 
 	void ChatImpl::RequestChatRoomWithUser(GalaxyID userID, IChatRoomWithUserRetrieveListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		uint64_t request_id = MessageUniqueID::get();
 
 		request_chat_room_with_user_requests.emplace(request_id, listener);
@@ -27,6 +29,8 @@ namespace universelan::client {
 	}
 
 	void ChatImpl::RequestChatRoomWithUserProcessed(const std::shared_ptr<RequestChatRoomWithUserMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		IChatRoomWithUserRetrieveListener* listener = request_chat_room_with_user_requests.pop(data->request_id);
 
 		bool success{ false };
@@ -48,6 +52,8 @@ namespace universelan::client {
 	}
 
 	void ChatImpl::RequestChatRoomMessages(ChatRoomID chatRoomID, uint32_t limit, ChatMessageID referenceMessageID, IChatRoomMessagesRetrieveListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		uint64_t request_id = MessageUniqueID::get();
 
 		request_chat_room_messages_requests.emplace(request_id, listener);
@@ -55,6 +61,8 @@ namespace universelan::client {
 	}
 
 	void ChatImpl::RequestChatRoomMessagesProcessed(const std::shared_ptr<RequestChatRoomMessagesMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		IChatRoomMessagesRetrieveListener* listener = request_chat_room_messages_requests.pop(data->request_id);
 
 		lock_t lock{ mtx };
@@ -88,6 +96,8 @@ namespace universelan::client {
 	}
 
 	uint32_t ChatImpl::SendChatRoomMessage(ChatRoomID chatRoomID, const char* msg, IChatRoomMessageSendListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		uint64_t request_id = MessageUniqueID::get();
 
 		SendToChatRoomMessage message{ request_id, chatRoomID, std::make_shared<ChatMessage>(CHAT_MESSAGE_TYPE_CHAT_MESSAGE, chatRoomID, intf->config->GetApiGalaxyID(), 0UL, msg) };
@@ -100,6 +110,8 @@ namespace universelan::client {
 	}
 
 	void ChatImpl::SendChatRoomMessageProcessed(const std::shared_ptr<SendToChatRoomMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		IChatRoomMessageSendListener* listener = send_to_chat_room_requests.pop(data->request_id);
 
 		if (data->message) {
@@ -123,6 +135,8 @@ namespace universelan::client {
 	}
 
 	uint32_t ChatImpl::GetChatRoomMessageByIndex(uint32_t index, ChatMessageID& messageID, ChatMessageType& messageType, GalaxyID& senderID, uint32_t& sendTime, char* buffer, uint32_t bufferLength) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		lock_t lock{ mtx };
 		if (incomming_messages_buffer == nullptr) {
 			return 0;
@@ -141,6 +155,8 @@ namespace universelan::client {
 	}
 
 	uint32_t ChatImpl::GetChatRoomMemberCount(ChatRoomID chatRoomID) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		lock_t lock{ mtx };
 		auto chat_room = chatroom_manager.GetChatRoom(chatRoomID);
 		if (chat_room != nullptr) {
@@ -152,6 +168,8 @@ namespace universelan::client {
 	}
 
 	GalaxyID ChatImpl::GetChatRoomMemberUserIDByIndex(ChatRoomID chatRoomID, uint32_t index) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		lock_t lock{ mtx };
 		auto chat_room = chatroom_manager.GetChatRoom(chatRoomID);
 		if (chat_room != nullptr) {
@@ -163,6 +181,8 @@ namespace universelan::client {
 	}
 
 	uint32_t ChatImpl::GetChatRoomUnreadMessageCount(ChatRoomID chatRoomID) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		lock_t lock{ mtx };
 		auto chat_room = chatroom_manager.GetChatRoom(chatRoomID);
 		if (chat_room != nullptr) {
@@ -174,6 +194,8 @@ namespace universelan::client {
 	}
 
 	void ChatImpl::MarkChatRoomAsRead(ChatRoomID chatRoomID) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		lock_t lock{ mtx };
 		auto chat_room = chatroom_manager.GetChatRoom(chatRoomID);
 		if (chat_room != nullptr) {

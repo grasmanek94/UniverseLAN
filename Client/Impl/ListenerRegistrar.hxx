@@ -81,7 +81,6 @@ namespace universelan::client {
 		bool ExecuteForListenerType(ListenerType listenerType, IGalaxyListener* extra, std::function<void(const std::set<IGalaxyListener*>& listeners)> code);
 		bool ExecuteForListenerTypePerEntry(ListenerType listenerType, IGalaxyListener* extra, std::function<void(IGalaxyListener* listeners)> code);
 
-		// NotifyAll<IConnectionOpenListener>(&IConnectionOpenListener::OnConnectionOpenFailure, connectionString, IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE);
 		template <typename T, class _Fx, class... _Types>
 		bool NotifyAll(_Fx&& _Func, _Types&&... _Args) {	
 			return ExecuteForListenerTypePerEntry(T::GetListenerType(), [&](IGalaxyListener* listener) {
@@ -92,7 +91,6 @@ namespace universelan::client {
 				});
 		}
 
-		// NotifyAll<IConnectionOpenListener>(connectionString, &IConnectionOpenListener::OnConnectionOpenFailure, connectionString, IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE);
 		template <typename T, class _Fx, class... _Types>
 		bool NotifyAll(T* extra, _Fx&& _Func, _Types&&... _Args) {
 			return ExecuteForListenerTypePerEntry(T::GetListenerType(), extra, [&](IGalaxyListener* listener) {

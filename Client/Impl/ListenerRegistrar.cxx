@@ -1,5 +1,7 @@
 #include "ListenerRegistrar.hxx"
 
+#include <Tracer.hxx>
+
 #include <iostream>
 #include <mutex>
 #include <stdexcept>
@@ -9,10 +11,14 @@ namespace universelan::client {
 	ListenerRegistrarImpl::ListenerRegistrarImpl(InterfaceInstances* intf) :
 		intf{ intf },
 		listeners{}
-	{ }
+	{
+		tracer::Trace trace{ __FUNCTION__ };
+	}
 
 	ListenerRegistrarImpl::~ListenerRegistrarImpl()
 	{
+		tracer::Trace trace{ __FUNCTION__ };
+
 		for (int t = LISTENER_TYPE_BEGIN; t < LISTENER_TYPE_END; ++t) {
 			if (listeners[t].set.size()) {
 				std::cerr << "Listeners have not been unregistered: " << t << '\n';
@@ -21,17 +27,23 @@ namespace universelan::client {
 	}
 
 	void ListenerRegistrarImpl::Register(ListenerType listenerType, IGalaxyListener* listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		lock_t lock{ listeners[listenerType].mtx };
 		listeners[listenerType].set.insert(listener);
 	}
 
 	void ListenerRegistrarImpl::Unregister(ListenerType listenerType, IGalaxyListener* listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		lock_t lock{ listeners[listenerType].mtx };
 		listeners[listenerType].set.erase(listener);
 	}
 
 	bool ListenerRegistrarImpl::ExecuteForListenerType(ListenerType listenerType, std::function<void(const std::set<IGalaxyListener*>& listeners)> code)
 	{
+		tracer::Trace trace{ __FUNCTION__"1"};
+
 		lock_t lock{ listeners[listenerType].mtx };
 
 		listener_set& set = listeners[listenerType].set;
@@ -46,6 +58,8 @@ namespace universelan::client {
 
 	bool ListenerRegistrarImpl::ExecuteForListenerTypePerEntry(ListenerType listenerType, std::function<void(IGalaxyListener* listeners)> code)
 	{
+		tracer::Trace trace{ __FUNCTION__"1"};
+
 		lock_t lock{ listeners[listenerType].mtx };
 
 		listener_set& set = listeners[listenerType].set;
@@ -62,6 +76,8 @@ namespace universelan::client {
 
 	bool ListenerRegistrarImpl::ExecuteForListenerType(ListenerType listenerType, IGalaxyListener* extra, std::function<void(const std::set<IGalaxyListener*>& listeners)> code)
 	{
+		tracer::Trace trace{ __FUNCTION__"2"};
+
 		lock_t lock{ listeners[listenerType].mtx };
 
 		listener_set& set = listeners[listenerType].set;
@@ -87,6 +103,8 @@ namespace universelan::client {
 
 	bool ListenerRegistrarImpl::ExecuteForListenerTypePerEntry(ListenerType listenerType, IGalaxyListener* extra, std::function<void(IGalaxyListener* listeners)> code)
 	{
+		tracer::Trace trace{ __FUNCTION__"2"};
+
 		lock_t lock{ listeners[listenerType].mtx };
 
 		listener_set& set = listeners[listenerType].set;

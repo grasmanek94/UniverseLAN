@@ -15,6 +15,8 @@ namespace galaxy::api {
 	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Init(const InitOptions& initOptions) {
 		intf_inst.init(initOptions);
 
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (intf_inst.config->GetEnableConsole()) {
 			EnableCustomConsole();
 		}
@@ -29,58 +31,86 @@ namespace galaxy::api {
 	}
 
 	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Shutdown() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		intf_inst.reset();
 	}
 
 	GALAXY_DLL_EXPORT IUser* GALAXY_CALLTYPE User() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return intf_inst.user.get();
 	}
 
 	GALAXY_DLL_EXPORT IFriends* GALAXY_CALLTYPE Friends() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return intf_inst.friends.get();
 	}
 
 	GALAXY_DLL_EXPORT IChat* GALAXY_CALLTYPE Chat() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return intf_inst.chat.get();
 	}
 
 	GALAXY_DLL_EXPORT IMatchmaking* GALAXY_CALLTYPE Matchmaking() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return intf_inst.matchmaking.get();
 	}
 
 	GALAXY_DLL_EXPORT INetworking* GALAXY_CALLTYPE Networking() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return intf_inst.networking.get();
 	}
 
 	GALAXY_DLL_EXPORT IStats* GALAXY_CALLTYPE Stats() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return intf_inst.stats.get();
 	}
 
 	GALAXY_DLL_EXPORT IUtils* GALAXY_CALLTYPE Utils() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return intf_inst.utils.get();
 	}
 
 	GALAXY_DLL_EXPORT IApps* GALAXY_CALLTYPE Apps() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return intf_inst.apps.get();
 	}
 
 	GALAXY_DLL_EXPORT IStorage* GALAXY_CALLTYPE Storage() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return intf_inst.storage.get();
 	}
 
 	GALAXY_DLL_EXPORT ICustomNetworking* GALAXY_CALLTYPE CustomNetworking() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return intf_inst.custom_networking.get();
 	}
 
 	GALAXY_DLL_EXPORT ILogger* GALAXY_CALLTYPE Logger() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return intf_inst.logger.get();
 	}
 
 	GALAXY_DLL_EXPORT ITelemetry* GALAXY_CALLTYPE Telemetry() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return intf_inst.telemetry.get();
 	}
 
 	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE ProcessData() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (intf_inst.client != nullptr) {
 			intf_inst.client->ProcessEvents();
 		}
@@ -91,14 +121,19 @@ namespace galaxy::api {
 	}
 
 	GALAXY_DLL_EXPORT IListenerRegistrar* GALAXY_CALLTYPE ListenerRegistrar() {
+		tracer::Trace trace{ __FUNCTION__ };
 		return intf_inst.notification.get();
 	}
 
 	GALAXY_DLL_EXPORT const IError* GALAXY_CALLTYPE GetError() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return nullptr;
 	}
 }
 
 extern "C" GALAXY_DLL_EXPORT uint32_t load() {
+	universelan::tracer::Trace trace{ __FUNCTION__ };
+
 	return 0;
 }

@@ -11,21 +11,31 @@ namespace universelan::client {
 		listeners{ intf->notification.get() },
 		specific_user_data_requests{},
 		user_data{}
-	{ }
+	{
+		tracer::Trace trace{ __FUNCTION__ };
+	}
 
 	UserImpl::~UserImpl()
 	{
+		tracer::Trace trace{ __FUNCTION__ };
+
 	}
 
 	bool UserImpl::SignedIn() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return intf->config->GetSignedIn();
 	}
 
 	GalaxyID UserImpl::GetGalaxyID() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return intf->config->GetCustomGalaxyID();
 	}
 
 	void UserImpl::SignIn(IAuthListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (intf->config->GetSignedIn()) {
 			listeners->NotifyAll(listener, &IAuthListener::OnAuthSuccess);
 			listeners->NotifyAll<IOperationalStateChangeListener>(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_LOGGED_ON);
@@ -37,63 +47,93 @@ namespace universelan::client {
 	}
 
 	void UserImpl::SignInCredentials(const char* login, const char* password, IAuthListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		SignIn(listener);
 	}
 
 	void UserImpl::SignInToken(const char* refreshToken, IAuthListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		SignIn(listener);
 	}
 
 	void UserImpl::SignInLauncher(IAuthListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		SignIn(listener);
 	}
 
 	void UserImpl::SignInSteam(const void* steamAppTicket, uint32_t steamAppTicketSize, const char* personaName, IAuthListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		SignIn(listener);
 	}
 
 	void UserImpl::SignInEpic(const char* epicAccessToken, const char* epicUsername, IAuthListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		SignIn(listener);
 	}
 
 	void UserImpl::SignInGalaxy(bool requireOnline, IAuthListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		SignIn(listener);
 	}
 
 	void UserImpl::SignInUWP(IAuthListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		SignIn(listener);
 	}
 
 	void UserImpl::SignInPS4(const char* ps4ClientID, IAuthListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		SignIn(listener);
 	}
 
 	void UserImpl::SignInXB1(const char* xboxOneUserID, IAuthListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		SignIn(listener);
 	}
 
 	void UserImpl::SignInXBLive(const char* token, const char* signature, const char* marketplaceID, const char* locale, IAuthListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		SignIn(listener);
 	}
 
 	void UserImpl::SignInAnonymous(IAuthListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		SignIn(listener);
 	}
 
 	void UserImpl::SignInAnonymousTelemetry(IAuthListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		SignIn(listener);
 	}
 
 	void UserImpl::SignInServerKey(const char* serverKey, IAuthListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		SignIn(listener);
 	}
 
 	void UserImpl::SignOut() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		listeners->NotifyAll<IAuthListener>(&IAuthListener::OnAuthLost);
 		listeners->NotifyAll<IOperationalStateChangeListener>(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN);
 	}
 
 	void UserImpl::RequestUserData(GalaxyID userID, ISpecificUserDataListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (intf->config->IsSelfUserID(userID)) {
 			listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, userID);
 			listeners->NotifyAll<IUserDataListener>(&IUserDataListener::OnUserDataUpdated);
@@ -107,6 +147,8 @@ namespace universelan::client {
 	}
 
 	void UserImpl::SpecificUserDataRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		ISpecificUserDataListener* listener = specific_user_data_requests.pop(data->request_id);
 
 		if (data->found) {
@@ -121,6 +163,8 @@ namespace universelan::client {
 	}
 
 	bool UserImpl::IsUserDataAvailable(GalaxyID userID) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (intf->config->IsSelfUserID(userID)) {
 			return true;
 		}
@@ -131,6 +175,8 @@ namespace universelan::client {
 	}
 
 	const char* UserImpl::GetUserData(const char* key, GalaxyID userID) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (intf->config->IsSelfUserID(userID)) {
 			return intf->config->GetUserData(key).c_str();
 		}
@@ -149,6 +195,8 @@ namespace universelan::client {
 	}
 
 	void UserImpl::GetUserDataCopy(const char* key, char* buffer, uint32_t bufferLength, GalaxyID userID) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (intf->config->IsSelfUserID(userID)) {
 			const std::string& str = intf->config->GetUserData(key);
 			std::copy_n(str.begin(), std::min((uint32_t)str.length(), bufferLength), buffer);
@@ -166,6 +214,8 @@ namespace universelan::client {
 	}
 
 	void UserImpl::SetUserData(const char* key, const char* value, ISpecificUserDataListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		intf->config->SetUserData(key, value);
 		intf->config->SaveStatsAndAchievements();
 
@@ -176,6 +226,8 @@ namespace universelan::client {
 	}
 
 	uint32_t UserImpl::GetUserDataCount(GalaxyID userID) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (intf->config->IsSelfUserID(userID)) {
 			return (uint32_t)intf->config->GetASUC().UserData.size();
 		}
@@ -186,6 +238,8 @@ namespace universelan::client {
 	}
 
 	bool UserImpl::GetUserDataByIndex(uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength, GalaxyID userID) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (intf->config->IsSelfUserID(userID)) {
 			auto& map = intf->config->GetASUC().UserData;
 			if (map.size() < index) {
@@ -215,41 +269,58 @@ namespace universelan::client {
 	}
 
 	void UserImpl::DeleteUserData(const char* key, ISpecificUserDataListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		SetUserData(key, "", listener);
 	}
 
 	bool UserImpl::IsLoggedOn() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return intf->config->GetSignedIn();
 	}
 
 	void UserImpl::RequestEncryptedAppTicket(const void* data, uint32_t dataSize, IEncryptedAppTicketListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		listeners->NotifyAll(listener, &IEncryptedAppTicketListener::OnEncryptedAppTicketRetrieveSuccess);
 	}
 
 	void UserImpl::GetEncryptedAppTicket(void* encryptedAppTicket, uint32_t maxEncryptedAppTicketSize, uint32_t& currentEncryptedAppTicketSize) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		((char*)encryptedAppTicket)[maxEncryptedAppTicketSize - 1] = 0;
 		currentEncryptedAppTicketSize = maxEncryptedAppTicketSize;
 	}
 
 	SessionID UserImpl::GetSessionID() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return (uint64_t)this;
 	}
 
 	const char* UserImpl::GetAccessToken() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return "95959595959595959595959595";
 	}
 
 	void UserImpl::GetAccessTokenCopy(char* buffer, uint32_t bufferLength) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		std::copy_n(GetAccessToken(), std::min((uint32_t)strlen(GetAccessToken()), bufferLength), buffer);
 	}
 
 	bool UserImpl::ReportInvalidAccessToken(const char* accessToken, const char* info) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		listeners->NotifyAll<IAccessTokenListener>(&IAccessTokenListener::OnAccessTokenChanged);
 		return true;
 	}
 
-	std::shared_ptr<GalaxyUserData> UserImpl::GetGalaxyUserData(GalaxyID userID)
-	{
+	std::shared_ptr<GalaxyUserData> UserImpl::GetGalaxyUserData(GalaxyID userID) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		lock_t lock(mtx_user_data);
 		auto user = user_data.find(userID);
 		if (user == user_data.end()) {

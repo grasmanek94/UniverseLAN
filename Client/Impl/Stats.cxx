@@ -6,12 +6,18 @@ namespace universelan::client {
 	using namespace galaxy::api;
 	StatsImpl::StatsImpl(InterfaceInstances* intf) :
 		intf{ intf }, listeners{ intf->notification.get() }
-	{}
+	{
+		tracer::Trace trace{ __FUNCTION__ };
+	}
 
 	StatsImpl::~StatsImpl()
-	{}
+	{
+		tracer::Trace trace{ __FUNCTION__ };
+	}
 
 	void StatsImpl::RequestUserStatsAndAchievements(GalaxyID userID, IUserStatsAndAchievementsRetrieveListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (intf->config->IsSelfUserID(userID)) {
 			listeners->NotifyAll(listener, &IUserStatsAndAchievementsRetrieveListener::OnUserStatsAndAchievementsRetrieveSuccess, userID);
 		}
@@ -24,6 +30,8 @@ namespace universelan::client {
 	}
 
 	void StatsImpl::SpecificUserStatsAndAchievementsRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		IUserStatsAndAchievementsRetrieveListener* listener = specific_user_stats_and_achievements_requests.pop(data->request_id);
 
 		if (data->found) {
@@ -38,6 +46,8 @@ namespace universelan::client {
 	}
 
 	int32_t StatsImpl::GetStatInt(const char* name, GalaxyID userID) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (intf->config->IsSelfUserID(userID)) {
 			return intf->config->GetStat(name).i;
 		}
@@ -54,6 +64,8 @@ namespace universelan::client {
 	}
 
 	float StatsImpl::GetStatFloat(const char* name, GalaxyID userID) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (intf->config->IsSelfUserID(userID)) {
 			return intf->config->GetStat(name).f;
 		}
@@ -70,18 +82,26 @@ namespace universelan::client {
 	}
 
 	void StatsImpl::SetStatInt(const char* name, int32_t value) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		intf->config->SetStat(name, value);
 	}
 
 	void StatsImpl::SetStatFloat(const char* name, float value) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		intf->config->SetStat(name, value);
 	}
 
 	void StatsImpl::UpdateAvgRateStat(const char* name, float countThisSession, double sessionLength) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		intf->config->SetStat(name, (float)(intf->config->GetStat(name).f + (countThisSession / sessionLength)));
 	}
 
 	void StatsImpl::GetAchievement(const char* name, bool& unlocked, uint32_t& unlockTime, GalaxyID userID) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (intf->config->IsSelfUserID(userID)) {
 			auto data = intf->config->GetAchievementData(name);
 			unlocked = data->GetUnlocked();
@@ -99,6 +119,8 @@ namespace universelan::client {
 	}
 
 	void StatsImpl::SetAchievement(const char* name) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		auto data = intf->config->GetAchievementData(name);
 		data->SetUnlocked(true);
 		data->SetUnlockTimeNow();
@@ -107,12 +129,16 @@ namespace universelan::client {
 	}
 
 	void StatsImpl::ClearAchievement(const char* name) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		auto data = intf->config->GetAchievementData(name);
 		data->SetUnlocked(false);
 		data->SetUnlockTime(0);
 	}
 
 	void StatsImpl::StoreStatsAndAchievements(IStatsAndAchievementsStoreListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		intf->config->SaveStatsAndAchievements();
 
 		intf->client->GetConnection().SendAsync(UserHelloDataMessage{intf->config->GetASUC()});
@@ -121,6 +147,8 @@ namespace universelan::client {
 	}
 
 	void StatsImpl::ResetStatsAndAchievements(IStatsAndAchievementsStoreListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		intf->config->ResetStatsAndAchievements();
 
 		intf->client->GetConnection().SendAsync(UserHelloDataMessage{ intf->config->GetASUC() });
@@ -129,47 +157,69 @@ namespace universelan::client {
 	}
 
 	const char* StatsImpl::GetAchievementDisplayName(const char* name) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return name;
 	}
 
 	void StatsImpl::GetAchievementDisplayNameCopy(const char* name, char* buffer, uint32_t bufferLength) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		std::copy_n(name, std::min(bufferLength, (uint32_t)strlen(name)), buffer);
 	}
 
 	const char* StatsImpl::GetAchievementDescription(const char* name) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return intf->config->GetAchievementData(name)->GetDescription().c_str();
 	}
 
 	void StatsImpl::GetAchievementDescriptionCopy(const char* name, char* buffer, uint32_t bufferLength) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		const std::string& desc = intf->config->GetAchievementData(name)->GetDescription();
 		std::copy_n(desc.c_str(), std::min(bufferLength, (uint32_t)desc.size()), buffer);
 	}
 
 	bool StatsImpl::IsAchievementVisible(const char* name) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return intf->config->GetAchievementData(name)->GetVisible();
 	}
 
 	bool StatsImpl::IsAchievementVisibleWhileLocked(const char* name) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return intf->config->GetAchievementData(name)->GetVisibleWhileLocked();
 	}
 
 	void StatsImpl::RequestLeaderboards(ILeaderboardsRetrieveListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		listeners->NotifyAll(listener, &ILeaderboardsRetrieveListener::OnLeaderboardsRetrieveFailure, ILeaderboardsRetrieveListener::FAILURE_REASON_UNDEFINED);
 	}
 
 	const char* StatsImpl::GetLeaderboardDisplayName(const char* name) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return name;
 	}
 
 	void StatsImpl::GetLeaderboardDisplayNameCopy(const char* name, char* buffer, uint32_t bufferLength) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		std::copy_n(name, std::min(bufferLength, (uint32_t)strlen(name)), buffer);
 	}
 
 	LeaderboardSortMethod StatsImpl::GetLeaderboardSortMethod(const char* name) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return LEADERBOARD_SORT_METHOD_NONE;
 	}
 
 	LeaderboardDisplayType StatsImpl::GetLeaderboardDisplayType(const char* name) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return LEADERBOARD_DISPLAY_TYPE_NONE;
 	}
 
@@ -178,6 +228,8 @@ namespace universelan::client {
 		uint32_t rangeStart,
 		uint32_t rangeEnd,
 		ILeaderboardEntriesRetrieveListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		listeners->NotifyAll(listener, &ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
 	}
 
@@ -187,6 +239,8 @@ namespace universelan::client {
 		uint32_t countAfter,
 		GalaxyID userID,
 		ILeaderboardEntriesRetrieveListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		listeners->NotifyAll(listener, &ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
 	}
 
@@ -195,10 +249,14 @@ namespace universelan::client {
 		GalaxyID* userArray,
 		uint32_t userArraySize,
 		ILeaderboardEntriesRetrieveListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		listeners->NotifyAll(listener, &ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
 	}
 
-	void StatsImpl::GetRequestedLeaderboardEntry(uint32_t index, uint32_t& rank, int32_t& score, GalaxyID& userID) { }
+	void StatsImpl::GetRequestedLeaderboardEntry(uint32_t index, uint32_t& rank, int32_t& score, GalaxyID& userID) {
+		tracer::Trace trace{ __FUNCTION__ };
+	}
 
 	void StatsImpl::GetRequestedLeaderboardEntryWithDetails(
 		uint32_t index,
@@ -207,13 +265,17 @@ namespace universelan::client {
 		void* details,
 		uint32_t detailsSize,
 		uint32_t& outDetailsSize,
-		GalaxyID& userID) { }
+		GalaxyID& userID) {
+		tracer::Trace trace{ __FUNCTION__ };
+	}
 
 	void StatsImpl::SetLeaderboardScore(
 		const char* name,
 		int32_t score,
 		bool forceUpdate,
 		ILeaderboardScoreUpdateListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		listeners->NotifyAll(listener, &ILeaderboardScoreUpdateListener::OnLeaderboardScoreUpdateFailure, name, score, ILeaderboardScoreUpdateListener::FAILURE_REASON_UNDEFINED);
 	}
 
@@ -224,14 +286,20 @@ namespace universelan::client {
 		uint32_t detailsSize,
 		bool forceUpdate,
 		ILeaderboardScoreUpdateListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		listeners->NotifyAll(listener, &ILeaderboardScoreUpdateListener::OnLeaderboardScoreUpdateFailure, name, score, ILeaderboardScoreUpdateListener::FAILURE_REASON_UNDEFINED);
 	}
 
 	uint32_t StatsImpl::GetLeaderboardEntryCount(const char* name) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return 0;
 	}
 
 	void StatsImpl::FindLeaderboard(const char* name, ILeaderboardRetrieveListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		listeners->NotifyAll(listener, &ILeaderboardRetrieveListener::OnLeaderboardRetrieveFailure, name, ILeaderboardRetrieveListener::FAILURE_REASON_UNDEFINED);
 	}
 
@@ -241,10 +309,14 @@ namespace universelan::client {
 		const LeaderboardSortMethod& sortMethod,
 		const LeaderboardDisplayType& displayType,
 		ILeaderboardRetrieveListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		listeners->NotifyAll(listener, &ILeaderboardRetrieveListener::OnLeaderboardRetrieveFailure, name, ILeaderboardRetrieveListener::FAILURE_REASON_UNDEFINED);
 	}
 
 	void StatsImpl::RequestUserTimePlayed(GalaxyID userID, IUserTimePlayedRetrieveListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		//if (intf->config->IsSelfUserID(userID)) {
 		listeners->NotifyAll(listener, &IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveSuccess, userID);
 		//} else {
@@ -254,6 +326,8 @@ namespace universelan::client {
 	}
 
 	uint32_t StatsImpl::GetUserTimePlayed(GalaxyID userID) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		//if (intf->config->IsSelfUserID(userID)) {
 		return intf->config->GetPlayTime();
 		//} else {

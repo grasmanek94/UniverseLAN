@@ -11,54 +11,78 @@ namespace universelan::client {
 		intf{ intf }, listeners{ intf->notification.get() },
 		file_upload_requests{}, file_download_requests{},
 		sfu(intf->config->GetGameDataPath())
-	{}
+	{
+		tracer::Trace trace{ __FUNCTION__ };
+	}
 
-	StorageImpl::~StorageImpl() {}
+	StorageImpl::~StorageImpl() {
+		tracer::Trace trace{ __FUNCTION__ };
+	}
 
 	void StorageImpl::FileWrite(const char* fileName, const void* data, uint32_t dataSize) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (!sfu.WriteLocal(fileName, (const char*)data, dataSize)) {
 			std::cerr << __FUNCTION__ << " fail: " << fileName << "\n";
 		}
 	}
 
 	uint32_t StorageImpl::FileRead(const char* fileName, void* data, uint32_t dataSize) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return sfu.ReadLocal(fileName, (char*)data, dataSize);
 	}
 
 	void StorageImpl::FileDelete(const char* fileName) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (!sfu.RemoveLocal(fileName)) {
 			std::cerr << __FUNCTION__ << " fail: " << fileName << "\n";
 		}
 	}
 
 	bool StorageImpl::FileExists(const char* fileName) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return sfu.ExistsLocal(fileName);
 	}
 
 	uint32_t StorageImpl::GetFileSize(const char* fileName) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return sfu.GetSizeLocal(fileName);
 	}
 
 	uint32_t StorageImpl::GetFileTimestamp(const char* fileName) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return sfu.GetTimestampLocal(fileName);
 	}
 
 	uint32_t StorageImpl::GetFileCount() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return sfu.GetFileCountLocal();
 	}
 
 	const char* StorageImpl::GetFileNameByIndex(uint32_t index) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		static thread_local char buffer[256];
 		GetFileNameCopyByIndex(index, buffer, sizeof(buffer));
 		return buffer;
 	}
 
 	void StorageImpl::GetFileNameCopyByIndex(uint32_t index, char* buffer, uint32_t bufferLength) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		std::string path = sfu.GetFileNameByIndexLocal(index);
 		std::copy_n(path.c_str(), std::min((size_t)bufferLength, path.length()), buffer);
 	}
 
 	void StorageImpl::FileShare(const char* fileName, IFileShareListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (!intf->config->GetAllowFileSharingUpload()) {
 			listeners->NotifyAll(listener, &IFileShareListener::OnFileShareFailure, fileName, IFileShareListener::FAILURE_REASON_UNDEFINED);
 			return;
@@ -83,6 +107,8 @@ namespace universelan::client {
 	}
 
 	void StorageImpl::DownloadSharedFile(SharedFileID sharedFileID, ISharedFileDownloadListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (!intf->config->GetAllowFileSharingDownload()) {
 			listeners->NotifyAll(listener, &ISharedFileDownloadListener::OnSharedFileDownloadFailure, sharedFileID, ISharedFileDownloadListener::FAILURE_REASON_UNDEFINED);
 			return;
@@ -95,41 +121,59 @@ namespace universelan::client {
 	}
 
 	const char* StorageImpl::GetSharedFileName(SharedFileID sharedFileID) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		static thread_local char buffer[256];
 		GetSharedFileNameCopy(sharedFileID, buffer, sizeof(buffer));
 		return buffer;
 	}
 
 	void StorageImpl::GetSharedFileNameCopy(SharedFileID sharedFileID, char* buffer, uint32_t bufferLength) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		std::string name = sfu.GetSharedFileName(sharedFileID);
 		std::copy_n(name.c_str(), std::min((size_t)bufferLength, name.length()), buffer);
 	}
 
 	uint32_t StorageImpl::GetSharedFileSize(SharedFileID sharedFileID) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return sfu.GetSizeShared(sharedFileID);
 	}
 
 	GalaxyID StorageImpl::GetSharedFileOwner(SharedFileID sharedFileID) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return intf->config->GetApiGalaxyID();
 	}
 
 	uint32_t StorageImpl::SharedFileRead(SharedFileID sharedFileID, void* data, uint32_t dataSize, uint32_t offset) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return sfu.ReadShared(sharedFileID, (char*)data, dataSize, offset);
 	}
 
 	void StorageImpl::SharedFileClose(SharedFileID sharedFileID) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		sfu.UnlinkSharedFileStorage(sharedFileID);
 	}
 
 	uint32_t StorageImpl::GetDownloadedSharedFileCount() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return sfu.GetFileCountShared();
 	}
 
 	SharedFileID StorageImpl::GetDownloadedSharedFileByIndex(uint32_t index) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return sfu.GetSharedIDByIndex(index);
 	}
 
 	void StorageImpl::FileDownloaded(const std::shared_ptr<FileRequestMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (!intf->config->GetAllowFileSharingDownload()) {
 			return;
 		}
@@ -149,6 +193,8 @@ namespace universelan::client {
 	}
 
 	void StorageImpl::FileUploaded(const std::shared_ptr<FileShareResponseMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (!intf->config->GetAllowFileSharingUpload()) {
 			return;
 		}

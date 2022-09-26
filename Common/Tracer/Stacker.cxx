@@ -198,6 +198,25 @@ namespace universelan::tracer {
 
 			Real_terminate();
 		}
+
+		LPTOP_LEVEL_EXCEPTION_FILTER filter{ nullptr };
+
+		LONG WINAPI OurCrashHandler(EXCEPTION_POINTERS* ExceptionInfo)
+		{
+			IUnhandledExceptionCallback* cb = callback.load();
+			if (cb != nullptr)
+			{
+				KeepCount keeper{};
+				UnhandledExceptionCallback(cb);
+			}
+
+			while (entered_counter.load()) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			}
+
+			return filter != nullptr ? filter(ExceptionInfo) : EXCEPTION_CONTINUE_SEARCH;
+		}
+
 	}
 
 	Stacker::Stacker() {
@@ -214,7 +233,10 @@ namespace universelan::tracer {
 	}
 
 	bool Stacker::Init() {
-		if (DetourIsHelperProcess()) {
+		filter = SetUnhandledExceptionFilter(OurCrashHandler);
+		return true;
+
+		/*if (DetourIsHelperProcess()) {
 			return true;
 		}
 
@@ -223,7 +245,7 @@ namespace universelan::tracer {
 		DetourUpdateThread(GetCurrentThread());
 		DetourAttach(&(PVOID&)Real_terminate, HOOK_terminate);
 
-		return (DetourTransactionCommit() == NO_ERROR);
+		return (DetourTransactionCommit() == NO_ERROR);*/
 	}
 
 	void Stacker::SetUnhandledExceptionCallback(IUnhandledExceptionCallback* target) {

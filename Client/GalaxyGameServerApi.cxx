@@ -16,6 +16,8 @@ namespace galaxy::api {
 	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE InitGameServer(const InitOptions& initOptions) {
 		gameserver_intf_inst.init(initOptions);
 
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (gameserver_intf_inst.config->GetEnableConsole()) {
 			EnableCustomConsole();
 		}
@@ -30,42 +32,62 @@ namespace galaxy::api {
 	}
 
 	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE ShutdownGameServer() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		gameserver_intf_inst.reset();
 	}
 
 	GALAXY_DLL_EXPORT IUser* GALAXY_CALLTYPE GameServerUser() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return gameserver_intf_inst.user.get();
 	}
 
 	GALAXY_DLL_EXPORT IMatchmaking* GALAXY_CALLTYPE GameServerMatchmaking() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return gameserver_intf_inst.matchmaking.get();
 	}
 
 	GALAXY_DLL_EXPORT INetworking* GALAXY_CALLTYPE GameServerNetworking() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return gameserver_intf_inst.networking.get();
 	}
 
 	GALAXY_DLL_EXPORT INetworking* GALAXY_CALLTYPE ServerNetworking() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return gameserver_intf_inst.networking.get();
 	}
 
 	GALAXY_DLL_EXPORT IUtils* GALAXY_CALLTYPE GameServerUtils() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return gameserver_intf_inst.utils.get();
 	}
 
 	GALAXY_DLL_EXPORT ITelemetry* GALAXY_CALLTYPE GameServerTelemetry() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return gameserver_intf_inst.telemetry.get();
 	}
 
 	GALAXY_DLL_EXPORT ILogger* GALAXY_CALLTYPE GameServerLogger() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return gameserver_intf_inst.logger.get();
 	}
 
 	GALAXY_DLL_EXPORT IListenerRegistrar* GALAXY_CALLTYPE GameServerListenerRegistrar() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return gameserver_intf_inst.notification.get();
 	}
 
 	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE ProcessGameServerData() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (gameserver_intf_inst.client != nullptr) {
 			gameserver_intf_inst.client->ProcessEvents();
 		}

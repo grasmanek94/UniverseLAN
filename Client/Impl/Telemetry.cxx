@@ -13,6 +13,8 @@ namespace universelan::client {
 		intf{ intf }, listeners{ intf->notification.get() },
 		mtx{}, telemetry_file{}, counter{ 1 }, visit_id{ "1337" }
 	{
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (!intf->config->GetTelemetryStore()) {
 			return;
 		}
@@ -38,6 +40,8 @@ namespace universelan::client {
 
 	TelemetryImpl::~TelemetryImpl()
 	{
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (telemetry_file) {
 			lock_t lock(mtx);
 			telemetry_file.flush();
@@ -45,6 +49,8 @@ namespace universelan::client {
 	}
 
 	void TelemetryImpl::AddStringParam(const char* name, const char* value) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (!telemetry_file) {
 			return;
 		}
@@ -54,6 +60,8 @@ namespace universelan::client {
 	}
 
 	void TelemetryImpl::AddIntParam(const char* name, int32_t value) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (!telemetry_file) {
 			return;
 		}
@@ -63,6 +71,8 @@ namespace universelan::client {
 	}
 
 	void TelemetryImpl::AddFloatParam(const char* name, double value) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (!telemetry_file) {
 			return;
 		}
@@ -72,6 +82,8 @@ namespace universelan::client {
 	}
 
 	void TelemetryImpl::AddBoolParam(const char* name, bool value) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (!telemetry_file) {
 			return;
 		}
@@ -81,6 +93,8 @@ namespace universelan::client {
 	}
 
 	void TelemetryImpl::AddObjectParam(const char* name) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (!telemetry_file) {
 			return;
 		}
@@ -90,6 +104,8 @@ namespace universelan::client {
 	}
 
 	void TelemetryImpl::AddArrayParam(const char* name) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (!telemetry_file) {
 			return;
 		}
@@ -99,6 +115,8 @@ namespace universelan::client {
 	}
 
 	void TelemetryImpl::CloseParam() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (!telemetry_file) {
 			return;
 		}
@@ -108,6 +126,8 @@ namespace universelan::client {
 	}
 
 	void TelemetryImpl::ClearParams() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (!telemetry_file) {
 			return;
 		}
@@ -117,6 +137,8 @@ namespace universelan::client {
 	}
 
 	void TelemetryImpl::SetSamplingClass(const char* name) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		if (!telemetry_file) {
 			return;
 		}
@@ -126,6 +148,8 @@ namespace universelan::client {
 	}
 
 	uint32_t TelemetryImpl::SendTelemetryEvent(const char* eventType, ITelemetryEventSendListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		uint32_t id = counter.fetch_add(1);
 		std::string event_type{ eventType };
 
@@ -147,20 +171,28 @@ namespace universelan::client {
 	}
 
 	uint32_t TelemetryImpl::SendAnonymousTelemetryEvent(const char* eventType, ITelemetryEventSendListener* const listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return SendTelemetryEvent(eventType, listener);
 	}
 
 	const char* TelemetryImpl::GetVisitID() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		lock_t lock{ mtx };
 		return visit_id.c_str();
 	}
 
 	void TelemetryImpl::GetVisitIDCopy(char* buffer, uint32_t bufferLength) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		lock_t lock{ mtx };
 		std::copy_n(visit_id.c_str(), std::min(bufferLength, (uint32_t)visit_id.size()), buffer);
 	}
 
 	void TelemetryImpl::ResetVisitID() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		lock_t lock{ mtx };
 		visit_id = std::to_string((uint32_t)((uint64_t)this) + counter.fetch_add(1));
 	}

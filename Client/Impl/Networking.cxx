@@ -7,10 +7,14 @@ namespace universelan::client {
 	NetworkingImpl::NetworkingImpl(InterfaceInstances* intf) :
 		intf{ intf }, listeners{ intf->notification.get() },
 		buffer{}
-	{}
+	{
+		tracer::Trace trace{ __FUNCTION__ };
+	}
 
 	NetworkingImpl::~NetworkingImpl()
-	{}
+	{
+		tracer::Trace trace{ __FUNCTION__ };
+	}
 
 	bool NetworkingImpl::SendP2PPacket(GalaxyID galaxyID, const void* data, uint32_t dataSize, P2PSendType sendType, uint8_t channel) {
 		ENetPacketFlag flag{};
@@ -93,16 +97,22 @@ namespace universelan::client {
 	}
 
 	void NetworkingImpl::RequestNatTypeDetection() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		listeners->NotifyAll<INatTypeDetectionListener>(
 			&INatTypeDetectionListener::OnNatTypeDetectionSuccess,
 			NAT_TYPE_NONE);
 	}
 
 	NatType NetworkingImpl::GetNatType() {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return NAT_TYPE_NONE;
 	}
 
 	ConnectionType NetworkingImpl::GetConnectionType(GalaxyID userID) {
+		tracer::Trace trace{ __FUNCTION__ };
+
 		return CONNECTION_TYPE_DIRECT;
 	}
 

@@ -83,4 +83,6 @@ namespace universelan::client {
 #include <GalaxyApi.h>
 #include <GalaxyGameServerApi.h>
 
+#include <Tracer.hxx>
+
 #endif
