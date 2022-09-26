@@ -24,7 +24,7 @@ namespace universelan::tracer {
 	{
 	public:
 		virtual void UnhandledExceptionOccurred(bool unknown_exception, const std::string exception_type, const std::string& exception_message, bool error_occured_during_stack_walk, const CallStackEntries& call_stack) = 0;
-		virtual ~IUnhandledExceptionCallback() {};
+		virtual ~IUnhandledExceptionCallback() {}
 	};
 
 	class Stacker

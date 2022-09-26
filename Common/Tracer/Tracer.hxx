@@ -1,31 +1,19 @@
 #pragma once
 
 namespace universelan::tracer {
-	class Trace;
-	class Tracer
-	{
-	public:
-		friend class Trace;
-
-	private:
-		Tracer(const char* const log_directory);
-		~Tracer();
-
-		void Enter(const char* const func, const void* const return_address);
-		void Exit(const char* const func, const void* const return_address);
-
-	public:
-		static Tracer* InitInstance(const char* const log_directory);
-		static Tracer* GetInstance();
-	};
-
+	class Tracer;
 	class Trace
 	{
 	private:
 		Tracer* const tracer_ptr;
+		const bool enabled;
 		const char* const func;
 		const void* return_address;
 	public:
+		static bool InitTracing(const char* const log_directory, bool in_unhandled_exception_logging, bool in_tracing_enabled);
+		static void SetUnhandledExceptionLogging(bool enabled);
+		static void SetTracingEnabled(bool enabled);
+
 		Trace(const char* const func);
 		~Trace();
 	};
