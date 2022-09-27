@@ -23,15 +23,17 @@ namespace universelan::client {
 			config->IsUnhandledExceptionLoggingEnabled(),
 			config->IsCallTracingEnabled(),
 			config->CreateMiniDumpOnUnhandledException(),
-			config->GetMiniDumpVerbosityLevel()
+			config->GetMiniDumpVerbosityLevel(),
+			config->ShouldAlwaysFlushTracing()
 		);
 
 		tracer::Trace trace{ __FUNCTION__ };
 
-		init_options = std::make_unique<InitOptionsModern>(initOptions);
-		notification = std::make_unique<ListenerRegistrarImpl>(this);
-		client = std::make_unique<Client>(this);
 		delay_runner = std::make_unique<DelayRunner>(); // No 'this' on purpose
+
+		init_options = std::make_unique<InitOptionsModern>(initOptions);
+		notification = std::make_unique<ListenerRegistrarImpl>(this, delay_runner.get());
+		client = std::make_unique<Client>(this);
 		user = std::make_unique<UserImpl>(this);
 		friends = std::make_unique<FriendsImpl>(this);
 		chat = std::make_unique<ChatImpl>(this);
@@ -56,10 +58,13 @@ namespace universelan::client {
 			config->IsUnhandledExceptionLoggingEnabled(),
 			config->IsCallTracingEnabled(),
 			config->CreateMiniDumpOnUnhandledException(),
-			config->GetMiniDumpVerbosityLevel()
+			config->GetMiniDumpVerbosityLevel(),
+			config->ShouldAlwaysFlushTracing()
 		);
 
 		tracer::Trace trace{ __FUNCTION__ };
+
+		delay_runner = nullptr;
 
 		if (client) {
 			client->Stop();
@@ -78,7 +83,6 @@ namespace universelan::client {
 		friends = nullptr;
 		user = nullptr;
 		init_options = nullptr;
-		delay_runner = nullptr;
 		client = nullptr;
 		notification = nullptr;
 	}

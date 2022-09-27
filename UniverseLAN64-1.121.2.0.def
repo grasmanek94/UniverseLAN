@@ -1,0 +1,28 @@
+LIBRARY 
+EXPORTS
+  ?Apps@api@galaxy@@YAPEAVIApps@12@XZ @1
+  ?Chat@api@galaxy@@YAPEAVIChat@12@XZ @2
+  ?CustomNetworking@api@galaxy@@YAPEAVICustomNetworking@12@XZ @3
+  ?Friends@api@galaxy@@YAPEAVIFriends@12@XZ @4
+  ?GameServerListenerRegistrar@api@galaxy@@YAPEAVIListenerRegistrar@12@XZ @5
+  ?GameServerLogger@api@galaxy@@YAPEAVILogger@12@XZ @6
+  ?GameServerMatchmaking@api@galaxy@@YAPEAVIMatchmaking@12@XZ @7
+  ?GameServerNetworking@api@galaxy@@YAPEAVINetworking@12@XZ @8
+  ?GameServerUser@api@galaxy@@YAPEAVIUser@12@XZ @9
+  ?GetError@api@galaxy@@YAPEBVIError@12@XZ @10
+  ?Init@api@galaxy@@YAXAEBUInitOptions@12@@Z @11
+  ?InitGameServer@api@galaxy@@YAXAEBUInitOptions@12@@Z @12
+  ?ListenerRegistrar@api@galaxy@@YAPEAVIListenerRegistrar@12@XZ @13
+  ?Logger@api@galaxy@@YAPEAVILogger@12@XZ @14
+  ?Matchmaking@api@galaxy@@YAPEAVIMatchmaking@12@XZ @15
+  ?Networking@api@galaxy@@YAPEAVINetworking@12@XZ @16
+  ?ProcessData@api@galaxy@@YAXXZ @17
+  ?ProcessGameServerData@api@galaxy@@YAXXZ @18
+  ?ServerNetworking@api@galaxy@@YAPEAVINetworking@12@XZ @19
+  ?Shutdown@api@galaxy@@YAXXZ @20
+  ?ShutdownGameServer@api@galaxy@@YAXXZ @21
+  ?Stats@api@galaxy@@YAPEAVIStats@12@XZ @22
+  ?Storage@api@galaxy@@YAPEAVIStorage@12@XZ @23
+  ?User@api@galaxy@@YAPEAVIUser@12@XZ @24
+  ?Utils@api@galaxy@@YAPEAVIUtils@12@XZ @25
+  load @26

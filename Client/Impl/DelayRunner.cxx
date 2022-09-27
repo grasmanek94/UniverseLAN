@@ -1,12 +1,8 @@
 #include "DelayRunner.hxx"
 
 namespace universelan::client {
-	DelayRunner::DelayRunner() 
-		: queue{}
-	{}
-
-	DelayRunner::~DelayRunner() 
-	{}
+	DelayRunner::DelayRunner() : queue{} {}
+	DelayRunner::~DelayRunner() {}
 
 	void DelayRunner::Run() {
 		func_t func;

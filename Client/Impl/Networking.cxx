@@ -99,7 +99,7 @@ namespace universelan::client {
 	void NetworkingImpl::RequestNatTypeDetection() {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		listeners->NotifyAll<INatTypeDetectionListener>(
+		listeners->NotifyAll(
 			&INatTypeDetectionListener::OnNatTypeDetectionSuccess,
 			NAT_TYPE_NONE);
 	}
@@ -132,7 +132,7 @@ namespace universelan::client {
 			channel_var.packets.push(packet);
 		}
 
-		if (listeners->NotifyAll<INetworkingListener>(&INetworkingListener::OnP2PPacketAvailable, (uint32_t)packet->data.size(), packet->channel)) {
+		if (listeners->NotifyAll(&INetworkingListener::OnP2PPacketAvailable, (uint32_t)packet->data.size(), packet->channel)) {
 			PopP2PPacket(packet->channel);
 		}
 	}

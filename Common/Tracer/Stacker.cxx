@@ -173,7 +173,7 @@ namespace universelan::tracer {
 			}
 		}
 
-		void(__cdecl* Real_terminate)(void) = terminate;
+		// void(__cdecl* Real_terminate)(void) = terminate;
 
 		struct KeepCount {
 			KeepCount() {
@@ -184,20 +184,20 @@ namespace universelan::tracer {
 			}
 		};
 
-		void __cdecl HOOK_terminate() throw() {
-			IUnhandledExceptionCallback* cb = callback.load();
-			if(cb != nullptr)
-			{
-				KeepCount keeper{};
-				UnhandledExceptionCallback(cb);
-			}
-
-			while (entered_counter.load()) {
-				std::this_thread::sleep_for(std::chrono::milliseconds(1));
-			}
-
-			Real_terminate();
-		}
+		// void __cdecl HOOK_terminate() throw() {
+		// 	IUnhandledExceptionCallback* cb = callback.load();
+		// 	if(cb != nullptr)
+		// 	{
+		// 		KeepCount keeper{};
+		// 		UnhandledExceptionCallback(cb);
+		// 	}
+		// 
+		// 	while (entered_counter.load()) {
+		// 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		// 	}
+		// 
+		// 	Real_terminate();
+		// }
 
 		LPTOP_LEVEL_EXCEPTION_FILTER filter{ nullptr };
 
@@ -236,16 +236,16 @@ namespace universelan::tracer {
 		filter = SetUnhandledExceptionFilter(OurCrashHandler);
 		return true;
 
-		/*if (DetourIsHelperProcess()) {
-			return true;
-		}
-
-		DetourRestoreAfterWith();
-		DetourTransactionBegin();
-		DetourUpdateThread(GetCurrentThread());
-		DetourAttach(&(PVOID&)Real_terminate, HOOK_terminate);
-
-		return (DetourTransactionCommit() == NO_ERROR);*/
+		// if (DetourIsHelperProcess()) {
+		// 	return true;
+		// }
+		// 
+		// DetourRestoreAfterWith();
+		// DetourTransactionBegin();
+		// DetourUpdateThread(GetCurrentThread());
+		// DetourAttach(&(PVOID&)Real_terminate, HOOK_terminate);
+		// 
+		// return (DetourTransactionCommit() == NO_ERROR);
 	}
 
 	void Stacker::SetUnhandledExceptionCallback(IUnhandledExceptionCallback* target) {

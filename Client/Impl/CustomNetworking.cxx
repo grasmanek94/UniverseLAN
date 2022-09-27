@@ -101,7 +101,7 @@ namespace universelan::client {
 	{
 		tracer::Trace trace{ __FUNCTION__ };
 
-		listeners->NotifyAll<IConnectionOpenListener>(&IConnectionOpenListener::OnConnectionOpenSuccess, channel->connection_string.c_str(), (ConnectionID)channel.get());
+		listeners->NotifyAll(&IConnectionOpenListener::OnConnectionOpenSuccess, channel->connection_string.c_str(), (ConnectionID)channel.get());
 	}
 
 	void CustomNetworkingImpl::WebSocketOnMessage(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl, custom_networking::message_ptr msg)
@@ -116,7 +116,7 @@ namespace universelan::client {
 			channel->buffer.insert(channel->buffer.end(), data.c_str(), data.c_str() + data.size());
 		}
 
-		listeners->NotifyAll<IConnectionDataListener>(&IConnectionDataListener::OnConnectionDataReceived, (ConnectionID)channel.get(), data_size);
+		listeners->NotifyAll(&IConnectionDataListener::OnConnectionDataReceived, (ConnectionID)channel.get(), data_size);
 	}
 
 	void CustomNetworkingImpl::WebSocketOnClose(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl)

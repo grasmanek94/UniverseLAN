@@ -323,7 +323,7 @@ namespace universelan::client {
 				lobby->SetMaxMembers(data->max_members);
 			}
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
-			listeners->NotifyAll<ILobbyDataListener>(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
+			listeners->NotifyAll(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
 		}
 		else {
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateFailure, data->lobby_id, data->fail_reason);
@@ -394,7 +394,7 @@ namespace universelan::client {
 				lobby->SetType(data->type);
 			}
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
-			listeners->NotifyAll<ILobbyDataListener>(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
+			listeners->NotifyAll(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
 		}
 		else {
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateFailure, data->lobby_id, data->fail_reason);
@@ -439,7 +439,7 @@ namespace universelan::client {
 				lobby->SetJoinable(data->joinable);
 			}
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
-			listeners->NotifyAll<ILobbyDataListener>(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
+			listeners->NotifyAll(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
 		}
 		else {
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateFailure, data->lobby_id, data->fail_reason);
@@ -485,7 +485,7 @@ namespace universelan::client {
 			}
 
 			listeners->NotifyAll(listener, &ILobbyDataRetrieveListener::OnLobbyDataRetrieveSuccess, data->lobby_id);
-			listeners->NotifyAll<ILobbyDataListener>(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
+			listeners->NotifyAll(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
 		}
 		else {
 			listeners->NotifyAll(listener, &ILobbyDataRetrieveListener::OnLobbyDataRetrieveFailure, data->lobby_id, data->fail_reason);
@@ -545,7 +545,7 @@ namespace universelan::client {
 			}
 
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
-			listeners->NotifyAll<ILobbyDataListener>(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
+			listeners->NotifyAll(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
 		}
 		else {
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateFailure, data->lobby_id, data->fail_reason);
@@ -648,7 +648,7 @@ namespace universelan::client {
 			}
 
 			listeners->NotifyAll(listener, &ILobbyMemberDataUpdateListener::OnLobbyMemberDataUpdateSuccess, data->lobby_id, data->member_id);
-			listeners->NotifyAll<ILobbyDataListener>(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, data->member_id);
+			listeners->NotifyAll(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, data->member_id);
 		}
 		else {
 			listeners->NotifyAll(listener, &ILobbyMemberDataUpdateListener::OnLobbyMemberDataUpdateFailure, data->lobby_id, data->member_id, data->fail_reason);
@@ -741,7 +741,7 @@ namespace universelan::client {
 			}
 		}
 
-		listeners->NotifyAll<ILobbyMessageListener>(&ILobbyMessageListener::OnLobbyMessageReceived, data->lobby_id, data->message.sender, data->message.message_id, (uint32_t)data->message.data.size());	
+		listeners->NotifyAll(&ILobbyMessageListener::OnLobbyMessageReceived, data->lobby_id, data->message.sender, data->message.message_id, (uint32_t)data->message.data.size());	
 	}
 
 	uint32_t MatchmakingImpl::GetLobbyMessage(GalaxyID lobbyID, uint32_t messageID, GalaxyID& senderID, char* msg, uint32_t msgLength) {
@@ -782,7 +782,7 @@ namespace universelan::client {
 			}
 		}
 
-		listeners->NotifyAll<ILobbyMemberStateListener>(&ILobbyMemberStateListener::OnLobbyMemberStateChanged, data->lobby_id, data->member_id, data->state);
+		listeners->NotifyAll(&ILobbyMemberStateListener::OnLobbyMemberStateChanged, data->lobby_id, data->member_id, data->state);
 	}
 
 	void MatchmakingImpl::LobbyOwnerChange(const std::shared_ptr<LobbyOwnerChangeMessage>& data) {
@@ -798,7 +798,7 @@ namespace universelan::client {
 			}
 		}
 
-		listeners->NotifyAll<ILobbyOwnerChangeListener>(&ILobbyOwnerChangeListener::OnLobbyOwnerChanged, data->lobby_id, data->member_id);
+		listeners->NotifyAll(&ILobbyOwnerChangeListener::OnLobbyOwnerChanged, data->lobby_id, data->member_id);
 	}
 
 }

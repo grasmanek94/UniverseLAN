@@ -40,6 +40,7 @@ namespace universelan {
 		UnhandledExceptionLogging = ini.GetBoolValue(TracingSection.c_str(), "UnhandledExceptionLogging", true);
 		MiniDumpOnUnhandledException = ini.GetBoolValue(TracingSection.c_str(), "MiniDumpOnUnhandledException", true);
 		MiniDumpVerbosityLevel = ini.GetLongValue(TracingSection.c_str(), "MiniDumpVerbosityLevel", 2);
+		TracingAlwaysFlush = ini.GetBoolValue(TracingSection.c_str(), "AlwaysFlush", true);
 
 		AuthenticationKey = ini.GetValue(AuthenticationSection.c_str(), "Key", "9g5tA53SLyiNkBTqsX3BmBgy/PPVTU6VGKWNNw3wUIY5nK1C2MOT4UsZ2pauCb8fm5UQSJRijid+w1t9WpDaKQ==");
 	}
@@ -58,6 +59,10 @@ namespace universelan {
 
 	int IniData::GetMiniDumpVerbosityLevel() const {
 		return MiniDumpVerbosityLevel;
+	}
+
+	bool IniData::ShouldAlwaysFlushTracing() const {
+		return TracingAlwaysFlush;
 	}
 
 	const std::string& IniData::GetGameDataPath() const

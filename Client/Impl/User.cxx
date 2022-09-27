@@ -38,11 +38,11 @@ namespace universelan::client {
 
 		if (intf->config->GetSignedIn()) {
 			listeners->NotifyAll(listener, &IAuthListener::OnAuthSuccess);
-			listeners->NotifyAll<IOperationalStateChangeListener>(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_LOGGED_ON);
+			listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_LOGGED_ON);
 		}
 		else {
 			listeners->NotifyAll(listener, &IAuthListener::OnAuthFailure, IAuthListener::FAILURE_REASON_EXTERNAL_SERVICE_FAILURE);
-			listeners->NotifyAll<IOperationalStateChangeListener>(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN);
+			listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN);
 		}
 	}
 
@@ -127,8 +127,8 @@ namespace universelan::client {
 	void UserImpl::SignOut() {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		listeners->NotifyAll<IAuthListener>(&IAuthListener::OnAuthLost);
-		listeners->NotifyAll<IOperationalStateChangeListener>(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN);
+		listeners->NotifyAll(&IAuthListener::OnAuthLost);
+		listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN);
 	}
 
 	void UserImpl::RequestUserData(GalaxyID userID, ISpecificUserDataListener* const listener) {
@@ -136,7 +136,7 @@ namespace universelan::client {
 
 		if (intf->config->IsSelfUserID(userID)) {
 			listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, userID);
-			listeners->NotifyAll<IUserDataListener>(&IUserDataListener::OnUserDataUpdated);
+			listeners->NotifyAll(&IUserDataListener::OnUserDataUpdated);
 		}
 		else {
 			uint64_t request_id = MessageUniqueID::get();
@@ -222,7 +222,7 @@ namespace universelan::client {
 		// TODO: send data to server
 
 		listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, intf->config->GetApiGalaxyID());
-		listeners->NotifyAll<IUserDataListener>(&IUserDataListener::OnUserDataUpdated);
+		listeners->NotifyAll(&IUserDataListener::OnUserDataUpdated);
 	}
 
 	uint32_t UserImpl::GetUserDataCount(GalaxyID userID) {
@@ -314,7 +314,7 @@ namespace universelan::client {
 	bool UserImpl::ReportInvalidAccessToken(const char* accessToken, const char* info) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		listeners->NotifyAll<IAccessTokenListener>(&IAccessTokenListener::OnAccessTokenChanged);
+		listeners->NotifyAll(&IAccessTokenListener::OnAccessTokenChanged);
 		return true;
 	}
 

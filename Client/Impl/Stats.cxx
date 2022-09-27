@@ -125,7 +125,7 @@ namespace universelan::client {
 		data->SetUnlocked(true);
 		data->SetUnlockTimeNow();
 
-		listeners->NotifyAll<IAchievementChangeListener>(&IAchievementChangeListener::OnAchievementUnlocked, name);
+		listeners->NotifyAll(&IAchievementChangeListener::OnAchievementUnlocked, name);
 	}
 
 	void StatsImpl::ClearAchievement(const char* name) {

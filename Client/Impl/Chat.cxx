@@ -82,7 +82,7 @@ namespace universelan::client {
 				&IChatRoomMessagesRetrieveListener::OnChatRoomMessagesRetrieveSuccess,
 				data->id, (uint32_t)data->messages.size(), longest_message);
 
-			listeners->NotifyAll<IChatRoomMessagesListener>(
+			listeners->NotifyAll(
 				&IChatRoomMessagesListener::OnChatRoomMessagesReceived,
 				data->id, (uint32_t)data->messages.size(), longest_message);
 

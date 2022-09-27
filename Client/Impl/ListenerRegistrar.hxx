@@ -1,10 +1,13 @@
 #ifndef LSFDRMFG_IMPL_LISTENER_H
 #define LSFDRMFG_IMPL_LISTENER_H
 
+#include "DelayRunner.hxx"
+
 /**
  * @file
  * Contains data structures and interfaces related to callback listeners.
  */
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <GalaxyExport.h>
@@ -45,11 +48,12 @@ namespace universelan::client {
 		};
 
 		InterfaceInstances* intf;
+		DelayRunner* delay_runner;
 		std::array<data, LISTENER_TYPE_END> listeners;
 
 	public:
 
-		ListenerRegistrarImpl(InterfaceInstances* intf);
+		ListenerRegistrarImpl(InterfaceInstances* intf, DelayRunner* delay_runner);
 		virtual ~ListenerRegistrarImpl();
 
 		/**
@@ -81,8 +85,17 @@ namespace universelan::client {
 		bool ExecuteForListenerType(ListenerType listenerType, IGalaxyListener* extra, std::function<void(const std::set<IGalaxyListener*>& listeners)> code);
 		bool ExecuteForListenerTypePerEntry(ListenerType listenerType, IGalaxyListener* extra, std::function<void(IGalaxyListener* listeners)> code);
 
-		template <typename T, class _Fx, class... _Types>
-		bool NotifyAll(_Fx&& _Func, _Types&&... _Args) {	
+		//primary template 
+		template<typename> struct extract_class_from_member_function_ptr;
+
+		template <typename A, typename B, class... _Types>
+		struct extract_class_from_member_function_ptr<A(B::*)(_Types...)> {
+			using type = B;
+		};
+
+		template <class _Fx, class... _Types>
+		bool NotifyAll(_Fx&& _Func, _Types&&... _Args) {
+			using T = extract_class_from_member_function_ptr<_Fx>::type;
 			return ExecuteForListenerTypePerEntry(T::GetListenerType(), [&](IGalaxyListener* listener) {
 				T* casted_listener = dynamic_cast<T*>(listener);
 				if (casted_listener) {
@@ -92,14 +105,25 @@ namespace universelan::client {
 		}
 
 		template <typename T, class _Fx, class... _Types>
-		bool NotifyAll(T* extra, _Fx&& _Func, _Types&&... _Args) {
-			return ExecuteForListenerTypePerEntry(T::GetListenerType(), extra, [&](IGalaxyListener* listener) {
-				T* casted_listener = dynamic_cast<T*>(listener);
+		bool NotifyAll(T* one_time_specific_listener, _Fx&& _Func, _Types&&... _Args) {
+			using BaseT = extract_class_from_member_function_ptr<_Fx>::type;
+			return ExecuteForListenerTypePerEntry(BaseT::GetListenerType(), one_time_specific_listener, [&](IGalaxyListener* listener) {
+				BaseT* casted_listener = dynamic_cast<BaseT*>(listener);
 				if (casted_listener) {
 					std::invoke(std::forward<_Fx>(_Func), casted_listener, std::forward<_Types>(_Args)...);
 				}
 				});
 		}
+
+		//template <typename T, class _Fx, class... _Types>
+		//void NotifyAll(_Fx&& _Func, _Types&&... _Args) {
+		//	delay_runner->Add([=, this] { this->NotifyAllNow<T>(std::forward<_Fx>(_Func), std::forward<_Types>(_Args)...); });
+		//}
+
+		//template <typename T, typename... _Types>
+		//void NotifyAll(T* extra, _Types&&... _Args) {
+		//	delay_runner->Add([=, this] { this->NotifyAllNow(extra, std::forward<_Types>(_Args)...); });
+		//}
 	};
 
 	template<typename T>

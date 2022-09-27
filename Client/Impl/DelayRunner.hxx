@@ -6,14 +6,6 @@
 #include <concurrent_queue.h>
 
 namespace universelan::client {
-	/**
-	 * @addtogroup api
-	 * @{
-	 */
-
-	 /**
-	  * The interface for handling telemetry.
-	  */
 	class DelayRunner
 	{
 	public:
@@ -26,13 +18,11 @@ namespace universelan::client {
 
 	public:
 		DelayRunner();
-		virtual ~DelayRunner();
+		~DelayRunner();
 
-		virtual void Run();
-		virtual void Add(const func_t& func);
+		void Run();
+		void Add(const func_t& func);
 	};
-
-	/** @} */
 }
 
 #endif

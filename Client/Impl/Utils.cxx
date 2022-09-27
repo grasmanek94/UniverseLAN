@@ -9,7 +9,7 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		intf->delay_runner->Add([=] {
-			listeners->NotifyAll<IGogServicesConnectionStateListener>(&IGogServicesConnectionStateListener::OnConnectionStateChange, GOG_SERVICES_CONNECTION_STATE_CONNECTED);
+			listeners->NotifyAll(&IGogServicesConnectionStateListener::OnConnectionStateChange, GOG_SERVICES_CONNECTION_STATE_CONNECTED);
 		});
 	}
 
