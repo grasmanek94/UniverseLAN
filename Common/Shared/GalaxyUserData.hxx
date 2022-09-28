@@ -5,6 +5,7 @@
 #include <AchievementsAndStatsContainer.hxx>
 
 #include <memory>
+#include <string>
 #include <unordered_map>
 
 namespace universelan {
@@ -18,5 +19,6 @@ namespace universelan {
 		const galaxy::api::GalaxyID id;
 
 		AchievementsAndStatsContainer stats;
+		std::string nickname;
 	};
 }

@@ -5,6 +5,8 @@
 
 #include <GalaxyApi.h>
 
+#include <string>
+
 namespace universelan {
 	class RequestSpecificUserDataMessage
 	{
@@ -20,17 +22,24 @@ namespace universelan {
 		bool found;
 		AchievementsAndStatsContainer asuc;
 		RequestType type;
+		std::string nickname;
 
 		template<class Archive>
 		void serialize(Archive& ar)
 		{
-			ar(request_id, id, found, asuc);
+			ar(request_id, id, found, asuc, type, nickname);
 		}
 
 		UniqueClassId_Declare(RequestSpecificUserDataMessage);
 
-		RequestSpecificUserDataMessage() : request_id{}, id{}, found{ false }, asuc{}, type{ RequestTypeUserData } {}
-		RequestSpecificUserDataMessage(RequestType type, const galaxy::api::GalaxyID& id) : request_id{}, id{ id }, found{ false }, asuc{}, type{ RequestTypeUserData } {}
-		RequestSpecificUserDataMessage(RequestType type, uint64_t request_id, const galaxy::api::GalaxyID& id) : request_id{ request_id }, id{ id }, found{ false }, asuc{}, type{ RequestTypeUserData } {}
+		RequestSpecificUserDataMessage() 
+			: request_id{}, id{}, found{ false }, asuc{}, 
+			type{ RequestTypeUserData }, nickname{} {}
+		RequestSpecificUserDataMessage(RequestType type, const galaxy::api::GalaxyID& id)
+			: request_id{}, id{ id }, found{ false }, asuc{}, 
+			type{ RequestTypeUserData }, nickname{} {}
+		RequestSpecificUserDataMessage(RequestType type, uint64_t request_id, const galaxy::api::GalaxyID& id) 
+			: request_id{ request_id }, id{ id }, found{ false },
+			asuc{}, type{ RequestTypeUserData }, nickname{} {}
 	};
 }

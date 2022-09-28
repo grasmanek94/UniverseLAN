@@ -19,19 +19,16 @@ namespace universelan::client {
 	void UtilsImpl::GetImageSize(uint32_t imageID, int32_t& width, int32_t& height) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-
+		width = 0;
+		height = 0;
 	}
 
 	void UtilsImpl::GetImageRGBA(uint32_t imageID, void* buffer, uint32_t bufferLength) {
 		tracer::Trace trace{ __FUNCTION__ };
-
-
 	}
 
 	void UtilsImpl::RegisterForNotification(const char* type) {
 		tracer::Trace trace{ __FUNCTION__ };
-
-
 	}
 
 	uint32_t UtilsImpl::GetNotification(NotificationID notificationID, bool& consumable, char* type, uint32_t typeLength, void* content, uint32_t contentSize) {

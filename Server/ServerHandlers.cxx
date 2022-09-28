@@ -84,6 +84,9 @@ namespace universelan::server {
 
 		peer::ptr pd = peer_mapper.Get(peer);
 		pd->user_data->stats = data->asuc;
+		if (!data->nickname.empty() && pd->user_data->nickname.empty()) {
+			pd->user_data->nickname = data->nickname;
+		}
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
@@ -99,6 +102,7 @@ namespace universelan::server {
 		if (target) {
 			response.found = true;
 			response.asuc = target->user_data->stats;
+			response.nickname = target->user_data->nickname;
 		}
 		else {
 			response.found = false;

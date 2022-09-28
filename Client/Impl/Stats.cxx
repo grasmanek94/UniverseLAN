@@ -124,7 +124,7 @@ namespace universelan::client {
 
 		intf->config->SaveStatsAndAchievements();
 
-		intf->client->GetConnection().SendAsync(UserHelloDataMessage{ intf->config->GetLocalUserData()->stats});
+		intf->client->GetConnection().SendAsync(UserHelloDataMessage{ intf->config->GetLocalUserData()->stats });
 
 		listeners->NotifyAll(listener, &IStatsAndAchievementsStoreListener::OnUserStatsAndAchievementsStoreSuccess);
 	}
