@@ -132,7 +132,7 @@ namespace universelan::client {
 			channel_var.packets.push(packet);
 		}
 
-		if (listeners->NotifyAll(&INetworkingListener::OnP2PPacketAvailable, (uint32_t)packet->data.size(), packet->channel)) {
+		if (listeners->NotifyAllNow(&INetworkingListener::OnP2PPacketAvailable, (uint32_t)packet->data.size(), packet->channel)) {
 			PopP2PPacket(packet->channel);
 		}
 	}

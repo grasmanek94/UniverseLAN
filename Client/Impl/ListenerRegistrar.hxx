@@ -79,7 +79,6 @@ namespace universelan::client {
 		 */
 		virtual void Unregister(ListenerType listenerType, IGalaxyListener* listener) override;
 
-
 		bool ExecuteForListenerType(ListenerType listenerType, std::function<void(const std::set<IGalaxyListener*>& listeners)> code);
 		bool ExecuteForListenerTypePerEntry(ListenerType listenerType, std::function<void(IGalaxyListener* listeners)> code);
 		bool ExecuteForListenerType(ListenerType listenerType, IGalaxyListener* extra, std::function<void(const std::set<IGalaxyListener*>& listeners)> code);
@@ -88,42 +87,55 @@ namespace universelan::client {
 		//primary template 
 		template<typename> struct extract_class_from_member_function_ptr;
 
-		template <typename A, typename B, class... _Types>
-		struct extract_class_from_member_function_ptr<A(B::*)(_Types...)> {
-			using type = B;
+		template <typename RET_T, typename CLASS, class... ArgTypes>
+		struct extract_class_from_member_function_ptr<RET_T(CLASS::*)(ArgTypes...)> {
+			using type = CLASS;
 		};
 
-		template <class _Fx, class... _Types>
-		bool NotifyAll(_Fx&& _Func, _Types&&... _Args) {
-			using T = extract_class_from_member_function_ptr<_Fx>::type;
+		template <typename RET_T, typename CLASS, class... ArgTypes>
+		struct extract_class_from_member_function_ptr<RET_T(CLASS::* const)(ArgTypes...)> {
+			using type = CLASS;
+		};
+
+		template <typename RET_T, typename CLASS, class... ArgTypes>
+		struct extract_class_from_member_function_ptr<RET_T(CLASS::*&)(ArgTypes...)> {
+			using type = CLASS;
+		};
+
+		template <typename RET_T, typename CLASS, class... ArgTypes>
+		struct extract_class_from_member_function_ptr<RET_T(CLASS::* const&)(ArgTypes...)> {
+			using type = CLASS;
+		};
+
+		template <class FuncT, class... ArgTypes>
+		bool NotifyAllNow(FuncT&& Function, ArgTypes&&... _Args) {
+			using T = extract_class_from_member_function_ptr<FuncT>::type;
 			return ExecuteForListenerTypePerEntry(T::GetListenerType(), [&](IGalaxyListener* listener) {
 				T* casted_listener = dynamic_cast<T*>(listener);
 				if (casted_listener) {
-					std::invoke(std::forward<_Fx>(_Func), casted_listener, std::forward<_Types>(_Args)...);
+					std::invoke(std::forward<FuncT>(Function), casted_listener, std::forward<ArgTypes>(_Args)...);
 				}
 				});
 		}
 
-		template <typename T, class _Fx, class... _Types>
-		bool NotifyAll(T* one_time_specific_listener, _Fx&& _Func, _Types&&... _Args) {
-			using BaseT = extract_class_from_member_function_ptr<_Fx>::type;
+		template <typename T, class FuncT, class... ArgTypes>
+		bool NotifyAllNow(T* one_time_specific_listener, FuncT&& Function, ArgTypes&&... _Args) {
+			using BaseT = extract_class_from_member_function_ptr<FuncT>::type;
 			return ExecuteForListenerTypePerEntry(BaseT::GetListenerType(), one_time_specific_listener, [&](IGalaxyListener* listener) {
 				BaseT* casted_listener = dynamic_cast<BaseT*>(listener);
 				if (casted_listener) {
-					std::invoke(std::forward<_Fx>(_Func), casted_listener, std::forward<_Types>(_Args)...);
+					std::invoke(std::forward<FuncT>(Function), casted_listener, std::forward<ArgTypes>(_Args)...);
 				}
 				});
 		}
 
-		//template <typename T, class _Fx, class... _Types>
-		//void NotifyAll(_Fx&& _Func, _Types&&... _Args) {
-		//	delay_runner->Add([=, this] { this->NotifyAllNow<T>(std::forward<_Fx>(_Func), std::forward<_Types>(_Args)...); });
-		//}
-
-		//template <typename T, typename... _Types>
-		//void NotifyAll(T* extra, _Types&&... _Args) {
-		//	delay_runner->Add([=, this] { this->NotifyAllNow(extra, std::forward<_Types>(_Args)...); });
-		//}
+		template <typename... ArgTypes>
+		void NotifyAll(ArgTypes&&... Arguments)
+		{
+			delay_runner->Add(std::bind_front([this](auto&&... args) {
+				this->NotifyAllNow(std::forward<decltype(args)>(args)...);
+				}, std::forward<ArgTypes>(Arguments)...));
+		}
 	};
 
 	template<typename T>
