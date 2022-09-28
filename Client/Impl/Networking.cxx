@@ -69,12 +69,14 @@ namespace universelan::client {
 	}
 
 	bool NetworkingImpl::IsP2PPacketAvailable(uint32_t* outMsgSize, uint8_t channel) {
-		int32_t front_size = buffer[channel].front_size.load();
-		if(front_size == ProtectedChannel::NO_PACKETS) {
+		channels_array::value_type& channel_var = buffer[channel];
+
+		lock_t lock{ channel_var.mtx };
+		if(channel_var.packets.empty()) {
 			return false;
 		} 
 
-		*outMsgSize = front_size;
+		*outMsgSize = (int32_t)channel_var.packets.front()->data.size();
 		return true;
 	}
 
@@ -83,13 +85,6 @@ namespace universelan::client {
 
 		lock_t lock{ channel_var.mtx };
 		channel_var.packets.pop();
-
-		if (!channel_var.packets.empty()) {
-			channel_var.front_size.store((int32_t)channel_var.packets.front()->data.size());
-		}
-		else {
-			channel_var.front_size.store(ProtectedChannel::NO_PACKETS);
-		}
 	}
 
 	int NetworkingImpl::GetPingWith(GalaxyID galaxyID) {
@@ -126,9 +121,6 @@ namespace universelan::client {
 			channels_array::value_type& channel_var = buffer[packet->channel];
 
 			lock_t lock{ channel_var.mtx };
-			if (channel_var.packets.empty()) {
-				channel_var.front_size.store((int32_t)packet->data.size());
-			}
 			channel_var.packets.push(packet);
 		}
 
