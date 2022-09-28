@@ -39,7 +39,7 @@ namespace universelan::client {
 		using lock_t = std::scoped_lock<mutex_t>;
 
 	private:
-		mutex_t mtx_user_data;
+		mutable mutex_t mtx_user_data;
 
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
@@ -480,7 +480,8 @@ namespace universelan::client {
 		virtual bool ReportInvalidAccessToken(const char* accessToken, const char* info = NULL) override;
 
 		void SpecificUserDataRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
-		std::shared_ptr<GalaxyUserData> GetGalaxyUserData(GalaxyID userID);
+		GalaxyUserData::ptr_t GetGalaxyUserData(GalaxyID userID);
+		bool IsGalaxyUserDataPresent(GalaxyID userID) const;
 	};
 
 	/** @} */

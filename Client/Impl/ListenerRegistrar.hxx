@@ -108,24 +108,29 @@ namespace universelan::client {
 		};
 
 		template <class FuncT, class... ArgTypes>
-		bool NotifyAllNow(FuncT&& Function, ArgTypes&&... _Args) {
+		bool NotifyAllNow(FuncT&& Function, ArgTypes&&... Arguments) {
 			using T = extract_class_from_member_function_ptr<FuncT>::type;
 			return ExecuteForListenerTypePerEntry(T::GetListenerType(), [&](IGalaxyListener* listener) {
 				T* casted_listener = dynamic_cast<T*>(listener);
-				if (casted_listener) {
-					std::invoke(std::forward<FuncT>(Function), casted_listener, std::forward<ArgTypes>(_Args)...);
-				}
+				assert(casted_listener != nullptr);
+
+				std::invoke(std::forward<FuncT>(Function), casted_listener, std::forward<ArgTypes>(Arguments)...);
 				});
 		}
 
 		template <typename T, class FuncT, class... ArgTypes>
-		bool NotifyAllNow(T* one_time_specific_listener, FuncT&& Function, ArgTypes&&... _Args) {
+		bool NotifyAllNow(T* one_time_specific_listener, FuncT&& Function, ArgTypes&&... Arguments) {
 			using BaseT = extract_class_from_member_function_ptr<FuncT>::type;
+
+			if (one_time_specific_listener == nullptr) {
+				return NotifyAllNow(std::forward<FuncT>(Function), std::forward<ArgTypes>(Arguments)...);
+			}
+
 			return ExecuteForListenerTypePerEntry(BaseT::GetListenerType(), one_time_specific_listener, [&](IGalaxyListener* listener) {
 				BaseT* casted_listener = dynamic_cast<BaseT*>(listener);
-				if (casted_listener) {
-					std::invoke(std::forward<FuncT>(Function), casted_listener, std::forward<ArgTypes>(_Args)...);
-				}
+				assert(casted_listener != nullptr);
+
+				std::invoke(std::forward<FuncT>(Function), casted_listener, std::forward<ArgTypes>(Arguments)...);
 				});
 		}
 

@@ -1,11 +1,12 @@
 #pragma once
 
-#include "AchievementsAndStatsContainer.hxx"
+#include "GalaxyUserData.hxx"
 
 #include <GalaxyID.h>
 #include <SimpleIni.h>
 
 #include <chrono>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -115,7 +116,7 @@ namespace universelan {
 		bool SignedIn;
 
 		const std::string AchievementsFile = "Achievements.ini";
-		AchievementsAndStatsContainer achievements_stats;
+		GalaxyUserData::ptr_t local_user_data;
 
 		const std::string DLCFile = "DLC.ini";
 		const std::string DLCSection = "DLC";
@@ -123,14 +124,14 @@ namespace universelan {
 
 		const std::string StatsFile = "Stats.ini";
 		const std::string MetadataSection = "Metadata";
-		uint32_t PlayTime;
+		// container see local_user_data
 
 		const std::string StatsSection = "Stats";
-		// container see achievements_stats
+		// container see local_user_data
 
 		const std::string UserDataFile = "UserData.ini";
 		const std::string UserDataSection = "UserData";
-		// container see achievements_stats
+		// container see local_user_data
 
 		std::string GetPath(const std::string& filename) const;
 
@@ -173,6 +174,6 @@ namespace universelan {
 
 		void ResetStatsAndAchievements();
 
-		const AchievementsAndStatsContainer& GetASUC() const;
+		const GalaxyUserData::ptr_t& GetLocalUserData() const;
 	};
 }

@@ -11,8 +11,10 @@ namespace universelan {
 	public:
 		enum RequestType {
 			RequestTypeUserData,
-			RequestTypeAchievementsAndStats
+			RequestTypeAchievementsAndStats,
+			RequestTypePlayTime
 		};
+
 		uint64_t request_id;
 		galaxy::api::GalaxyID id;
 		bool found;

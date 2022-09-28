@@ -52,7 +52,9 @@ namespace universelan::client {
 	void FriendsImpl::GetPersonaNameCopy(char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		std::copy_n(intf_inst.config->GetCustomPersonaName().c_str(), std::min((size_t)bufferLength, intf_inst.config->GetCustomPersonaName().length()), buffer);
+		auto name = intf_inst.config->GetCustomPersonaName();
+
+		std::copy_n(name.c_str(), std::min((size_t)bufferLength, name.length()), buffer);
 	}
 
 	PersonaState FriendsImpl::GetPersonaState() {

@@ -13,12 +13,16 @@ namespace universelan::client {
 		user_data{}
 	{
 		tracer::Trace trace{ __FUNCTION__ };
+
+		// add local user
+		user_data.emplace(intf->config->GetApiGalaxyID(), intf->config->GetLocalUserData());
+		user_data.emplace(GalaxyID(0), intf->config->GetLocalUserData());
+		user_data.emplace(GalaxyID::FromRealID(GalaxyID::ID_TYPE_USER, 0), intf->config->GetLocalUserData());
 	}
 
 	UserImpl::~UserImpl()
 	{
 		tracer::Trace trace{ __FUNCTION__ };
-
 	}
 
 	bool UserImpl::SignedIn() {
@@ -168,49 +172,37 @@ namespace universelan::client {
 		if (intf->config->IsSelfUserID(userID)) {
 			return true;
 		}
-		else {
-			auto entry = GetGalaxyUserData(userID);
-			return !entry->stats.UserData.empty();
-		}
+
+		auto entry = GetGalaxyUserData(userID);
+		return entry->stats.run_locked_userdata<bool>([&](auto& map) -> bool {
+			return !map.empty();
+			});
 	}
 
 	const char* UserImpl::GetUserData(const char* key, GalaxyID userID) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		if (intf->config->IsSelfUserID(userID)) {
-			return intf->config->GetUserData(key).c_str();
-		}
-		else {
-			auto entry = GetGalaxyUserData(userID);
-			const char* ret = "";
-			entry->stats.run_locked_userdata([&](AchievementsAndStatsContainer::map_t<std::string>& map) {
-				auto it = map.find(key);
-				if (it != map.end()) {
-					ret = it->second.c_str();
-				}
-				});
-
-			return ret;
-		}
+		auto entry = GetGalaxyUserData(userID);
+		return entry->stats.run_locked_userdata<const char*>([&](auto& map) -> const char* {
+			auto it = map.find(key);
+			if (it != map.end()) {
+				return it->second.c_str();
+			}
+			return "";
+			});
 	}
 
 	void UserImpl::GetUserDataCopy(const char* key, char* buffer, uint32_t bufferLength, GalaxyID userID) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		if (intf->config->IsSelfUserID(userID)) {
-			const std::string& str = intf->config->GetUserData(key);
-			std::copy_n(str.begin(), std::min((uint32_t)str.length(), bufferLength), buffer);
-		}
-		else {
-			auto entry = GetGalaxyUserData(userID);
-			entry->stats.run_locked_userdata([&](AchievementsAndStatsContainer::map_t<std::string>& map) {
-				auto it = map.find(key);
-				if (it != map.end()) {
-					const std::string& str = it->second;
-					std::copy_n(str.begin(), std::min((uint32_t)str.length(), bufferLength), buffer);
-				}
-				});
-		}
+		auto entry = GetGalaxyUserData(userID);
+		entry->stats.run_locked_userdata<void>([&](auto& map) {
+			auto it = map.find(key);
+			if (it != map.end()) {
+				const std::string& str = it->second;
+				std::copy_n(str.begin(), std::min((uint32_t)str.length(), bufferLength), buffer);
+			}
+			});
 	}
 
 	void UserImpl::SetUserData(const char* key, const char* value, ISpecificUserDataListener* const listener) {
@@ -228,44 +220,26 @@ namespace universelan::client {
 	uint32_t UserImpl::GetUserDataCount(GalaxyID userID) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		if (intf->config->IsSelfUserID(userID)) {
-			return (uint32_t)intf->config->GetASUC().UserData.size();
-		}
-		else {
-			auto entry = GetGalaxyUserData(userID);
-			return (uint32_t)entry->stats.UserData.size();
-		}
+		auto entry = GetGalaxyUserData(userID);
+		return entry->stats.run_locked_userdata<uint32_t>([&](auto& map) -> uint32_t {
+			return (uint32_t)map.size();
+			});
 	}
 
 	bool UserImpl::GetUserDataByIndex(uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength, GalaxyID userID) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		if (intf->config->IsSelfUserID(userID)) {
-			auto& map = intf->config->GetASUC().UserData;
+		auto entry = GetGalaxyUserData(userID);
+		return entry->stats.run_locked_userdata<bool>([&](auto& map) -> bool {
 			if (map.size() < index) {
 				return false;
 			}
+
 			auto ref = container_get_by_index(map, index);
 			std::copy_n(ref.first.begin(), std::min((uint32_t)ref.first.length(), keyLength), key);
 			std::copy_n(ref.second.begin(), std::min((uint32_t)ref.second.length(), valueLength), value);
 			return true;
-		}
-		else {
-			bool ret = false;
-			auto entry = GetGalaxyUserData(userID);
-			entry->stats.run_locked_userdata([&](AchievementsAndStatsContainer::map_t<std::string>& map) {
-				if (map.size() < index) {
-					ret = false;
-					return;
-				}
-				ret = true;
-
-				auto ref = container_get_by_index(map, index);
-				std::copy_n(ref.first.begin(), std::min((uint32_t)ref.first.length(), keyLength), key);
-				std::copy_n(ref.second.begin(), std::min((uint32_t)ref.second.length(), valueLength), value);
-				});
-			return ret;
-		}
+			});
 	}
 
 	void UserImpl::DeleteUserData(const char* key, ISpecificUserDataListener* const listener) {
@@ -318,8 +292,12 @@ namespace universelan::client {
 		return true;
 	}
 
-	std::shared_ptr<GalaxyUserData> UserImpl::GetGalaxyUserData(GalaxyID userID) {
+	GalaxyUserData::ptr_t UserImpl::GetGalaxyUserData(GalaxyID userID) {
 		tracer::Trace trace{ __FUNCTION__ };
+
+		if (intf->config->IsSelfUserID(userID)) {
+			return intf->config->GetLocalUserData();
+		}
 
 		lock_t lock(mtx_user_data);
 		auto user = user_data.find(userID);
@@ -328,5 +306,21 @@ namespace universelan::client {
 		}
 
 		return user->second;
+	}
+
+	bool UserImpl::IsGalaxyUserDataPresent(GalaxyID userID) const {
+		tracer::Trace trace{ __FUNCTION__ };
+
+		if (intf->config->IsSelfUserID(userID)) {
+			return true;
+		}
+
+		lock_t lock(mtx_user_data);
+		auto user = user_data.find(userID);
+		if (user != user_data.end()) {
+			return true;
+		}
+
+		return false;
 	}
 }

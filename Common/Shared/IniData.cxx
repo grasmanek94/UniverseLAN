@@ -137,6 +137,7 @@ namespace universelan {
 	}
 
 	ClientIniData::ClientIniData()
+		: local_user_data{ nullptr }
 	{
 		// Config
 		{
@@ -253,6 +254,8 @@ namespace universelan {
 			}
 		}
 
+		local_user_data = std::make_shared<GalaxyUserData>(GetApiGalaxyID());
+
 		// Achievements
 		{
 			CSimpleIniA ini;
@@ -263,22 +266,24 @@ namespace universelan {
 			CSimpleIniA::TNamesDepend sections;
 			ini.GetAllSections(sections);
 
-			for (const auto& entry : sections) {
-				if ((entry.pItem != nullptr) && (strlen(entry.pItem) > 0)) {
-					AchievementData data;
+			local_user_data->stats.run_locked_achievements<void>([&](auto& Achievements) {
+				for (const auto& entry : sections) {
+					if ((entry.pItem != nullptr) && (strlen(entry.pItem) > 0)) {
+						AchievementData data;
 
-					data.SetName(entry.pItem);
-					data.SetDescription(ini.GetValue(entry.pItem, "Description", ""));
-					data.SetUnlocked(ini.GetBoolValue(entry.pItem, "Unlocked", false));
-					data.SetUnlockTime(ini.GetLongValue(entry.pItem, "UnlockTime", 0));
-					data.SetVisible(ini.GetBoolValue(entry.pItem, "Visible", false));
-					data.SetVisibleWhileLocked(ini.GetBoolValue(entry.pItem, "VisibleWhileLocked", false));
+						data.SetName(entry.pItem);
+						data.SetDescription(ini.GetValue(entry.pItem, "Description", ""));
+						data.SetUnlocked(ini.GetBoolValue(entry.pItem, "Unlocked", false));
+						data.SetUnlockTime(ini.GetLongValue(entry.pItem, "UnlockTime", 0));
+						data.SetVisible(ini.GetBoolValue(entry.pItem, "Visible", false));
+						data.SetVisibleWhileLocked(ini.GetBoolValue(entry.pItem, "VisibleWhileLocked", false));
 
-					data.ResetDirty();
+						data.ResetDirty();
 
-					achievements_stats.Achievements.emplace(data.GetName(), data);
+						Achievements.emplace(data.GetName(), data);
+					}
 				}
-			}
+				});
 		}
 
 		// DLC
@@ -306,18 +311,20 @@ namespace universelan {
 
 			IniData::LoadIni(ini, GetPath(StatsFile));
 
-			PlayTime = ini.GetLongValue(MetadataSection.c_str(), "PlayTime", 0);
+			local_user_data->stats.SetPlayTime(ini.GetLongValue(MetadataSection.c_str(), "PlayTime", 0));
 
 			// get all keys in a section
 			CSimpleIniA::TNamesDepend keys;
 			ini.GetAllKeys(StatsSection.c_str(), keys);
 
-			for (const auto& entry : keys) {
-				if ((entry.pItem != nullptr) && (strlen(entry.pItem) > 0)) {
-					StatsDataContainer c{ .i = ini.GetLongValue(StatsSection.c_str(), entry.pItem, 0) };
-					achievements_stats.Stats.emplace(std::string(entry.pItem), c);
+			local_user_data->stats.run_locked_stats<void>([&](auto& Stats) {
+				for (const auto& entry : keys) {
+					if ((entry.pItem != nullptr) && (strlen(entry.pItem) > 0)) {
+						StatsDataContainer c{ .i = ini.GetLongValue(StatsSection.c_str(), entry.pItem, 0) };
+						Stats.emplace(std::string(entry.pItem), c);
+					}
 				}
-			}
+				});
 		}
 
 		// UserData
@@ -331,11 +338,13 @@ namespace universelan {
 			CSimpleIniA::TNamesDepend keys;
 			ini.GetAllKeys(UserDataSection.c_str(), keys);
 
-			for (const auto& entry : keys) {
-				if ((entry.pItem != nullptr) && (strlen(entry.pItem) > 0)) {
-					achievements_stats.UserData.emplace(std::string(entry.pItem), std::string(ini.GetValue(UserDataSection.c_str(), entry.pItem, "")));
+			local_user_data->stats.run_locked_userdata<void>([&](auto& UserData) {
+				for (const auto& entry : keys) {
+					if ((entry.pItem != nullptr) && (strlen(entry.pItem) > 0)) {
+						UserData.emplace(std::string(entry.pItem), std::string(ini.GetValue(UserDataSection.c_str(), entry.pItem, "")));
+					}
 				}
-			}
+				});
 		}
 	}
 
@@ -435,21 +444,22 @@ namespace universelan {
 
 	uint32_t ClientIniData::GetPlayTime() const
 	{
-		// cast the duration into seconds
-		const auto seconds = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - BootTime);
-
-		return PlayTime + (uint32_t)seconds.count();
+		return local_user_data->stats.GetPlayTime();
 	}
 
 	AchievementData* ClientIniData::GetAchievementData(const std::string& name)
 	{
-		auto it = achievements_stats.Achievements.find(name);
-		if (it == achievements_stats.Achievements.end()) {
-			AchievementData* data = &achievements_stats.Achievements.emplace(name, AchievementData()).first->second;
-			data->SetName(name);
-			return data;
-		}
-		return &it->second;
+		return local_user_data->stats.run_locked_achievements<AchievementData*>([&](auto& Achievements) -> AchievementData* {
+			auto it = Achievements.find(name);
+			if (it == Achievements.end()) {
+				AchievementData* data = &Achievements.emplace(name, AchievementData()).first->second;
+				data->SetName(name);
+				return data;
+			}
+			else {
+				return &it->second;
+			}
+			});
 	}
 
 	bool ClientIniData::IsDLCInstalled(const std::string& name)
@@ -463,50 +473,62 @@ namespace universelan {
 
 	const StatsDataContainer& ClientIniData::GetStat(const std::string& name)
 	{
-		auto it = achievements_stats.Stats.find(name);
-		if (it == achievements_stats.Stats.end()) {
-			return achievements_stats.Stats.emplace(name, 0).first->second;
-		}
-		return it->second;
+		return local_user_data->stats.run_locked_stats<const StatsDataContainer&>([&](auto& Stats) -> const StatsDataContainer& {
+			auto it = Stats.find(name);
+			if (it == Stats.end()) {
+				return Stats.emplace(name, 0).first->second;
+			}
+			else {
+				return it->second;
+			}
+			});
 	}
 
 	void ClientIniData::SetStat(const std::string& name, int32_t value) {
-		auto it = achievements_stats.Stats.find(name);
-		if (it == achievements_stats.Stats.end()) {
-			StatsDataContainer c{ .i = value };
-			it = achievements_stats.Stats.emplace(name, c).first;
-		}
+		local_user_data->stats.run_locked_stats<void>([&](auto& Stats) {
+			auto it = Stats.find(name);
+			if (it == Stats.end()) {
+				StatsDataContainer c{ .i = value };
+				it = Stats.emplace(name, c).first;
+			}
 
-		it->second.i = value;
+			it->second.i = value;
+			});
 	}
 
 	void ClientIniData::SetStat(const std::string& name, float value) {
-		auto it = achievements_stats.Stats.find(name);
-		if (it == achievements_stats.Stats.end()) {
-			StatsDataContainer c{ .f = value };
-			it = achievements_stats.Stats.emplace(name, c).first;
-		}
+		local_user_data->stats.run_locked_stats<void>([&](auto& Stats) {
+			auto it = Stats.find(name);
+			if (it == Stats.end()) {
+				StatsDataContainer c{ .f = value };
+				it = Stats.emplace(name, c).first;
+			}
 
-		it->second.f = value;
+			it->second.f = value;
+			});
 	}
 
 	const std::string& ClientIniData::GetUserData(const std::string& name)
 	{
-		auto it = achievements_stats.UserData.find(name);
-		if (it == achievements_stats.UserData.end()) {
-			return achievements_stats.UserData.emplace(name, "").first->second;
-		}
-		return it->second;
+		return local_user_data->stats.run_locked_userdata<const std::string&>([&](auto& UserData) -> const std::string& {
+			auto it = UserData.find(name);
+			if (it == UserData.end()) {
+				return UserData.emplace(name, "").first->second;
+			}
+			return it->second;
+			});
 	}
 
 	void ClientIniData::SetUserData(const std::string& name, const std::string& data) {
-		auto it = achievements_stats.UserData.find(name);
-		if (it == achievements_stats.UserData.end()) {
-			achievements_stats.UserData.emplace(name, data);
-			return;
-		}
+		local_user_data->stats.run_locked_userdata<void>([&](auto& UserData) {
+			auto it = UserData.find(name);
+			if (it == UserData.end()) {
+				UserData.emplace(name, data);
+				return;
+			}
 
-		it->second = data;
+			it->second = data;
+			});
 	}
 
 	void ClientIniData::SaveStatsAndAchievements()
@@ -519,18 +541,20 @@ namespace universelan {
 
 			IniData::LoadIni(ini, GetPath(AchievementsFile));
 
-			for (auto& achievement : achievements_stats.Achievements) {
-				auto& data = achievement.second;
-				if (data.IsDirty()) {
-					data.ResetDirty();
-					std::string name = data.GetName().c_str();
-					ini.SetValue(name.c_str(), "Description", data.GetDescription().c_str());
-					ini.SetBoolValue(name.c_str(), "Unlocked", data.GetUnlocked());
-					ini.SetLongValue(name.c_str(), "UnlockTime", data.GetUnlockTime());
-					ini.SetBoolValue(name.c_str(), "Visible", data.GetVisible());
-					ini.SetBoolValue(name.c_str(), "VisibleWhileLocked", data.GetVisibleWhileLocked());
+			local_user_data->stats.run_locked_achievements<void>([&](auto& Achievements) {
+				for (auto& achievement : Achievements) {
+					auto& data = achievement.second;
+					if (data.IsDirty()) {
+						data.ResetDirty();
+						std::string name = data.GetName().c_str();
+						ini.SetValue(name.c_str(), "Description", data.GetDescription().c_str());
+						ini.SetBoolValue(name.c_str(), "Unlocked", data.GetUnlocked());
+						ini.SetLongValue(name.c_str(), "UnlockTime", data.GetUnlockTime());
+						ini.SetBoolValue(name.c_str(), "Visible", data.GetVisible());
+						ini.SetBoolValue(name.c_str(), "VisibleWhileLocked", data.GetVisibleWhileLocked());
+					}
 				}
-			}
+				});
 
 			ini.SaveFile(GetPath(AchievementsFile).c_str());
 		}
@@ -559,11 +583,13 @@ namespace universelan {
 
 			IniData::LoadIni(ini, GetPath(StatsFile));
 
-			ini.SetLongValue(MetadataSection.c_str(), "PlayTime", GetPlayTime());
+			ini.SetLongValue(MetadataSection.c_str(), "PlayTime", local_user_data->stats.GetPlayTime());
 
-			for (const auto& stat : achievements_stats.Stats) {
-				ini.SetLongValue(StatsSection.c_str(), stat.first.c_str(), stat.second.i);
-			}
+			local_user_data->stats.run_locked_stats<void>([&](auto& Stats) {
+				for (const auto& stat : Stats) {
+					ini.SetLongValue(StatsSection.c_str(), stat.first.c_str(), stat.second.i);
+				}
+				});
 
 			ini.SaveFile(GetPath(StatsFile).c_str());
 		}
@@ -576,9 +602,11 @@ namespace universelan {
 
 			IniData::LoadIni(ini, GetPath(UserDataFile));
 
-			for (const auto& user_data : achievements_stats.UserData) {
-				ini.SetValue(UserDataSection.c_str(), user_data.first.c_str(), user_data.second.c_str());
-			}
+			local_user_data->stats.run_locked_userdata<void>([&](auto& UserData) {
+				for (const auto& user_data : UserData) {
+					ini.SetValue(UserDataSection.c_str(), user_data.first.c_str(), user_data.second.c_str());
+				}
+				});
 
 			ini.SaveFile(GetPath(UserDataFile).c_str());
 		}
@@ -596,20 +624,24 @@ namespace universelan {
 
 	void ClientIniData::ResetStatsAndAchievements()
 	{
-		for (auto& entry : achievements_stats.Achievements) {
-			entry.second.SetUnlocked(false);
-			entry.second.SetUnlockTime(0);
-		}
+		local_user_data->stats.run_locked_achievements<void>([&](auto& Achievements) {
+			for (auto& entry : Achievements) {
+				entry.second.SetUnlocked(false);
+				entry.second.SetUnlockTime(0);
+			}
+			});
 
-		for (auto& entry : achievements_stats.Stats) {
-			entry.second.i = 0;
-		}
+		local_user_data->stats.run_locked_stats<void>([&](auto& Stats) {
+			for (auto& entry : Stats) {
+				entry.second.i = 0;
+			}
+			});
 
 		SaveStatsAndAchievements();
 	}
 
-	const AchievementsAndStatsContainer& ClientIniData::GetASUC() const
+	const GalaxyUserData::ptr_t& ClientIniData::GetLocalUserData() const
 	{
-		return achievements_stats;
+		return local_user_data;
 	}
 }

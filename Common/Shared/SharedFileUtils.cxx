@@ -198,7 +198,8 @@ namespace universelan {
 	galaxy::api::SharedFileID SharedFileUtils::GetSharedIDByIndex(uint32_t index) const {
 		using std::filesystem::directory_iterator;
 
-		for (auto& entry : directory_iterator(GetPath(ROOT_ID_TO_FILENAME, "/"))) {
+		auto entries = directory_iterator(GetPath(ROOT_ID_TO_FILENAME, "/"));
+		for (auto& entry : entries) {
 			if (index-- == 0) {
 				return std::stoull(entry.path().string());
 			}
@@ -210,7 +211,8 @@ namespace universelan {
 	std::string SharedFileUtils::GetFileNameByIndex(const std::string& root, uint32_t index) const {
 		using std::filesystem::directory_iterator;
 
-		for (auto& entry : directory_iterator(GetPath(root, "/"))) {
+		auto entries = directory_iterator(GetPath(root, "/"));
+		for (auto& entry : entries) {
 			if (index-- == 0) {
 				return entry.path().string();
 			}

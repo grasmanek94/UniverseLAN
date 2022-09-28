@@ -31,8 +31,10 @@ namespace universelan::client {
 	void ListenerRegistrarImpl::Register(ListenerType listenerType, IGalaxyListener* listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		lock_t lock{ listeners[listenerType].mtx };
-		listeners[listenerType].set.insert(listener);
+		if (listener != nullptr) {
+			lock_t lock{ listeners[listenerType].mtx };
+			listeners[listenerType].set.insert(listener);
+		}
 	}
 
 	void ListenerRegistrarImpl::Unregister(ListenerType listenerType, IGalaxyListener* listener) {

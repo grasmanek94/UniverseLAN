@@ -41,6 +41,7 @@ namespace universelan::client {
 		ListenerRegistrarImpl* listeners;
 
 		ListenersRequestHelper<IUserStatsAndAchievementsRetrieveListener*> specific_user_stats_and_achievements_requests;
+		ListenersRequestHelper<IUserTimePlayedRetrieveListener*> specific_user_time_played_requests;
 
 	public:
 
@@ -543,6 +544,7 @@ namespace universelan::client {
 		virtual uint32_t GetUserTimePlayed(GalaxyID userID = GalaxyID()) override;
 
 		void SpecificUserStatsAndAchievementsRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
+		void RequestUserTimePlayedProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
 	};
 
 	/** @} */

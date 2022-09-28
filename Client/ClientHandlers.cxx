@@ -46,7 +46,7 @@ namespace universelan::client {
 
 		std::cout << "Connection accepted by server" << std::endl;
 
-		connection.SendAsync(UserHelloDataMessage{ interfaces->config->GetASUC() });
+		connection.SendAsync(UserHelloDataMessage{ interfaces->config->GetLocalUserData()->stats });
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<RequestSpecificUserDataMessage>& data)

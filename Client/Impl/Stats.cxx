@@ -5,7 +5,9 @@
 namespace universelan::client {
 	using namespace galaxy::api;
 	StatsImpl::StatsImpl(InterfaceInstances* intf) :
-		intf{ intf }, listeners{ intf->notification.get() }
+		intf{ intf }, listeners{ intf->notification.get() },
+		specific_user_stats_and_achievements_requests{},
+		specific_user_time_played_requests{}
 	{
 		tracer::Trace trace{ __FUNCTION__ };
 	}
@@ -48,37 +50,25 @@ namespace universelan::client {
 	int32_t StatsImpl::GetStatInt(const char* name, GalaxyID userID) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		if (intf->config->IsSelfUserID(userID)) {
-			return intf->config->GetStat(name).i;
-		}
-		else {
-			int32_t val = 0;
-			intf->user->GetGalaxyUserData(userID)->stats.run_locked_stats([&](AchievementsAndStatsContainer::stats_t& stats) {
-				auto it = stats.find(name);
-				if (it != stats.end()) {
-					val = it->second.i;
-				}
-				});
-			return val;
-		}
+		return intf->user->GetGalaxyUserData(userID)->stats.run_locked_stats<uint32_t>([&](auto& stats) -> uint32_t {
+			auto it = stats.find(name);
+			if (it != stats.end()) {
+				return it->second.i;
+			}
+			return 0;
+			});
 	}
 
 	float StatsImpl::GetStatFloat(const char* name, GalaxyID userID) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		if (intf->config->IsSelfUserID(userID)) {
-			return intf->config->GetStat(name).f;
-		}
-		else {
-			float val = 0;
-			intf->user->GetGalaxyUserData(userID)->stats.run_locked_stats([&](AchievementsAndStatsContainer::stats_t& stats) {
-				auto it = stats.find(name);
-				if (it != stats.end()) {
-					val = it->second.f;
-				}
-				});
-			return val;
-		}
+		return intf->user->GetGalaxyUserData(userID)->stats.run_locked_stats<float>([&](auto& stats) -> float {
+			auto it = stats.find(name);
+			if (it != stats.end()) {
+				return it->second.f;
+			}
+			return 0.0f;
+			});
 	}
 
 	void StatsImpl::SetStatInt(const char* name, int32_t value) {
@@ -102,20 +92,13 @@ namespace universelan::client {
 	void StatsImpl::GetAchievement(const char* name, bool& unlocked, uint32_t& unlockTime, GalaxyID userID) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		if (intf->config->IsSelfUserID(userID)) {
-			auto data = intf->config->GetAchievementData(name);
-			unlocked = data->GetUnlocked();
-			unlockTime = data->GetUnlockTime();
-		}
-		else {
-			intf->user->GetGalaxyUserData(userID)->stats.run_locked_achievements([&](AchievementsAndStatsContainer::achievements_t& achievements) {
-				auto it = achievements.find(name);
-				if (it != achievements.end()) {
-					unlocked = it->second.GetUnlocked();
-					unlockTime = it->second.GetUnlockTime();
-				}
-				});
-		}
+		intf->user->GetGalaxyUserData(userID)->stats.run_locked_achievements<void>([&](auto& achievements) {
+			auto it = achievements.find(name);
+			if (it != achievements.end()) {
+				unlocked = it->second.GetUnlocked();
+				unlockTime = it->second.GetUnlockTime();
+			}
+			});
 	}
 
 	void StatsImpl::SetAchievement(const char* name) {
@@ -141,8 +124,8 @@ namespace universelan::client {
 
 		intf->config->SaveStatsAndAchievements();
 
-		intf->client->GetConnection().SendAsync(UserHelloDataMessage{intf->config->GetASUC()});
-		
+		intf->client->GetConnection().SendAsync(UserHelloDataMessage{ intf->config->GetLocalUserData()->stats});
+
 		listeners->NotifyAll(listener, &IStatsAndAchievementsStoreListener::OnUserStatsAndAchievementsStoreSuccess);
 	}
 
@@ -151,7 +134,7 @@ namespace universelan::client {
 
 		intf->config->ResetStatsAndAchievements();
 
-		intf->client->GetConnection().SendAsync(UserHelloDataMessage{ intf->config->GetASUC() });
+		intf->client->GetConnection().SendAsync(UserHelloDataMessage{ intf->config->GetLocalUserData()->stats });
 
 		listeners->NotifyAll(listener, &IStatsAndAchievementsStoreListener::OnUserStatsAndAchievementsStoreSuccess);
 	}
@@ -317,22 +300,37 @@ namespace universelan::client {
 	void StatsImpl::RequestUserTimePlayed(GalaxyID userID, IUserTimePlayedRetrieveListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		//if (intf->config->IsSelfUserID(userID)) {
-		listeners->NotifyAll(listener, &IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveSuccess, userID);
-		//} else {
-		// TODO implement
-		//	listeners->NotifyAll(listener, &IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveSuccess, userID);
-		//}
+		// no need to refresh play time because it's the diff between 'submitted_time_played + (time_now - connect_time)'
+		if (intf->user->IsGalaxyUserDataPresent(userID)) {
+			listeners->NotifyAll(listener, &IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveSuccess, userID);
+		}
+		else {
+			uint64_t request_id = MessageUniqueID::get();
+
+			specific_user_time_played_requests.emplace(request_id, listener);
+			intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ RequestSpecificUserDataMessage::RequestTypePlayTime, request_id, userID });
+		}
+	}
+
+	void StatsImpl::RequestUserTimePlayedProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__ };
+
+		IUserTimePlayedRetrieveListener* listener = specific_user_time_played_requests.pop(data->request_id);
+
+		if (data->found) {
+			auto entry = intf->user->GetGalaxyUserData(data->id);
+			entry->stats = data->asuc;
+
+			listeners->NotifyAll(listener, &IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveSuccess, data->id);
+		}
+		else {
+			listeners->NotifyAll(listener, &IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveFailure, data->id, IUserTimePlayedRetrieveListener::FAILURE_REASON_UNDEFINED);
+		}
 	}
 
 	uint32_t StatsImpl::GetUserTimePlayed(GalaxyID userID) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		//if (intf->config->IsSelfUserID(userID)) {
-		return intf->config->GetPlayTime();
-		//} else {
-		// TODO: update
-		//	return intf->config->GetPlayTime();
-		//}
+		return intf->user->GetGalaxyUserData(userID)->stats.GetPlayTime();
 	}
 }

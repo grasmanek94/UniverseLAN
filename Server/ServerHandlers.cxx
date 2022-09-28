@@ -173,7 +173,8 @@ namespace universelan::server {
 			messages.push_back(message);
 			RequestChatRoomMessagesMessage notification{ data->request_id, data->id, oldest_message, messages };
 
-			for (const auto& member : chat_room->GetMembers()) {
+			auto& members = chat_room->GetMembers();
+			for (const auto& member : members) {
 				peer::ptr member_peer = peer_mapper.Get(member);
 				connection.Send(member_peer->peer, notification);
 			}
@@ -357,7 +358,8 @@ namespace universelan::server {
 		data->message.message_id = lobby->SendMsg(data->message.sender, data->message.data);
 
 		if (data->message.message_id != 0) {
-			for (auto& member : pd->lobby->GetMembers()) {
+			auto members = pd->lobby->GetMembers();
+			for (auto& member : members) {
 				auto member_peer = peer_mapper.Get(member);
 				if (member_peer) {
 					connection.Send(member_peer->peer, data);
@@ -393,7 +395,8 @@ namespace universelan::server {
 		connection.Send(peer, data);
 
 		SetLobbyDataMessage notification{ 0, data->lobby_id, data->key, data->value };
-		for (auto& member : pd->lobby->GetMembers()) {
+		auto members = pd->lobby->GetMembers();
+		for (auto& member : members) {
 			auto member_peer = peer_mapper.Get(member);
 			if (member_peer && (member_peer->peer != peer)) {
 				connection.Send(member_peer->peer, notification);
@@ -424,7 +427,8 @@ namespace universelan::server {
 		data->success = true;
 		connection.Send(peer, data);
 
-		for (auto& member : pd->lobby->GetMembers()) {
+		auto members = pd->lobby->GetMembers();
+		for (auto& member : members) {
 			auto member_peer = peer_mapper.Get(member);
 			if (member_peer && (member_peer->peer != peer)) {
 				connection.Send(member_peer->peer, notification);
@@ -498,7 +502,8 @@ namespace universelan::server {
 		connection.Send(peer, data);
 
 		SetLobbyMemberDataMessage notification{ 0, data->lobby_id, data->member_id, data->key, data->value };
-		for (auto& member : pd->lobby->GetMembers()) {
+		auto members = pd->lobby->GetMembers();
+		for (auto& member : members) {
 			auto member_peer = peer_mapper.Get(member);
 			if (member_peer && (member_peer->peer != peer)) {
 				connection.Send(member_peer->peer, notification);
@@ -542,7 +547,8 @@ namespace universelan::server {
 
 		LobbyOwnerChangeMessage owner_change_message{ lobby->GetID(), new_owner_id };
 
-		for (auto& member : lobby->GetMembers()) {
+		auto members = lobby->GetMembers();
+		for (auto& member : members) {
 			auto member_peer = peer_mapper.Get(member);
 
 			if (!close && new_owner) {
@@ -611,7 +617,8 @@ namespace universelan::server {
 			// ^ but we don't care about that
 		}
 		else {
-			for (auto& member : chat_room->GetMembers()) {
+			auto members = chat_room->GetMembers();
+			for (auto& member : members) {
 				auto member_peer = peer_mapper.Get(member);
 
 				// TODO: let member know participant has left
