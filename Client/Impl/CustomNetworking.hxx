@@ -15,7 +15,6 @@
 #include <websocketpp/config/asio_no_tls_client.hpp>
 #include <websocketpp/client.hpp>
 
-#include <atomic>
 #include <deque>
 #include <memory>
 #include <mutex>

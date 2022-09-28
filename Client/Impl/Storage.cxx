@@ -3,6 +3,7 @@
 #include "UniverseLAN.hxx"
 
 #include <string>
+#include <utility>
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -98,11 +99,11 @@ namespace universelan::client {
 		}
 
 		// !!! LEAK !!! (albeit temporary when thread exits)
-		std::thread([=] {
+		std::thread([=, this, sfu = std::move(sfu), str_file_name = std::move(str_file_name)] {
 			uint64_t request_id = MessageUniqueID::get();
 
 			file_upload_requests.emplace(request_id, listener);
-			intf->client->GetConnection().SendAsync(FileShareMessage{ request_id, fileName, sfu.ReadLocal(str_file_name) });
+			intf->client->GetConnection().SendAsync(FileShareMessage{ request_id, str_file_name, sfu.ReadLocal(str_file_name) });
 			}).detach();
 	}
 

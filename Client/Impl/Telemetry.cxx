@@ -154,18 +154,14 @@ namespace universelan::client {
 		std::string event_type{ eventType };
 
 		if (!telemetry_file) {
-			intf->delay_runner->Add([=] {
-				listeners->NotifyAll(listener, &ITelemetryEventSendListener::OnTelemetryEventSendFailure, event_type.c_str(), id, ITelemetryEventSendListener::FAILURE_REASON_UNDEFINED);
-				});
+			listeners->NotifyAll(listener, &ITelemetryEventSendListener::OnTelemetryEventSendFailure, event_type.c_str(), id, ITelemetryEventSendListener::FAILURE_REASON_UNDEFINED);
 			return id;
 		}
 
 		lock_t lock{ mtx };
 		telemetry_file << "(SendTelemetryEvent) " << eventType << "\n";
 
-		intf->delay_runner->Add([=] {
-			listeners->NotifyAll(listener, &ITelemetryEventSendListener::OnTelemetryEventSendSuccess, event_type.c_str(), id);
-		});
+		listeners->NotifyAll(listener, &ITelemetryEventSendListener::OnTelemetryEventSendSuccess, event_type.c_str(), id);
 
 		return id;
 	}

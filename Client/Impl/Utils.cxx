@@ -8,9 +8,7 @@ namespace universelan::client {
 	{
 		tracer::Trace trace{ __FUNCTION__ };
 
-		intf->delay_runner->Add([=] {
-			listeners->NotifyAll(&IGogServicesConnectionStateListener::OnConnectionStateChange, GOG_SERVICES_CONNECTION_STATE_CONNECTED);
-		});
+		listeners->NotifyAll(&IGogServicesConnectionStateListener::OnConnectionStateChange, GOG_SERVICES_CONNECTION_STATE_CONNECTED);
 	}
 
 	UtilsImpl::~UtilsImpl()
@@ -45,7 +43,8 @@ namespace universelan::client {
 	void UtilsImpl::ShowOverlayWithWebPage(const char* url) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-
+		std::cout << "ShowOverlayWithWebPage:\n\t";
+		std::cout << url << std::endl;
 	}
 
 	bool UtilsImpl::IsOverlayVisible() {
@@ -62,8 +61,6 @@ namespace universelan::client {
 
 	void UtilsImpl::DisableOverlayPopups(const char* popupGroup) {
 		tracer::Trace trace{ __FUNCTION__ };
-
-
 	}
 
 	GogServicesConnectionState UtilsImpl::GetGogServicesConnectionState() {
