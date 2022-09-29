@@ -126,12 +126,7 @@ namespace universelan::server {
 
 		peer::ptr pd = peer_mapper.Get(peer);
 
-		pd->user_data->stats.run_locked_userdata<void>([&](auto& UserData) {
-			auto emplace = UserData.emplace(data->key, data->value);
-			if (!emplace.second) {
-				emplace.first->second = data->value;
-			}
-			});
+		pd->user_data->stats.SetUserData(data->key, data->value);
 
 		data->id = pd->id;
 		connection.Broadcast(data, peer);
