@@ -355,7 +355,9 @@ namespace universelan::client {
 	void FriendsImpl::SendInvitation(GalaxyID userID, const char* connectionString, ISendInvitationListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
+		// TODO: implement this sometime
 
+		listeners->NotifyAll(listener, &ISendInvitationListener::OnInvitationSendFailure, userID, connectionString, ISendInvitationListener::FAILURE_REASON_RECEIVER_DOES_NOT_ALLOW_INVITING);
 	}
 
 	void FriendsImpl::FindUser(const char* userSpecifier, IUserFindListener* const listener) {
