@@ -8,7 +8,7 @@ namespace universelan::client {
 	using namespace galaxy::api;
 	FriendsImpl::FriendsImpl(InterfaceInstances* intf) :
 		intf{ intf }, listeners{ intf->notification.get() },
-		avatar_criteria{ 0 }
+		user_information_requests{}, avatar_criteria { 0 }
 	{
 		tracer::Trace trace{ __FUNCTION__ };
 	}
@@ -36,13 +36,38 @@ namespace universelan::client {
 		IUserInformationRetrieveListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
+		if (intf->config->IsSelfUserID(userID)) {
+			listeners->NotifyAll(listener, &IUserInformationRetrieveListener::OnUserInformationRetrieveSuccess, userID);
+		}
+		else {
+			uint64_t request_id = MessageUniqueID::get();
 
+			user_information_requests.emplace(request_id, listener);
+			intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ RequestSpecificUserDataMessage::RequestTypeFriends, request_id, userID });
+		}
+	}
+
+	void FriendsImpl::RequestUserInformationProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__ };
+
+		IUserInformationRetrieveListener* listener = user_information_requests.pop(data->request_id);
+
+		if (data->found) {
+			auto entry = intf->user->GetGalaxyUserData(data->id);
+			entry->stats = data->asuc;
+			entry->nickname = data->nickname;
+
+			listeners->NotifyAll(listener, &IUserInformationRetrieveListener::OnUserInformationRetrieveSuccess, data->id);
+		}
+		else {
+			listeners->NotifyAll(listener, &IUserInformationRetrieveListener::OnUserInformationRetrieveFailure, data->id, IUserInformationRetrieveListener::FAILURE_REASON_UNDEFINED);
+		}
 	}
 
 	bool FriendsImpl::IsUserInformationAvailable(GalaxyID userID) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		return false;
+		return intf->user->IsUserDataAvailable(userID);
 	}
 
 	const char* FriendsImpl::GetPersonaName() {
@@ -121,7 +146,7 @@ namespace universelan::client {
 	void FriendsImpl::RequestFriendList(IFriendListListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-
+		listeners->NotifyAll(listener, &IFriendListListener::OnFriendListRetrieveSuccess);
 	}
 
 	bool FriendsImpl::IsFriend(GalaxyID userID) {
@@ -145,19 +170,19 @@ namespace universelan::client {
 	void FriendsImpl::SendFriendInvitation(GalaxyID userID, IFriendInvitationSendListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-
+		listeners->NotifyAll(listener, &IFriendInvitationSendListener::OnFriendInvitationSendSuccess, userID);
 	}
 
 	void FriendsImpl::RequestFriendInvitationList(IFriendInvitationListRetrieveListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-
+		listeners->NotifyAll(listener, &IFriendInvitationListRetrieveListener::OnFriendInvitationListRetrieveSuccess);
 	}
 
 	void FriendsImpl::RequestSentFriendInvitationList(ISentFriendInvitationListRetrieveListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-
+		listeners->NotifyAll(listener, &ISentFriendInvitationListRetrieveListener::OnSentFriendInvitationListRetrieveSuccess);
 	}
 
 	uint32_t FriendsImpl::GetFriendInvitationCount() {
@@ -175,13 +200,13 @@ namespace universelan::client {
 	void FriendsImpl::RespondToFriendInvitation(GalaxyID userID, bool accept, IFriendInvitationRespondToListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-
+		listeners->NotifyAll(listener, &IFriendInvitationRespondToListener::OnFriendInvitationRespondToFailure, userID, IFriendInvitationRespondToListener::FAILURE_REASON_UNDEFINED);
 	}
 
 	void FriendsImpl::DeleteFriend(GalaxyID userID, IFriendDeleteListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-
+		listeners->NotifyAll(listener, &IFriendDeleteListener::OnFriendDeleteFailure, userID, IFriendDeleteListener::FAILURE_REASON_UNDEFINED);
 	}
 
 	void FriendsImpl::SetRichPresence(const char* key, const char* value, IRichPresenceChangeListener* const listener) {
@@ -247,7 +272,7 @@ namespace universelan::client {
 	void FriendsImpl::FindUser(const char* userSpecifier, IUserFindListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-
+		listeners->NotifyAll(listener, &IUserFindListener::OnUserFindFailure, userSpecifier, IUserFindListener::FAILURE_REASON_UNDEFINED);
 	}
 
 	bool FriendsImpl::IsUserInTheSameGame(GalaxyID userID) const {

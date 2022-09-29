@@ -69,6 +69,10 @@ namespace universelan::client {
 		case RequestSpecificUserDataMessage::RequestTypePlayTime:
 			interfaces->stats->RequestUserTimePlayedProcessed(data);
 			break;
+
+		case RequestSpecificUserDataMessage::RequestTypeFriends:
+			interfaces->friends->RequestUserInformationProcessed(data);
+			break;
 		}
 	}
 

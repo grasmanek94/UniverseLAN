@@ -158,6 +158,7 @@ namespace universelan::client {
 		if (data->found) {
 			auto entry = GetGalaxyUserData(data->id);
 			entry->stats = data->asuc;
+			entry->nickname = data->nickname;
 
 			listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, data->id);
 		}

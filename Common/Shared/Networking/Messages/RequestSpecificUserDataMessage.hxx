@@ -14,7 +14,8 @@ namespace universelan {
 		enum RequestType {
 			RequestTypeUserData,
 			RequestTypeAchievementsAndStats,
-			RequestTypePlayTime
+			RequestTypePlayTime,
+			RequestTypeFriends
 		};
 
 		uint64_t request_id;

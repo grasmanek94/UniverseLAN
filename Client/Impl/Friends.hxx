@@ -8,6 +8,8 @@
 
 #include "ListenerRegistrar.hxx"
 
+#include <Networking/Messages/RequestSpecificUserDataMessage.hxx>
+
 #include <IFriends.h>
 #include <GalaxyID.h>
 #include <IListenerRegistrar.h>
@@ -29,6 +31,8 @@ namespace universelan::client {
 	private:
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
+
+		ListenersRequestHelper<IUserInformationRetrieveListener*> user_information_requests;
 
 		AvatarCriteria avatar_criteria;
 	public:
@@ -466,6 +470,8 @@ namespace universelan::client {
 		 * @return true if the specified user is playing the same game, false otherwise.
 		 */
 		virtual bool IsUserInTheSameGame(GalaxyID userID) const override;
+
+		void RequestUserInformationProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
 	};
 
 	/** @} */

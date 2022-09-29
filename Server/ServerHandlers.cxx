@@ -103,7 +103,7 @@ namespace universelan::server {
 		peer::ptr pd = peer_mapper.Get(peer);
 		peer::ptr target = peer_mapper.Get(data->id);
 
-		RequestSpecificUserDataMessage response{ data->type, data->id };
+		RequestSpecificUserDataMessage response{ data->type, data->request_id, data->id };
 
 		if (target) {
 			response.found = true;
