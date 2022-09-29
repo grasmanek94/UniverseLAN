@@ -73,6 +73,10 @@ namespace universelan::client {
 		case RequestSpecificUserDataMessage::RequestTypeFriends:
 			interfaces->friends->RequestUserInformationProcessed(data);
 			break;
+
+		case RequestSpecificUserDataMessage::RequestTypeRichPresence:
+			interfaces->friends->RequestRichPresenceProcessed(data);
+			break;
 		}
 	}
 
@@ -201,5 +205,12 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__"::SetUserDataMessage" };
 
 		interfaces->user->SetUserDataMessageReceived(data);
+	}
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<RichPresenceChangeMessage>& data)
+	{
+		tracer::Trace trace{ __FUNCTION__"::RichPresenceChangeMessage" };
+
+		interfaces->friends->RichPresenceChangeMessageProcessed(data);
 	}
 }

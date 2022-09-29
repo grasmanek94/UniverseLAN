@@ -9,6 +9,7 @@
 #include "ListenerRegistrar.hxx"
 
 #include <Networking/Messages/RequestSpecificUserDataMessage.hxx>
+#include <Networking/Messages/RichPresenceChangeMessage.hxx>
 
 #include <IFriends.h>
 #include <GalaxyID.h>
@@ -33,6 +34,8 @@ namespace universelan::client {
 		ListenerRegistrarImpl* listeners;
 
 		ListenersRequestHelper<IUserInformationRetrieveListener*> user_information_requests;
+		ListenersRequestHelper<IRichPresenceChangeListener*> rich_presence_change_requests;
+		ListenersRequestHelper<IRichPresenceRetrieveListener*> retrieve_rich_presence_requests;
 
 		AvatarCriteria avatar_criteria;
 	public:
@@ -472,6 +475,8 @@ namespace universelan::client {
 		virtual bool IsUserInTheSameGame(GalaxyID userID) const override;
 
 		void RequestUserInformationProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
+		void RichPresenceChangeMessageProcessed(const std::shared_ptr<RichPresenceChangeMessage>& data);
+		void RequestRichPresenceProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
 	};
 
 	/** @} */

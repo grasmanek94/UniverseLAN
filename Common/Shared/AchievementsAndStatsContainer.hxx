@@ -36,19 +36,21 @@ namespace universelan {
 		mutable mutex_t mtx_achievements;
 		mutable mutex_t mtx_stats;
 		mutable mutex_t mtx_userdata;
+		mutable mutex_t mtx_richpresence;
 
 		achievements_t Achievements;
 		stats_t Stats;
 		user_data_t UserData;
 		time_point BootTime;
 		uint32_t PlayTime;
+		user_data_t RichPresence;
 
 	public:
 
 		template<class Archive>
 		void serialize(Archive& ar)
 		{
-			ar(Achievements, Stats, UserData, BootTime, PlayTime);
+			ar(Achievements, Stats, UserData, BootTime, PlayTime, RichPresence);
 		}
 
 		AchievementsAndStatsContainer();
@@ -72,6 +74,12 @@ namespace universelan {
 			return func(UserData);
 		}
 
+		template<typename T>
+		T  run_locked_richpresence(std::function<T(map_t<std::string>&)> func) {
+			lock_t lock(mtx_richpresence);
+			return func(RichPresence);
+		}
+
 		void SetPlayTime(uint32_t play_time);
 		uint32_t GetPlayTime() const;
 
@@ -85,6 +93,11 @@ namespace universelan {
 
 		const std::string& GetUserData(const std::string& name);
 		void SetUserData(const std::string& name, const std::string& data);
+
+		const std::string& GetRichPresence(const std::string& name);
+		void SetRichPresence(const std::string& name, const std::string& data);
+		void EraseRichPresence(const std::string& name);
+		void ClearRichPresence();
 
 		bool IsUserDataAvailable();
 	};

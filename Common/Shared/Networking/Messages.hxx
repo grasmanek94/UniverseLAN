@@ -21,6 +21,7 @@
 #include "Messages/RequestLobbyDataMessage.hxx"
 #include "Messages/RequestLobbyListMessage.hxx"
 #include "Messages/RequestSpecificUserDataMessage.hxx"
+#include "Messages/RichPresenceChangeMessage.hxx"
 #include "Messages/SendToChatRoomMessage.hxx"
 #include "Messages/SendToLobbyMessage.hxx"
 #include "Messages/SetLobbyDataMessage.hxx"
@@ -52,6 +53,7 @@ namespace universelan {
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(RequestLobbyDataMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(RequestLobbyListMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(RequestSpecificUserDataMessage); \
+	SHARED_NETWORK_IMPLEMENT_CASE_FOR(RichPresenceChangeMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(SendToChatRoomMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(SendToLobbyMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(SetLobbyDataMessage); \

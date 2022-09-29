@@ -594,6 +594,40 @@ namespace universelan::server {
 		return true;
 	}
 
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RichPresenceChangeMessage>& data)
+	{
+		tracer::Trace trace{ __FUNCTION__"::RichPresenceChangeMessage" };
+
+		REQUIRES_AUTHENTICATION(peer);
+
+		peer::ptr pd = peer_mapper.Get(peer);
+
+		data->id = pd->id;
+		auto& entry = pd->user_data->stats;
+		switch (data->action) {
+		case RichPresenceChangeMessage::ACTION_SET:
+			entry.SetRichPresence(data->key, data->value);
+			data->success = true;
+			break;
+
+		case RichPresenceChangeMessage::ACTION_DELETE:
+			entry.EraseRichPresence(data->key);
+			data->success = true;
+			break;
+
+		case RichPresenceChangeMessage::ACTION_CLEAR:
+			entry.ClearRichPresence();
+			data->success = true;
+			break;
+
+		case RichPresenceChangeMessage::ACTION_NONE:
+			data->success = false;
+			break;
+		}
+
+		connection.Broadcast(data);
+	}
+
 	bool Server::HandleMemberChatLeave(ENetPeer* peer) {
 		tracer::Trace trace{ __FUNCTION__"1"};
 

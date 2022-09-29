@@ -15,7 +15,8 @@ namespace universelan {
 			RequestTypeUserData,
 			RequestTypeAchievementsAndStats,
 			RequestTypePlayTime,
-			RequestTypeFriends
+			RequestTypeFriends,
+			RequestTypeRichPresence
 		};
 
 		uint64_t request_id;
