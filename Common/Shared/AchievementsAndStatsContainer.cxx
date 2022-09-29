@@ -40,4 +40,86 @@ namespace universelan {
 
 		return *this;
 	}
+
+	AchievementData* AchievementsAndStatsContainer::GetAchievementData(const std::string& name)
+	{
+		return run_locked_achievements<AchievementData*>([&](auto& Achievements) -> AchievementData* {
+			auto it = Achievements.find(name);
+			if (it == Achievements.end()) {
+				AchievementData* data = &Achievements.emplace(name, AchievementData()).first->second;
+				data->SetName(name);
+				return data;
+			}
+			else {
+				return &it->second;
+			}
+			});
+	}
+
+	const StatsDataContainer& AchievementsAndStatsContainer::GetStat(const std::string& name)
+	{
+		return run_locked_stats<const StatsDataContainer&>([&](auto& Stats) -> const StatsDataContainer& {
+			auto it = Stats.find(name);
+			if (it == Stats.end()) {
+				return Stats.emplace(name, 0).first->second;
+			}
+			else {
+				return it->second;
+			}
+			});
+	}
+
+	void AchievementsAndStatsContainer::SetStat(const std::string& name, int32_t value) {
+		run_locked_stats<void>([&](auto& Stats) {
+			auto it = Stats.find(name);
+			if (it == Stats.end()) {
+				StatsDataContainer c{ .i = value };
+				it = Stats.emplace(name, c).first;
+			}
+
+			it->second.i = value;
+			});
+	}
+
+	void AchievementsAndStatsContainer::SetStat(const std::string& name, float value) {
+		run_locked_stats<void>([&](auto& Stats) {
+			auto it = Stats.find(name);
+			if (it == Stats.end()) {
+				StatsDataContainer c{ .f = value };
+				it = Stats.emplace(name, c).first;
+			}
+
+			it->second.f = value;
+			});
+	}
+
+	const std::string& AchievementsAndStatsContainer::GetUserData(const std::string& name)
+	{
+		return run_locked_userdata<const std::string&>([&](auto& UserData) -> const std::string& {
+			auto it = UserData.find(name);
+			if (it == UserData.end()) {
+				return UserData.emplace(name, "").first->second;
+			}
+			return it->second;
+			});
+	}
+
+	void AchievementsAndStatsContainer::SetUserData(const std::string& name, const std::string& data) {
+		run_locked_userdata<void>([&](auto& UserData) {
+			auto it = UserData.find(name);
+			if (it == UserData.end()) {
+				UserData.emplace(name, data);
+				return;
+			}
+
+			it->second = data;
+			});
+	}
+
+
+	bool AchievementsAndStatsContainer::IsUserDataAvailable() {
+		return run_locked_userdata<bool>([&](auto& map) -> bool {
+			return !map.empty();
+			});
+	}
 }

@@ -33,9 +33,9 @@ namespace universelan {
 		using mutex_t = std::recursive_mutex;
 		using lock_t = std::scoped_lock<mutex_t>;
 
-		mutex_t mtx_achievements;
-		mutex_t mtx_stats;
-		mutex_t mtx_userdata;
+		mutable mutex_t mtx_achievements;
+		mutable mutex_t mtx_stats;
+		mutable mutex_t mtx_userdata;
 
 		achievements_t Achievements;
 		stats_t Stats;
@@ -76,5 +76,16 @@ namespace universelan {
 		uint32_t GetPlayTime() const;
 
 		AchievementsAndStatsContainer& operator=(const AchievementsAndStatsContainer& other);
+
+		AchievementData* GetAchievementData(const std::string& name);
+
+		const StatsDataContainer& GetStat(const std::string& name);
+		void SetStat(const std::string& name, int32_t value);
+		void SetStat(const std::string& name, float value);
+
+		const std::string& GetUserData(const std::string& name);
+		void SetUserData(const std::string& name, const std::string& data);
+
+		bool IsUserDataAvailable();
 	};
 }

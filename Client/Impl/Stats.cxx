@@ -50,63 +50,53 @@ namespace universelan::client {
 	int32_t StatsImpl::GetStatInt(const char* name, GalaxyID userID) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		return intf->user->GetGalaxyUserData(userID)->stats.run_locked_stats<uint32_t>([&](auto& stats) -> uint32_t {
-			auto it = stats.find(name);
-			if (it != stats.end()) {
-				return it->second.i;
-			}
-			return 0;
-			});
+		return intf->user->GetGalaxyUserData(userID)->stats.GetStat(name).i;
 	}
 
 	float StatsImpl::GetStatFloat(const char* name, GalaxyID userID) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		return intf->user->GetGalaxyUserData(userID)->stats.run_locked_stats<float>([&](auto& stats) -> float {
-			auto it = stats.find(name);
-			if (it != stats.end()) {
-				return it->second.f;
-			}
-			return 0.0f;
-			});
+		return intf->user->GetGalaxyUserData(userID)->stats.GetStat(name).f;
 	}
 
 	void StatsImpl::SetStatInt(const char* name, int32_t value) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		intf->config->SetStat(name, value);
+		intf->config->GetLocalUserData()->stats.SetStat(name, value);
 	}
 
 	void StatsImpl::SetStatFloat(const char* name, float value) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		intf->config->SetStat(name, value);
+		intf->config->GetLocalUserData()->stats.SetStat(name, value);
 	}
 
 	void StatsImpl::UpdateAvgRateStat(const char* name, float countThisSession, double sessionLength) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		intf->config->SetStat(name, (float)(intf->config->GetStat(name).f + (countThisSession / sessionLength)));
+		intf->config->GetLocalUserData()->stats.SetStat(name, (float)(intf->config->GetLocalUserData()->stats.GetStat(name).f + (countThisSession / sessionLength)));
 	}
 
 	void StatsImpl::GetAchievement(const char* name, bool& unlocked, uint32_t& unlockTime, GalaxyID userID) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		intf->user->GetGalaxyUserData(userID)->stats.run_locked_achievements<void>([&](auto& achievements) {
-			auto it = achievements.find(name);
-			if (it != achievements.end()) {
-				unlocked = it->second.GetUnlocked();
-				unlockTime = it->second.GetUnlockTime();
-			}
-			});
+		auto* data = intf->user->GetGalaxyUserData(userID)->stats.GetAchievementData(name);
+
+		if (data) {
+			unlocked = data->GetUnlocked();
+			unlockTime = data->GetUnlockTime();
+		}
 	}
 
 	void StatsImpl::SetAchievement(const char* name) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		auto data = intf->config->GetAchievementData(name);
-		data->SetUnlocked(true);
-		data->SetUnlockTimeNow();
+		auto* data = intf->config->GetLocalUserData()->stats.GetAchievementData(name);
+
+		if (data) {
+			data->SetUnlocked(true);
+			data->SetUnlockTimeNow();
+		}
 
 		listeners->NotifyAll(&IAchievementChangeListener::OnAchievementUnlocked, name);
 	}
@@ -114,9 +104,11 @@ namespace universelan::client {
 	void StatsImpl::ClearAchievement(const char* name) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		auto data = intf->config->GetAchievementData(name);
-		data->SetUnlocked(false);
-		data->SetUnlockTime(0);
+		auto* data = intf->config->GetLocalUserData()->stats.GetAchievementData(name);
+		if (data) {
+			data->SetUnlocked(false);
+			data->SetUnlockTime(0);
+		}
 	}
 
 	void StatsImpl::StoreStatsAndAchievements(IStatsAndAchievementsStoreListener* const listener) {
@@ -154,26 +146,47 @@ namespace universelan::client {
 	const char* StatsImpl::GetAchievementDescription(const char* name) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		return intf->config->GetAchievementData(name)->GetDescription().c_str();
+		auto* data = intf->config->GetLocalUserData()->stats.GetAchievementData(name);
+		if (data) {
+			return data->GetDescription().c_str();
+		}
+
+		return "";
 	}
 
 	void StatsImpl::GetAchievementDescriptionCopy(const char* name, char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		const std::string& desc = intf->config->GetAchievementData(name)->GetDescription();
-		std::copy_n(desc.c_str(), std::min(bufferLength, (uint32_t)desc.size()), buffer);
+		auto* data = intf->config->GetLocalUserData()->stats.GetAchievementData(name);
+
+		if (data) {
+			const std::string& desc = data->GetDescription();
+			std::copy_n(desc.c_str(), std::min(bufferLength, (uint32_t)desc.size()), buffer);
+		}
 	}
 
 	bool StatsImpl::IsAchievementVisible(const char* name) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		return intf->config->GetAchievementData(name)->GetVisible();
+		auto* data = intf->config->GetLocalUserData()->stats.GetAchievementData(name);
+
+		if (data) {
+			return data->GetVisible();
+		}
+
+		return false;
 	}
 
 	bool StatsImpl::IsAchievementVisibleWhileLocked(const char* name) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		return intf->config->GetAchievementData(name)->GetVisibleWhileLocked();
+		auto* data = intf->config->GetLocalUserData()->stats.GetAchievementData(name);
+
+		if (data) {
+			return data->GetVisibleWhileLocked();
+		}
+
+		return false;
 	}
 
 	void StatsImpl::RequestLeaderboards(ILeaderboardsRetrieveListener* const listener) {

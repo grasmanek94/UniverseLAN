@@ -159,14 +159,8 @@ namespace universelan {
 		bool GetSignedIn() const;
 		uint32_t GetPlayTime() const;
 
-		AchievementData* GetAchievementData(const std::string& name);
 		bool IsDLCInstalled(const std::string& name);
-		const StatsDataContainer& GetStat(const std::string& name);
-		void SetStat(const std::string& name, int32_t value);
-		void SetStat(const std::string& name, float value);
-		const std::string& GetUserData(const std::string& name);
-		void SetUserData(const std::string& name, const std::string& data);
-
+	
 		void SaveStatsAndAchievements();
 
 		bool IsSelfUserID(uint64_t userID) const;

@@ -174,42 +174,26 @@ namespace universelan::client {
 			return true;
 		}
 
-		auto entry = GetGalaxyUserData(userID);
-		return entry->stats.run_locked_userdata<bool>([&](auto& map) -> bool {
-			return !map.empty();
-			});
+		return GetGalaxyUserData(userID)->stats.IsUserDataAvailable();
 	}
 
 	const char* UserImpl::GetUserData(const char* key, GalaxyID userID) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		auto entry = GetGalaxyUserData(userID);
-		return entry->stats.run_locked_userdata<const char*>([&](auto& map) -> const char* {
-			auto it = map.find(key);
-			if (it != map.end()) {
-				return it->second.c_str();
-			}
-			return "";
-			});
+		return GetGalaxyUserData(userID)->stats.GetUserData(key).c_str();
 	}
 
 	void UserImpl::GetUserDataCopy(const char* key, char* buffer, uint32_t bufferLength, GalaxyID userID) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		auto entry = GetGalaxyUserData(userID);
-		entry->stats.run_locked_userdata<void>([&](auto& map) {
-			auto it = map.find(key);
-			if (it != map.end()) {
-				const std::string& str = it->second;
-				std::copy_n(str.begin(), std::min((uint32_t)str.length(), bufferLength), buffer);
-			}
-			});
+		const std::string& str = GetGalaxyUserData(userID)->stats.GetUserData(key);
+		std::copy_n(str.begin(), std::min((uint32_t)str.length(), bufferLength), buffer);
 	}
 
 	void UserImpl::SetUserData(const char* key, const char* value, ISpecificUserDataListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		intf->config->SetUserData(key, value);
+		intf->config->GetLocalUserData()->stats.SetUserData(key, value);
 		intf->config->SaveStatsAndAchievements();
 
 		intf->client->GetConnection().SendAsync(SetUserDataMessage{ intf->config->GetApiGalaxyID(), key, value });
@@ -300,12 +284,7 @@ namespace universelan::client {
 	}
 
 	void UserImpl::SetUserDataMessageReceived(const std::shared_ptr<SetUserDataMessage>& data) {
-		GetGalaxyUserData(data->id)->stats.run_locked_userdata<void>([&](auto& UserData) {
-			auto emplace = UserData.emplace(data->key, data->value);
-			if (!emplace.second) {
-				emplace.first->second = data->value;
-			}
-			});
+		GetGalaxyUserData(data->id)->stats.SetUserData(data->key, data->value);
 	}
 
 	GalaxyUserData::ptr_t UserImpl::GetGalaxyUserData(GalaxyID userID) {

@@ -447,21 +447,6 @@ namespace universelan {
 		return local_user_data->stats.GetPlayTime();
 	}
 
-	AchievementData* ClientIniData::GetAchievementData(const std::string& name)
-	{
-		return local_user_data->stats.run_locked_achievements<AchievementData*>([&](auto& Achievements) -> AchievementData* {
-			auto it = Achievements.find(name);
-			if (it == Achievements.end()) {
-				AchievementData* data = &Achievements.emplace(name, AchievementData()).first->second;
-				data->SetName(name);
-				return data;
-			}
-			else {
-				return &it->second;
-			}
-			});
-	}
-
 	bool ClientIniData::IsDLCInstalled(const std::string& name)
 	{
 		auto it = DLCs.find(name);
@@ -469,66 +454,6 @@ namespace universelan {
 			return DLCs.emplace(name, false).first->second;
 		}
 		return it->second;
-	}
-
-	const StatsDataContainer& ClientIniData::GetStat(const std::string& name)
-	{
-		return local_user_data->stats.run_locked_stats<const StatsDataContainer&>([&](auto& Stats) -> const StatsDataContainer& {
-			auto it = Stats.find(name);
-			if (it == Stats.end()) {
-				return Stats.emplace(name, 0).first->second;
-			}
-			else {
-				return it->second;
-			}
-			});
-	}
-
-	void ClientIniData::SetStat(const std::string& name, int32_t value) {
-		local_user_data->stats.run_locked_stats<void>([&](auto& Stats) {
-			auto it = Stats.find(name);
-			if (it == Stats.end()) {
-				StatsDataContainer c{ .i = value };
-				it = Stats.emplace(name, c).first;
-			}
-
-			it->second.i = value;
-			});
-	}
-
-	void ClientIniData::SetStat(const std::string& name, float value) {
-		local_user_data->stats.run_locked_stats<void>([&](auto& Stats) {
-			auto it = Stats.find(name);
-			if (it == Stats.end()) {
-				StatsDataContainer c{ .f = value };
-				it = Stats.emplace(name, c).first;
-			}
-
-			it->second.f = value;
-			});
-	}
-
-	const std::string& ClientIniData::GetUserData(const std::string& name)
-	{
-		return local_user_data->stats.run_locked_userdata<const std::string&>([&](auto& UserData) -> const std::string& {
-			auto it = UserData.find(name);
-			if (it == UserData.end()) {
-				return UserData.emplace(name, "").first->second;
-			}
-			return it->second;
-			});
-	}
-
-	void ClientIniData::SetUserData(const std::string& name, const std::string& data) {
-		local_user_data->stats.run_locked_userdata<void>([&](auto& UserData) {
-			auto it = UserData.find(name);
-			if (it == UserData.end()) {
-				UserData.emplace(name, data);
-				return;
-			}
-
-			it->second = data;
-			});
 	}
 
 	void ClientIniData::SaveStatsAndAchievements()

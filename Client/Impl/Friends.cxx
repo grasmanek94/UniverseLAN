@@ -218,7 +218,6 @@ namespace universelan::client {
 	void FriendsImpl::DeleteRichPresence(const char* key, IRichPresenceChangeListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-
 	}
 
 	void FriendsImpl::ClearRichPresence(IRichPresenceChangeListener* const listener) {
