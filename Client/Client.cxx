@@ -41,6 +41,10 @@ namespace universelan::client {
 		return connection;
 	}
 
+	bool Client::IsConnected() const {
+		return connection.IsConnected();
+	}
+
 	Client::~Client()
 	{
 		Stop();

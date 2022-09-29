@@ -14,6 +14,7 @@
 #include "Messages/LeaveLobbyMessage.hxx"
 #include "Messages/LobbyMemberStateChangeMessage.hxx"
 #include "Messages/LobbyOwnerChangeMessage.hxx"
+#include "Messages/OnlineStatusChangeMessage.hxx"
 #include "Messages/P2PNetworkPacketMessage.hxx"
 #include "Messages/RequestChatRoomMessagesMessage.hxx"
 #include "Messages/RequestChatRoomWithUserMessage.hxx"
@@ -27,6 +28,7 @@
 #include "Messages/SetLobbyMaxMembersMessage.hxx"
 #include "Messages/SetLobbyMemberDataMessage.hxx"
 #include "Messages/SetLobbyTypeMessage.hxx"
+#include "Messages/SetUserDataMessage.hxx"
 #include "Messages/UserHelloDataMessage.hxx"
 
 namespace universelan {
@@ -43,6 +45,7 @@ namespace universelan {
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(LeaveLobbyMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(LobbyMemberStateChangeMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(LobbyOwnerChangeMessage); \
+	SHARED_NETWORK_IMPLEMENT_CASE_FOR(OnlineStatusChangeMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(P2PNetworkPacketMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(RequestChatRoomMessagesMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(RequestChatRoomWithUserMessage); \
@@ -56,6 +59,7 @@ namespace universelan {
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(SetLobbyMaxMembersMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(SetLobbyMemberDataMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(SetLobbyTypeMessage); \
+	SHARED_NETWORK_IMPLEMENT_CASE_FOR(SetUserDataMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(UserHelloDataMessage)
 
 }

@@ -211,7 +211,7 @@ namespace universelan::client {
 		intf->config->SetUserData(key, value);
 		intf->config->SaveStatsAndAchievements();
 
-		// TODO: send data to server
+		intf->client->GetConnection().SendAsync(SetUserDataMessage{ intf->config->GetApiGalaxyID(), key, value });
 
 		listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, intf->config->GetApiGalaxyID());
 		listeners->NotifyAll(&IUserDataListener::OnUserDataUpdated);
@@ -290,6 +290,21 @@ namespace universelan::client {
 
 		listeners->NotifyAll(&IAccessTokenListener::OnAccessTokenChanged);
 		return true;
+	}
+
+	void UserImpl::OnlineUserStateChange(const std::shared_ptr<OnlineStatusChangeMessage>& data) {
+		tracer::Trace trace{ __FUNCTION__ };
+
+		GetGalaxyUserData(data->id)->online = data->online;
+	}
+
+	void UserImpl::SetUserDataMessageReceived(const std::shared_ptr<SetUserDataMessage>& data) {
+		GetGalaxyUserData(data->id)->stats.run_locked_userdata<void>([&](auto& UserData) {
+			auto emplace = UserData.emplace(data->key, data->value);
+			if (!emplace.second) {
+				emplace.first->second = data->value;
+			}
+			});
 	}
 
 	GalaxyUserData::ptr_t UserImpl::GetGalaxyUserData(GalaxyID userID) {

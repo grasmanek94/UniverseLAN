@@ -56,6 +56,7 @@ namespace universelan {
 
 						if (!errorOccured) {
 							Handle(event.peer, var);
+							return true;
 						}
 					}
 					else {
@@ -87,7 +88,7 @@ namespace universelan {
 
 		size_t x = (size_t)ss.tellp();
 
-		ENetPacket* packet = enet_packet_create(nullptr, x, flags);
+		ENetPacket* packet = enet_packet_create(nullptr, x, flags); // maybe no allocate flag and the nullptr can be replaced by data somehow
 
 		if (!packet)
 		{
@@ -111,21 +112,10 @@ namespace universelan {
 		mutable Concurrency::concurrent_queue<ENetPacket*> delayed_packets_to_send;
 		mutable Concurrency::concurrent_queue<ENetEvent> received_events_to_process;
 
+		bool is_connected;
+
+		void Cleanup();
 	public:
-		template<typename T>
-		bool SendAsync(const std::shared_ptr<T>& object, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE) const
-		{
-			ENetPacket* packet = ConvertToENetPacket(*object, flags);
-
-			if (!packet)
-			{
-				return false;
-			}
-
-			delayed_packets_to_send.push(packet);
-			return true;
-		}
-
 		template<typename T>
 		bool SendAsync(const T& object, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE) const
 		{
@@ -140,37 +130,23 @@ namespace universelan {
 			return true;
 		}
 
+		template<typename T>
+		bool SendAsync(const std::shared_ptr<T>& object, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE) const
+		{
+			return SendAsync(*object, flags);
+		}
+
 		void RunNetworking(uint32_t timeout);
 		void ProcessEvents(MessageReceiver* receiver);
-
-	private:
-		std::atomic<bool> is_active;
-
-	public:
-		void SetActive(bool active);
-		bool IsActive() const;
+		bool IsConnected() const;
 
 		GalaxyNetworkClient();
-
-		virtual ~GalaxyNetworkClient() {}
+		virtual ~GalaxyNetworkClient();
 	};
 
 	class GalaxyNetworkServer : public NetworkServer
 	{
 	public:
-		template<typename T>
-		int Send(ENetPeer* peer, const std::shared_ptr<T>& object, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE)
-		{
-			ENetPacket* packet = ConvertToENetPacket(*object, flags);
-
-			if (!packet)
-			{
-				return -1;
-			}
-
-			return NetworkServer::Send(peer, packet);
-		}
-
 		template<typename T>
 		int Send(ENetPeer* peer, const T& object, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE)
 		{
@@ -185,17 +161,9 @@ namespace universelan {
 		}
 
 		template<typename T>
-		bool Broadcast(const std::shared_ptr<T>& object, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE)
+		int Send(ENetPeer* peer, const std::shared_ptr<T>& object, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE)
 		{
-			ENetPacket* packet = ConvertToENetPacket(*object, flags);
-
-			if (!packet)
-			{
-				return false;
-			}
-
-			NetworkServer::Broadcast(packet);
-			return true;
+			return Send(peer, *object, flags);
 		}
 
 		template<typename T>
@@ -212,19 +180,10 @@ namespace universelan {
 			return true;
 		}
 
-
 		template<typename T>
-		bool Broadcast(const std::shared_ptr<T>& object, ENetPeer* except, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE)
+		bool Broadcast(const std::shared_ptr<T>& object, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE)
 		{
-			ENetPacket* packet = ConvertToENetPacket(*object, flags);
-
-			if (!packet)
-			{
-				return false;
-			}
-
-			NetworkServer::Broadcast(packet, except);
-			return true;
+			return Broadcast(*object, flags);
 		}
 
 		template<typename T>
@@ -239,6 +198,13 @@ namespace universelan {
 
 			NetworkServer::Broadcast(packet, except);
 			return true;
+		}
+
+
+		template<typename T>
+		bool Broadcast(const std::shared_ptr<T>& object, ENetPeer* except, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE)
+		{
+			return Broadcast(*object, except, flags);
 		}
 
 		virtual ~GalaxyNetworkServer() {}

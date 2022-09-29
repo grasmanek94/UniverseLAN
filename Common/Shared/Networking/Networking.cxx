@@ -68,46 +68,26 @@ namespace universelan {
 			NetworkClient::Send(packet);
 		}
 
+		bool disconnected{ false };
 		if (NetworkClient::Pull(timeout))
 		{
 			ENetEvent event = NetworkClient::Event();
 			if (event.type != ENET_EVENT_TYPE_NONE)
 			{
-				if (IsActive() || event.type != ENET_EVENT_TYPE_RECEIVE)
-				{
-					received_events_to_process.push(event);
+				if (event.type == ENET_EVENT_TYPE_CONNECT) {
+					is_connected = true;
 				}
-				else if (!IsActive() && event.type == ENET_EVENT_TYPE_RECEIVE)
-				{
-					ENetPacket* packet = event.packet;
-					if (packet->dataLength >= sizeof(uint64_t))
-					{
-						uint64_t unique_class_id = (*reinterpret_cast<uint64_t*>(packet->data));
-
-#define SHARED_NETWORK_IMPLEMENT_CASE_FOR(class_name) \
-						case class_name::UniqueClassId(): \
-						{ \
-							received_events_to_process.push(event); \
-						} \
-						break;
-
-#pragma warning( push )
-#pragma warning( disable : 4307 )
-
-						switch (unique_class_id)
-						{
-							SHARED_NETWORK_IMPLEMENT_ALL_CASES();
-
-						default:
-							break;
-						}
-
-#pragma warning( pop )
-
-#undef SHARED_NETWORK_IMPLEMENT_CASE_FOR
-					}
+				else if (event.type == ENET_EVENT_TYPE_DISCONNECT) {
+					is_connected = false;
+					disconnected = true;
 				}
+
+				received_events_to_process.push(event);
 			}
+		}
+
+		if (disconnected) {
+			Cleanup();
 		}
 	}
 
@@ -121,17 +101,35 @@ namespace universelan {
 		}
 	}
 
-	GalaxyNetworkClient::GalaxyNetworkClient()
-		: is_active(true)
-	{ }
-
-	void GalaxyNetworkClient::SetActive(bool active)
-	{
-		is_active = active;
+	bool GalaxyNetworkClient::IsConnected() const {
+		return is_connected;
 	}
 
-	bool GalaxyNetworkClient::IsActive() const
-	{
-		return is_active;
+	GalaxyNetworkClient::GalaxyNetworkClient() :
+		is_connected{ false }
+	{ }
+
+
+	GalaxyNetworkClient::~GalaxyNetworkClient() {
+		Cleanup();
+	}
+
+
+	void GalaxyNetworkClient::Cleanup() {
+		ENetEvent event{};
+		while (!received_events_to_process.empty()) {
+			if (received_events_to_process.try_pop(event)) {
+				if (event.type == ENET_EVENT_TYPE_RECEIVE) {
+					enet_packet_destroy(event.packet);
+				}
+			}
+		}
+
+		ENetPacket* packet = nullptr;
+		while (!delayed_packets_to_send.empty()) {
+			if (delayed_packets_to_send.try_pop(packet)) {
+				enet_packet_destroy(packet);
+			}
+		}
 	}
 }

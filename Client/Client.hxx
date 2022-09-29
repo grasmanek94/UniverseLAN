@@ -36,5 +36,6 @@ namespace universelan::client {
 		void ProcessEvents();
 
 		const GalaxyNetworkClient& GetConnection() const;
+		bool IsConnected() const;
 	};
 }

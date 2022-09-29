@@ -10,6 +10,8 @@
 #include <GalaxyUserData.hxx>
 
 #include <Networking/Messages/RequestSpecificUserDataMessage.hxx>
+#include <Networking/Messages/OnlineStatusChangeMessage.hxx>
+#include <Networking/Messages/SetUserDataMessage.hxx>
 
 #include <IUser.h>
 #include <GalaxyID.h>
@@ -480,6 +482,9 @@ namespace universelan::client {
 		virtual bool ReportInvalidAccessToken(const char* accessToken, const char* info = NULL) override;
 
 		void SpecificUserDataRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
+		void OnlineUserStateChange(const std::shared_ptr<OnlineStatusChangeMessage>& data);
+		void SetUserDataMessageReceived(const std::shared_ptr<SetUserDataMessage>& data);
+
 		GalaxyUserData::ptr_t GetGalaxyUserData(GalaxyID userID);
 		bool IsGalaxyUserDataPresent(GalaxyID userID) const;
 	};

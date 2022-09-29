@@ -30,6 +30,7 @@ namespace universelan::client {
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
 
+		AvatarCriteria avatar_criteria;
 	public:
 
 		FriendsImpl(InterfaceInstances* intf);

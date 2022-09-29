@@ -15,6 +15,7 @@ namespace universelan::server {
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<CreateLobbyResponseMessage>& data) { tracer::Trace trace{ __FUNCTION__"::CreateLobbyResponseMessage" }; REQUIRES_AUTHENTICATION(peer); }
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<LobbyMemberStateChangeMessage>& data) { tracer::Trace trace{ __FUNCTION__"::LobbyMemberStateChangeMessage" }; REQUIRES_AUTHENTICATION(peer); }
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<LobbyOwnerChangeMessage>& data) { tracer::Trace trace{ __FUNCTION__"::LobbyOwnerChangeMessage" }; REQUIRES_AUTHENTICATION(peer); }
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<OnlineStatusChangeMessage>& data) { tracer::Trace trace{ __FUNCTION__"::OnlineStatusChangeMessage" }; REQUIRES_AUTHENTICATION(peer); }
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data)
 	{
@@ -43,6 +44,10 @@ namespace universelan::server {
 		user_data.erase(pd->id);
 		unauthenticated_peers.erase(peer);
 
+		if (pd->id.IsValid()) {
+			connection.Broadcast(OnlineStatusChangeMessage{ pd->id, false }, peer);
+		}
+
 		peer_mapper.Disconnect(peer);
 		pd = nullptr;
 		peer->data = nullptr;
@@ -66,6 +71,7 @@ namespace universelan::server {
 
 					unauthenticated_peers.erase(peer);
 					connection.Send(peer, ConnectionAcceptedMessage{});
+					connection.Broadcast(OnlineStatusChangeMessage{ pd->id, true }, peer);
 
 					std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") KeyChallengeMessage ACCEPT" << std::endl;
 					return;
@@ -109,6 +115,26 @@ namespace universelan::server {
 		}
 
 		connection.Send(peer, response);
+	}
+
+
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<SetUserDataMessage>& data)
+	{
+		tracer::Trace trace{ __FUNCTION__"::SetUserDataMessage" };
+
+		REQUIRES_AUTHENTICATION(peer);
+
+		peer::ptr pd = peer_mapper.Get(peer);
+
+		pd->user_data->stats.run_locked_userdata<void>([&](auto& UserData) {
+			auto emplace = UserData.emplace(data->key, data->value);
+			if (!emplace.second) {
+				emplace.first->second = data->value;
+			}
+			});
+
+		data->id = pd->id;
+		connection.Broadcast(data, peer);
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestChatRoomWithUserMessage>& data) {

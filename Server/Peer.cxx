@@ -51,7 +51,7 @@ namespace universelan::server::peer {
 	Data::Data(ENetPeer* peer, Mapper* mapper) :
 		mapper{ mapper}, peer{ peer }, id{ 0ULL }, challenge{},
 		connected_time{ std::chrono::system_clock::now() },
-		chat_rooms{}, lobby{nullptr}
+		user_data{ nullptr }, chat_rooms{}, lobby{nullptr}
 	{
 		assert(peer != nullptr);
 		assert(peer->data == nullptr);

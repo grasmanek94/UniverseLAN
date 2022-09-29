@@ -184,4 +184,18 @@ namespace universelan::client {
 
 		interfaces->matchmaking->LobbyOwnerChange(data);
 	}
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<OnlineStatusChangeMessage>& data)
+	{
+		tracer::Trace trace{ __FUNCTION__"::OnlineStatusChangeMessage" };
+
+		interfaces->user->OnlineUserStateChange(data);
+	}
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<SetUserDataMessage>& data)
+	{
+		tracer::Trace trace{ __FUNCTION__"::SetUserDataMessage" };
+
+		interfaces->user->SetUserDataMessageReceived(data);
+	}
 }

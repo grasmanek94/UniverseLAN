@@ -7,7 +7,8 @@
 namespace universelan::client {
 	using namespace galaxy::api;
 	FriendsImpl::FriendsImpl(InterfaceInstances* intf) :
-		intf{ intf }, listeners{ intf->notification.get() }
+		intf{ intf }, listeners{ intf->notification.get() },
+		avatar_criteria{ 0 }
 	{
 		tracer::Trace trace{ __FUNCTION__ };
 	}
@@ -15,18 +16,18 @@ namespace universelan::client {
 	FriendsImpl::~FriendsImpl()
 	{
 		tracer::Trace trace{ __FUNCTION__ };
-
 	}
 
 	AvatarCriteria FriendsImpl::GetDefaultAvatarCriteria() {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		return 0;
+		return avatar_criteria;
 	}
 
 	void FriendsImpl::SetDefaultAvatarCriteria(AvatarCriteria defaultAvatarCriteria) {
 		tracer::Trace trace{ __FUNCTION__ };
 
+		avatar_criteria = defaultAvatarCriteria;
 	}
 
 	void FriendsImpl::RequestUserInformation(
@@ -34,6 +35,7 @@ namespace universelan::client {
 		AvatarCriteria avatarCriteria,
 		IUserInformationRetrieveListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
+
 
 	}
 
@@ -60,25 +62,30 @@ namespace universelan::client {
 	PersonaState FriendsImpl::GetPersonaState() {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		return PERSONA_STATE_ONLINE;
+		return intf->client->IsConnected() ?
+			PERSONA_STATE_ONLINE :
+			PERSONA_STATE_OFFLINE;
 	}
 
 	const char* FriendsImpl::GetFriendPersonaName(GalaxyID userID) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		return "GetFriendPersonaName";
+		return intf->user->GetGalaxyUserData(userID)->nickname.c_str();
 	}
 
 	void FriendsImpl::GetFriendPersonaNameCopy(GalaxyID userID, char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		std::copy_n(GetFriendPersonaName(userID), std::min((size_t)bufferLength, strlen(GetFriendPersonaName(userID))), buffer);
+		std::string nickname = intf->user->GetGalaxyUserData(userID)->nickname;
+		std::copy_n(nickname.c_str(), std::min((size_t)bufferLength, nickname.size()), buffer);
 	}
 
 	PersonaState FriendsImpl::GetFriendPersonaState(GalaxyID userID) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		return PERSONA_STATE_OFFLINE;
+		return intf->user->GetGalaxyUserData(userID)->online ?
+			PERSONA_STATE_ONLINE :
+			PERSONA_STATE_OFFLINE;
 	}
 
 	const char* FriendsImpl::GetFriendAvatarUrl(GalaxyID userID, AvatarType avatarType) {
@@ -228,7 +235,7 @@ namespace universelan::client {
 	void FriendsImpl::ShowOverlayInviteDialog(const char* connectionString) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-
+		std::cout << "ShowOverlayInviteDialog\n\t" << connectionString << std::endl;
 	}
 
 	void FriendsImpl::SendInvitation(GalaxyID userID, const char* connectionString, ISendInvitationListener* const listener) {
@@ -246,6 +253,6 @@ namespace universelan::client {
 	bool FriendsImpl::IsUserInTheSameGame(GalaxyID userID) const {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		return true;
+		return intf->user->GetGalaxyUserData(userID)->online;
 	}
 }
