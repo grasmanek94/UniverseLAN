@@ -48,6 +48,9 @@ namespace universelan::server {
 
 		bool HandleMemberChatLeave(ENetPeer* peer);
 		bool HandleMemberChatLeave(ENetPeer* peer, galaxy::api::ChatRoomID chat_room_id);
+
+		void PerformPeerCleanup();
+
 	public:
 		Server();
 		virtual ~Server();

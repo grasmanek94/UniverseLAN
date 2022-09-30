@@ -92,6 +92,25 @@ namespace universelan::server {
 		//ready
 	}
 
+	void Server::PerformPeerCleanup() {
+		tracer::Trace trace{ __FUNCTION__ };
+
+		auto now = std::chrono::system_clock::now();
+
+		for (auto& peer : unauthenticated_peers) {
+			peer::ptr pd = peer_mapper.Get(peer);
+			if (pd == nullptr) {
+				connection.Disconnect(peer);
+			}
+			else {
+				auto time = ((now - pd->connected_time) / std::chrono::milliseconds(1));
+				if (time > 2500) {
+					connection.Disconnect(peer);
+				}
+			}
+		}
+	}
+
 	void Server::Tick()
 	{
 		while (connection.Pull())
@@ -100,21 +119,9 @@ namespace universelan::server {
 		}
 
 		if (++ticks > 50) {
-			tracer::Trace trace_peer_cleanup{ "Server::Tick::PeerCleanup"};
 			ticks = 0;
-			auto now = std::chrono::system_clock::now();
-
-			for (auto& peer : unauthenticated_peers) {
-				peer::ptr pd = peer_mapper.Get(peer);
-				if (pd == nullptr) {
-					connection.Disconnect(peer);
-				}
-				else {
-					auto time = ((now - pd->connected_time) / std::chrono::milliseconds(1));
-					if (time > 2500) {
-						connection.Disconnect(peer);
-					}
-				}
+			if (!unauthenticated_peers.empty()) {
+				PerformPeerCleanup();
 			}
 		}
 	}
