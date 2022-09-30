@@ -97,6 +97,7 @@ namespace universelan::server {
 
 		auto now = std::chrono::system_clock::now();
 
+		std::queue<ENetPeer*> disconnect_list{};
 		for (auto& peer : unauthenticated_peers) {
 			peer::ptr pd = peer_mapper.Get(peer);
 			if (pd == nullptr) {
@@ -104,10 +105,20 @@ namespace universelan::server {
 			}
 			else {
 				auto time = ((now - pd->connected_time) / std::chrono::milliseconds(1));
-				if (time > 2500) {
-					connection.Disconnect(peer);
+				if (time > 10000) {
+					disconnect_list.push(peer);
 				}
 			}
+		}
+
+		while (!disconnect_list.empty()) {
+			auto peer = disconnect_list.front();
+			disconnect_list.pop();
+
+			std::cout << "Disconnecting Peer(" << peer->address.host << ":" << peer->address.port << ") due to authentication timeout" << std::endl;
+
+			Handle(peer, std::shared_ptr<EventDisconnect>{nullptr});
+			connection.Disconnect(peer);
 		}
 	}
 

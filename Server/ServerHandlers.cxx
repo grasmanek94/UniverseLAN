@@ -36,20 +36,22 @@ namespace universelan::server {
 
 		std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") EventDisconnect" << std::endl;
 
-		peer::ptr pd = peer_mapper.Get(peer);
-
-		HandleMemberLobbyLeave(peer, true);
-		HandleMemberChatLeave(peer);
-
-		user_data.erase(pd->id);
 		unauthenticated_peers.erase(peer);
 
-		if (pd->id.IsValid()) {
-			connection.Broadcast(OnlineStatusChangeMessage{ pd->id, false }, peer);
+		peer::ptr pd = peer_mapper.Get(peer);
+		if (pd) {
+			HandleMemberLobbyLeave(peer, true);
+			HandleMemberChatLeave(peer);
+
+			user_data.erase(pd->id);
+
+			if (pd->id.IsValid()) {
+				connection.Broadcast(OnlineStatusChangeMessage{ pd->id, false }, peer);
+			}
+			pd = nullptr;
 		}
 
 		peer_mapper.Disconnect(peer);
-		pd = nullptr;
 		peer->data = nullptr;
 	}
 
