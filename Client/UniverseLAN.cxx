@@ -27,6 +27,8 @@ namespace universelan::client {
 			config->ShouldAlwaysFlushTracing()
 		);
 
+		tracer::Trace::SetTracingEnabled(true);
+
 		tracer::Trace trace{ __FUNCTION__ };
 
 		delay_runner = std::make_unique<DelayRunner>(); // No 'this' on purpose
@@ -48,6 +50,14 @@ namespace universelan::client {
 		telemetry = std::make_unique<TelemetryImpl>(this);
 	}
 
+	InterfaceInstances::~InterfaceInstances() {
+		tracer::Trace::SetTracingEnabled(false);
+
+		if (client) {
+			client->Stop();
+		}
+	}
+
 	void InterfaceInstances::reset() {
 		if (config == nullptr) {
 			config = std::make_unique<ClientIniData>();
@@ -61,8 +71,6 @@ namespace universelan::client {
 			config->GetMiniDumpVerbosityLevel(),
 			config->ShouldAlwaysFlushTracing()
 		);
-
-		tracer::Trace trace{ __FUNCTION__ };
 
 		delay_runner = nullptr;
 

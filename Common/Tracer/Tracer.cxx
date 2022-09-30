@@ -20,17 +20,8 @@ namespace universelan::tracer {
 	class Tracer
 	{
 	public:
-		friend class Trace;
-
-	private:
-		Tracer();
-		~Tracer();
-
-		void Enter(const char* const func, const void* const return_address);
-		void Exit(const char* const func, const void* const return_address);
-
-	public:
-		static Tracer* GetInstance();
+		static void Enter(const char* const func, const void* const return_address);
+		static void Exit(const char* const func, const void* const return_address);
 	};
 
 	fs::path trace_log_directory;
@@ -43,13 +34,11 @@ namespace universelan::tracer {
 			virtual ~UnhandledExceptionCallback() {}
 		};
 
+		bool tracing_initialized;
 		std::atomic_bool tracing_enabled;
 		std::atomic_bool unhandled_exception_logging;
 		bool should_always_flush_tracing;
-
 		UnhandledExceptionCallback tracer_callstack_handler{};
-
-		Tracer* tracer{ nullptr };
 		std::ofstream global_trace_file;
 
 		void LogUnhandledExceptionOccurred(std::ofstream& file, DWORD thread_id, bool unknown_exception, const std::string exception_type, const std::string& exception_message, bool error_occured_during_stack_walk, const CallStackEntries& call_stack) {
@@ -164,10 +153,6 @@ namespace universelan::tracer {
 	void Trace::SetUnhandledExceptionLogging(bool enabled) {
 		unhandled_exception_logging = enabled;
 
-		if (unhandled_exception_logging && (tracer == nullptr)) {
-			tracer = new Tracer();
-		}
-
 		Stacker::GetInstance()
 			->SetUnhandledExceptionCallback(
 				unhandled_exception_logging ?
@@ -178,16 +163,13 @@ namespace universelan::tracer {
 
 	void Trace::SetTracingEnabled(bool enabled) {
 		tracing_enabled = enabled;
-		if (tracing_enabled && (tracer == nullptr)) {
-			tracer = new Tracer();
-		}
 	}
 
-	bool Trace::InitTracing(const char* const log_directory, 
-		bool in_unhandled_exception_logging, bool in_tracing_enabled, 
+	bool Trace::InitTracing(const char* const log_directory,
+		bool in_unhandled_exception_logging, bool in_tracing_enabled,
 		bool mindump_on_unhandled_exception, int in_minidump_verbosity_level,
 		bool in_should_always_flush_tracing) {
-		if (tracer != nullptr) {
+		if (tracing_initialized) {
 			return false;
 		}
 
@@ -204,6 +186,19 @@ namespace universelan::tracer {
 
 		trace_log_directory = fs::path(log_directory) / path.str();
 
+		if (!fs::create_directories(trace_log_directory)) {
+			std::cerr << "Failed to create tracing directory: " << trace_log_directory << std::endl;
+			return false;
+		}
+
+		global_trace_file = std::ofstream{ (trace_log_directory / "all.trace").string(), std::ios::trunc | std::ios::out };
+		if (!global_trace_file) {
+			std::cerr << "Error opening for write: " << (trace_log_directory / "all.trace") << std::endl;
+			return false;
+		}
+
+		tracing_initialized = true;
+
 		create_minidump_on_unhandles_exception = mindump_on_unhandled_exception;
 		minidump_verbosity_level = in_minidump_verbosity_level;
 		should_always_flush_tracing = in_should_always_flush_tracing;
@@ -215,16 +210,14 @@ namespace universelan::tracer {
 	}
 
 	Trace::Trace(const char* const func) :
-		enabled{ tracing_enabled }, tracer_ptr{ Tracer::GetInstance() },
+		enabled{ tracing_enabled },
 		func{ func }, return_address{ nullptr } {
 		if (!enabled) {
 			return;
 		}
 
 		return_address = _ReturnAddress();
-		if (tracer_ptr) {
-			tracer_ptr->Enter(func, return_address);
-		}
+		Tracer::Enter(func, return_address);
 	}
 
 	Trace::~Trace() {
@@ -232,25 +225,8 @@ namespace universelan::tracer {
 			return;
 		}
 
-		if (tracer_ptr) {
-			tracer_ptr->Exit(func, return_address);
-		}
+		Tracer::Exit(func, return_address);
 	}
-
-	Tracer::Tracer() {
-		if (!fs::create_directories(trace_log_directory)) {
-			std::cerr << "Failed to create tracing directory: " << trace_log_directory << std::endl;
-			return;
-		}
-
-		global_trace_file = std::ofstream{ (trace_log_directory / "all.trace").string(), std::ios::trunc | std::ios::out };
-		if (!global_trace_file) {
-			std::cerr << "Error opening for write: " << (trace_log_directory / "all.trace") << std::endl;
-			return;
-		}
-	}
-
-	Tracer::~Tracer() {}
 
 	void Tracer::Enter(const char* const func, const void* const return_address) {
 		auto& log_file = thread_tracer.GetLogFile();
@@ -291,9 +267,5 @@ namespace universelan::tracer {
 				global_trace_file.flush();
 			}
 		}
-	}
-
-	Tracer* Tracer::GetInstance() {
-		return tracer;
 	}
 }

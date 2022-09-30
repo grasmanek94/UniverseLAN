@@ -1,8 +1,6 @@
 #pragma once
 
 namespace universelan::tracer {
-	class Tracer;
-
 	enum class TRACE_MASK {
 
 	};
@@ -10,7 +8,6 @@ namespace universelan::tracer {
 	class Trace
 	{
 	private:
-		Tracer* const tracer_ptr;
 		const bool enabled;
 		const char* const func;
 		const void* return_address;

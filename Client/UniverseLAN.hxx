@@ -53,6 +53,8 @@ namespace universelan::client {
 
 		void init(const galaxy::api::InitOptions& initOptions);
 		void reset();
+
+		~InterfaceInstances();
 	};
 
 	extern InterfaceInstances intf_inst;
