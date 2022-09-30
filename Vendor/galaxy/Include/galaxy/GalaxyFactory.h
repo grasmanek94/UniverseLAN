@@ -15,6 +15,8 @@ namespace galaxy
 {
 	namespace api
 	{
+		using IErrorManager = void;
+
 		/**
 		 * @addtogroup api
 		 * @{

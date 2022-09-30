@@ -2,14 +2,6 @@
 
 #include <Tracer.hxx>
 
-#define IErrorManager void
-
-#undef GALAXY_CALLTYPE
-#undef GALAXY_DLL_EXPORT
-
-#define GALAXY_DLL_EXPORT __declspec(dllexport)
-#define GALAXY_CALLTYPE __cdecl
-
 #include <GalaxyFactory.h>
 
 using namespace universelan::tracer;

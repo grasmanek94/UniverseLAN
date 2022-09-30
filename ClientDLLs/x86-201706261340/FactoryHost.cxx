@@ -1,13 +1,4 @@
-#ifndef _WIN64
-
-#define IErrorManager void
 #include <GalaxyFactory.h>
-
-#else
-
-#include <GalaxyApi.h>
-
-#endif
 
 #include <windows.h>
 
@@ -19,7 +10,6 @@ using namespace std::chrono;
 
 int Run()
 {
-#ifndef _WIN64
 	auto galaxy = GalaxyFactory::GetInstance();
 
 	galaxy->Init("","");
@@ -29,17 +19,7 @@ int Run()
 		galaxy->ProcessData();
 		std::this_thread::sleep_for(milliseconds(5));
 	}
-#else
-	InitOptions options("", "");
 
-	Init(options);
-
-	while (true)
-	{
-		ProcessData();
-		std::this_thread::sleep_for(milliseconds(5));
-	}
-#endif
 	return 0;
 }
 
