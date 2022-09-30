@@ -17,7 +17,7 @@ namespace universelan::client {
 		// add local user
 		user_data.emplace(intf->config->GetApiGalaxyID(), intf->config->GetLocalUserData());
 		user_data.emplace(GalaxyID(0), intf->config->GetLocalUserData());
-		user_data.emplace(GalaxyID::FromRealID(GalaxyID::ID_TYPE_USER, 0), intf->config->GetLocalUserData());
+		user_data.emplace(GalaxyID(static_cast<uint64_t>(GalaxyID::ID_TYPE_USER) << 56), intf->config->GetLocalUserData());
 	}
 
 	UserImpl::~UserImpl()
