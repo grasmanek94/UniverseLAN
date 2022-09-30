@@ -22,6 +22,11 @@ namespace universelan::server {
 			return true;
 		}
 
+		std::cout << "Disconnecting Peer("
+			<< std::hex << peer->address.host << ":" << peer->address.port
+			<< ") due to trying to forbidden access" << std::endl;
+
+		Handle(peer, std::shared_ptr<EventDisconnect>{nullptr});
 		connection.Disconnect(peer);
 
 		return false;
@@ -105,7 +110,7 @@ namespace universelan::server {
 			}
 			else {
 				auto time = ((now - pd->connected_time) / std::chrono::milliseconds(1));
-				if (time > 10000) {
+				if (time > 600000) {
 					disconnect_list.push(peer);
 				}
 			}
@@ -115,7 +120,9 @@ namespace universelan::server {
 			auto peer = disconnect_list.front();
 			disconnect_list.pop();
 
-			std::cout << "Disconnecting Peer(" << peer->address.host << ":" << peer->address.port << ") due to authentication timeout" << std::endl;
+			std::cout << "Disconnecting Peer(" 
+				<< std::hex << peer->address.host << ":" << peer->address.port 
+				<< ") due to authentication timeout" << std::endl;
 
 			Handle(peer, std::shared_ptr<EventDisconnect>{nullptr});
 			connection.Disconnect(peer);

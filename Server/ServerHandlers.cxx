@@ -22,7 +22,9 @@ namespace universelan::server {
 		tracer::Trace trace{ __FUNCTION__"::EventConnect" };
 
 		peer->data = nullptr;
-		std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") EventConnect" << std::endl;
+		std::cout << "Peer(" 
+			<< std::hex << peer->address.host << ":" << peer->address.port 
+			<< ") EventConnect" << std::endl;
 
 		peer::ptr pd = peer_mapper.Connect(peer);
 		unauthenticated_peers.insert(peer);
@@ -34,7 +36,9 @@ namespace universelan::server {
 	{
 		tracer::Trace trace{ __FUNCTION__"::EventDisconnect" };
 
-		std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") EventDisconnect" << std::endl;
+		std::cout << "Peer(" 
+			<< std::hex << peer->address.host << ":" << peer->address.port 
+			<< ") EventDisconnect" << std::endl;
 
 		unauthenticated_peers.erase(peer);
 
