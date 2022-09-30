@@ -15,6 +15,8 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__"::EventConnect"};
 
 		std::cout << "Peer connected: " << peer->address.host << ":" << peer->address.port << std::endl;
+
+		interfaces->utils->ConnectionStateChangeReceived(true);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data)
@@ -22,6 +24,8 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__"::EventDisconnect" };
 
 		std::cout << "Peer disconnected: " << peer->address.host << ":" << peer->address.port << std::endl;
+
+		interfaces->utils->ConnectionStateChangeReceived(false);
 
 		connection.Reconnect();
 	}

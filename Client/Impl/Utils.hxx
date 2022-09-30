@@ -141,6 +141,8 @@ namespace universelan::client {
 		 * @return Current GOG services connection state.
 		 */
 		virtual GogServicesConnectionState GetGogServicesConnectionState() override;
+
+		virtual void ConnectionStateChangeReceived(bool connected);
 	};
 
 	/** @} */

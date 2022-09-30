@@ -7,8 +7,6 @@ namespace universelan::client {
 		intf{ intf }, listeners{ intf->notification.get() }
 	{
 		tracer::Trace trace{ __FUNCTION__ };
-
-		listeners->NotifyAll(&IGogServicesConnectionStateListener::OnConnectionStateChange, GOG_SERVICES_CONNECTION_STATE_CONNECTED);
 	}
 
 	UtilsImpl::~UtilsImpl()
@@ -63,6 +61,18 @@ namespace universelan::client {
 	GogServicesConnectionState UtilsImpl::GetGogServicesConnectionState() {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		return GOG_SERVICES_CONNECTION_STATE_CONNECTED;
+		return intf->client->IsConnected() ?
+			GOG_SERVICES_CONNECTION_STATE_CONNECTED :
+			GOG_SERVICES_CONNECTION_STATE_DISCONNECTED;
+	}
+
+	void UtilsImpl::ConnectionStateChangeReceived(bool connected) {
+		tracer::Trace trace{ __FUNCTION__ };
+
+		listeners->NotifyAll(&IGogServicesConnectionStateListener::OnConnectionStateChange,
+			(connected ?
+				GOG_SERVICES_CONNECTION_STATE_CONNECTED :
+				GOG_SERVICES_CONNECTION_STATE_DISCONNECTED)
+		);
 	}
 }
