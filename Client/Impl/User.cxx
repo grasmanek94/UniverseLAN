@@ -18,6 +18,11 @@ namespace universelan::client {
 		user_data.emplace(intf->config->GetApiGalaxyID(), intf->config->GetLocalUserData());
 		user_data.emplace(GalaxyID(0), intf->config->GetLocalUserData());
 		user_data.emplace(GalaxyID(static_cast<uint64_t>(GalaxyID::ID_TYPE_USER) << 56), intf->config->GetLocalUserData());
+
+		if (intf->config->GetSignedIn()) {
+			listeners->NotifyAll(&IAuthListener::OnAuthSuccess);
+			listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_LOGGED_ON);
+		}
 	}
 
 	UserImpl::~UserImpl()
