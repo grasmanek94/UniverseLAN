@@ -11,17 +11,6 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	/**
-	 * Retrieves error connected with the last API call on the local thread.
-	 *
-	 * @return Either the last API call error or NULL if there was no error.
-	 */
-	GALAXY_DLL_EXPORT const IError* GALAXY_CALLTYPE GetError();
-
-	/**
-	 * @addtogroup api
-	 * @{
-	 */
 
 	 /**
 	  * Base interface for exceptions.

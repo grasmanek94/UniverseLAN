@@ -7,15 +7,26 @@
  * control the Galaxy Peer.
  */
 
-#include "IGalaxy.h"
-#include "Errors.h"
-#include "GalaxyExport.h"
+#include <IGalaxy.h>
+#include <Errors.h>
+#include <GalaxyExport.h>
+
+#include <cstdint>
 
 namespace galaxy
 {
 	namespace api
 	{
-		using IErrorManager = void;
+		class GALAXY_DLL_EXPORT IErrorManager
+		{
+		public:
+
+			// maybe something like 'cause exception when error occurred'
+			virtual int Unknown1() = 0;
+			virtual IErrorManager* Unknown2() = 0;
+			virtual int Unknown3() = 0;
+			virtual ~IErrorManager() {}
+		};
 
 		/**
 		 * @addtogroup api
@@ -38,7 +49,9 @@ namespace galaxy
 			 *
 			 * @return The instance of IGalaxy or NULL if it has not been created yet.
 			 */
-			static IGalaxy* GALAXY_CALLTYPE GetInstance(void);
+			static IGalaxy* GALAXY_CALLTYPE GetInstance(
+				//uint32_t a, uint32_t b
+			);
 
 			/**
 			 * Returns the instance of error manager. Creates it if it does not exists yet.

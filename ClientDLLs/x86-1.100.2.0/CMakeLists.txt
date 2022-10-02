@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 
 get_filename_component(PARENT_DIR ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 
-add_library(lsfdrmfg-client-${PARENT_DIR} SHARED Factory.cxx  GalaxyFactory.h UniverseLAN.def)
+add_library(lsfdrmfg-client-${PARENT_DIR} SHARED Factory.cxx GalaxyFactory.h UniverseLAN.def)
 add_executable(lsfdrmfg-dllhost-${PARENT_DIR} WIN32 FactoryHost.cxx )
 
 target_include_directories(lsfdrmfg-client-${PARENT_DIR} PUBLIC ".")
