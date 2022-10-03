@@ -29,7 +29,11 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__ };
 	}
 
-	uint32_t UtilsImpl::GetNotification(NotificationID notificationID, bool& consumable, char* type, uint32_t typeLength, void* content, uint32_t contentSize) {
+	uint32_t UtilsImpl::GetNotification(NotificationID notificationID
+#if (GALAXY_VERSION) > 112400
+		, bool& consumable
+#endif
+		, char* type, uint32_t typeLength, void* content, uint32_t contentSize) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		return 0;
@@ -58,6 +62,7 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__ };
 	}
 
+#if (GALAXY_VERSION) > 112400
 	GogServicesConnectionState UtilsImpl::GetGogServicesConnectionState() {
 		tracer::Trace trace{ __FUNCTION__ };
 
@@ -65,14 +70,16 @@ namespace universelan::client {
 			GOG_SERVICES_CONNECTION_STATE_CONNECTED :
 			GOG_SERVICES_CONNECTION_STATE_DISCONNECTED;
 	}
+#endif
 
 	void UtilsImpl::ConnectionStateChangeReceived(bool connected) {
 		tracer::Trace trace{ __FUNCTION__ };
-
+#if (GALAXY_VERSION) > 112400
 		listeners->NotifyAll(&IGogServicesConnectionStateListener::OnConnectionStateChange,
 			(connected ?
 				GOG_SERVICES_CONNECTION_STATE_CONNECTED :
 				GOG_SERVICES_CONNECTION_STATE_DISCONNECTED)
 		);
+#endif
 	}
 }

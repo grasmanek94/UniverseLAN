@@ -1,5 +1,6 @@
 #ifndef LSFDRMFG_IMPL_TELEMETRY_H
 #define LSFDRMFG_IMPL_TELEMETRY_H
+#if (GALAXY_VERSION) > 112400
 
 /**
  * @file
@@ -222,4 +223,5 @@ namespace universelan::client {
 	/** @} */
 }
 
+#endif
 #endif

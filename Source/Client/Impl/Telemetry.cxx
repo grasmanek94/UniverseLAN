@@ -1,3 +1,5 @@
+#if (GALAXY_VERSION) > 112400
+
 #include "Telemetry.hxx"
 #include "UniverseLAN.hxx"
 
@@ -193,3 +195,5 @@ namespace universelan::client {
 		visit_id = std::to_string((uint32_t)((uint64_t)this) + counter.fetch_add(1));
 	}
 }
+
+#endif
