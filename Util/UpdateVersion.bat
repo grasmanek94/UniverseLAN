@@ -1,6 +1,6 @@
 @ECHO OFF
 cd /d "%~dp0"
-cd ../Common/Version
+cd ../Source/Version
 
 for /f "delims=" %%a in ('git rev-list HEAD --count') do set _COUNT=%%a
 echo #define BUILD_VERSION %_COUNT% > auto_version_check.h
