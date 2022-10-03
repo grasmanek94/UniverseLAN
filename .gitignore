@@ -301,6 +301,6 @@ cmake/
 Config/Galaxy64.dll
 Config/Galaxy.dll
 bin/
-Common/Version/auto_version.h
+Source/Version/auto_version.h
 cmake-x86/
 cmake-x64/
