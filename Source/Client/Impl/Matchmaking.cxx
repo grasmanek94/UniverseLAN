@@ -439,7 +439,7 @@ namespace universelan::client {
 	}
 
 #if (GALAXY_VERSION) > 112400
-	void MatchmakingImpl::SetLobbyType(GalaxyID lobbyID, LobbyType lobbyType, ILobbyDataUpdateListener* const listener = NULL)
+	void MatchmakingImpl::SetLobbyType(GalaxyID lobbyID, LobbyType lobbyType, ILobbyDataUpdateListener* const listener)
 #else
 	bool MatchmakingImpl::SetLobbyType(GalaxyID lobbyID, LobbyType lobbyType)
 #endif
