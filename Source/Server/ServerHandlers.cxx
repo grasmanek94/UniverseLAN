@@ -233,7 +233,7 @@ namespace universelan::server {
 
 		if (target_pd) {
 			data->id = pd->id;
-			connection.Send(peer, *data);
+			connection.Send(target_pd->peer, *data);
 		}
 	}
 
@@ -338,6 +338,16 @@ namespace universelan::server {
 		pd->lobby = lobby;
 		data->result = LOBBY_ENTER_RESULT_SUCCESS;
 		connection.Send(peer, data);
+
+		LobbyMemberStateChangeMessage enter_notification{ lobby->GetID(), pd->id, LOBBY_MEMBER_STATE_CHANGED_ENTERED };
+
+		// hmm should we include the user itself?
+		auto members = lobby->GetMembers();
+		for (auto& member : members) {
+			auto member_peer = peer_mapper.Get(member);
+
+			connection.Send(member_peer->peer, enter_notification);
+		}
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<LeaveLobbyMessage>& data) {

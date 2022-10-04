@@ -442,7 +442,7 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		auto entry = intf->user->GetGalaxyUserData(userID);
-		return entry->stats.run_locked_richpresence<GetRichPresenceReturnT>([&](auto& map) {
+		return entry->stats.run_locked_richpresence<GetRichPresenceReturnT>([&](auto& map) -> GetRichPresenceReturnT {
 			if (map.size() < index) {
 #if (GALAXY_VERSION) <= 112400
 				return false;
@@ -452,11 +452,11 @@ namespace universelan::client {
 			auto ref = container_get_by_index(map, index);
 			std::copy_n(ref.first.begin(), std::min((uint32_t)ref.first.length(), keyLength), key);
 			std::copy_n(ref.second.begin(), std::min((uint32_t)ref.second.length(), valueLength), value);
-			});
 
 #if (GALAXY_VERSION) <= 112400
-		return true;
+			return true;
 #endif
+			});
 	}
 
 	void FriendsImpl::ShowOverlayInviteDialog(const char* connectionString) {
