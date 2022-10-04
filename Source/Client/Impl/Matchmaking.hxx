@@ -25,6 +25,11 @@ namespace universelan::client {
 	using namespace galaxy::api;
 	struct InterfaceInstances;
 
+#if (GALAXY_VERSION) <= 112400
+	using ILobbyDataUpdateListener = ILobbyDataListener;
+	using ILobbyMemberDataUpdateListener = ILobbyDataListener;
+#endif
+
 	/**
 	 * @addtogroup api
 	 * @{
@@ -108,12 +113,15 @@ namespace universelan::client {
 		 * @param [in] lobbyEnteredListener The lobby entering listener for specific operation call.
 		 */
 		virtual void CreateLobby(
-			LobbyType lobbyType,
-			uint32_t maxMembers,
-			bool joinable,
-			LobbyTopologyType lobbyTopologyType,
-			ILobbyCreatedListener* const lobbyCreatedListener = NULL,
-			ILobbyEnteredListener* const lobbyEnteredListener = NULL) override;
+			LobbyType lobbyType
+			, uint32_t maxMembers
+			, bool joinable
+			, LobbyTopologyType lobbyTopologyType
+#if (GALAXY_VERSION) > 112400
+			, ILobbyCreatedListener* const lobbyCreatedListener = NULL
+			, ILobbyEnteredListener* const lobbyEnteredListener = NULL
+#endif
+		) override;
 
 		/**
 		 * Performs a request for a list of relevant lobbies.
@@ -134,8 +142,13 @@ namespace universelan::client {
 		 * @param [in] allowFullLobbies Are full lobbies allowed.
 		 * @param [in] listener The listener for specific operation call.
 		 */
-		virtual void RequestLobbyList(bool allowFullLobbies = false, ILobbyListListener* const listener = NULL) override;
+		virtual void RequestLobbyList(bool allowFullLobbies = false
+#if (GALAXY_VERSION) > 112400
+			, ILobbyListListener* const listener = NULL
+#endif
+		) override;
 
+#if (GALAXY_VERSION) > 112400
 		/**
 		 * Sets the maximum number of lobbies to be returned next time you call RequestLobbyList().
 		 *
@@ -146,6 +159,7 @@ namespace universelan::client {
 		 * @param [in] limit The maximum non-zero number of lobbies to retrieve.
 		 */
 		virtual void AddRequestLobbyListResultCountFilter(uint32_t limit) override;
+#endif
 
 		/**
 		 * Adds a string filter to be applied next time you call RequestLobbyList().
@@ -210,7 +224,11 @@ namespace universelan::client {
 		 * @param [in] lobbyID The ID of the lobby to join.
 		 * @param [in] listener The listener for specific operation call.
 		 */
-		virtual void JoinLobby(GalaxyID lobbyID, ILobbyEnteredListener* const listener = NULL) override;
+		virtual void JoinLobby(GalaxyID lobbyID
+#if (GALAXY_VERSION) > 112400
+			, ILobbyEnteredListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Leaves a specified lobby.
@@ -223,7 +241,11 @@ namespace universelan::client {
 		 * @param [in] lobbyID The ID of the lobby to leave.
 		 * @param [in] listener The listener for specific operation call.
 		 */
-		virtual void LeaveLobby(GalaxyID lobbyID, ILobbyLeftListener* const listener = NULL) override;
+		virtual void LeaveLobby(GalaxyID lobbyID
+#if (GALAXY_VERSION) > 112400
+			, ILobbyLeftListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Sets the maximum number of users that can be in a specified lobby.
@@ -232,8 +254,12 @@ namespace universelan::client {
 		 * @param [in] maxNumLobbyMembers The maximum number of members allowed for the lobby with the limit of 250 members.
 		 * @param [in] listener The listener for specific operation.
 		 */
+#if (GALAXY_VERSION) > 112400
 		virtual void SetMaxNumLobbyMembers(GalaxyID lobbyID, uint32_t maxNumLobbyMembers, ILobbyDataUpdateListener* const listener = NULL) override;
+#else
+		virtual bool SetMaxNumLobbyMembers(GalaxyID lobbyID, uint32_t maxNumLobbyMembers) override;
 
+#endif
 		/**
 		 * Returns the maximum number of users that can be in a specified lobby.
 		 *
@@ -272,8 +298,11 @@ namespace universelan::client {
 		 * @param [in] lobbyType The type of the lobby.
 		 * @param [in] listener The listener for specific operation.
 		 */
+#if (GALAXY_VERSION) > 112400
 		virtual void SetLobbyType(GalaxyID lobbyID, LobbyType lobbyType, ILobbyDataUpdateListener* const listener = NULL) override;
-
+#else
+		virtual bool SetLobbyType(GalaxyID lobbyID, LobbyType lobbyType) override;
+#endif
 		/**
 		 * Returns the type of a specified lobby.
 		 *
@@ -297,7 +326,11 @@ namespace universelan::client {
 		 * @param [in] joinable Is the lobby joinable.
 		 * @param [in] listener The listener for specific operation.
 		 */
+#if (GALAXY_VERSION) > 112400
 		virtual void SetLobbyJoinable(GalaxyID lobbyID, bool joinable, ILobbyDataUpdateListener* const listener = NULL) override;
+#else
+		virtual bool SetLobbyJoinable(GalaxyID lobbyID, bool joinable) override;
+#endif
 
 		/**
 		 * Checks if a specified lobby is joinable.
@@ -321,7 +354,11 @@ namespace universelan::client {
 		 * @param [in] lobbyID The ID of the lobby.
 		 * @param [in] listener The listener for specific operation call.
 		 */
+#if (GALAXY_VERSION) > 112400
 		virtual void RequestLobbyData(GalaxyID lobbyID, ILobbyDataRetrieveListener* const listener = NULL) override;
+#else
+		virtual bool RequestLobbyData(GalaxyID lobbyID) override;
+#endif
 
 		/**
 		 * Returns an entry from the properties of a specified lobby.
@@ -375,7 +412,11 @@ namespace universelan::client {
 		 * @param [in] value The value of the property to set with the limit of 4095 bytes.
 		 * @param [in] listener The listener for specific operation.
 		 */
+#if (GALAXY_VERSION) > 112400
 		virtual void SetLobbyData(GalaxyID lobbyID, const char* key, const char* value, ILobbyDataUpdateListener* const listener = NULL) override;
+#else
+		virtual bool SetLobbyData(GalaxyID lobbyID, const char* key, const char* value) override;
+#endif
 
 		/**
 		 * Returns the number of entries in the properties of a specified lobby.
@@ -414,7 +455,11 @@ namespace universelan::client {
 		 * @param [in] key The name of the property of the lobby.
 		 * @param [in] listener The listener for specific operation.
 		 */
+#if (GALAXY_VERSION) > 112400
 		virtual void DeleteLobbyData(GalaxyID lobbyID, const char* key, ILobbyDataUpdateListener* const listener = NULL) override;
+#else
+		virtual bool DeleteLobbyData(GalaxyID lobbyID, const char* key) override;
+#endif
 
 		/**
 		 * Returns an entry from the properties of a specified member
@@ -473,7 +518,11 @@ namespace universelan::client {
 		 * @param [in] value The value of the property to set with the limit of 4095 bytes.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void SetLobbyMemberData(GalaxyID lobbyID, const char* key, const char* value, ILobbyMemberDataUpdateListener* const listener = NULL) override;
+		virtual void SetLobbyMemberData(GalaxyID lobbyID, const char* key, const char* value
+#if (GALAXY_VERSION) > 112400
+			, ILobbyMemberDataUpdateListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Returns the number of entries in the properties of a specified member
@@ -514,7 +563,11 @@ namespace universelan::client {
 		 * @param [in] key The name of the property of the lobby member.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void DeleteLobbyMemberData(GalaxyID lobbyID, const char* key, ILobbyMemberDataUpdateListener* const listener = NULL) override;
+		virtual void DeleteLobbyMemberData(GalaxyID lobbyID, const char* key
+#if (GALAXY_VERSION) > 112400
+			, ILobbyMemberDataUpdateListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Returns the owner of a specified lobby.

@@ -47,7 +47,10 @@ namespace universelan::client {
 		storage = std::make_unique<StorageImpl>(this);
 		custom_networking = std::make_unique<CustomNetworkingImpl>(this);
 		logger = std::make_unique<LoggerImpl>(this);
+
+#if (GALAXY_VERSION) > 112400
 		telemetry = std::make_unique<TelemetryImpl>(this);
+#endif
 	}
 
 	InterfaceInstances::~InterfaceInstances() {
@@ -78,7 +81,10 @@ namespace universelan::client {
 			client->Stop();
 		}
 
+#if (GALAXY_VERSION) > 112400
 		telemetry = nullptr;
+#endif
+
 		logger = nullptr;
 		custom_networking = nullptr;
 		storage = nullptr;

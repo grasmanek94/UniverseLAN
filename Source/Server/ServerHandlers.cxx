@@ -447,7 +447,10 @@ namespace universelan::server {
 
 		peer::ptr pd = peer_mapper.Get(peer);
 
+#if (GALAXY_VERSION) > 112400
 		data->fail_reason = ILobbyDataUpdateListener::FAILURE_REASON_UNDEFINED;
+#endif
+
 		data->success = false;
 
 		if ((!pd->lobby) ||

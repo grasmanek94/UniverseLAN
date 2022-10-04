@@ -22,6 +22,24 @@
 #include <mutex>
 #include <unordered_map>
 
+#if (GALAXY_VERSION) > 112400
+
+#define USER_SIGN_IN_CREDENTIALS SignInCredentials
+#define USER_SIGN_IN_STEAM SignInSteam
+#define USER_SIGN_IN_GALAXY SignInGalaxy
+#define USER_SIGN_IN_PS4 SignInPS4
+#define USER_SIGN_IN_SERVER_KEY SignInServerKey
+
+#else
+
+#define USER_SIGN_IN_CREDENTIALS SignIn
+#define USER_SIGN_IN_STEAM SignIn
+#define USER_SIGN_IN_GALAXY SignIn
+#define USER_SIGN_IN_PS4 SignIn
+#define USER_SIGN_IN_SERVER_KEY SignIn
+
+#endif
+
 namespace universelan::client {
 	using namespace galaxy::api;
 	struct InterfaceInstances;
@@ -98,8 +116,9 @@ namespace universelan::client {
 		 * @param [in] password The user's password.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void SignInCredentials(const char* login, const char* password, IAuthListener* const listener = NULL) override;
+		virtual void USER_SIGN_IN_CREDENTIALS(const char* login, const char* password, IAuthListener* const listener = NULL) override;
 
+#if (GALAXY_VERSION) > 112400
 		/**
 		 * Authenticates the Galaxy Peer with refresh token.
 		 *
@@ -115,6 +134,7 @@ namespace universelan::client {
 		 * @param [in] refreshToken The refresh token obtained from Galaxy login page.
 		 * @param [in] listener The listener for specific operation.
 		 */
+
 		virtual void SignInToken(const char* refreshToken, IAuthListener* const listener = NULL) override;
 
 		/**
@@ -131,6 +151,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void SignInLauncher(IAuthListener* const listener = NULL) override;
+#endif
 
 		/**
 		 * Authenticates the Galaxy Peer based on Steam Encrypted App Ticket.
@@ -146,8 +167,9 @@ namespace universelan::client {
 		 * @param [in] personaName The user's persona name, i.e. the username from Steam.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void SignInSteam(const void* steamAppTicket, uint32_t steamAppTicketSize, const char* personaName, IAuthListener* const listener = NULL) override;
+		virtual void USER_SIGN_IN_STEAM(const void* steamAppTicket, uint32_t steamAppTicketSize, const char* personaName, IAuthListener* const listener = NULL) override;
 
+#if (GALAXY_VERSION) > 112400
 		/**
 		 * Authenticates the Galaxy Peer based on Epic Access Token.
 		 *
@@ -162,6 +184,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void SignInEpic(const char* epicAccessToken, const char* epicUsername, IAuthListener* const listener = NULL) override;
+#endif
 
 		/**
 		 * Authenticates the Galaxy Peer based on Galaxy Client authentication.
@@ -175,8 +198,9 @@ namespace universelan::client {
 		 * @param [in] requireOnline Indicates if sing in with Galaxy backend is required.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void SignInGalaxy(bool requireOnline = false, IAuthListener* const listener = NULL) override;
+		virtual void USER_SIGN_IN_GALAXY(bool requireOnline = false, IAuthListener* const listener = NULL) override;
 
+#if (GALAXY_VERSION) > 112400
 		/**
 		 * Authenticates the Galaxy Peer based on Windows Store authentication
 		 * in Universal Windows Platform application.
@@ -236,6 +260,24 @@ namespace universelan::client {
 		 */
 		virtual void SignInXBLive(const char* token, const char* signature, const char* marketplaceID, const char* locale, IAuthListener* const listener = NULL) override;
 
+#else
+		virtual void SignIn(const char* ps4ClientID, const char* ps4TitleID, const char* ps4TitleSecret, uint32_t ps4TitleSecretLength, IAuthListener* listener = NULL) override;
+
+		/**
+		* Initializes the Galaxy Peer based on XBOX ONE credentials.
+		*
+		* This call is asynchronous. Responses come to the IAuthListener
+		* (for all GlobalAuthListener-derived and optional listener passed as argument).
+		*
+		* @remark Information about being signed in or signed out also comes to
+		* the IOperationalStateChangeListener.
+		*
+		* @param [in] xboxOneUserID The XBOX ONE user ID.
+		* @param [in] listener The listener for specific operation [EXPERIMENTAL].
+		*/
+		virtual void SignIn(uint32_t xboxOneUserID, IAuthListener* listener = NULL);
+#endif
+
 		/**
 		 * Authenticates the Galaxy Game Server anonymously.
 		 *
@@ -249,6 +291,7 @@ namespace universelan::client {
 		 */
 		virtual void SignInAnonymous(IAuthListener* const listener = NULL) override;
 
+#if (GALAXY_VERSION) > 112400
 		/**
 		 * Authenticates the Galaxy Peer anonymously.
 		 *
@@ -260,6 +303,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void SignInAnonymousTelemetry(IAuthListener* const listener = NULL) override;
+#endif
 
 		/**
 		 * Authenticates the Galaxy Peer with a specified server key.
@@ -277,8 +321,9 @@ namespace universelan::client {
 		 * @param [in] serverKey The server key.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void SignInServerKey(const char* serverKey, IAuthListener* const listener = NULL) override;
+		virtual void USER_SIGN_IN_SERVER_KEY(const char* serverKey, IAuthListener* const listener = NULL) override;
 
+#if (GALAXY_VERSION) > 112400
 		/**
 		 * Signs the Galaxy Peer out.
 		 *
@@ -288,6 +333,7 @@ namespace universelan::client {
 		 * Their listeners will be called with the next call to the ProcessData().
 		 */
 		virtual void SignOut() override;
+#endif
 
 		/**
 		 * Retrieves/Refreshes user data storage.
@@ -297,7 +343,11 @@ namespace universelan::client {
 		 * @param [in] userID The ID of the user. It can be omitted when requesting for own data.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void RequestUserData(GalaxyID userID = GalaxyID(), ISpecificUserDataListener* const listener = NULL) override;
+		virtual void RequestUserData(GalaxyID userID = GalaxyID()
+#if (GALAXY_VERSION) > 112400
+			, ISpecificUserDataListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Checks if user data exists.
@@ -345,7 +395,11 @@ namespace universelan::client {
 		 * @param [in] value The value of the property to set with the limit of 4095 bytes.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void SetUserData(const char* key, const char* value, ISpecificUserDataListener* const listener = NULL) override;
+		virtual void SetUserData(const char* key, const char* value
+#if (GALAXY_VERSION) > 112400
+			, ISpecificUserDataListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Returns the number of entries in the user data storage
@@ -383,7 +437,11 @@ namespace universelan::client {
 		 * @param [in] key The name of the property of the user data storage.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void DeleteUserData(const char* key, ISpecificUserDataListener* const listener = NULL) override;
+		virtual void DeleteUserData(const char* key
+#if (GALAXY_VERSION) > 112400
+			, ISpecificUserDataListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Checks if the user is logged on to Galaxy backend services.
@@ -408,7 +466,11 @@ namespace universelan::client {
 		 * @param [in] dataSize The size of the additional data.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void RequestEncryptedAppTicket(const void* data, uint32_t dataSize, IEncryptedAppTicketListener* const listener = NULL) override;
+		virtual void RequestEncryptedAppTicket(const void* data, uint32_t dataSize
+#if (GALAXY_VERSION) > 112400
+			, IEncryptedAppTicketListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Returns the Encrypted App Ticket.
@@ -479,7 +541,11 @@ namespace universelan::client {
 		 * @param [in] info Additional information, e.g. the URI of the resource it was used for.
 		 * @return true if the report was accepted, false otherwise.
 		 */
-		virtual bool ReportInvalidAccessToken(const char* accessToken, const char* info = NULL) override;
+		virtual bool ReportInvalidAccessToken(const char* accessToken
+#if (GALAXY_VERSION) > 112400
+			, const char* info = NULL
+#endif
+		) override;
 
 		void SpecificUserDataRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
 		void OnlineUserStateChange(const std::shared_ptr<OnlineStatusChangeMessage>& data);

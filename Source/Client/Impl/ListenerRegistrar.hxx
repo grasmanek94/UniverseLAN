@@ -117,7 +117,7 @@ namespace universelan::client {
 		template <class FuncT, class... ArgTypes>
 		bool NotifyAllNow(FuncT&& Function, ArgTypes&&... Arguments) {
 			using T = extract_class_from_member_function_ptr<FuncT>::type;
-			return ExecuteForListenerTypePerEntry(T::GetListenerType(), [&](IGalaxyListener* listener) {
+			return ExecuteForListenerTypePerEntry((ListenerType)T::GetListenerType(), [&](IGalaxyListener* listener) {
 				T* casted_listener = dynamic_cast<T*>(listener);
 				assert(casted_listener != nullptr);
 
@@ -133,7 +133,7 @@ namespace universelan::client {
 				return NotifyAllNow(std::forward<FuncT>(Function), std::forward<ArgTypes>(Arguments)...);
 			}
 
-			return ExecuteForListenerTypePerEntry(BaseT::GetListenerType(), one_time_specific_listener, [&](IGalaxyListener* listener) {
+			return ExecuteForListenerTypePerEntry((ListenerType)BaseT::GetListenerType(), one_time_specific_listener, [&](IGalaxyListener* listener) {
 				BaseT* casted_listener = dynamic_cast<BaseT*>(listener);
 				assert(casted_listener != nullptr);
 

@@ -55,12 +55,13 @@ namespace universelan::client {
 		}
 	}
 
-	void UserImpl::SignInCredentials(const char* login, const char* password, IAuthListener* const listener) {
+	void UserImpl::USER_SIGN_IN_CREDENTIALS(const char* login, const char* password, IAuthListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		SignIn(listener);
 	}
 
+#if (GALAXY_VERSION) > 112400
 	void UserImpl::SignInToken(const char* refreshToken, IAuthListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
@@ -72,25 +73,29 @@ namespace universelan::client {
 
 		SignIn(listener);
 	}
+#endif
 
-	void UserImpl::SignInSteam(const void* steamAppTicket, uint32_t steamAppTicketSize, const char* personaName, IAuthListener* const listener) {
+	void UserImpl::USER_SIGN_IN_STEAM(const void* steamAppTicket, uint32_t steamAppTicketSize, const char* personaName, IAuthListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		SignIn(listener);
 	}
 
+#if (GALAXY_VERSION) > 112400
 	void UserImpl::SignInEpic(const char* epicAccessToken, const char* epicUsername, IAuthListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		SignIn(listener);
 	}
+#endif
 
-	void UserImpl::SignInGalaxy(bool requireOnline, IAuthListener* const listener) {
+	void UserImpl::USER_SIGN_IN_GALAXY(bool requireOnline, IAuthListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		SignIn(listener);
 	}
 
+#if (GALAXY_VERSION) > 112400
 	void UserImpl::SignInUWP(IAuthListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
@@ -115,42 +120,72 @@ namespace universelan::client {
 		SignIn(listener);
 	}
 
+#else
+
+	void UserImpl::SignIn(uint32_t xboxOneUserID, IAuthListener* listener) {
+		tracer::Trace trace{ __FUNCTION__ };
+
+		SignIn(listener);
+	}
+
+	void UserImpl::SignIn(const char* ps4ClientID, const char* ps4TitleID, const char* ps4TitleSecret, uint32_t ps4TitleSecretLength, IAuthListener* listener) {
+		tracer::Trace trace{ __FUNCTION__ }; 
+		
+		SignIn(listener);
+	}
+#endif
+
 	void UserImpl::SignInAnonymous(IAuthListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		SignIn(listener);
 	}
 
+#if (GALAXY_VERSION) > 112400
 	void UserImpl::SignInAnonymousTelemetry(IAuthListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		SignIn(listener);
 	}
+#endif
 
-	void UserImpl::SignInServerKey(const char* serverKey, IAuthListener* const listener) {
+	void UserImpl::USER_SIGN_IN_SERVER_KEY(const char* serverKey, IAuthListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		SignIn(listener);
 	}
 
+#if (GALAXY_VERSION) > 112400
 	void UserImpl::SignOut() {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		listeners->NotifyAll(&IAuthListener::OnAuthLost);
 		listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN);
 	}
+#endif
 
-	void UserImpl::RequestUserData(GalaxyID userID, ISpecificUserDataListener* const listener) {
+	void UserImpl::RequestUserData(GalaxyID userID
+#if (GALAXY_VERSION) > 112400
+		, ISpecificUserDataListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		if (intf->config->IsSelfUserID(userID)) {
-			listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, userID);
+			listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+				listener,
+#endif
+				&ISpecificUserDataListener::OnSpecificUserDataUpdated, userID);
 			listeners->NotifyAll(&IUserDataListener::OnUserDataUpdated);
 		}
 		else {
 			uint64_t request_id = MessageUniqueID::get();
 
+#if (GALAXY_VERSION) > 112400
 			specific_user_data_requests.emplace(request_id, listener);
+#endif
+
 			intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ RequestSpecificUserDataMessage::RequestTypeUserData, request_id, userID });
 		}
 	}
@@ -195,7 +230,11 @@ namespace universelan::client {
 		std::copy_n(str.begin(), std::min((uint32_t)str.length(), bufferLength), buffer);
 	}
 
-	void UserImpl::SetUserData(const char* key, const char* value, ISpecificUserDataListener* const listener) {
+	void UserImpl::SetUserData(const char* key, const char* value
+#if (GALAXY_VERSION) > 112400
+		, ISpecificUserDataListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		intf->config->GetLocalUserData()->stats.SetUserData(key, value);
@@ -203,7 +242,11 @@ namespace universelan::client {
 
 		intf->client->GetConnection().SendAsync(SetUserDataMessage{ intf->config->GetApiGalaxyID(), key, value });
 
-		listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, intf->config->GetApiGalaxyID());
+		listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+			listener,
+#endif
+			&ISpecificUserDataListener::OnSpecificUserDataUpdated, intf->config->GetApiGalaxyID());
 		listeners->NotifyAll(&IUserDataListener::OnUserDataUpdated);
 	}
 
@@ -232,10 +275,18 @@ namespace universelan::client {
 			});
 	}
 
-	void UserImpl::DeleteUserData(const char* key, ISpecificUserDataListener* const listener) {
+	void UserImpl::DeleteUserData(const char* key
+#if (GALAXY_VERSION) > 112400
+		, ISpecificUserDataListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		SetUserData(key, "", listener);
+		SetUserData(key, ""
+#if (GALAXY_VERSION) > 112400
+			, listener
+#endif
+		);
 	}
 
 	bool UserImpl::IsLoggedOn() {
@@ -244,10 +295,18 @@ namespace universelan::client {
 		return intf->config->GetSignedIn();
 	}
 
-	void UserImpl::RequestEncryptedAppTicket(const void* data, uint32_t dataSize, IEncryptedAppTicketListener* const listener) {
+	void UserImpl::RequestEncryptedAppTicket(const void* data, uint32_t dataSize
+#if (GALAXY_VERSION) > 112400
+		, IEncryptedAppTicketListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		listeners->NotifyAll(listener, &IEncryptedAppTicketListener::OnEncryptedAppTicketRetrieveSuccess);
+		listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+			listener,
+#endif
+			&IEncryptedAppTicketListener::OnEncryptedAppTicketRetrieveSuccess);
 	}
 
 	void UserImpl::GetEncryptedAppTicket(void* encryptedAppTicket, uint32_t maxEncryptedAppTicketSize, uint32_t& currentEncryptedAppTicketSize) {
@@ -275,7 +334,11 @@ namespace universelan::client {
 		std::copy_n(GetAccessToken(), std::min((uint32_t)strlen(GetAccessToken()), bufferLength), buffer);
 	}
 
-	bool UserImpl::ReportInvalidAccessToken(const char* accessToken, const char* info) {
+	bool UserImpl::ReportInvalidAccessToken(const char* accessToken
+#if (GALAXY_VERSION) > 112400
+		, const char* info
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		listeners->NotifyAll(&IAccessTokenListener::OnAccessTokenChanged);

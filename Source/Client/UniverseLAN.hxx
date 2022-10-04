@@ -27,7 +27,11 @@ namespace universelan::client {
 	class StorageImpl;
 	class CustomNetworkingImpl;
 	class LoggerImpl;
+
+#if (GALAXY_VERSION) > 112400
 	class TelemetryImpl;
+#endif
+
 	class ListenerRegistrarImpl;
 	class DelayRunner;
 
@@ -47,7 +51,11 @@ namespace universelan::client {
 		std::unique_ptr<StorageImpl>			storage = nullptr;
 		std::unique_ptr<CustomNetworkingImpl>	custom_networking = nullptr;
 		std::unique_ptr<LoggerImpl>				logger = nullptr;
+
+#if (GALAXY_VERSION) > 112400
 		std::unique_ptr<TelemetryImpl>			telemetry = nullptr;
+#endif
+
 		std::unique_ptr<ListenerRegistrarImpl>	notification = nullptr;
 		std::unique_ptr<DelayRunner>			delay_runner = nullptr;
 

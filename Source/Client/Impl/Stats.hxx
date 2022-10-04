@@ -57,7 +57,11 @@ namespace universelan::client {
 		 * @param [in] userID The ID of the user. It can be omitted when requesting for own data.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void RequestUserStatsAndAchievements(GalaxyID userID = GalaxyID(), IUserStatsAndAchievementsRetrieveListener* const listener = NULL) override;
+		virtual void RequestUserStatsAndAchievements(GalaxyID userID = GalaxyID()
+#if (GALAXY_VERSION) > 112400
+			, IUserStatsAndAchievementsRetrieveListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Reads integer value of a statistic of a specified user.
@@ -164,7 +168,11 @@ namespace universelan::client {
 		 *
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void StoreStatsAndAchievements(IStatsAndAchievementsStoreListener* const listener = NULL) override;
+		virtual void StoreStatsAndAchievements(
+#if (GALAXY_VERSION) > 112400
+			IStatsAndAchievementsStoreListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Resets all statistics and achievements.
@@ -177,7 +185,11 @@ namespace universelan::client {
 		 *
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void ResetStatsAndAchievements(IStatsAndAchievementsStoreListener* const listener = NULL) override;
+		virtual void ResetStatsAndAchievements(
+#if (GALAXY_VERSION) > 112400
+			IStatsAndAchievementsStoreListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Returns display name of a specified achievement.
@@ -243,7 +255,10 @@ namespace universelan::client {
 		 * @param [in] name The name of the achievement.
 		 * @return If the achievement is visible before unlocking.
 		 */
+
+#if (GALAXY_VERSION) > 112400
 		virtual bool IsAchievementVisibleWhileLocked(const char* name) override;
+#endif
 
 		/**
 		 * Performs a request for definitions of leaderboards.
@@ -252,7 +267,11 @@ namespace universelan::client {
 		 *
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void RequestLeaderboards(ILeaderboardsRetrieveListener* const listener = NULL) override;
+		virtual void RequestLeaderboards(
+#if (GALAXY_VERSION) > 112400
+			ILeaderboardsRetrieveListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Returns display name of a specified leaderboard.
@@ -323,10 +342,13 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RequestLeaderboardEntriesGlobal(
-			const char* name,
-			uint32_t rangeStart,
-			uint32_t rangeEnd,
-			ILeaderboardEntriesRetrieveListener* const listener = NULL) override;
+			const char* name
+			, uint32_t rangeStart
+			, uint32_t rangeEnd
+#if (GALAXY_VERSION) > 112400
+			, ILeaderboardEntriesRetrieveListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Performs a request for entries of a specified leaderboard for and near the specified user.
@@ -351,11 +373,14 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RequestLeaderboardEntriesAroundUser(
-			const char* name,
-			uint32_t countBefore,
-			uint32_t countAfter,
-			GalaxyID userID = GalaxyID(),
-			ILeaderboardEntriesRetrieveListener* const listener = NULL) override;
+			const char* name
+			, uint32_t countBefore
+			, uint32_t countAfter
+			, GalaxyID userID = GalaxyID()
+#if (GALAXY_VERSION) > 112400
+			, ILeaderboardEntriesRetrieveListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Performs a request for entries of a specified leaderboard for specified users.
@@ -372,10 +397,13 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RequestLeaderboardEntriesForUsers(
-			const char* name,
-			GalaxyID* userArray,
-			uint32_t userArraySize,
-			ILeaderboardEntriesRetrieveListener* const listener = NULL) override;
+			  const char* name
+			, GalaxyID* userArray
+			, uint32_t userArraySize
+#if (GALAXY_VERSION) > 112400
+			, ILeaderboardEntriesRetrieveListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Returns data from the currently processed request for leaderboard entries.
@@ -446,10 +474,13 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void SetLeaderboardScore(
-			const char* name,
-			int32_t score,
-			bool forceUpdate = false,
-			ILeaderboardScoreUpdateListener* const listener = NULL) override;
+			const char* name
+			, int32_t score
+			, bool forceUpdate = false
+#if (GALAXY_VERSION) > 112400
+			, ILeaderboardScoreUpdateListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Updates entry with details for own user in a specified leaderboard.
@@ -471,12 +502,15 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void SetLeaderboardScoreWithDetails(
-			const char* name,
-			int32_t score,
-			const void* details,
-			uint32_t detailsSize,
-			bool forceUpdate = false,
-			ILeaderboardScoreUpdateListener* const listener = NULL) override;
+			const char* name
+			, int32_t score
+			, const void* details
+			, uint32_t detailsSize
+			, bool forceUpdate = false
+#if (GALAXY_VERSION) > 112400
+			, ILeaderboardScoreUpdateListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Returns the leaderboard entry count for requested leaderboard.
@@ -498,7 +532,11 @@ namespace universelan::client {
 		 * @param [in] name The name of the leaderboard.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void FindLeaderboard(const char* name, ILeaderboardRetrieveListener* const listener = NULL) override;
+		virtual void FindLeaderboard(const char* name
+#if (GALAXY_VERSION) > 112400
+			, ILeaderboardRetrieveListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Performs a request for definition of a specified leaderboard, creating it
@@ -517,11 +555,14 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void FindOrCreateLeaderboard(
-			const char* name,
-			const char* displayName,
-			const LeaderboardSortMethod& sortMethod,
-			const LeaderboardDisplayType& displayType,
-			ILeaderboardRetrieveListener* const listener = NULL) override;
+			const char* name
+			, const char* displayName
+			, const LeaderboardSortMethod& sortMethod
+			, const LeaderboardDisplayType& displayType
+#if (GALAXY_VERSION) > 112400
+			, ILeaderboardRetrieveListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Performs a request for user time played.
@@ -531,7 +572,11 @@ namespace universelan::client {
 		 * @param [in] userID The ID of the user. It can be omitted when requesting for own data.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void RequestUserTimePlayed(GalaxyID userID = GalaxyID(), IUserTimePlayedRetrieveListener* const listener = NULL) override;
+		virtual void RequestUserTimePlayed(GalaxyID userID = GalaxyID()
+#if (GALAXY_VERSION) > 112400
+			, IUserTimePlayedRetrieveListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Reads the number of seconds played by a specified user.

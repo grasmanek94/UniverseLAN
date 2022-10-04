@@ -93,7 +93,11 @@ namespace universelan::client {
 		 * @param [in] connectionString The string which contains connection info.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void OpenConnection(const char* connectionString, IConnectionOpenListener* const listener = NULL) override;
+		virtual void OpenConnection(const char* connectionString
+#if (GALAXY_VERSION) > 112400
+			, IConnectionOpenListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Close a connection.
@@ -103,7 +107,11 @@ namespace universelan::client {
 		 * @param [in] connectionID The ID of the connection.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void CloseConnection(ConnectionID connectionID, IConnectionCloseListener* const listener = NULL) override;
+		virtual void CloseConnection(ConnectionID connectionID
+#if (GALAXY_VERSION) > 112400
+			, IConnectionCloseListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Send binary data over a specific connection.

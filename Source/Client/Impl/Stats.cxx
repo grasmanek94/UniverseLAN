@@ -17,16 +17,27 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__ };
 	}
 
-	void StatsImpl::RequestUserStatsAndAchievements(GalaxyID userID, IUserStatsAndAchievementsRetrieveListener* const listener) {
+	void StatsImpl::RequestUserStatsAndAchievements(GalaxyID userID
+#if (GALAXY_VERSION) > 112400
+		, IUserStatsAndAchievementsRetrieveListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		if (intf->config->IsSelfUserID(userID)) {
-			listeners->NotifyAll(listener, &IUserStatsAndAchievementsRetrieveListener::OnUserStatsAndAchievementsRetrieveSuccess, userID);
+			listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+				listener,
+#endif
+				&IUserStatsAndAchievementsRetrieveListener::OnUserStatsAndAchievementsRetrieveSuccess, userID);
 		}
 		else {
 			uint64_t request_id = MessageUniqueID::get();
 
+#if (GALAXY_VERSION) > 112400
 			specific_user_stats_and_achievements_requests.emplace(request_id, listener);
+#endif
+
 			intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ RequestSpecificUserDataMessage::RequestTypeAchievementsAndStats, request_id, userID });
 		}
 	}
@@ -111,24 +122,40 @@ namespace universelan::client {
 		}
 	}
 
-	void StatsImpl::StoreStatsAndAchievements(IStatsAndAchievementsStoreListener* const listener) {
+	void StatsImpl::StoreStatsAndAchievements(
+#if (GALAXY_VERSION) > 112400
+		IStatsAndAchievementsStoreListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		intf->config->SaveStatsAndAchievements();
 
 		intf->client->GetConnection().SendAsync(UserHelloDataMessage{ intf->config->GetLocalUserData()->stats });
 
-		listeners->NotifyAll(listener, &IStatsAndAchievementsStoreListener::OnUserStatsAndAchievementsStoreSuccess);
+		listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+			listener,
+#endif
+			&IStatsAndAchievementsStoreListener::OnUserStatsAndAchievementsStoreSuccess);
 	}
 
-	void StatsImpl::ResetStatsAndAchievements(IStatsAndAchievementsStoreListener* const listener) {
+	void StatsImpl::ResetStatsAndAchievements(
+#if (GALAXY_VERSION) > 112400
+		IStatsAndAchievementsStoreListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		intf->config->ResetStatsAndAchievements();
 
 		intf->client->GetConnection().SendAsync(UserHelloDataMessage{ intf->config->GetLocalUserData()->stats });
 
-		listeners->NotifyAll(listener, &IStatsAndAchievementsStoreListener::OnUserStatsAndAchievementsStoreSuccess);
+		listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+			listener,
+#endif
+			&IStatsAndAchievementsStoreListener::OnUserStatsAndAchievementsStoreSuccess);
 	}
 
 	const char* StatsImpl::GetAchievementDisplayName(const char* name) {
@@ -177,6 +204,7 @@ namespace universelan::client {
 		return false;
 	}
 
+#if (GALAXY_VERSION) > 112400
 	bool StatsImpl::IsAchievementVisibleWhileLocked(const char* name) {
 		tracer::Trace trace{ __FUNCTION__ };
 
@@ -188,11 +216,20 @@ namespace universelan::client {
 
 		return false;
 	}
+#endif
 
-	void StatsImpl::RequestLeaderboards(ILeaderboardsRetrieveListener* const listener) {
+	void StatsImpl::RequestLeaderboards(
+#if (GALAXY_VERSION) > 112400
+		ILeaderboardsRetrieveListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		listeners->NotifyAll(listener, &ILeaderboardsRetrieveListener::OnLeaderboardsRetrieveFailure, ILeaderboardsRetrieveListener::FAILURE_REASON_UNDEFINED);
+		listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+			listener,
+#endif
+			&ILeaderboardsRetrieveListener::OnLeaderboardsRetrieveFailure, ILeaderboardsRetrieveListener::FAILURE_REASON_UNDEFINED);
 	}
 
 	const char* StatsImpl::GetLeaderboardDisplayName(const char* name) {
@@ -220,34 +257,55 @@ namespace universelan::client {
 	}
 
 	void StatsImpl::RequestLeaderboardEntriesGlobal(
-		const char* name,
-		uint32_t rangeStart,
-		uint32_t rangeEnd,
-		ILeaderboardEntriesRetrieveListener* const listener) {
+		const char* name
+		, uint32_t rangeStart
+		, uint32_t rangeEnd
+#if (GALAXY_VERSION) > 112400
+		, ILeaderboardEntriesRetrieveListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		listeners->NotifyAll(listener, &ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
+		listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+			listener,
+#endif
+			&ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
 	}
 
 	void StatsImpl::RequestLeaderboardEntriesAroundUser(
-		const char* name,
-		uint32_t countBefore,
-		uint32_t countAfter,
-		GalaxyID userID,
-		ILeaderboardEntriesRetrieveListener* const listener) {
+		const char* name
+		, uint32_t countBefore
+		, uint32_t countAfter
+		, GalaxyID userID
+#if (GALAXY_VERSION) > 112400
+		, ILeaderboardEntriesRetrieveListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		listeners->NotifyAll(listener, &ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
+		listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+			listener,
+#endif
+			&ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
 	}
 
 	void StatsImpl::RequestLeaderboardEntriesForUsers(
-		const char* name,
-		GalaxyID* userArray,
-		uint32_t userArraySize,
-		ILeaderboardEntriesRetrieveListener* const listener) {
+		const char* name
+		, GalaxyID* userArray
+		, uint32_t userArraySize
+#if (GALAXY_VERSION) > 112400
+		, ILeaderboardEntriesRetrieveListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		listeners->NotifyAll(listener, &ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
+		listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+			listener, 
+#endif
+			&ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
 	}
 
 	void StatsImpl::GetRequestedLeaderboardEntry(uint32_t index, uint32_t& rank, int32_t& score, GalaxyID& userID) {
@@ -266,25 +324,39 @@ namespace universelan::client {
 	}
 
 	void StatsImpl::SetLeaderboardScore(
-		const char* name,
-		int32_t score,
-		bool forceUpdate,
-		ILeaderboardScoreUpdateListener* const listener) {
+		const char* name
+		, int32_t score
+		, bool forceUpdate
+#if (GALAXY_VERSION) > 112400
+		, ILeaderboardScoreUpdateListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		listeners->NotifyAll(listener, &ILeaderboardScoreUpdateListener::OnLeaderboardScoreUpdateFailure, name, score, ILeaderboardScoreUpdateListener::FAILURE_REASON_UNDEFINED);
+		listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+			listener,
+#endif
+			&ILeaderboardScoreUpdateListener::OnLeaderboardScoreUpdateFailure, name, score, ILeaderboardScoreUpdateListener::FAILURE_REASON_UNDEFINED);
 	}
 
 	void StatsImpl::SetLeaderboardScoreWithDetails(
-		const char* name,
-		int32_t score,
-		const void* details,
-		uint32_t detailsSize,
-		bool forceUpdate,
-		ILeaderboardScoreUpdateListener* const listener) {
+		const char* name
+		, int32_t score
+		, const void* details
+		, uint32_t detailsSize
+		, bool forceUpdate
+#if (GALAXY_VERSION) > 112400
+		, ILeaderboardScoreUpdateListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		listeners->NotifyAll(listener, &ILeaderboardScoreUpdateListener::OnLeaderboardScoreUpdateFailure, name, score, ILeaderboardScoreUpdateListener::FAILURE_REASON_UNDEFINED);
+		listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+			listener, 
+#endif
+			&ILeaderboardScoreUpdateListener::OnLeaderboardScoreUpdateFailure, name, score, ILeaderboardScoreUpdateListener::FAILURE_REASON_UNDEFINED);
 	}
 
 	uint32_t StatsImpl::GetLeaderboardEntryCount(const char* name) {
@@ -293,34 +365,60 @@ namespace universelan::client {
 		return 0;
 	}
 
-	void StatsImpl::FindLeaderboard(const char* name, ILeaderboardRetrieveListener* const listener) {
+	void StatsImpl::FindLeaderboard(const char* name
+#if (GALAXY_VERSION) > 112400
+		, ILeaderboardRetrieveListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		listeners->NotifyAll(listener, &ILeaderboardRetrieveListener::OnLeaderboardRetrieveFailure, name, ILeaderboardRetrieveListener::FAILURE_REASON_UNDEFINED);
+		listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+			listener, 
+#endif
+			&ILeaderboardRetrieveListener::OnLeaderboardRetrieveFailure, name, ILeaderboardRetrieveListener::FAILURE_REASON_UNDEFINED);
 	}
 
 	void StatsImpl::FindOrCreateLeaderboard(
-		const char* name,
-		const char* displayName,
-		const LeaderboardSortMethod& sortMethod,
-		const LeaderboardDisplayType& displayType,
-		ILeaderboardRetrieveListener* const listener) {
+		const char* name
+		, const char* displayName
+		, const LeaderboardSortMethod& sortMethod
+		, const LeaderboardDisplayType& displayType
+#if (GALAXY_VERSION) > 112400
+		, ILeaderboardRetrieveListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		listeners->NotifyAll(listener, &ILeaderboardRetrieveListener::OnLeaderboardRetrieveFailure, name, ILeaderboardRetrieveListener::FAILURE_REASON_UNDEFINED);
+		listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+			listener, 
+#endif
+			&ILeaderboardRetrieveListener::OnLeaderboardRetrieveFailure, name, ILeaderboardRetrieveListener::FAILURE_REASON_UNDEFINED);
 	}
 
-	void StatsImpl::RequestUserTimePlayed(GalaxyID userID, IUserTimePlayedRetrieveListener* const listener) {
+	void StatsImpl::RequestUserTimePlayed(GalaxyID userID
+#if (GALAXY_VERSION) > 112400
+		, IUserTimePlayedRetrieveListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		// no need to refresh play time because it's the diff between 'submitted_time_played + (time_now - connect_time)'
 		if (intf->user->IsGalaxyUserDataPresent(userID)) {
-			listeners->NotifyAll(listener, &IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveSuccess, userID);
+			listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+				listener, 
+#endif
+				&IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveSuccess, userID);
 		}
 		else {
 			uint64_t request_id = MessageUniqueID::get();
 
+#if (GALAXY_VERSION) > 112400
 			specific_user_time_played_requests.emplace(request_id, listener);
+#endif
+
 			intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ RequestSpecificUserDataMessage::RequestTypePlayTime, request_id, userID });
 		}
 	}

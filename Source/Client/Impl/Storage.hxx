@@ -131,7 +131,11 @@ namespace universelan::client {
 		 * @param [in] fileName The name of the file in the form of a path (see the description of FileWrite()).
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void FileShare(const char* fileName, IFileShareListener* const listener = NULL) override;
+		virtual void FileShare(const char* fileName
+#if (GALAXY_VERSION) > 112400
+			, IFileShareListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Downloads previously shared file.
@@ -141,7 +145,11 @@ namespace universelan::client {
 		 * @param [in] sharedFileID The ID of the shared file.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void DownloadSharedFile(SharedFileID sharedFileID, ISharedFileDownloadListener* const listener = NULL) override;
+		virtual void DownloadSharedFile(SharedFileID sharedFileID
+#if (GALAXY_VERSION) > 112400
+			, ISharedFileDownloadListener* const listener = NULL
+#endif
+		) override;
 
 		/**
 		 * Gets name of downloaded shared file.

@@ -67,11 +67,13 @@ namespace galaxy::api {
 		return gameserver_intf_inst.utils.get();
 	}
 
+#if (GALAXY_VERSION) > 112400
 	GALAXY_DLL_EXPORT ITelemetry* GALAXY_CALLTYPE GameServerTelemetry() {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		return gameserver_intf_inst.telemetry.get();
 	}
+#endif
 
 	GALAXY_DLL_EXPORT ILogger* GALAXY_CALLTYPE GameServerLogger() {
 		tracer::Trace trace{ __FUNCTION__ };

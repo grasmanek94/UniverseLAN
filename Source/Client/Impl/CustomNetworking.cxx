@@ -38,7 +38,13 @@ namespace universelan::client {
 		if (ec) {
 			std::cerr << "CustomNetworking: Could not create connection because: " << ec.message() << std::endl;
 
-			custom_network->listeners->NotifyAll(listener, &IConnectionOpenListener::OnConnectionOpenFailure, connectionString, IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE);
+			custom_network->listeners->NotifyAll(listener, &IConnectionOpenListener::OnConnectionOpenFailure, connectionString
+#if (GALAXY_VERSION) > 112400
+				, IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE
+#else
+				, IConnectionOpenListener::FAILURE_REASON_UNDEFINED
+#endif
+			);
 
 			return false;
 		}
@@ -134,7 +140,13 @@ namespace universelan::client {
 	{
 		tracer::Trace trace{ __FUNCTION__ };
 
-		listeners->NotifyAll(channel->listener_open, &IConnectionOpenListener::OnConnectionOpenFailure, channel->connection_string.c_str(), IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE);
+		listeners->NotifyAll(channel->listener_open, &IConnectionOpenListener::OnConnectionOpenFailure, channel->connection_string.c_str()
+#if (GALAXY_VERSION) > 112400
+			, IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE
+#else
+			, IConnectionOpenListener::FAILURE_REASON_UNDEFINED
+#endif
+		);
 
 		if (!channel->client.stopped()) {
 			channel->client.stop();
@@ -152,12 +164,22 @@ namespace universelan::client {
 		return entry->second;
 	}
 
-	void CustomNetworkingImpl::OpenConnection(const char* connectionString, IConnectionOpenListener* const listener) {
+	void CustomNetworkingImpl::OpenConnection(const char* connectionString
+#if (GALAXY_VERSION) > 112400
+		, IConnectionOpenListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		auto channel = std::make_shared<Channel>(this);
 
-		if (channel->connect(connectionString, listener))
+		if (channel->connect(connectionString
+#if (GALAXY_VERSION) > 112400
+			, listener
+#else
+			, nullptr
+#endif
+		))
 		{
 			{
 				lock_t lock(mtx);
@@ -167,7 +189,11 @@ namespace universelan::client {
 		}
 	}
 
-	void CustomNetworkingImpl::CloseConnection(ConnectionID connectionID, IConnectionCloseListener* const listener) {
+	void CustomNetworkingImpl::CloseConnection(ConnectionID connectionID
+#if (GALAXY_VERSION) > 112400
+		, IConnectionCloseListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		std::shared_ptr<Channel> channel{ GetChannel(connectionID) };
@@ -175,7 +201,9 @@ namespace universelan::client {
 			return;
 		}
 
+#if (GALAXY_VERSION) > 112400
 		channel->listener_close = listener;
+#endif
 		if (channel->connection) {
 			channel->connection->close(websocketpp::close::status::normal, "normal");
 		}

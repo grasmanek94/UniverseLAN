@@ -38,18 +38,27 @@ namespace universelan::client {
 	}
 
 	void FriendsImpl::RequestUserInformation(
-		GalaxyID userID,
-		AvatarCriteriaImpl avatarCriteria,
-		IUserInformationRetrieveListener* const listener) {
+		GalaxyID userID
+		, AvatarCriteriaImpl avatarCriteria
+#if (GALAXY_VERSION) > 112400
+		, IUserInformationRetrieveListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		if (intf->config->IsSelfUserID(userID)) {
+#if (GALAXY_VERSION) > 112400
 			listeners->NotifyAll(listener, &IUserInformationRetrieveListener::OnUserInformationRetrieveSuccess, userID);
+#endif
+			// TODO: IPerson blabla listener
 		}
 		else {
 			uint64_t request_id = MessageUniqueID::get();
 
+#if (GALAXY_VERSION) > 112400
 			user_information_requests.emplace(request_id, listener);
+#endif
+
 			intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ RequestSpecificUserDataMessage::RequestTypeFriends, request_id, userID });
 		}
 	}
@@ -57,17 +66,24 @@ namespace universelan::client {
 	void FriendsImpl::RequestUserInformationProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
 		tracer::Trace trace{ __FUNCTION__ };
 
+#if (GALAXY_VERSION) > 112400
 		IUserInformationRetrieveListener* listener = user_information_requests.pop(data->request_id);
+#endif
+
+		// TODO: IPerson blabla listener
 
 		if (data->found) {
 			auto entry = intf->user->GetGalaxyUserData(data->id);
 			entry->stats = data->asuc;
 			entry->nickname = data->nickname;
-
+#if (GALAXY_VERSION) > 112400
 			listeners->NotifyAll(listener, &IUserInformationRetrieveListener::OnUserInformationRetrieveSuccess, data->id);
+#endif
 		}
 		else {
+#if (GALAXY_VERSION) > 112400
 			listeners->NotifyAll(listener, &IUserInformationRetrieveListener::OnUserInformationRetrieveFailure, data->id, IUserInformationRetrieveListener::FAILURE_REASON_UNDEFINED);
+#endif
 		}
 	}
 
@@ -150,10 +166,18 @@ namespace universelan::client {
 		return false;
 	}
 
-	void FriendsImpl::RequestFriendList(IFriendListListener* const listener) {
+	void FriendsImpl::RequestFriendList(
+#if (GALAXY_VERSION) > 112400
+		IFriendListListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		listeners->NotifyAll(listener, &IFriendListListener::OnFriendListRetrieveSuccess);
+		listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+			listener, 
+#endif
+			&IFriendListListener::OnFriendListRetrieveSuccess);
 	}
 
 	bool FriendsImpl::IsFriend(GalaxyID userID) {
@@ -174,22 +198,46 @@ namespace universelan::client {
 		return 0;
 	}
 
-	void FriendsImpl::SendFriendInvitation(GalaxyID userID, IFriendInvitationSendListener* const listener) {
+	void FriendsImpl::SendFriendInvitation(GalaxyID userID
+#if (GALAXY_VERSION) > 112400
+		, IFriendInvitationSendListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		listeners->NotifyAll(listener, &IFriendInvitationSendListener::OnFriendInvitationSendSuccess, userID);
+		listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+			listener,
+#endif
+			&IFriendInvitationSendListener::OnFriendInvitationSendSuccess, userID);
 	}
 
-	void FriendsImpl::RequestFriendInvitationList(IFriendInvitationListRetrieveListener* const listener) {
+	void FriendsImpl::RequestFriendInvitationList(
+#if (GALAXY_VERSION) > 112400
+		IFriendInvitationListRetrieveListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		listeners->NotifyAll(listener, &IFriendInvitationListRetrieveListener::OnFriendInvitationListRetrieveSuccess);
+		listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+			listener,
+#endif
+			&IFriendInvitationListRetrieveListener::OnFriendInvitationListRetrieveSuccess);
 	}
 
-	void FriendsImpl::RequestSentFriendInvitationList(ISentFriendInvitationListRetrieveListener* const listener) {
+	void FriendsImpl::RequestSentFriendInvitationList(
+#if (GALAXY_VERSION) > 112400
+		ISentFriendInvitationListRetrieveListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		listeners->NotifyAll(listener, &ISentFriendInvitationListRetrieveListener::OnSentFriendInvitationListRetrieveSuccess);
+		listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+			listener, 
+#endif
+			&ISentFriendInvitationListRetrieveListener::OnSentFriendInvitationListRetrieveSuccess);
 	}
 
 	uint32_t FriendsImpl::GetFriendInvitationCount() {
@@ -202,48 +250,85 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__ };
 	}
 
-	void FriendsImpl::RespondToFriendInvitation(GalaxyID userID, bool accept, IFriendInvitationRespondToListener* const listener) {
+	void FriendsImpl::RespondToFriendInvitation(GalaxyID userID, bool accept
+#if (GALAXY_VERSION) > 112400
+		, IFriendInvitationRespondToListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		listeners->NotifyAll(listener, &IFriendInvitationRespondToListener::OnFriendInvitationRespondToFailure, userID, IFriendInvitationRespondToListener::FAILURE_REASON_UNDEFINED);
+		listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+			listener,
+#endif
+			&IFriendInvitationRespondToListener::OnFriendInvitationRespondToFailure, userID, IFriendInvitationRespondToListener::FAILURE_REASON_UNDEFINED);
 	}
 
-	void FriendsImpl::DeleteFriend(GalaxyID userID, IFriendDeleteListener* const listener) {
+	void FriendsImpl::DeleteFriend(GalaxyID userID
+#if (GALAXY_VERSION) > 112400
+		, IFriendDeleteListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		listeners->NotifyAll(listener, &IFriendDeleteListener::OnFriendDeleteFailure, userID, IFriendDeleteListener::FAILURE_REASON_UNDEFINED);
+		listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+			listener, 
+#endif
+			&IFriendDeleteListener::OnFriendDeleteFailure, userID, IFriendDeleteListener::FAILURE_REASON_UNDEFINED);
 	}
 
-	void FriendsImpl::SetRichPresence(const char* key, const char* value, IRichPresenceChangeListener* const listener) {
+	void FriendsImpl::SetRichPresence(const char* key, const char* value
+#if (GALAXY_VERSION) > 112400
+		, IRichPresenceChangeListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		intf->config->GetLocalUserData()->stats.SetRichPresence(key, value);
 
 		uint64_t request_id = MessageUniqueID::get();
 
+#if (GALAXY_VERSION) > 112400
 		rich_presence_change_requests.emplace(request_id, listener);
+#endif
+
 		intf->client->GetConnection().SendAsync(RichPresenceChangeMessage{ request_id, 0, RichPresenceChangeMessage::ACTION_SET, key, value });
 	}
 
-	void FriendsImpl::DeleteRichPresence(const char* key, IRichPresenceChangeListener* const listener) {
+	void FriendsImpl::DeleteRichPresence(const char* key
+#if (GALAXY_VERSION) > 112400
+		, IRichPresenceChangeListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		intf->config->GetLocalUserData()->stats.EraseRichPresence(key);
 
 		uint64_t request_id = MessageUniqueID::get();
 
+#if (GALAXY_VERSION) > 112400
 		rich_presence_change_requests.emplace(request_id, listener);
+#endif
+
 		intf->client->GetConnection().SendAsync(RichPresenceChangeMessage{ request_id, 0, RichPresenceChangeMessage::ACTION_DELETE, key });
 	}
 
-	void FriendsImpl::ClearRichPresence(IRichPresenceChangeListener* const listener) {
+	void FriendsImpl::ClearRichPresence(
+#if (GALAXY_VERSION) > 112400
+		IRichPresenceChangeListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		intf->config->GetLocalUserData()->stats.ClearRichPresence();
 
 		uint64_t request_id = MessageUniqueID::get();
 
+#if (GALAXY_VERSION) > 112400
 		rich_presence_change_requests.emplace(request_id, listener);
+#endif
+
 		intf->client->GetConnection().SendAsync(RichPresenceChangeMessage{ request_id, 0, RichPresenceChangeMessage::ACTION_CLEAR });
 	}
 
@@ -255,6 +340,7 @@ namespace universelan::client {
 
 			if (data->success) {
 				listeners->NotifyAll(listener, &IRichPresenceChangeListener::OnRichPresenceChangeSuccess);
+				listeners->NotifyAll(&IRichPresenceListener::OnRichPresenceUpdated, intf->config->GetApiGalaxyID());
 			}
 			else {
 				listeners->NotifyAll(listener, &IRichPresenceChangeListener::OnRichPresenceChangeFailure, IRichPresenceChangeListener::FAILURE_REASON_UNDEFINED);
@@ -282,16 +368,25 @@ namespace universelan::client {
 		}
 	}
 
-	void FriendsImpl::RequestRichPresence(GalaxyID userID, IRichPresenceRetrieveListener* const listener) {
+	void FriendsImpl::RequestRichPresence(GalaxyID userID
+#if (GALAXY_VERSION) > 112400
+		, IRichPresenceRetrieveListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		if (intf->config->IsSelfUserID(userID)) {
+#if (GALAXY_VERSION) > 112400
 			listeners->NotifyAll(listener, &IRichPresenceRetrieveListener::OnRichPresenceRetrieveSuccess, userID);
+#endif
+			listeners->NotifyAll(&IRichPresenceListener::OnRichPresenceUpdated, userID);
 		}
 		else {
 			uint64_t request_id = MessageUniqueID::get();
-
+#if (GALAXY_VERSION) > 112400
 			retrieve_rich_presence_requests.emplace(request_id, listener);
+#endif
+
 			intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ RequestSpecificUserDataMessage::RequestTypeRichPresence, request_id, userID });
 		}
 	}
@@ -299,17 +394,25 @@ namespace universelan::client {
 	void FriendsImpl::RequestRichPresenceProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
 		tracer::Trace trace{ __FUNCTION__ };
 
+#if (GALAXY_VERSION) > 112400
 		IRichPresenceRetrieveListener* listener = retrieve_rich_presence_requests.pop(data->request_id);
+#endif
 
 		if (data->found) {
 			auto entry = intf->user->GetGalaxyUserData(data->id);
 			entry->stats = data->asuc;
 			entry->nickname = data->nickname;
 
+#if (GALAXY_VERSION) > 112400
 			listeners->NotifyAll(listener, &IRichPresenceRetrieveListener::OnRichPresenceRetrieveSuccess, data->id);
+#endif
+
+			listeners->NotifyAll(&IRichPresenceListener::OnRichPresenceUpdated, data->id);
 		}
 		else {
+#if (GALAXY_VERSION) > 112400
 			listeners->NotifyAll(listener, &IRichPresenceRetrieveListener::OnRichPresenceRetrieveFailure, data->id, IRichPresenceRetrieveListener::FAILURE_REASON_UNDEFINED);
+#endif
 		}
 	}
 

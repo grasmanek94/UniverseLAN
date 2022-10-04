@@ -115,11 +115,13 @@ namespace galaxy::api {
 		return intf_inst.logger.get();
 	}
 
+#if (GALAXY_VERSION) > 112400
 	GALAXY_DLL_EXPORT ITelemetry* GALAXY_CALLTYPE Telemetry() {
 		//tracer::Trace trace{ __FUNCTION__ };
 
 		return intf_inst.telemetry.get();
 	}
+#endif
 
 	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE ProcessData() {
 		//tracer::Trace trace{ __FUNCTION__ };

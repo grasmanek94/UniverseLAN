@@ -81,11 +81,19 @@ namespace universelan::client {
 		std::copy_n(path.c_str(), std::min((size_t)bufferLength, path.length()), buffer);
 	}
 
-	void StorageImpl::FileShare(const char* fileName, IFileShareListener* const listener) {
+	void StorageImpl::FileShare(const char* fileName
+#if (GALAXY_VERSION) > 112400
+		, IFileShareListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		if (!intf->config->GetAllowFileSharingUpload()) {
-			listeners->NotifyAll(listener, &IFileShareListener::OnFileShareFailure, fileName, IFileShareListener::FAILURE_REASON_UNDEFINED);
+			listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+				listener, 
+#endif
+				&IFileShareListener::OnFileShareFailure, fileName, IFileShareListener::FAILURE_REASON_UNDEFINED);
 			return;
 		}
 
@@ -94,7 +102,11 @@ namespace universelan::client {
 		if (!sfu.OpenLocal(str_file_name, std::ios::in | std::ios::binary)) {
 			std::cerr << __FUNCTION__ << " fail: " << fileName << "\n";
 
-			listeners->NotifyAll(listener, &IFileShareListener::OnFileShareFailure, fileName, IFileShareListener::FAILURE_REASON_UNDEFINED);
+			listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+				listener, 
+#endif
+				&IFileShareListener::OnFileShareFailure, fileName, IFileShareListener::FAILURE_REASON_UNDEFINED);
 			return;
 		}
 
@@ -102,22 +114,35 @@ namespace universelan::client {
 		std::thread([=, this, sfu = std::move(sfu), str_file_name = std::move(str_file_name)] {
 			uint64_t request_id = MessageUniqueID::get();
 
+#if (GALAXY_VERSION) > 112400
 			file_upload_requests.emplace(request_id, listener);
+#endif
 			intf->client->GetConnection().SendAsync(FileShareMessage{ request_id, str_file_name, sfu.ReadLocal(str_file_name) });
 			}).detach();
 	}
 
-	void StorageImpl::DownloadSharedFile(SharedFileID sharedFileID, ISharedFileDownloadListener* const listener) {
+	void StorageImpl::DownloadSharedFile(SharedFileID sharedFileID
+#if (GALAXY_VERSION) > 112400
+		, ISharedFileDownloadListener* const listener
+#endif
+	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		if (!intf->config->GetAllowFileSharingDownload()) {
-			listeners->NotifyAll(listener, &ISharedFileDownloadListener::OnSharedFileDownloadFailure, sharedFileID, ISharedFileDownloadListener::FAILURE_REASON_UNDEFINED);
+			listeners->NotifyAll(
+#if (GALAXY_VERSION) > 112400
+				listener,
+#endif
+				&ISharedFileDownloadListener::OnSharedFileDownloadFailure, sharedFileID, ISharedFileDownloadListener::FAILURE_REASON_UNDEFINED);
 			return;
 		}
 
 		uint64_t request_id = MessageUniqueID::get();
 
+#if (GALAXY_VERSION) > 112400
 		file_download_requests.emplace(request_id, listener);
+#endif
+
 		intf->client->GetConnection().SendAsync(FileRequestMessage{ request_id, sharedFileID });
 	}
 
