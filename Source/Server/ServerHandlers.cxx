@@ -5,7 +5,7 @@
 #include <Networking/Networking.hxx>
 #include <Tracer.hxx>
 
-#define REQUIRES_AUTHENTICATION(peer) {if(KickUnauthenticated(peer)) { return; }}
+#define REQUIRES_AUTHENTICATION(peer) {if(!KickUnauthenticated(peer)) { return; }}
 
 namespace universelan::server {
 	using namespace galaxy::api;
@@ -289,7 +289,7 @@ namespace universelan::server {
 			pd->lobby = lobby;
 		}
 
-		connection.Send(peer, CreateLobbyResponseMessage{ data->request_id,lobby });
+		connection.Send(peer, CreateLobbyResponseMessage{ data->request_id, lobby });
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestLobbyListMessage>& data) {

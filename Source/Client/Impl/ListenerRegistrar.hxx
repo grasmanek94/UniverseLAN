@@ -174,8 +174,11 @@ namespace universelan::client {
 			if (it == map.end()) {
 				return nullptr;
 			}
+
+			T ret_val = it->second;
 			map.erase(it);
-			return it->second;
+
+			return ret_val;
 		}
 	};
 }

@@ -102,15 +102,15 @@ namespace universelan::client {
 			auto& key = filter_entry.key;
 			auto& comparison_type = filter_entry.filter.comparison_type;
 			auto& specified = filter_entry.filter.value;
-			auto specified_str = std::get<1>(specified);
-			auto specified_i = std::get<0>(specified);
+			auto specified_str = specified.index() == 1 ? std::get<1>(specified) : "";
+			auto specified_i = specified.index() == 0 ? std::get<0>(specified) : (int32_t)0;
 			const auto value_str = std::string(lobby->GetData(key.c_str()));
 
 			int32_t integer_converted{ 0 };
 			try {
 				integer_converted = std::stol(value_str);
 			}
-			catch (std::out_of_range) {}
+			catch (...) {}
 
 			const int32_t value_i = integer_converted;
 
