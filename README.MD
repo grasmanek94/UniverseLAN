@@ -1,4 +1,4 @@
-This extends the ["You buy it, you own it"](https://www.gog.com/en/about_gog) GOG philisophy to multiplayer portion of all game that use GOG Galaxy.
+This extends the ["You buy it, you own it"](https://www.gog.com/en/about_gog) GOG philisophy to the multiplayer portion of all games that use GOG Galaxy.
 
 Why Universe? Because Universe >> Galaxy.
 
