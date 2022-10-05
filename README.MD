@@ -1,3 +1,7 @@
+This extends the ["You buy it, you own it"](https://www.gog.com/en/about_gog) GOG philisophy to multiplayer portion of all game that use GOG Galaxy.
+
+Why Universe? Because Universe >> Galaxy.
+
 To generate the module definition files, use [wrap_dll](https://github.com/mavenlin/wrap_dll).  
   
 - Replace target game `Galaxy.dll` or `Galaxy64.dll` to use UniverseLAN.
