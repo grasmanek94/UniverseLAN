@@ -323,7 +323,7 @@ namespace galaxy
 			virtual void SignInToken(const char* refreshToken, IAuthListener* const listener = NULL) = 0;
 
 			/**
-			 * Authenticates the Galaxy Peer based on CDPR launcher authentication.
+			 * Authenticates the Galaxy Peer based on launcher authentication.
 			 *
 			 * This call is asynchronous. Responses come to the IAuthListener
 			 * (for all GlobalAuthListener-derived and optional listener passed as argument).
@@ -331,7 +331,7 @@ namespace galaxy
 			 * @remark Information about being signed in or signed out also comes to
 			 * the IOperationalStateChangeListener.
 			 *
-			 * @note This method is for internal uses only.
+			 * @note This method is for internal use only.
 			 *
 			 * @param [in] listener The listener for specific operation.
 			 */
@@ -383,6 +383,8 @@ namespace galaxy
 			virtual void SignInGalaxy(bool requireOnline = false, IAuthListener* const listener = NULL) = 0;
 
 			/**
+			 * @deprecated This method is no longer supported.
+
 			 * Authenticates the Galaxy Peer based on Windows Store authentication
 			 * in Universal Windows Platform application.
 			 *

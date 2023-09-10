@@ -7,10 +7,7 @@
  * used by Galaxy Peer.
  */
 
-#include <cstddef>
-#include <utility>
-
-#include <stdint.h>
+#include "stdint.h"
 #include <assert.h>
 
 namespace galaxy
@@ -24,19 +21,14 @@ namespace galaxy
 
 #pragma pack( push, 1 )
 
-		 /**
-		  * Represents the ID of an entity used by Galaxy Peer.
-		  *
-		  * This can be the ID of either a lobby or a Galaxy user.
-		  */
+		/**
+		 * Represents the ID of an entity used by Galaxy Peer.
+		 *
+		 * This can be the ID of either a lobby or a Galaxy user.
+		 */
 		class GalaxyID
 		{
 		public:
-			template<class Archive>
-			void serialize(Archive& ar)
-			{
-				ar(value);
-			}
 
 			/**
 			 * The type of the ID.
@@ -177,7 +169,7 @@ namespace galaxy
 			 */
 			uint64_t GetRealID() const
 			{
-				return value & 0x00ffffffffffffff;
+				return value & 0xffffffffffffff;
 			}
 
 			/**
@@ -189,13 +181,6 @@ namespace galaxy
 			{
 				return static_cast<IDType>(value >> 56);
 			}
-
-			struct Hash {
-				std::size_t operator()(const GalaxyID& k) const
-				{
-					return std::hash<uint64_t>()(k.GetRealID());
-				}
-			};
 
 		private:
 

@@ -43,7 +43,9 @@ namespace galaxy
 				FAILURE_REASON_CONNECTION_FAILURE, ///< Unable to communicate with backend services.
 				FAILURE_REASON_NO_SAMPLING_CLASS_IN_CONFIG, ///< The event sampling class not present in configuration.
 				FAILURE_REASON_SAMPLING_CLASS_FIELD_MISSING, ///< Sampling class' field not present in the event.
-				FAILURE_REASON_EVENT_SAMPLED_OUT ///< The event did not match sampling criteria.
+				FAILURE_REASON_EVENT_SAMPLED_OUT, ///< The event did not match sampling criteria.
+				FAILURE_REASON_SAMPLING_RESULT_ALREADY_EXIST, ///< The event already contains a field defined as "dry_run_result_path".
+				FAILURE_REASON_SAMPLING_INVALID_RESULT_PATH ///< "dry_run_result_path" has an invalid value (doesn't start with "data" or "meta" or one of the intermediate elements isn't an object).
 			};
 
 			/**

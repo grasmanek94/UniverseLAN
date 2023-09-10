@@ -5,6 +5,7 @@
 #include <GalaxyID.h>
 
 #include <GalaxyUserData.hxx>
+#include <GalaxyIDHash.hxx>
 #include <Networking/Networking.hxx>
 #include <ChatRoomManager.hxx>
 #include <LobbyManager.hxx>
@@ -20,7 +21,7 @@ namespace universelan::server::peer {
 		friend class Data;
 
 	public:
-		using map_t = std::unordered_map<galaxy::api::GalaxyID, ENetPeer*, galaxy::api::GalaxyID::Hash>;
+		using map_t = std::unordered_map<galaxy::api::GalaxyID, ENetPeer*, universelan::GalaxyIDHash>;
 
 	private:
 		map_t map;

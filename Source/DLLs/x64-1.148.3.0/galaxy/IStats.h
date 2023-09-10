@@ -699,7 +699,7 @@ namespace galaxy
 			/**
 			 * Returns data from the currently processed request for leaderboard entries.
 			 *
-			 * Use this call to iterate over last retrieved lobby entries, indexed from 0.
+			 * Use this call to iterate over last retrieved leaderboard entries, indexed from 0.
 			 *
 			 * @remark This method can be used only inside of
 			 * ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveSuccess().
@@ -718,7 +718,7 @@ namespace galaxy
 			/**
 			 * Returns data with details from the currently processed request for leaderboard entries.
 			 *
-			 * Use this call to iterate over last retrieved lobby entries, indexed from 0.
+			 * Use this call to iterate over last retrieved leaderboard entries, indexed from 0.
 			 *
 			 * If the buffer that is supposed to take the details data is too small,
 			 * the details will be truncated to its size.

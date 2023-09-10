@@ -183,19 +183,6 @@ namespace galaxy
 			IDType GetIDType() const
 			{
 				return static_cast<IDType>(value >> 56);
-			}
-
-			template<class Archive>
-			void serialize(Archive& ar)
-			{
-				ar(value);
-			}
-
-			struct Hash {
-				std::size_t operator()(const GalaxyID& k) const
-				{
-					return std::hash<uint64_t>()(k.GetRealID());
-				}
 			};
 
 		private:

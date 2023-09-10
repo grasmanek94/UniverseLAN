@@ -8,7 +8,8 @@ function(define_shared GALAXY_VERSION)
   add_library(lsfdrmfg-common-shared-${GALAXY_VERSION} STATIC ${COMMON_SHARED_SRC-${GALAXY_VERSION}} )
   
   target_include_directories(lsfdrmfg-common-shared-${GALAXY_VERSION} PUBLIC "${CMAKE_SOURCE_DIR}/Source/Shared/")
-  
+  add_version_definitions_to(lsfdrmfg-common-shared-${GALAXY_VERSION})
+ 
   target_link_libraries(
     lsfdrmfg-common-shared-${GALAXY_VERSION}
     PUBLIC

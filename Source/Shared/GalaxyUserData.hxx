@@ -3,6 +3,7 @@
 #include <GalaxyID.h>
 
 #include <AchievementsAndStatsContainer.hxx>
+#include <GalaxyIDHash.hxx>
 
 #include <memory>
 #include <string>
@@ -12,7 +13,7 @@ namespace universelan {
 	class GalaxyUserData {
 	public:
 		using ptr_t = std::shared_ptr<GalaxyUserData>;
-		using map_t = std::unordered_map<galaxy::api::GalaxyID, ptr_t, galaxy::api::GalaxyID::Hash>;
+		using map_t = std::unordered_map<galaxy::api::GalaxyID, ptr_t, universelan::GalaxyIDHash>;
 
 		GalaxyUserData(galaxy::api::GalaxyID id);
 

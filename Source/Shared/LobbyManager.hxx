@@ -5,6 +5,8 @@
 #include <GalaxyID.h>
 #include <IMatchMaking.h>
 
+#include <GalaxyIDHash.hxx>
+
 #include <memory>
 #include <unordered_map>
 
@@ -12,7 +14,7 @@ namespace universelan {
 	class LobbyManager {
 	public:
 		using lobby_t = std::shared_ptr<Lobby>;
-		using lobbies_t = std::unordered_map<galaxy::api::GalaxyID, lobby_t, galaxy::api::GalaxyID::Hash>;
+		using lobbies_t = std::unordered_map<galaxy::api::GalaxyID, lobby_t, universelan::GalaxyIDHash>;
 	
 	private:
 		lobbies_t lobbies;

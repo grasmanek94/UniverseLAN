@@ -171,9 +171,12 @@ namespace universelan::client {
 				}
 				break;
 
+#if (GALAXY_VERSION) > 114830
 			case LOBBY_COMPARISON_TYPE_NEAR:
 				// TODO: figure out what to do with this, probably calculate the difference and then sort by this (highest to lowest, lowest to highest)?
 				break;
+#endif
+
 			}
 		}
 
@@ -261,9 +264,11 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::AddRequestLobbyListNearValueFilter(const char* keyToMatch, int32_t valueToBeCloseTo) {
+#if (GALAXY_VERSION) > 114830
 		tracer::Trace trace{ __FUNCTION__ };
 
 		AddRequestLobbyListNumericalFilter(keyToMatch, valueToBeCloseTo, LOBBY_COMPARISON_TYPE_NEAR);
+#endif
 	}
 
 	GalaxyID MatchmakingImpl::GetLobbyByIndex(uint32_t index) {

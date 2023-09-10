@@ -8,7 +8,7 @@
 #include "GalaxyAllocator.h"
 #include "GalaxyThread.h"
 
-#include <stdint.h>
+#include "stdint.h"
 #include <cstddef>
 
 namespace galaxy
@@ -33,7 +33,7 @@ namespace galaxy
 			 *
 			 * @param [in] _clientID The ID of the client.
 			 * @param [in] _clientSecret The secret of the client.
-			 * @param [in] _configFilePath The path to folder which contains configuration files.
+			 * @param [in] _configFilePath The path to a folder which contains configuration files. Note: a relative path is relative to the current working directory, but not to an executable.
 			 * @param [in] _galaxyAllocator The custom memory allocator. The same instance has to be passed to both Galaxy Peer and Game Server.
 			 * @param [in] _storagePath Path to a directory that can be used for storing internal SDK data. Used only on Android devices. See remarks for more information.
 			 * @param [in] _host The local IP address this peer would bind to.
@@ -48,8 +48,7 @@ namespace galaxy
 				const char* _storagePath = NULL,
 				const char* _host = NULL,
 				uint16_t _port = 0,
-				IGalaxyThreadFactory* _galaxyThreadFactory = NULL
-			)
+				IGalaxyThreadFactory* _galaxyThreadFactory = NULL)
 				: clientID(_clientID)
 				, clientSecret(_clientSecret)
 				, configFilePath(_configFilePath)

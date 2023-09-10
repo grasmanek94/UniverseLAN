@@ -6,7 +6,7 @@
  * Contains data structures and interfaces related to callback listeners.
  */
 
-#include <stdint.h>
+#include "stdint.h"
 #include <stdlib.h>
 #include "GalaxyExport.h"
 
@@ -38,7 +38,6 @@ namespace galaxy
 			AUTH, ///< Used by IAuthListener.
 			LOBBY_MESSAGE, ///< Used by ILobbyMessageListener.
 			NETWORKING, ///< Used by INetworkingListener.
-			_SERVER_NETWORKING, ///< @deprecated Used by IServerNetworkingListener.
 			USER_DATA, ///< Used by IUserDataListener.
 			USER_STATS_AND_ACHIEVEMENTS_RETRIEVE, ///< Used by IUserStatsAndAchievementsRetrieveListener.
 			STATS_AND_ACHIEVEMENTS_STORE, ///< Used by IStatsAndAchievementsStoreListener.
@@ -50,7 +49,6 @@ namespace galaxy
 			RICH_PRESENCE_CHANGE_LISTENER, ///< Used by IRichPresenceChangeListener.
 			GAME_JOIN_REQUESTED_LISTENER, ///< Used by IGameJoinRequested.
 			OPERATIONAL_STATE_CHANGE, ///< Used by IOperationalStateChangeListener.
-			_OVERLAY_STATE_CHANGE, ///< @deprecated Replaced with OVERLAY_VISIBILITY_CHANGE
 			FRIEND_LIST_RETRIEVE, ///< Used by IFriendListListener.
 			ENCRYPTED_APP_TICKET_RETRIEVE, ///< Used by IEncryptedAppTicketListener.
 			ACCESS_TOKEN_CHANGE, ///< Used by IAccessTokenListener.
@@ -63,7 +61,6 @@ namespace galaxy
 			LOBBY_DATA_RETRIEVE, ///< Used by ILobbyDataRetrieveListener.
 			USER_TIME_PLAYED_RETRIEVE, ///< Used by IUserTimePlayedRetrieveListener.
 			OTHER_SESSION_START, ///< Used by IOtherSessionStartListener.
-			_STORAGE_SYNCHRONIZATION, ///< @deprecated Synchronization is performed solely by Galaxy Client.
 			FILE_SHARE, ///< Used by IFileShareListener.
 			SHARED_FILE_DOWNLOAD, ///< Used by ISharedFileDownloadListener.
 			CUSTOM_NETWORKING_CONNECTION_OPEN, ///< Used by IConnectionOpenListener.

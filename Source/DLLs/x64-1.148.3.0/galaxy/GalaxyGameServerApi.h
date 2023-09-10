@@ -59,8 +59,8 @@ namespace galaxy
 		 * The Game Server is only allowed to create public non-host-migrating lobbies.
 		 * Joining a specific lobby is not possible for the Game Server.
 		 *
-		 * While in a lobby, the Game Server operation on the server INetworking interface, so
-		 * incomming packets should be handled by the IServerNetworkingListener.
+		 * While in a lobby, the Game Server operates on the server INetworking interface, so
+		 * incomming packets may be handled by the GameServerGlobalNetworkingListener.
 		 */
 
 		/**

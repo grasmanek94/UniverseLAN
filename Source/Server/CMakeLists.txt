@@ -9,7 +9,8 @@ function(define_server GALAXY_VERSION)
   
   target_include_directories(lsfdrmfg-server-${GALAXY_VERSION} PUBLIC "${CMAKE_SOURCE_DIR}/Source/Server/")
   target_compile_definitions(lsfdrmfg-server-${GALAXY_VERSION} PUBLIC "SERVER" )
-  
+  add_version_definitions_to(lsfdrmfg-server-${GALAXY_VERSION})
+
   target_link_libraries(
     lsfdrmfg-server-${GALAXY_VERSION}
     PUBLIC lsfdrmfg-common-shared-${GALAXY_VERSION}

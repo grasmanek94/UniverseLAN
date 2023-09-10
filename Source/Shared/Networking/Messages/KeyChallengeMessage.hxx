@@ -5,6 +5,8 @@
 
 #include <GalaxyApi.h>
 
+#include <GalaxyIDSerialization.hxx>
+
 namespace universelan {
 	/**
 	* Challenge works like this:

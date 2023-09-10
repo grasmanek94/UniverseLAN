@@ -3,6 +3,8 @@
 #include <GalaxyID.h>
 #include <IMatchMaking.h>
 
+#include <GalaxyIDHash.hxx>
+
 #include <map>
 #include <memory>
 #include <ranges>
@@ -25,7 +27,7 @@ namespace universelan {
 		};
 
 		using data_t = std::unordered_map<std::string, std::string>;
-		using user_data_t = std::unordered_map<galaxy::api::GalaxyID, data_t, galaxy::api::GalaxyID::Hash>;
+		using user_data_t = std::unordered_map<galaxy::api::GalaxyID, data_t, universelan::GalaxyIDHash>;
 		using messages_t = std::map<uint32_t, Message>;
 		using view_members_t = std::ranges::elements_view<
 			std::ranges::ref_view<const universelan::Lobby::user_data_t>,
