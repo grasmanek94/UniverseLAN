@@ -924,7 +924,7 @@ namespace galaxy
 			/**
 			 * Finds a specified user.
 			 *
-			 * This call is asynchronous. Responses come to the IUserFindListener.
+			 * This call is asynchronous. Responses come to the IUserSearchListener.
 			 *
 			 * Searches for the user given either a username or an email address.
 			 * Only exact match will be returned.

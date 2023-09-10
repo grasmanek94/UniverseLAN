@@ -144,10 +144,7 @@ namespace galaxy
 			virtual void Register(uint32_t listenerType, IGalaxyListener* listener) = 0;
 
 			/**
-			 * Unregisters a listener previously globally registered with Register()
-			 * or registered for specific action.
-			 *
-			 * Call Unregister() unregisters listener from all pending asynchonous calls.
+			 * Unregisters a listener previously globally registered with Register().
 			 *
 			 * @param [in] listenerType The type of the listener. A value of ListenerType.
 			 * @param [in] listener The specific listener of the specified type.

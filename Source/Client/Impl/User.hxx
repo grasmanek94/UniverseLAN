@@ -22,7 +22,12 @@
 #include <mutex>
 #include <unordered_map>
 
-#if (GALAXY_VERSION) > 112400
+#define GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED ((GALAXY_VERSION) > 112120)
+#define GALAXY_VERSION_LISTENER_TO_USERDATA_FUNCTION_SIGNATURES_ADDED ((GALAXY_VERSION) > 112400)
+#define GALAXY_VERSION_NEW_SIGN_IN_FUNCTIONS_ADDED ((GALAXY_VERSION) > 112400)
+#define GALAXY_VERSION_INVALID_ACCESS_TOKEN_INFO_ADDED ((GALAXY_VERSION) > 112400)
+
+#if GALAXY_VERSION_NEW_SIGN_IN_FUNCTIONS_ADDED
 
 #define USER_SIGN_IN_CREDENTIALS SignInCredentials
 #define USER_SIGN_IN_STEAM SignInSteam
@@ -116,9 +121,91 @@ namespace universelan::client {
 		 * @param [in] password The user's password.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void USER_SIGN_IN_CREDENTIALS(const char* login, const char* password, IAuthListener* const listener = NULL) override;
+		virtual void USER_SIGN_IN_CREDENTIALS(const char* login, const char* password
+#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
+			, IAuthListener* const listener = NULL
+#endif
+		) override;
 
-#if (GALAXY_VERSION) > 112400
+		/**
+		 * Authenticates the Galaxy Peer based on Steam Encrypted App Ticket.
+		 *
+		 * This call is asynchronous. Responses come to the IAuthListener
+		 * (for all GlobalAuthListener-derived and optional listener passed as argument).
+		 *
+		 * @remark Information about being signed in or signed out also comes to
+		 * the IOperationalStateChangeListener.
+		 *
+		 * @param [in] steamAppTicket The Encrypted App Ticket from the Steam API.
+		 * @param [in] steamAppTicketSize The size of the ticket.
+		 * @param [in] personaName The user's persona name, i.e. the username from Steam.
+		 * @param [in] listener The listener for specific operation.
+		 */
+		virtual void USER_SIGN_IN_STEAM(const void* steamAppTicket, uint32_t steamAppTicketSize, const char* personaName
+#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
+			, IAuthListener* const listener = NULL
+#endif
+		) override;
+
+		/**
+		 * Authenticates the Galaxy Peer based on Galaxy Client authentication.
+		 *
+		 * This call is asynchronous. Responses come to the IAuthListener
+		 * (for all GlobalAuthListener-derived and optional listener passed as argument).
+		 *
+		 * @remark Information about being signed in or signed out also comes to
+		 * the IOperationalStateChangeListener.
+		 *
+		 * @param [in] requireOnline Indicates if sing in with Galaxy backend is required.
+		 * @param [in] listener The listener for specific operation.
+		 */
+		virtual void USER_SIGN_IN_GALAXY(bool requireOnline = false
+#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
+			, IAuthListener* const listener = NULL
+#endif
+		) override;
+
+		/**
+		 * Authenticates the Galaxy Peer with a specified server key.
+		 *
+		 * This call is asynchronous. Responses come to the IAuthListener.
+		 *
+		 * @warning Make sure you do not put your server key in public builds.
+		 *
+		 * @remark Information about being signed in or signed out also comes to
+		 * the IOperationalStateChangeListener.
+		 *
+		 * @remark Signing in with a server key is meant for server-side usage,
+		 * meaning that typically there will be no user associated to the session.
+		 *
+		 * @param [in] serverKey The server key.
+		 * @param [in] listener The listener for specific operation.
+		 */
+		virtual void USER_SIGN_IN_SERVER_KEY(const char* serverKey
+#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
+			, IAuthListener* const listener = NULL
+#endif
+		) override;
+
+		/**
+		 * Authenticates the Galaxy Game Server anonymously.
+		 *
+		 * This call is asynchronous. Responses come to the IAuthListener
+		 * (for all GlobalAuthListener-derived and optional listener passed as argument).
+		 *
+		 * @remark Information about being signed in or signed out also comes to
+		 * the IOperationalStateChangeListener.
+		 *
+		 * @param [in] listener The listener for specific operation.
+		 */
+		virtual void SignInAnonymous(
+#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
+			IAuthListener* const listener = NULL
+#endif
+		) override;
+
+#if GALAXY_VERSION_NEW_SIGN_IN_FUNCTIONS_ADDED
+
 		/**
 		 * Authenticates the Galaxy Peer with refresh token.
 		 *
@@ -151,25 +238,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void SignInLauncher(IAuthListener* const listener = NULL) override;
-#endif
 
-		/**
-		 * Authenticates the Galaxy Peer based on Steam Encrypted App Ticket.
-		 *
-		 * This call is asynchronous. Responses come to the IAuthListener
-		 * (for all GlobalAuthListener-derived and optional listener passed as argument).
-		 *
-		 * @remark Information about being signed in or signed out also comes to
-		 * the IOperationalStateChangeListener.
-		 *
-		 * @param [in] steamAppTicket The Encrypted App Ticket from the Steam API.
-		 * @param [in] steamAppTicketSize The size of the ticket.
-		 * @param [in] personaName The user's persona name, i.e. the username from Steam.
-		 * @param [in] listener The listener for specific operation.
-		 */
-		virtual void USER_SIGN_IN_STEAM(const void* steamAppTicket, uint32_t steamAppTicketSize, const char* personaName, IAuthListener* const listener = NULL) override;
-
-#if (GALAXY_VERSION) > 112400
 		/**
 		 * Authenticates the Galaxy Peer based on Epic Access Token.
 		 *
@@ -184,23 +253,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void SignInEpic(const char* epicAccessToken, const char* epicUsername, IAuthListener* const listener = NULL) override;
-#endif
 
-		/**
-		 * Authenticates the Galaxy Peer based on Galaxy Client authentication.
-		 *
-		 * This call is asynchronous. Responses come to the IAuthListener
-		 * (for all GlobalAuthListener-derived and optional listener passed as argument).
-		 *
-		 * @remark Information about being signed in or signed out also comes to
-		 * the IOperationalStateChangeListener.
-		 *
-		 * @param [in] requireOnline Indicates if sing in with Galaxy backend is required.
-		 * @param [in] listener The listener for specific operation.
-		 */
-		virtual void USER_SIGN_IN_GALAXY(bool requireOnline = false, IAuthListener* const listener = NULL) override;
-
-#if (GALAXY_VERSION) > 112400
 		/**
 		 * Authenticates the Galaxy Peer based on Windows Store authentication
 		 * in Universal Windows Platform application.
@@ -260,8 +313,28 @@ namespace universelan::client {
 		 */
 		virtual void SignInXBLive(const char* token, const char* signature, const char* marketplaceID, const char* locale, IAuthListener* const listener = NULL) override;
 
+		/**
+		 * Authenticates the Galaxy Peer anonymously.
+		 *
+		 * This authentication method enables the peer to send anonymous telemetry events.
+		 *
+		 * This call is asynchronous. Responses come to the IAuthListener
+		 * (for all GlobalAuthListener-derived and optional listener passed as argument).
+		 *
+		 * @param [in] listener The listener for specific operation.
+		 */
+		virtual void SignInAnonymousTelemetry(IAuthListener* const listener = NULL) override;
+
+		/**
+		 * Signs the Galaxy Peer out.
+		 *
+		 * This call is asynchronous. Responses come to the IAuthListener and IOperationalStateChangeListener.
+		 *
+		 * @remark All pending asynchronous operations will be finished immediately.
+		 * Their listeners will be called with the next call to the ProcessData().
+		 */
+		virtual void SignOut() override;
 #else
-		virtual void SignIn(const char* ps4ClientID, const char* ps4TitleID, const char* ps4TitleSecret, uint32_t ps4TitleSecretLength, IAuthListener* listener = NULL) override;
 
 		/**
 		* Initializes the Galaxy Peer based on XBOX ONE credentials.
@@ -275,11 +348,14 @@ namespace universelan::client {
 		* @param [in] xboxOneUserID The XBOX ONE user ID.
 		* @param [in] listener The listener for specific operation [EXPERIMENTAL].
 		*/
-		virtual void SignIn(uint32_t xboxOneUserID, IAuthListener* listener = NULL);
+		virtual void SignIn(uint32_t xboxOneUserID
+#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
+			, IAuthListener* listener = NULL
 #endif
+		);
 
 		/**
-		 * Authenticates the Galaxy Game Server anonymously.
+		 * Initializes the Galaxy Peer based on PS4 credentials.
 		 *
 		 * This call is asynchronous. Responses come to the IAuthListener
 		 * (for all GlobalAuthListener-derived and optional listener passed as argument).
@@ -287,52 +363,18 @@ namespace universelan::client {
 		 * @remark Information about being signed in or signed out also comes to
 		 * the IOperationalStateChangeListener.
 		 *
-		 * @param [in] listener The listener for specific operation.
+		 * @param [in] ps4ClientID The PlayStation 4 client ID.
+		 * @param [in] ps4TitleID Not used anymore. Will be removed in future releases.
+		 * @param [in] ps4TitleSecret Not used anymore. Will be removed in future releases.
+		 * @param [in] ps4TitleSecretLength Not used anymore. Will be removed in future releases.
+		 * @param [in] listener The listener for specific operation [EXPERIMENTAL].
 		 */
-		virtual void SignInAnonymous(IAuthListener* const listener = NULL) override;
-
-#if (GALAXY_VERSION) > 112400
-		/**
-		 * Authenticates the Galaxy Peer anonymously.
-		 *
-		 * This authentication method enables the peer to send anonymous telemetry events.
-		 *
-		 * This call is asynchronous. Responses come to the IAuthListener
-		 * (for all GlobalAuthListener-derived and optional listener passed as argument).
-		 *
-		 * @param [in] listener The listener for specific operation.
-		 */
-		virtual void SignInAnonymousTelemetry(IAuthListener* const listener = NULL) override;
+		virtual void SignIn(const char* ps4ClientID, const char* ps4TitleID, const char* ps4TitleSecret, uint32_t ps4TitleSecretLength
+#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
+			, IAuthListener* const listener = NULL
 #endif
+		) override;
 
-		/**
-		 * Authenticates the Galaxy Peer with a specified server key.
-		 *
-		 * This call is asynchronous. Responses come to the IAuthListener.
-		 *
-		 * @warning Make sure you do not put your server key in public builds.
-		 *
-		 * @remark Information about being signed in or signed out also comes to
-		 * the IOperationalStateChangeListener.
-		 *
-		 * @remark Signing in with a server key is meant for server-side usage,
-		 * meaning that typically there will be no user associated to the session.
-		 *
-		 * @param [in] serverKey The server key.
-		 * @param [in] listener The listener for specific operation.
-		 */
-		virtual void USER_SIGN_IN_SERVER_KEY(const char* serverKey, IAuthListener* const listener = NULL) override;
-
-#if (GALAXY_VERSION) > 112400
-		/**
-		 * Signs the Galaxy Peer out.
-		 *
-		 * This call is asynchronous. Responses come to the IAuthListener and IOperationalStateChangeListener.
-		 *
-		 * @remark All pending asynchronous operations will be finished immediately.
-		 * Their listeners will be called with the next call to the ProcessData().
-		 */
-		virtual void SignOut() override;
 #endif
 
 		/**
@@ -344,7 +386,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RequestUserData(GalaxyID userID = GalaxyID()
-#if (GALAXY_VERSION) > 112400
+#if GALAXY_VERSION_LISTENER_TO_USERDATA_FUNCTION_SIGNATURES_ADDED
 			, ISpecificUserDataListener* const listener = NULL
 #endif
 		) override;
@@ -396,7 +438,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void SetUserData(const char* key, const char* value
-#if (GALAXY_VERSION) > 112400
+#if GALAXY_VERSION_LISTENER_TO_USERDATA_FUNCTION_SIGNATURES_ADDED
 			, ISpecificUserDataListener* const listener = NULL
 #endif
 		) override;
@@ -438,7 +480,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void DeleteUserData(const char* key
-#if (GALAXY_VERSION) > 112400
+#if GALAXY_VERSION_LISTENER_TO_USERDATA_FUNCTION_SIGNATURES_ADDED
 			, ISpecificUserDataListener* const listener = NULL
 #endif
 		) override;
@@ -467,7 +509,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RequestEncryptedAppTicket(const void* data, uint32_t dataSize
-#if (GALAXY_VERSION) > 112400
+#if GALAXY_VERSION_LISTENER_TO_USERDATA_FUNCTION_SIGNATURES_ADDED
 			, IEncryptedAppTicketListener* const listener = NULL
 #endif
 		) override;
@@ -542,7 +584,7 @@ namespace universelan::client {
 		 * @return true if the report was accepted, false otherwise.
 		 */
 		virtual bool ReportInvalidAccessToken(const char* accessToken
-#if (GALAXY_VERSION) > 112400
+#if GALAXY_VERSION_INVALID_ACCESS_TOKEN_INFO_ADDED
 			, const char* info = NULL
 #endif
 		) override;

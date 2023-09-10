@@ -289,8 +289,7 @@ namespace galaxy
 			/**
 			 * Initializes the Galaxy Peer with specified user credentials.
 			 *
-			 * This call is asynchronous. Responses come to the IAuthListener
-			 * (for all GlobalAuthListener-derived and optional listener passed as argument).
+			 * This call is asynchronous. Responses come to the IAuthListener.
 			 *
 			 * Information about being signed in or signed out also comes to
 			 * the IOperationalStateChangeListener.
@@ -300,9 +299,8 @@ namespace galaxy
 			 *
 			 * @param [in] login The user's login.
 			 * @param [in] password The user's password.
-			 * @param [in] listener The listener for specific operation [EXPERIMENTAL].
 			 */
-			virtual void SignIn(const char* login, const char* password, IAuthListener* listener = NULL) = 0;
+			virtual void SignIn(const char* login, const char* password) = 0;
 
 			/**
 			 * Initializes the Galaxy Peer based on Steam Encrypted App Ticket.
@@ -315,29 +313,25 @@ namespace galaxy
 			 * @param [in] steamAppTicket The Encrypted App Ticket from the Steam API.
 			 * @param [in] steamAppTicketSize The size of the ticket.
 			 * @param [in] personaName The user's persona name, i.e. the username from Steam.
-			 * @param [in] listener The listener for specific operation [EXPERIMENTAL].
 			 */
-			virtual void SignIn(const void* steamAppTicket, uint32_t steamAppTicketSize, const char* personaName, IAuthListener* listener = NULL) = 0;
+			virtual void SignIn(const void* steamAppTicket, uint32_t steamAppTicketSize, const char* personaName) = 0;
 
 			/**
 			 * Initializes the Galaxy Peer based on Galaxy Client authentication.
 			 *
-			 * This call is asynchronous. Responses come to the IAuthListener
-			 * (for all GlobalAuthListener-derived and optional listener passed as argument).
+			 * This call is asynchronous. Responses come to the IAuthListener.
 			 *
 			 * @remark Information about being signed in or signed out also comes to
 			 * the IOperationalStateChangeListener.
 			 *
 			 * @param [in] requireOnline Indicates if sing in with Galaxy backend is required.
-			 * @param [in] listener The listener for specific operation [EXPERIMENTAL].
 			 */
-			virtual void SignIn(bool requireOnline = false, IAuthListener* listener = NULL) = 0;
+			virtual void SignIn(bool requireOnline = false) = 0;
 
 			/**
 			 * Initializes the Galaxy Peer based on PS4 credentials.
 			 *
-			 * This call is asynchronous. Responses come to the IAuthListener
-			 * (for all GlobalAuthListener-derived and optional listener passed as argument).
+			 * This call is asynchronous. Responses come to the IAuthListener.
 			 *
 			 * @remark Information about being signed in or signed out also comes to
 			 * the IOperationalStateChangeListener.
@@ -346,36 +340,30 @@ namespace galaxy
 			 * @param [in] ps4TitleID Not used anymore. Will be removed in future releases.
 			 * @param [in] ps4TitleSecret Not used anymore. Will be removed in future releases.
 			 * @param [in] ps4TitleSecretLength Not used anymore. Will be removed in future releases.
-			 * @param [in] listener The listener for specific operation [EXPERIMENTAL].
 			 */
-			virtual void SignIn(const char* ps4ClientID, const char* ps4TitleID, const char* ps4TitleSecret, uint32_t ps4TitleSecretLength, IAuthListener* listener = NULL) = 0;
+			virtual void SignIn(const char* ps4ClientID, const char* ps4TitleID, const char* ps4TitleSecret, uint32_t ps4TitleSecretLength) = 0;
 
 			/**
 			 * Initializes the Galaxy Peer based on XBOX ONE credentials.
 			 *
-			 * This call is asynchronous. Responses come to the IAuthListener
-			 * (for all GlobalAuthListener-derived and optional listener passed as argument).
+			 * This call is asynchronous. Responses come to the IAuthListener.
 			 *
 			 * @remark Information about being signed in or signed out also comes to
 			 * the IOperationalStateChangeListener.
 			 *
 			 * @param [in] xboxOneUserID The XBOX ONE user ID.
-			 * @param [in] listener The listener for specific operation [EXPERIMENTAL].
 			 */
-			virtual void SignIn(uint32_t xboxOneUserID, IAuthListener* listener = NULL) = 0;
+			virtual void SignIn(uint32_t xboxOneUserID) = 0;
 
 			/**
 			 * Initializes the Galaxy Game Server anonymously.
 			 *
-			 * This call is asynchronous. Responses come to the IAuthListener
-			 * (for all GlobalAuthListener-derived and optional listener passed as argument).
+			 * This call is asynchronous. Responses come to the IAuthListener.
 			 *
 			 * @remark Information about being signed in or signed out also comes to
 			 * the IOperationalStateChangeListener.
-			 *
-			 * @param [in] listener The listener for specific operation [EXPERIMENTAL].
 			 */
-			virtual void SignInAnonymous(IAuthListener* listener = NULL) = 0;
+			virtual void SignInAnonymous() = 0;
 
 			/**
 			 * Retrieves/Refreshes user data storage.
@@ -522,9 +510,8 @@ namespace galaxy
 			 * meaning that typically there will be no user associated to the session.
 			 *
 			 * @param [in] serverKey The server key.
-			 * @param [in] listener The listener for specific operation.
 			 */
-			virtual void SignIn(const char* serverKey, IAuthListener* listener = NULL) = 0;
+			virtual void SignIn(const char* serverKey) = 0;
 
 			/**
 			 * Returns the ID of current session.

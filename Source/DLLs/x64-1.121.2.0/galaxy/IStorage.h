@@ -111,11 +111,10 @@ namespace galaxy
 			/**
 			 * Writes data into the file.
 			 *
-			 * @pre The name that specifies the file can be provided in the form of a relative path that uses slashes
+			 * @pre The name that specifies the file can be provided in the form of a path that uses slashes
 			 * as separators and is a valid UTF-8 string. Every part of the path must must be portable,
 			 * i.e. it cannot refer to any special or restricted name on any of the supported platforms.
-			 * Backslashes are not allowed. The files created using this method will be stored in GOG Galaxy internal
-			 * directory and should be accessed only via Galaxy SDK methods.
+			 * Backslashes are not allowed.
 			 *
 			 * @param [in] fileName The name of the file in the form of a path (see the description of the method).
 			 * @param [in] data The data to write.

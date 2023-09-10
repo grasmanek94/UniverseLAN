@@ -114,7 +114,7 @@ namespace galaxy
 		};
 
 		/**
-		 * Globally self-registering version of IChatRoomMessageSendListener.
+		 * Globally self-registering version of ILobbyMessageListener.
 		 */
 		typedef SelfRegisteringListener<IChatRoomMessageSendListener> GlobalChatRoomMessageSendListener;
 

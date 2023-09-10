@@ -7,10 +7,7 @@
  * used by Galaxy Peer.
  */
 
-#include <cstddef>
-#include <utility>
-
-#include <stdint.h>
+#include "stdint.h"
 #include <assert.h>
 
 namespace galaxy

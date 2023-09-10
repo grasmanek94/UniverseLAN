@@ -23,9 +23,9 @@ namespace universelan::client {
 		clientID = initOptions.clientID;
 		clientSecret = initOptions.clientSecret;
 		configFilePath = initOptions.configFilePath != nullptr ? initOptions.configFilePath : "";
-		storagePath = initOptions.storagePath != nullptr ? initOptions.storagePath : "";
 		galaxyAllocator = initOptions.galaxyAllocator;
 #if (GALAXY_VERSION) > 112400
+		storagePath = initOptions.storagePath != nullptr ? initOptions.storagePath : "";
 		galaxyThreadFactory = initOptions.galaxyThreadFactory;
 		host = initOptions.host != nullptr ? initOptions.host : "";
 		port = initOptions.port;
