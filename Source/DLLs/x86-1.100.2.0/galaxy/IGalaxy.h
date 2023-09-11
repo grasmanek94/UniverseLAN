@@ -25,9 +25,41 @@ namespace galaxy
 		class IStats;
 		class IUtils;
 		class IApps;
+		class IStorage;
+		class ICustomNetworking;
 		class IListenerRegistrar;
 		class ILogger;
 		class IError;
+
+		/**
+		 * The group of options used for Init configuration.
+		 */
+		struct InitOptions
+		{
+			/**
+			 * InitOptions constructor.
+			 *
+			 * @param _clientID The ID of the client.
+			 * @param _clientSecret The secret of the client.
+			 * @param _galaxyPeerPath Path to the galaxyPeer library location.
+			 * @param _throwExceptions Indicates if Galaxy should throw exceptions.
+			 * @param _configFilePath The path to folder which contains configuration files.
+			 */
+			InitOptions(const char* _clientID, const char* _clientSecret, const char* _galaxyPeerPath = "", bool _throwExceptions = true, const char* _configFilePath = ".")
+				: throwExceptions(_throwExceptions)
+				, clientID(_clientID)
+				, clientSecret(_clientSecret)
+				, galaxyPeerPath(_galaxyPeerPath)
+				, configFilePath(_configFilePath)
+			{
+			}
+
+			const bool throwExceptions; ///< Indicates if Galaxy should throw exceptions.
+			const char* clientID; ///< The ID of the client.
+			const char* clientSecret; ///< The secret of the client.
+			const char* galaxyPeerPath; ///< Path to the galaxyPeer library location.
+			const char* configFilePath; ///< The path to folder which contains configuration files.
+		};
 
 		/**
 		 * The main interface for controlling the Galaxy Peer.
@@ -46,6 +78,11 @@ namespace galaxy
 			 * @remark When you do not need the Galaxy Peer anymore, you should call
 			 * Shutdown() in order to deactivate it and free its resources.
 			 *
+			 * @remark This method can succeed partially, in which case it leaves
+			 * Galaxy Peer partially functional, hence even in case of an error, be
+			 * sure to call Shutdown() when you do not need the Galaxy Peer anymore.
+			 * See the documentation of specific interfaces on how they behave.
+			 *
 			 * @param clientID The ID of the client.
 			 * @param clientSecret The secret of the client.
 			 * @param throwExceptions Indicates if Galaxy should throw exceptions.
@@ -57,6 +94,26 @@ namespace galaxy
 			 *
 			 * @remark When you do not need the Galaxy Peer anymore, you should call
 			 * Shutdown() in order to deactivate it and free its resources.
+			 *
+			 * @remark This method can succeed partially, in which case it leaves
+			 * Galaxy Peer partially functional, hence even in case of an error, be
+			 * sure to call Shutdown() when you do not need the Galaxy Peer anymore.
+			 * See the documentation of specific interfaces on how they behave.
+			 *
+			 * @param initOptions The group of the init options.
+			 */
+			virtual void Init(const InitOptions& initOptions) = 0;
+
+			/**
+			 * Initializes the Galaxy Peer with specified credentials.
+			 *
+			 * @remark When you do not need the Galaxy Peer anymore, you should call
+			 * Shutdown() in order to deactivate it and free its resources.
+			 *
+			 * @remark This method can succeed partially, in which case it leaves
+			 * Galaxy Peer partially functional, hence even in case of an error, be
+			 * sure to call Shutdown() when you do not need the Galaxy Peer anymore.
+			 * See the documentation of specific interfaces on how they behave.
 			 *
 			 * @warning This method allows for using local Galaxy Peer library
 			 * instead of the one provided by the desktop service Galaxy Client.
@@ -133,11 +190,25 @@ namespace galaxy
 			virtual IUtils* GetUtils() const = 0;
 
 			/**
-			* Returns an instance of IApps.
-			*
-			* @return An instance of IApps.
-			*/
+			 * Returns an instance of IApps.
+			 *
+			 * @return An instance of IApps.
+			 */
 			virtual IApps* GetApps() const = 0;
+
+			/**
+			 * Returns an instance of IStorage.
+			 *
+			 * @return An instance of IStorage.
+			 */
+			virtual IStorage* GetStorage() const = 0;
+
+			/**
+			* Returns an instance of ICustomNetworking.
+			*
+			* @return An instance of ICustomNetworking.
+			*/
+			virtual ICustomNetworking* GetCustomNetworking() const = 0;
 
 			/**
 			 * Returns an instance of IListenerRegistrar.
@@ -162,9 +233,9 @@ namespace galaxy
 			virtual void ProcessData() = 0;
 
 			/**
-			 * Retrieves error connected with last api call
+			 * Retrieves error connected with the last API call.
 			 *
-			 * @return last api call error or NULL if there was no error
+			 * @return Either the last API call error or NULL if there was no error.
 			 */
 			virtual const IError* GetError() const = 0;
 		};

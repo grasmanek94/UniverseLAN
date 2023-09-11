@@ -26,7 +26,7 @@ namespace galaxy
 		 * The interface for managing application activities.
 		 *
 		 * @remark This interface is fully functional in any situation when
-		 * Init() reports an error.
+		 * IGalaxy::Init() reports an error.
 		 */
 		class IApps
 		{
@@ -39,7 +39,7 @@ namespace galaxy
 			/**
 			 * Checks if specified DLC is installed.
 			 *
-			 * @param [in] productID The ID of the DLC to check.
+			 * @param productID The ID of the DLC to check.
 			 * @return true if specified DLC is installed, false otherwise.
 			 */
 			virtual bool IsDlcInstalled(ProductID productID) = 0;
@@ -47,7 +47,7 @@ namespace galaxy
 			/**
 			 * Returns current game language for given product ID.
 			 *
-			 * @param [in] productID The ID of the game or DLC to check.
+			 * @param productID The ID of the game or DLC to check.
 			 * @return current game language for given product ID.
 			 */
 			virtual const char* GetCurrentGameLanguage(ProductID productID = 0) = 0;
@@ -55,9 +55,9 @@ namespace galaxy
 			/**
 			 * Copies the current game language for given product ID to a buffer.
 			 *
-			 * @param [in, out] buffer The output buffer.
-			 * @param [in] bufferLength The size of the output buffer.
-			 * @param [in] productID The ID of the game or DLC to check.
+			 * @param buffer The output buffer.
+			 * @param bufferLength The size of the output buffer.
+			 * @param productID The ID of the game or DLC to check.
 			 * @return current game language for given product ID.
 			 */
 			virtual void GetCurrentGameLanguageCopy(char* buffer, uint32_t bufferLength, ProductID productID = 0) = 0;

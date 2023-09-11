@@ -6,8 +6,6 @@
  * Contains classes representing exceptions.
  */
 
-#include "GalaxyExport.h"
-
 namespace galaxy
 {
 	namespace api
@@ -62,7 +60,7 @@ namespace galaxy
 		};
 
 		/**
-		 * The exception thrown when calling Galaxy interfaces while
+		 * The exception thrown when calling IGalaxy or an interface it provides while
 		 * the user is not signed in and thus not authorized for any interaction.
 		 */
 		class IUnauthorizedAccessError : public IError
@@ -92,11 +90,23 @@ namespace galaxy
 		};
 
 		/**
-		 * Retrieves error connected with the last API call on the local thread.
-		 *
-		 * @return Either the last API call error or NULL if there was no error.
+		 * The interface of the error manager. Not to be used directly.
 		 */
-		GALAXY_DLL_EXPORT const IError* GALAXY_CALLTYPE GetError();
+		class IErrorManager
+		{
+		public:
+
+			virtual ~IErrorManager()
+			{
+			}
+
+			/**
+			 * Retrieves the stored last error.
+			 *
+			 * @return Either the stored last error or NULL if there is none.
+			 */
+			virtual api::IError* GetLastError() = 0;
+		};
 
 		/** @} */
 	}

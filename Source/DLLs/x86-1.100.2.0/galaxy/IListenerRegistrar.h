@@ -6,9 +6,9 @@
  * Contains data structures and interfaces related to callback listeners.
  */
 
+#include "GalaxyFactory.h"
 #include "stdint.h"
 #include <stdlib.h>
-#include "GalaxyExport.h"
 
 namespace galaxy
 {
@@ -50,7 +50,7 @@ namespace galaxy
 			RICH_PRESENCE_CHANGE_LISTENER, ///< Used by IRichPresenceChangeListener.
 			GAME_JOIN_REQUESTED_LISTENER, ///< Used by IGameJoinRequested.
 			OPERATIONAL_STATE_CHANGE, ///< Used by IOperationalStateChangeListener.
-			_OVERLAY_STATE_CHANGE, ///< Used by IOverlayStateChangeListener. @deprecated Replaced with OVERLAY_VISIBILITY_CHANGE
+			OVERLAY_STATE_CHANGE, ///< Used by IOverlayStateChangeListener.
 			FRIEND_LIST_RETRIEVE, ///< Used by IFriendListListener.
 			ENCRYPTED_APP_TICKET_RETRIEVE, ///< Used by IEncryptedAppTicketListener.
 			ACCESS_TOKEN_CHANGE, ///< Used by IAccessTokenListener.
@@ -69,21 +69,6 @@ namespace galaxy
 			CUSTOM_NETWORKING_CONNECTION_OPEN, ///< Used by IConnectionOpenListener.
 			CUSTOM_NETWORKING_CONNECTION_CLOSE, ///< Used by IConnectionCloseListener.
 			CUSTOM_NETWORKING_CONNECTION_DATA, ///< Used by IConnectionDataListener.
-			OVERLAY_INITIALIZATION_STATE_CHANGE, ///< Used by IOverlayInitializationStateChangeListener.
-			OVERLAY_VISIBILITY_CHANGE, ///< Used by IOverlayVisibilityChangeListener.
-			CHAT_ROOM_WITH_USER_RETRIEVE_LISTENER, ///< Used by IChatRoomWithUserRetrieveListener.
-			CHAT_ROOM_MESSAGE_SEND_LISTENER, ///< Used by IChatRoomMessageSendListener.
-			CHAT_ROOM_MESSAGES_LISTENER, ///< Used by IChatRoomMessagesListener.
-			FRIEND_INVITATION_SEND_LISTENER, ///< Used by IFriendInvitationSendListener.
-			FRIEND_INVITATION_LIST_RETRIEVE_LISTENER, ///< Used by IFriendInvitationListRetrieveListener.
-			FRIEND_INVITATION_LISTENER, ///< Used by IFriendInvitationListener.
-			FRIEND_INVITATION_RESPOND_TO_LISTENER, ///< Used by IFriendInvitationRespondToListener.
-			FRIEND_ADD_LISTENER, ///< Used by IFriendAddListener.
-			FRIEND_DELETE_LISTENER, ///< Used by IFriendDeleteListener.
-			CHAT_ROOM_MESSAGES_RETRIEVE_LISTENER, ///< Used by IChatRoomMessagesRetrieveListener.
-			USER_FIND_LISTENER, ///< Used by IUserFindListener.
-			NAT_TYPE_DETECTION, ///< Used by INatTypeDetectionListener.
-			SENT_FRIEND_INVITATION_LIST_RETRIEVE_LISTENER, ///< Used by ISentFriendInvitationListRetrieveListener.
 			LISTENER_TYPE_END ///< Used for iterating over listener types.
 		};
 
@@ -136,68 +121,29 @@ namespace galaxy
 			 * and is of any of the standard listener types specified in ListenerType.
 			 *
 			 * @remark Call Unregister() for all registered listeners before calling
-			 * Shutdown().
+			 * IGalaxy::Shutdown().
 			 *
-			 * @param [in] listenerType The type of the listener. A value of ListenerType.
-			 * @param [in] listener The specific listener of the specified type.
+			 * @param listenerType The type of the listener. A value of ListenerType.
+			 * @param listener The specific listener of the specified type.
 			 */
 			virtual void Register(uint32_t listenerType, IGalaxyListener* listener) = 0;
 
 			/**
-			 * Unregisters a listener previously globally registered with Register()
-			 * or registered for specific action.
+			 * Unregisters a listener previously globally registered with Register().
 			 *
-			 * Call Unregister() unregisters listener from all pending asynchonous calls.
-			 *
-			 * @param [in] listenerType The type of the listener. A value of ListenerType.
-			 * @param [in] listener The specific listener of the specified type.
+			 * @param listenerType The type of the listener. A value of ListenerType.
+			 * @param listener The specific listener of the specified type.
 			 */
 			virtual void Unregister(uint32_t listenerType, IGalaxyListener* listener) = 0;
 		};
-
-		/**
-		 * @addtogroup Peer
-		 * @{
-		 */
-
-		/**
-		 * Returns an instance of IListenerRegistrar.
-		 *
-		 * @return An instance of IListenerRegistrar.
-		 */
-		GALAXY_DLL_EXPORT IListenerRegistrar* GALAXY_CALLTYPE ListenerRegistrar();
-
-		/** @} */
-
-		/**
-		 * @addtogroup GameServer
-		 * @{
-		 */
-
-		/**
-		 * Returns an instance of IListenerRegistrar interface the for Game Server entity.
-		 *
-		 * @return An instance of IListenerRegistrar.
-		 */
-		GALAXY_DLL_EXPORT IListenerRegistrar* GALAXY_CALLTYPE GameServerListenerRegistrar();
-
-		/** @} */
 
 		/**
 		 * The class that is inherited by the self-registering versions of all specific
 		 * callback listeners. An instance of a listener that derives from it
 		 * automatically globally registers itself for proper callback notifications,
 		 * and unregisters when destroyed, which is done with IListenerRegistrar.
-		 *
-		 * @remark You can provide a custom IListenerRegistrar, yet that would
-		 * not make the listener visible for Galaxy Peer. For that the listener
-		 * needs to be registered with the IListenerRegistrar of Galaxy Peer.
-		 *
-		 * @param [in] _Registrar The instance of IListenerRegistrar to use
-		 * for registering and unregistering. Defaults to the one provided by Galaxy Peer.
 		 */
-		template<typename _TypeAwareListener, IListenerRegistrar*(*_Registrar)() = ListenerRegistrar>
-		class SelfRegisteringListener : public _TypeAwareListener
+		template<typename _TypeAwareListener> class SelfRegisteringListener : public _TypeAwareListener
 		{
 		public:
 
@@ -205,13 +151,21 @@ namespace galaxy
 			 * Creates an instance of SelfRegisteringListener and registers it with the
 			 * IListenerRegistrar provided by Galaxy Peer.
 			 *
-			 * @remark Delete all registered listeners before calling Shutdown().
+			 * @remark You can provide a custom IListenerRegistrar, yet that would
+			 * not make the listener visible for Galaxy Peer. For that the listener
+			 * needs to be registered with the IListenerRegistrar of Galaxy Peer.
 			 *
+			 * @remark Delete all registered listeners before calling
+			 * IGalaxy::Shutdown().
+			 *
+			 * @param _registrar The instance of IListenerRegistrar to use for registering and unregistering. Defaults to the one provided by Galaxy Peer.
 			 */
-			SelfRegisteringListener()
+			SelfRegisteringListener(IListenerRegistrar* _registrar = NULL)
+				: registrar(_registrar)
 			{
-				if (_Registrar())
-					_Registrar()->Register(_TypeAwareListener::GetListenerType(), this);
+				IListenerRegistrar* tmpRegistrar = registrar ? registrar : GalaxyFactory::GetInstance()->GetListenerRegistrar();
+				if (tmpRegistrar)
+					tmpRegistrar->Register(_TypeAwareListener::GetListenerType(), this);
 			}
 
 			/**
@@ -221,9 +175,14 @@ namespace galaxy
 			 */
 			~SelfRegisteringListener()
 			{
-				if (_Registrar())
-					_Registrar()->Unregister(_TypeAwareListener::GetListenerType(), this);
+				IListenerRegistrar* tmpRegistrar = registrar ? registrar : GalaxyFactory::GetInstance()->GetListenerRegistrar();
+				if (tmpRegistrar)
+					tmpRegistrar->Unregister(_TypeAwareListener::GetListenerType(), this);
 			}
+
+		private:
+
+			IListenerRegistrar* registrar; ///< The instance of IListenerRegistrar that was used to register the listener when it was created.
 		};
 
 		/** @} */

@@ -6,7 +6,7 @@
  * Contains a macro used for DLL export.
  */
 
-#if defined(_WIN32) || defined(_XBOX_ONE) || defined(__ORBIS__)
+#if defined(_WIN32) && !defined(__ORBIS__) && !defined(_XBOX_ONE)
 	#if defined(GALAXY_EXPORT)
 		#define GALAXY_DLL_EXPORT __declspec(dllexport)
 	#else

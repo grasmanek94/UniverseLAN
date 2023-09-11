@@ -7,27 +7,14 @@
  * control the Galaxy Peer.
  */
 
-#include <IGalaxy.h>
-#include <Errors.h>
-#include <GalaxyExport.h>
-
-#include <cstdint>
+#include "IGalaxy.h"
+#include "Errors.h"
+#include "GalaxyExport.h"
 
 namespace galaxy
 {
 	namespace api
 	{
-		class GALAXY_DLL_EXPORT IErrorManager
-		{
-		public:
-
-			// maybe something like 'cause exception when error occurred'
-			virtual int Unknown1() = 0;
-			virtual IErrorManager* Unknown2() = 0;
-			virtual int Unknown3() = 0;
-			virtual ~IErrorManager() {}
-		};
-
 		/**
 		 * @addtogroup api
 		 * @{
@@ -49,16 +36,14 @@ namespace galaxy
 			 *
 			 * @return The instance of IGalaxy or NULL if it has not been created yet.
 			 */
-			static IGalaxy* GALAXY_CALLTYPE GetInstance(
-				//uint32_t a, uint32_t b
-			);
+			static IGalaxy* GALAXY_CALLTYPE GetInstance();
 
 			/**
 			 * Returns the instance of error manager. Creates it if it does not exists yet.
 			 *
 			 * @return instance of error manager.
 			 */
-			static IErrorManager* GALAXY_CALLTYPE GetErrorManager(void);
+			static IErrorManager* GALAXY_CALLTYPE GetErrorManager();
 
 			/**
 			 * Removes the created instance of IGalaxy.
@@ -66,7 +51,7 @@ namespace galaxy
 			 * @remark Instead of using this method directly, you probably should use
 			 * the Shutdown() method defined in GalaxyApi.h.
 			 */
-			static void GALAXY_CALLTYPE ResetInstance(void);
+			static void GALAXY_CALLTYPE ResetInstance();
 
 			/**
 			 * Returns the instance of IGalaxy. Creates it if it does not exist yet.
@@ -76,7 +61,7 @@ namespace galaxy
 			 *
 			 * @return The instance of IGalaxy.
 			 */
-			static IGalaxy* GALAXY_CALLTYPE CreateInstance(void);
+			static IGalaxy* GALAXY_CALLTYPE CreateInstance();
 
 		private:
 

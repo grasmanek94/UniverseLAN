@@ -6,8 +6,8 @@
  * Contains data structures and interfaces related to user account.
  */
 
-#include "GalaxyID.h"
 #include "IListenerRegistrar.h"
+#include "GalaxyID.h"
 
 namespace galaxy
 {
@@ -46,14 +46,13 @@ namespace galaxy
 				FAILURE_REASON_CONNECTION_FAILURE = 3, ///< Unable to communicate with backend services.
 				FAILURE_REASON_NO_LICENSE = 4, ///< User that is being signed in has no license for this application.
 				FAILURE_REASON_INVALID_CREDENTIALS = 5, ///< Unable to match client credentials (ID, secret) or user credentials (username, password).
-				FAILURE_REASON_GALAXY_NOT_INITIALIZED = 6, ///< Galaxy has not been initialized.
-				FAILURE_REASON_EXTERNAL_SERVICE_FAILURE = 7 ///< Unable to communicate with external service.
+				FAILURE_REASON_GALAXY_NOT_INITIALIZED = 6 ///< Galaxy has not been initialized.
 			};
 
 			/**
 			 * Notification for the event of unsuccessful sign in.
 			 *
-			 * @param [in] failureReason The cause of the failure.
+			 * @param failureReason The cause of the failure.
 			 */
 			virtual void OnAuthFailure(FailureReason failureReason) = 0;
 
@@ -69,11 +68,6 @@ namespace galaxy
 		 * Globally self-registering version of IAuthListener.
 		 */
 		typedef SelfRegisteringListener<IAuthListener> GlobalAuthListener;
-
-		/**
-		 * Globally self-registering version of IAuthListener for the Game Server.
-		 */
-		typedef SelfRegisteringListener<IAuthListener, GameServerListenerRegistrar> GameServerGlobalAuthListener;
 
 		/**
 		 * Listener for the events related to starting of other sessions.
@@ -94,11 +88,6 @@ namespace galaxy
 		typedef SelfRegisteringListener<IOtherSessionStartListener> GlobalOtherSessionStartListener;
 
 		/**
-		 * Globally self-registering version of IOtherSessionStartListener for the Game Server.
-		 */
-		typedef SelfRegisteringListener<IOtherSessionStartListener, GameServerListenerRegistrar> GameServerGlobalOtherSessionStartListener;
-
-		/**
 		 * Listener for the event of a change of the operational state.
 		 */
 		class IOperationalStateChangeListener : public GalaxyTypeAwareListener<OPERATIONAL_STATE_CHANGE>
@@ -117,7 +106,7 @@ namespace galaxy
 			/**
 			 * Notification for the event of a change of the operational state.
 			 *
-			 * @param [in] operationalState The sum of the bit flags representing the operational state, as defined in IOperationalStateChangeListener::OperationalState.
+			 * @param operationalState The sum of the bit flags representing the operational state, as defined in IOperationalStateChangeListener::OperationalState.
 			 */
 			virtual void OnOperationalStateChanged(uint32_t operationalState) = 0;
 		};
@@ -126,11 +115,6 @@ namespace galaxy
 		 * Globally self-registering version of IOperationalStateChangeListener.
 		 */
 		typedef SelfRegisteringListener<IOperationalStateChangeListener> GlobalOperationalStateChangeListener;
-
-		/**
-		 * Globally self-registering version of IOperationalStateChangeListener for the GameServer.
-		 */
-		typedef SelfRegisteringListener<IOperationalStateChangeListener, GameServerListenerRegistrar> GameServerGlobalOperationalStateChangeListener;
 
 		/**
 		 * Listener for the events related to user data changes of current user only.
@@ -154,11 +138,6 @@ namespace galaxy
 		typedef SelfRegisteringListener<IUserDataListener> GlobalUserDataListener;
 
 		/**
-		 * Globally self-registering version of IUserDataListener for the GameServer.
-		 */
-		typedef SelfRegisteringListener<IUserDataListener, GameServerListenerRegistrar> GameServerGlobalUserDataListener;
-
-		/**
 		 * Listener for the events related to user data changes.
 		 */
 		class ISpecificUserDataListener : public GalaxyTypeAwareListener<SPECIFIC_USER_DATA>
@@ -168,7 +147,7 @@ namespace galaxy
 			/**
 			 * Notification for the event of user data change.
 			 *
-			 * @param [in] userID The ID of the user.
+			 * @param userID The ID of the user.
 			 */
 			virtual void OnSpecificUserDataUpdated(GalaxyID userID) = 0;
 		};
@@ -177,11 +156,6 @@ namespace galaxy
 		 * Globally self-registering version of ISpecificUserDataListener.
 		 */
 		typedef SelfRegisteringListener<ISpecificUserDataListener> GlobalSpecificUserDataListener;
-
-		/**
-		 * Globally self-registering version of ISpecificUserDataListener for the Game Server.
-		 */
-		typedef SelfRegisteringListener<ISpecificUserDataListener, GameServerListenerRegistrar> GameServerGlobalSpecificUserDataListener;
 
 		/**
 		 * Listener for the event of retrieving a requested Encrypted App Ticket.
@@ -193,7 +167,7 @@ namespace galaxy
 			/**
 			 * Notification for an event of a success in retrieving the Encrypted App Ticket.
 			 *
-			 * In order to read the Encrypted App Ticket, call IUser::GetEncryptedAppTicket().
+			 * In order to read the Encrypted App Ticket, call GetEncryptedAppTicket().
 			 */
 			virtual void OnEncryptedAppTicketRetrieveSuccess() = 0;
 
@@ -208,7 +182,7 @@ namespace galaxy
 			/**
 			 * Notification for the event of a failure in retrieving an Encrypted App Ticket.
 			 *
-			 * @param [in] failureReason The cause of the failure.
+			 * @param failureReason The cause of the failure.
 			 */
 			virtual void OnEncryptedAppTicketRetrieveFailure(FailureReason failureReason) = 0;
 		};
@@ -217,12 +191,6 @@ namespace galaxy
 		 * Globally self-registering version of IEncryptedAppTicketListener.
 		 */
 		typedef SelfRegisteringListener<IEncryptedAppTicketListener> GlobalEncryptedAppTicketListener;
-
-		/**
-		 * Globally self-registering version of IEncryptedAppTicketListener for the Game Server.
-		 */
-		typedef SelfRegisteringListener<IEncryptedAppTicketListener, GameServerListenerRegistrar> GameServerGlobalEncryptedAppTicketListener;
-
 
 		/**
 		 * Listener for the event of a change of current access token.
@@ -234,7 +202,7 @@ namespace galaxy
 			/**
 			 * Notification for an event of retrieving an access token.
 			 *
-			 * In order to read the access token, call IUser::GetAccessToken().
+			 * In order to read the access token, call GetAccessToken().
 			 */
 			virtual void OnAccessTokenChanged() = 0;
 		};
@@ -243,11 +211,6 @@ namespace galaxy
 		 * Globally self-registering version of IAccessTokenListener.
 		 */
 		typedef SelfRegisteringListener<IAccessTokenListener> GlobalAccessTokenListener;
-
-		/**
-		 * Globally self-registering version of IAccessTokenListener for the GameServer.
-		 */
-		typedef SelfRegisteringListener<IAccessTokenListener, GameServerListenerRegistrar> GameServerGlobalAccessTokenListener;
 
 		/**
 		 * The interface for handling the user account.
@@ -289,20 +252,18 @@ namespace galaxy
 			/**
 			 * Initializes the Galaxy Peer with specified user credentials.
 			 *
-			 * This call is asynchronous. Responses come to the IAuthListener
-			 * (for all GlobalAuthListener-derived and optional listener passed as argument).
+			 * This call is asynchronous. Responses come to the IAuthListener.
 			 *
-			 * Information about being signed in or signed out also comes to
+			 * @remark Information about being signed in or signed out also comes to
 			 * the IOperationalStateChangeListener.
 			 *
 			 * @warning This method is only for testing purposes and is not meant
 			 * to be used in production environment in any way.
 			 *
-			 * @param [in] login The user's login.
-			 * @param [in] password The user's password.
-			 * @param [in] listener The listener for specific operation [EXPERIMENTAL].
+			 * @param login The user's login.
+			 * @param password The user's password.
 			 */
-			virtual void SignIn(const char* login, const char* password, IAuthListener* listener = NULL) = 0;
+			virtual void SignIn(const char* login, const char* password) = 0;
 
 			/**
 			 * Initializes the Galaxy Peer based on Steam Encrypted App Ticket.
@@ -312,99 +273,68 @@ namespace galaxy
 			 * @remark Information about being signed in or signed out also comes to
 			 * the IOperationalStateChangeListener.
 			 *
-			 * @param [in] steamAppTicket The Encrypted App Ticket from the Steam API.
-			 * @param [in] steamAppTicketSize The size of the ticket.
-			 * @param [in] personaName The user's persona name, i.e. the username from Steam.
-			 * @param [in] listener The listener for specific operation [EXPERIMENTAL].
+			 * @param steamAppTicket The Encrypted App Ticket from the Steam API.
+			 * @param steamAppTicketSize The size of the ticket.
+			 * @param personaName The user's persona name, i.e. the username from Steam.
 			 */
-			virtual void SignIn(const void* steamAppTicket, uint32_t steamAppTicketSize, const char* personaName, IAuthListener* listener = NULL) = 0;
+			virtual void SignIn(const void* steamAppTicket, uint32_t steamAppTicketSize, const char* personaName) = 0;
 
 			/**
 			 * Initializes the Galaxy Peer based on Galaxy Client authentication.
 			 *
-			 * This call is asynchronous. Responses come to the IAuthListener
-			 * (for all GlobalAuthListener-derived and optional listener passed as argument).
+			 * This call is asynchronous. Responses come to the IAuthListener.
 			 *
 			 * @remark Information about being signed in or signed out also comes to
 			 * the IOperationalStateChangeListener.
 			 *
-			 * @param [in] requireOnline Indicates if sing in with Galaxy backend is required.
-			 * @param [in] listener The listener for specific operation [EXPERIMENTAL].
+			 * @param requireOnline Indicates if sing in with Galaxy backend is required.
 			 */
-			virtual void SignIn(bool requireOnline = false, IAuthListener* listener = NULL) = 0;
+			virtual void SignIn(bool requireOnline = false) = 0;
 
 			/**
 			 * Initializes the Galaxy Peer based on PS4 credentials.
 			 *
-			 * This call is asynchronous. Responses come to the IAuthListener
-			 * (for all GlobalAuthListener-derived and optional listener passed as argument).
+			 * This call is asynchronous. Responses come to the IAuthListener.
 			 *
 			 * @remark Information about being signed in or signed out also comes to
 			 * the IOperationalStateChangeListener.
 			 *
-			 * @param [in] ps4ClientID The PlayStation 4 client ID.
-			 * @param [in] ps4TitleID Not used anymore. Will be removed in future releases.
-			 * @param [in] ps4TitleSecret Not used anymore. Will be removed in future releases.
-			 * @param [in] ps4TitleSecretLength Not used anymore. Will be removed in future releases.
-			 * @param [in] listener The listener for specific operation [EXPERIMENTAL].
+			 * @param ps4ClientID The PlayStation 4 client ID.
+			 * @param ps4TitleID The PlayStation 4 title ID.
+			 * @param ps4TitleSecret The PlayStation 4 title secret.
+			 * @param ps4TitleSecretLength The length of the title secret.
 			 */
-			virtual void SignIn(const char* ps4ClientID, const char* ps4TitleID, const char* ps4TitleSecret, uint32_t ps4TitleSecretLength, IAuthListener* listener = NULL) = 0;
+			virtual void SignIn(const char* ps4ClientID, const char* ps4TitleID, const char* ps4TitleSecret, uint32_t ps4TitleSecretLength) = 0;
 
 			/**
 			 * Initializes the Galaxy Peer based on XBOX ONE credentials.
 			 *
-			 * This call is asynchronous. Responses come to the IAuthListener
-			 * (for all GlobalAuthListener-derived and optional listener passed as argument).
+			 * This call is asynchronous. Responses come to the IAuthListener.
 			 *
 			 * @remark Information about being signed in or signed out also comes to
 			 * the IOperationalStateChangeListener.
 			 *
-			 * @param [in] xboxOneUserID The XBOX ONE user ID.
-			 * @param [in] listener The listener for specific operation [EXPERIMENTAL].
+			 * @param xboxOneUserID The XBOX ONE user ID.
 			 */
-			virtual void SignIn(uint32_t xboxOneUserID, IAuthListener* listener = NULL) = 0;
-
-			/**
-			 * Initializes the Galaxy Game Server anonymously.
-			 *
-			 * This call is asynchronous. Responses come to the IAuthListener
-			 * (for all GlobalAuthListener-derived and optional listener passed as argument).
-			 *
-			 * @remark Information about being signed in or signed out also comes to
-			 * the IOperationalStateChangeListener.
-			 *
-			 * @param [in] listener The listener for specific operation [EXPERIMENTAL].
-			 */
-			virtual void SignInAnonymous(IAuthListener* listener = NULL) = 0;
+			virtual void SignIn(uint32_t xboxOneUserID) = 0;
 
 			/**
 			 * Retrieves/Refreshes user data storage.
 			 *
 			 * This call is asynchronous. Responses come to the IUserDataListener and ISpecificUserDataListener.
 			 *
-			 * @param [in] userID The ID of the user. It can be omitted when requesting for own data.
+			 * @param userID The ID of the user. It can be omitted when requesting for own data.
 			 */
 			virtual void RequestUserData(GalaxyID userID = GalaxyID()) = 0;
 
 			/**
-			 * Checks if user data exists.
-			 *
-			 * @pre Retrieve the user data first by calling RequestUserData().
-			 *
-			 * @param [in] userID The ID of the user. It can be omitted when checking for own data.
-			 * @return true if user data exists, false otherwise.
-			 */
-			virtual bool IsUserDataAvailable(GalaxyID userID = GalaxyID()) = 0;
-
-			/**
 			 * Returns an entry from the data storage of current user.
 			 *
+			 * @remark Retrieve the user data first by calling RequestUserData().
 			 * @remark This call is not thread-safe as opposed to GetUserDataCopy().
 			 *
-			 * @pre Retrieve the user data first by calling RequestUserData().
-			 *
-			 * @param [in] key The name of the property of the user data storage.
-			 * @param [in] userID The ID of the user. It can be omitted when reading own data.
+			 * @param key The name of the property of the user data storage.
+			 * @param userID The ID of the user. It can be omitted when reading own data.
 			 * @return The value of the property, or an empty string if failed.
 			 */
 			virtual const char* GetUserData(const char* key, GalaxyID userID = GalaxyID()) = 0;
@@ -412,12 +342,12 @@ namespace galaxy
 			/**
 			 * Copies an entry from the data storage of current user.
 			 *
-			 * @pre Retrieve the user data first by calling RequestUserData().
+			 * @remark Retrieve the user data first by calling RequestUserData().
 			 *
-			 * @param [in] key The name of the property of the user data storage.
-			 * @param [in, out] buffer The output buffer.
-			 * @param [in] bufferLength The size of the output buffer.
-			 * @param [in] userID The ID of the user. It can be omitted when reading own data.
+			 * @param key The name of the property of the user data storage.
+			 * @param buffer The output buffer.
+			 * @param bufferLength The size of the output buffer.
+			 * @param userID The ID of the user. It can be omitted when reading own data.
 			 */
 			virtual void GetUserDataCopy(const char* key, char* buffer, uint32_t bufferLength, GalaxyID userID = GalaxyID()) = 0;
 
@@ -428,17 +358,17 @@ namespace galaxy
 			 *
 			 * @remark To clear a property, set it to an empty string.
 			 *
-			 * @param [in] key The name of the property of the user data storage with the limit of 1023 bytes.
-			 * @param [in] value The value of the property to set with the limit of 4095 bytes.
+			 * @param key The name of the property of the user data storage with the limit of 1023 bytes.
+			 * @param value The value of the property to set with the limit of 4095 bytes.
 			 */
 			virtual void SetUserData(const char* key, const char* value) = 0;
 
 			/**
 			 * Returns the number of entries in the user data storage
 			 *
-			 * @pre Retrieve the user data first by calling RequestUserData().
+			 * @remark Retrieve the user data first by calling RequestUserData().
 			 *
-			 * @param [in] userID The ID of the user. It can be omitted when reading own data.
+			 * @param userID The ID of the user. It can be omitted when reading own data.
 			 * @return The number of entries, or 0 if failed.
 			 */
 			virtual uint32_t GetUserDataCount(GalaxyID userID = GalaxyID()) = 0;
@@ -446,14 +376,14 @@ namespace galaxy
 			/**
 			 * Returns a property from the user data storage by index.
 			 *
-			 * @pre Retrieve the user data first by calling RequestUserData().
+			 * @remark Retrieve the user data first by calling RequestUserData().
 			 *
-			 * @param [in] index Index as an integer in the range of [0, number of entries).
-			 * @param [in, out] key The name of the property of the user data storage.
-			 * @param [in] keyLength The length of the name of the property of the user data storage.
-			 * @param [in, out] value The value of the property of the user data storage.
-			 * @param [in] valueLength The length of the value of the property of the user data storage.
-			 * @param [in] userID The ID of the user. It can be omitted when reading own data.
+			 * @param index Index as an integer in the range of [0, number of entries).
+			 * @param key The name of the property of the user data storage.
+			 * @param keyLength The length of the name of the property of the user data storage.
+			 * @param value The value of the property of the user data storage.
+			 * @param valueLength The length of the value of the property of the user data storage.
+			 * @param userID The ID of the user. It can be omitted when reading own data.
 			 * @return true if succeeded, false when there is no such property.
 			 */
 			virtual bool GetUserDataByIndex(uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength, GalaxyID userID = GalaxyID()) = 0;
@@ -466,7 +396,7 @@ namespace galaxy
 			 *
 			 * This call in asynchronous. Responses come to the IUserDataListener and ISpecificUserDataListener.
 			 *
-			 * @param [in] key The name of the property of the user data storage.
+			 * @param key The name of the property of the user data storage.
 			 */
 			virtual void DeleteUserData(const char* key) = 0;
 
@@ -492,19 +422,19 @@ namespace galaxy
 			 *
 			 * This call is asynchronous. Responses come to the IEncryptedAppTicketListener.
 			 *
-			 * @param [in] data The additional data to be placed within the Encrypted App Ticket with the limit of 1023 bytes.
-			 * @param [in] dataSize The size of the additional data.
+			 * @param data The additional data to be placed within the Encrypted App Ticket with the limit of 1023 bytes.
+			 * @param dataSize The size of the additional data.
 			 */
-			virtual void RequestEncryptedAppTicket(const void* data, uint32_t dataSize) = 0;
+			virtual void RequestEncryptedAppTicket(void* data, uint32_t dataSize) = 0;
 
 			/**
 			 * Returns the Encrypted App Ticket.
 			 *
-			 * @pre Retrieve an Encrypted App Ticket first by calling RequestEncryptedAppTicket().
+			 * @remark Retrieve an Encrypted App Ticket first by calling RequestEncryptedAppTicket().
 			 *
-			 * @param [in, out] encryptedAppTicket The Encrypted App Ticket.
-			 * @param [in] maxEncryptedAppTicketSize The maximum size of the Encrypted App Ticket.
-			 * @param [out] currentEncryptedAppTicketSize The actual size of the Encrypted App Ticket.
+			 * @param encryptedAppTicket The Encrypted App Ticket.
+			 * @param maxEncryptedAppTicketSize The maximum size of the Encrypted App Ticket.
+			 * @param currentEncryptedAppTicketSize The actual size of the Encrypted App Ticket.
 			 */
 			virtual void GetEncryptedAppTicket(void* encryptedAppTicket, uint32_t maxEncryptedAppTicketSize, uint32_t& currentEncryptedAppTicketSize) = 0;
 
@@ -513,18 +443,17 @@ namespace galaxy
 			 *
 			 * This call is asynchronous. Responses come to the IAuthListener.
 			 *
-			 * @warning Make sure you do not put your server key in public builds.
-			 *
 			 * @remark Information about being signed in or signed out also comes to
 			 * the IOperationalStateChangeListener.
 			 *
 			 * @remark Signing in with a server key is meant for server-side usage,
 			 * meaning that typically there will be no user associated to the session.
 			 *
-			 * @param [in] serverKey The server key.
-			 * @param [in] listener The listener for specific operation.
+			 * @warning Make sure you do not put your server key in user builds.
+			 *
+			 * @param serverKey The server key.
 			 */
-			virtual void SignIn(const char* serverKey, IAuthListener* listener = NULL) = 0;
+			virtual void SignIn(const char* serverKey) = 0;
 
 			/**
 			 * Returns the ID of current session.
@@ -555,8 +484,8 @@ namespace galaxy
 			 * Each time the access token is updated, a notification comes to the
 			 * IAccessTokenListener.
 			 *
-			 * @param [in, out] buffer The output buffer.
-			 * @param [in] bufferLength The size of the output buffer.
+			 * @param buffer The output buffer.
+			 * @param bufferLength The size of the output buffer.
 			 */
 			virtual void GetAccessTokenCopy(char* buffer, uint32_t bufferLength) = 0;
 
@@ -577,7 +506,7 @@ namespace galaxy
 			 * In such case do not expect a notification to IAccessTokenListener and
 			 * simply get the new access token by calling GetAccessToken().
 			 *
-			 * @param [in] accessToken The invalid access token.
+			 * @param accessToken The invalid access token.
 			 * @return true if the report was accepted, false otherwise.
 			 */
 			virtual bool ReportInvalidAccessToken(const char* accessToken) = 0;

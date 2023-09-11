@@ -7,10 +7,7 @@
  * used by Galaxy Peer.
  */
 
-#include <cstddef>
-#include <utility>
-
-#include <stdint.h>
+#include "stdint.h"
 #include <assert.h>
 
 namespace galaxy
@@ -34,33 +31,9 @@ namespace galaxy
 		public:
 
 			/**
-			 * The type of the ID.
-			 */
-			enum IDType {
-				ID_TYPE_UNASSIGNED = 0,
-				ID_TYPE_LOBBY = 1,
-				ID_TYPE_USER = 2
-			};
-
-			/**
 			 * The numerical value used when the instance of GalaxyID is not valid.
 			 */
 			static const uint64_t UNASSIGNED_VALUE = 0;
-
-			/**
-			 * Creates GalaxyID from real ID and type.
-			 *
-			 * @param [in] type The type of the ID.
-			 * @param [in] value The real ID value.
-			 * @return The GalaxyID.
-			 */
-			static GalaxyID FromRealID(IDType type, uint64_t value)
-			{
-				assert(type != ID_TYPE_UNASSIGNED);
-				assert(value != UNASSIGNED_VALUE);
-				assert(static_cast<IDType>(value >> 56) == ID_TYPE_UNASSIGNED);
-				return GalaxyID(static_cast<uint64_t>(type) << 56 | value);
-			}
 
 			/**
 			 * Default constructor.
@@ -74,7 +47,7 @@ namespace galaxy
 			/**
 			 * Creates an instance of GalaxyID of a specified value.
 			 *
-			 * @param [in] _value The numerical value of the ID.
+			 * @param _value The numerical value of the ID.
 			 */
 			GalaxyID(uint64_t _value) : value(_value)
 			{
@@ -85,7 +58,7 @@ namespace galaxy
 			 *
 			 * Creates a copy of another instance of GalaxyID.
 			 *
-			 * @param [in] galaxyID The instance of GalaxyID to copy from.
+			 * @param galaxyID The instance of GalaxyID to copy from.
 			 */
 			GalaxyID(const GalaxyID& galaxyID) : value(galaxyID.value)
 			{
@@ -94,7 +67,7 @@ namespace galaxy
 			/**
 			 * The assignment operator. Makes the ID equal to another ID.
 			 *
-			 * @param [in] other The instance of GalaxyID to copy from.
+			 * @param other The instance of GalaxyID to copy from.
 			 * @return A reference to this ID.
 			 */
 			GalaxyID& operator=(const GalaxyID& other)
@@ -107,7 +80,7 @@ namespace galaxy
 			 * The lower operator. It is supposed to be used to compare only valid
 			 * instances of GalaxyID that are assigned to entities of the same type.
 			 *
-			 * @param [in] other Another instance of GalaxyID to compare to.
+			 * @param other Another instance of GalaxyID to compare to.
 			 * @return true if this instance is lower, false otherwise.
 			 */
 			bool operator<(const GalaxyID& other) const
@@ -119,7 +92,7 @@ namespace galaxy
 			/**
 			 * The equality operator. Might be used to compare all sorts of GalaxyID.
 			 *
-			 * @param [in] other Another instance of GalaxyID to compare to.
+			 * @param other Another instance of GalaxyID to compare to.
 			 * @return true if the instances are equal, false otherwise.
 			 */
 			bool operator==(const GalaxyID& other) const
@@ -130,7 +103,7 @@ namespace galaxy
 			/**
 			 * The inequality operator. The opposite to the equality operator.
 			 *
-			 * @param [in] other Another instance of GalaxyID to compare to.
+			 * @param other Another instance of GalaxyID to compare to.
 			 * @return false if the instances are equal, true otherwise.
 			 */
 			bool operator!=(const GalaxyID& other) const
@@ -173,16 +146,6 @@ namespace galaxy
 			uint64_t GetRealID() const
 			{
 				return value & 0xffffffffffffff;
-			}
-
-			/**
-			 * Returns the type of the ID.
-			 *
-			 * @return The type of the ID.
-			 */
-			IDType GetIDType() const
-			{
-				return static_cast<IDType>(value >> 56);
 			}
 
 		private:

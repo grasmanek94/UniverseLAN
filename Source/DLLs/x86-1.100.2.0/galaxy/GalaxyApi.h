@@ -1,27 +1,10 @@
-﻿#ifndef GALAXY_API_H
+#ifndef GALAXY_API_H
 #define GALAXY_API_H
 
 /**
  * @file
  * Includes all other files that are needed to work with the Galaxy library.
  */
-
-#include "GalaxyExport.h"
-#include "InitOptions.h"
-#include "IUser.h"
-#include "IFriends.h"
-#include "IChat.h"
-#include "IMatchmaking.h"
-#include "INetworking.h"
-#include "IStats.h"
-#include "IUtils.h"
-#include "IApps.h"
-#include "IStorage.h"
-#include "ICustomNetworking.h"
-#include "ILogger.h"
-#include "Errors.h"
-
-#include <cstddef>
 
 namespace galaxy
 {
@@ -52,7 +35,7 @@ namespace galaxy
 		 *
 		 * In order to use the Galaxy API, you should request special client credentials
 		 * from GOG.com for each game you develop. You will be provided with a pair of
-		 * Client ID and Client Secret that are to be used when calling Init().
+		 * Client ID and Client Secret that are to be used when calling IGalaxy::Init().
 		 *
 		 * Client credentials identify your game within Galaxy. Only Galaxy Peers that
 		 * use the same Client ID can interact with each other.
@@ -63,23 +46,32 @@ namespace galaxy
 		 * only the header files with the data structures and interfaces you need, or
 		 * simply include the file called GalaxyApi.h that includes all the other files.
 		 *
-		 * You can control your Galaxy Peer through interfaces for specific feature sets,
-		 * e.g. IUser, IMatchmaking, INetworking, IFriends, IListenerRegistrar, ILogger.
-		 * They can be accessed with global functions called User(),
-		 * Matchmaking(), Networking(), ListenerRegistrar(), etc.
+		 * You can control your Galaxy Peer with an instance of the IGalaxy, that you
+		 * can acquire by calling GalaxyFactory::GetInstance(). The IGalaxy interface
+		 * lets you control your Galaxy Peer by providing interfaces for specific
+		 * feature sets, e.g. IUser, IMatchmaking, INetworking,
+		 * IFriends, IListenerRegistrar, ILogger.
 		 *
-		 * For every frame you should call ProcessData() to process input
+		 * For your convenience, there are global functions called Matchmaking(),
+		 * Networking(), ListenerRegistrar(), etc. What they do is call
+		 * GalaxyFactory::GetInstance(), acquire appropriate interface from it, and
+		 * return it.
+		 *
+		 * For every frame you should call IGalaxy::ProcessData() to process input
 		 * and output streams.
 		 *
 		 * @section errors Error handling
 		 *
-		 * Error occured on call to Galaxy API can be obtain by calling GetError(),
-		 * which returns NULL if there was no error. Every call to an API method resets
-		 * last stored error, therefore you should check for errors after each call.
+		 * The Galaxy API has two ways of handling errors.
 		 *
-		 * Global function ThrowIfGalaxyError() can translate errors to C++ exceptions.
-		 * It calls GetError() and throws appropriate exception if there was an error
-		 * during the last API call.
+		 * The first one is by throwing errors as exceptions. This is the default.
+		 *
+		 * The second one is to check if there were any errors during last operation
+		 * by calling IGalaxy::GetError(), which returns NULL if there was no error.
+		 * Every call to an API method resets last stored error, therefore you should
+		 * check for errors after each call.
+		 *
+		 * You can set the way of handling errors with the IGalaxy::Init() method.
 		 *
 		 * @section listeners Listeners
 		 *
@@ -93,16 +85,17 @@ namespace galaxy
 		 * that registers and unregisters automatically.
 		 *
 		 * Listeners are called during the phase of processing data, i.e. during the
-		 * call to ProcessData().
+		 * call to IGalaxy::ProcessData().
 		 *
 		 * @section authentication Authentication
 		 *
 		 * You need to initialize the Galaxy Peer by signing in the user. To do that,
-		 * you need to get an instance of IUser interface and call IUser::SignIn().
+		 * you need to get an instance of IUser from the IGalaxy and call
+		 * IUser::SignIn().
 		 *
 		 * As with any other asynchronous call, you will get the information about
 		 * the result of your request via a dedicated listener. For that to happen,
-		 * you already need to call ProcessData() in a loop as mentioned earlier.
+		 * you already need to call IGalaxy::ProcessData() in a loop as mentioned earlier.
 		 *
 		 * In case of limited availability of Galaxy backend services it might happen
 		 * that the user gets signed in within local Galaxy Service, yet still does not
@@ -166,21 +159,11 @@ namespace galaxy
 		 *
 		 * To receive the packets that come to your Galaxy Peer as a regular lobby
 		 * member, get the instance of INetworking by calling
-		 * GetNetworking().
+		 * IGalaxy::GetNetworking().
 		 *
 		 * To receive the packets that come to your Galaxy Peer as a lobby owner, so
 		 * that you can process them as the game host, get the instance o
-		 * INetworking by calling GetServerNetworking().
-		 *
-		 * @section game-server Game Server
-		 *
-		 * The Game Server API allows for creating a lightweight dedicated servers,
-		 * that does not require Galaxy Client installed.
-		 *
-		 * @note INetworking interface returned by the GetServerNetworking interface
-		 * is an interface on the Galaxy Peer and is not related to the Game Server.
-		 *
-		 * For the detailed description of the Game Server interfaces refer to the @ref GameServer.
+		 * INetworking by calling IGalaxy::GetServerNetworking().
 		 *
 		 * @section statistics Statistics, achievements and leaderboards
 		 *
@@ -241,22 +224,7 @@ namespace galaxy
 		 * @section storage Storage
 		 *
 		 * The Galaxy API allows you to store files in Galaxy's backend services. The files are automatically synchronized
-		 * by the Galaxy Client application.
-
-		 * @subsection automatic-cloud-saves-syncing Automatic Cloud Saves syncing
-		 *
-		 * The easiest way to add Cloud Saves functionality to your game is to use the Automatic Cloud Saves syncing mechanism.
-		 * In this solution GOG Galaxy only needs to know the path, where the save games are stored and will handle sync between
-		 * the local folder and cloud storage automatically. The sync is performed before the game is launched, after the game quits,
-		 * after the installation and before the uninstallation.
-		 * To enable Automatic Cloud Saves syncing contact your Product Manager.
-		 *
-		 * @subsection cloud-storage-direct-access Cloud Storage direct access
-		 *
-		 * If your game requires more complex managing of local and remote files or you don't want to interact with the file system
-		 * directly you can use the IStorage interface. It provides the abstraction over the file system (read/write/delete files and the metadata).
-		 * You can also share the files created this way with other gog users.
-		 * The folder will be synchronized automatically like mentioned in the previous section.
+		 * by the Galaxy Client application. You can access the stored files using the IStorage interface.
 		 *
 		 * @section dlc-discovery DLC discovery
 		 *
@@ -264,7 +232,7 @@ namespace galaxy
 		 * IApps::IsDlcInstalled() with the Product ID of the particular DLC.
 		 * This feature does not require the user to be online, or Galaxy Client
 		 * to be installed, or even Galaxy API to be fully initialized, however
-		 * you still need to call Init() first.
+		 * you still need to call IGalaxy::Init() first.
 		 *
 		 * @section language Game language
 		 *
@@ -273,143 +241,95 @@ namespace galaxy
 		 * (0 can be used to retrieve base game language) or particular DLC.
 		 * This feature does not require the user to be online, or Galaxy Client
 		 * to be installed, or even Galaxy API to be fully initialized, however
-		 * you still need to call Init() first.
+		 * you still need to call IGalaxy::Init() first.
 		 *
 		 * @section thread-safety Thread-safety
 		 *
 		 * The Galaxy API is thread-safe in general, however there are some methods that return pointers and therefore
 		 * cannot be used in multi-threaded environments. In order to address the issue the similar methods of names with
 		 * a suffix of "Copy" were introduced, e.g. compare IFriends::GetPersonaName() and IFriends::GetPersonaNameCopy().
+		 *
 		 */
 
-		 /** @} */
+		/** @} */
+	}
+}
 
+#include "IGalaxy.h"
+#include "IUser.h"
+#include "IFriends.h"
+#include "IMatchmaking.h"
+#include "INetworking.h"
+#include "IStats.h"
+#include "IUtils.h"
+#include "IApps.h"
+#include "IStorage.h"
+#include "ICustomNetworking.h"
+#include "IListenerRegistrar.h"
+#include "ILogger.h"
+#include "Errors.h"
+#include "GalaxyFactory.h"
+
+#include <cstddef>
+
+namespace galaxy
+{
+	namespace api
+	{
 		/**
 		 * @addtogroup api
 		 * @{
 		 */
 
 		/**
-		 * @addtogroup Peer
-		 * @{
+		 * Calls IGalaxy::Init() on the singleton instance of IGalaxy.
+		 *
+		 * @param clientID The ID of the client.
+		 * @param clientSecret The secret of the client.
+		 * @param throwExceptions Indicates if Galaxy should throw exceptions.
 		 */
+		static void GALAXY_CALLTYPE Init(const char* clientID, const char* clientSecret, bool throwExceptions = true)
+		{
+			GalaxyFactory::CreateInstance()->Init(clientID, clientSecret, throwExceptions);
+		}
 
 		/**
-		 * Initializes the Galaxy Peer with specified credentials.
+		 * Calls IGalaxy::Init() on the singleton instance of IGalaxy.
 		 *
-		 * @remark When you do not need the Galaxy Peer anymore, you should call
-		 * Shutdown() in order to deactivate it and free its resources.
-		 *
-		 * @remark This method can succeed partially, in which case it leaves
-		 * Galaxy Peer partially functional, hence even in case of an error, be
-		 * sure to call Shutdown() when you do not need the Galaxy Peer anymore.
-		 * See the documentation of specific interfaces on how they behave.
-		 *
-		 * @param [in] initOptions The group of the init options.
+		 * @param initOptions The group of the init options.
 		 */
-		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Init(const InitOptions& initOptions);
+		static void GALAXY_CALLTYPE Init(const InitOptions& initOptions)
+		{
+			GalaxyFactory::CreateInstance()->Init(initOptions);
+		}
 
 		/**
-		 * Shuts down the Galaxy Peer.
+		 * Calls IGalaxy::InitLocal() on the singleton instance of IGalaxy.
 		 *
-		 * The Galaxy Peer is deactivated and brought to the state it had when it
-		 * was created and before it was initialized.
-		 *
-		 * @pre Delete all self-registering listeners before calling Shutdown().
+		 * @param clientID The ID of the client.
+		 * @param clientSecret The secret of the client.
+		 * @param galaxyPeerPath Path to the galaxyPeer library location.
+		 * @param throwExceptions indicates if Galaxy should throw exceptions.
 		 */
-		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Shutdown();
+		static void GALAXY_CALLTYPE InitLocal(const char* clientID, const char* clientSecret, const char* galaxyPeerPath = ".", bool throwExceptions = true)
+		{
+			GalaxyFactory::CreateInstance()->InitLocal(clientID, clientSecret, galaxyPeerPath, throwExceptions);
+		}
 
 		/**
-		 * Returns an instance of IUser.
-		 *
-		 * @return An instance of IUser.
+		 * Calls IGalaxy::Shutdown() on the singleton instance of IGalaxy and then frees the instance.
 		 */
-		GALAXY_DLL_EXPORT IUser* GALAXY_CALLTYPE User();
+		static void GALAXY_CALLTYPE Shutdown()
+		{
+			if (!GalaxyFactory::GetInstance())
+				return;
+
+			GalaxyFactory::GetInstance()->Shutdown();
+			GalaxyFactory::ResetInstance();
+		}
 
 		/**
-		 * Returns an instance of IFriends.
-		 *
-		 * @return An instance of IFriends.
-		 */
-		GALAXY_DLL_EXPORT IFriends* GALAXY_CALLTYPE Friends();
-
-		/**
-		 * Returns an instance of IChat.
-		 *
-		 * @return An instance of IChat.
-		 */
-		GALAXY_DLL_EXPORT IChat* GALAXY_CALLTYPE Chat();
-
-		/**
-		 * Returns an instance of IMatchmaking.
-		 *
-		 * @return An instance of IMatchmaking.
-		 */
-		GALAXY_DLL_EXPORT IMatchmaking* GALAXY_CALLTYPE Matchmaking();
-
-		/**
-		 * Returns an instance of INetworking that allows to communicate
-		 * as a regular lobby member.
-		 *
-		 * @return An instance of INetworking.
-		 */
-		GALAXY_DLL_EXPORT INetworking* GALAXY_CALLTYPE Networking();
-
-		/**
-		 * Returns an instance of INetworking that allows to communicate
-		 * as the lobby host.
-		 *
-		 * @return An instance of INetworking.
-		 */
-		GALAXY_DLL_EXPORT INetworking* GALAXY_CALLTYPE ServerNetworking();
-
-		/**
-		 * Returns an instance of IStats.
-		 *
-		 * @return An instance of IStats.
-		 */
-		GALAXY_DLL_EXPORT IStats* GALAXY_CALLTYPE Stats();
-
-		/**
-		 * Returns an instance of IUtils.
-		 *
-		 * @return An instance of IUtils.
-		 */
-		GALAXY_DLL_EXPORT IUtils* GALAXY_CALLTYPE Utils();
-
-		/**
-		 * Returns an instance of IApps.
-		 *
-		 * @return An instance of IApps.
-		 */
-		GALAXY_DLL_EXPORT IApps* GALAXY_CALLTYPE Apps();
-
-		/**
-		 * Returns an instance of IStorage.
-		 *
-		 * @return An instance of IStorage.
-		 */
-		GALAXY_DLL_EXPORT IStorage* GALAXY_CALLTYPE Storage();
-
-		/**
-		 * Returns an instance of ICustomNetworking.
-		 *
-		 * @return An instance of ICustomNetworking.
-		 */
-		GALAXY_DLL_EXPORT ICustomNetworking* GALAXY_CALLTYPE CustomNetworking();
-
-		/**
-		 * Returns an instance of ILogger.
-		 *
-		 * @return An instance of ILogger.
-		 */
-		GALAXY_DLL_EXPORT ILogger* GALAXY_CALLTYPE Logger();
-
-		/**
-		 * Makes the Galaxy Peer process its input and output streams.
-		 *
-		 * During the phase of processing data, Galaxy Peer recognizes specific
-		 * events and casts notifications for callback listeners immediately.
+		 * Calls IGalaxy::ProcessData() on the singleton instance of IGalaxy.
 		 *
 		 * This method should be called in a loop, preferably every frame,
 		 * so that Galaxy is able to process input and output streams.
@@ -417,12 +337,181 @@ namespace galaxy
 		 * @remark When this method is not called, any asynchronous calls to Galaxy API
 		 * cannot be processed and any listeners will not be properly called.
 		 */
-		GALAXY_DLL_EXPORT void GALAXY_CALLTYPE ProcessData();
+		static void GALAXY_CALLTYPE ProcessData()
+		{
+			if (!GalaxyFactory::GetInstance())
+				return;
+
+			GalaxyFactory::GetInstance()->ProcessData();
+		}
+
+		/**
+		 * Calls IGalaxy::GetUser() on the singleton instance of IGalaxy.
+		 *
+		 * @return An instance of IUser.
+		 */
+		static IUser* GALAXY_CALLTYPE User()
+		{
+			if (!GalaxyFactory::GetInstance())
+				return NULL;
+
+			return GalaxyFactory::GetInstance()->GetUser();
+		}
+
+		/**
+		 * Calls IGalaxy::GetFriends() on the singleton instance of IGalaxy.
+		 *
+		 * @return An instance of IFriends.
+		 */
+		static IFriends* GALAXY_CALLTYPE Friends()
+		{
+			if (!GalaxyFactory::GetInstance())
+				return NULL;
+
+			return GalaxyFactory::GetInstance()->GetFriends();
+		}
+
+		/**
+		 * Calls IGalaxy::GetMatchmaking() on the singleton instance of IGalaxy.
+		 *
+		 * @return An instance of IMatchmaking.
+		 */
+		static IMatchmaking* GALAXY_CALLTYPE Matchmaking()
+		{
+			if (!GalaxyFactory::GetInstance())
+				return NULL;
+
+			return GalaxyFactory::GetInstance()->GetMatchmaking();
+		}
+
+		/**
+		 * Calls IGalaxy::GetNetworking() on the singleton instance of IGalaxy.
+		 *
+		 * @return An instance of INetworking.
+		 */
+		static INetworking* GALAXY_CALLTYPE Networking()
+		{
+			if (!GalaxyFactory::GetInstance())
+				return NULL;
+
+			return GalaxyFactory::GetInstance()->GetNetworking();
+		}
+
+		/**
+		 * Calls IGalaxy::GetServerNetworking() on the singleton instance of IGalaxy.
+		 *
+		 * @return An instance of INetworking.
+		 */
+		static INetworking* GALAXY_CALLTYPE ServerNetworking()
+		{
+			if (!GalaxyFactory::GetInstance())
+				return NULL;
+
+			return GalaxyFactory::GetInstance()->GetServerNetworking();
+		}
+
+		/**
+		 * Calls IGalaxy::GetStats() on the singleton instance of IGalaxy.
+		 *
+		 * @return An instance of IStats.
+		 */
+		static IStats* GALAXY_CALLTYPE Stats()
+		{
+			if (!GalaxyFactory::GetInstance())
+				return NULL;
+
+			return GalaxyFactory::GetInstance()->GetStats();
+		}
+
+		/**
+		 * Calls IGalaxy::GetUtils() on the singleton instance of IGalaxy.
+		 *
+		 * @return An instance of IUtils.
+		 */
+		static IUtils* GALAXY_CALLTYPE Utils()
+		{
+			if (!GalaxyFactory::GetInstance())
+				return NULL;
+
+			return GalaxyFactory::GetInstance()->GetUtils();
+		}
+
+		/**
+		 * Calls IGalaxy::GetApps() on the singleton instance of IGalaxy.
+		 *
+		 * @return An instance of IApps.
+		 */
+		static IApps* GALAXY_CALLTYPE Apps()
+		{
+			if (!GalaxyFactory::GetInstance())
+				return NULL;
+
+			return GalaxyFactory::GetInstance()->GetApps();
+		}
+
+		/**
+		 * Calls IGalaxy::GetStorage() on the singleton instance of IGalaxy.
+		 *
+		 * @return An instance of IStorage.
+		 */
+		static IStorage* GALAXY_CALLTYPE Storage()
+		{
+			if (!GalaxyFactory::GetInstance())
+				return NULL;
+
+			return GalaxyFactory::GetInstance()->GetStorage();
+		}
+
+		/**
+		* Calls IGalaxy::GetCustomNetworking() on the singleton instance of IGalaxy.
+		*
+		* @return An instance of ICustomNetworking.
+		*/
+		static ICustomNetworking* GALAXY_CALLTYPE CustomNetworking()
+		{
+			if (!GalaxyFactory::GetInstance())
+				return NULL;
+
+			return GalaxyFactory::GetInstance()->GetCustomNetworking();
+		}
+
+		/**
+		 * Calls IGalaxy::GetListenerRegistrar() on the singleton instance of IGalaxy.
+		 *
+		 * @return An instance of IListenerRegistrar.
+		 */
+		static IListenerRegistrar* GALAXY_CALLTYPE ListenerRegistrar()
+		{
+			if (!GalaxyFactory::GetInstance())
+				return NULL;
+
+			return GalaxyFactory::GetInstance()->GetListenerRegistrar();
+		}
+
+		/**
+		 * Calls IGalaxy::GetLogger() on the singleton instance of IGalaxy.
+		 *
+		 * @return An instance of ILogger.
+		 */
+		static ILogger* GALAXY_CALLTYPE Logger()
+		{
+			if (!GalaxyFactory::GetInstance())
+				return NULL;
+
+			return GalaxyFactory::GetInstance()->GetLogger();
+		}
+
+		/**
+		 * Calls IGalaxy::GetError() on singleton instance of IGalaxy.
+		 *
+		 * @return Either the last API call error or NULL if there was no error.
+		 */
+		static const IError* GALAXY_CALLTYPE GetError()
+		{
+			return GalaxyFactory::GetErrorManager()->GetLastError();
+		}
 
 		/** @} */
-
-		/** @} */
-
 	}
 }
 
