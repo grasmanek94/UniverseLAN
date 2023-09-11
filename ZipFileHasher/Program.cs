@@ -32,6 +32,7 @@ namespace ZipFileHasher
                             {
                                 string version = reader.Entry.Key.Split('_')[1];
                                 string dll_name = reader.Entry.Key.Split('/').Last();
+                                string dll_version = Path.GetFileName(entry).Replace("DevelopmentKit_", "").Replace(".tar.gz", "");
 
                                 using(MemoryStream memory_stream = new MemoryStream())
                                 {
@@ -44,7 +45,9 @@ namespace ZipFileHasher
                                         {
                                             formatted.AppendFormat("{0:x2}", b);
                                         }
-                                        Console.WriteLine("{0}={1}", formatted.ToString(), version);
+                                        string output = string.Format("{0}={1}", formatted.ToString(), dll_version);
+                                        Console.WriteLine(output);
+                                        File.AppendAllText("hashes.txt", output + "\n");
                                     }      
                                 }
                             }
