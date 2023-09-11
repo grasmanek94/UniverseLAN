@@ -306,7 +306,14 @@ namespace universelan::client {
 		if (data->result == LOBBY_ENTER_RESULT_SUCCESS) {
 			lock_t lock{ mtx };
 			auto lobby_entry = lobby_list.find(data->lobby_id);
-			assert(lobby_entry != lobby_list.end());
+
+			// Aragami2 fix?
+			//assert(lobby_entry != lobby_list.end());
+			if (lobby_entry == lobby_list.end()) {
+				tracer::Trace trace{ "LOBBY_NOT_FOUND_CREATED_DEFAULT_ENTRY" };
+				lobby_list.emplace(data->lobby_id, std::make_shared<Lobby>());
+				lobby_entry = lobby_list.find(data->lobby_id);
+			}
 
 			joined_lobby = lobby_entry->second;
 			joined_lobby->AddMember(intf->config->GetApiGalaxyID());
