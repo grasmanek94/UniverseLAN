@@ -135,7 +135,7 @@ namespace universelan::client {
 			}
 
 			return ExecuteForListenerTypePerEntry((ListenerType)BaseT::GetListenerType(), one_time_specific_listener, [&](IGalaxyListener* listener) {
-				//BaseT* casted_listener = dynamic_cast<BaseT*>(listener
+				//BaseT* casted_listener = dynamic_cast<BaseT*>(listener);
 				BaseT* casted_listener = (BaseT*)(listener);
 				assert(casted_listener != nullptr);
 

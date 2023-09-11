@@ -135,7 +135,7 @@ namespace universelan {
 	}
 
 	bool SharedFileUtils::Write(const std::string& root, const std::string& file_name, const char* data, size_t data_length) const {
-		auto file = Open(root, file_name, std::ios::trunc | std::ios::binary);
+		auto file = Open(root, file_name, std::ios::out | std::ios::trunc | std::ios::binary);
 		if (!file) {
 			return false;
 		}
