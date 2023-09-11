@@ -118,7 +118,8 @@ namespace universelan::client {
 		bool NotifyAllNow(FuncT&& Function, ArgTypes&&... Arguments) {
 			using T = extract_class_from_member_function_ptr<FuncT>::type;
 			return ExecuteForListenerTypePerEntry((ListenerType)T::GetListenerType(), [&](IGalaxyListener* listener) {
-				T* casted_listener = dynamic_cast<T*>(listener);
+				//T* casted_listener = dynamic_cast<T*>(listener);
+				T* casted_listener = (T*)(listener);
 				assert(casted_listener != nullptr);
 
 				std::invoke(std::forward<FuncT>(Function), casted_listener, std::forward<ArgTypes>(Arguments)...);
@@ -134,16 +135,52 @@ namespace universelan::client {
 			}
 
 			return ExecuteForListenerTypePerEntry((ListenerType)BaseT::GetListenerType(), one_time_specific_listener, [&](IGalaxyListener* listener) {
-				BaseT* casted_listener = dynamic_cast<BaseT*>(listener);
+				//BaseT* casted_listener = dynamic_cast<BaseT*>(listener
+				BaseT* casted_listener = (BaseT*)(listener);
 				assert(casted_listener != nullptr);
 
 				std::invoke(std::forward<FuncT>(Function), casted_listener, std::forward<ArgTypes>(Arguments)...);
 				});
 		}
 
+#ifndef NDEBUG
+		template <class FuncT, class... ArgTypes>
+		bool NotifyAllNowSimulate(FuncT&& Function, ArgTypes&&... Arguments) {
+			using T = extract_class_from_member_function_ptr<FuncT>::type;
+			return ExecuteForListenerTypePerEntry((ListenerType)T::GetListenerType(), [&](IGalaxyListener* listener) {
+				T* casted_listener = (T*)(listener);
+
+				assert(casted_listener != nullptr);
+
+				// no invoke
+				});
+		}
+
+		template <typename T, class FuncT, class... ArgTypes>
+		bool NotifyAllNowSimulate(T* one_time_specific_listener, FuncT&& Function, ArgTypes&&... Arguments) {
+			using BaseT = extract_class_from_member_function_ptr<FuncT>::type;
+
+			if (one_time_specific_listener == nullptr) {
+				return NotifyAllNowSimulate(std::forward<FuncT>(Function), std::forward<ArgTypes>(Arguments)...);
+			}
+
+			return ExecuteForListenerTypePerEntry((ListenerType)BaseT::GetListenerType(), one_time_specific_listener, [&](IGalaxyListener* listener) {
+				BaseT* casted_listener = (BaseT*)(listener);
+
+				assert(casted_listener != nullptr);
+
+				// no invoke
+				});
+		}
+#endif
+
 		template <typename... ArgTypes>
 		void NotifyAll(ArgTypes&&... Arguments)
 		{
+#ifndef NDEBUG
+			this->NotifyAllNowSimulate(std::forward<decltype(Arguments)>(Arguments)...);
+#endif
+
 			delay_runner->Add(std::bind_front([this](auto&&... args) {
 				this->NotifyAllNow(std::forward<decltype(args)>(args)...);
 				}, std::forward<ArgTypes>(Arguments)...));

@@ -127,8 +127,9 @@ namespace universelan::client {
 
 	void UserImpl::SignInEpic(const char* epicAccessToken, const char* epicUsername, IAuthListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
-
-		SignIn(listener);
+		if (epicAccessToken != nullptr && epicUsername != nullptr) {
+			SignIn(listener);
+		}
 	}
 
 	void UserImpl::SignInUWP(IAuthListener* const listener) {
@@ -140,19 +141,25 @@ namespace universelan::client {
 	void UserImpl::SignInPS4(const char* ps4ClientID, IAuthListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		SignIn(listener);
+		if (ps4ClientID != nullptr) {
+			SignIn(listener);
+		}
 	}
 
 	void UserImpl::SignInXB1(const char* xboxOneUserID, IAuthListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		SignIn(listener);
+		if (xboxOneUserID != nullptr) {
+			SignIn(listener);
+		}
 	}
 
 	void UserImpl::SignInXBLive(const char* token, const char* signature, const char* marketplaceID, const char* locale, IAuthListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		SignIn(listener);
+		if (token != nullptr && signature != nullptr && marketplaceID != nullptr && locale != nullptr) {
+			SignIn(listener);
+		}
 	}
 
 	void UserImpl::SignInAnonymousTelemetry(IAuthListener* const listener) {
@@ -179,7 +186,9 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		SignIn(GET_LISTENER(listener));
+		if (ps4ClientID != nullptr && ps4TitleID != nullptr && ps4TitleSecret != nullptr) {
+			SignIn(GET_LISTENER(listener));
+		}
 	}
 #endif
 
