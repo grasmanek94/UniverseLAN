@@ -6,6 +6,13 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
+
+#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
+#define GET_LISTENER(listener) (listener)
+#else
+#define GET_LISTENER(listener) ((IAuthListener* const)nullptr)
+#endif
+
 	UserImpl::UserImpl(InterfaceInstances* intf) :
 		mtx_user_data{}, intf{ intf },
 		listeners{ intf->notification.get() },
@@ -62,11 +69,7 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		SignIn(
-#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
-			listener
-#endif
-		);
+		SignIn(GET_LISTENER(listener));
 	}
 
 	void UserImpl::USER_SIGN_IN_CREDENTIALS(const char* login, const char* password
@@ -76,11 +79,7 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		SignIn(
-#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
-			listener
-#endif
-		);
+		SignIn(GET_LISTENER(listener));
 	}
 
 	void UserImpl::USER_SIGN_IN_GALAXY(bool requireOnline
@@ -90,11 +89,7 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		SignIn(
-#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
-			listener
-#endif
-		);
+		SignIn(GET_LISTENER(listener));
 	}
 
 	void UserImpl::USER_SIGN_IN_SERVER_KEY(const char* serverKey
@@ -104,11 +99,7 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		SignIn(
-#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
-			listener
-#endif
-		);
+		SignIn(GET_LISTENER(listener));
 	}
 
 	void UserImpl::SignInAnonymous(
@@ -118,11 +109,7 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		SignIn(
-#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
-			listener
-#endif
-		);
+		SignIn(GET_LISTENER(listener));
 	}
 
 #if GALAXY_VERSION_NEW_SIGN_IN_FUNCTIONS_ADDED
@@ -182,11 +169,7 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		SignIn(
-#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
-			listener
-#endif
-		);
+		SignIn(GET_LISTENER(listener));
 	}
 
 	void UserImpl::SignIn(const char* ps4ClientID, const char* ps4TitleID, const char* ps4TitleSecret, uint32_t ps4TitleSecretLength
@@ -196,11 +179,7 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		SignIn(
-#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
-			listener
-#endif
-		);
+		SignIn(GET_LISTENER(listener));
 	}
 #endif
 

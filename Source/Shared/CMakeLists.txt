@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 function(define_shared GALAXY_VERSION)
-  message("-- define_shared Version: ${GALAXY_VERSION}")
+  #message("-- define_shared Version: ${GALAXY_VERSION}")
 
   file(GLOB_RECURSE COMMON_SHARED_SRC-${GALAXY_VERSION} CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/Source/Shared/*.*")
   

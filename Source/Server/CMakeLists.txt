@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 function(define_server GALAXY_VERSION)
-  message("-- define_server Version: ${GALAXY_VERSION}")
+  #message("-- define_server Version: ${GALAXY_VERSION}")
 
   file(GLOB_RECURSE SERVER_SRC-${GALAXY_VERSION} CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/Source/Server/*.*")
   

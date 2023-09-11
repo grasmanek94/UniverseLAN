@@ -16,6 +16,10 @@ function(add_version_definitions_to TARGET)
   list (GET GALAXY_VERSION_DEF_LIST 3 GALAXY_VERSION_PATCH_MAJOR)
   list (GET GALAXY_VERSION_DEF_LIST 4 GALAXY_VERSION_PATCH_MINOR)
 
+  if("${GALAXY_VERSION_MAJOR}" STREQUAL "0")
+    string(SUBSTRING "${GALAXY_VERSION_DEF}" 1 -1 GALAXY_VERSION_DEF)
+  endif()
+
   target_compile_definitions(${TARGET} PUBLIC 
     "GALAXY_VERSION_PLATFORM=${GALAXY_VERSION_PLATFORM}"
     "GALAXY_VERSION_MAJOR=${GALAXY_VERSION_MAJOR}"
@@ -27,6 +31,8 @@ function(add_version_definitions_to TARGET)
 endfunction()
 
 function(define_projects_for_version GALAXY_VERSION)
+  message("-- Adding Version: ${GALAXY_VERSION}")
+
   define_galaxy(${GALAXY_VERSION})
   define_shared(${GALAXY_VERSION})
   define_client(${GALAXY_VERSION})

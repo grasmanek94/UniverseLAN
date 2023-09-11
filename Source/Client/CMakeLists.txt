@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 function(define_client GALAXY_VERSION)
-  message("-- define_client Version: ${GALAXY_VERSION}")
+  #message("-- define_client Version: ${GALAXY_VERSION}")
 
   file(GLOB_RECURSE CLIENT_SRC-${GALAXY_VERSION} CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/Source/Client/*.*")
 

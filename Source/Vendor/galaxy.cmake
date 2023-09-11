@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 function(define_galaxy GALAXY_VERSION)
-  message("-- define_galaxy Version: ${GALAXY_VERSION}")
+  #message("-- define_galaxy Version: ${GALAXY_VERSION}")
 
   file(GLOB_RECURSE GALAXY_SRC-${GALAXY_VERSION} CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/Source/DLLs/${GALAXY_VERSION}/galaxy/*.*")
 
