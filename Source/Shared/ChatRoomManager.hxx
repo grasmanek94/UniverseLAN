@@ -1,5 +1,7 @@
 #pragma once
 
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
+
 #include "ChatRoom.hxx"
 
 #include <IChat.h>
@@ -28,3 +30,4 @@ namespace universelan {
 		bool AddChatRoom(const ChatRoom& chat_room); 
 	};
 }
+#endif

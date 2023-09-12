@@ -3,7 +3,7 @@
 #include <GalaxyID.h>
 
 #include <AchievementsAndStatsContainer.hxx>
-#include <GalaxyIDHash.hxx>
+#include <GalaxyID.hxx>
 
 #include <memory>
 #include <string>

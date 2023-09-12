@@ -22,12 +22,7 @@
 #include <mutex>
 #include <unordered_map>
 
-#define GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED ((GALAXY_VERSION) > 112120)
-#define GALAXY_VERSION_LISTENER_TO_USERDATA_FUNCTION_SIGNATURES_ADDED ((GALAXY_VERSION) > 112400)
-#define GALAXY_VERSION_NEW_SIGN_IN_FUNCTIONS_ADDED ((GALAXY_VERSION) > 112400)
-#define GALAXY_VERSION_INVALID_ACCESS_TOKEN_INFO_ADDED ((GALAXY_VERSION) > 112400)
-
-#if GALAXY_VERSION_NEW_SIGN_IN_FUNCTIONS_ADDED
+#if GALAXY_BUILD_FEATURE_USER_SIGNIN_CROSSPLATFORM
 
 #define USER_SIGN_IN_CREDENTIALS SignInCredentials
 #define USER_SIGN_IN_STEAM SignInSteam
@@ -122,7 +117,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void USER_SIGN_IN_CREDENTIALS(const char* login, const char* password
-#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
+#if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 			, IAuthListener* const listener = NULL
 #endif
 		) override;
@@ -142,7 +137,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void USER_SIGN_IN_STEAM(const void* steamAppTicket, uint32_t steamAppTicketSize, const char* personaName
-#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
+#if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 			, IAuthListener* const listener = NULL
 #endif
 		) override;
@@ -160,7 +155,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void USER_SIGN_IN_GALAXY(bool requireOnline = false
-#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
+#if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 			, IAuthListener* const listener = NULL
 #endif
 		) override;
@@ -182,7 +177,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void USER_SIGN_IN_SERVER_KEY(const char* serverKey
-#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
+#if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 			, IAuthListener* const listener = NULL
 #endif
 		) override;
@@ -199,12 +194,12 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void SignInAnonymous(
-#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
+#if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 			IAuthListener* const listener = NULL
 #endif
 		) override;
 
-#if GALAXY_VERSION_NEW_SIGN_IN_FUNCTIONS_ADDED
+#if GALAXY_BUILD_FEATURE_USER_SIGNIN_CROSSPLATFORM
 
 		/**
 		 * Authenticates the Galaxy Peer with refresh token.
@@ -349,7 +344,7 @@ namespace universelan::client {
 		* @param [in] listener The listener for specific operation [EXPERIMENTAL].
 		*/
 		virtual void SignIn(uint32_t xboxOneUserID
-#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
+#if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 			, IAuthListener* listener = NULL
 #endif
 		);
@@ -370,7 +365,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation [EXPERIMENTAL].
 		 */
 		virtual void SignIn(const char* ps4ClientID, const char* ps4TitleID, const char* ps4TitleSecret, uint32_t ps4TitleSecretLength
-#if GALAXY_VERSION_LISTENER_TO_FUNCTION_SIGNATURES_ADDED
+#if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 			, IAuthListener* const listener = NULL
 #endif
 		) override;
@@ -386,7 +381,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RequestUserData(GalaxyID userID = GalaxyID()
-#if GALAXY_VERSION_LISTENER_TO_USERDATA_FUNCTION_SIGNATURES_ADDED
+#if GALAXY_BUILD_FEATURE_USER_DATA_LISTENERS
 			, ISpecificUserDataListener* const listener = NULL
 #endif
 		) override;
@@ -438,7 +433,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void SetUserData(const char* key, const char* value
-#if GALAXY_VERSION_LISTENER_TO_USERDATA_FUNCTION_SIGNATURES_ADDED
+#if GALAXY_BUILD_FEATURE_USER_DATA_LISTENERS
 			, ISpecificUserDataListener* const listener = NULL
 #endif
 		) override;
@@ -480,7 +475,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void DeleteUserData(const char* key
-#if GALAXY_VERSION_LISTENER_TO_USERDATA_FUNCTION_SIGNATURES_ADDED
+#if GALAXY_BUILD_FEATURE_USER_DATA_LISTENERS
 			, ISpecificUserDataListener* const listener = NULL
 #endif
 		) override;
@@ -509,7 +504,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RequestEncryptedAppTicket(const void* data, uint32_t dataSize
-#if GALAXY_VERSION_LISTENER_TO_USERDATA_FUNCTION_SIGNATURES_ADDED
+#if GALAXY_BUILD_FEATURE_USER_DATA_LISTENERS
 			, IEncryptedAppTicketListener* const listener = NULL
 #endif
 		) override;
@@ -584,7 +579,7 @@ namespace universelan::client {
 		 * @return true if the report was accepted, false otherwise.
 		 */
 		virtual bool ReportInvalidAccessToken(const char* accessToken
-#if GALAXY_VERSION_INVALID_ACCESS_TOKEN_INFO_ADDED
+#if GALAXY_BUILD_FEATURE_USER_ACCESS_TOKEN_INFO
 			, const char* info = NULL
 #endif
 		) override;

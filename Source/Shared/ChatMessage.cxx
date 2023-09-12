@@ -1,4 +1,4 @@
-#pragma once
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
 
 #include "ChatMessage.hxx"
 #include "GlobalUniqueID.hxx"
@@ -50,3 +50,4 @@ namespace universelan {
 		return contents;
 	}
 }
+#endif

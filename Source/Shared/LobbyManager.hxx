@@ -5,7 +5,7 @@
 #include <GalaxyID.h>
 #include <IMatchMaking.h>
 
-#include <GalaxyIDHash.hxx>
+#include <GalaxyID.hxx>
 
 #include <memory>
 #include <unordered_map>

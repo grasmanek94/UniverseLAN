@@ -1,5 +1,7 @@
 #pragma once
 
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
+
 #include <ChatRoom.hxx>
 
 #include <Networking/SendableEventMessage.hxx>
@@ -26,3 +28,4 @@ namespace universelan {
 		SendToChatRoomMessage(uint64_t request_id, galaxy::api::ChatRoomID id, const ChatRoom::message_t& message) : request_id{ request_id }, id{ id }, message { message } {}
 	};
 }
+#endif

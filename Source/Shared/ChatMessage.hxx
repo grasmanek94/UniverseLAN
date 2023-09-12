@@ -1,5 +1,7 @@
 #pragma once
 
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
+
 #include <IChat.h>
 
 #include <string>
@@ -34,3 +36,4 @@ namespace universelan {
 		}
 	};
 }
+#endif

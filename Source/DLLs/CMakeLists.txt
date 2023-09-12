@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
+include(determine_galaxy_version_feature_definitions.cmake)
+ 
 function(add_version_definitions_to TARGET)
   string(REPLACE "." "" GALAXY_VERSION_DEF ${GALAXY_VERSION})
   string(REPLACE "x64-" "" GALAXY_VERSION_DEF ${GALAXY_VERSION_DEF})
@@ -27,7 +29,11 @@ function(add_version_definitions_to TARGET)
     "GALAXY_VERSION_PATCH_MAJOR=${GALAXY_VERSION_PATCH_MAJOR}"
     "GALAXY_VERSION_PATCH_MINOR=${GALAXY_VERSION_PATCH_MINOR}"
     "GALAXY_VERSION=${GALAXY_VERSION_DEF}"
+# Bug in MSVC, causes warnings
+#    "IS_GALAXY_VERSION_GE(MAJOR,MINOR,PATCH)=(((GALAXY_VERSION_MAJOR)>(MAJOR))||(((GALAXY_VERSION_MAJOR)==(MAJOR))&&((GALAXY_VERSION_MINOR)>(MINOR)))||(((GALAXY_VERSION_MAJOR)==(MAJOR))&&((GALAXY_VERSION_MINOR)==(MINOR))&&((GALAXY_VERSION_PATCH_MAJOR)>=(PATCH))))"
   )
+
+  add_feature_definitions_to_target(${TARGET} ${GALAXY_VERSION_MAJOR} ${GALAXY_VERSION_MINOR} ${GALAXY_VERSION_PATCH_MAJOR})
 endfunction()
 
 function(define_projects_for_version GALAXY_VERSION)

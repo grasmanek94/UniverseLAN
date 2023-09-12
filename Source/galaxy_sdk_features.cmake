@@ -1,0 +1,19 @@
+cmake_minimum_required(VERSION 3.12)
+
+# these are prefixed with GALAXY_BUILD_FEATURE_
+function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
+  set(UVV "${MAJOR}.${MINOR}.${PATCH}")
+
+  afvd(HAS_ICHAT 1.104.3)
+  afvd(LOBBY_LISTENERS 1.124.1)
+  afvd(MATCHMAKING_RESULT_COUNT 1.124.1)
+  afvd(NEAR_FILTER_ENUM 1.999.0)
+  afvd(MATCHMAKING_RET_TYPE_VOID 1.124.1)
+  afvd(USER_SIGNIN_LISTENERS 1.121.3)
+  afvd(USER_DATA_LISTENERS 1.124.1)
+  afvd(USER_SIGNIN_CROSSPLATFORM 1.124.1)
+  afvd(USER_ACCESS_TOKEN_INFO 1.124.1)
+  afvd(GALAXYID_HAS_IDTYPE 1.106.0)
+  afvd(FACTORY_INTERFACE 0.0.0 1.114.12)
+
+endfunction()

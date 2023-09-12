@@ -1,5 +1,7 @@
 #pragma once
 
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
+
 #include "ChatMessage.hxx"
 
 #include <IChat.h>
@@ -55,3 +57,4 @@ namespace universelan {
 		}
 	};
 }
+#endif

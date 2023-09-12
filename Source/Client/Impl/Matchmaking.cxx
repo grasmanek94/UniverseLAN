@@ -28,7 +28,7 @@ namespace universelan::client {
 		, uint32_t maxMembers
 		, bool joinable
 		, LobbyTopologyType lobbyTopologyType
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		, ILobbyCreatedListener* const lobbyCreatedListener
 		, ILobbyEnteredListener* const lobbyEnteredListener
 #endif
@@ -37,7 +37,7 @@ namespace universelan::client {
 
 		uint64_t request_id = MessageUniqueID::get();
 
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		create_lobby_requests.emplace(request_id, lobbyCreatedListener);
 		create_lobby_entered_requests.emplace(request_id, lobbyEnteredListener);
 #endif
@@ -69,7 +69,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::RequestLobbyList(bool allowFullLobbies
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		, ILobbyListListener* const listener
 #endif
 	) {
@@ -86,7 +86,7 @@ namespace universelan::client {
 			lobby_list_filters = LobbyFilters{ {}, 250, true };
 		}
 
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		list_lobbies_requests.emplace(request_id, listener);
 #endif
 
@@ -171,7 +171,7 @@ namespace universelan::client {
 				}
 				break;
 
-#if GALAXY_VERSION_ADDED_NEAR_FILTER_ENUM
+#if GALAXY_BUILD_FEATURE_NEAR_FILTER_ENUM
 			case LOBBY_COMPARISON_TYPE_NEAR:
 				// TODO: figure out what to do with this, probably calculate the difference and then sort by this (highest to lowest, lowest to highest)?
 				break;
@@ -194,7 +194,7 @@ namespace universelan::client {
 				listener
 				, &ILobbyListListener::OnLobbyList
 				, (uint32_t)0
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 				, LOBBY_LIST_RESULT_ERROR
 #else
 				, true
@@ -224,7 +224,7 @@ namespace universelan::client {
 			listener
 			, &ILobbyListListener::OnLobbyList
 			, (uint32_t)lobby_list_filtered.size()
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, LOBBY_LIST_RESULT_SUCCESS
 #else
 			, false
@@ -232,7 +232,7 @@ namespace universelan::client {
 		);
 	}
 
-#if GALAXY_VERSION_ADDED_RESULT_COUNT
+#if GALAXY_BUILD_FEATURE_MATCHMAKING_RESULT_COUNT
 	void MatchmakingImpl::AddRequestLobbyListResultCountFilter(uint32_t limit) {
 		tracer::Trace trace{ __FUNCTION__ };
 
@@ -265,7 +265,7 @@ namespace universelan::client {
 
 	void MatchmakingImpl::AddRequestLobbyListNearValueFilter(const char* keyToMatch, int32_t valueToBeCloseTo) {
 		tracer::Trace trace{ __FUNCTION__ };
-#if GALAXY_VERSION_ADDED_NEAR_FILTER_ENUM
+#if GALAXY_BUILD_FEATURE_NEAR_FILTER_ENUM
 		AddRequestLobbyListNumericalFilter(keyToMatch, valueToBeCloseTo, LOBBY_COMPARISON_TYPE_NEAR);
 #endif
 	}
@@ -283,7 +283,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::JoinLobby(GalaxyID lobbyID
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		, ILobbyEnteredListener* const listener
 #endif
 	) {
@@ -291,7 +291,7 @@ namespace universelan::client {
 
 		uint64_t request_id = MessageUniqueID::get();
 
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		join_lobby_requests.emplace(request_id, listener);
 #endif
 
@@ -323,7 +323,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::LeaveLobby(GalaxyID lobbyID
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		, ILobbyLeftListener* const listener
 #endif
 	) {
@@ -331,7 +331,7 @@ namespace universelan::client {
 
 		uint64_t request_id = MessageUniqueID::get();
 
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		leave_lobby_requests.emplace(request_id, listener);
 #endif
 
@@ -353,7 +353,7 @@ namespace universelan::client {
 			listener
 			, &ILobbyLeftListener::OnLobbyLeft
 			, data->lobby_id
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, data->reason
 #else
 			, false
@@ -362,13 +362,13 @@ namespace universelan::client {
 	}
 
 
-#if GALAXY_VERSION_MATCHMAKING_RETURN_TYPE_VOID
+#if GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 	void
 #else
 	bool
 #endif
 		MatchmakingImpl::SetMaxNumLobbyMembers(GalaxyID lobbyID, uint32_t maxNumLobbyMembers
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		, ILobbyDataUpdateListener* const listener
 #endif
 	)
@@ -376,11 +376,11 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		uint64_t request_id = MessageUniqueID::get();
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		set_max_lobby_members_requests.emplace(request_id, listener);
 		intf->client->GetConnection().SendAsync(SetLobbyMaxMembersMessage{ request_id, lobbyID, maxNumLobbyMembers });
 #endif	
-#if !GALAXY_VERSION_MATCHMAKING_RETURN_TYPE_VOID
+#if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 		return true;
 #endif
 	}
@@ -402,14 +402,14 @@ namespace universelan::client {
 				lobby->SetMaxMembers(data->max_members);
 			}
 
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
 #endif
 
 			listeners->NotifyAll(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
 		}
 		else {
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateFailure, data->lobby_id, data->fail_reason);
 #endif
 		}
@@ -456,13 +456,13 @@ namespace universelan::client {
 
 
 
-#if GALAXY_VERSION_MATCHMAKING_RETURN_TYPE_VOID
+#if GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 	void
 #else
 	bool
 #endif
 		MatchmakingImpl::SetLobbyType(GalaxyID lobbyID, LobbyType lobbyType
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		, ILobbyDataUpdateListener* const listener
 #endif
 	)
@@ -471,11 +471,11 @@ namespace universelan::client {
 
 		uint64_t request_id = MessageUniqueID::get();
 
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		set_lobby_type_requests.emplace(request_id, listener);
 		intf->client->GetConnection().SendAsync(SetLobbyTypeMessage{ request_id, lobbyID, lobbyType });
 #endif
-#if !GALAXY_VERSION_MATCHMAKING_RETURN_TYPE_VOID
+#if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 		return true;
 #endif		
 	}
@@ -496,14 +496,14 @@ namespace universelan::client {
 				lobby->SetType(data->type);
 			}
 
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
 #endif
 
 			listeners->NotifyAll(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
 		}
 		else {
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateFailure, data->lobby_id, data->fail_reason);
 #endif
 		}
@@ -523,13 +523,13 @@ namespace universelan::client {
 	}
 
 
-#if GALAXY_VERSION_MATCHMAKING_RETURN_TYPE_VOID
+#if GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 	void
 #else
 	bool
 #endif
 		MatchmakingImpl::SetLobbyJoinable(GalaxyID lobbyID, bool joinable
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		, ILobbyDataUpdateListener* const listener
 #endif
 	)
@@ -538,11 +538,11 @@ namespace universelan::client {
 
 		uint64_t request_id = MessageUniqueID::get();
 
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		set_lobby_joinable_requests.emplace(request_id, listener);
 		intf->client->GetConnection().SendAsync(SetLobbyJoinableMessage{ request_id, lobbyID, joinable });
 #endif	
-#if !GALAXY_VERSION_MATCHMAKING_RETURN_TYPE_VOID
+#if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 		return true;
 #endif
 	}
@@ -563,13 +563,13 @@ namespace universelan::client {
 				lobby->SetJoinable(data->joinable);
 			}
 
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
 #endif
 			listeners->NotifyAll(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
 		}
 		else {
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateFailure, data->lobby_id, data->fail_reason);
 #endif
 		}
@@ -589,13 +589,13 @@ namespace universelan::client {
 	}
 
 
-#if GALAXY_VERSION_MATCHMAKING_RETURN_TYPE_VOID
+#if GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 	void
 #else
 	bool
 #endif
 		MatchmakingImpl::RequestLobbyData(GalaxyID lobbyID
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		, ILobbyDataRetrieveListener* const listener
 #endif
 	)
@@ -604,11 +604,11 @@ namespace universelan::client {
 
 		uint64_t request_id = MessageUniqueID::get();
 
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		get_lobby_data_requests.emplace(request_id, listener);
 		intf->client->GetConnection().SendAsync(RequestLobbyDataMessage{ request_id, lobbyID });
 #endif
-#if !GALAXY_VERSION_MATCHMAKING_RETURN_TYPE_VOID
+#if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 		return true;
 #endif
 	}
@@ -666,13 +666,13 @@ namespace universelan::client {
 	}
 
 
-#if GALAXY_VERSION_MATCHMAKING_RETURN_TYPE_VOID
+#if GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 	void
 #else
 	bool
 #endif
 		MatchmakingImpl::SetLobbyData(GalaxyID lobbyID, const char* key, const char* value
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		, ILobbyDataUpdateListener* const listener
 #endif
 	)
@@ -681,11 +681,11 @@ namespace universelan::client {
 
 		uint64_t request_id = MessageUniqueID::get();
 
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		set_lobby_data_requests.emplace(request_id, listener);
 		intf->client->GetConnection().SendAsync(SetLobbyDataMessage{ request_id, lobbyID, key, value });
 #endif
-#if !GALAXY_VERSION_MATCHMAKING_RETURN_TYPE_VOID
+#if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 		return true;
 #endif
 	}
@@ -705,13 +705,13 @@ namespace universelan::client {
 				lobby->SetData(data->key.c_str(), data->value.c_str());
 			}
 
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
 #endif
 			listeners->NotifyAll(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
 		}
 		else {
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateFailure, data->lobby_id, data->fail_reason);
 #endif
 		}
@@ -755,13 +755,13 @@ namespace universelan::client {
 	}
 
 
-#if GALAXY_VERSION_MATCHMAKING_RETURN_TYPE_VOID
+#if GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 	void
 #else
 	bool
 #endif
 		MatchmakingImpl::DeleteLobbyData(GalaxyID lobbyID, const char* key
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		, ILobbyDataUpdateListener* const listener
 #endif
 	)
@@ -769,7 +769,7 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		return SetLobbyData(lobbyID, key, ""
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, listener
 #endif
 		);
@@ -804,7 +804,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::SetLobbyMemberData(GalaxyID lobbyID, const char* key, const char* value
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		, ILobbyMemberDataUpdateListener* const listener
 #endif
 	) {
@@ -812,7 +812,7 @@ namespace universelan::client {
 
 		uint64_t request_id = MessageUniqueID::get();
 
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		set_lobby_member_data_requests.emplace(request_id, listener);
 #endif
 
@@ -834,13 +834,13 @@ namespace universelan::client {
 				lobby->SetMemberData(data->member_id, data->key.c_str(), data->value.c_str());
 			}
 
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			listeners->NotifyAll(listener, &ILobbyMemberDataUpdateListener::OnLobbyMemberDataUpdateSuccess, data->lobby_id, data->member_id);
 #endif
 			listeners->NotifyAll(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, data->member_id);
 		}
 		else {
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			listeners->NotifyAll(listener, &ILobbyMemberDataUpdateListener::OnLobbyMemberDataUpdateFailure, data->lobby_id, data->member_id, data->fail_reason);
 #endif
 		}
@@ -884,14 +884,14 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::DeleteLobbyMemberData(GalaxyID lobbyID, const char* key
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		, ILobbyMemberDataUpdateListener* const listener
 #endif
 	) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		SetLobbyMemberData(lobbyID, key, ""
-#if GALAXY_VERSION_ADDED_LISTENERS_TO_LOBBY
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, listener
 #endif
 		);

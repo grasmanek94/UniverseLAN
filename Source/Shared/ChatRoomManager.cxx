@@ -1,4 +1,4 @@
-#pragma once
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
 
 #include "ChatRoomManager.hxx"
 
@@ -40,3 +40,4 @@ namespace universelan {
 		return chatroom;
 	}
 }
+#endif

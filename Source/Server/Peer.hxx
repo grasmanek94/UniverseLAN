@@ -5,7 +5,7 @@
 #include <GalaxyID.h>
 
 #include <GalaxyUserData.hxx>
-#include <GalaxyIDHash.hxx>
+#include <GalaxyID.hxx>
 #include <Networking/Networking.hxx>
 #include <ChatRoomManager.hxx>
 #include <LobbyManager.hxx>

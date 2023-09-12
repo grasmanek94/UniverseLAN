@@ -1,5 +1,7 @@
 #pragma once
 
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
+
 #include <ChatRoom.hxx>
 #include <Networking/SendableEventMessage.hxx>
 
@@ -30,3 +32,4 @@ namespace universelan {
 		RequestChatRoomMessagesMessage(uint64_t request_id, galaxy::api::ChatRoomID id, galaxy::api::ChatMessageID oldest_message, const ChatRoom::messages_t& messages) : request_id{ request_id }, id{ id }, oldest_message{ oldest_message }, messages{ messages } {}
 	};
 }
+#endif
