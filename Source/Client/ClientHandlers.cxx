@@ -15,7 +15,7 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__"::EventConnect"};
 
 		std::cout << "Peer connected: " 
-			<< std::hex <<peer->address.host << ":" << peer->address.port << std::endl;
+			<< std::hex <<peer->address.host << ":" << std::dec << peer->address.port << std::endl;
 
 		interfaces->utils->ConnectionStateChangeReceived(true);
 	}
@@ -25,7 +25,7 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__"::EventDisconnect" };
 
 		std::cout << "Peer disconnected: " 
-			<< std::hex << peer->address.host << ":" << peer->address.port << std::endl;
+			<< std::hex << peer->address.host << ":" << std::dec << peer->address.port << std::endl;
 
 		interfaces->utils->ConnectionStateChangeReceived(false);
 

@@ -32,7 +32,7 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		if (listener != nullptr) {
-			std::cout << __FUNCTION__ << ":" << listenerType << " @" << std::hex << (size_t)listener << std::endl;
+			std::cout << __FUNCTION__ << ":" << std::dec << listenerType << " @" << std::hex << (size_t)listener << std::dec << std::endl;
 
 			lock_t lock{ listeners[listenerType].mtx };
 			listeners[listenerType].set.insert(listener);
