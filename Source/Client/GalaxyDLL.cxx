@@ -8,11 +8,13 @@
 
 #include <Version.hxx>
 
-namespace galaxy::api {
+namespace universelan::client {
+	using namespace galaxy::api;
 	using namespace universelan;
 	using namespace universelan::client;
 
-	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Init(const InitOptions& initOptions) {
+	void Init(const InitOptions& initOptions) 
+	{
 		{
 			TCHAR szFileName[MAX_PATH];
 			if (GetModuleFileName(NULL, szFileName, MAX_PATH) == ERROR_SUCCESS) {
@@ -43,89 +45,95 @@ namespace galaxy::api {
 		intf_inst.client->Start();
 	}
 
-	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Shutdown() {
+	void Shutdown() {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		intf_inst.reset();
 	}
 
-	GALAXY_DLL_EXPORT IUser* GALAXY_CALLTYPE User() {
+	IUser* User() {
 		//tracer::Trace trace{ __FUNCTION__ };
 
 		return intf_inst.user.get();
 	}
 
-	GALAXY_DLL_EXPORT IFriends* GALAXY_CALLTYPE Friends() {
+	IFriends* Friends() {
 		//tracer::Trace trace{ __FUNCTION__ };
 
 		return intf_inst.friends.get();
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
-	GALAXY_DLL_EXPORT IChat* GALAXY_CALLTYPE Chat() {
+	IChat* Chat() {
 		//tracer::Trace trace{ __FUNCTION__ };
 
 		return intf_inst.chat.get();
 	}
 #endif
 
-	GALAXY_DLL_EXPORT IMatchmaking* GALAXY_CALLTYPE Matchmaking() {
+	IMatchmaking* Matchmaking() {
 		//tracer::Trace trace{ __FUNCTION__ };
 
 		return intf_inst.matchmaking.get();
 	}
 
-	GALAXY_DLL_EXPORT INetworking* GALAXY_CALLTYPE Networking() {
+	INetworking* Networking() {
 		//tracer::Trace trace{ __FUNCTION__ };
 
 		return intf_inst.networking.get();
 	}
 
-	GALAXY_DLL_EXPORT IStats* GALAXY_CALLTYPE Stats() {
+	INetworking* ServerNetworking() {
+		//tracer::Trace trace{ __FUNCTION__ };
+
+		return intf_inst.server_networking.get();
+	}
+
+	IStats* Stats() {
 		//tracer::Trace trace{ __FUNCTION__ };
 
 		return intf_inst.stats.get();
 	}
 
-	GALAXY_DLL_EXPORT IUtils* GALAXY_CALLTYPE Utils() {
+	IUtils* Utils() {
 		//tracer::Trace trace{ __FUNCTION__ };
 
 		return intf_inst.utils.get();
 	}
 
-	GALAXY_DLL_EXPORT IApps* GALAXY_CALLTYPE Apps() {
+	IApps* Apps() {
 		//tracer::Trace trace{ __FUNCTION__ };
 
 		return intf_inst.apps.get();
 	}
 
-	GALAXY_DLL_EXPORT IStorage* GALAXY_CALLTYPE Storage() {
+	IStorage* Storage() {
 		//tracer::Trace trace{ __FUNCTION__ };
 
 		return intf_inst.storage.get();
 	}
 
-	GALAXY_DLL_EXPORT ICustomNetworking* GALAXY_CALLTYPE CustomNetworking() {
+	ICustomNetworking* CustomNetworking() {
 		//tracer::Trace trace{ __FUNCTION__ };
 
 		return intf_inst.custom_networking.get();
 	}
 
-	GALAXY_DLL_EXPORT ILogger* GALAXY_CALLTYPE Logger() {
+	ILogger* Logger() {
 		//tracer::Trace trace{ __FUNCTION__ };
 
 		return intf_inst.logger.get();
 	}
 
 #if (GALAXY_VERSION) > 112400
-	GALAXY_DLL_EXPORT ITelemetry* GALAXY_CALLTYPE Telemetry() {
+	ITelemetry* Telemetry() {
 		//tracer::Trace trace{ __FUNCTION__ };
 
 		return intf_inst.telemetry.get();
 	}
 #endif
 
-	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE ProcessData() {
+	void ProcessData() {
 		//tracer::Trace trace{ __FUNCTION__ };
 
 		if (intf_inst.client != nullptr) {
@@ -137,7 +145,7 @@ namespace galaxy::api {
 		}
 	}
 
-	GALAXY_DLL_EXPORT IListenerRegistrar* GALAXY_CALLTYPE ListenerRegistrar() {
+	IListenerRegistrar* ListenerRegistrar() {
 		//tracer::Trace trace{ __FUNCTION__ };
 
 		return intf_inst.notification.get();
@@ -146,26 +154,164 @@ namespace galaxy::api {
 	/*
 	* Seems this gets called after each ProcessData call.
 	*/
-	GALAXY_DLL_EXPORT const IError* GALAXY_CALLTYPE GetError() {
+	const IError* GetError() {
 		//tracer::Trace trace{ __FUNCTION__ };
 
 		return nullptr;
 	}
 }
 
+#if GALAXY_BUILD_FEATURE_HAS_IGALAXY
+#include <IGalaxy.h>
+
+namespace galaxy::api
+{
+	using namespace universelan::tracer;
+	class GalaxyImpl : public IGalaxy
+	{
+	public:
+		GalaxyImpl() {
+			Trace trace{ __FUNCTION__ };
+		}
+
+		virtual ~GalaxyImpl() {
+			Trace trace{ __FUNCTION__ };
+		}
+
+		virtual void Init(const InitOptions& initOptions) override {
+			universelan::client::Init(initOptions);
+		}
+
+		virtual void Init(const char* clientID, const char* clientSecret, bool throwExceptions = true) override {
+			universelan::client::Init(InitOptions{ clientID, clientSecret, "", throwExceptions, "." });
+		}
+
+		virtual void InitLocal(const char* clientID, const char* clientSecret, const char* galaxyPeerPath = ".", bool throwExceptions = true) override {
+			universelan::client::Init(InitOptions{ clientID, clientSecret, galaxyPeerPath, throwExceptions, "." });
+		}
+
+		virtual void Shutdown() override {
+			universelan::client::Shutdown();
+		}
+
+		virtual IUser* GetUser() const override {
+			return universelan::client::User();
+		}
+
+		virtual IFriends* GetFriends() const override {
+			return universelan::client::Friends();
+		}
+
+		virtual IMatchmaking* GetMatchmaking() const override {
+			return universelan::client::Matchmaking();
+		}
+
+		virtual INetworking* GetNetworking() const override {
+			return universelan::client::Networking();
+		}
+
+		virtual INetworking* GetServerNetworking() const override {
+			return universelan::client::ServerNetworking();
+		}
+
+		virtual IStats* GetStats() const override {
+			return universelan::client::Stats();
+		}
+
+		virtual IUtils* GetUtils() const override {
+			return universelan::client::Utils();
+		}
+
+		virtual IApps* GetApps() const override {
+			return universelan::client::Apps();
+		}
+
+		virtual IStorage* GetStorage() const override {
+			return universelan::client::Storage();
+		}
+
+		virtual ICustomNetworking* GetCustomNetworking() const override {
+			return universelan::client::CustomNetworking();
+		}
+
+		virtual IListenerRegistrar* GetListenerRegistrar() const override {
+			return universelan::client::ListenerRegistrar();
+		}
+
+		virtual ILogger* GetLogger() const override {
+			return universelan::client::Logger();
+		}
+
+		virtual void ProcessData() override {
+			universelan::client::ProcessData();
+		}
+
+		virtual const IError* GetError() const override {
+			return universelan::client::GetError();
+		}
+	};
+
+	class ErrorManager : public IErrorManager {
+	public:
+		virtual ~ErrorManager() override {
+			Trace trace{ __FUNCTION__ };
+		}
+
+		ErrorManager() {
+			Trace trace{ __FUNCTION__ };
+		}
+
+		virtual api::IError* GetLastError() override {
+			return nullptr;
+		}
+	};
+
+	IGalaxy* GalaxyFactory::instance{ nullptr };
+	IErrorManager* GalaxyFactory::errorManager{ nullptr };
+
+	IGalaxy* GalaxyFactory::GetInstance() {
+		Trace trace{ __FUNCTION__ };
+
+		if (instance == nullptr) {
+			instance = new GalaxyImpl();
+		}
+
+		return instance;
+	}
+
+	IErrorManager* GalaxyFactory::GetErrorManager() {
+		Trace trace{ __FUNCTION__ };
+
+		if (errorManager == nullptr) {
+			errorManager = new ErrorManager();
+		}
+
+		return errorManager;
+	}
+
+	void GalaxyFactory::ResetInstance() {
+		Trace trace{ __FUNCTION__ };
+
+		if (instance != nullptr) {
+			delete instance;
+			instance = nullptr;
+		}
+	}
+
+	IGalaxy* GalaxyFactory::CreateInstance() {
+		Trace trace{ __FUNCTION__ };
+
+		if (instance == nullptr) {
+			instance = new GalaxyImpl();
+		}
+
+		return instance;
+	}
+}
+#endif
+
 extern "C" GALAXY_DLL_EXPORT uint32_t load() {
 	universelan::tracer::Trace trace{ __FUNCTION__ };
 
 	return 0;
 }
-
-//BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
-//
-//	if (fdwReason == DLL_PROCESS_ATTACH) {
-//		std::cout << "DLL_PROCESS_ATTACH" << std::endl;
-//	}
-//	else if (fdwReason == DLL_PROCESS_DETACH) {
-//		std::cout << "DLL_PROCESS_DETACH" << std::endl;
-//	}
-//	return TRUE;
-//}

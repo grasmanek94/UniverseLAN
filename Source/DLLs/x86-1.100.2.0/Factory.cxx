@@ -1,176 +1,234 @@
-#include <Impl/Errors.hxx>
-#include <UniverseLAN.hxx>
-
-#include <Tracer.hxx>
-
 #include <GalaxyFactory.h>
 
-using namespace universelan::tracer;
-namespace galaxy::api
-{
-	class GalaxyImpl : public IGalaxy
+namespace galaxy::api {
+
+	/**
+	 * Calls IGalaxy::Init() on the singleton instance of IGalaxy.
+	 *
+	 * @param clientID The ID of the client.
+	 * @param clientSecret The secret of the client.
+	 * @param throwExceptions Indicates if Galaxy should throw exceptions.
+	 */
+	static void GALAXY_CALLTYPE Init(const char* clientID, const char* clientSecret, bool throwExceptions = true)
 	{
-	public:
-		GalaxyImpl() {
-			Trace trace{ __FUNCTION__ };
-		}
-
-		virtual ~GalaxyImpl() {
-			Trace trace{ __FUNCTION__ };
-		}
-
-		virtual void Init(const char* clientID, const char* clientSecret, bool throwExceptions = true) override {
-			InitOptions options{ clientID, clientSecret };
-			galaxy::api::Init(options);
-		}
-
-		virtual void InitLocal(const char* clientID, const char* clientSecret, const char* galaxyPeerPath = ".", bool throwExceptions = true) override {
-			InitOptions options{ clientID, clientSecret };
-			galaxy::api::Init(options);
-		}
-
-		virtual void Shutdown() override {
-			galaxy::api::Shutdown();
-		}
-
-		virtual IUser* GetUser() const override {
-			return galaxy::api::User();
-		}
-
-		virtual IFriends* GetFriends() const override {
-			return galaxy::api::Friends();
-		}
-
-		virtual IMatchmaking* GetMatchmaking() const override {
-			return galaxy::api::Matchmaking();
-		}
-
-		virtual INetworking* GetNetworking() const override {
-			return galaxy::api::Networking();
-		}
-
-		virtual INetworking* GetServerNetworking() const override {
-			return galaxy::api::GameServerNetworking();
-		}
-
-		virtual IStats* GetStats() const override {
-			return galaxy::api::Stats();
-		}
-
-		virtual IUtils* GetUtils() const override {
-			return galaxy::api::Utils();
-		}
-
-		virtual IApps* GetApps() const override {
-			return galaxy::api::Apps();
-		}
-
-		virtual IListenerRegistrar* GetListenerRegistrar() const override {
-			return galaxy::api::ListenerRegistrar();
-		}
-
-		virtual ILogger* GetLogger() const override {
-			return galaxy::api::Logger();
-		}
-
-		virtual void ProcessData() override {
-			galaxy::api::ProcessData();
-		}
-
-		virtual const IError* GetError() const override {
-			return galaxy::api::GetError();
-		}
-	};
-	
-	class ErrorManager : public IErrorManager {
-	public:
-		int a = 0;
-		int b = 0;
-		int c = 0;
-
-		virtual int Unknown1() override {
-			Trace trace{ __FUNCTION__ };
-			return 0;
-		}
-
-		virtual IErrorManager* Unknown2() override {
-			Trace trace{ __FUNCTION__ };
-			return this;
-		}
-
-		virtual int Unknown3() override {
-			Trace trace{ __FUNCTION__ };
-			return 0;
-		}
-
-		virtual ~ErrorManager() override {
-			Trace trace{ __FUNCTION__ };
-		}
-
-		ErrorManager() {
-			Trace trace{ __FUNCTION__ };
-		}
-	};
-
-	IGalaxy* GalaxyFactory::instance{nullptr};
-	IErrorManager* GalaxyFactory::errorManager{ nullptr };
-
-	IGalaxy* GalaxyFactory::GetInstance(
-		//uint32_t a, uint32_t b
-	) {
-		Trace trace{ __FUNCTION__ };
-
-		//std::cout << __FUNCTION__ ": " << a << ", " << b << std::endl;
-
-		//int __this;
-		//using _DWORD = unsigned int;
-		//
-		//__this = (int)galaxy::api::GalaxyFactory::GetErrorManager();
-		//
-		//_DWORD vtable = *(_DWORD*)__this;
-		//_DWORD func = vtable + 4;
-		//
-		//using some_t = void(__thiscall**)(int);
-		//some_t casted_func = (some_t)func;
-		//auto the_function = *casted_func;
-		//the_function(__this);
-
-		if (instance == nullptr) {
-			instance = new GalaxyImpl();
-		}
-
-		return instance;
+		GalaxyFactory::CreateInstance()->Init(clientID, clientSecret, throwExceptions);
 	}
 
-	IErrorManager* GalaxyFactory::GetErrorManager() {
-		Trace trace{ __FUNCTION__ };
-
-		if (errorManager == nullptr) {
-			errorManager = new ErrorManager();
-		}
-
-		const int x = sizeof(ErrorManager);
-		static_assert(x == 0x10);
-
-		return errorManager;
+	/**
+	 * Calls IGalaxy::Init() on the singleton instance of IGalaxy.
+	 *
+	 * @param initOptions The group of the init options.
+	 */
+	static void GALAXY_CALLTYPE Init(const InitOptions& initOptions)
+	{
+		GalaxyFactory::CreateInstance()->Init(initOptions);
 	}
 
-	void GalaxyFactory::ResetInstance() {
-		Trace trace{ __FUNCTION__ };
-
-		if (instance != nullptr) {
-			delete instance;
-			instance = nullptr;
-		}
+	/**
+	 * Calls IGalaxy::InitLocal() on the singleton instance of IGalaxy.
+	 *
+	 * @param clientID The ID of the client.
+	 * @param clientSecret The secret of the client.
+	 * @param galaxyPeerPath Path to the galaxyPeer library location.
+	 * @param throwExceptions indicates if Galaxy should throw exceptions.
+	 */
+	static void GALAXY_CALLTYPE InitLocal(const char* clientID, const char* clientSecret, const char* galaxyPeerPath = ".", bool throwExceptions = true)
+	{
+		GalaxyFactory::CreateInstance()->InitLocal(clientID, clientSecret, galaxyPeerPath, throwExceptions);
 	}
 
-	IGalaxy* GalaxyFactory::CreateInstance() {
-		Trace trace{ __FUNCTION__ };
+	/**
+	 * Calls IGalaxy::Shutdown() on the singleton instance of IGalaxy and then frees the instance.
+	 */
+	static void GALAXY_CALLTYPE Shutdown()
+	{
+		if (!GalaxyFactory::GetInstance())
+			return;
 
-		if (instance == nullptr) {
-			instance = new GalaxyImpl();
-		}
+		GalaxyFactory::GetInstance()->Shutdown();
+		GalaxyFactory::ResetInstance();
+	}
 
-		return instance;
+	/**
+	 * Calls IGalaxy::ProcessData() on the singleton instance of IGalaxy.
+	 *
+	 * This method should be called in a loop, preferably every frame,
+	 * so that Galaxy is able to process input and output streams.
+	 *
+	 * @remark When this method is not called, any asynchronous calls to Galaxy API
+	 * cannot be processed and any listeners will not be properly called.
+	 */
+	static void GALAXY_CALLTYPE ProcessData()
+	{
+		if (!GalaxyFactory::GetInstance())
+			return;
+
+		GalaxyFactory::GetInstance()->ProcessData();
+	}
+
+	/**
+	 * Calls IGalaxy::GetUser() on the singleton instance of IGalaxy.
+	 *
+	 * @return An instance of IUser.
+	 */
+	static IUser* GALAXY_CALLTYPE User()
+	{
+		if (!GalaxyFactory::GetInstance())
+			return nullptr;
+
+		return GalaxyFactory::GetInstance()->GetUser();
+	}
+
+	/**
+	 * Calls IGalaxy::GetFriends() on the singleton instance of IGalaxy.
+	 *
+	 * @return An instance of IFriends.
+	 */
+	static IFriends* GALAXY_CALLTYPE Friends()
+	{
+		if (!GalaxyFactory::GetInstance())
+			return nullptr;
+
+		return GalaxyFactory::GetInstance()->GetFriends();
+	}
+
+	/**
+	 * Calls IGalaxy::GetMatchmaking() on the singleton instance of IGalaxy.
+	 *
+	 * @return An instance of IMatchmaking.
+	 */
+	static IMatchmaking* GALAXY_CALLTYPE Matchmaking()
+	{
+		if (!GalaxyFactory::GetInstance())
+			return nullptr;
+
+		return GalaxyFactory::GetInstance()->GetMatchmaking();
+	}
+
+	/**
+	 * Calls IGalaxy::GetNetworking() on the singleton instance of IGalaxy.
+	 *
+	 * @return An instance of INetworking.
+	 */
+	static INetworking* GALAXY_CALLTYPE Networking()
+	{
+		if (!GalaxyFactory::GetInstance())
+			return nullptr;
+
+		return GalaxyFactory::GetInstance()->GetNetworking();
+	}
+
+	/**
+	 * Calls IGalaxy::GetServerNetworking() on the singleton instance of IGalaxy.
+	 *
+	 * @return An instance of INetworking.
+	 */
+	static INetworking* GALAXY_CALLTYPE ServerNetworking()
+	{
+		if (!GalaxyFactory::GetInstance())
+			return nullptr;
+
+		return GalaxyFactory::GetInstance()->GetServerNetworking();
+	}
+
+	/**
+	 * Calls IGalaxy::GetStats() on the singleton instance of IGalaxy.
+	 *
+	 * @return An instance of IStats.
+	 */
+	static IStats* GALAXY_CALLTYPE Stats()
+	{
+		if (!GalaxyFactory::GetInstance())
+			return nullptr;
+
+		return GalaxyFactory::GetInstance()->GetStats();
+	}
+
+	/**
+	 * Calls IGalaxy::GetUtils() on the singleton instance of IGalaxy.
+	 *
+	 * @return An instance of IUtils.
+	 */
+	static IUtils* GALAXY_CALLTYPE Utils()
+	{
+		if (!GalaxyFactory::GetInstance())
+			return nullptr;
+
+		return GalaxyFactory::GetInstance()->GetUtils();
+	}
+
+	/**
+	 * Calls IGalaxy::GetApps() on the singleton instance of IGalaxy.
+	 *
+	 * @return An instance of IApps.
+	 */
+	static IApps* GALAXY_CALLTYPE Apps()
+	{
+		if (!GalaxyFactory::GetInstance())
+			return nullptr;
+
+		return GalaxyFactory::GetInstance()->GetApps();
+	}
+
+	/**
+	 * Calls IGalaxy::GetStorage() on the singleton instance of IGalaxy.
+	 *
+	 * @return An instance of IStorage.
+	 */
+	static IStorage* GALAXY_CALLTYPE Storage()
+	{
+		if (!GalaxyFactory::GetInstance())
+			return nullptr;
+
+		return GalaxyFactory::GetInstance()->GetStorage();
+	}
+
+	/**
+	* Calls IGalaxy::GetCustomNetworking() on the singleton instance of IGalaxy.
+	*
+	* @return An instance of ICustomNetworking.
+	*/
+	static ICustomNetworking* GALAXY_CALLTYPE CustomNetworking()
+	{
+		if (!GalaxyFactory::GetInstance())
+			return nullptr;
+
+		return GalaxyFactory::GetInstance()->GetCustomNetworking();
+	}
+
+	/**
+	 * Calls IGalaxy::GetListenerRegistrar() on the singleton instance of IGalaxy.
+	 *
+	 * @return An instance of IListenerRegistrar.
+	 */
+	static IListenerRegistrar* GALAXY_CALLTYPE ListenerRegistrar()
+	{
+		if (!GalaxyFactory::GetInstance())
+			return nullptr;
+
+		return GalaxyFactory::GetInstance()->GetListenerRegistrar();
+	}
+
+	/**
+	 * Calls IGalaxy::GetLogger() on the singleton instance of IGalaxy.
+	 *
+	 * @return An instance of ILogger.
+	 */
+	static ILogger* GALAXY_CALLTYPE Logger()
+	{
+		if (!GalaxyFactory::GetInstance())
+			return nullptr;
+
+		return GalaxyFactory::GetInstance()->GetLogger();
+	}
+
+	/**
+	 * Calls IGalaxy::GetError() on singleton instance of IGalaxy.
+	 *
+	 * @return Either the last API call error or NULL if there was no error.
+	 */
+	static const IError* GALAXY_CALLTYPE GetError()
+	{
+		return GalaxyFactory::GetErrorManager()->GetLastError();
 	}
 }

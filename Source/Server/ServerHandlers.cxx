@@ -45,7 +45,9 @@ namespace universelan::server {
 		peer::ptr pd = peer_mapper.Get(peer);
 		if (pd) {
 			HandleMemberLobbyLeave(peer, true);
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
 			HandleMemberChatLeave(peer);
+#endif
 
 			user_data.erase(pd->id);
 
@@ -138,6 +140,7 @@ namespace universelan::server {
 		connection.Broadcast(data, peer);
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestChatRoomWithUserMessage>& data) {
 		tracer::Trace trace{ __FUNCTION__"::RequestChatRoomWithUserMessage" };
 
@@ -214,6 +217,7 @@ namespace universelan::server {
 			connection.Send(peer, SendToChatRoomMessage{ data->request_id, data->id, nullptr });
 		}
 	}
+#endif
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<P2PNetworkPacketMessage>& data) {
 		REQUIRES_AUTHENTICATION(peer);
@@ -221,7 +225,7 @@ namespace universelan::server {
 		peer::ptr pd = peer_mapper.Get(peer);
 		peer::ptr target_pd{ nullptr };
 
-		if (data->id.GetIDType() == GalaxyID::ID_TYPE_LOBBY) {
+		if (galaxy::api::GetIDType(data->id) == galaxy::api::IDType::ID_TYPE_LOBBY) {
 			auto lobby = lobby_manager.GetLobby(data->id);
 			if (lobby) {
 				target_pd = peer_mapper.Get(lobby->GetOwner());
@@ -661,7 +665,7 @@ namespace universelan::server {
 
 		connection.Broadcast(data);
 	}
-
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
 	bool Server::HandleMemberChatLeave(ENetPeer* peer) {
 		tracer::Trace trace{ __FUNCTION__"1"};
 
@@ -722,4 +726,5 @@ namespace universelan::server {
 
 		return true;
 	}
+#endif
 }

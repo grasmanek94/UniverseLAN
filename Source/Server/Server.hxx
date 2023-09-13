@@ -29,7 +29,9 @@ namespace universelan::server {
 		size_t minimum_tick_wait_time;
 
 		GalaxyUserData::map_t user_data;
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
 		ChatRoomManager chat_room_manager;
+#endif
 		LobbyManager lobby_manager;
 		peer::Mapper peer_mapper;
 
@@ -46,8 +48,10 @@ namespace universelan::server {
 
 		bool HandleMemberLobbyLeave(ENetPeer* peer, bool disconnected);
 
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
 		bool HandleMemberChatLeave(ENetPeer* peer);
 		bool HandleMemberChatLeave(ENetPeer* peer, galaxy::api::ChatRoomID chat_room_id);
+#endif
 
 		void PerformPeerCleanup();
 

@@ -26,8 +26,27 @@ namespace galaxy::api {
 		ID_TYPE_USER
 	};
 #endif
+	/**
+	 * Returns the type of the ID.
+	 *
+	 * @return The type of the ID.
+	 */
+	inline IDType GetIDType(uint64_t value)
+	{
+		return static_cast<IDType>(value >> 56);
+	}
 
-	static GalaxyID FromRealID(IDType type, uint64_t value)
+	/**
+	 * Returns the type of the ID.
+	 *
+	 * @return The type of the ID.
+	 */
+	inline IDType GetIDType(GalaxyID value)
+	{
+		return static_cast<IDType>(value.ToUint64() >> 56);
+	}
+
+	inline GalaxyID FromRealID(IDType type, uint64_t value)
 	{
 		/**
 		 * The numerical value used when the instance of GalaxyID is not valid.

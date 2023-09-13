@@ -43,6 +43,7 @@ namespace universelan::client {
 #endif
 		matchmaking = std::make_unique<MatchmakingImpl>(this);
 		networking = std::make_unique<NetworkingImpl>(this);
+		server_networking = std::make_unique<NetworkingImpl>(this);
 		stats = std::make_unique<StatsImpl>(this);
 		utils = std::make_unique<UtilsImpl>(this);
 		apps = std::make_unique<AppsImpl>(this);
@@ -94,6 +95,7 @@ namespace universelan::client {
 		utils = nullptr;
 		stats = nullptr;
 		networking = nullptr;
+		server_networking = nullptr;
 		matchmaking = nullptr;
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
 		chat = nullptr;

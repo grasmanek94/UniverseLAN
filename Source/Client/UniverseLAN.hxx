@@ -1,5 +1,4 @@
-﻿#ifndef LSFDRMFG_UNIVERSE_LAN_API_H
-#define LSFDRMFG_UNIVERSE_LAN_API_H
+﻿#pragma once
 
 /**
  * @file
@@ -47,6 +46,7 @@ namespace universelan::client {
 #endif
 		std::unique_ptr<MatchmakingImpl>		matchmaking = nullptr;
 		std::unique_ptr<NetworkingImpl>			networking = nullptr;
+		std::unique_ptr<NetworkingImpl>			server_networking = nullptr;
 		std::unique_ptr<StatsImpl>				stats = nullptr;
 		std::unique_ptr<UtilsImpl>				utils = nullptr;
 		std::unique_ptr<AppsImpl>				apps = nullptr;
@@ -99,5 +99,3 @@ namespace universelan::client {
 #endif
 
 #include <Tracer.hxx>
-
-#endif

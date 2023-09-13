@@ -35,7 +35,10 @@ namespace universelan::server {
 	Server::Server()
 		: config{}, connection{}, max_connections{ 1024 },
 		connected_peers{}, authentication_key{ 0 }, random{}, ticks{ 0 },
-		minimum_tick_wait_time{ 0 }, user_data{}, chat_room_manager{},
+		minimum_tick_wait_time{ 0 }, user_data{}, 
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
+		chat_room_manager{},
+#endif
 		lobby_manager{}, peer_mapper{}, sfu{ config.GetServerDataPath() },
 		shared_file_counter{ 1 }
 	{
