@@ -34,6 +34,12 @@ function(add_version_definitions_to TARGET)
   )
 
   add_feature_definitions_to_target(${TARGET} ${GALAXY_VERSION_MAJOR} ${GALAXY_VERSION_MINOR} ${GALAXY_VERSION_PATCH_MAJOR})
+
+  string(TIMESTAMP PROJECT_CURRENT_YEAR "%Y")
+
+  # ${CMAKE_CURRENT_SOURCE_DIR} is location of folder below (so version specific one)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../versioninfo.rc.cmake.in ${CMAKE_CURRENT_SOURCE_DIR}/versioninfo.rc @ONLY)
+  target_sources(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/versioninfo.rc)
 endfunction()
 
 function(define_projects_for_version GALAXY_VERSION)

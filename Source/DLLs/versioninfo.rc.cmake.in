@@ -1,0 +1,25 @@
+1 TYPELIB "versioninfo.rc"
+
+1 VERSIONINFO
+ FILEVERSION @GALAXY_VERSION_MAJOR@, @GALAXY_VERSION_MINOR@, @GALAXY_VERSION_PATCH_MAJOR@, @GALAXY_VERSION_PATCH_MINOR@
+ PRODUCTVERSION @GALAXY_VERSION_MAJOR@, @GALAXY_VERSION_MINOR@, @GALAXY_VERSION_PATCH_MAJOR@, @GALAXY_VERSION_PATCH_MINOR@
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "CompanyName", "grasmanek94"
+            VALUE "FileDescription", "Universe LAN Client - https://github.com/grasmanek94/LanSupportForDRMFreeGames"
+            VALUE "FileVersion","@GALAXY_VERSION_MAJOR@, @GALAXY_VERSION_MINOR@, @GALAXY_VERSION_PATCH_MAJOR@, @GALAXY_VERSION_PATCH_MINOR@"
+            VALUE "InternalName", "@PROJECT_NAME@"
+            VALUE "LegalCopyright", "Universe LAN 2022 - @PROJECT_CURRENT_YEAR@"
+            VALUE "OriginalFilename", "Galaxy-@GALAXY_VERSION@.dll"
+            VALUE "ProductName", "Universe LAN Client"
+            VALUE "ProductVersion","@GALAXY_VERSION_MAJOR@, @GALAXY_VERSION_MINOR@, @GALAXY_VERSION_PATCH_MAJOR@, @GALAXY_VERSION_PATCH_MINOR@"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
