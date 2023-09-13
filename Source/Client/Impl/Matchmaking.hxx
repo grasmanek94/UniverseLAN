@@ -25,6 +25,18 @@ namespace universelan::client {
 	using namespace galaxy::api;
 	struct InterfaceInstances;
 
+#if GALAXY_BUILD_FEATURE_SEND_LOBBY_MESSAGE_CHAR_TO_VOID
+	using SEND_LOBBY_MESSAGE_DATA_T = const void;
+#else
+	using SEND_LOBBY_MESSAGE_DATA_T = const char;
+#endif
+
+#if GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
+	using MATCHMAKING_RET_TYPE = void;
+#else
+	using MATCHMAKING_RET_TYPE = bool;
+#endif
+
 #if !GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 	using ILobbyDataUpdateListener = ILobbyDataListener;
 	using ILobbyMemberDataUpdateListener = ILobbyDataListener;
@@ -254,13 +266,7 @@ namespace universelan::client {
 		 * @param [in] maxNumLobbyMembers The maximum number of members allowed for the lobby with the limit of 250 members.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual
-#if GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
-			void
-#else
-			bool
-#endif
-			SetMaxNumLobbyMembers(GalaxyID lobbyID, uint32_t maxNumLobbyMembers
+		virtual MATCHMAKING_RET_TYPE SetMaxNumLobbyMembers(GalaxyID lobbyID, uint32_t maxNumLobbyMembers
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 				, ILobbyDataUpdateListener* const listener = NULL
 #endif
@@ -304,13 +310,7 @@ namespace universelan::client {
 		 * @param [in] lobbyType The type of the lobby.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual
-#if GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
-			void
-#else
-		bool
-#endif
-			SetLobbyType(GalaxyID lobbyID, LobbyType lobbyType
+		virtual MATCHMAKING_RET_TYPE SetLobbyType(GalaxyID lobbyID, LobbyType lobbyType
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, ILobbyDataUpdateListener* const listener = NULL
 #endif
@@ -339,13 +339,7 @@ namespace universelan::client {
 		 * @param [in] joinable Is the lobby joinable.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual
-#if GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
-			void
-#else
-			bool
-#endif
-			SetLobbyJoinable(GalaxyID lobbyID, bool joinable
+		virtual MATCHMAKING_RET_TYPE SetLobbyJoinable(GalaxyID lobbyID, bool joinable
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, ILobbyDataUpdateListener* const listener = NULL
 #endif
@@ -373,13 +367,7 @@ namespace universelan::client {
 		 * @param [in] lobbyID The ID of the lobby.
 		 * @param [in] listener The listener for specific operation call.
 		 */
-		virtual
-#if GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
-			void
-#else
-			bool
-#endif
-			RequestLobbyData(GalaxyID lobbyID
+		virtual MATCHMAKING_RET_TYPE RequestLobbyData(GalaxyID lobbyID
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, ILobbyDataRetrieveListener* const listener = NULL
 #endif
@@ -437,13 +425,7 @@ namespace universelan::client {
 		 * @param [in] value The value of the property to set with the limit of 4095 bytes.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual
-#if GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
-			void
-#else
-			bool
-#endif
-			SetLobbyData(GalaxyID lobbyID, const char* key, const char* value
+		virtual MATCHMAKING_RET_TYPE SetLobbyData(GalaxyID lobbyID, const char* key, const char* value
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, ILobbyDataUpdateListener* const listener = NULL
 #endif
@@ -486,13 +468,7 @@ namespace universelan::client {
 		 * @param [in] key The name of the property of the lobby.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual
-#if GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
-			void
-#else
-			bool
-#endif
-			DeleteLobbyData(GalaxyID lobbyID, const char* key
+		virtual MATCHMAKING_RET_TYPE DeleteLobbyData(GalaxyID lobbyID, const char* key
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, ILobbyDataUpdateListener* const listener = NULL
 #endif
@@ -630,7 +606,7 @@ namespace universelan::client {
 		 * @param [in] dataSize The length of the data.
 		 * @return true if the message was scheduled for sending, false otherwise.
 		 */
-		virtual bool SendLobbyMessage(GalaxyID lobbyID, const void* data, uint32_t dataSize) override;
+		virtual bool SendLobbyMessage(GalaxyID lobbyID, SEND_LOBBY_MESSAGE_DATA_T* data, uint32_t dataSize) override;
 
 		/**
 		 * Receives a specified message from one of the members of a specified lobby.

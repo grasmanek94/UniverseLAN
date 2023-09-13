@@ -1,6 +1,6 @@
 #pragma once
 
-#if GALAXY_BUILD_FEATURE_FACTORY_INTERFACE
+#if !HAS_INITOPTIONS
 #include <stdint.h>
 #include <cstddef>
 

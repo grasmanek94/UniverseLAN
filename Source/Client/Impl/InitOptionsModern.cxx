@@ -12,7 +12,7 @@ namespace universelan::client {
 		,clientSecret{ ""}
 		,configFilePath{ "" }
 		,storagePath{  "" }
-#if !GALAXY_BUILD_FEATURE_FACTORY_INTERFACE
+#if GALAXY_BUILD_FEATURE_ALLOCATOR
 		,galaxyAllocator{ nullptr }
 #endif
 #if (GALAXY_VERSION) > 112400
@@ -26,7 +26,7 @@ namespace universelan::client {
 		clientID = initOptions.clientID;
 		clientSecret = initOptions.clientSecret;
 		configFilePath = initOptions.configFilePath != nullptr ? initOptions.configFilePath : "";
-#if !GALAXY_BUILD_FEATURE_FACTORY_INTERFACE
+#if GALAXY_BUILD_FEATURE_ALLOCATOR
 		galaxyAllocator = initOptions.galaxyAllocator;
 #endif
 #if (GALAXY_VERSION) > 112400

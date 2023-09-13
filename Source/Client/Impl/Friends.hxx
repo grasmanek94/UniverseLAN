@@ -16,6 +16,13 @@
 #include <IListenerRegistrar.h>
 
 namespace universelan::client {
+
+#if GALAXY_BUILD_FEATURE_GetImageRGBA_CHAR_TO_VOID
+	using GetImageRGBABufferType = void;
+#else
+	using GetImageRGBABufferType = unsigned char;
+#endif
+
 	using namespace galaxy::api;
 	struct InterfaceInstances;
 
@@ -53,6 +60,7 @@ namespace universelan::client {
 		FriendsImpl(InterfaceInstances* intf);
 		virtual ~FriendsImpl();
 
+#if GALAXY_BUILD_FEATURE_HAS_CONNECTION_TYPE
 		/**
 		 * Returns the default avatar criteria.
 		 *
@@ -69,7 +77,7 @@ namespace universelan::client {
 		 * @param [in] defaultAvatarCriteria The bit sum of default AvatarType.
 		 */
 		virtual void SetDefaultAvatarCriteria(AvatarCriteriaImpl defaultAvatarCriteria) override;
-
+#endif
 		/**
 		 * Performs a request for information about specified user.
 		 *
@@ -97,6 +105,7 @@ namespace universelan::client {
 #endif
 		) override;
 
+#if GALAXY_BUILD_FEATURE_HAS_USERDATAINFOAVAILABLE
 		/**
 		 * Checks if the information of specified user is available.
 		 *
@@ -106,7 +115,7 @@ namespace universelan::client {
 		 * @return true if the information of the user is available, false otherwise.
 		 */
 		virtual bool IsUserInformationAvailable(GalaxyID userID) override;
-
+#endif
 		/**
 		 * Returns the user's nickname.
 		 *
@@ -214,7 +223,7 @@ namespace universelan::client {
 		 * @param [in, out] buffer The output buffer.
 		 * @param [in] bufferLength The size of the output buffer.
 		 */
-		virtual void GetFriendAvatarImageRGBA(GalaxyID userID, AvatarType avatarType, void* buffer, uint32_t bufferLength) override;
+		virtual void GetFriendAvatarImageRGBA(GalaxyID userID, AvatarType avatarType, GetImageRGBABufferType* buffer, uint32_t bufferLength) override;
 
 		/**
 		 * Checks if a specified avatar image is available.
@@ -267,6 +276,7 @@ namespace universelan::client {
 		 */
 		virtual GalaxyID GetFriendByIndex(uint32_t index) override;
 
+#if GALAXY_BUILD_FEATURE_NEW_FRIEND_FEATURES_104_3
 		/**
 		 * Sends a friend invitation.
 		 *
@@ -355,7 +365,7 @@ namespace universelan::client {
 			, IFriendDeleteListener* const listener = NULL
 #endif
 		) override;
-
+#endif
 		/**
 		 * Sets the variable value under a specified name.
 		 *
@@ -508,6 +518,7 @@ namespace universelan::client {
 #endif
 		) override;
 
+#if GALAXY_BUILD_FEATURE_FIND_USER
 		/**
 		 * Finds a specified user.
 		 *
@@ -524,6 +535,7 @@ namespace universelan::client {
 			, IUserFindListener* const listener = NULL
 #endif
 		) override;
+#endif
 
 		/**
 		 * Checks if a specified user is playing the same game.

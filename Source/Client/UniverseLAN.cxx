@@ -38,7 +38,9 @@ namespace universelan::client {
 		client = std::make_unique<Client>(this);
 		user = std::make_unique<UserImpl>(this);
 		friends = std::make_unique<FriendsImpl>(this);
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
 		chat = std::make_unique<ChatImpl>(this);
+#endif
 		matchmaking = std::make_unique<MatchmakingImpl>(this);
 		networking = std::make_unique<NetworkingImpl>(this);
 		stats = std::make_unique<StatsImpl>(this);
@@ -93,7 +95,9 @@ namespace universelan::client {
 		stats = nullptr;
 		networking = nullptr;
 		matchmaking = nullptr;
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
 		chat = nullptr;
+#endif
 		friends = nullptr;
 		user = nullptr;
 		init_options = nullptr;

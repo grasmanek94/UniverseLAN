@@ -1,9 +1,15 @@
 #pragma once
 
-#if GALAXY_BUILD_FEATURE_FACTORY_INTERFACE
-#include "InitOptionsFactory.hxx"
-#else
+#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
+
+#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_MODERN
 #include <InitOptions.h>
+#else
+#include <IGalaxy.h>
+#endif
+
+#else
+#include "InitOptionsFactory.hxx"
 #endif
 
 #include <string>
@@ -12,10 +18,10 @@ namespace universelan::client {
 	using namespace galaxy::api;
 
 	// this is to help intellisense complaining about ambiguous classes, compilation works fine though
-#if GALAXY_BUILD_FEATURE_FACTORY_INTERFACE
-	using InitOptionsImpl = InitOptionsFactory;
-#else
+#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS	
 	using InitOptionsImpl = InitOptions;
+#else
+	using InitOptionsImpl = InitOptionsFactory;
 #endif
 
 	/**
@@ -39,7 +45,7 @@ namespace universelan::client {
 		std::string clientSecret; ///< The secret of the client.
 		std::string configFilePath; ///< The path to folder which contains configuration files.
 		std::string storagePath; ///< The path to folder for storing internal SDK data. Used only on Android devices.
-#if !GALAXY_BUILD_FEATURE_FACTORY_INTERFACE
+#if GALAXY_BUILD_FEATURE_ALLOCATOR
 		GalaxyAllocator* galaxyAllocator;
 #endif
 #if (GALAXY_VERSION) > 112400

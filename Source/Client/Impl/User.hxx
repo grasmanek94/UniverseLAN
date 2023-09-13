@@ -182,6 +182,7 @@ namespace universelan::client {
 #endif
 		) override;
 
+#if GALAXY_BUILD_FEATURE_GAME_SERVER_API
 		/**
 		 * Authenticates the Galaxy Game Server anonymously.
 		 *
@@ -198,6 +199,7 @@ namespace universelan::client {
 			IAuthListener* const listener = NULL
 #endif
 		) override;
+#endif
 
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_CROSSPLATFORM
 
@@ -386,6 +388,7 @@ namespace universelan::client {
 #endif
 		) override;
 
+#if GALAXY_BUILD_FEATURE_HAS_USERDATAINFOAVAILABLE
 		/**
 		 * Checks if user data exists.
 		 *
@@ -395,6 +398,7 @@ namespace universelan::client {
 		 * @return true if user data exists, false otherwise.
 		 */
 		virtual bool IsUserDataAvailable(GalaxyID userID = GalaxyID()) override;
+#endif
 
 		/**
 		 * Returns an entry from the data storage of current user.
@@ -494,6 +498,12 @@ namespace universelan::client {
 		 */
 		virtual bool IsLoggedOn() override;
 
+#if GALAXY_BUILD_FEATURE_ENCRYPTED_APP_TICKET
+#if GALAXY_BUILD_FEATURE_ENCRYPTED_APP_TICKET_CONST
+		using RequestEncryptedAppTicketDataT = const void;
+#else
+		using RequestEncryptedAppTicketDataT = void;
+#endif
 		/**
 		 * Performs a request for an Encrypted App Ticket.
 		 *
@@ -503,7 +513,7 @@ namespace universelan::client {
 		 * @param [in] dataSize The size of the additional data.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void RequestEncryptedAppTicket(const void* data, uint32_t dataSize
+		virtual void RequestEncryptedAppTicket(RequestEncryptedAppTicketDataT* data, uint32_t dataSize
 #if GALAXY_BUILD_FEATURE_USER_DATA_LISTENERS
 			, IEncryptedAppTicketListener* const listener = NULL
 #endif
@@ -522,7 +532,7 @@ namespace universelan::client {
 		 * @param [out] currentEncryptedAppTicketSize The actual size of the Encrypted App Ticket.
 		 */
 		virtual void GetEncryptedAppTicket(void* encryptedAppTicket, uint32_t maxEncryptedAppTicketSize, uint32_t& currentEncryptedAppTicketSize) override;
-
+#endif
 		/**
 		 * Returns the ID of current session.
 		 *

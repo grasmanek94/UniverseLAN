@@ -16,7 +16,9 @@ namespace universelan::client {
 	class Client;
 	class UserImpl;
 	class FriendsImpl;
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
 	class ChatImpl;
+#endif
 	class MatchmakingImpl;
 	class NetworkingImpl;
 	class StatsImpl;
@@ -40,7 +42,9 @@ namespace universelan::client {
 		std::unique_ptr<Client>					client = nullptr;
 		std::unique_ptr<UserImpl>				user = nullptr;
 		std::unique_ptr<FriendsImpl>			friends = nullptr;
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
 		std::unique_ptr<ChatImpl>				chat = nullptr;
+#endif
 		std::unique_ptr<MatchmakingImpl>		matchmaking = nullptr;
 		std::unique_ptr<NetworkingImpl>			networking = nullptr;
 		std::unique_ptr<StatsImpl>				stats = nullptr;
@@ -90,7 +94,7 @@ namespace universelan::client {
 
 #include <GalaxyApi.h>
 
-#if !GALAXY_BUILD_FEATURE_FACTORY_INTERFACE
+#if GALAXY_BUILD_FEATURE_GAME_SERVER_API
 #include <GalaxyGameServerApi.h>
 #endif
 

@@ -86,6 +86,7 @@ namespace universelan::client {
 		}
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<RequestChatRoomWithUserMessage>& data) {
 		tracer::Trace trace{ __FUNCTION__"::RequestChatRoomWithUserMessage" };
 
@@ -103,6 +104,7 @@ namespace universelan::client {
 
 		interfaces->chat->SendChatRoomMessageProcessed(data);
 	}
+#endif
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<P2PNetworkPacketMessage>& data) {
 

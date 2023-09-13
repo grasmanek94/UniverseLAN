@@ -24,7 +24,7 @@ namespace universelan::client {
 		// add local user
 		user_data.emplace(intf->config->GetApiGalaxyID(), intf->config->GetLocalUserData());
 		user_data.emplace(GalaxyID(0), intf->config->GetLocalUserData());
-		user_data.emplace(GalaxyID(static_cast<uint64_t>(GalaxyID::ID_TYPE_USER) << 56), intf->config->GetLocalUserData());
+		user_data.emplace(GalaxyID(static_cast<uint64_t>(galaxy::api::IDType::ID_TYPE_USER) << 56), intf->config->GetLocalUserData());
 
 		if (intf->config->GetSignedIn()) {
 			listeners->NotifyAll(&IAuthListener::OnAuthSuccess);
@@ -57,7 +57,7 @@ namespace universelan::client {
 			listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_LOGGED_ON);
 		}
 		else {
-			listeners->NotifyAll(listener, &IAuthListener::OnAuthFailure, IAuthListener::FAILURE_REASON_EXTERNAL_SERVICE_FAILURE);
+			listeners->NotifyAll(listener, &IAuthListener::OnAuthFailure, IAuthListener::FAILURE_REASON_GALAXY_SERVICE_NOT_AVAILABLE);
 			listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN);
 		}
 	}
@@ -102,6 +102,7 @@ namespace universelan::client {
 		SignIn(GET_LISTENER(listener));
 	}
 
+#if GALAXY_BUILD_FEATURE_GAME_SERVER_API
 	void UserImpl::SignInAnonymous(
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 		IAuthListener* const listener
@@ -111,6 +112,7 @@ namespace universelan::client {
 
 		SignIn(GET_LISTENER(listener));
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_CROSSPLATFORM
 	void UserImpl::SignInToken(const char* refreshToken, IAuthListener* const listener) {
@@ -246,6 +248,7 @@ namespace universelan::client {
 		}
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_USERDATAINFOAVAILABLE
 	bool UserImpl::IsUserDataAvailable(GalaxyID userID) {
 		tracer::Trace trace{ __FUNCTION__ };
 
@@ -255,6 +258,7 @@ namespace universelan::client {
 
 		return GetGalaxyUserData(userID)->stats.IsUserDataAvailable();
 	}
+#endif
 
 	const char* UserImpl::GetUserData(const char* key, GalaxyID userID) {
 		tracer::Trace trace{ __FUNCTION__ };
@@ -334,7 +338,8 @@ namespace universelan::client {
 		return intf->config->GetSignedIn();
 	}
 
-	void UserImpl::RequestEncryptedAppTicket(const void* data, uint32_t dataSize
+#if GALAXY_BUILD_FEATURE_ENCRYPTED_APP_TICKET
+	void UserImpl::RequestEncryptedAppTicket(RequestEncryptedAppTicketDataT* data, uint32_t dataSize
 #if GALAXY_BUILD_FEATURE_USER_DATA_LISTENERS
 		, IEncryptedAppTicketListener* const listener
 #endif
@@ -354,6 +359,7 @@ namespace universelan::client {
 		((char*)encryptedAppTicket)[maxEncryptedAppTicketSize - 1] = 0;
 		currentEncryptedAppTicketSize = maxEncryptedAppTicketSize;
 	}
+#endif
 
 	SessionID UserImpl::GetSessionID() {
 		tracer::Trace trace{ __FUNCTION__ };

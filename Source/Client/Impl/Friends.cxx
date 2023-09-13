@@ -25,6 +25,7 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__ };
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_CONNECTION_TYPE
 	AvatarCriteriaImpl FriendsImpl::GetDefaultAvatarCriteria() {
 		tracer::Trace trace{ __FUNCTION__ };
 
@@ -36,6 +37,7 @@ namespace universelan::client {
 
 		avatar_criteria = defaultAvatarCriteria;
 	}
+#endif
 
 	void FriendsImpl::RequestUserInformation(
 		GalaxyID userID
@@ -87,11 +89,13 @@ namespace universelan::client {
 		}
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_USERDATAINFOAVAILABLE
 	bool FriendsImpl::IsUserInformationAvailable(GalaxyID userID) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		return intf->user->IsUserDataAvailable(userID);
 	}
+#endif
 
 	const char* FriendsImpl::GetPersonaName() {
 		tracer::Trace trace{ __FUNCTION__ };
@@ -154,7 +158,7 @@ namespace universelan::client {
 		return 0;
 	}
 
-	void FriendsImpl::GetFriendAvatarImageRGBA(GalaxyID userID, AvatarType avatarType, void* buffer, uint32_t bufferLength) {
+	void FriendsImpl::GetFriendAvatarImageRGBA(GalaxyID userID, AvatarType avatarType, GetImageRGBABufferType* buffer, uint32_t bufferLength) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 
@@ -197,6 +201,8 @@ namespace universelan::client {
 
 		return 0;
 	}
+
+#if GALAXY_BUILD_FEATURE_NEW_FRIEND_FEATURES_104_3
 
 	void FriendsImpl::SendFriendInvitation(GalaxyID userID
 #if (GALAXY_VERSION) > 112400
@@ -277,6 +283,8 @@ namespace universelan::client {
 #endif
 			&IFriendDeleteListener::OnFriendDeleteFailure, userID, IFriendDeleteListener::FAILURE_REASON_UNDEFINED);
 	}
+
+#endif
 
 	void FriendsImpl::SetRichPresence(const char* key, const char* value
 #if (GALAXY_VERSION) > 112400
@@ -481,6 +489,7 @@ namespace universelan::client {
 			&ISendInvitationListener::OnInvitationSendFailure, userID, connectionString, ISendInvitationListener::FAILURE_REASON_RECEIVER_DOES_NOT_ALLOW_INVITING);
 	}
 
+#if GALAXY_BUILD_FEATURE_FIND_USER
 	void FriendsImpl::FindUser(const char* userSpecifier
 #if (GALAXY_VERSION) > 112400
 		, IUserFindListener* const listener
@@ -494,6 +503,7 @@ namespace universelan::client {
 #endif
 			&IUserFindListener::OnUserFindFailure, userSpecifier, IUserFindListener::FAILURE_REASON_UNDEFINED);
 	}
+#endif
 
 #if (GALAXY_VERSION) > 112400
 	bool FriendsImpl::IsUserInTheSameGame(GalaxyID userID) const {

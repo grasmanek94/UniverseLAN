@@ -61,11 +61,13 @@ namespace galaxy::api {
 		return intf_inst.friends.get();
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
 	GALAXY_DLL_EXPORT IChat* GALAXY_CALLTYPE Chat() {
 		//tracer::Trace trace{ __FUNCTION__ };
 
 		return intf_inst.chat.get();
 	}
+#endif
 
 	GALAXY_DLL_EXPORT IMatchmaking* GALAXY_CALLTYPE Matchmaking() {
 		//tracer::Trace trace{ __FUNCTION__ };

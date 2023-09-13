@@ -11,13 +11,14 @@
 #include <IUtils.h>
 #include <IListenerRegistrar.h>
 
+namespace universelan::client {
+
 #if GALAXY_BUILD_FEATURE_GetImageRGBA_CHAR_TO_VOID
-using GetImageRGBABufferType = void;
+	using GetImageRGBABufferType = void;
 #else
-using GetImageRGBABufferType = unsigned char;
+	using GetImageRGBABufferType = unsigned char;
 #endif
 
-namespace universelan::client {
 	using namespace galaxy::api;
 	struct InterfaceInstances;
 
