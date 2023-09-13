@@ -34,12 +34,33 @@ function(add_version_definitions_to TARGET)
   )
 
   add_feature_definitions_to_target(${TARGET} ${GALAXY_VERSION_MAJOR} ${GALAXY_VERSION_MINOR} ${GALAXY_VERSION_PATCH_MAJOR})
+endfunction()
+
+function(add_client_version_rc)
+  string(REPLACE "." "" GALAXY_VERSION_DEF ${GALAXY_VERSION})
+  string(REPLACE "x64-" "" GALAXY_VERSION_DEF ${GALAXY_VERSION_DEF})
+  string(REPLACE "x86-" "" GALAXY_VERSION_DEF ${GALAXY_VERSION_DEF})
+
+  string(REPLACE "-" " " GALAXY_VERSION_DEF_LIST ${GALAXY_VERSION})
+  string(REPLACE "x" ""  GALAXY_VERSION_DEF_LIST ${GALAXY_VERSION_DEF_LIST})
+  string(REPLACE "." " " GALAXY_VERSION_DEF_LIST ${GALAXY_VERSION_DEF_LIST})
+
+  separate_arguments(GALAXY_VERSION_DEF_LIST)
+  list (GET GALAXY_VERSION_DEF_LIST 0 GALAXY_VERSION_PLATFORM)
+  list (GET GALAXY_VERSION_DEF_LIST 1 GALAXY_VERSION_MAJOR)
+  list (GET GALAXY_VERSION_DEF_LIST 2 GALAXY_VERSION_MINOR)
+  list (GET GALAXY_VERSION_DEF_LIST 3 GALAXY_VERSION_PATCH_MAJOR)
+  list (GET GALAXY_VERSION_DEF_LIST 4 GALAXY_VERSION_PATCH_MINOR)
+
+  if("${GALAXY_VERSION_MAJOR}" STREQUAL "0")
+    string(SUBSTRING "${GALAXY_VERSION_DEF}" 1 -1 GALAXY_VERSION_DEF)
+  endif()
 
   string(TIMESTAMP PROJECT_CURRENT_YEAR "%Y")
 
   # ${CMAKE_CURRENT_SOURCE_DIR} is location of folder below (so version specific one)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../versioninfo.rc.cmake.in ${CMAKE_CURRENT_SOURCE_DIR}/versioninfo.rc @ONLY)
-  target_sources(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/versioninfo.rc)
+  target_sources(lsfdrmfg-client-${GALAXY_VERSION} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/versioninfo.rc)
 endfunction()
 
 function(define_projects_for_version GALAXY_VERSION)

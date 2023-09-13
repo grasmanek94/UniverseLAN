@@ -6,3 +6,5 @@ define_projects_for_version(${GALAXY_VERSION})
 
 include(dll.cmake)
 include(dllhost.cmake)
+
+add_client_version_rc()
