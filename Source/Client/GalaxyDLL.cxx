@@ -266,9 +266,9 @@ namespace galaxy::api
 	IErrorManager* GalaxyFactory::errorManager{ nullptr };
 
 	IGalaxy* GalaxyFactory::GetInstance() {
-		Trace trace{ __FUNCTION__ };
-
 		if (instance == nullptr) {
+			Trace trace{ __FUNCTION__ };
+
 			instance = new GalaxyImpl();
 		}
 
@@ -276,9 +276,9 @@ namespace galaxy::api
 	}
 
 	IErrorManager* GalaxyFactory::GetErrorManager() {
-		Trace trace{ __FUNCTION__ };
-
 		if (errorManager == nullptr) {
+			Trace trace{ __FUNCTION__ };
+
 			errorManager = new ErrorManager();
 		}
 
@@ -286,18 +286,18 @@ namespace galaxy::api
 	}
 
 	void GalaxyFactory::ResetInstance() {
-		Trace trace{ __FUNCTION__ };
-
 		if (instance != nullptr) {
+			Trace trace{ __FUNCTION__ };
+
 			delete instance;
 			instance = nullptr;
 		}
 	}
 
 	IGalaxy* GalaxyFactory::CreateInstance() {
-		Trace trace{ __FUNCTION__ };
-
 		if (instance == nullptr) {
+			Trace trace{ __FUNCTION__ };
+
 			instance = new GalaxyImpl();
 		}
 
