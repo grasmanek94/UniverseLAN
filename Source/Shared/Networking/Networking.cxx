@@ -24,6 +24,10 @@ namespace universelan {
 				switch (unique_class_id)
 				{
 					SHARED_NETWORK_IMPLEMENT_ALL_CASES();
+
+				default:
+					return_value = false;
+					break;
 				}
 
 #pragma warning( pop )
