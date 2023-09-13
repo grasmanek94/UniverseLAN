@@ -3,9 +3,6 @@
 #include "UniverseLAN.hxx"
 
 namespace universelan::client {
-	using namespace galaxy::api;
-	using namespace universelan;
-
 	void Init(const InitOptions& initOptions);
 	void Shutdown();
 	IUser* User();
@@ -16,9 +13,7 @@ namespace universelan::client {
 
 	IMatchmaking* Matchmaking();
 	INetworking* Networking();
-#if !GALAXY_BUILD_FEATURE_GAME_SERVER_API
 	INetworking* ServerNetworking();
-#endif
 
 	IStats* Stats();
 	IUtils* Utils();

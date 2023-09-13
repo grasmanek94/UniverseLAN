@@ -9,10 +9,6 @@
 #include <Version.hxx>
 
 namespace universelan::client {
-	using namespace galaxy::api;
-	using namespace universelan;
-	using namespace universelan::client;
-
 	void Init(const InitOptions& initOptions) 
 	{
 		{
