@@ -11,6 +11,12 @@
 #include <IUtils.h>
 #include <IListenerRegistrar.h>
 
+#if GALAXY_BUILD_FEATURE_GetImageRGBA_CHAR_TO_VOID
+using GetImageRGBABufferType = void;
+#else
+using GetImageRGBABufferType = unsigned char;
+#endif
+
 namespace universelan::client {
 	using namespace galaxy::api;
 	struct InterfaceInstances;
@@ -52,7 +58,7 @@ namespace universelan::client {
 		 * @param [in, out] buffer The output buffer.
 		 * @param [in] bufferLength The size of the output buffer.
 		 */
-		virtual void GetImageRGBA(uint32_t imageID, void* buffer, uint32_t bufferLength) override;
+		virtual void GetImageRGBA(uint32_t imageID, GetImageRGBABufferType* buffer, uint32_t bufferLength) override;
 
 		/**
 		 * Register for notifications of a specified type.
@@ -90,6 +96,7 @@ namespace universelan::client {
 		 */
 		virtual void ShowOverlayWithWebPage(const char* url) override;
 
+#if GALAXY_BUILD_FEATURE_OVERLAYSTATE_ENUM
 		/**
 		 * Return current visibility of the overlay
 		 *
@@ -118,7 +125,9 @@ namespace universelan::client {
 		 * @return State of the overlay.
 		 */
 		virtual OverlayState GetOverlayState() override;
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_DISABLEOVERLAYPOPUPS
 		/**
 		 * Disable overlay pop-up notifications.
 		 *
@@ -133,7 +142,7 @@ namespace universelan::client {
 		 * @param [in] popupGroup - The name of the notification pop-up group.
 		 */
 		virtual void DisableOverlayPopups(const char* popupGroup) override;
-
+#endif
 		/**
 		 * Return current state of the connection to GOG services.
 		 *

@@ -1,3 +1,5 @@
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT 
+
 #include "Chat.hxx"
 
 #include "UniverseLAN.hxx"
@@ -224,3 +226,4 @@ namespace universelan::client {
 		}
 	}
 }
+#endif

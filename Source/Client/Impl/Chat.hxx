@@ -1,6 +1,6 @@
-#ifndef LSFDRMFG_IMPL_CHAT_H
-#define LSFDRMFG_IMPL_CHAT_H
+#pragma once
 
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT 
 /**
  * @file
  * Contains data structures and interfaces related to chat communication

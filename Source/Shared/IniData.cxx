@@ -424,7 +424,7 @@ namespace universelan {
 
 	galaxy::api::GalaxyID ClientIniData::GetApiGalaxyID() const
 	{
-		return galaxy::api::FromRealID(galaxy::api::ID_TYPE_USER, GetCustomGalaxyID());
+		return galaxy::api::FromRealID(galaxy::api::IDType::ID_TYPE_USER, GetCustomGalaxyID());
 	}
 
 	uint64_t ClientIniData::GetGalaxyIDOffset() const

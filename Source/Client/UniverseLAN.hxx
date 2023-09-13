@@ -10,8 +10,6 @@
 
 #include <IniData.hxx>
 
-#include <InitOptions.h>
-
 #include <memory>
 
 namespace universelan::client {
@@ -59,7 +57,7 @@ namespace universelan::client {
 		std::unique_ptr<ListenerRegistrarImpl>	notification = nullptr;
 		std::unique_ptr<DelayRunner>			delay_runner = nullptr;
 
-		void init(const galaxy::api::InitOptions& initOptions);
+		void init(const InitOptionsImpl& initOptions);
 		void reset();
 
 		~InterfaceInstances();
@@ -91,7 +89,10 @@ namespace universelan::client {
 #include "Impl/Utils.hxx"
 
 #include <GalaxyApi.h>
+
+#if !GALAXY_BUILD_FEATURE_FACTORY_INTERFACE
 #include <GalaxyGameServerApi.h>
+#endif
 
 #include <Tracer.hxx>
 

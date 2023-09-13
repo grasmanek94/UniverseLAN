@@ -13,7 +13,7 @@ namespace universelan::client {
 	namespace fs = std::filesystem;
 	InterfaceInstances intf_inst;
 
-	void InterfaceInstances::init(const InitOptions& initOptions) {
+	void InterfaceInstances::init(const InitOptionsImpl& initOptions) {
 		if (config == nullptr) {
 			config = std::make_unique<ClientIniData>();
 		}

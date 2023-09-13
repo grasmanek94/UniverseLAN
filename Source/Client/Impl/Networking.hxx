@@ -189,6 +189,7 @@ namespace universelan::client {
 		 */
 		virtual int GetPingWith(GalaxyID galaxyID) override;
 
+#if GALAXY_BUILD_FEATURE_HAS_NAT_FUNCTIONALITY
 		/**
 		 * Initiates a NAT type detection process.
 		 *
@@ -213,7 +214,8 @@ namespace universelan::client {
 		 * @return The determined NAT type.
 		 */
 		virtual NatType GetNatType() override;
-
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_CONNECTION_TYPE
 		/**
 		 * Retrieves connection type of the specified user.
 		 *
@@ -223,7 +225,7 @@ namespace universelan::client {
 		 * @return The connection type of the specified user.
 		 */
 		virtual ConnectionType GetConnectionType(GalaxyID userID) override;
-
+#endif
 		virtual void AddPacket(const packet_t& packet);
 		virtual bool GetP2PPacket(void* dest, uint32_t destSize, uint32_t* outMsgSize, GalaxyID& outGalaxyID, uint8_t channel, bool pop);
 	};

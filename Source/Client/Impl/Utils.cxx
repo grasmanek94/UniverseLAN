@@ -21,7 +21,7 @@ namespace universelan::client {
 		height = 0;
 	}
 
-	void UtilsImpl::GetImageRGBA(uint32_t imageID, void* buffer, uint32_t bufferLength) {
+	void UtilsImpl::GetImageRGBA(uint32_t imageID, GetImageRGBABufferType* buffer, uint32_t bufferLength) {
 		tracer::Trace trace{ __FUNCTION__ };
 	}
 
@@ -46,6 +46,7 @@ namespace universelan::client {
 		std::cout << url << std::endl;
 	}
 
+#if GALAXY_BUILD_FEATURE_OVERLAYSTATE_ENUM
 	bool UtilsImpl::IsOverlayVisible() {
 		tracer::Trace trace{ __FUNCTION__ };
 
@@ -58,10 +59,12 @@ namespace universelan::client {
 		return OVERLAY_STATE_DISABLED;
 	}
 
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_DISABLEOVERLAYPOPUPS
 	void UtilsImpl::DisableOverlayPopups(const char* popupGroup) {
 		tracer::Trace trace{ __FUNCTION__ };
 	}
-
+#endif
 #if (GALAXY_VERSION) > 112400
 	GogServicesConnectionState UtilsImpl::GetGogServicesConnectionState() {
 		tracer::Trace trace{ __FUNCTION__ };

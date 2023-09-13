@@ -91,6 +91,7 @@ namespace universelan::client {
 		return -1;
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_NAT_FUNCTIONALITY
 	void NetworkingImpl::RequestNatTypeDetection() {
 		tracer::Trace trace{ __FUNCTION__ };
 
@@ -104,12 +105,15 @@ namespace universelan::client {
 
 		return NAT_TYPE_NONE;
 	}
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_CONNECTION_TYPE
 	ConnectionType NetworkingImpl::GetConnectionType(GalaxyID userID) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		return CONNECTION_TYPE_DIRECT;
 	}
+#endif
 
 	void NetworkingImpl::AddPacket(const NetworkingImpl::packet_t& packet) {
 		if (!packet) {

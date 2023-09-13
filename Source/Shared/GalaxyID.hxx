@@ -34,9 +34,9 @@ namespace galaxy::api {
 		 */
 		static const uint64_t UNASSIGNED_VALUE = 0;
 
-		assert(type != ID_TYPE_UNASSIGNED);
+		assert(type != IDType::ID_TYPE_UNASSIGNED);
 		assert(value != UNASSIGNED_VALUE);
-		assert(static_cast<IDType>(value >> 56) == ID_TYPE_UNASSIGNED);
+		assert(static_cast<IDType>(value >> 56) == IDType::ID_TYPE_UNASSIGNED);
 		return GalaxyID(static_cast<uint64_t>(type) << 56 | value);
 	}
 }
