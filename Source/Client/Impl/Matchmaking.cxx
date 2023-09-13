@@ -4,6 +4,7 @@
 
 #include <ContainerGetByIndex.hxx>
 #include <Networking/Messages.hxx>
+#include <SafeStringCopy.hxx>
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -646,8 +647,7 @@ namespace universelan::client {
 		}
 
 		const char* data = lobby->second->GetData(key);
-		uint32_t min_size = std::min(bufferLength, (uint32_t)strlen(data));
-		std::copy_n(data, min_size, buffer);
+		universelan::util::safe_copy_str_n(data, buffer, bufferLength);
 	}
 
 
@@ -727,11 +727,8 @@ namespace universelan::client {
 			return false;
 		}
 
-		uint32_t min_key_size = std::min(keyLength, (uint32_t)data.first.size());
-		uint32_t min_value_size = std::min(valueLength, (uint32_t)data.second.size());
-
-		std::copy_n(data.first.c_str(), min_key_size, key);
-		std::copy_n(data.second.c_str(), min_value_size, value);
+		universelan::util::safe_copy_str_n(data.first, key, keyLength);
+		universelan::util::safe_copy_str_n(data.second, value, valueLength);
 
 		return true;
 	}
@@ -776,8 +773,7 @@ namespace universelan::client {
 		}
 
 		const char* data = lobby->second->GetMemberData(memberID, key);
-		uint32_t min_size = std::min(bufferLength, (uint32_t)strlen(data));
-		std::copy_n(data, min_size, buffer);
+		universelan::util::safe_copy_str_n(data, buffer, bufferLength);
 	}
 
 	void MatchmakingImpl::SetLobbyMemberData(GalaxyID lobbyID, const char* key, const char* value
@@ -852,11 +848,8 @@ namespace universelan::client {
 			return false;
 		}
 
-		uint32_t min_key_size = std::min(keyLength, (uint32_t)data.first.size());
-		uint32_t min_value_size = std::min(valueLength, (uint32_t)data.second.size());
-
-		std::copy_n(data.first.c_str(), min_key_size, key);
-		std::copy_n(data.second.c_str(), min_value_size, value);
+		universelan::util::safe_copy_str_n(data.first, key, keyLength);
+		universelan::util::safe_copy_str_n(data.second, value, valueLength);
 
 		return true;
 	}

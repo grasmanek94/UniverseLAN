@@ -2,6 +2,8 @@
 
 #include "UniverseLAN.hxx"
 
+#include <SafeStringCopy.hxx>
+
 namespace universelan::client {
 	using namespace galaxy::api;
 	StatsImpl::StatsImpl(InterfaceInstances* intf) :
@@ -167,7 +169,7 @@ namespace universelan::client {
 	void StatsImpl::GetAchievementDisplayNameCopy(const char* name, char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		std::copy_n(name, std::min(bufferLength, (uint32_t)strlen(name)), buffer);
+		universelan::util::safe_copy_str_n(name, buffer, bufferLength);
 	}
 
 	const char* StatsImpl::GetAchievementDescription(const char* name) {
@@ -188,7 +190,7 @@ namespace universelan::client {
 
 		if (data) {
 			const std::string& desc = data->GetDescription();
-			std::copy_n(desc.c_str(), std::min(bufferLength, (uint32_t)desc.size()), buffer);
+			universelan::util::safe_copy_str_n(desc, buffer, bufferLength);
 		}
 	}
 
@@ -241,7 +243,7 @@ namespace universelan::client {
 	void StatsImpl::GetLeaderboardDisplayNameCopy(const char* name, char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		std::copy_n(name, std::min(bufferLength, (uint32_t)strlen(name)), buffer);
+		universelan::util::safe_copy_str_n(name, buffer, bufferLength);
 	}
 
 	LeaderboardSortMethod StatsImpl::GetLeaderboardSortMethod(const char* name) {

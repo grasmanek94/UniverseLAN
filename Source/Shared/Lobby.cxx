@@ -4,6 +4,7 @@
 
 #include "ContainerGetByIndex.hxx"
 #include "GlobalUniqueID.hxx"
+#include "SafeStringCopy.hxx"
 
 #include <GalaxyID.h>
 #include <IMatchMaking.h>
@@ -235,11 +236,10 @@ namespace universelan {
 
 		Message& entry = message->second;
 
-		uint32_t min_size = std::min(msgLength, (uint32_t)entry.data.size());
 		senderID = entry.sender;
-		std::copy_n(entry.data.begin(), min_size, msg);
+		universelan::util::safe_copy_str_n(entry.data, msg, msgLength);
 
-		return min_size;
+		return std::min(msgLength, (uint32_t)(entry.data.size() + 1));
 	}
 
 	Lobby::data_t Lobby::GetAllData() const {

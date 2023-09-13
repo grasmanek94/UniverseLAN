@@ -3,6 +3,7 @@
 #include "UniverseLAN.hxx"
 
 #include <ContainerGetByIndex.hxx>
+#include <SafeStringCopy.hxx>
 
 #include <algorithm>
 
@@ -108,7 +109,7 @@ namespace universelan::client {
 
 		auto name = intf_inst.config->GetCustomPersonaName();
 
-		std::copy_n(name.c_str(), std::min((size_t)bufferLength, name.length()), buffer);
+		universelan::util::safe_copy_str_n(name, buffer, bufferLength);
 	}
 
 	PersonaState FriendsImpl::GetPersonaState() {
@@ -129,7 +130,7 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		std::string nickname = intf->user->GetGalaxyUserData(userID)->nickname;
-		std::copy_n(nickname.c_str(), std::min((size_t)bufferLength, nickname.size()), buffer);
+		universelan::util::safe_copy_str_n(nickname, buffer, bufferLength);
 	}
 
 	PersonaState FriendsImpl::GetFriendPersonaState(GalaxyID userID) {
@@ -149,7 +150,7 @@ namespace universelan::client {
 	void FriendsImpl::GetFriendAvatarUrlCopy(GalaxyID userID, AvatarType avatarType, char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		std::copy_n(GetFriendAvatarUrl(userID, avatarType), std::min((size_t)bufferLength, strlen(GetFriendAvatarUrl(userID, avatarType))), buffer);
+		universelan::util::safe_copy_str_n(GetFriendAvatarUrl(userID, avatarType), buffer, bufferLength);
 	}
 
 	uint32_t FriendsImpl::GetFriendAvatarImageID(GalaxyID userID, AvatarType avatarType) {
@@ -434,7 +435,7 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		std::string value = intf->user->GetGalaxyUserData(userID)->stats.GetRichPresence(key);
-		std::copy_n(value.c_str(), std::min((size_t)bufferLength, value.size()), buffer);
+		universelan::util::safe_copy_str_n(value, buffer, bufferLength);
 	}
 
 	uint32_t FriendsImpl::GetRichPresenceCount(GalaxyID userID) {
@@ -458,8 +459,8 @@ namespace universelan::client {
 			}
 
 			auto ref = container_get_by_index(map, index);
-			std::copy_n(ref.first.begin(), std::min((uint32_t)ref.first.length(), keyLength), key);
-			std::copy_n(ref.second.begin(), std::min((uint32_t)ref.second.length(), valueLength), value);
+			universelan::util::safe_copy_str_n(ref.first, key, keyLength);
+			universelan::util::safe_copy_str_n(ref.second, value, valueLength);
 
 #if (GALAXY_VERSION) <= 112400
 			return true;

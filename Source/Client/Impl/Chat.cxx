@@ -5,6 +5,7 @@
 #include "UniverseLAN.hxx"
 
 #include <ContainerGetByIndex.hxx>
+#include <SafeStringCopy.hxx>
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -172,7 +173,7 @@ namespace universelan::client {
 		sendTime = message->GetSendTime();
 
 		const auto& contents = message->GetContents();
-		std::copy_n(contents.begin(), std::min((uint32_t)contents.length(), bufferLength), buffer);
+		universelan::util::safe_copy_str_n(contents, buffer, bufferLength);
 
 		return (uint32_t)contents.length();
 	}

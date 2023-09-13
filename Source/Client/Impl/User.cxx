@@ -3,6 +3,7 @@
 #include "UniverseLAN.hxx"
 
 #include <ContainerGetByIndex.hxx>
+#include <SafeStringCopy.hxx>
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -270,7 +271,7 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		const std::string& str = GetGalaxyUserData(userID)->stats.GetUserData(key);
-		std::copy_n(str.begin(), std::min((uint32_t)str.length(), bufferLength), buffer);
+		universelan::util::safe_copy_str_n(str, buffer, bufferLength);
 	}
 
 	void UserImpl::SetUserData(const char* key, const char* value
@@ -312,8 +313,9 @@ namespace universelan::client {
 			}
 
 			auto ref = container_get_by_index(map, index);
-			std::copy_n(ref.first.begin(), std::min((uint32_t)ref.first.length(), keyLength), key);
-			std::copy_n(ref.second.begin(), std::min((uint32_t)ref.second.length(), valueLength), value);
+			universelan::util::safe_copy_str_n(ref.first, key, keyLength);
+			universelan::util::safe_copy_str_n(ref.second, value, valueLength);
+
 			return true;
 			});
 	}
@@ -376,7 +378,7 @@ namespace universelan::client {
 	void UserImpl::GetAccessTokenCopy(char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace{ __FUNCTION__ };
 
-		std::copy_n(GetAccessToken(), std::min((uint32_t)strlen(GetAccessToken()), bufferLength), buffer);
+		universelan::util::safe_copy_str_n(GetAccessToken(), buffer, bufferLength);
 	}
 
 	bool UserImpl::ReportInvalidAccessToken(const char* accessToken

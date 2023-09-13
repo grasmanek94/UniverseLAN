@@ -3,6 +3,8 @@
 #include "Telemetry.hxx"
 #include "UniverseLAN.hxx"
 
+#include <SafeStringCopy.hxx>
+
 #include <algorithm>
 #include <filesystem>
 #include <iostream>
@@ -185,7 +187,7 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		lock_t lock{ mtx };
-		std::copy_n(visit_id.c_str(), std::min(bufferLength, (uint32_t)visit_id.size()), buffer);
+		universelan::util::safe_copy_str_n(visit_id, buffer, bufferLength);
 	}
 
 	void TelemetryImpl::ResetVisitID() {

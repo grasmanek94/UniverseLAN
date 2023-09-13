@@ -2,6 +2,8 @@
 
 #include "UniverseLAN.hxx"
 
+#include <SafeStringCopy.hxx>
+
 #include <string>
 #include <utility>
 
@@ -78,7 +80,7 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		std::string path = sfu.GetFileNameByIndexLocal(index);
-		std::copy_n(path.c_str(), std::min((size_t)bufferLength, path.length()), buffer);
+		universelan::util::safe_copy_str_n(path, buffer, bufferLength);
 	}
 
 	void StorageImpl::FileShare(const char* fileName
@@ -158,7 +160,7 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		std::string name = sfu.GetSharedFileName(sharedFileID);
-		std::copy_n(name.c_str(), std::min((size_t)bufferLength, name.length()), buffer);
+		universelan::util::safe_copy_str_n(name, buffer, bufferLength);
 	}
 
 	uint32_t StorageImpl::GetSharedFileSize(SharedFileID sharedFileID) {
