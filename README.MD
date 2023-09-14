@@ -24,20 +24,26 @@ To generate the module definition files, use [wrap_dll](https://github.com/maven
 
 | Game       | Status                | Tested GOG Galaxy SDK Version | Notes |
 | :--------- | :-------:             | :---------: | :---------: |
-| Aragami 1  | :white_check_mark:(2) | 1.121.2 |
+| Aragami 1  | :white_check_mark:(2) | 1.121.2 | |
+| Forsaken Remastered | :white_check_mark:(3) | 1.124.0.0 | |
+| Guns, Gore & Cannoli 2  | :white_check_mark:(3) | 1.124.0.0 | |
 | MetalSlug3 | :construction:        | 1.100.2 | Can host and join lobby, can't get past character selection screen. |
+| Serious Sams Bogus Detour | :construction: | 1.100.2 | Stuck on "Creating lobby..." or "Joining lobby..." |
 | Alien vs Predator 2000 | :question: |  | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176.2.6? |
-| Roboquest | :x: | 1.148.3 | Probably does not use GOG Galaxy for networking. |
-| Aragami 2 | :left_right_arrow: | 1.148.3 | Probably does not use GOG Galaxy for networking (doesn't work for private lobbies).<br> Can play on public lobbies without GOG Galaxy or with this patch AFAIK. |
-| Shadow Warrior 2 | :warning: | | | 
+| Shadow Warrior 2 | :warning: | 1.95.0 | | 
+| Homeworld Remastered Collection | :warning:  | | | 
+| Homeworld: Deserts of Kharak | :warning:  | | | 
+| No Man's Sky | :warning:  | | | 
+| Serious Sam 4 | :warning:  | 1.144.1 | | 
+| Northgard | :warning:  | 1.139.2 | | 
+| Niffelheim | :warning:  | 1.139.2 | | 
+| DUSK | :warning:  | 1.133.6 | | 
+| Absolver | :warning:  | 1.104.2 | | 
+| Rage of Mages II: Necromancer | :left_right_arrow: | | | 
+| Neverwinter Nights 2 Complete | :left_right_arrow: | | | 
 | Baldur's Gate 3 | :left_right_arrow: | | | 
 | Heroes of Might and Magic 3 | :left_right_arrow: | | | 
 | Empire Earth 3 | :left_right_arrow: | | | 
 | Jazz Jackrabbit 2 Collection | :left_right_arrow: | | | 
-| Homeworld Remastered Collection | :warning:  | | | 
-| Rage of Mages II: Necromancer | :left_right_arrow: | | | 
-| Neverwinter Nights 2 Complete | :left_right_arrow: | | | 
-| Homeworld: Deserts of Kharak | :warning:  | | | 
-| No Man's Sky | :warning:  | | | 
-| Serious Sam 4 | :warning:  | | | 
-| Forsaken Remastered | :white_check_mark:(3) | 1.124.0.0 | |
+| Aragami 2 | :left_right_arrow: | 1.148.3 | Probably does not use GOG Galaxy for networking (doesn't work for private lobbies).<br> Can play on public lobbies without GOG Galaxy or with this patch AFAIK. |
+| Roboquest | :x: | 1.148.3 | Probably does not use GOG Galaxy for networking. |
