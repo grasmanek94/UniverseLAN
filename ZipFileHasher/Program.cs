@@ -30,7 +30,6 @@ namespace ZipFileHasher
                         {
                             if (reader.Entry.Key.EndsWith("/Galaxy.dll") || reader.Entry.Key.EndsWith("/Galaxy64.dll"))
                             {
-                                string version = reader.Entry.Key.Split('_')[1];
                                 string dll_name = reader.Entry.Key.Split('/').Last();
                                 string dll_version = Path.GetFileName(entry).Replace("DevelopmentKit_", "").Replace(".tar.gz", "");
 
