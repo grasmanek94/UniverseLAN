@@ -40,4 +40,4 @@ To generate the module definition files, use [wrap_dll](https://github.com/maven
 | Homeworld: Deserts of Kharak | :warning:  | | | 
 | No Man's Sky | :warning:  | | | 
 | Serious Sam 4 | :warning:  | | | 
-| Forsaken Remastered | :white_check_mark:(2) | 1.124.0.0 | |
+| Forsaken Remastered | :white_check_mark:(3) | 1.124.0.0 | |
