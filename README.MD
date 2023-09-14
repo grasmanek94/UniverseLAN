@@ -30,15 +30,20 @@ To generate the module definition files, use [wrap_dll](https://github.com/maven
 | MetalSlug3 | :construction:        | 1.100.2 | Can host and join lobby, can't get past character selection screen. |
 | Serious Sams Bogus Detour | :construction: | 1.100.2 | Stuck on "Creating lobby..." or "Joining lobby..." |
 | Alien vs Predator 2000 | :question: |  | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176.2.6? |
-| Shadow Warrior 2 | :warning: | 1.95.0 | | 
 | Homeworld Remastered Collection | :warning:  | | | 
 | Homeworld: Deserts of Kharak | :warning:  | | | 
 | No Man's Sky | :warning:  | | | 
 | Serious Sam 4 | :warning:  | 1.144.1 | | 
+| Speed Brawl | :warning:  | 1.144.1 | | 
 | Northgard | :warning:  | 1.139.2 | | 
 | Niffelheim | :warning:  | 1.139.2 | | 
+| Ticket to Ride | :warning:  | 1.139.2 | | 
+| Tropico 6 | :warning:  | 1.139.2 | | 
 | DUSK | :warning:  | 1.133.6 | | 
+| Tooth and Tail | :warning:  | 1.122.1 | | 
 | Absolver | :warning:  | 1.104.2 | | 
+| Shadow Warrior 2 | :warning: | 1.95.0 | | 
+| Tropico 5 | :warning:  | 1.68.0 | | 
 | Rage of Mages II: Necromancer | :left_right_arrow: | | | 
 | Neverwinter Nights 2 Complete | :left_right_arrow: | | | 
 | Baldur's Gate 3 | :left_right_arrow: | | | 
