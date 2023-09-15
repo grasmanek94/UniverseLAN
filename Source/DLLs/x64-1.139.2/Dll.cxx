@@ -66,6 +66,10 @@ namespace galaxy::api {
 		return universelan::client::ServerNetworking();
 	}
 
+	GALAXY_DLL_EXPORT ITelemetry* GALAXY_CALLTYPE Telemetry(void) {
+		return universelan::client::Telemetry();
+	}
+
 	GALAXY_DLL_EXPORT IStats* GALAXY_CALLTYPE Stats(void)
 	{
 		return universelan::client::Stats();

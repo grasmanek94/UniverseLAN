@@ -23,3 +23,8 @@
 #endif
 
 #endif
+
+#ifndef CLIENT_FACTORY
+#undef GALAXY_DLL_EXPORT
+#define GALAXY_DLL_EXPORT
+#endif

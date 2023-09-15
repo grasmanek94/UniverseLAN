@@ -37,7 +37,6 @@ To generate the module definition files, use [wrap_dll](https://github.com/maven
 | Speed Brawl | :warning:  | 1.144.1 | | 
 | Northgard | :warning:  | 1.139.2 | | 
 | Niffelheim | :warning:  | 1.139.2 | | 
-| Ticket to Ride | :warning:  | 1.139.2 | | 
 | Tropico 6 | :warning:  | 1.139.2 | | 
 | DUSK | :warning:  | 1.133.6 | | 
 | Tooth and Tail | :warning:  | 1.122.1 | | 
@@ -50,5 +49,6 @@ To generate the module definition files, use [wrap_dll](https://github.com/maven
 | Heroes of Might and Magic 3 | :left_right_arrow: | | | 
 | Empire Earth 3 | :left_right_arrow: | | | 
 | Jazz Jackrabbit 2 Collection | :left_right_arrow: | | | 
+| Ticket to Ride | :left_right_arrow:   | 1.139.2 | Tried it with the wrapper and works, but need to create a free Wonder account | 
 | Aragami 2 | :left_right_arrow: | 1.148.3 | Probably does not use GOG Galaxy for networking (doesn't work for private lobbies).<br> Can play on public lobbies without GOG Galaxy or with this patch AFAIK. |
 | Roboquest | :x: | 1.148.3 | Probably does not use GOG Galaxy for networking. |
