@@ -82,7 +82,7 @@ namespace universelan::client {
 		 * @return The number of bytes written to the content buffer.
 		 */
 		virtual uint32_t GetNotification(NotificationID notificationID
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			, bool& consumable
 #endif
 			, char* type, uint32_t typeLength, void* content, uint32_t contentSize) override;
@@ -154,7 +154,7 @@ namespace universelan::client {
 		 *
 		 * @return Current GOG services connection state.
 		 */
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		virtual GogServicesConnectionState GetGogServicesConnectionState() override;
 #endif
 

@@ -39,7 +39,7 @@ namespace universelan::client {
 			std::cerr << "CustomNetworking: Could not create connection because: " << ec.message() << std::endl;
 
 			custom_network->listeners->NotifyAll(listener, &IConnectionOpenListener::OnConnectionOpenFailure, connectionString
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 				, IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE
 #else
 				, IConnectionOpenListener::FAILURE_REASON_UNDEFINED
@@ -141,7 +141,7 @@ namespace universelan::client {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		listeners->NotifyAll(channel->listener_open, &IConnectionOpenListener::OnConnectionOpenFailure, channel->connection_string.c_str()
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			, IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE
 #else
 			, IConnectionOpenListener::FAILURE_REASON_UNDEFINED
@@ -165,7 +165,7 @@ namespace universelan::client {
 	}
 
 	void CustomNetworkingImpl::OpenConnection(const char* connectionString
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		, IConnectionOpenListener* const listener
 #endif
 	) {
@@ -174,7 +174,7 @@ namespace universelan::client {
 		auto channel = std::make_shared<Channel>(this);
 
 		if (channel->connect(connectionString
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			, listener
 #else
 			, nullptr
@@ -190,7 +190,7 @@ namespace universelan::client {
 	}
 
 	void CustomNetworkingImpl::CloseConnection(ConnectionID connectionID
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		, IConnectionCloseListener* const listener
 #endif
 	) {
@@ -201,7 +201,7 @@ namespace universelan::client {
 			return;
 		}
 
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		channel->listener_close = listener;
 #endif
 		if (channel->connection) {

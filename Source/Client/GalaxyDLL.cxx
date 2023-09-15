@@ -121,7 +121,7 @@ namespace universelan::client {
 		return intf_inst.logger.get();
 	}
 
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 	ITelemetry* Telemetry() {
 		//tracer::Trace trace{ __FUNCTION__ };
 

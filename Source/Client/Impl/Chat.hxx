@@ -65,7 +65,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RequestChatRoomWithUser(GalaxyID userID
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			, IChatRoomWithUserRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -86,7 +86,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RequestChatRoomMessages(ChatRoomID chatRoomID, uint32_t limit, ChatMessageID referenceMessageID = 0
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			, IChatRoomMessagesRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -110,7 +110,7 @@ namespace universelan::client {
 		 * @return Internal message index.
 		 */
 		virtual uint32_t SendChatRoomMessage(ChatRoomID chatRoomID, const char* msg
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			, IChatRoomMessageSendListener* const listener = NULL
 #endif
 		) override;

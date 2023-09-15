@@ -21,7 +21,7 @@ namespace universelan::client {
 	IStorage* Storage();
 	ICustomNetworking* CustomNetworking();
 	ILogger* Logger();
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 	ITelemetry* Telemetry();
 #endif
 

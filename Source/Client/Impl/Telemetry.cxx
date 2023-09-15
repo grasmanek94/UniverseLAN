@@ -1,4 +1,4 @@
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 
 #include "Telemetry.hxx"
 #include "UniverseLAN.hxx"

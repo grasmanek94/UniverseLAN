@@ -33,7 +33,7 @@ namespace galaxy::api {
 		return gameserver.GameServerUtils();
 	}
 
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 	GALAXY_DLL_EXPORT ITelemetry* GALAXY_CALLTYPE GameServerTelemetry() {
 		return gameserver.GameServerTelemetry();
 	}

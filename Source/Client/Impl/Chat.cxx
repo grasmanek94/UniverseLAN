@@ -23,7 +23,7 @@ namespace universelan::client {
 	}
 
 	void ChatImpl::RequestChatRoomWithUser(GalaxyID userID
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		, IChatRoomWithUserRetrieveListener* const listener
 #endif
 	) {
@@ -31,7 +31,7 @@ namespace universelan::client {
 
 		uint64_t request_id = MessageUniqueID::get();
 
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		request_chat_room_with_user_requests.emplace(request_id, listener);
 #endif
 
@@ -62,7 +62,7 @@ namespace universelan::client {
 	}
 
 	void ChatImpl::RequestChatRoomMessages(ChatRoomID chatRoomID, uint32_t limit, ChatMessageID referenceMessageID
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		, IChatRoomMessagesRetrieveListener* const listener
 #endif
 	) {
@@ -70,7 +70,7 @@ namespace universelan::client {
 
 		uint64_t request_id = MessageUniqueID::get();
 
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		request_chat_room_messages_requests.emplace(request_id, listener);
 #endif
 
@@ -113,7 +113,7 @@ namespace universelan::client {
 	}
 
 	uint32_t ChatImpl::SendChatRoomMessage(ChatRoomID chatRoomID, const char* msg
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		, IChatRoomMessageSendListener* const listener
 #endif
 	) {
@@ -123,7 +123,7 @@ namespace universelan::client {
 
 		SendToChatRoomMessage message{ request_id, chatRoomID, std::make_shared<ChatMessage>(CHAT_MESSAGE_TYPE_CHAT_MESSAGE, chatRoomID, intf->config->GetApiGalaxyID(), 0UL, msg) };
 
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		send_to_chat_room_requests.emplace(request_id, listener);
 #endif
 

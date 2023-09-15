@@ -8,6 +8,7 @@
 
 #include "ListenerRegistrar.hxx"
 
+#include <DynamicReturn.hxx>
 #include <LobbyManager.hxx>
 #include <Networking/Messages.hxx>
 
@@ -32,9 +33,9 @@ namespace universelan::client {
 #endif
 
 #if GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
-	using MATCHMAKING_RET_TYPE = void;
+	using MATCHMAKING_RET_TYPE = universelan::util::dynamic_return<void>;
 #else
-	using MATCHMAKING_RET_TYPE = bool;
+	using MATCHMAKING_RET_TYPE = universelan::util::dynamic_return<bool>;
 #endif
 
 #if !GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
@@ -266,7 +267,7 @@ namespace universelan::client {
 		 * @param [in] maxNumLobbyMembers The maximum number of members allowed for the lobby with the limit of 250 members.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual MATCHMAKING_RET_TYPE SetMaxNumLobbyMembers(GalaxyID lobbyID, uint32_t maxNumLobbyMembers
+		virtual MATCHMAKING_RET_TYPE::type SetMaxNumLobbyMembers(GalaxyID lobbyID, uint32_t maxNumLobbyMembers
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 				, ILobbyDataUpdateListener* const listener = NULL
 #endif
@@ -310,7 +311,7 @@ namespace universelan::client {
 		 * @param [in] lobbyType The type of the lobby.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual MATCHMAKING_RET_TYPE SetLobbyType(GalaxyID lobbyID, LobbyType lobbyType
+		virtual MATCHMAKING_RET_TYPE::type SetLobbyType(GalaxyID lobbyID, LobbyType lobbyType
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, ILobbyDataUpdateListener* const listener = NULL
 #endif
@@ -339,7 +340,7 @@ namespace universelan::client {
 		 * @param [in] joinable Is the lobby joinable.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual MATCHMAKING_RET_TYPE SetLobbyJoinable(GalaxyID lobbyID, bool joinable
+		virtual MATCHMAKING_RET_TYPE::type SetLobbyJoinable(GalaxyID lobbyID, bool joinable
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, ILobbyDataUpdateListener* const listener = NULL
 #endif
@@ -367,7 +368,7 @@ namespace universelan::client {
 		 * @param [in] lobbyID The ID of the lobby.
 		 * @param [in] listener The listener for specific operation call.
 		 */
-		virtual MATCHMAKING_RET_TYPE RequestLobbyData(GalaxyID lobbyID
+		virtual MATCHMAKING_RET_TYPE::type RequestLobbyData(GalaxyID lobbyID
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, ILobbyDataRetrieveListener* const listener = NULL
 #endif
@@ -425,7 +426,7 @@ namespace universelan::client {
 		 * @param [in] value The value of the property to set with the limit of 4095 bytes.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual MATCHMAKING_RET_TYPE SetLobbyData(GalaxyID lobbyID, const char* key, const char* value
+		virtual MATCHMAKING_RET_TYPE::type SetLobbyData(GalaxyID lobbyID, const char* key, const char* value
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, ILobbyDataUpdateListener* const listener = NULL
 #endif
@@ -468,7 +469,7 @@ namespace universelan::client {
 		 * @param [in] key The name of the property of the lobby.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual MATCHMAKING_RET_TYPE DeleteLobbyData(GalaxyID lobbyID, const char* key
+		virtual MATCHMAKING_RET_TYPE::type DeleteLobbyData(GalaxyID lobbyID, const char* key
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, ILobbyDataUpdateListener* const listener = NULL
 #endif

@@ -14,7 +14,7 @@ namespace universelan {
 		galaxy::api::GalaxyID lobby_id = 0;
 		galaxy::api::LobbyType type = galaxy::api::LOBBY_TYPE_PRIVATE;
 		bool success = true;
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		galaxy::api::ILobbyDataUpdateListener::FailureReason fail_reason = galaxy::api::ILobbyDataUpdateListener::FAILURE_REASON_UNDEFINED;
 #endif
 
@@ -25,7 +25,7 @@ namespace universelan {
 				, lobby_id
 				, type
 				, success
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 				, fail_reason
 #endif
 			);
@@ -38,7 +38,7 @@ namespace universelan {
 		SetLobbyTypeMessage(uint64_t request_id, galaxy::api::GalaxyID lobby_id, galaxy::api::LobbyType type)
 			: request_id{ request_id }, lobby_id{ lobby_id }, type{ type }, success{ true } {}
 
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		SetLobbyTypeMessage(uint64_t request_id, galaxy::api::GalaxyID lobby_id, galaxy::api::LobbyType type, galaxy::api::ILobbyDataUpdateListener::FailureReason fail_reason)
 			: request_id{ request_id }, lobby_id{ lobby_id }, type{ type }, success{ false },
 			fail_reason{ fail_reason } {}

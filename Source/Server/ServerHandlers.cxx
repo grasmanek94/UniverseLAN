@@ -361,7 +361,7 @@ namespace universelan::server {
 
 		peer::ptr pd = peer_mapper.Get(peer);
 
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		data->reason = ILobbyLeftListener::LOBBY_LEAVE_REASON_USER_LEFT;
 #endif
 
@@ -426,7 +426,7 @@ namespace universelan::server {
 		auto lobby = lobby_manager.GetLobby(data->lobby_id);
 		if (!lobby) {
 			data->success = false;
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			data->fail_reason = ILobbyDataUpdateListener::FAILURE_REASON_LOBBY_DOES_NOT_EXIST;
 #endif
 			connection.Send(peer, data);
@@ -435,7 +435,7 @@ namespace universelan::server {
 
 		if (lobby->GetOwner() != pd->id) {
 			data->success = false;
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			data->fail_reason = ILobbyDataUpdateListener::FAILURE_REASON_UNDEFINED;
 #endif
 			connection.Send(peer, data);
@@ -461,7 +461,7 @@ namespace universelan::server {
 
 		peer::ptr pd = peer_mapper.Get(peer);
 
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		data->fail_reason = ILobbyDataUpdateListener::FAILURE_REASON_UNDEFINED;
 #endif
 
@@ -539,7 +539,7 @@ namespace universelan::server {
 		auto lobby = lobby_manager.GetLobby(data->lobby_id);
 		if (!lobby) {
 			data->success = false;
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			data->fail_reason = ILobbyMemberDataUpdateListener::FAILURE_REASON_LOBBY_DOES_NOT_EXIST;
 #endif
 			connection.Send(peer, data);
@@ -550,7 +550,7 @@ namespace universelan::server {
 
 		if (!lobby->SetMemberData(data->member_id, data->key.c_str(), data->value.c_str())) {
 			data->success = false;
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			data->fail_reason = ILobbyMemberDataUpdateListener::FAILURE_REASON_UNDEFINED;
 #endif
 			connection.Send(peer, data);
@@ -595,7 +595,7 @@ namespace universelan::server {
 
 		LobbyMemberStateChangeMessage leave_notification{ lobby->GetID(), pd->id, (disconnected ? LOBBY_MEMBER_STATE_CHANGED_DISCONNECTED : LOBBY_MEMBER_STATE_CHANGED_LEFT) };
 		LeaveLobbyMessage close_message{ 0, lobby->GetID()
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			, ILobbyLeftListener::LOBBY_LEAVE_REASON_LOBBY_CLOSED
 #endif
 		};

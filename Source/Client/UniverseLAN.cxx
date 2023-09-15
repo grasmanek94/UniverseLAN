@@ -51,7 +51,7 @@ namespace universelan::client {
 		custom_networking = std::make_unique<CustomNetworkingImpl>(this);
 		logger = std::make_unique<LoggerImpl>(this);
 
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		telemetry = std::make_unique<TelemetryImpl>(this);
 #endif
 	}
@@ -84,7 +84,7 @@ namespace universelan::client {
 			client->Stop();
 		}
 
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		telemetry = nullptr;
 #endif
 

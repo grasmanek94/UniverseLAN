@@ -14,7 +14,7 @@ namespace universelan {
 		galaxy::api::GalaxyID lobby_id = 0;
 		bool joinable = true;
 		bool success = true;
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		galaxy::api::ILobbyDataUpdateListener::FailureReason fail_reason = galaxy::api::ILobbyDataUpdateListener::FAILURE_REASON_UNDEFINED;
 #endif
 
@@ -25,7 +25,7 @@ namespace universelan {
 				, lobby_id
 				, joinable
 				, success
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 				, fail_reason
 #endif
 			);
@@ -39,7 +39,7 @@ namespace universelan {
 			: request_id{ request_id }, lobby_id{ lobby_id }, joinable{ joinable }
 			 {}
 
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		SetLobbyJoinableMessage(uint64_t request_id, galaxy::api::GalaxyID lobby_id, bool joinable, galaxy::api::ILobbyDataUpdateListener::FailureReason fail_reason)
 			: request_id{ request_id }, lobby_id{ lobby_id }, joinable{ joinable }, success{ false },
 			fail_reason{ fail_reason } {}

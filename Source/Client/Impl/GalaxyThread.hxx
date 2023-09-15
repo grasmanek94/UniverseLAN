@@ -1,6 +1,5 @@
-#ifndef LSFDRMFG_IMPL_GALAXY_THREAD_H
-#define LSFDRMFG_IMPL_GALAXY_THREAD_H
-#if (GALAXY_VERSION) > 112400
+#pragma once
+#if GALAXY_BUILD_FEATURE_HAS_IGALAXYTHREADFACTORY
 
 #include <thread>
 
@@ -70,5 +69,4 @@ namespace universelan::client {
 	/** @} */
 }
 
-#endif
 #endif

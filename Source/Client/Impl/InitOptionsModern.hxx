@@ -47,8 +47,10 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_ALLOCATOR
 		galaxy::api::GalaxyAllocator* galaxyAllocator;
 #endif
-#if (GALAXY_VERSION) > 112400
+#if GALAXY_BUILD_FEATURE_HAS_IGALAXYTHREADFACTORY
 		galaxy::api::IGalaxyThreadFactory* galaxyThreadFactory; ///< The custom thread factory used by GOG Galaxy SDK to spawn internal threads.
+#endif
+#if (GALAXY_VERSION) > 11240
 		std::string host; ///< The local IP address this peer would bind to.
 		uint16_t port; ///< The local port used to communicate with GOG Galaxy Multiplayer server and other players.
 #endif

@@ -365,7 +365,7 @@ namespace universelan::client {
 	}
 
 
-	MATCHMAKING_RET_TYPE MatchmakingImpl::SetMaxNumLobbyMembers(GalaxyID lobbyID, uint32_t maxNumLobbyMembers
+	MATCHMAKING_RET_TYPE::type MatchmakingImpl::SetMaxNumLobbyMembers(GalaxyID lobbyID, uint32_t maxNumLobbyMembers
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		, ILobbyDataUpdateListener* const listener
 #endif
@@ -378,16 +378,14 @@ namespace universelan::client {
 		set_max_lobby_members_requests.emplace(request_id, listener);
 #endif	
 		intf->client->GetConnection().SendAsync(SetLobbyMaxMembersMessage{ request_id, lobbyID, maxNumLobbyMembers });
-#if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
-		return true;
-#endif
+
+		return MATCHMAKING_RET_TYPE::value_true();
 	}
 
 	void MatchmakingImpl::SetLobbyMaxMembersProcessed(const std::shared_ptr<SetLobbyMaxMembersMessage>& data) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		uint64_t request_id = MessageUniqueID::get();
-
 
 		auto listener = set_max_lobby_members_requests.pop(request_id);
 		if (data->success) {
@@ -454,7 +452,7 @@ namespace universelan::client {
 
 
 
-	MATCHMAKING_RET_TYPE MatchmakingImpl::SetLobbyType(GalaxyID lobbyID, LobbyType lobbyType
+	MATCHMAKING_RET_TYPE::type MatchmakingImpl::SetLobbyType(GalaxyID lobbyID, LobbyType lobbyType
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		, ILobbyDataUpdateListener* const listener
 #endif
@@ -470,9 +468,7 @@ namespace universelan::client {
 
 		intf->client->GetConnection().SendAsync(SetLobbyTypeMessage{ request_id, lobbyID, lobbyType });
 
-#if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
-		return true;
-#endif		
+		return MATCHMAKING_RET_TYPE::value_true();
 	}
 
 	void MatchmakingImpl::SetLobbyTypeProcessed(const std::shared_ptr<SetLobbyTypeMessage>& data) {
@@ -518,7 +514,7 @@ namespace universelan::client {
 	}
 
 
-	MATCHMAKING_RET_TYPE MatchmakingImpl::SetLobbyJoinable(GalaxyID lobbyID, bool joinable
+	MATCHMAKING_RET_TYPE::type MatchmakingImpl::SetLobbyJoinable(GalaxyID lobbyID, bool joinable
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		, ILobbyDataUpdateListener* const listener
 #endif
@@ -533,9 +529,7 @@ namespace universelan::client {
 #endif	
 		intf->client->GetConnection().SendAsync(SetLobbyJoinableMessage{ request_id, lobbyID, joinable });
 
-#if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
-		return true;
-#endif
+		return MATCHMAKING_RET_TYPE::value_true();
 	}
 
 	void MatchmakingImpl::SetLobbyJoinableProcessed(const std::shared_ptr<SetLobbyJoinableMessage>& data) {
@@ -580,7 +574,7 @@ namespace universelan::client {
 	}
 
 
-	MATCHMAKING_RET_TYPE MatchmakingImpl::RequestLobbyData(GalaxyID lobbyID
+	MATCHMAKING_RET_TYPE::type MatchmakingImpl::RequestLobbyData(GalaxyID lobbyID
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		, ILobbyDataRetrieveListener* const listener
 #endif
@@ -596,9 +590,7 @@ namespace universelan::client {
 
 		intf->client->GetConnection().SendAsync(RequestLobbyDataMessage{ request_id, lobbyID });
 
-#if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
-		return true;
-#endif
+		return MATCHMAKING_RET_TYPE::value_true();
 	}
 
 	void MatchmakingImpl::RequestLobbyDataProcessed(const std::shared_ptr<RequestLobbyDataMessage>& data) {
@@ -653,7 +645,7 @@ namespace universelan::client {
 	}
 
 
-	MATCHMAKING_RET_TYPE MatchmakingImpl::SetLobbyData(GalaxyID lobbyID, const char* key, const char* value
+	MATCHMAKING_RET_TYPE::type MatchmakingImpl::SetLobbyData(GalaxyID lobbyID, const char* key, const char* value
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		, ILobbyDataUpdateListener* const listener
 #endif
@@ -669,9 +661,7 @@ namespace universelan::client {
 
 		intf->client->GetConnection().SendAsync(SetLobbyDataMessage{ request_id, lobbyID, key, value });
 
-#if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
-		return true;
-#endif
+		return MATCHMAKING_RET_TYPE::value_true();
 	}
 
 	void MatchmakingImpl::SetLobbyDataProcessed(const std::shared_ptr<SetLobbyDataMessage>& data) {
@@ -736,7 +726,7 @@ namespace universelan::client {
 	}
 
 
-	MATCHMAKING_RET_TYPE MatchmakingImpl::DeleteLobbyData(GalaxyID lobbyID, const char* key
+	MATCHMAKING_RET_TYPE::type MatchmakingImpl::DeleteLobbyData(GalaxyID lobbyID, const char* key
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		, ILobbyDataUpdateListener* const listener
 #endif
@@ -744,11 +734,14 @@ namespace universelan::client {
 	{
 		tracer::Trace trace{ __FUNCTION__ };
 
-		return SetLobbyData(lobbyID, key, ""
+
+		SetLobbyData(lobbyID, key, ""
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, listener
 #endif
 		);
+
+		return MATCHMAKING_RET_TYPE::value_true();
 	}
 
 	const char* MatchmakingImpl::GetLobbyMemberData(GalaxyID lobbyID, GalaxyID memberID, const char* key) {

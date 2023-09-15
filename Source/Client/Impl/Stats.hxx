@@ -58,7 +58,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RequestUserStatsAndAchievements(GalaxyID userID = GalaxyID()
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			, IUserStatsAndAchievementsRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -169,7 +169,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void StoreStatsAndAchievements(
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			IStatsAndAchievementsStoreListener* const listener = NULL
 #endif
 		) override;
@@ -186,7 +186,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void ResetStatsAndAchievements(
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			IStatsAndAchievementsStoreListener* const listener = NULL
 #endif
 		) override;
@@ -256,7 +256,7 @@ namespace universelan::client {
 		 * @return If the achievement is visible before unlocking.
 		 */
 
-#if (GALAXY_VERSION) > 112400
+#if GALAXY_BUILD_FEATURE_IFRIENDS_ISTATS_UPDATE_1_127_0
 		virtual bool IsAchievementVisibleWhileLocked(const char* name) override;
 #endif
 
@@ -268,7 +268,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RequestLeaderboards(
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			ILeaderboardsRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -345,7 +345,7 @@ namespace universelan::client {
 			const char* name
 			, uint32_t rangeStart
 			, uint32_t rangeEnd
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			, ILeaderboardEntriesRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -377,7 +377,7 @@ namespace universelan::client {
 			, uint32_t countBefore
 			, uint32_t countAfter
 			, GalaxyID userID = GalaxyID()
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			, ILeaderboardEntriesRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -400,7 +400,7 @@ namespace universelan::client {
 			  const char* name
 			, GalaxyID* userArray
 			, uint32_t userArraySize
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			, ILeaderboardEntriesRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -477,7 +477,7 @@ namespace universelan::client {
 			const char* name
 			, int32_t score
 			, bool forceUpdate = false
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			, ILeaderboardScoreUpdateListener* const listener = NULL
 #endif
 		) override;
@@ -507,7 +507,7 @@ namespace universelan::client {
 			, const void* details
 			, uint32_t detailsSize
 			, bool forceUpdate = false
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			, ILeaderboardScoreUpdateListener* const listener = NULL
 #endif
 		) override;
@@ -533,7 +533,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void FindLeaderboard(const char* name
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			, ILeaderboardRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -559,7 +559,7 @@ namespace universelan::client {
 			, const char* displayName
 			, const LeaderboardSortMethod& sortMethod
 			, const LeaderboardDisplayType& displayType
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			, ILeaderboardRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -573,7 +573,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RequestUserTimePlayed(GalaxyID userID = GalaxyID()
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			, IUserTimePlayedRetrieveListener* const listener = NULL
 #endif
 		) override;

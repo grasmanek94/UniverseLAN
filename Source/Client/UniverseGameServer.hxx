@@ -20,7 +20,7 @@ namespace universelan::client {
 
 		IUtils* GameServerUtils();
 
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		ITelemetry* GameServerTelemetry();
 #endif
 

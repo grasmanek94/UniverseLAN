@@ -32,5 +32,8 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
   afvd(SEND_LOBBY_MESSAGE_CHAR_TO_VOID 	1.113.3			)
   afvd(FIND_USER 						1.109.0			)
   afvd(NEW_FRIEND_FEATURES_104_3		1.104.3			)
+  afvd(ADDED_RICH_PRESENCE_LISTENERS	1.74.0			)
+  afvd(IFRIENDS_ISTATS_UPDATE_1_127_0	1.127.0			)
+  afvd(HAS_IGALAXYTHREADFACTORY 		1.140.0			)
 
 endfunction()

@@ -84,7 +84,7 @@ namespace universelan::client {
 	}
 
 	void StorageImpl::FileShare(const char* fileName
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		, IFileShareListener* const listener
 #endif
 	) {
@@ -92,7 +92,7 @@ namespace universelan::client {
 
 		if (!intf->config->GetAllowFileSharingUpload()) {
 			listeners->NotifyAll(
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 				listener, 
 #endif
 				&IFileShareListener::OnFileShareFailure, fileName, IFileShareListener::FAILURE_REASON_UNDEFINED);
@@ -105,7 +105,7 @@ namespace universelan::client {
 			std::cerr << __FUNCTION__ << " fail: " << fileName << "\n";
 
 			listeners->NotifyAll(
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 				listener, 
 #endif
 				&IFileShareListener::OnFileShareFailure, fileName, IFileShareListener::FAILURE_REASON_UNDEFINED);
@@ -116,7 +116,7 @@ namespace universelan::client {
 		std::thread([=, this, sfu = std::move(sfu), str_file_name = std::move(str_file_name)] {
 			uint64_t request_id = MessageUniqueID::get();
 
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			file_upload_requests.emplace(request_id, listener);
 #endif
 			intf->client->GetConnection().SendAsync(FileShareMessage{ request_id, str_file_name, sfu.ReadLocal(str_file_name) });
@@ -124,7 +124,7 @@ namespace universelan::client {
 	}
 
 	void StorageImpl::DownloadSharedFile(SharedFileID sharedFileID
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		, ISharedFileDownloadListener* const listener
 #endif
 	) {
@@ -132,7 +132,7 @@ namespace universelan::client {
 
 		if (!intf->config->GetAllowFileSharingDownload()) {
 			listeners->NotifyAll(
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 				listener,
 #endif
 				&ISharedFileDownloadListener::OnSharedFileDownloadFailure, sharedFileID, ISharedFileDownloadListener::FAILURE_REASON_UNDEFINED);
@@ -141,7 +141,7 @@ namespace universelan::client {
 
 		uint64_t request_id = MessageUniqueID::get();
 
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		file_download_requests.emplace(request_id, listener);
 #endif
 

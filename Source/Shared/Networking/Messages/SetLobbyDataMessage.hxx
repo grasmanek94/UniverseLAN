@@ -15,7 +15,7 @@ namespace universelan {
 		uint64_t request_id = 0;
 		galaxy::api::GalaxyID lobby_id = 0;
 		bool success = true;
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		galaxy::api::ILobbyDataUpdateListener::FailureReason fail_reason = galaxy::api::ILobbyDataUpdateListener::FAILURE_REASON_UNDEFINED;
 #endif
 		std::string key = "";
@@ -27,7 +27,7 @@ namespace universelan {
 			ar(request_id
 				, lobby_id
 				, success
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 				, fail_reason
 #endif
 				, key
@@ -48,7 +48,7 @@ namespace universelan {
 			, key{ key }
 			, value{ value } {}
 
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		SetLobbyDataMessage(uint64_t request_id, galaxy::api::GalaxyID lobby_id, galaxy::api::ILobbyDataUpdateListener::FailureReason fail_reason)
 			: request_id{ request_id }, lobby_id{ lobby_id },
 			success{ false }, fail_reason{ fail_reason },

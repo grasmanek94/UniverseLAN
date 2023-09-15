@@ -56,6 +56,6 @@ namespace universelan::client {
 
 		BindStdHandlesToConsole();
 
-		SetConsoleTitleA("Universe LAN");
+		SetConsoleTitleA("UniverseLAN");
 	}
 }

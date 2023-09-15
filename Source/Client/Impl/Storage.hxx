@@ -132,7 +132,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void FileShare(const char* fileName
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			, IFileShareListener* const listener = NULL
 #endif
 		) override;
@@ -146,7 +146,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void DownloadSharedFile(SharedFileID sharedFileID
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 			, ISharedFileDownloadListener* const listener = NULL
 #endif
 		) override;

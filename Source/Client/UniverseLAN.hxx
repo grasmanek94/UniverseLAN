@@ -27,7 +27,7 @@ namespace universelan::client {
 	class CustomNetworkingImpl;
 	class LoggerImpl;
 
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 	class TelemetryImpl;
 #endif
 
@@ -54,7 +54,7 @@ namespace universelan::client {
 		std::unique_ptr<CustomNetworkingImpl>	custom_networking = nullptr;
 		std::unique_ptr<LoggerImpl>				logger = nullptr;
 
-#if (GALAXY_VERSION) > 112400
+#if (GALAXY_VERSION) > 11240
 		std::unique_ptr<TelemetryImpl>			telemetry = nullptr;
 #endif
 
