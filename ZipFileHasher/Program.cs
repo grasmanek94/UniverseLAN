@@ -28,7 +28,8 @@ namespace ZipFileHasher
 
             for(int i = 0; i < proc_count; ++i)
             {
-                tasks.Add(Task<string[]>.Factory.StartNew(() => ProcessEntries(all_entries, i, proc_count)));
+                int id = i;
+                tasks.Add(Task<string[]>.Factory.StartNew(() => ProcessEntries(all_entries, id, proc_count)));
             }
 
             Task.WaitAll(tasks.ToArray());
