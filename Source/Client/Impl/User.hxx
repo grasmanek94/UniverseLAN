@@ -221,6 +221,7 @@ namespace universelan::client {
 
 		virtual void SignInToken(const char* refreshToken, IAuthListener* const listener = NULL) override;
 
+#if GALAXY_BUILD_FEATURE_IUSER_SIGNINLAUNCHER
 		/**
 		 * Authenticates the Galaxy Peer based on CDPR launcher authentication.
 		 *
@@ -235,7 +236,9 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void SignInLauncher(IAuthListener* const listener = NULL) override;
+#endif
 
+#if GALAXY_BUILD_FEATURE_IUSER_SIGNINEPIC
 		/**
 		 * Authenticates the Galaxy Peer based on Epic Access Token.
 		 *
@@ -250,6 +253,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void SignInEpic(const char* epicAccessToken, const char* epicUsername, IAuthListener* const listener = NULL) override;
+#endif
 
 		/**
 		 * Authenticates the Galaxy Peer based on Windows Store authentication
@@ -293,6 +297,7 @@ namespace universelan::client {
 		 */
 		virtual void SignInXB1(const char* xboxOneUserID, IAuthListener* const listener = NULL) override;
 
+#if GALAXY_BUILD_FEATURE_IUSER_SIGNINXBLIVE
 		/**
 		 * Authenticates the Galaxy Peer based on Xbox Live tokens.
 		 *
@@ -309,7 +314,9 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void SignInXBLive(const char* token, const char* signature, const char* marketplaceID, const char* locale, IAuthListener* const listener = NULL) override;
+#endif
 
+#if GALAXY_BUILD_FEATURE_ITELEMETRY_1_139_6_UPDATE
 		/**
 		 * Authenticates the Galaxy Peer anonymously.
 		 *
@@ -321,6 +328,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void SignInAnonymousTelemetry(IAuthListener* const listener = NULL) override;
+#endif
 
 		/**
 		 * Signs the Galaxy Peer out.

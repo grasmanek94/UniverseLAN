@@ -16,6 +16,7 @@ namespace universelan::client {
 	{
 	public:
 		GalaxyThreadImpl(std::thread&& thread);
+
 		/**
 		 * Join the thread.
 		 *
@@ -23,6 +24,7 @@ namespace universelan::client {
 		 */
 		virtual void Join() override;
 
+#if GALAXY_BUILD_FEATURE_IGALAXYTHREAD_JOINABLE_DETACH
 		/**
 		 * Checks if the IGalaxyThread is ready to Join().
 		 *
@@ -36,6 +38,7 @@ namespace universelan::client {
 		 * Separate the thread of execution from the IGalaxyThread object, allowing execution to continue independently.
 		 */
 		virtual void Detach() override;
+#endif
 
 		virtual ~GalaxyThreadImpl();
 

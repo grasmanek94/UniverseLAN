@@ -66,7 +66,7 @@ namespace universelan::client {
 		return gameserver_intf_inst.utils.get();
 	}
 
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 	ITelemetry* UniverseGameServer::GameServerTelemetry() {
 		tracer::Trace trace{ __FUNCTION__ };
 

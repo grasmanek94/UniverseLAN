@@ -26,6 +26,7 @@ namespace universelan::client {
 		_thread.join();
 	}
 
+#if GALAXY_BUILD_FEATURE_IGALAXYTHREAD_JOINABLE_DETACH
 	/**
 	 * Checks if the IGalaxyThread is ready to Join().
 	 *
@@ -43,6 +44,7 @@ namespace universelan::client {
 	void GalaxyThreadImpl::Detach() {
 		_thread.detach();
 	}
+#endif
 
 	GalaxyThreadImpl::~GalaxyThreadImpl() {
 		tracer::Trace trace{ __FUNCTION__ };

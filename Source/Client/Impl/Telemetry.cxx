@@ -1,4 +1,4 @@
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 
 #include "Telemetry.hxx"
 #include "UniverseLAN.hxx"
@@ -140,6 +140,7 @@ namespace universelan::client {
 		telemetry_file << "(ClearParams) " << "\n";
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY_SAMPLING_CLASS
 	void TelemetryImpl::SetSamplingClass(const char* name) {
 		tracer::Trace trace{ __FUNCTION__ };
 
@@ -150,6 +151,7 @@ namespace universelan::client {
 		lock_t lock{ mtx };
 		telemetry_file << "(SetSamplingClass) " << name << "\n";
 	}
+#endif
 
 	uint32_t TelemetryImpl::SendTelemetryEvent(const char* eventType, ITelemetryEventSendListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
@@ -170,12 +172,15 @@ namespace universelan::client {
 		return id;
 	}
 
+#if GALAXY_BUILD_FEATURE_ITELEMETRY_1_139_6_UPDATE
 	uint32_t TelemetryImpl::SendAnonymousTelemetryEvent(const char* eventType, ITelemetryEventSendListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		return SendTelemetryEvent(eventType, listener);
 	}
+#endif
 
+#if GALAXY_BUILD_FEATURE_ITELEMETRY_1_139_7_UPDATE
 	const char* TelemetryImpl::GetVisitID() {
 		tracer::Trace trace{ __FUNCTION__ };
 
@@ -196,6 +201,8 @@ namespace universelan::client {
 		lock_t lock{ mtx };
 		visit_id = std::to_string((uint32_t)((uint64_t)this) + counter.fetch_add(1));
 	}
+#endif
+
 }
 
 #endif

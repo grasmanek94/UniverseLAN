@@ -122,18 +122,22 @@ namespace universelan::client {
 		SignIn(listener);
 	}
 
+#if GALAXY_BUILD_FEATURE_IUSER_SIGNINLAUNCHER
 	void UserImpl::SignInLauncher(IAuthListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		SignIn(listener);
 	}
+#endif
 
+#if GALAXY_BUILD_FEATURE_IUSER_SIGNINEPIC
 	void UserImpl::SignInEpic(const char* epicAccessToken, const char* epicUsername, IAuthListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 		if (epicAccessToken != nullptr && epicUsername != nullptr) {
 			SignIn(listener);
 		}
 	}
+#endif
 
 	void UserImpl::SignInUWP(IAuthListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
@@ -157,6 +161,7 @@ namespace universelan::client {
 		}
 	}
 
+#if GALAXY_BUILD_FEATURE_IUSER_SIGNINXBLIVE
 	void UserImpl::SignInXBLive(const char* token, const char* signature, const char* marketplaceID, const char* locale, IAuthListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
@@ -164,12 +169,16 @@ namespace universelan::client {
 			SignIn(listener);
 		}
 	}
+#endif
 
+#if GALAXY_BUILD_FEATURE_ITELEMETRY_1_139_6_UPDATE
 	void UserImpl::SignInAnonymousTelemetry(IAuthListener* const listener) {
 		tracer::Trace trace{ __FUNCTION__ };
 
 		SignIn(listener);
 	}
+#endif
+
 #else
 
 	void UserImpl::SignIn(uint32_t xboxOneUserID

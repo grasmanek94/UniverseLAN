@@ -1,6 +1,5 @@
-#ifndef LSFDRMFG_IMPL_TELEMETRY_H
-#define LSFDRMFG_IMPL_TELEMETRY_H
-#if (GALAXY_VERSION) > 11240
+#pragma once
+#if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 
 /**
  * @file
@@ -151,6 +150,7 @@ namespace universelan::client {
 		virtual void ClearParams() override;
 
 
+#if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY_SAMPLING_CLASS
 		/**
 		 * Sets a sampling class to be applied next time you call SendTelemetryEvent()
 		 * or SendAnonymousTelemetryEvent().
@@ -158,6 +158,7 @@ namespace universelan::client {
 		 * @param [in] name The name of the sampling class.
 		 */
 		virtual void SetSamplingClass(const char* name) override;
+#endif
 
 		/**
 		 * Sends a telemetry event.
@@ -176,6 +177,7 @@ namespace universelan::client {
 		 */
 		virtual uint32_t SendTelemetryEvent(const char* eventType, ITelemetryEventSendListener* const listener = NULL) override;
 
+#if GALAXY_BUILD_FEATURE_ITELEMETRY_1_139_6_UPDATE
 		/**
 		 * Sends an anonymous telemetry event.
 		 *
@@ -192,7 +194,9 @@ namespace universelan::client {
 		 * @return Internal event index.
 		 */
 		virtual uint32_t SendAnonymousTelemetryEvent(const char* eventType, ITelemetryEventSendListener* const listener = NULL) override;
+#endif
 
+#if GALAXY_BUILD_FEATURE_ITELEMETRY_1_139_7_UPDATE
 		/**
 		 * Retrieves current VisitID.
 		 *
@@ -218,10 +222,11 @@ namespace universelan::client {
 		 * Visit ID is used to link subsequent telemetry events that corresponds to the same action (e.x. game session).
 		 */
 		virtual void ResetVisitID() override;
+#endif
+
 	};
 
 	/** @} */
 }
 
-#endif
 #endif
