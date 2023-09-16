@@ -2,11 +2,17 @@
 
 This extends the ["You buy it, you own it"](https://www.gog.com/en/about_gog) and  "DRM-Free" GOG philisophy to the multiplayer portion of all games that use GOG Galaxy.
 
-Why Universe? Because Universe >> Galaxy.
+Why *Universe*LAN? Because the Universe is much bigger than the Galaxy!
 
 # What is *UniverseLAN*?
 
 UniverseLAN is a GOG Galaxy wrapper which allows LAN / Direct IP connections for games using Galaxy Multiplayer (without using GOG Galaxy client).  
+
+# What is the status of *UniverseLAN*?
+UniverseLAN is in development, and in beta.  
+Do expect bugs, possibly lost save files, updates and fixes.  
+At this moment in time you are expected to build it yourself to get binaries.  
+UniverseLAN requires a C++20 compatible compiler.  
 
 ### Note
 <small>*** Some games do use GOG Galaxy but do not use GOG Galaxy for multiplayer.  
