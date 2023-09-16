@@ -1,11 +1,14 @@
 #include "Minidump.hxx"
 
+#ifdef _WIN32
 #include <tchar.h>
 #include <windows.h>
 #include <dbghelp.h>
 #include <intrin.h>
+#endif
 
 namespace universelan::tracer {
+#ifdef _WIN32
 	// The following code gets exception pointers using a workaround found in CRT code.
 	void GetExceptionPointers(DWORD dwExceptionCode,
 		EXCEPTION_POINTERS** ppExceptionPointers)
@@ -71,10 +74,12 @@ namespace universelan::tracer {
 		(*ppExceptionPointers)->ExceptionRecord = pExceptionRecord;
 		(*ppExceptionPointers)->ContextRecord = pContextRecord;
 	}
+#endif
 
 	// This method creates minidump of the process
 	void CreateMiniDump(const char* filename, int verbosity)
 	{	
+#ifdef _WIN32
 		// Retrieve exception information
 		EXCEPTION_POINTERS* pExcPtrs = NULL;
 		GetExceptionPointers(0, &pExcPtrs);
@@ -186,5 +191,6 @@ namespace universelan::tracer {
 
 		// Unload dbghelp.dll
 		FreeLibrary(hDbgHelp);
+#endif
 	}
 }

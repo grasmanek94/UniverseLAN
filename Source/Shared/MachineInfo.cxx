@@ -1,8 +1,10 @@
 #include "MachineInfo.hxx"
 
+#ifdef _WIN32
 #include <Windows.h>
 #include <winsock2.h>
 #include <iphlpapi.h>
+#endif
 
 #include <iomanip>
 #include <sstream>
@@ -15,10 +17,13 @@ namespace universelan {
 	}
 
 	static std::string hexStr(const uint8_t* data, int len);
+#ifdef _WIN32
 	static int RetriveLocalMacAddress(ULONG ulFlags, ULONG ulFamily, unsigned char** pszAddress);
+#endif
 
 	std::string MachineInfo::GetLocalMachineName()
 	{
+#ifdef _WIN32
 		if (machine_name.length() == 0) {
 			const size_t INFO_BUFFER_SIZE = 32;
 			TCHAR  infoBuf[INFO_BUFFER_SIZE];
@@ -29,12 +34,16 @@ namespace universelan {
 				machine_name.assign((const char* const)infoBuf, (const size_t)bufCharCount);
 			}
 		}
+#else
+		machine_name = "GetLocalMachineNameNotImplemented";
+#endif
 
 		return machine_name;
 	}
 
 	std::string MachineInfo::GetLocalUserName()
 	{
+#ifdef _WIN32
 		if (user_name.length() == 0) {
 			const size_t INFO_BUFFER_SIZE = 256;
 			TCHAR  infoBuf[INFO_BUFFER_SIZE];
@@ -45,6 +54,9 @@ namespace universelan {
 				user_name.assign((const char* const)infoBuf, (const size_t)bufCharCount);
 			}
 		}
+#else
+		user_name = "GetLocalUserNameNotImplemented";
+#endif
 
 		return user_name;
 	}
@@ -52,6 +64,7 @@ namespace universelan {
 	std::vector<std::string> MachineInfo::GetLocalMACs()
 	{
 		if (macs.size() == 0) {
+#ifdef _WIN32
 			unsigned char* pszBuff = NULL;
 			int nCount = 0;
 			int idx = 0;
@@ -69,6 +82,9 @@ namespace universelan {
 
 			HeapFree(GetProcessHeap(), 0x00, pszBuff);
 			pszBuff = NULL;
+#else
+			macs.push_back("12345678abcd");
+#endif
 		}
 
 		return macs;
@@ -85,6 +101,7 @@ namespace universelan {
 		return ss.str();
 	}
 
+#ifdef _WIN32
 	static int RetriveLocalMacAddress(ULONG ulFlags, ULONG ulFamily, unsigned char** pszAddress)
 	{
 		PIP_ADAPTER_ADDRESSES pCurrAddresses = NULL;
@@ -140,4 +157,5 @@ namespace universelan {
 		}
 		return nAddressCount;
 	}
+#endif
 }

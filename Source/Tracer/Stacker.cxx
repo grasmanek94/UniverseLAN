@@ -1,12 +1,14 @@
 #include "Stacker.hxx"
 #include "Minidump.hxx"
 
+#ifdef _WIN32
 #include <tchar.h>
 #include <windows.h>
 #include <dbghelp.h>
 
 #include <detours.h>
 #include <StackWalker.h>
+#endif
 
 #include <atomic>
 #include <filesystem>
@@ -28,6 +30,7 @@ namespace universelan::tracer {
 	bool create_minidump_on_unhandles_exception{false};
 	int minidump_verbosity_level{0};
 
+#ifdef _WIN32
 	namespace {
 		const size_t max_call_stack_depth{ 128 };
 		std::atomic_size_t entered_counter{ 0 };
@@ -218,6 +221,7 @@ namespace universelan::tracer {
 		}
 
 	}
+#endif
 
 	Stacker::Stacker() {
 		if (!Init()) {
@@ -233,8 +237,12 @@ namespace universelan::tracer {
 	}
 
 	bool Stacker::Init() {
+#ifdef _WIN32
 		filter = SetUnhandledExceptionFilter(OurCrashHandler);
 		return true;
+#else
+		return false;
+#endif
 
 		// if (DetourIsHelperProcess()) {
 		// 	return true;
@@ -249,6 +257,8 @@ namespace universelan::tracer {
 	}
 
 	void Stacker::SetUnhandledExceptionCallback(IUnhandledExceptionCallback* target) {
+#ifdef _WIN32
 		callback.store(target);
+#endif
 	}
 }

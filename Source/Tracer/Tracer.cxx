@@ -2,8 +2,10 @@
 
 #include "Stacker.hxx"
 
+#ifdef _WIN32
 #include <intrin.h>
 #include <Windows.h>
+#endif
 
 #include <atomic>
 #include <filesystem>
@@ -43,7 +45,7 @@ namespace universelan::tracer {
 		UnhandledExceptionCallback tracer_callstack_handler{};
 		std::ofstream global_trace_file;
 
-		void LogUnhandledExceptionOccurred(std::ofstream& file, DWORD thread_id, bool unknown_exception, const std::string exception_type, const std::string& exception_message, bool error_occured_during_stack_walk, const CallStackEntries& call_stack) {
+		void LogUnhandledExceptionOccurred(std::ofstream& file, uint64_t thread_id, bool unknown_exception, const std::string exception_type, const std::string& exception_message, bool error_occured_during_stack_walk, const CallStackEntries& call_stack) {
 			if (!file) {
 				return;
 			}
@@ -98,11 +100,11 @@ namespace universelan::tracer {
 		class ThreadTracer {
 		private:
 			std::ofstream log_file;
-			DWORD thread_id;
+			uint64_t thread_id;
 
 		public:
 			size_t depth;
-			DWORD GetCachedThreadID() {
+			uint64_t GetCachedThreadID() {
 				if (thread_id == 0) {
 					GetLogFile();
 				}
@@ -119,7 +121,12 @@ namespace universelan::tracer {
 
 			std::ofstream& GetLogFile() {
 				if (thread_id == 0) {
+#ifdef _WIN32
 					thread_id = GetCurrentThreadId();
+#else
+					thread_id = (uint64_t)this;
+#endif
+
 					std::string filename = std::format("{:08x}", thread_id);
 					std::string path{ (trace_log_directory / (filename + ".trace")).string() };
 
@@ -219,7 +226,9 @@ namespace universelan::tracer {
 			return;
 		}
 
+#ifdef _WIN32
 		return_address = _ReturnAddress();
+#endif
 		Tracer::Enter(func, return_address);
 	}
 

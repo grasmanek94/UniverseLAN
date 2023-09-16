@@ -1,3 +1,7 @@
+#ifndef _WIN32
+#define __STACKWALKER_H__
+#endif
+
 #ifndef __STACKWALKER_H__
 #define __STACKWALKER_H__
 
