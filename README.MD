@@ -4,7 +4,7 @@ Why Universe? Because Universe >> Galaxy.
 
 To generate the module definition files, use [wrap_dll](https://github.com/mavenlin/wrap_dll).  
   
-- Replace target game `Galaxy.dll` or `Galaxy64.dll` to use UniverseLAN (check the .dll file properties to view the version information, else make an sha1 checksum and look in [sha1_hashes.txt](https://github.com/grasmanek94/LanSupportForDRMFreeGames/blob/master/ZipFileHasher/sha1_hashes.txt) for the hash to determine the sdk version).
+- Replace target game `Galaxy.dll`, `Galaxy64.dll`, `REDGalaxy.dll` or `REDGalaxy64.dll` to use UniverseLAN (check the .dll file properties to view the version information, else make an sha1 checksum and look in [sha1_hashes.txt](https://github.com/grasmanek94/LanSupportForDRMFreeGames/blob/master/ZipFileHasher/sha1_hashes.txt) for the hash to determine the sdk version).
 - Place config files in the working directory of the game
 - Adjust config accordingly (e.g. point to a server address that hosts the UniverseLAN Backend)
 - It's recommended to NOT mix x64 and x86 platforms (e.g. x64 server with x86 game)

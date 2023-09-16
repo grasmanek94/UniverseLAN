@@ -1,12 +1,10 @@
 ﻿using SharpCompress.Readers;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace ZipFileHasher
@@ -21,7 +19,18 @@ namespace ZipFileHasher
                 path = args[0];
             }
 
-            string[] all_entries = Directory.GetFileSystemEntries(path, "*.tar.gz", SearchOption.AllDirectories);
+            List<string> all_entries = new List<string>(Directory.GetFileSystemEntries(path, "*.tar.gz", SearchOption.AllDirectories));
+            if (File.Exists("md5_hashes.txt"))
+            {
+                string[] current_present_hashes = File.ReadAllLines("md5_hashes.txt");
+
+                foreach (var item in current_present_hashes)
+                {
+                    string endswith = "DevelopmentKit_" + item.Split('=')[1] + ".tar.gz";
+                    all_entries = all_entries.Where(x => { return !x.EndsWith(endswith); }).ToList();
+                }
+            }
+
             int proc_count = (int)(Environment.ProcessorCount * 0.95);
 
             List<Task<string[]>> tasks = new List<Task<string[]>>();
@@ -43,12 +52,12 @@ namespace ZipFileHasher
             Console.WriteLine("All threads complete");
         }
 
-        static string[] ProcessEntries(string[] entries, int id, int proc_count)
+        static string[] ProcessEntries(List<string> entries, int id, int proc_count)
         {
             string md5_hashes = "";
             string sha1_hashes = "";
 
-            for(int e = id; e < entries.Length; e += proc_count)
+            for(int e = id; e < entries.Count; e += proc_count)
             {
                 string entry = entries[e];
                 using (Stream stream = File.OpenRead(entry))
@@ -58,7 +67,9 @@ namespace ZipFileHasher
                     {
                         if (!reader.Entry.IsDirectory)
                         {
-                            if (reader.Entry.Key.EndsWith("/Galaxy.dll") || reader.Entry.Key.EndsWith("/Galaxy64.dll"))
+                            if (reader.Entry.Key.EndsWith("/Galaxy.dll") || reader.Entry.Key.EndsWith("/Galaxy64.dll") ||
+                                reader.Entry.Key.EndsWith("/REDGalaxy.dll") || reader.Entry.Key.EndsWith("/REDGalaxy64.dll")
+                                )
                             {
                                 string dll_name = reader.Entry.Key.Split('/').Last();
                                 string dll_version = Path.GetFileName(entry).Replace("DevelopmentKit_", "").Replace(".tar.gz", "");
