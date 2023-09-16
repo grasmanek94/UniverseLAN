@@ -6,7 +6,12 @@ Why Universe? Because Universe >> Galaxy.
 
 # What is *UniverseLAN*?
 
-UniverseLAN is a GOG Galaxy wrapper which allows LAN / Direct IP connections for games using Galaxy Multiplayer (without using GOG Galaxy client).
+UniverseLAN is a GOG Galaxy wrapper which allows LAN / Direct IP connections for games using Galaxy Multiplayer (without using GOG Galaxy client).  
+
+### Note
+<small>*** Some games do use GOG Galaxy but do not use GOG Galaxy for multiplayer.  
+They can use other services or custom networking implementations.  
+Such games might not be able to be played together using UniverseLAN wrapper.</small>
 
 # How do you get .def files?
 To generate the module definition files, use [wrap_dll](https://github.com/mavenlin/wrap_dll):  
