@@ -11,8 +11,9 @@ UniverseLAN is a GOG Galaxy wrapper which allows LAN / Direct IP connections for
 # What is the status of *UniverseLAN*?
 UniverseLAN is in development, and in beta.  
 Do expect bugs, possibly lost save files, updates and fixes.  
-At this moment in time you are expected to build it yourself to get binaries.  
-UniverseLAN requires a C++20 compatible compiler.  
+> At this moment in time you are expected to build it yourself to get binaries.  
+> UniverseLAN requires a C++20 compatible compiler.  
+> The internal development name of this project is `LanSupportForDRMFreeGames [LSFDRMFG]`, you might see references to that in the source.  
 
 ### Note
 <small>*** Some games do use GOG Galaxy but do not use GOG Galaxy for multiplayer.  
