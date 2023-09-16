@@ -14,6 +14,7 @@ function(define_shared GALAXY_VERSION)
     lsfdrmfg-common-shared-${GALAXY_VERSION}
     PUBLIC
       lsfdrmfg-galaxy-${GALAXY_VERSION}
+      lsfdrmfg-magic_enum
       lsfdrmfg-cereal
       lsfdrmfg-enet
       lsfdrmfg-simpleini

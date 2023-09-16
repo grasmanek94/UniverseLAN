@@ -6,6 +6,7 @@ add_subdirectory(Detours)
 add_subdirectory(StackWalker)
 
 include(simpleini.cmake)
+include(magic_enum.cmake)
 
 include(cereal.cmake)
 include(websocketpp.cmake)

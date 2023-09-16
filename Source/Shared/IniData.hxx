@@ -27,6 +27,7 @@ namespace universelan {
 		bool MiniDumpOnUnhandledException;
 		int MiniDumpVerbosityLevel;
 		bool TracingAlwaysFlush;
+		uint64_t CallTracingFlags;
 
 		const std::string AuthenticationSection = "Authentication";
 		std::string AuthenticationKey;
@@ -48,6 +49,7 @@ namespace universelan {
 		bool CreateMiniDumpOnUnhandledException() const;
 		int GetMiniDumpVerbosityLevel() const;
 		bool ShouldAlwaysFlushTracing() const;
+		uint64_t GetCallTracingFlags() const;
 
 		const std::chrono::system_clock::time_point BootTime;
 	};

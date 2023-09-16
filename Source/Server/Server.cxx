@@ -48,7 +48,8 @@ namespace universelan::server {
 			config.IsCallTracingEnabled(),
 			config.CreateMiniDumpOnUnhandledException(),
 			config.GetMiniDumpVerbosityLevel(),
-			config.ShouldAlwaysFlushTracing()
+			config.ShouldAlwaysFlushTracing(),
+			config.GetCallTracingFlags()
 		);
 
 		tracer::Trace server_constructor{ __FUNCTION__ };

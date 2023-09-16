@@ -38,6 +38,8 @@ namespace universelan::tracer {
 		std::atomic_bool tracing_enabled;
 		std::atomic_bool unhandled_exception_logging;
 		bool should_always_flush_tracing;
+		uint64_t enabled_tracing_flags;
+
 		UnhandledExceptionCallback tracer_callstack_handler{};
 		std::ofstream global_trace_file;
 
@@ -168,7 +170,7 @@ namespace universelan::tracer {
 	bool Trace::InitTracing(const char* const log_directory,
 		bool in_unhandled_exception_logging, bool in_tracing_enabled,
 		bool mindump_on_unhandled_exception, int in_minidump_verbosity_level,
-		bool in_should_always_flush_tracing) {
+		bool in_should_always_flush_tracing, uint64_t mask) {
 		if (tracing_initialized) {
 			return false;
 		}
@@ -202,6 +204,7 @@ namespace universelan::tracer {
 		create_minidump_on_unhandles_exception = mindump_on_unhandled_exception;
 		minidump_verbosity_level = in_minidump_verbosity_level;
 		should_always_flush_tracing = in_should_always_flush_tracing;
+		enabled_tracing_flags = mask;
 
 		SetTracingEnabled(in_tracing_enabled);
 		SetUnhandledExceptionLogging(in_unhandled_exception_logging);
@@ -209,8 +212,8 @@ namespace universelan::tracer {
 		return true;
 	}
 
-	Trace::Trace(const char* const func) :
-		enabled{ tracing_enabled },
+	Trace::Trace(const char* const func, MASK mask) :
+		enabled{ tracing_enabled && ((enabled_tracing_flags & mask) == mask) },
 		func{ func }, return_address{ nullptr } {
 		if (!enabled) {
 			return;
@@ -220,12 +223,39 @@ namespace universelan::tracer {
 		Tracer::Enter(func, return_address);
 	}
 
+	// delegate constructor
+	Trace::Trace(MASK mask, const char* const func) : Trace{func, mask} {}
+
 	Trace::~Trace() {
 		if (!enabled) {
 			return;
 		}
 
 		Tracer::Exit(func, return_address);
+	}
+
+	Trace::operator bool() const {
+		return enabled;
+	}
+
+	bool Trace::operator!() const {
+		return !enabled;
+	}
+
+	bool Trace::has_flags(MASK mask) const {
+		return enabled && ((enabled_tracing_flags & mask) == mask);
+	}
+
+	std::ofstream& Trace::thread_logger() {
+		auto& log_file = thread_tracer.GetLogFile();
+		if (log_file) {
+			log_file << std::string(thread_tracer.depth, ' ');
+		}
+		return log_file;
+	}
+
+	std::osyncstream Trace::global_logger() {
+		return std::osyncstream(global_trace_file);
 	}
 
 	void Tracer::Enter(const char* const func, const void* const return_address) {
@@ -243,7 +273,6 @@ namespace universelan::tracer {
 			sync_stream << '[' << std::format("{:08x}", thread_tracer.GetCachedThreadID()) << "] " << '+' << func << "@" << std::hex << ((size_t)return_address) << '\n';
 			if (should_always_flush_tracing) {
 				sync_stream.flush();
-				global_trace_file.flush();
 			}
 		}
 	}

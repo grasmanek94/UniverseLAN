@@ -3,15 +3,90 @@
 #include "ConstHash.hxx"
 #include "MachineInfo.hxx"
 
+#include <magic_enum/magic_enum.hpp>
+#include <Tracer.hxx>
+
 #include <exception>
 #include <filesystem>
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <chrono>
+
+template <>
+struct magic_enum::customize::enum_range<universelan::tracer::Trace::MASK> {
+	static constexpr bool is_flags = true;
+};
 
 namespace universelan {
 	static const uint64_t GalaxyIDMask = 0x00FFFFFFFFFFFFFFULL;
+
+	namespace {
+		std::string_view trim(const std::string_view& in) {
+			auto left = in.begin();
+			for (;; ++left) {
+				if (left == in.end())
+					return std::string_view();
+				if (!isspace(*left))
+					break;
+			}
+
+			auto right = in.end() - 1;
+			for (; right > left && isspace(*right); --right);
+
+			return std::string_view(left, right + 1);
+		}
+
+		std::vector<std::string_view> split(const std::string_view str, const char delim = '|')
+		{
+			std::vector<std::string_view> result;
+
+			int indexCommaToLeftOfColumn = 0;
+			int indexCommaToRightOfColumn = -1;
+
+			for (int i = 0; i < static_cast<int>(str.size()); i++)
+			{
+				if (str[i] == delim)
+				{
+					indexCommaToLeftOfColumn = indexCommaToRightOfColumn;
+					indexCommaToRightOfColumn = i;
+					int index = indexCommaToLeftOfColumn + 1;
+					int length = indexCommaToRightOfColumn - index;
+
+					// Bounds checking can be omitted as logically, this code can never be invoked 
+					// Try it: put a breakpoint here and run the unit tests.
+					/*if (index + length >= static_cast<int>(str.size()))
+					{
+						length--;
+					}
+					if (length < 0)
+					{
+						length = 0;
+					}*/
+
+					std::string_view column(str.data() + index, length);
+					result.push_back(trim(column));
+				}
+			}
+
+			const std::string_view finalColumn(str.data() + indexCommaToRightOfColumn + 1, str.size() - indexCommaToRightOfColumn - 1);
+			result.push_back(trim(finalColumn));
+			return result;
+		}
+
+
+		uint64_t parse_flags(const std::string& str) {
+			auto result = split(str);
+
+			uint64_t flags = 0;
+			for (auto& entry : result) {
+				flags |= magic_enum::enum_cast<tracer::Trace::MASK>(entry).value_or(tracer::Trace::INFORMATIONAL);
+			}
+
+			return flags;
+		}
+	}
 
 	std::string IniData::GetPath(std::string base, const std::string& filename)
 	{
@@ -41,6 +116,7 @@ namespace universelan {
 		MiniDumpOnUnhandledException = ini.GetBoolValue(TracingSection.c_str(), "MiniDumpOnUnhandledException", true);
 		MiniDumpVerbosityLevel = ini.GetLongValue(TracingSection.c_str(), "MiniDumpVerbosityLevel", 2);
 		TracingAlwaysFlush = ini.GetBoolValue(TracingSection.c_str(), "AlwaysFlush", true);
+		CallTracingFlags = parse_flags(ini.GetValue(TracingSection.c_str(), "CallTracingFlags", "INFORMATIONAL"));
 
 		AuthenticationKey = ini.GetValue(AuthenticationSection.c_str(), "Key", "9g5tA53SLyiNkBTqsX3BmBgy/PPVTU6VGKWNNw3wUIY5nK1C2MOT4UsZ2pauCb8fm5UQSJRijid+w1t9WpDaKQ==");
 	}
@@ -63,6 +139,10 @@ namespace universelan {
 
 	bool IniData::ShouldAlwaysFlushTracing() const {
 		return TracingAlwaysFlush;
+	}
+
+	uint64_t IniData::GetCallTracingFlags() const {
+		return CallTracingFlags;
 	}
 
 	const std::string& IniData::GetGameDataPath() const
