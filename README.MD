@@ -27,6 +27,7 @@ To generate the module definition files, use [wrap_dll](https://github.com/maven
 | Aragami 1  | :white_check_mark:(2) | 1.121.2 | |
 | Forsaken Remastered | :white_check_mark:(3) | 1.124.0.0 | |
 | Guns, Gore & Cannoli 2  | :white_check_mark:(3) | 1.124.0.0 | |
+| Tropico 6 | :white_check_mark:(2)  | 1.139.2 | Also other games are displayed? Game has custom networking? | 
 | MetalSlug3 | :construction:        | 1.100.2 | Can host and join lobby, can't get past character selection screen. |
 | Serious Sams Bogus Detour | :construction: | 1.100.2 | Stuck on "Creating lobby..." or "Joining lobby..." |
 | Alien vs Predator 2000 | :question: |  | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176.2.6? |
@@ -37,7 +38,6 @@ To generate the module definition files, use [wrap_dll](https://github.com/maven
 | Speed Brawl | :warning:  | 1.144.1 | | 
 | Northgard | :warning:  | 1.139.2 | | 
 | Niffelheim | :warning:  | 1.139.2 | | 
-| Tropico 6 | :warning:  | 1.139.2 | | 
 | DUSK | :warning:  | 1.133.6 | | 
 | Tooth and Tail | :warning:  | 1.122.1 | | 
 | Absolver | :warning:  | 1.104.2 | | 
