@@ -1,17 +1,34 @@
+# Why?
+
 This extends the ["You buy it, you own it"](https://www.gog.com/en/about_gog) and  "DRM-Free" GOG philisophy to the multiplayer portion of all games that use GOG Galaxy.
 
 Why Universe? Because Universe >> Galaxy.
 
-To generate the module definition files, use [wrap_dll](https://github.com/mavenlin/wrap_dll).  
+# What is *UniverseLAN*?
+
+UniverseLAN is a GOG Galaxy wrapper which allows LAN / Direct IP connections for games using Galaxy Multiplayer
+
+# How do you get .def files?
+To generate the module definition files, use [wrap_dll](https://github.com/mavenlin/wrap_dll):  
+- `python3 wrap_dll.py Galaxy64.dll`  
+
+Then remove on each line everything after (and including) **`=` sign** in .def file.
+Place in `Source/DLLs/<version>/UniverseLAN.def`
   
+# Instructions
+
 - Replace target game `Galaxy.dll`, `Galaxy64.dll`, `REDGalaxy.dll` or `REDGalaxy64.dll` to use UniverseLAN (check the .dll file properties to view the version information, else make an sha1 checksum and look in [sha1_hashes.txt](ZipFileHasher/sha1_hashes.txt) for the hash to determine the sdk version).
 - Place config files in the working directory of the game
+- Place Server executable where config files are located
 - Adjust config accordingly (e.g. point to a server address that hosts the UniverseLAN Backend)
 - It's recommended to NOT mix x64 and x86 platforms (e.g. x64 server with x86 game)
 - Do NOT mix different versions due to ABI incompatibility (e.g. 1.148.3.0 client with 1.100.2.0 server or vice versa), GOG does not keep their Galaxy library backwards compatible / upgradeable.
-- Don't add GOG stdint.h, remove it. If you try it WILL cause errors.
+- Don't add GOG stdint.h when adding new SDK versions, remove it. If you try it WILL cause errors.
 - It is possible to support Galaxy SDK versions from 1.57 up to the newest ones (1.152.6+).
 - If someone has earlier SDK files please share <3
+
+# Debug Information
+Debug (tracing) files can be found in `<Configuration Files Directory>/tracing/<date time when application was launched>/`.
 
 # List / status of games
 
