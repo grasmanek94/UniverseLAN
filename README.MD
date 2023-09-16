@@ -81,3 +81,6 @@ Debug (tracing) files can be found in `<Configuration Files Directory>/tracing/<
 | Ticket to Ride | :left_right_arrow:   | 1.139.2 | Tried it with the wrapper and works, but need to create a free Wonder account | 
 | Aragami 2 | :left_right_arrow: | 1.148.3 | Probably does not use GOG Galaxy for networking (doesn't work for private lobbies).<br> Can play on public lobbies without GOG Galaxy or with this patch AFAIK. |
 | Roboquest | :x: | 1.148.3 | Probably does not use GOG Galaxy for networking. |
+
+# Notice
+I'm not affiliated in any way with GOG or CD Projekt RED. All trademarks and copyright are property of their respective owners.
