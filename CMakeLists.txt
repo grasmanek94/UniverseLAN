@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 
 ######################################################################################
 
-project( lsfdrmfg )
+project( universelan )
 
 enable_language( CXX )
 enable_language( C )

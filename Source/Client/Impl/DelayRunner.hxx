@@ -1,5 +1,5 @@
-#ifndef LSFDRMFG_IMPL_DELAY_RUNNER_H
-#define LSFDRMFG_IMPL_DELAY_RUNNER_H
+#ifndef UNIVERSELAN_IMPL_DELAY_RUNNER_H
+#define UNIVERSELAN_IMPL_DELAY_RUNNER_H
 
 #include <functional>
 #include <mutex>

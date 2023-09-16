@@ -57,7 +57,7 @@ function(add_client_version_rc)
 
   # ${CMAKE_CURRENT_SOURCE_DIR} is location of folder below (so version specific one)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../versioninfo.rc.cmake.in ${CMAKE_CURRENT_SOURCE_DIR}/versioninfo.rc @ONLY)
-  target_sources(lsfdrmfg-client-${GALAXY_VERSION} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/versioninfo.rc)
+  target_sources(universelan-client-${GALAXY_VERSION} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/versioninfo.rc)
 endfunction()
 
 function(define_projects_for_version GALAXY_VERSION)

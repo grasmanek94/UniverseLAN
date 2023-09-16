@@ -297,7 +297,6 @@ Makefile
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
-cmake/
 Config/Galaxy64.dll
 Config/Galaxy.dll
 bin/

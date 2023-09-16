@@ -1,5 +1,5 @@
-#ifndef LSFDRMFG_IMPL_APPS_H
-#define LSFDRMFG_IMPL_APPS_H
+#ifndef UNIVERSELAN_IMPL_APPS_H
+#define UNIVERSELAN_IMPL_APPS_H
 
 /**
  * @file

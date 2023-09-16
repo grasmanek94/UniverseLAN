@@ -1,7 +1,0 @@
-<map id="ITelemetry.h" name="ITelemetry.h">
-<area shape="rect" id="node1" title="Contains data structures and interfaces related to telemetry." alt="" coords="105,5,198,32"/>
-<area shape="rect" id="node2" href="$IListenerRegistrar_8h.html" title="Contains data structures and interfaces related to callback listeners." alt="" coords="84,80,219,107"/>
-<area shape="rect" id="node3" href="$stdint_8h_source.html" title=" " alt="" coords="5,155,71,181"/>
-<area shape="rect" id="node4" title=" " alt="" coords="119,155,183,181"/>
-<area shape="rect" id="node5" href="$GalaxyExport_8h.html" title="Contains a macro used for DLL export." alt="" coords="207,155,319,181"/>
-</map>

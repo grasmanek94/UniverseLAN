@@ -1,5 +1,5 @@
-#ifndef LSFDRMFG_IMPL_FRIENDS_H
-#define LSFDRMFG_IMPL_FRIENDS_H
+#ifndef UNIVERSELAN_IMPL_FRIENDS_H
+#define UNIVERSELAN_IMPL_FRIENDS_H
 
 /**
  * @file
@@ -28,7 +28,7 @@ namespace universelan::client {
 	using namespace galaxy::api;
 	struct InterfaceInstances;
 
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 	using AvatarCriteriaImpl = AvatarCriteria;
 #else
 	using AvatarCriteriaImpl = uint32_t;
@@ -54,7 +54,7 @@ namespace universelan::client {
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
 
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 		ListenersRequestHelper<IUserInformationRetrieveListener*> user_information_requests;
 		ListenersRequestHelper<IRichPresenceRetrieveListener*> retrieve_rich_presence_requests;
 #endif
@@ -107,7 +107,7 @@ namespace universelan::client {
 		virtual void RequestUserInformation(
 			GalaxyID userID
 			, AvatarCriteriaImpl avatarCriteria = AVATAR_TYPE_NONE
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			, IUserInformationRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -249,7 +249,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RequestFriendList(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			IFriendListListener* const listener = NULL
 #endif
 		) override;
@@ -295,7 +295,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void SendFriendInvitation(GalaxyID userID
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			, IFriendInvitationSendListener* const listener = NULL
 #endif
 		) override;
@@ -308,7 +308,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RequestFriendInvitationList(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			IFriendInvitationListRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -321,7 +321,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RequestSentFriendInvitationList(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			ISentFriendInvitationListRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -356,7 +356,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RespondToFriendInvitation(GalaxyID userID, bool accept
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			, IFriendInvitationRespondToListener* const listener = NULL
 #endif
 		) override;
@@ -370,7 +370,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void DeleteFriend(GalaxyID userID
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			, IFriendDeleteListener* const listener = NULL
 #endif
 		) override;
@@ -396,7 +396,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void SetRichPresence(const char* key, const char* value
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			, IRichPresenceChangeListener* const listener = NULL
 #endif
 		) override;
@@ -412,7 +412,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void DeleteRichPresence(const char* key
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			, IRichPresenceChangeListener* const listener = NULL
 #endif
 		) override;
@@ -425,7 +425,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void ClearRichPresence(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			IRichPresenceChangeListener* const listener = NULL
 #endif
 		) override;
@@ -441,7 +441,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RequestRichPresence(GalaxyID userID = GalaxyID()
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			, IRichPresenceRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -524,7 +524,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void SendInvitation(GalaxyID userID, const char* connectionString
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			, ISendInvitationListener* const listener = NULL
 #endif
 		) override;
@@ -542,7 +542,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void FindUser(const char* userSpecifier
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			, IUserFindListener* const listener = NULL
 #endif
 		) override;
@@ -557,7 +557,7 @@ namespace universelan::client {
 		 * @return true if the specified user is playing the same game, false otherwise.
 		 */
 
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 		virtual bool IsUserInTheSameGame(GalaxyID userID) const override;
 #endif
 

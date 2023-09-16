@@ -24,7 +24,7 @@ namespace universelan {
 			TCHAR  infoBuf[INFO_BUFFER_SIZE];
 			DWORD  bufCharCount = INFO_BUFFER_SIZE;
 
-			// Get and display the user name.
+			// Get the computer name.
 			if (!GetComputerName(infoBuf, &bufCharCount)) {
 				machine_name.assign((const char* const)infoBuf, (const size_t)bufCharCount);
 			}
@@ -40,7 +40,7 @@ namespace universelan {
 			TCHAR  infoBuf[INFO_BUFFER_SIZE];
 			DWORD  bufCharCount = INFO_BUFFER_SIZE;
 
-			// Get and display the user name.
+			// Get the user name.
 			if (!GetUserName(infoBuf, &bufCharCount)) {
 				user_name.assign((const char* const)infoBuf, (const size_t)bufCharCount);
 			}

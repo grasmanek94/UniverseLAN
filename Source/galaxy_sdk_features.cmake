@@ -43,5 +43,7 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
   afvd(IUSER_SIGNINLAUNCHER				1.146.0			)
   afvd(IUSER_SIGNINEPIC					1.139.5			)
   afvd(IUSER_SIGNINXBLIVE				1.143.0			)
+  afvd(IFRIENDS_ONPERSONADATACHANGED	1.61.0			)
+  afvd(IFRIENDS_INFORMATIONLISTENERS	1.126.0			)
 
 endfunction()

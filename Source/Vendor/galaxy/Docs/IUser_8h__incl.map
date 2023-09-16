@@ -1,9 +1,0 @@
-<map id="IUser.h" name="IUser.h">
-<area shape="rect" id="node1" title="Contains data structures and interfaces related to user account." alt="" coords="146,5,209,32"/>
-<area shape="rect" id="node2" href="$GalaxyID_8h.html" title="Contains GalaxyID, which is the class that represents the ID of an entity used by Galaxy Peer." alt="" coords="67,80,154,107"/>
-<area shape="rect" id="node5" href="$IListenerRegistrar_8h.html" title="Contains data structures and interfaces related to callback listeners." alt="" coords="178,80,313,107"/>
-<area shape="rect" id="node3" href="$stdint_8h_source.html" title=" " alt="" coords="99,155,165,181"/>
-<area shape="rect" id="node4" title=" " alt="" coords="5,155,75,181"/>
-<area shape="rect" id="node6" title=" " alt="" coords="213,155,277,181"/>
-<area shape="rect" id="node7" href="$GalaxyExport_8h.html" title="Contains a macro used for DLL export." alt="" coords="301,155,413,181"/>
-</map>

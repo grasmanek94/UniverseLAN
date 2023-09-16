@@ -1,7 +1,0 @@
-<map id="IError" name="IError">
-<area shape="rect" id="node1" title="Base interface for exceptions." alt="" coords="273,5,327,32"/>
-<area shape="rect" id="node2" href="$classgalaxy_1_1api_1_1IInvalidArgumentError.html" title="The exception thrown to report that a method was called with an invalid argument." alt="" coords="5,80,149,107"/>
-<area shape="rect" id="node3" href="$classgalaxy_1_1api_1_1IInvalidStateError.html" title="The exception thrown to report that a method was called while the callee is in an invalid state,..." alt="" coords="174,80,293,107"/>
-<area shape="rect" id="node4" href="$classgalaxy_1_1api_1_1IRuntimeError.html" title="The exception thrown to report errors that can only be detected during runtime." alt="" coords="317,80,419,107"/>
-<area shape="rect" id="node5" href="$classgalaxy_1_1api_1_1IUnauthorizedAccessError.html" title="The exception thrown when calling Galaxy interfaces while the user is not signed in and thus not auth..." alt="" coords="443,80,616,107"/>
-</map>

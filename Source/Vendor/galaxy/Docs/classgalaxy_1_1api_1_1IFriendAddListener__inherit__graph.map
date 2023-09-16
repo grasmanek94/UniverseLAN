@@ -1,5 +1,0 @@
-<map id="IFriendAddListener" name="IFriendAddListener">
-<area shape="rect" id="node1" title="Listener for the event of a user being added to the friend list." alt="" coords="38,169,169,196"/>
-<area shape="rect" id="node2" href="$classgalaxy_1_1api_1_1GalaxyTypeAwareListener.html" title=" " alt="" coords="5,80,201,121"/>
-<area shape="rect" id="node3" href="$classgalaxy_1_1api_1_1IGalaxyListener.html" title="The interface that is implemented by all specific callback listeners." alt="" coords="47,5,159,32"/>
-</map>
