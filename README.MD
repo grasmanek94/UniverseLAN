@@ -37,7 +37,7 @@ Place in `Source/DLLs/<version>/UniverseLAN.def`
 - Do NOT mix different versions due to ABI incompatibility (e.g. 1.148.3.0 client with 1.100.2.0 server or vice versa), GOG does not keep their Galaxy library backwards compatible / upgradeable.
 - Don't add GOG stdint.h when adding new SDK versions, remove it. If you try it WILL cause errors.
 - It is possible to support Galaxy SDK versions from 1.57 up to the newest ones (1.152.6+).
-- If someone has earlier SDK files please share <3
+- If someone has earlier SDK headers and/or documentation files please share <3
 
 # Debug Information
 Debug (tracing) files can be found in `<Configuration Files Directory>/tracing/<date time when application was launched>/`.
@@ -83,4 +83,8 @@ Debug (tracing) files can be found in `<Configuration Files Directory>/tracing/<
 | Roboquest | :x: | 1.148.3 | Probably does not use GOG Galaxy for networking. |
 
 # Notice
-I'm not affiliated in any way with GOG or CD Projekt RED. All trademarks and copyright are property of their respective owners.
+I'm not affiliated in any way with GOG or CD Projekt RED.  
+All trademarks and copyright are property of their respective owners.  
+Any statements or expressed opinions here are each of their respective own person and do not represent any companies or other entities.  
+GOG SDK documentation and SDK include files are freely available from https://docs.gog.com/galaxyapi/  .
+No copyright infringement intended.  
