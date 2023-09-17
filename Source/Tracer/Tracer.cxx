@@ -9,12 +9,12 @@
 
 #include <atomic>
 #include <filesystem>
-#include <format>
+#include <format> // Requires GCC 13 (!) / VS 2019 16.09
 #include <fstream>
 #include <iostream>
 #include <mutex>
 #include <string>
-#include <syncstream>
+#include <syncstream> // Requires GCC 11 (!) / VS 2019 16.10
 
 namespace universelan::tracer {
 	namespace fs = std::filesystem;
