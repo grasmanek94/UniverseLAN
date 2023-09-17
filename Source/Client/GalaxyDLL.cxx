@@ -25,7 +25,13 @@ namespace universelan::client {
 			intf_inst.init(initOptions);
 		}
 		catch (std::exception& ex) {
+
+#ifdef _WIN32
 			MessageBox(NULL, ex.what(), "UniverseLAN - Error", 0);
+#else
+			std::cout << "Exception occurred during init: " << ex.what() << std::endl;
+#endif
+
 		}
 
 		tracer::Trace trace{  };
