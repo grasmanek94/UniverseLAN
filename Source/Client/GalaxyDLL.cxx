@@ -11,12 +11,14 @@
 namespace universelan::client {
 	void Init(const InitOptions& initOptions) 
 	{
+#ifdef _WIN32
 		{
 			TCHAR szFileName[MAX_PATH];
 			if (GetModuleFileName(NULL, szFileName, MAX_PATH) == ERROR_SUCCESS) {
 				std::cout << "Process: " << szFileName << std::endl;
 			}
 		}
+#endif
 
 		try
 		{
