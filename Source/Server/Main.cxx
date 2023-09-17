@@ -16,7 +16,7 @@ std::unique_ptr<Server> server;
 
 int main()
 {
-	Trace trace_main{ __FUNCTION__ };
+	Trace trace_main{  };
 
 	std::cout << "Version: " << universelan::Version_Number << std::endl;
 

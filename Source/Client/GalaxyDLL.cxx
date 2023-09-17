@@ -26,7 +26,7 @@ namespace universelan::client {
 			MessageBox(NULL, ex.what(), "UniverseLAN - Error", 0);
 		}
 
-		tracer::Trace trace{ __FUNCTION__ };
+		tracer::Trace trace{  };
 
 		if (intf_inst.config->GetEnableConsole()) {
 			EnableCustomConsole();
@@ -42,95 +42,95 @@ namespace universelan::client {
 	}
 
 	void Shutdown() {
-		tracer::Trace trace{ __FUNCTION__ };
+		tracer::Trace trace{  };
 
 		intf_inst.reset();
 	}
 
 	IUser* User() {
-		//tracer::Trace trace{ __FUNCTION__ };
+		//tracer::Trace trace{  };
 
 		return intf_inst.user.get();
 	}
 
 	IFriends* Friends() {
-		//tracer::Trace trace{ __FUNCTION__ };
+		//tracer::Trace trace{  };
 
 		return intf_inst.friends.get();
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
 	IChat* Chat() {
-		//tracer::Trace trace{ __FUNCTION__ };
+		//tracer::Trace trace{  };
 
 		return intf_inst.chat.get();
 	}
 #endif
 
 	IMatchmaking* Matchmaking() {
-		//tracer::Trace trace{ __FUNCTION__ };
+		//tracer::Trace trace{  };
 
 		return intf_inst.matchmaking.get();
 	}
 
 	INetworking* Networking() {
-		//tracer::Trace trace{ __FUNCTION__ };
+		//tracer::Trace trace{  };
 
 		return intf_inst.networking.get();
 	}
 
 	INetworking* ServerNetworking() {
-		//tracer::Trace trace{ __FUNCTION__ };
+		//tracer::Trace trace{  };
 
 		return intf_inst.server_networking.get();
 	}
 
 	IStats* Stats() {
-		//tracer::Trace trace{ __FUNCTION__ };
+		//tracer::Trace trace{  };
 
 		return intf_inst.stats.get();
 	}
 
 	IUtils* Utils() {
-		//tracer::Trace trace{ __FUNCTION__ };
+		//tracer::Trace trace{  };
 
 		return intf_inst.utils.get();
 	}
 
 	IApps* Apps() {
-		//tracer::Trace trace{ __FUNCTION__ };
+		//tracer::Trace trace{  };
 
 		return intf_inst.apps.get();
 	}
 
 	IStorage* Storage() {
-		//tracer::Trace trace{ __FUNCTION__ };
+		//tracer::Trace trace{  };
 
 		return intf_inst.storage.get();
 	}
 
 	ICustomNetworking* CustomNetworking() {
-		//tracer::Trace trace{ __FUNCTION__ };
+		//tracer::Trace trace{  };
 
 		return intf_inst.custom_networking.get();
 	}
 
 	ILogger* Logger() {
-		//tracer::Trace trace{ __FUNCTION__ };
+		//tracer::Trace trace{  };
 
 		return intf_inst.logger.get();
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 	ITelemetry* Telemetry() {
-		//tracer::Trace trace{ __FUNCTION__ };
+		//tracer::Trace trace{  };
 
 		return intf_inst.telemetry.get();
 	}
 #endif
 
 	void ProcessData() {
-		//tracer::Trace trace{ __FUNCTION__ };
+		//tracer::Trace trace{  };
 
 		if (intf_inst.client != nullptr) {
 			intf_inst.client->ProcessEvents();
@@ -142,7 +142,7 @@ namespace universelan::client {
 	}
 
 	IListenerRegistrar* ListenerRegistrar() {
-		//tracer::Trace trace{ __FUNCTION__ };
+		//tracer::Trace trace{  };
 
 		return intf_inst.notification.get();
 	}
@@ -151,7 +151,7 @@ namespace universelan::client {
 	* Seems this gets called after each ProcessData call.
 	*/
 	const IError* GetError() {
-		//tracer::Trace trace{ __FUNCTION__ };
+		//tracer::Trace trace{  };
 
 		return nullptr;
 	}
@@ -167,11 +167,11 @@ namespace galaxy::api
 	{
 	public:
 		GalaxyImpl() {
-			Trace trace{ __FUNCTION__ };
+			Trace trace{  };
 		}
 
 		virtual ~GalaxyImpl() {
-			Trace trace{ __FUNCTION__ };
+			Trace trace{  };
 		}
 
 		virtual void Init(const InitOptions& initOptions) override {
@@ -250,11 +250,11 @@ namespace galaxy::api
 	class ErrorManager : public IErrorManager {
 	public:
 		virtual ~ErrorManager() override {
-			Trace trace{ __FUNCTION__ };
+			Trace trace{  };
 		}
 
 		ErrorManager() {
-			Trace trace{ __FUNCTION__ };
+			Trace trace{  };
 		}
 
 		virtual api::IError* GetLastError() override {
@@ -267,7 +267,7 @@ namespace galaxy::api
 
 	IGalaxy* GalaxyFactory::GetInstance() {
 		if (instance == nullptr) {
-			Trace trace{ __FUNCTION__ };
+			Trace trace{  };
 
 			instance = new GalaxyImpl();
 		}
@@ -277,7 +277,7 @@ namespace galaxy::api
 
 	IErrorManager* GalaxyFactory::GetErrorManager() {
 		if (errorManager == nullptr) {
-			Trace trace{ __FUNCTION__ };
+			Trace trace{  };
 
 			errorManager = new ErrorManager();
 		}
@@ -287,7 +287,7 @@ namespace galaxy::api
 
 	void GalaxyFactory::ResetInstance() {
 		if (instance != nullptr) {
-			Trace trace{ __FUNCTION__ };
+			Trace trace{  };
 
 			delete instance;
 			instance = nullptr;
@@ -296,7 +296,7 @@ namespace galaxy::api
 
 	IGalaxy* GalaxyFactory::CreateInstance() {
 		if (instance == nullptr) {
-			Trace trace{ __FUNCTION__ };
+			Trace trace{  };
 
 			instance = new GalaxyImpl();
 		}
@@ -307,7 +307,7 @@ namespace galaxy::api
 #endif
 
 extern "C" GALAXY_DLL_EXPORT uint32_t load() {
-	universelan::tracer::Trace trace{ __FUNCTION__ };
+	universelan::tracer::Trace trace{  };
 
 	return 0;
 }

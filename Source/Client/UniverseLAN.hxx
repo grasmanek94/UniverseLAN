@@ -71,6 +71,14 @@ namespace universelan::client {
 	extern InterfaceInstances gameserver_intf_inst;
 }
 
+#include <Tracer.hxx>
+
+#include <GalaxyApi.h>
+
+#if GALAXY_BUILD_FEATURE_GAME_SERVER_API
+#include <GalaxyGameServerApi.h>
+#endif
+
 #include "Client.hxx"
 #include "CustomConsole.hxx"
 
@@ -82,7 +90,6 @@ namespace universelan::client {
 #include "Impl/Chat.hxx"
 #include "Impl/CustomNetworking.hxx"
 #include "Impl/Friends.hxx"
-
 #include "Impl/Logger.hxx"
 #include "Impl/Matchmaking.hxx"
 #include "Impl/Networking.hxx"
@@ -91,11 +98,3 @@ namespace universelan::client {
 #include "Impl/Telemetry.hxx"
 #include "Impl/User.hxx"
 #include "Impl/Utils.hxx"
-
-#include <GalaxyApi.h>
-
-#if GALAXY_BUILD_FEATURE_GAME_SERVER_API
-#include <GalaxyGameServerApi.h>
-#endif
-
-#include <Tracer.hxx>

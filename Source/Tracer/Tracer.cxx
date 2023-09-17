@@ -22,8 +22,8 @@ namespace universelan::tracer {
 	class Tracer
 	{
 	public:
-		static void Enter(const char* const func, const void* const return_address);
-		static void Exit(const char* const func, const void* const return_address);
+		static void Enter(const char* const func, const char* const extra, const void* const return_address);
+		static void Exit(const char* const func, const char* const extra, const void* const return_address);
 	};
 
 	fs::path trace_log_directory;
@@ -219,9 +219,9 @@ namespace universelan::tracer {
 		return true;
 	}
 
-	Trace::Trace(const char* const func, MASK mask) :
+	Trace::Trace(const char* const extra, MASK mask, const char* const func) :
 		enabled{ tracing_enabled && ((enabled_tracing_flags & mask) == mask) },
-		func{ func }, return_address{ nullptr } {
+		func{ func }, extra{ extra }, return_address{ nullptr } {
 		if (!enabled) {
 			return;
 		}
@@ -229,18 +229,19 @@ namespace universelan::tracer {
 #ifdef _WIN32
 		return_address = _ReturnAddress();
 #endif
-		Tracer::Enter(func, return_address);
+		Tracer::Enter(func, extra, return_address);
 	}
 
 	// delegate constructor
-	Trace::Trace(MASK mask, const char* const func) : Trace{func, mask} {}
+	Trace::Trace(MASK mask, const char* const extra, const char* const func) : Trace{ extra, mask, func } {}
+
 
 	Trace::~Trace() {
 		if (!enabled) {
 			return;
 		}
 
-		Tracer::Exit(func, return_address);
+		Tracer::Exit(func, extra, return_address);
 	}
 
 	Trace::operator bool() const {
@@ -267,10 +268,16 @@ namespace universelan::tracer {
 		return std::osyncstream(global_trace_file);
 	}
 
-	void Tracer::Enter(const char* const func, const void* const return_address) {
+	void Tracer::Enter(const char* const func, const char* const extra, const void* const return_address) {
 		auto& log_file = thread_tracer.GetLogFile();
 		if (log_file) {
-			log_file << std::string(thread_tracer.depth, ' ') << '+' << func << "@" << std::hex << ((size_t)return_address) << '\n';
+			log_file << std::string(thread_tracer.depth, ' ') << '+' << func;
+
+			if (extra != nullptr) {
+				log_file << extra;
+			}
+
+			log_file << "@" << std::hex << ((size_t)return_address) << '\n';
 			if (should_always_flush_tracing) {
 				log_file.flush();
 			}
@@ -279,14 +286,20 @@ namespace universelan::tracer {
 
 		if (global_trace_file) {
 			std::osyncstream sync_stream(global_trace_file);
-			sync_stream << '[' << std::format("{:08x}", thread_tracer.GetCachedThreadID()) << "] " << '+' << func << "@" << std::hex << ((size_t)return_address) << '\n';
+			sync_stream << '[' << std::format("{:08x}", thread_tracer.GetCachedThreadID()) << "] " << '+' << func;
+
+			if (extra != nullptr) {
+				sync_stream << extra;
+			}
+
+			sync_stream << "@" << std::hex << ((size_t)return_address) << '\n';
 			if (should_always_flush_tracing) {
 				sync_stream.flush();
 			}
 		}
 	}
 
-	void Tracer::Exit(const char* const func, const void* const return_address) {
+	void Tracer::Exit(const char* const func, const char* const extra, const void* const return_address) {
 		--thread_tracer.depth;
 		auto& log_file = thread_tracer.GetLogFile();
 

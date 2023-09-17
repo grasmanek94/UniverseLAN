@@ -52,7 +52,7 @@ namespace universelan::server {
 			config.GetCallTracingFlags()
 		);
 
-		tracer::Trace server_constructor{ __FUNCTION__ };
+		tracer::Trace server_constructor{  };
 
 		int init_code = connection.GetInitCode();
 
@@ -102,7 +102,7 @@ namespace universelan::server {
 	}
 
 	void Server::PerformPeerCleanup() {
-		tracer::Trace trace{ __FUNCTION__ };
+		tracer::Trace trace{  };
 
 		auto now = std::chrono::system_clock::now();
 
@@ -154,6 +154,6 @@ namespace universelan::server {
 
 	Server::~Server()
 	{
-		tracer::Trace destructor{ __FUNCTION__ };
+		tracer::Trace destructor{  };
 	}
 }

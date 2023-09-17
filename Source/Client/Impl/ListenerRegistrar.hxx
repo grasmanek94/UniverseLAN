@@ -20,7 +20,7 @@
 #include <set>
 #include <unordered_map>
 
-#include <GalaxyAPI.h>
+#include <GalaxyApi.h>
 
 namespace universelan::client {
 	using namespace galaxy::api;

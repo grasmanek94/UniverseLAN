@@ -27,7 +27,7 @@ namespace universelan::client {
 		, IChatRoomWithUserRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ __FUNCTION__ };
+		tracer::Trace trace{  };
 
 		uint64_t request_id = MessageUniqueID::get();
 
@@ -39,7 +39,7 @@ namespace universelan::client {
 	}
 
 	void ChatImpl::RequestChatRoomWithUserProcessed(const std::shared_ptr<RequestChatRoomWithUserMessage>& data) {
-		tracer::Trace trace{ __FUNCTION__ };
+		tracer::Trace trace{  };
 
 		IChatRoomWithUserRetrieveListener* listener = request_chat_room_with_user_requests.pop(data->request_id);
 
@@ -66,7 +66,7 @@ namespace universelan::client {
 		, IChatRoomMessagesRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ __FUNCTION__ };
+		tracer::Trace trace{  };
 
 		uint64_t request_id = MessageUniqueID::get();
 
@@ -78,7 +78,7 @@ namespace universelan::client {
 	}
 
 	void ChatImpl::RequestChatRoomMessagesProcessed(const std::shared_ptr<RequestChatRoomMessagesMessage>& data) {
-		tracer::Trace trace{ __FUNCTION__ };
+		tracer::Trace trace{  };
 
 		IChatRoomMessagesRetrieveListener* listener = request_chat_room_messages_requests.pop(data->request_id);
 
@@ -117,7 +117,7 @@ namespace universelan::client {
 		, IChatRoomMessageSendListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ __FUNCTION__ };
+		tracer::Trace trace{  };
 
 		uint64_t request_id = MessageUniqueID::get();
 
@@ -134,7 +134,7 @@ namespace universelan::client {
 	}
 
 	void ChatImpl::SendChatRoomMessageProcessed(const std::shared_ptr<SendToChatRoomMessage>& data) {
-		tracer::Trace trace{ __FUNCTION__ };
+		tracer::Trace trace{  };
 
 		IChatRoomMessageSendListener* listener = send_to_chat_room_requests.pop(data->request_id);
 
@@ -159,7 +159,7 @@ namespace universelan::client {
 	}
 
 	uint32_t ChatImpl::GetChatRoomMessageByIndex(uint32_t index, ChatMessageID& messageID, ChatMessageType& messageType, GalaxyID& senderID, uint32_t& sendTime, char* buffer, uint32_t bufferLength) {
-		tracer::Trace trace{ __FUNCTION__ };
+		tracer::Trace trace{  };
 
 		lock_t lock{ mtx };
 		if (incomming_messages_buffer == nullptr) {
@@ -179,7 +179,7 @@ namespace universelan::client {
 	}
 
 	uint32_t ChatImpl::GetChatRoomMemberCount(ChatRoomID chatRoomID) {
-		tracer::Trace trace{ __FUNCTION__ };
+		tracer::Trace trace{  };
 
 		lock_t lock{ mtx };
 		auto chat_room = chatroom_manager.GetChatRoom(chatRoomID);
@@ -192,7 +192,7 @@ namespace universelan::client {
 	}
 
 	GalaxyID ChatImpl::GetChatRoomMemberUserIDByIndex(ChatRoomID chatRoomID, uint32_t index) {
-		tracer::Trace trace{ __FUNCTION__ };
+		tracer::Trace trace{  };
 
 		lock_t lock{ mtx };
 		auto chat_room = chatroom_manager.GetChatRoom(chatRoomID);
@@ -205,7 +205,7 @@ namespace universelan::client {
 	}
 
 	uint32_t ChatImpl::GetChatRoomUnreadMessageCount(ChatRoomID chatRoomID) {
-		tracer::Trace trace{ __FUNCTION__ };
+		tracer::Trace trace{  };
 
 		lock_t lock{ mtx };
 		auto chat_room = chatroom_manager.GetChatRoom(chatRoomID);
@@ -218,7 +218,7 @@ namespace universelan::client {
 	}
 
 	void ChatImpl::MarkChatRoomAsRead(ChatRoomID chatRoomID) {
-		tracer::Trace trace{ __FUNCTION__ };
+		tracer::Trace trace{  };
 
 		lock_t lock{ mtx };
 		auto chat_room = chatroom_manager.GetChatRoom(chatRoomID);

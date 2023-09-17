@@ -9,7 +9,7 @@
 
 #include "ListenerRegistrar.hxx"
 
-#include <networking/Messages/P2PNetworkPacketMessage.hxx>
+#include <Networking/Messages/P2PNetworkPacketMessage.hxx>
 
 #include <INetworking.h>
 #include <IListenerRegistrar.h>

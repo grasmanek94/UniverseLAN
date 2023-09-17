@@ -13,6 +13,7 @@ namespace universelan::tracer {
 	private:
 		const bool enabled;
 		const char* const func;
+		const char* const extra;
 		const void* return_address;
 	public:
 		enum MASK: uint64_t {
@@ -31,8 +32,8 @@ namespace universelan::tracer {
 		static void SetUnhandledExceptionLogging(bool enabled);
 		static void SetTracingEnabled(bool enabled);
 
-		Trace(const char* const func = std::source_location::current().function_name(), MASK mask = INFORMATIONAL);
-		Trace(MASK mask, const char* const func = std::source_location::current().function_name());
+		Trace(const char* const extra = nullptr, MASK mask = INFORMATIONAL, const char* const func = std::source_location::current().function_name());
+		Trace(MASK mask, const char* const extra = nullptr, const char* const func = std::source_location::current().function_name());
 
 		~Trace();
 

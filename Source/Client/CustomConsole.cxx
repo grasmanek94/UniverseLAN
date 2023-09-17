@@ -15,7 +15,7 @@ namespace universelan::client {
 
 	void BindStdHandlesToConsole()
 	{
-		tracer::Trace trace{ __FUNCTION__ };
+		tracer::Trace trace{  };
 
 		FILE* fDummy;
 		freopen_s(&fDummy, "CONIN$", "r", stdin);
@@ -37,7 +37,7 @@ namespace universelan::client {
 
 	void EnableCustomConsole()
 	{
-		tracer::Trace trace{ __FUNCTION__ };
+		tracer::Trace trace{  };
 
 		static bool CustomConsoleEnabled = false;
 

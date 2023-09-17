@@ -2,6 +2,8 @@
 
 #include <Networking/Networking.hxx>
 
+#include <iostream>
+
 namespace universelan::client {
 	using namespace galaxy::api;
 
@@ -12,7 +14,7 @@ namespace universelan::client {
 	// Handlers:
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data)
 	{
-		tracer::Trace trace{ __FUNCTION__"::EventConnect"};
+		tracer::Trace trace{ "::EventConnect"};
 
 		std::cout << "Peer connected: " 
 			<< std::hex <<peer->address.host << ":" << std::dec << peer->address.port << std::endl;
@@ -22,7 +24,7 @@ namespace universelan::client {
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data)
 	{
-		tracer::Trace trace{ __FUNCTION__"::EventDisconnect" };
+		tracer::Trace trace{ "::EventDisconnect" };
 
 		std::cout << "Peer disconnected: " 
 			<< std::hex << peer->address.host << ":" << std::dec << peer->address.port << std::endl;
@@ -34,7 +36,7 @@ namespace universelan::client {
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<KeyChallengeMessage>& data)
 	{
-		tracer::Trace trace{ __FUNCTION__"::KeyChallengeMessage" };
+		tracer::Trace trace{ "::KeyChallengeMessage" };
 
 		auto& config = interfaces->config;
 		const uint64_t key = const_hash64(config->GetAuthenticationKey());
@@ -48,7 +50,7 @@ namespace universelan::client {
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAcceptedMessage>& data)
 	{
-		tracer::Trace trace{ __FUNCTION__"::ConnectionAcceptedMessage" };
+		tracer::Trace trace{ "::ConnectionAcceptedMessage" };
 
 		std::cout << "Connection accepted by server" << std::endl;
 
@@ -61,7 +63,7 @@ namespace universelan::client {
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<RequestSpecificUserDataMessage>& data)
 	{
-		tracer::Trace trace{ __FUNCTION__"::RequestSpecificUserDataMessage" };
+		tracer::Trace trace{ "::RequestSpecificUserDataMessage" };
 
 		switch (data->type) {
 		case RequestSpecificUserDataMessage::RequestTypeUserData:
@@ -88,19 +90,19 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<RequestChatRoomWithUserMessage>& data) {
-		tracer::Trace trace{ __FUNCTION__"::RequestChatRoomWithUserMessage" };
+		tracer::Trace trace{ "::RequestChatRoomWithUserMessage" };
 
 		interfaces->chat->RequestChatRoomWithUserProcessed(data);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<RequestChatRoomMessagesMessage>& data) {
-		tracer::Trace trace{ __FUNCTION__"::RequestChatRoomMessagesMessage" };
+		tracer::Trace trace{ "::RequestChatRoomMessagesMessage" };
 
 		interfaces->chat->RequestChatRoomMessagesProcessed(data);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<SendToChatRoomMessage>& data) {
-		tracer::Trace trace{ __FUNCTION__"::SendToChatRoomMessage" };
+		tracer::Trace trace{ "::SendToChatRoomMessage" };
 
 		interfaces->chat->SendChatRoomMessageProcessed(data);
 	}
@@ -112,112 +114,112 @@ namespace universelan::client {
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<FileShareResponseMessage>& data) {
-		tracer::Trace trace{ __FUNCTION__"::FileShareResponseMessage" };
+		tracer::Trace trace{ "::FileShareResponseMessage" };
 
 		interfaces->storage->FileUploaded(data);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<FileRequestMessage>& data) {
-		tracer::Trace trace{ __FUNCTION__"::FileRequestMessage" };
+		tracer::Trace trace{ "::FileRequestMessage" };
 
 		interfaces->storage->FileDownloaded(data);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<CreateLobbyResponseMessage>& data) {
-		tracer::Trace trace{ __FUNCTION__"::CreateLobbyResponseMessage" };
+		tracer::Trace trace{ "::CreateLobbyResponseMessage" };
 
 		interfaces->matchmaking->CreateLobbyProcessed(data);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<RequestLobbyListMessage>& data) {
-		tracer::Trace trace{ __FUNCTION__"::RequestLobbyListMessage" };
+		tracer::Trace trace{ "::RequestLobbyListMessage" };
 
 		interfaces->matchmaking->RequestLobbyListProcessed(data);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<JoinLobbyMessage>& data) {
-		tracer::Trace trace{ __FUNCTION__"::JoinLobbyMessage" };
+		tracer::Trace trace{ "::JoinLobbyMessage" };
 
 		interfaces->matchmaking->JoinLobbyProcessed(data);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<LeaveLobbyMessage>& data) {
-		tracer::Trace trace{ __FUNCTION__"::LeaveLobbyMessage" };
+		tracer::Trace trace{ "::LeaveLobbyMessage" };
 
 		interfaces->matchmaking->LeaveLobbyProcessed(data);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<RequestLobbyDataMessage>& data) {
-		tracer::Trace trace{ __FUNCTION__"::RequestLobbyDataMessage" };
+		tracer::Trace trace{ "::RequestLobbyDataMessage" };
 
 		interfaces->matchmaking->RequestLobbyDataProcessed(data);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<SendToLobbyMessage>& data) {
-		tracer::Trace trace{ __FUNCTION__"::SendToLobbyMessage" };
+		tracer::Trace trace{ "::SendToLobbyMessage" };
 
 		interfaces->matchmaking->SendLobbyMessageProcessed(data);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyDataMessage>& data) {
-		tracer::Trace trace{ __FUNCTION__"::SetLobbyDataMessage" };
+		tracer::Trace trace{ "::SetLobbyDataMessage" };
 
 		interfaces->matchmaking->SetLobbyDataProcessed(data);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyJoinableMessage>& data) {
-		tracer::Trace trace{ __FUNCTION__"::SetLobbyJoinableMessage" };
+		tracer::Trace trace{ "::SetLobbyJoinableMessage" };
 
 		interfaces->matchmaking->SetLobbyJoinableProcessed(data);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyMaxMembersMessage>& data) {
-		tracer::Trace trace{ __FUNCTION__"::SetLobbyMaxMembersMessage" };
+		tracer::Trace trace{ "::SetLobbyMaxMembersMessage" };
 
 		interfaces->matchmaking->SetLobbyMaxMembersProcessed(data);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyMemberDataMessage>& data) {
-		tracer::Trace trace{ __FUNCTION__"::SetLobbyMemberDataMessage" };
+		tracer::Trace trace{ "::SetLobbyMemberDataMessage" };
 
 		interfaces->matchmaking->SetLobbyMemberDataProcessed(data);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyTypeMessage>& data) {
-		tracer::Trace trace{ __FUNCTION__"::SetLobbyTypeMessage" };
+		tracer::Trace trace{ "::SetLobbyTypeMessage" };
 
 		interfaces->matchmaking->SetLobbyTypeProcessed(data);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<LobbyMemberStateChangeMessage>& data) {
-		tracer::Trace trace{ __FUNCTION__"::LobbyMemberStateChangeMessage" };
+		tracer::Trace trace{ "::LobbyMemberStateChangeMessage" };
 
 		interfaces->matchmaking->LobbyMemberStateChange(data);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<LobbyOwnerChangeMessage>& data) {
-		tracer::Trace trace{ __FUNCTION__"::LobbyOwnerChangeMessage" };
+		tracer::Trace trace{ "::LobbyOwnerChangeMessage" };
 
 		interfaces->matchmaking->LobbyOwnerChange(data);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<OnlineStatusChangeMessage>& data)
 	{
-		tracer::Trace trace{ __FUNCTION__"::OnlineStatusChangeMessage" };
+		tracer::Trace trace{ "::OnlineStatusChangeMessage" };
 
 		interfaces->user->OnlineUserStateChange(data);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<SetUserDataMessage>& data)
 	{
-		tracer::Trace trace{ __FUNCTION__"::SetUserDataMessage" };
+		tracer::Trace trace{ "::SetUserDataMessage" };
 
 		interfaces->user->SetUserDataMessageReceived(data);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<RichPresenceChangeMessage>& data)
 	{
-		tracer::Trace trace{ __FUNCTION__"::RichPresenceChangeMessage" };
+		tracer::Trace trace{ "::RichPresenceChangeMessage" };
 
 		interfaces->friends->RichPresenceChangeMessageProcessed(data);
 	}
