@@ -12,8 +12,10 @@
 #include <iostream>
 
 namespace universelan::client {
+#ifdef _WIN32
 	static WNDPROC ConsoleWndProc = NULL;
 	static HWND	ConsoleWndHandle = NULL;
+#endif
 
 	void BindStdHandlesToConsole()
 	{
