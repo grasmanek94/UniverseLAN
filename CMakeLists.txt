@@ -18,7 +18,5 @@ if(MSVC)
 endif()
 
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/)
-file(COPY Config/ DESTINATION ${CMAKE_SOURCE_DIR}/bin/Debug/)
-file(COPY Config/ DESTINATION ${CMAKE_SOURCE_DIR}/bin/Release/)
 
 add_subdirectory(Source)

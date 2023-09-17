@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
+set(UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
 include(determine_galaxy_version_feature_definitions.cmake)
  
 function(add_version_definitions_to TARGET)
@@ -55,45 +57,33 @@ function(add_client_version_rc)
 
   string(TIMESTAMP PROJECT_CURRENT_YEAR "%Y")
 
-  # ${CMAKE_CURRENT_SOURCE_DIR} is location of folder below (so version specific one)
-  SET(OUT_VERSION_RC_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/${GALAXY_ARCH}/versioninfo.rc)
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/versioninfo.rc.cmake.in ${OUT_VERSION_RC_FILE} @ONLY)
+  # ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR} is location of folder below (so version specific one)
+  SET(OUT_VERSION_RC_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/${GALAXY_ARCH}/versioninfo.rc)
+  configure_file(${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/versioninfo.rc.cmake.in ${OUT_VERSION_RC_FILE} @ONLY)
   target_sources(universelan-client-${GALAXY_VERSION} PUBLIC ${OUT_VERSION_RC_FILE})
 endfunction()
 
-function(define_projects_for_version GALAXY_VERSION UNIVERSELAN_SDK_INCL_DIR)
+function(define_projects_for_version)
   message("-- Adding Version: ${GALAXY_VERSION}")
 
   define_galaxy(${GALAXY_VERSION} ${UNIVERSELAN_SDK_INCL_DIR})
   define_shared(${GALAXY_VERSION})
   define_client(${GALAXY_VERSION})
-  define_server(${GALAXY_VERSION})
+  define_server(${GALAXY_VERSION} ${GALAXY_VERSION_NUMBER} "${ARCH_ADDITION}")
 endfunction()
 
 function(add_universelan_executables GALAXY_VERSION_NUMBER)
-
-  if (MSVC)
-    if("${MSVC_C_ARCHITECTURE_ID}" STREQUAL "X86")
-      set(GALAXY_ARCH "x86")
-    elseif("${MSVC_C_ARCHITECTURE_ID}" STREQUAL "x64")
-      set(GALAXY_ARCH "x64")
-    endif()
-  else()
-    # unsupported arch/OS/compiler?
-    return()
-  endif()
-
   set(GALAXY_VERSION "${GALAXY_ARCH}-${GALAXY_VERSION_NUMBER}")
-  set(MODULE_DEFINITION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/${GALAXY_ARCH}/UniverseLAN.def)
-  set(DLL_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/Dll.cxx)
-  set(FACTORY_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/Factory.cxx)
-  set(DLL_HOST_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/DllHost.cxx)
-  set(FACTORY_HOST_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/FactoryHost.cxx)
+  set(MODULE_DEFINITION_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/${GALAXY_ARCH}/UniverseLAN.def)
+  set(DLL_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/Dll.cxx)
+  set(FACTORY_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/Factory.cxx)
+  set(DLL_HOST_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/DllHost.cxx)
+  set(FACTORY_HOST_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/FactoryHost.cxx)
 
   set(UNIVERSELAN_OUT_TYPE "DLL")
   set(UNIVERSELAN_SOURCE_CLIENT "${DLL_FILE}")
   set(UNIVERSELAN_SOURCE_HOST "${DLL_HOST_FILE}")
-  set(UNIVERSELAN_SDK_INCL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/")
+  set(UNIVERSELAN_SDK_INCL_DIR "${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/")
 
   if(NOT EXISTS "${DLL_FILE}")
     # Switch to FACTORY type if this is not a DLL type
@@ -106,19 +96,21 @@ function(add_universelan_executables GALAXY_VERSION_NUMBER)
     return()
   endif()
 
-  define_projects_for_version(${GALAXY_VERSION} ${UNIVERSELAN_SDK_INCL_DIR})
-
   set(ARCH_ADDITION ${GALAXY_ARCH})
   string(REPLACE "x64" "64" ARCH_ADDITION ${ARCH_ADDITION})
   string(REPLACE "x86" "" ARCH_ADDITION ${ARCH_ADDITION})
+
+  define_projects_for_version()
 
   # Create the .DLL / Shared library
   add_library(universelan-client-${GALAXY_VERSION} SHARED "${UNIVERSELAN_SOURCE_CLIENT}" "${MODULE_DEFINITION_FILE}" )
   target_include_directories(universelan-client-${GALAXY_VERSION} PUBLIC "${UNIVERSELAN_SDK_INCL_DIR}")
   target_compile_definitions(universelan-client-${GALAXY_VERSION} PUBLIC "CLIENT_${UNIVERSELAN_OUT_TYPE}")
   target_link_libraries(universelan-client-${GALAXY_VERSION} PUBLIC universelan-lib-${GALAXY_VERSION})
-  set_target_properties(universelan-client-${GALAXY_VERSION} PROPERTIES OUTPUT_NAME "Galaxy${ARCH_ADDITION}-${GALAXY_VERSION_NUMBER}")
-
+  set_target_properties(universelan-client-${GALAXY_VERSION} PROPERTIES 
+    OUTPUT_NAME "Galaxy${ARCH_ADDITION}"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/"
+  )
   # add version.rc
   add_client_version_rc()
 
@@ -127,8 +119,15 @@ function(add_universelan_executables GALAXY_VERSION_NUMBER)
   target_include_directories(universelan-dllhost-${GALAXY_VERSION} PUBLIC "${UNIVERSELAN_SDK_INCL_DIR}")
   target_compile_definitions(universelan-dllhost-${GALAXY_VERSION} PUBLIC "HOST_${UNIVERSELAN_OUT_TYPE}")
   target_link_libraries(universelan-dllhost-${GALAXY_VERSION} PUBLIC universelan-client-${GALAXY_VERSION} )
-  set_target_properties(universelan-dllhost-${GALAXY_VERSION} PROPERTIES OUTPUT_NAME "UniverseLANDllHost${ARCH_ADDITION}-${GALAXY_VERSION_NUMBER}")
-  set_property(TARGET universelan-dllhost-${GALAXY_VERSION} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/Debug/")
+  set_target_properties(universelan-dllhost-${GALAXY_VERSION} PROPERTIES 
+    OUTPUT_NAME "UniverseLANDllHost${ARCH_ADDITION}"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/"
+  )
+  set_property(TARGET universelan-dllhost-${GALAXY_VERSION} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/Debug/")
+
+  file(COPY "${CMAKE_SOURCE_DIR}/Config/" DESTINATION "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/Debug/")
+  file(COPY "${CMAKE_SOURCE_DIR}/Config/" DESTINATION "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/Release/")
+
 endfunction()
 
 MACRO(SUBDIRLIST result curdir)
@@ -142,8 +141,22 @@ MACRO(SUBDIRLIST result curdir)
   SET(${result} ${dirlist})
 ENDMACRO()
 
-SUBDIRLIST(SUBDIRS ${CMAKE_CURRENT_SOURCE_DIR})
+if (MSVC)
+  if("${MSVC_C_ARCHITECTURE_ID}" STREQUAL "X86")
+    set(GALAXY_ARCH "x86")
+  elseif("${MSVC_C_ARCHITECTURE_ID}" STREQUAL "x64")
+    set(GALAXY_ARCH "x64")
+  endif()
+else()
+  # unsupported arch/OS/compiler?
+  return()
+endif()
 
-FOREACH(subdir ${SUBDIRS})
-  add_universelan_executables(${subdir})
+SUBDIRLIST(SUBDIRS ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR})
+
+FOREACH(GALAXY_VERSION_NUMBER ${SUBDIRS})
+  set(TOTAL_PATH "${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/${GALAXY_ARCH}")
+  if(EXISTS "${TOTAL_PATH}/CMakeLists.txt")
+    add_subdirectory(${TOTAL_PATH})
+  endif()
 ENDFOREACH()
