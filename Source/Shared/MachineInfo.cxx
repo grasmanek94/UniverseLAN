@@ -6,6 +6,7 @@
 #include <iphlpapi.h>
 #endif
 
+#include <cstdint>
 #include <iomanip>
 #include <sstream>
 #include <string>

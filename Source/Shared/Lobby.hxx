@@ -31,7 +31,7 @@ namespace universelan {
 		using messages_t = std::map<uint32_t, Message>;
 		using view_members_t = std::ranges::elements_view<
 			std::ranges::ref_view<const universelan::Lobby::user_data_t>,
-			0Ui64
+			0ULL
 		>;
 
 		using data_by_index_t = std::pair<std::string, std::string>;
