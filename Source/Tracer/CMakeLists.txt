@@ -10,7 +10,7 @@ target_link_libraries(
     universelan-common-tracer
     PUBLIC
       boost
-      detours
+      $<$<PLATFORM_ID:Windows>:detours>
       $<$<PLATFORM_ID:Windows>:StackWalker>
     PRIVATE
       $<$<PLATFORM_ID:Windows>:Imagehlp>

@@ -400,7 +400,7 @@ namespace universelan {
 			local_user_data->stats.run_locked_stats<void>([&](auto& Stats) {
 				for (const auto& entry : keys) {
 					if ((entry.pItem != nullptr) && (strlen(entry.pItem) > 0)) {
-						StatsDataContainer c{ .i = ini.GetLongValue(StatsSection.c_str(), entry.pItem, 0) };
+						StatsDataContainer c{ .i = static_cast<int32_t>(ini.GetLongValue(StatsSection.c_str(), entry.pItem, 0)) };
 						Stats.emplace(std::string(entry.pItem), c);
 					}
 				}
