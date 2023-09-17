@@ -20,7 +20,7 @@ function(define_shared GALAXY_VERSION)
       universelan-simpleini
       universelan-common-version
       universelan-common-tracer
-      $<$<PLATFORM_ID:Linux>:libtbb>
+      $<$<PLATFORM_ID:Linux>:tbb>
     PRIVATE
       $<$<PLATFORM_ID:Windows>:IPHLPAPI>
   )
