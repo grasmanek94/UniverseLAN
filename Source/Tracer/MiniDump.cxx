@@ -1,4 +1,4 @@
-#include "Minidump.hxx"
+#include "MiniDump.hxx"
 
 #ifdef _WIN32
 #include <tchar.h>

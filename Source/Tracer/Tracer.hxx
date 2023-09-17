@@ -1,9 +1,13 @@
 #pragma once
+#include <cstdint>
 #include <iostream>
 #include <syncstream>
 #include <source_location>
 
 namespace universelan::tracer {
+	template<uint64_t N>
+	static constexpr uint64_t bit() { return 1 << N; }
+
 	class Trace
 	{
 	private:
@@ -11,9 +15,6 @@ namespace universelan::tracer {
 		const char* const func;
 		const void* return_address;
 	public:
-		template<uint64_t N>
-		static constexpr uint64_t bit() { return 1 << N; }
-
 		enum MASK: uint64_t {
 			INFORMATIONAL = 0,
 			HIGH_FREQUENCY_CALLS = bit<0>(),
