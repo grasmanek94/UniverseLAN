@@ -15,7 +15,7 @@ namespace universelan::client {
 		using func_t = std::function<void(void)>;
 
 	private:
-		concurrency::concurrent_queue<func_t> queue;
+		Concurrency::concurrent_queue<func_t> queue;
 
 	public:
 		DelayRunner();

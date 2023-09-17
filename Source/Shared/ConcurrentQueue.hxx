@@ -6,4 +6,5 @@
 #include <tbb/concurrent_queue.h>
 
 namespace Concurrency = tbb;
+namespace concurrency = Concurrency;
 #endif
