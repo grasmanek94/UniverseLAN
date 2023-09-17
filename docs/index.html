@@ -1,3 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>GitHub - grasmanek94 - UniverseLAN</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
 <h1 id="why-">Why?</h1>
 <p>This extends the <a href="https://www.gog.com/en/about_gog">&quot;You buy it, you own it&quot;</a> and  &quot;DRM-Free&quot; GOG philisophy to the multiplayer portion of all games that use GOG Galaxy.</p>
 <p>Why <em>Universe</em>LAN? Because the Universe is much bigger than the Galaxy!</p>
@@ -19,7 +29,7 @@
 Place in <code>Source/DLLs/&lt;version&gt;/UniverseLAN.def</code></p>
 <h1 id="instructions">Instructions</h1>
 <ul>
-<li>Replace target game <code>Galaxy.dll</code>, <code>Galaxy64.dll</code>, <code>REDGalaxy.dll</code> or <code>REDGalaxy64.dll</code> to use UniverseLAN (check the .dll file properties to view the version information, else make an sha1 checksum and look in <a href="ZipFileHasher/sha1_hashes.txt">sha1_hashes.txt</a> for the hash to determine the sdk version).</li>
+<li>Replace target game <code>Galaxy.dll</code>, <code>Galaxy64.dll</code>, <code>REDGalaxy.dll</code> or <code>REDGalaxy64.dll</code> to use UniverseLAN (check the .dll file properties to view the version information, else make an sha1 checksum and look in <a href="https://github.com/grasmanek94/UniverseLAN/blob/master/ZipFileHasher/sha1_hashes.txt">sha1_hashes.txt</a> for the hash to determine the sdk version).</li>
 <li>Place config files in the working directory of the game</li>
 <li>Place Server executable where config files are located</li>
 <li>Adjust config accordingly (e.g. point to a server address that hosts the UniverseLAN Backend)</li>
@@ -31,187 +41,9 @@ Place in <code>Source/DLLs/&lt;version&gt;/UniverseLAN.def</code></p>
 </ul>
 <h1 id="debug-information">Debug Information</h1>
 <p>Debug (tracing) files can be found in <code>&lt;Configuration Files Directory&gt;/tracing/&lt;date time when application was launched&gt;/</code>.</p>
-<h1 id="list-status-of-games">List / status of games</h1>
-<p>:white_check_mark: (N) - Players can play together, tested with N players [(2) would mean 2 clients].<br>:construction: - Work in progress.<br>:warning: - May or may not work, not tested, the future will tell.<br>:x: - Tested and does not work.<br>:question: - Can&#39;t acquire the correct GOG Galaxy SDK version.<br>:left_right_arrow: - Game supports direct connect, LAN or free multiplayer, and as such does not need UniverseLAN.  </p>
-<table>
-<thead>
-<tr>
-<th style="text-align:left">Game</th>
-<th style="text-align:center">Status</th>
-<th style="text-align:center">Tested GOG Galaxy SDK Version</th>
-<th style="text-align:center">Notes</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left">Aragami 1</td>
-<td style="text-align:center">:white_check_mark:(2)</td>
-<td style="text-align:center">1.121.2</td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:left">Forsaken Remastered</td>
-<td style="text-align:center">:white_check_mark:(3)</td>
-<td style="text-align:center">1.124.0.0</td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:left">Guns, Gore &amp; Cannoli 2</td>
-<td style="text-align:center">:white_check_mark:(3)</td>
-<td style="text-align:center">1.124.0.0</td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:left">Tropico 6</td>
-<td style="text-align:center">:white_check_mark:(2)</td>
-<td style="text-align:center">1.139.2</td>
-<td style="text-align:center">Also other games are displayed? Game has custom networking?</td>
-</tr>
-<tr>
-<td style="text-align:left">MetalSlug3</td>
-<td style="text-align:center">:construction:</td>
-<td style="text-align:center">1.100.2</td>
-<td style="text-align:center">Can host and join lobby, can&#39;t get past character selection screen.</td>
-</tr>
-<tr>
-<td style="text-align:left">Serious Sams Bogus Detour</td>
-<td style="text-align:center">:construction:</td>
-<td style="text-align:center">1.100.2</td>
-<td style="text-align:center">Stuck on &quot;Creating lobby...&quot; or &quot;Joining lobby...&quot;</td>
-</tr>
-<tr>
-<td style="text-align:left">Alien vs Predator 2000</td>
-<td style="text-align:center">:question:</td>
-<td style="text-align:center"></td>
-<td style="text-align:center">It&#39;s some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176.2.6?</td>
-</tr>
-<tr>
-<td style="text-align:left">Homeworld Remastered Collection</td>
-<td style="text-align:center">:warning:</td>
-<td style="text-align:center"></td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:left">Homeworld: Deserts of Kharak</td>
-<td style="text-align:center">:warning:</td>
-<td style="text-align:center"></td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:left">No Man&#39;s Sky</td>
-<td style="text-align:center">:warning:</td>
-<td style="text-align:center"></td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:left">Serious Sam 4</td>
-<td style="text-align:center">:warning:</td>
-<td style="text-align:center">1.144.1</td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:left">Speed Brawl</td>
-<td style="text-align:center">:warning:</td>
-<td style="text-align:center">1.144.1</td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:left">Northgard</td>
-<td style="text-align:center">:warning:</td>
-<td style="text-align:center">1.139.2</td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:left">Niffelheim</td>
-<td style="text-align:center">:warning:</td>
-<td style="text-align:center">1.139.2</td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:left">DUSK</td>
-<td style="text-align:center">:warning:</td>
-<td style="text-align:center">1.133.6</td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:left">Tooth and Tail</td>
-<td style="text-align:center">:warning:</td>
-<td style="text-align:center">1.122.1</td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:left">Absolver</td>
-<td style="text-align:center">:warning:</td>
-<td style="text-align:center">1.104.2</td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:left">Shadow Warrior 2</td>
-<td style="text-align:center">:warning:</td>
-<td style="text-align:center">1.95.0</td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:left">Tropico 5</td>
-<td style="text-align:center">:warning:</td>
-<td style="text-align:center">1.68.0</td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:left">Rage of Mages II: Necromancer</td>
-<td style="text-align:center">:left_right_arrow:</td>
-<td style="text-align:center"></td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:left">Neverwinter Nights 2 Complete</td>
-<td style="text-align:center">:left_right_arrow:</td>
-<td style="text-align:center"></td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:left">Baldur&#39;s Gate 3</td>
-<td style="text-align:center">:left_right_arrow:</td>
-<td style="text-align:center"></td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:left">Heroes of Might and Magic 3</td>
-<td style="text-align:center">:left_right_arrow:</td>
-<td style="text-align:center"></td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:left">Empire Earth 3</td>
-<td style="text-align:center">:left_right_arrow:</td>
-<td style="text-align:center"></td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:left">Jazz Jackrabbit 2 Collection</td>
-<td style="text-align:center">:left_right_arrow:</td>
-<td style="text-align:center"></td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:left">Ticket to Ride</td>
-<td style="text-align:center">:left_right_arrow:</td>
-<td style="text-align:center">1.139.2</td>
-<td style="text-align:center">Tried it with the wrapper and works, but need to create a free Wonder account</td>
-</tr>
-<tr>
-<td style="text-align:left">Aragami 2</td>
-<td style="text-align:center">:left_right_arrow:</td>
-<td style="text-align:center">1.148.3</td>
-<td style="text-align:center">Probably does not use GOG Galaxy for networking (doesn&#39;t work for private lobbies).<br> Can play on public lobbies without GOG Galaxy or with this patch AFAIK.</td>
-</tr>
-<tr>
-<td style="text-align:left">Roboquest</td>
-<td style="text-align:center">:x:</td>
-<td style="text-align:center">1.148.3</td>
-<td style="text-align:center">Probably does not use GOG Galaxy for networking.</td>
-</tr>
-</tbody>
-</table>
+<h1 id="list-status-of-games"><a href="https://github.com/grasmanek94/UniverseLAN/">List / status of games</a></h1>
+<a href="https://github.com/grasmanek94/UniverseLAN/">Click here</a>
 <h1 id="notice">Notice</h1>
 <p>I&#39;m not affiliated in any way with GOG or CD Projekt RED.<br>All trademarks and copyright are property of their respective owners.<br>Any statements or expressed opinions here are each of their respective own person and do not represent any companies or other entities.<br>GOG SDK documentation and SDK include files are freely available from <a href="https://docs.gog.com/galaxyapi/">https://docs.gog.com/galaxyapi/</a>.<br>No copyright infringement intended.  </p>
+  </body>
+</html>
