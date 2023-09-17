@@ -15,6 +15,8 @@ if(MSVC)
   add_definitions(/MP)
   # Enable EHa 
   #string(REGEX REPLACE "/EHsc" "/EHa" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+else()
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/)
