@@ -2,9 +2,11 @@
 
 #include <Tracer.hxx>
 
+#ifdef _WIN32
 #include <Windows.h>
 #include <io.h>
 #include <fcntl.h>
+#endif
 
 #include <fstream>
 #include <iostream>
@@ -17,10 +19,12 @@ namespace universelan::client {
 	{
 		tracer::Trace trace{  };
 
+#ifdef _WIN32
 		FILE* fDummy;
 		freopen_s(&fDummy, "CONIN$", "r", stdin);
 		freopen_s(&fDummy, "CONOUT$", "w", stderr);
 		freopen_s(&fDummy, "CONOUT$", "w", stdout);
+#endif
 
 		//Clear the error state for each of the C++ standard stream objects. We need to do this, as
 		//attempts to access the standard streams before they refer to a valid target will cause the
@@ -48,6 +52,7 @@ namespace universelan::client {
 
 		CustomConsoleEnabled = true;
 
+#ifdef _WIN32
 		// allocate a console for this app
 		AllocConsole();
 
@@ -57,5 +62,6 @@ namespace universelan::client {
 		BindStdHandlesToConsole();
 
 		SetConsoleTitleA("UniverseLAN");
+#endif
 	}
 }
