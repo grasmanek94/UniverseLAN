@@ -5,7 +5,7 @@
 #include <Networking/SendableEventMessage.hxx>
 
 #include <GalaxyID.h>
-#include <IMatchMaking.h>
+#include <IMatchmaking.h>
 
 namespace universelan {
 	class LeaveLobbyMessage

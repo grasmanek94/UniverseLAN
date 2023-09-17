@@ -1,7 +1,7 @@
 #pragma once
 
 #include <GalaxyID.h>
-#include <IMatchMaking.h>
+#include <IMatchmaking.h>
 
 #include <GalaxyID.hxx>
 
