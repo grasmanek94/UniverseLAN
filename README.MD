@@ -6,13 +6,13 @@ Why *Universe*LAN? Because the Universe is much bigger than the Galaxy!
 
 # What is *UniverseLAN*?
 
-UniverseLAN is a GOG Galaxy wrapper which allows LAN / Direct IP connections for games using Galaxy Multiplayer (without using GOG Galaxy client).  
+[UniverseLAN](https://github.com/grasmanek94/UniverseLAN) is a GOG Galaxy wrapper which allows LAN / Direct IP connections for games using Galaxy Multiplayer (without using GOG Galaxy client).  
 
 # What is the status of *UniverseLAN*?
-UniverseLAN is in development, and in beta.  
+[UniverseLAN](https://github.com/grasmanek94/UniverseLAN) is in development, and in beta.  
 Do expect bugs, possibly lost save files, updates and fixes.  
 > At this moment in time you are expected to build it yourself to get binaries.  
-> UniverseLAN requires a C++20 compatible compiler.  
+> [UniverseLAN](https://github.com/grasmanek94/UniverseLAN) requires a C++20 compatible compiler.  
 > The internal development name of this project is `LanSupportForDRMFreeGames [LSFDRMFG]`, you might see references to that in the source.  
 
 ### Note
@@ -86,5 +86,5 @@ Debug (tracing) files can be found in `<Configuration Files Directory>/tracing/<
 I'm not affiliated in any way with GOG or CD Projekt RED.  
 All trademarks and copyright are property of their respective owners.  
 Any statements or expressed opinions here are each of their respective own person and do not represent any companies or other entities.  
-GOG SDK documentation and SDK include files are freely available from https://docs.gog.com/galaxyapi/  .
+GOG SDK documentation and SDK include files are freely available from https://docs.gog.com/galaxyapi/.  
 No copyright infringement intended.  
