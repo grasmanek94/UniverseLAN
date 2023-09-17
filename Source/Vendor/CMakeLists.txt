@@ -3,7 +3,10 @@ cmake_minimum_required(VERSION 3.12)
 add_subdirectory(Enet)
 add_subdirectory(boost)
 add_subdirectory(Detours)
+
+if(MSVC)
 add_subdirectory(StackWalker)
+endif()
 
 include(simpleini.cmake)
 include(magic_enum.cmake)

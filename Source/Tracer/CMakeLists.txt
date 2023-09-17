@@ -11,7 +11,7 @@ target_link_libraries(
     PUBLIC
       boost
       detours
-      StackWalker
+      $<$<PLATFORM_ID:Windows>:StackWalker>
     PRIVATE
       $<$<PLATFORM_ID:Windows>:Imagehlp>
 )

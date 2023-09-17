@@ -303,3 +303,4 @@ bin/
 Source/Version/auto_version.h
 cmake-x86/
 cmake-x64/
+cmake-linux/
