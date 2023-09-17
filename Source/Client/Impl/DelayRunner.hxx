@@ -1,9 +1,10 @@
 #ifndef UNIVERSELAN_IMPL_DELAY_RUNNER_H
 #define UNIVERSELAN_IMPL_DELAY_RUNNER_H
 
+#include <ConcurrentQueue.hxx>
+
 #include <functional>
 #include <mutex>
-#include <concurrent_queue.h>
 
 namespace universelan::client {
 	class DelayRunner

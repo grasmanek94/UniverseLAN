@@ -2,11 +2,9 @@
 
 #include <enet/enetpp.hxx>
 
-#include "Messages.hxx"
+#include <ConcurrentQueue.hxx>
 
-#ifdef _WIN32
-#include <concurrent_queue.h>
-#endif
+#include "Messages.hxx"
 
 #include <cstdlib>
 #include <memory>
