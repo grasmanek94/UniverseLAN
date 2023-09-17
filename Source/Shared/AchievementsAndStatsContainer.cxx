@@ -1,5 +1,3 @@
-#pragma once
-
 #include "AchievementsAndStatsContainer.hxx"
 
 #include <chrono>

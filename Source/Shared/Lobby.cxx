@@ -1,5 +1,3 @@
-#pragma once
-
 #include "Lobby.hxx"
 
 #include "ContainerGetByIndex.hxx"

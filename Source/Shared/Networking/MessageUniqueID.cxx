@@ -1,5 +1,3 @@
-#pragma once
-
 #include "MessageUniqueID.hxx"
 
 // Runtime unique ID
