@@ -1,14 +1,12 @@
 #include <GalaxyApi.h>
 
-#include <windows.h>
-
 #include <chrono>
 #include <thread>
 
 using namespace galaxy::api;
 using namespace std::chrono;
 
-int Run()
+int main()
 {
 	InitOptions options("", "");
 
@@ -22,11 +20,15 @@ int Run()
 	return 0;
 }
 
-int 
+#ifdef _WIN32
+#include <windows.h>
+
+int
 #ifndef _WIN64
-__stdcall 
+__stdcall
 #endif
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
-	return Run();
+	return main();
 }
+#endif

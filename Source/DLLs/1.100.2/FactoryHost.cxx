@@ -1,14 +1,12 @@
 #include <GalaxyFactory.h>
 
-#include <windows.h>
-
 #include <chrono>
 #include <thread>
 
 using namespace galaxy::api;
 using namespace std::chrono;
 
-int Run()
+int main()
 {
 	auto galaxy = GalaxyFactory::GetInstance(
 		//0, 0
@@ -25,11 +23,15 @@ int Run()
 	return 0;
 }
 
+#ifdef _WIN32
+#include <windows.h>
+
 int 
 #ifndef _WIN64
 __stdcall 
 #endif
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
-	return Run();
+	return main();
 }
+#endif
