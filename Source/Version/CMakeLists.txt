@@ -7,9 +7,9 @@ add_library(universelan-common-version STATIC ${COMMON_VERSION_SRC} )
 target_include_directories(universelan-common-version PUBLIC ".")
 
 if(MSVC)
-set(UpdateVersionExt bat)
+  set(UpdateVersionExt bat)
 else()
-set(UpdateVersionExt sh)
+  set(UpdateVersionExt sh)
 endif()
 
 add_custom_target(

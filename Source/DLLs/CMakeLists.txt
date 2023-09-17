@@ -141,6 +141,7 @@ MACRO(SUBDIRLIST result curdir)
   SET(${result} ${dirlist})
 ENDMACRO()
 
+
 if (MSVC)
   if("${MSVC_C_ARCHITECTURE_ID}" STREQUAL "X86")
     set(GALAXY_ARCH "x86")
@@ -148,8 +149,17 @@ if (MSVC)
     set(GALAXY_ARCH "x64")
   endif()
 else()
-  # unsupported arch/OS/compiler?
-  return()
+
+  if(NOT GALAXY_ARCH)
+    set(GALAXY_ARCH "" CACHE STRING "Architecture which is being compiled for (x86 or x64)")
+  endif()
+
+  if(NOT "--${GALAXY_ARCH}--" STREQUAL "--x86--")
+    if(NOT "--${GALAXY_ARCH}--" STREQUAL "--x64--")   
+      message("Unknown GALAXY_ARCH, please define GALAXY_ARCH manually (x86 or x64)")
+      return()
+    endif()
+  endif()
 endif()
 
 SUBDIRLIST(SUBDIRS ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR})
