@@ -8,6 +8,15 @@ Why *Universe*LAN? Because the Universe is much bigger than the Galaxy!
 
 [UniverseLAN](https://github.com/grasmanek94/UniverseLAN) is a GOG Galaxy wrapper which allows LAN / Direct IP connections for games using Galaxy Multiplayer (without using GOG Galaxy client).  
 
+<small>I hope this does not need to be said, but:</small>   
+- **UniverseLAN does not bypass or remove any DRM measures.**  
+- UniverseLAN does not condone piracy, does not facilitate piracy, and will not facilitate piracy.  
+- UniverseLAN is not a cheat tool and does not facilitate cheating.  
+- Please adhere to [GOG requirements](https://support.gog.com/hc/en-us/articles/212184489-Can-I-share-games-with-others-?product=gog):  
+> Your account and games are for your personal use only. If you want to share them, you can always buy a gift for that person.
+> 
+> The DRM-free nature of our service means that we trust you that this will not be abused.
+
 # What is the status of *UniverseLAN*?
 [UniverseLAN](https://github.com/grasmanek94/UniverseLAN) is in development, and in beta.  
 Do expect bugs, possibly lost save files, updates and fixes.  
