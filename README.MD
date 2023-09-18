@@ -1,6 +1,6 @@
 # Why?
 
-This extends the ["You buy it, you own it"](https://www.gog.com/en/about_gog) and  "DRM-Free" GOG philisophy to the multiplayer portion of all games that use GOG Galaxy.
+This extends the ["You buy it, you own it"](https://www.gog.com/en/about_gog) and  "DRM-Free" GOG philosophy to the multiplayer portion of all games that use GOG Galaxy.
 
 Why *Universe*LAN? Because the Universe is much bigger than the Galaxy!
 
