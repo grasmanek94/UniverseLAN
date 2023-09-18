@@ -7,6 +7,8 @@ Why *Universe*LAN? Because the Universe is much bigger than the Galaxy!
 # What is *UniverseLAN*?
 
 [UniverseLAN](https://github.com/grasmanek94/UniverseLAN) is a GOG Galaxy wrapper which allows LAN / Direct IP connections for games using Galaxy Multiplayer (without using GOG Galaxy client).  
+This is useful in cases where you and others own a game, don't have (reliable) internet access, and as such GOG Galaxy services won't work.  
+UniverseLAN allows you to play locally (e.g. LAN parties) without relying on internet access.   
 
 <small>I hope this does not need to be said, but:</small>   
 - **UniverseLAN does not bypass or remove any DRM measures.**  
