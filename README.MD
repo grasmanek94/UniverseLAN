@@ -24,6 +24,7 @@ UniverseLAN allows you to play locally (e.g. LAN parties) without relying on int
 > Your account and games are for your personal use only. If you want to share them, you can always buy a gift for that person.
 > 
 > The DRM-free nature of our service means that we trust you that this will not be abused.
+- The devices that you want to play on together do need to be able to reach each other on a reliable (local) network.
 
 # What is the status of *UniverseLAN*?
 [UniverseLAN](https://github.com/grasmanek94/UniverseLAN) is in development, and in beta.  
