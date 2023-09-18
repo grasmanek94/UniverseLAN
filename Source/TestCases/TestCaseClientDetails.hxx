@@ -9,6 +9,7 @@ namespace galaxy::api {
 	using namespace std::string_view_literals;
 
 #ifndef GALAXY_SDK_CLIENT_ID
+	// these are public and published by GOG themselves for everyone to use
 	constexpr std::string_view CLIENT_ID = "50225266424144145";
 	constexpr std::string_view CLIENT_SECRET = "45955f1104f99b625a5733fa1848479b43d63bdb98f0929e37c9affaf900e99f";
 #else
