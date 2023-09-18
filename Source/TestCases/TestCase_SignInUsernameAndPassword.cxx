@@ -56,6 +56,8 @@ public:
 int main()
 {
     tracer::Trace::InitTracing(".", false, true, false, 0, true);
+    tracer::Trace::SetLogToCout(true);
+
     tracer::Trace trace{};
 
     galaxy::api::InitOptions options(galaxy::api::CLIENT_ID_STR.data(), galaxy::api::CLIENT_SECRET.data());
@@ -69,16 +71,3 @@ int main()
     }
     return 0;
 }
-
-#ifdef _WIN32
-#include <windows.h>
-
-int
-#ifndef _WIN64
-__stdcall
-#endif
-WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
-{
-	return main();
-}
-#endif
