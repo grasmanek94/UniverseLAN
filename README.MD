@@ -106,7 +106,7 @@ Any statements or expressed opinions here are each of their respective own perso
 GOG SDK documentation and SDK include files are freely available from https://docs.gog.com/galaxyapi/.  
 No copyright infringement intended.  
 
-# Isn't distributing header files against copyrights?  
+# Is distributing header files against copyrights?  
 I don't think so:  
   
 1. https://en.wikipedia.org/wiki/Google_LLC_v._Oracle_America,_Inc.
