@@ -14,4 +14,7 @@ else
     GALAXY_ARCH="x86"
 fi
 
-cmake -D CMAKE_C_COMPILER=/usr/local/bin/gcc -D CMAKE_CXX_COMPILER=/usr/local/bin/g++ -D GALAXY_ARCH="${GALAXY_ARCH}" ..
+BUILD_TYPE="Debug" # Release Debug RelWithDebInfo MinSizeRel
+COMPILER_PATH=/usr/local/bin/
+
+cmake -D CMAKE_C_COMPILER="${COMPILER_PATH}/gcc" -D CMAKE_CXX_COMPILER="${COMPILER_PATH}/g++" -D GALAXY_ARCH="${GALAXY_ARCH}" -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" ..

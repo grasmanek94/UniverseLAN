@@ -109,8 +109,8 @@ function(add_universelan_executables GALAXY_VERSION_NUMBER)
   target_link_libraries(universelan-client-${GALAXY_VERSION} PUBLIC universelan-lib-${GALAXY_VERSION})
   set_target_properties(universelan-client-${GALAXY_VERSION} PROPERTIES 
     OUTPUT_NAME "Galaxy${ARCH_ADDITION}"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/"
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/${UNIVERSELAN_EXTRA_BIN_FOLDER}"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/${UNIVERSELAN_EXTRA_BIN_FOLDER}"
   )
 
   # add version.rc
@@ -123,8 +123,8 @@ function(add_universelan_executables GALAXY_VERSION_NUMBER)
   target_link_libraries(universelan-dllhost-${GALAXY_VERSION} PUBLIC universelan-client-${GALAXY_VERSION} )
   set_target_properties(universelan-dllhost-${GALAXY_VERSION} PROPERTIES 
     OUTPUT_NAME "UniverseLANDllHost${ARCH_ADDITION}"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/"
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/${UNIVERSELAN_EXTRA_BIN_FOLDER}"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/${UNIVERSELAN_EXTRA_BIN_FOLDER}"
   )
   set_property(TARGET universelan-dllhost-${GALAXY_VERSION} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/Debug/")
 
@@ -148,27 +148,6 @@ MACRO(SUBDIRLIST result curdir)
   ENDFOREACH()
   SET(${result} ${dirlist})
 ENDMACRO()
-
-
-if (MSVC)
-  if("${MSVC_C_ARCHITECTURE_ID}" STREQUAL "X86")
-    set(GALAXY_ARCH "x86")
-  elseif("${MSVC_C_ARCHITECTURE_ID}" STREQUAL "x64")
-    set(GALAXY_ARCH "x64")
-  endif()
-else()
-
-  if(NOT GALAXY_ARCH)
-    set(GALAXY_ARCH "" CACHE STRING "Architecture which is being compiled for (x86 or x64)")
-  endif()
-
-  if(NOT "--${GALAXY_ARCH}--" STREQUAL "--x86--")
-    if(NOT "--${GALAXY_ARCH}--" STREQUAL "--x64--")   
-      message("Unknown GALAXY_ARCH, please define GALAXY_ARCH manually (x86 or x64)")
-      return()
-    endif()
-  endif()
-endif()
 
 SUBDIRLIST(SUBDIRS ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR})
 
