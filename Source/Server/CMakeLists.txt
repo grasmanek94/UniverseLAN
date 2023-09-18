@@ -15,11 +15,15 @@ function(define_server GALAXY_VERSION GALAXY_VERSION_NUMBER GALAXY_ARCH)
     universelan-server-${GALAXY_VERSION}
     PUBLIC universelan-common-shared-${GALAXY_VERSION}
   )
-  
+
+  if(NOT MSVC)
+    target_link_options(universelan-server-${GALAXY_VERSION} PRIVATE -static-libgcc -static-libstdc++)
+  endif()
 
   set_target_properties(universelan-server-${GALAXY_VERSION} PROPERTIES 
     OUTPUT_NAME "UniverseLANServer${GALAXY_ARCH}"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/"
   )
 
   set_property(TARGET universelan-server-${GALAXY_VERSION} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/Debug/")

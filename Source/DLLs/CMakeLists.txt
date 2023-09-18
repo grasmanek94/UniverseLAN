@@ -110,7 +110,9 @@ function(add_universelan_executables GALAXY_VERSION_NUMBER)
   set_target_properties(universelan-client-${GALAXY_VERSION} PROPERTIES 
     OUTPUT_NAME "Galaxy${ARCH_ADDITION}"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/"
   )
+
   # add version.rc
   add_client_version_rc()
 
@@ -122,8 +124,14 @@ function(add_universelan_executables GALAXY_VERSION_NUMBER)
   set_target_properties(universelan-dllhost-${GALAXY_VERSION} PROPERTIES 
     OUTPUT_NAME "UniverseLANDllHost${ARCH_ADDITION}"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/"
   )
   set_property(TARGET universelan-dllhost-${GALAXY_VERSION} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/Debug/")
+
+  if(NOT MSVC)
+    target_link_options(universelan-client-${GALAXY_VERSION} PRIVATE -static-libgcc -static-libstdc++)
+    target_link_options(universelan-dllhost-${GALAXY_VERSION} PRIVATE -static-libgcc -static-libstdc++)
+  endif()
 
   file(COPY "${CMAKE_SOURCE_DIR}/Config/" DESTINATION "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/Debug/")
   file(COPY "${CMAKE_SOURCE_DIR}/Config/" DESTINATION "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/Release/")
