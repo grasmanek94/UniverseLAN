@@ -42,6 +42,14 @@ Place in `Source/DLLs/<version>/UniverseLAN.def`
 # Debug Information
 Debug (tracing) files can be found in `<Configuration Files Directory>/tracing/<date time when application was launched>/`.
 
+# Compilation
+## Windows
+- Visual Studio 2019 16.10 or newer required  
+  
+## Linux
+- Requires GCC 13 or newer.  
+- Requires libtbb to be present (libtbb:i386 on 64-bit systems when compiling for x86)  
+  
 # List / status of games
 
 :white_check_mark: (N) - Players can play together, tested with N players [(2) would mean 2 clients].  
