@@ -8,4 +8,10 @@ add_subdirectory(Client)
 add_subdirectory(Server)
 add_subdirectory(DLLs)
 
-add_subdirectory(TestCases)
+if(NOT BUILD_TEST_CASES)
+  set(BUILD_TEST_CASES "" CACHE STRING "If enabled, all test cases will be built")
+endif()
+
+if(BUILD_TEST_CASES)
+  add_subdirectory(TestCases)
+endif()
