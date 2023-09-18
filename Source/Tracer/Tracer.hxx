@@ -45,5 +45,6 @@ namespace universelan::tracer {
 
 		static std::ofstream& thread_logger();
 		static std::osyncstream global_logger();
+		static void write_all(const char* const data);
 	};
 }
