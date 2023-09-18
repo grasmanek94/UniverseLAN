@@ -118,13 +118,21 @@ function(add_universelan_executables GALAXY_VERSION_NUMBER)
 
   define_projects_for_version()
 
+  # some SDK versions use REDGalaxy instead of Galaxy for lib name
+  get_property(GALAXY_BUILD_FEATURE_HAS_RED_PREFIX GLOBAL PROPERTY "GALAXY_${GALAXY_VERSION_NUMBER}_BUILD_FEATURE_HAS_RED_PREFIX")
+  if(GALAXY_BUILD_FEATURE_HAS_RED_PREFIX)
+    set(MAYBE_RED_GALAXY_PREFIX "RED")
+  else()
+    set(MAYBE_RED_GALAXY_PREFIX "")
+  endif()
+
   # Create the .DLL / Shared library
   add_library(universelan-client-${GALAXY_VERSION} SHARED "${UNIVERSELAN_SOURCE_CLIENT}" "${MODULE_DEFINITION_FILE}" )
   target_include_directories(universelan-client-${GALAXY_VERSION} PUBLIC "${UNIVERSELAN_SDK_INCL_DIR}")
   target_compile_definitions(universelan-client-${GALAXY_VERSION} PUBLIC "CLIENT_${UNIVERSELAN_OUT_TYPE}")
   target_link_libraries(universelan-client-${GALAXY_VERSION} PUBLIC universelan-lib-${GALAXY_VERSION})
   set_target_properties(universelan-client-${GALAXY_VERSION} PROPERTIES 
-    OUTPUT_NAME "Galaxy${ARCH_ADDITION}"
+    OUTPUT_NAME "${MAYBE_RED_GALAXY_PREFIX}Galaxy${ARCH_ADDITION}"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/${UNIVERSELAN_EXTRA_BIN_FOLDER}"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/${UNIVERSELAN_EXTRA_BIN_FOLDER}"
   )

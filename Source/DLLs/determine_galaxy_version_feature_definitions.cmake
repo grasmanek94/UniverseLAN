@@ -20,6 +20,8 @@ function(afvd FEATURE_NAME FEATURE_MIN_VERSION)
   target_compile_definitions(${TARGET} PUBLIC 
     "GALAXY_BUILD_FEATURE_${FEATURE_NAME}=${RESULT}"
   )
+
+  set_property(GLOBAL PROPERTY "GALAXY_${UVV}_BUILD_FEATURE_${FEATURE_NAME}" "${RESULT}")
 endfunction()
 
 include(../galaxy_sdk_features.cmake)
