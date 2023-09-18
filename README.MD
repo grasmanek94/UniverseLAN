@@ -11,7 +11,7 @@ Why *Universe*LAN? Because the Universe is much bigger than the Galaxy!
 <small>I hope this does not need to be said, but:</small>   
 - **UniverseLAN does not bypass or remove any DRM measures.**  
 - UniverseLAN does not condone piracy, does not facilitate piracy, and will not facilitate piracy.  
-- UniverseLAN is not a cheat tool and does not facilitate cheating.  
+- UniverseLAN is not a cheat tool and does not facilitate cheating, and will not facilitate cheating.  
 - Please adhere to [GOG requirements](https://support.gog.com/hc/en-us/articles/212184489-Can-I-share-games-with-others-?product=gog):  
 > Your account and games are for your personal use only. If you want to share them, you can always buy a gift for that person.
 > 
