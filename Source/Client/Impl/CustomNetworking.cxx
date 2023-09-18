@@ -19,7 +19,7 @@ namespace universelan::client {
 
 	bool CustomNetworkingImpl::Channel::connect(const char* connectionString, IConnectionOpenListener* listener)
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		// Initialize ASIO
 		client.init_asio();
@@ -56,14 +56,14 @@ namespace universelan::client {
 
 	void CustomNetworkingImpl::Channel::start()
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		runner = std::jthread(&CustomNetworkingImpl::ChannelThread, custom_network, shared_from_this());
 	}
 
 	void CustomNetworkingImpl::ChannelThread(std::shared_ptr<Channel> channel)
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		channel->client.run();
 
@@ -89,23 +89,23 @@ namespace universelan::client {
 
 	CustomNetworkingImpl::Channel::~Channel()
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 	}
 
 	CustomNetworkingImpl::CustomNetworkingImpl(InterfaceInstances* intf) :
 		listeners{ intf->notification.get() }, mtx{}, channels{}
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 	}
 
 	CustomNetworkingImpl::~CustomNetworkingImpl()
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 	}
 
 	void CustomNetworkingImpl::WebSocketOnOpen(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl)
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		listeners->NotifyAll(&IConnectionOpenListener::OnConnectionOpenSuccess, channel->connection_string.c_str(), (ConnectionID)channel.get());
 	}
@@ -127,7 +127,7 @@ namespace universelan::client {
 
 	void CustomNetworkingImpl::WebSocketOnClose(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl)
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		listeners->NotifyAll(channel->listener_close, &IConnectionCloseListener::OnConnectionClosed, (ConnectionID)this, IConnectionCloseListener::CLOSE_REASON_UNDEFINED);
 
@@ -138,7 +138,7 @@ namespace universelan::client {
 
 	void CustomNetworkingImpl::WebSocketOnFail(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl)
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		listeners->NotifyAll(channel->listener_open, &IConnectionOpenListener::OnConnectionOpenFailure, channel->connection_string.c_str()
 #if (GALAXY_VERSION) > 11240
@@ -169,7 +169,7 @@ namespace universelan::client {
 		, IConnectionOpenListener* const listener
 #endif
 	) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		auto channel = std::make_shared<Channel>(this);
 
@@ -194,7 +194,7 @@ namespace universelan::client {
 		, IConnectionCloseListener* const listener
 #endif
 	) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		std::shared_ptr<Channel> channel{ GetChannel(connectionID) };
 		if (!channel) {

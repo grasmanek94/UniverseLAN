@@ -30,7 +30,7 @@ namespace universelan::client {
 
 		tracer::Trace::SetTracingEnabled(true);
 
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		delay_runner = std::make_unique<DelayRunner>(); // No 'this' on purpose
 

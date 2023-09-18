@@ -457,7 +457,7 @@ namespace universelan::server {
 	}
 
 	template<typename T, typename U> bool BoilerplateHandleLobbyDataUpdate(peer::Mapper& peer_mapper, GalaxyNetworkServer& connection, ENetPeer* peer, const T& data, const U& notification, std::function<bool(peer::ptr pd)> func) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		peer::ptr pd = peer_mapper.Get(peer);
 
@@ -571,7 +571,7 @@ namespace universelan::server {
 	}
 
 	bool Server::HandleMemberLobbyLeave(ENetPeer* peer, bool disconnected) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		peer::ptr pd = peer_mapper.Get(peer);
 

@@ -17,11 +17,11 @@ namespace universelan::client {
 		mtx{}, lobby_list{}, lobby_list_filters{ {}, 250, true },
 		lobby_list_filtered{}, joined_lobby{}, lobby_list_filtered_requests{}
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 	}
 
 	MatchmakingImpl::~MatchmakingImpl() {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 	}
 
 	void MatchmakingImpl::CreateLobby(
@@ -34,7 +34,7 @@ namespace universelan::client {
 		, ILobbyEnteredListener* const lobbyEnteredListener
 #endif
 	) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		uint64_t request_id = MessageUniqueID::get();
 
@@ -47,7 +47,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::CreateLobbyProcessed(const std::shared_ptr<CreateLobbyResponseMessage>& data) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		ILobbyCreatedListener* lobbyCreatedListener = create_lobby_requests.pop(data->request_id);
 		ILobbyEnteredListener* lobbyEnteredListener = create_lobby_entered_requests.pop(data->request_id);
@@ -75,7 +75,7 @@ namespace universelan::client {
 		, ILobbyListListener* const listener
 #endif
 	) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		uint64_t request_id = MessageUniqueID::get();
 
@@ -96,7 +96,7 @@ namespace universelan::client {
 	}
 
 	static bool ShouldFilterOut(LobbyManager::lobby_t& lobby, const MatchmakingImpl::filter_container_t& filters) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		bool add = true;
 
@@ -186,7 +186,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::RequestLobbyListProcessed(const std::shared_ptr<RequestLobbyListMessage>& data) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		auto listener = list_lobbies_requests.pop(data->request_id);
 		auto filter = lobby_list_filtered_requests.pop(data->request_id);
@@ -236,7 +236,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_MATCHMAKING_RESULT_COUNT
 	void MatchmakingImpl::AddRequestLobbyListResultCountFilter(uint32_t limit) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		lock_t lock{ mtx };
 		lobby_list_filters.max_entries = limit;
@@ -244,7 +244,7 @@ namespace universelan::client {
 #endif
 
 	void MatchmakingImpl::AddRequestLobbyListStringFilter(const char* keyToMatch, const char* valueToMatch, LobbyComparisonType comparisonType) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		lock_t lock{ mtx };
 
@@ -255,7 +255,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::AddRequestLobbyListNumericalFilter(const char* keyToMatch, int32_t valueToMatch, LobbyComparisonType comparisonType) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		lock_t lock{ mtx };
 
@@ -266,14 +266,14 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::AddRequestLobbyListNearValueFilter(const char* keyToMatch, int32_t valueToBeCloseTo) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 #if GALAXY_BUILD_FEATURE_NEAR_FILTER_ENUM
 		AddRequestLobbyListNumericalFilter(keyToMatch, valueToBeCloseTo, LOBBY_COMPARISON_TYPE_NEAR);
 #endif
 	}
 
 	GalaxyID MatchmakingImpl::GetLobbyByIndex(uint32_t index) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		lock_t lock{ mtx };
 
@@ -289,7 +289,7 @@ namespace universelan::client {
 		, ILobbyEnteredListener* const listener
 #endif
 	) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		uint64_t request_id = MessageUniqueID::get();
 
@@ -301,7 +301,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::JoinLobbyProcessed(const std::shared_ptr<JoinLobbyMessage>& data) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		auto listener = join_lobby_requests.pop(data->request_id);
 
@@ -330,7 +330,7 @@ namespace universelan::client {
 		, ILobbyLeftListener* const listener
 #endif
 	) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		uint64_t request_id = MessageUniqueID::get();
 
@@ -342,7 +342,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::LeaveLobbyProcessed(const std::shared_ptr<LeaveLobbyMessage>& data) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		auto listener = leave_lobby_requests.pop(data->request_id);
 
@@ -371,7 +371,7 @@ namespace universelan::client {
 #endif
 	)
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		uint64_t request_id = MessageUniqueID::get();
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
@@ -383,7 +383,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::SetLobbyMaxMembersProcessed(const std::shared_ptr<SetLobbyMaxMembersMessage>& data) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		uint64_t request_id = MessageUniqueID::get();
 
@@ -412,7 +412,7 @@ namespace universelan::client {
 	}
 
 	uint32_t MatchmakingImpl::GetMaxNumLobbyMembers(GalaxyID lobbyID) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		lock_t lock{ mtx };
 
@@ -425,7 +425,7 @@ namespace universelan::client {
 	}
 
 	uint32_t MatchmakingImpl::GetNumLobbyMembers(GalaxyID lobbyID) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		lock_t lock{ mtx };
 
@@ -438,7 +438,7 @@ namespace universelan::client {
 	}
 
 	GalaxyID MatchmakingImpl::GetLobbyMemberByIndex(GalaxyID lobbyID, uint32_t index) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		lock_t lock{ mtx };
 
@@ -458,7 +458,7 @@ namespace universelan::client {
 #endif
 	)
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		uint64_t request_id = MessageUniqueID::get();
 
@@ -472,7 +472,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::SetLobbyTypeProcessed(const std::shared_ptr<SetLobbyTypeMessage>& data) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		uint64_t request_id = MessageUniqueID::get();
 
@@ -501,7 +501,7 @@ namespace universelan::client {
 	}
 
 	LobbyType MatchmakingImpl::GetLobbyType(GalaxyID lobbyID) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		lock_t lock{ mtx };
 
@@ -520,7 +520,7 @@ namespace universelan::client {
 #endif
 	)
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		uint64_t request_id = MessageUniqueID::get();
 
@@ -533,7 +533,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::SetLobbyJoinableProcessed(const std::shared_ptr<SetLobbyJoinableMessage>& data) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		uint64_t request_id = MessageUniqueID::get();
 
@@ -561,7 +561,7 @@ namespace universelan::client {
 	}
 
 	bool MatchmakingImpl::IsLobbyJoinable(GalaxyID lobbyID) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		lock_t lock{ mtx };
 
@@ -580,7 +580,7 @@ namespace universelan::client {
 #endif
 	)
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		uint64_t request_id = MessageUniqueID::get();
 
@@ -594,7 +594,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::RequestLobbyDataProcessed(const std::shared_ptr<RequestLobbyDataMessage>& data) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		auto listener = get_lobby_data_requests.pop(data->request_id);
 
@@ -618,7 +618,7 @@ namespace universelan::client {
 	}
 
 	const char* MatchmakingImpl::GetLobbyData(GalaxyID lobbyID, const char* key) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		lock_t lock{ mtx };
 
@@ -631,7 +631,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::GetLobbyDataCopy(GalaxyID lobbyID, const char* key, char* buffer, uint32_t bufferLength) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		lock_t lock{ mtx };
 
@@ -651,7 +651,7 @@ namespace universelan::client {
 #endif
 	)
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		uint64_t request_id = MessageUniqueID::get();
 
@@ -665,7 +665,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::SetLobbyDataProcessed(const std::shared_ptr<SetLobbyDataMessage>& data) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		auto listener = set_lobby_data_requests.pop(data->request_id);
 
@@ -692,7 +692,7 @@ namespace universelan::client {
 	}
 
 	uint32_t MatchmakingImpl::GetLobbyDataCount(GalaxyID lobbyID) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		lock_t lock{ mtx };
 
@@ -705,7 +705,7 @@ namespace universelan::client {
 	}
 
 	bool MatchmakingImpl::GetLobbyDataByIndex(GalaxyID lobbyID, uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		lock_t lock{ mtx };
 
@@ -732,7 +732,7 @@ namespace universelan::client {
 #endif
 	)
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 
 		SetLobbyData(lobbyID, key, ""
@@ -745,7 +745,7 @@ namespace universelan::client {
 	}
 
 	const char* MatchmakingImpl::GetLobbyMemberData(GalaxyID lobbyID, GalaxyID memberID, const char* key) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		lock_t lock{ mtx };
 
@@ -758,7 +758,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::GetLobbyMemberDataCopy(GalaxyID lobbyID, GalaxyID memberID, const char* key, char* buffer, uint32_t bufferLength) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		lock_t lock{ mtx };
 
@@ -776,7 +776,7 @@ namespace universelan::client {
 		, ILobbyMemberDataUpdateListener* const listener
 #endif
 	) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		uint64_t request_id = MessageUniqueID::get();
 
@@ -788,7 +788,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::SetLobbyMemberDataProcessed(const std::shared_ptr<SetLobbyMemberDataMessage>& data) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		auto listener = set_lobby_member_data_requests.pop(data->request_id);
 
@@ -816,7 +816,7 @@ namespace universelan::client {
 	}
 
 	uint32_t MatchmakingImpl::GetLobbyMemberDataCount(GalaxyID lobbyID, GalaxyID memberID) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		lock_t lock{ mtx };
 
@@ -829,7 +829,7 @@ namespace universelan::client {
 	}
 
 	bool MatchmakingImpl::GetLobbyMemberDataByIndex(GalaxyID lobbyID, GalaxyID memberID, uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		lock_t lock{ mtx };
 
@@ -854,7 +854,7 @@ namespace universelan::client {
 		, ILobbyMemberDataUpdateListener* const listener
 #endif
 	) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		SetLobbyMemberData(lobbyID, key, ""
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
@@ -864,7 +864,7 @@ namespace universelan::client {
 	}
 
 	GalaxyID MatchmakingImpl::GetLobbyOwner(GalaxyID lobbyID) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		lock_t lock{ mtx };
 
@@ -877,7 +877,7 @@ namespace universelan::client {
 	}
 
 	bool MatchmakingImpl::SendLobbyMessage(GalaxyID lobbyID, SEND_LOBBY_MESSAGE_DATA_T* data, uint32_t dataSize) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		lock_t lock{ mtx };
 
@@ -890,7 +890,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::SendLobbyMessageProcessed(const std::shared_ptr<SendToLobbyMessage>& data) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		if (data->message.message_id == 0) {
 			return;
@@ -910,7 +910,7 @@ namespace universelan::client {
 	}
 
 	uint32_t MatchmakingImpl::GetLobbyMessage(GalaxyID lobbyID, uint32_t messageID, GalaxyID& senderID, char* msg, uint32_t msgLength) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		lock_t lock{ mtx };
 
@@ -923,7 +923,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::LobbyMemberStateChange(const std::shared_ptr<LobbyMemberStateChangeMessage>& data) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		{
 			lock_t lock{ mtx };
@@ -951,7 +951,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::LobbyOwnerChange(const std::shared_ptr<LobbyOwnerChangeMessage>& data) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		{
 			lock_t lock{ mtx };

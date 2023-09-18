@@ -14,12 +14,12 @@ namespace universelan::client {
 		intf{ intf }, delay_runner{ delay_runner },
 		listeners{}
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 	}
 
 	ListenerRegistrarImpl::~ListenerRegistrarImpl()
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		for (int t = LISTENER_TYPE_BEGIN; t < LISTENER_TYPE_END; ++t) {
 			if (listeners[t].set.size()) {
@@ -29,7 +29,7 @@ namespace universelan::client {
 	}
 
 	void ListenerRegistrarImpl::Register(ListenerTypeImpl listenerType, IGalaxyListener* listener) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		if (listener != nullptr) {
 			std::cout << __FUNCTION__ << ":" << std::dec << listenerType << " @" << std::hex << (size_t)listener << std::dec << std::endl;
@@ -40,7 +40,7 @@ namespace universelan::client {
 	}
 
 	void ListenerRegistrarImpl::Unregister(ListenerTypeImpl listenerType, IGalaxyListener* listener) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		lock_t lock{ listeners[listenerType].mtx };
 		listeners[listenerType].set.erase(listener);

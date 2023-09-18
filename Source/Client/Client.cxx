@@ -52,7 +52,7 @@ namespace universelan::client {
 
 	void Client::Start()
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		running = true;
 		tick_thread = std::thread{ &Client::Tick, this };
@@ -60,7 +60,7 @@ namespace universelan::client {
 
 	void Client::Stop()
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		running = false;
 		if (tick_thread.joinable()) {

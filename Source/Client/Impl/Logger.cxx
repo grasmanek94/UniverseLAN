@@ -15,7 +15,7 @@ namespace universelan::client {
 	LoggerImpl::LoggerImpl(InterfaceInstances* intf) :
 		intf{ intf }, mtx{}, logfile{}
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		static std::atomic_int counter = 0;
 
@@ -42,7 +42,7 @@ namespace universelan::client {
 
 	LoggerImpl::~LoggerImpl()
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		if (logfile) {
 			lock_t lock(mtx);
@@ -71,37 +71,37 @@ namespace universelan::client {
 			}
 
 	void LoggerImpl::Trace(const char* format, ...) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		Log("[T]");
 	}
 
 	void LoggerImpl::Debug(const char* format, ...) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		Log("[D]");
 	}
 
 	void LoggerImpl::Info(const char* format, ...) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		Log("[I]");
 	}
 
 	void LoggerImpl::Warning(const char* format, ...) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		Log("[W]");
 	}
 
 	void LoggerImpl::Error(const char* format, ...) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		Log("[E]");
 	}
 
 	void LoggerImpl::Fatal(const char* format, ...) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		Log("[F]");
 	}

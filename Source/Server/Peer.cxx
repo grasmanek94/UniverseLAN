@@ -29,7 +29,7 @@ namespace universelan::server::peer {
 	}
 
 	ptr Mapper::Connect(ENetPeer* peer) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		assert(peer != nullptr);
 		ptr x = (ptr)peer->data;
@@ -40,7 +40,7 @@ namespace universelan::server::peer {
 	}
 
 	void Mapper::Disconnect(ENetPeer* peer) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		assert(peer != nullptr);
 
@@ -68,7 +68,7 @@ namespace universelan::server::peer {
 	}
 
 	bool Data::link(const GalaxyID& id) {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		if (peer->data == nullptr) {
 			return false;

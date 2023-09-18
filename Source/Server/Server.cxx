@@ -102,7 +102,7 @@ namespace universelan::server {
 	}
 
 	void Server::PerformPeerCleanup() {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		auto now = std::chrono::system_clock::now();
 

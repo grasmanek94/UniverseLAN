@@ -238,9 +238,9 @@ namespace universelan::tracer {
 		Tracer::Enter(func, extra, return_address);
 	}
 
-	// delegate constructor
+	// delegate constructors
 	Trace::Trace(MASK mask, const char* const extra, const char* const func) : Trace{ extra, mask, func } {}
-
+	Trace::Trace(const char* const extra, const char* const func, MASK mask) : Trace{ extra, mask, func } {}
 
 	Trace::~Trace() {
 		if (!enabled) {

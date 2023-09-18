@@ -22,7 +22,7 @@ namespace universelan::client {
 	void UniverseGameServer::InitGameServer(const InitOptions& initOptions) {
 		gameserver_intf_inst.init(initOptions);
 
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		if (gameserver_intf_inst.config->GetEnableConsole()) {
 			EnableCustomConsole();
@@ -37,57 +37,57 @@ namespace universelan::client {
 		gameserver_intf_inst.client->Start();
 	}
 	void UniverseGameServer::ShutdownGameServer() {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		gameserver_intf_inst.reset();
 	}
 
 	IUser* UniverseGameServer::GameServerUser() {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		return gameserver_intf_inst.user.get();
 	}
 
 	IMatchmaking* UniverseGameServer::GameServerMatchmaking() {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		return gameserver_intf_inst.matchmaking.get();
 	}
 
 	INetworking* UniverseGameServer::GameServerNetworking() {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		return gameserver_intf_inst.networking.get();
 	}
 
 	IUtils* UniverseGameServer::GameServerUtils() {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		return gameserver_intf_inst.utils.get();
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 	ITelemetry* UniverseGameServer::GameServerTelemetry() {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		return gameserver_intf_inst.telemetry.get();
 	}
 #endif
 
 	ILogger* UniverseGameServer::GameServerLogger() {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		return gameserver_intf_inst.logger.get();
 	}
 
 	IListenerRegistrar* UniverseGameServer::GameServerListenerRegistrar() {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		return gameserver_intf_inst.notification.get();
 	}
 
 	void UniverseGameServer::ProcessGameServerData() {
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		if (gameserver_intf_inst.client != nullptr) {
 			gameserver_intf_inst.client->ProcessEvents();

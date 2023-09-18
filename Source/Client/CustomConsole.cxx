@@ -19,7 +19,7 @@ namespace universelan::client {
 
 	void BindStdHandlesToConsole()
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 #ifdef _WIN32
 		FILE* fDummy;
@@ -43,7 +43,7 @@ namespace universelan::client {
 
 	void EnableCustomConsole()
 	{
-		tracer::Trace trace{  };
+		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		static bool CustomConsoleEnabled = false;
 
