@@ -1,16 +1,22 @@
+#include "TestCaseClientDetails.hxx"
+
 #include <GalaxyApi.h>
+
+#include <Tracer.hxx>
 
 #include <chrono>
 #include <thread>
 
-class AuthListenerGlobal : public galaxy::api::GlobalAuthListener
+namespace tracer = universelan::tracer;
+
+class AuthListenerImplGlobal : public galaxy::api::GlobalAuthListener
 {
 public:
-    AuthListenerGlobal() {
+    AuthListenerImplGlobal() {
 
     }
 
-    virtual ~AuthListenerGlobal() = default;
+    virtual ~AuthListenerImplGlobal() = default;
 
     virtual void OnAuthSuccess() override {
 
@@ -25,14 +31,14 @@ public:
     }
 };
 
-class AuthListenerLocal : public galaxy::api::IAuthListener
+class AuthListenerImplLocal : public galaxy::api::IAuthListener
 {
 public:
-    AuthListenerLocal() {
+    AuthListenerImplLocal() {
 
     }
 
-    virtual ~AuthListenerLocal() = default;
+    virtual ~AuthListenerImplLocal() = default;
 
     virtual void OnAuthSuccess() override {
 
@@ -49,7 +55,10 @@ public:
 
 int main()
 {
-    galaxy::api::InitOptions options("", "");
+    tracer::Trace::InitTracing(".", false, true, false, 0, true);
+    tracer::Trace trace{};
+
+    galaxy::api::InitOptions options(galaxy::api::CLIENT_ID_STR.data(), galaxy::api::CLIENT_SECRET.data());
 
     galaxy::api::Init(options);
 

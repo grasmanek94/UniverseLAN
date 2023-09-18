@@ -18,8 +18,9 @@ function(add_simple_test_case GALAXY_VERSION_NUMBER TEST_CASE_NAME)
   # Create a simple DLL/SO host
   set(CURRENT_TEST_TARGET zz-testcase-${GALAXY_VERSION}-${TEST_CASE_NAME})
   set(CURRENT_TEST_OUTPUT "${CMAKE_SOURCE_DIR}/bin/tests/${GALAXY_VERSION_NUMBER}/${UNIVERSELAN_EXTRA_BIN_FOLDER}")
+  set(CURRENT_TEST_REFERENCE_DIR "${GALAXY_DLL_VERSIONS_DIR}/${GALAXY_VERSION_NUMBER}/gog")
 
-  add_executable(${CURRENT_TEST_TARGET} WIN32 "TestCase_${TEST_CASE_NAME}.cxx")
+  add_executable(${CURRENT_TEST_TARGET} "TestCase_${TEST_CASE_NAME}.cxx")
   target_include_directories(${CURRENT_TEST_TARGET} PUBLIC ".")
   target_compile_definitions(${CURRENT_TEST_TARGET} PUBLIC 
     "TEST_CASE=1"
@@ -42,7 +43,7 @@ function(add_simple_test_case GALAXY_VERSION_NUMBER TEST_CASE_NAME)
     universelan-galaxy-${GALAXY_VERSION} 
     universelan-common-tracer
     universelan-common-version
-    "${GALAXY_DLL_VERSIONS_DIR}/${GALAXY_VERSION_NUMBER}/gog/${MAYBE_RED_GALAXY_PREFIX}Galaxy${ARCH_ADDITION}.lib"
+    "${CURRENT_TEST_REFERENCE_DIR}/${MAYBE_RED_GALAXY_PREFIX}Galaxy${ARCH_ADDITION}.lib"
   )
 
   set_target_properties(${CURRENT_TEST_TARGET} PROPERTIES 
@@ -57,8 +58,12 @@ function(add_simple_test_case GALAXY_VERSION_NUMBER TEST_CASE_NAME)
 
     target_link_options(${CURRENT_TEST_TARGET} PRIVATE -static-libgcc -static-libstdc++)
     file(COPY "${CMAKE_SOURCE_DIR}/Config/" DESTINATION "${CURRENT_TEST_OUTPUT}")
+    file(COPY "${CURRENT_TEST_REFERENCE_DIR}/lib${MAYBE_RED_GALAXY_PREFIX}Galaxy${ARCH_ADDITION}.so" DESTINATION "${CURRENT_TEST_OUTPUT}/Debug/")
 
   else()
+
+    file(COPY "${CURRENT_TEST_REFERENCE_DIR}/${MAYBE_RED_GALAXY_PREFIX}Galaxy${ARCH_ADDITION}.dll" DESTINATION "${CURRENT_TEST_OUTPUT}/Debug/")
+    file(COPY "${CURRENT_TEST_REFERENCE_DIR}/${MAYBE_RED_GALAXY_PREFIX}Galaxy${ARCH_ADDITION}.dll" DESTINATION "${CURRENT_TEST_OUTPUT}/Release/")
 
     file(COPY "${CMAKE_SOURCE_DIR}/Config/" DESTINATION "${CURRENT_TEST_OUTPUT}/Debug/")
     file(COPY "${CMAKE_SOURCE_DIR}/Config/" DESTINATION "${CURRENT_TEST_OUTPUT}/Release/")
