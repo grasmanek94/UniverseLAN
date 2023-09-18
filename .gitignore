@@ -21,3 +21,5 @@ Source/Version/temp_auto_version.h
 cmake-x86/
 cmake-x64/
 cmake-linux/
+cmake-linux-x86/
+cmake-linux-x64/
