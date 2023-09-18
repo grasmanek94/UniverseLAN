@@ -1,2 +1,4 @@
-*/versioninfo.rc
-**/versioninfo.rc
+versioninfo.rc
+client_versioninfo.rc
+dllhost_versioninfo.rc
+server_versioninfo.rc

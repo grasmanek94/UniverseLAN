@@ -8,13 +8,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "grasmanek94"
-            VALUE "FileDescription", "UniverseLAN Client - https://github.com/grasmanek94/LanSupportForDRMFreeGames"
+            VALUE "CompanyName", "grasmanek94/UniverseLAN"
+            VALUE "FileDescription", "UniverseLAN @UVLAN_COMPONENT@ - https://github.com/grasmanek94/UniverseLAN"
             VALUE "FileVersion","@GALAXY_VERSION_MAJOR@, @GALAXY_VERSION_MINOR@, @GALAXY_VERSION_PATCH@, 0"
             VALUE "InternalName", "@PROJECT_NAME@"
             VALUE "LegalCopyright", "UniverseLAN 2022 - @PROJECT_CURRENT_YEAR@"
-            VALUE "OriginalFilename", "Galaxy-@GALAXY_VERSION@.dll"
-            VALUE "ProductName", "UniverseLAN Client"
+            VALUE "OriginalFilename", "@UVLAN_OriginalFilename@"
+            VALUE "ProductName", "UniverseLAN @UVLAN_COMPONENT@"
             VALUE "ProductVersion","@GALAXY_VERSION_MAJOR@, @GALAXY_VERSION_MINOR@, @GALAXY_VERSION_PATCH@, 0"
         END
     END

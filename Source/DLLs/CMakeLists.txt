@@ -36,7 +36,7 @@ function(add_version_definitions_to TARGET)
   add_feature_definitions_to_target(${TARGET} ${GALAXY_VERSION_MAJOR} ${GALAXY_VERSION_MINOR} ${GALAXY_VERSION_PATCH})
 endfunction()
 
-function(add_client_version_rc)
+function(add_version_rc)
   string(REPLACE "." "" GALAXY_VERSION_DEF ${GALAXY_VERSION})
   string(REPLACE "x64-" "" GALAXY_VERSION_DEF ${GALAXY_VERSION_DEF})
   string(REPLACE "x86-" "" GALAXY_VERSION_DEF ${GALAXY_VERSION_DEF})
@@ -57,10 +57,26 @@ function(add_client_version_rc)
 
   string(TIMESTAMP PROJECT_CURRENT_YEAR "%Y")
 
-  # ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR} is location of folder below (so version specific one)
-  SET(OUT_VERSION_RC_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/${GALAXY_ARCH}/versioninfo.rc)
-  configure_file(${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/versioninfo.rc.cmake.in ${OUT_VERSION_RC_FILE} @ONLY)
-  target_sources(universelan-client-${GALAXY_VERSION} PUBLIC ${OUT_VERSION_RC_FILE})
+  SET(IN_VERSION_RC_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/versioninfo.rc.cmake.in)
+
+  SET(UVLAN_COMPONENT "Client")
+  SET(UVLAN_OriginalFilename "Galaxy-${GALAXY_VERSION}.dll")
+  SET(OUT_VERSION_RC_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/${GALAXY_ARCH}/client_versioninfo.rc)
+  configure_file(${IN_VERSION_RC_FILE} ${OUT_VERSION_RC_FILE} @ONLY)
+  target_sources(universelan-client-${GALAXY_VERSION} PRIVATE ${OUT_VERSION_RC_FILE})
+
+  SET(UVLAN_COMPONENT "Dll Test Host")
+  SET(UVLAN_OriginalFilename "UniverseLANDLLHost-${GALAXY_VERSION}.exe")
+  SET(OUT_VERSION_RC_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/${GALAXY_ARCH}/dllhost_versioninfo.rc)
+  configure_file(${IN_VERSION_RC_FILE} ${OUT_VERSION_RC_FILE} @ONLY)
+  target_sources(universelan-dllhost-${GALAXY_VERSION} PRIVATE ${OUT_VERSION_RC_FILE})
+
+  SET(UVLAN_COMPONENT "Server")
+  SET(UVLAN_OriginalFilename "UniverseLANServer-${GALAXY_VERSION}.exe")
+  SET(OUT_VERSION_RC_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/${GALAXY_ARCH}/server_versioninfo.rc)
+  configure_file(${IN_VERSION_RC_FILE} ${OUT_VERSION_RC_FILE} @ONLY)
+  target_sources(universelan-server-${GALAXY_VERSION} PRIVATE ${OUT_VERSION_RC_FILE})
+
 endfunction()
 
 function(define_projects_for_version)
@@ -113,9 +129,6 @@ function(add_universelan_executables GALAXY_VERSION_NUMBER)
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/${UNIVERSELAN_EXTRA_BIN_FOLDER}"
   )
 
-  # add version.rc
-  add_client_version_rc()
-
   # Create a simple DLL/SO host
   add_executable(universelan-dllhost-${GALAXY_VERSION}  WIN32  "${UNIVERSELAN_SOURCE_HOST}")
   target_include_directories(universelan-dllhost-${GALAXY_VERSION} PUBLIC "${UNIVERSELAN_SDK_INCL_DIR}")
@@ -132,6 +145,9 @@ function(add_universelan_executables GALAXY_VERSION_NUMBER)
     target_link_options(universelan-client-${GALAXY_VERSION} PRIVATE -static-libgcc -static-libstdc++)
     target_link_options(universelan-dllhost-${GALAXY_VERSION} PRIVATE -static-libgcc -static-libstdc++)
   endif()
+
+  # add version.rc
+  add_version_rc()
 
   file(COPY "${CMAKE_SOURCE_DIR}/Config/" DESTINATION "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/Debug/")
   file(COPY "${CMAKE_SOURCE_DIR}/Config/" DESTINATION "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/Release/")
