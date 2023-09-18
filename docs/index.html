@@ -9,42 +9,76 @@
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
-<h1 id="why-">Why?</h1>
-<p>This extends the <a href="https://www.gog.com/en/about_gog">&quot;You buy it, you own it&quot;</a> and  &quot;DRM-Free&quot; GOG philisophy to the multiplayer portion of all games that use GOG Galaxy.</p>
-<p>Why <em>Universe</em>LAN? Because the Universe is much bigger than the Galaxy!</p>
-<h1 id="what-is-universelan-">What is <em>UniverseLAN</em>?</h1>
-<p><a href="https://github.com/grasmanek94/UniverseLAN">UniverseLAN</a> is a GOG Galaxy wrapper which allows LAN / Direct IP connections for games using Galaxy Multiplayer (without using GOG Galaxy client).  </p>
-<h1 id="what-is-the-status-of-universelan-">What is the status of <em>UniverseLAN</em>?</h1>
-<p><a href="https://github.com/grasmanek94/UniverseLAN">UniverseLAN</a> is in development, and in beta.<br>Do expect bugs, possibly lost save files, updates and fixes.  </p>
-<blockquote>
-<p>At this moment in time you are expected to build it yourself to get binaries.<br><a href="https://github.com/grasmanek94/UniverseLAN">UniverseLAN</a> requires a C++20 compatible compiler.<br>The internal development name of this project is <code>LanSupportForDRMFreeGames [LSFDRMFG]</code>, you might see references to that in the source.  </p>
-</blockquote>
-<h3 id="note">Note</h3>
-<p><small><em>*</em> Some games do use GOG Galaxy but do not use GOG Galaxy for multiplayer.<br>They can use other services or custom networking implementations.<br>Such games might not be able to be played together using UniverseLAN wrapper.</small></p>
-<h1 id="how-do-you-get-def-files-">How do you get .def files?</h1>
-<p>To generate the module definition files, use <a href="https://github.com/mavenlin/wrap_dll">wrap_dll</a>:  </p>
-<ul>
-<li><code>python3 wrap_dll.py Galaxy64.dll</code>  </li>
-</ul>
-<p>Then remove on each line everything after (and including) <strong><code>=</code> sign</strong> in .def file.
-Place in <code>Source/DLLs/&lt;version&gt;/UniverseLAN.def</code></p>
-<h1 id="instructions">Instructions</h1>
-<ul>
-<li>Replace target game <code>Galaxy.dll</code>, <code>Galaxy64.dll</code>, <code>REDGalaxy.dll</code> or <code>REDGalaxy64.dll</code> to use UniverseLAN (check the .dll file properties to view the version information, else make an sha1 checksum and look in <a href="https://github.com/grasmanek94/UniverseLAN/blob/master/ZipFileHasher/sha1_hashes.txt">sha1_hashes.txt</a> for the hash to determine the sdk version).</li>
-<li>Place config files in the working directory of the game</li>
-<li>Place Server executable where config files are located</li>
-<li>Adjust config accordingly (e.g. point to a server address that hosts the UniverseLAN Backend)</li>
-<li>It&#39;s recommended to NOT mix x64 and x86 platforms (e.g. x64 server with x86 game)</li>
-<li>Do NOT mix different versions due to ABI incompatibility (e.g. 1.148.3.0 client with 1.100.2.0 server or vice versa), GOG does not keep their Galaxy library backwards compatible / upgradeable.</li>
-<li>Don&#39;t add GOG stdint.h when adding new SDK versions, remove it. If you try it WILL cause errors.</li>
-<li>It is possible to support Galaxy SDK versions from 1.57 up to the newest ones (1.152.6+).</li>
-<li>If someone has earlier SDK headers and/or documentation files please share &lt;3</li>
-</ul>
-<h1 id="debug-information">Debug Information</h1>
-<p>Debug (tracing) files can be found in <code>&lt;Configuration Files Directory&gt;/tracing/&lt;date time when application was launched&gt;/</code>.</p>
-<h1 id="list-status-of-games"><a href="https://github.com/grasmanek94/UniverseLAN/">List / status of games</a></h1>
-<a href="https://github.com/grasmanek94/UniverseLAN/">Click here</a>
-<h1 id="notice">Notice</h1>
-<p>I&#39;m not affiliated in any way with GOG or CD Projekt RED.<br>All trademarks and copyright are property of their respective owners.<br>Any statements or expressed opinions here are each of their respective own person and do not represent any companies or other entities.<br>GOG SDK documentation and SDK include files are freely available from <a href="https://docs.gog.com/galaxyapi/">https://docs.gog.com/galaxyapi/</a>.<br>No copyright infringement intended.  </p>
-  </body>
+    <h1 id="why-">Why?</h1>
+    <p>This extends the <a href="https://www.gog.com/en/about_gog">&quot;You buy it, you own it&quot;</a> and  &quot;DRM-Free&quot; GOG philosophy to the multiplayer portion of all games that use GOG Galaxy.</p>
+    <p>Why <em>Universe</em>LAN? Because the Universe is much bigger than the Galaxy!</p>
+    <h1 id="what-is-universelan-">What is <em>UniverseLAN</em>?</h1>
+    <p><a href="https://github.com/grasmanek94/UniverseLAN">UniverseLAN</a> is a GOG Galaxy wrapper which allows LAN / Direct IP connections for games using Galaxy Multiplayer (without using GOG Galaxy client).<br>This is useful in cases where:
+    1) You and other people own a game
+    2) All or some of you don&#39;t have (reliable) internet access
+    3) And as such GOG Galaxy services won&#39;t work
+    4) The game you want to play does not natively support LAN and/or DirectIP connections
+    5) But you all want to play together anyway  </p>
+    <p>UniverseLAN allows you to play locally (e.g. LAN parties) without relying on internet access. UniverseLAN does not care if you are in a hotel room with bad WiFi or visiting a remote place with your friends! You can still enjoy your games, <em>together</em>.   </p>
+    <p><small>I hope this does not need to be said, but:</small>   </p>
+    <ul>
+    <li><strong>UniverseLAN does not bypass or remove any DRM measures.</strong>  </li>
+    <li>UniverseLAN does not condone piracy, does not facilitate piracy, and will not facilitate piracy.  </li>
+    <li>UniverseLAN is not a cheat tool and does not facilitate cheating, and will not facilitate cheating.  </li>
+    <li>Please adhere to <a href="https://support.gog.com/hc/en-us/articles/212184489-Can-I-share-games-with-others-?product=gog">GOG requirements</a>:  <blockquote>
+    <p>Your account and games are for your personal use only. If you want to share them, you can always buy a gift for that person.</p>
+    <p>The DRM-free nature of our service means that we trust you that this will not be abused.</p>
+    </blockquote>
+    </li>
+    <li>The devices that you want to play on together do need to be able to reach each other on a reliable (local) network.</li>
+    </ul>
+    <h1 id="what-is-the-status-of-universelan-">What is the status of <em>UniverseLAN</em>?</h1>
+    <p><a href="https://github.com/grasmanek94/UniverseLAN">UniverseLAN</a> is in development, and in beta.<br>Do expect bugs, possibly lost save files, updates and fixes.  </p>
+    <blockquote>
+    <p>At this moment in time you are expected to build it yourself to get binaries.<br><a href="https://github.com/grasmanek94/UniverseLAN">UniverseLAN</a> requires a C++20 compatible compiler.<br>The internal development name of this project is <code>LanSupportForDRMFreeGames [LSFDRMFG]</code>, you might see references to that in the source.  </p>
+    </blockquote>
+    <h3 id="note">Note</h3>
+    <p><small><em>*</em> Some games do use GOG Galaxy but do not use GOG Galaxy for multiplayer.<br>They can use other services or custom networking implementations.<br>Such games might not be able to be played together using UniverseLAN wrapper.</small></p>
+    <h1 id="how-do-you-get-def-files-">How do you get .def files?</h1>
+    <p>To generate the module definition files, use <a href="https://github.com/mavenlin/wrap_dll">wrap_dll</a>:  </p>
+    <ul>
+    <li><code>python3 wrap_dll.py Galaxy64.dll</code>  </li>
+    </ul>
+    <p>Then remove on each line everything after (and including) <strong><code>=</code> sign</strong> in .def file.
+    Place in <code>Source/DLLs/&lt;version&gt;/UniverseLAN.def</code></p>
+    <h1 id="instructions">Instructions</h1>
+    <ul>
+    <li>Replace target game <code>Galaxy.dll</code>, <code>Galaxy64.dll</code>, <code>REDGalaxy.dll</code> or <code>REDGalaxy64.dll</code> to use UniverseLAN (check the .dll file properties to view the version information, else make an sha1 checksum and look in <a href="https://github.com/grasmanek94/UniverseLAN/blob/master/ZipFileHasher/sha1_hashes.txt">sha1_hashes.txt</a> for the hash to determine the sdk version).</li>
+    <li>Place config files in the working directory of the game</li>
+    <li>Place Server executable where config files are located</li>
+    <li>Adjust config accordingly (e.g. point to a server address that hosts the UniverseLAN Backend)</li>
+    <li>It&#39;s recommended to NOT mix x64 and x86 platforms (e.g. x64 server with x86 game)</li>
+    <li>Do NOT mix different versions due to ABI incompatibility (e.g. 1.148.3.0 client with 1.100.2.0 server or vice versa), GOG does not keep their Galaxy library backwards compatible / upgradeable.</li>
+    <li>Don&#39;t add GOG stdint.h when adding new SDK versions, remove it. If you try it WILL cause errors.</li>
+    <li>It is possible to support Galaxy SDK versions from 1.57 up to the newest ones (1.152.6+).</li>
+    <li>If someone has earlier SDK headers and/or documentation files please share &lt;3</li>
+    </ul>
+    <h1 id="debug-information">Debug Information</h1>
+    <p>Debug (tracing) files can be found in <code>&lt;Configuration Files Directory&gt;/tracing/&lt;date time when application was launched&gt;/</code>.</p>
+    <h1 id="compilation">Compilation</h1>
+    <h2 id="windows">Windows</h2>
+    <ul>
+    <li>Visual Studio 2019 16.10 or newer required  </li>
+    </ul>
+    <h2 id="linux">Linux</h2>
+    <ul>
+    <li>Requires GCC 13 or newer.  </li>
+    <li>Requires libtbb to be present (libtbb:i386 on 64-bit systems when compiling for x86)  </li>
+    </ul>      
+  <h1 id="list-status-of-games"><a href="https://github.com/grasmanek94/UniverseLAN/">List / status of games</a></h1>
+  <a href="https://github.com/grasmanek94/UniverseLAN/">Click here</a>
+  <h1 id="notice">Notice</h1>
+  <p>I&#39;m not affiliated in any way with GOG or CD Projekt RED.<br>All trademarks and copyright are property of their respective owners.<br>Any statements or expressed opinions here are each of their respective own person and do not represent any companies or other entities.<br>GOG SDK documentation and SDK include files are freely available from <a href="https://docs.gog.com/galaxyapi/">https://docs.gog.com/galaxyapi/</a>.<br>No copyright infringement intended.  </p>
+  <h1 id="is-distributing-header-files-against-copyrights-">Is distributing header files against copyrights?</h1>
+  <p>I don&#39;t think so:  </p>
+  <ol>
+  <li><a href="https://en.wikipedia.org/wiki/Google_LLC_v._Oracle_America,_Inc">https://en.wikipedia.org/wiki/Google_LLC_v._Oracle_America,_Inc</a>.</li>
+  <li><a href="https://softwareengineering.stackexchange.com/questions/216471/how-does-copyrights-apply-to-source-code-header-files">https://softwareengineering.stackexchange.com/questions/216471/how-does-copyrights-apply-to-source-code-header-files</a></li>
+  </ol>
+</body>
 </html>
