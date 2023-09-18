@@ -2,3 +2,11 @@ versioninfo.rc
 client_versioninfo.rc
 dllhost_versioninfo.rc
 server_versioninfo.rc
+Galaxy.dll
+Galaxy.lib
+REDGalaxy.dll
+REDGalaxy.lib
+Galaxy64.dll
+Galaxy64.lib
+REDGalaxy64.dll
+REDGalaxy64.lib
