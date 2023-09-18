@@ -19,7 +19,7 @@ UniverseLAN allows you to play locally (e.g. LAN parties) without relying on int
 <small>I hope this does not need to be said, but:</small>   
 - **UniverseLAN does not bypass or remove any DRM measures.**    
 - **UniversLAN does not bypass any cd-key or ownership checks.**  
-- **UniverseLAN does not give you free DLC, you still need to buy DLC from GOG and install them before being able to use DLC.**  
+- **UniverseLAN does not give you free DLC, you still need to buy DLC from GOG and install the DLC before being able to use any DLC.**  
 - **UniverseLAN does not and can't bypass any "always online" requirements.**  
 - **UniverseLAN does not condone piracy, does not facilitate piracy, and will not facilitate piracy.**  
 - **UniverseLAN is not a cheat tool and does not facilitate cheating, and will not facilitate cheating.**  
