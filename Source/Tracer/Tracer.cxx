@@ -278,7 +278,7 @@ namespace universelan::tracer {
 	void Trace::write_all(const char* const data) {
 		auto& log_file = thread_tracer.GetLogFile();
 		if (log_file) {
-			log_file << std::string(thread_tracer.depth, ' ') << data;
+			log_file << std::string(thread_tracer.depth, ' ') << data << '\n';
 
 			if (should_always_flush_tracing) {
 				log_file.flush();
@@ -287,7 +287,7 @@ namespace universelan::tracer {
 
 		if (global_trace_file) {
 			std::osyncstream sync_stream(global_trace_file);
-			sync_stream << '[' << std::format("{:08x}", thread_tracer.GetCachedThreadID()) << "] " << data;
+			sync_stream << '[' << std::format("{:08x}", thread_tracer.GetCachedThreadID()) << "] " << data << '\n';
 
 			if (should_always_flush_tracing) {
 				sync_stream.flush();
@@ -296,7 +296,7 @@ namespace universelan::tracer {
 
 		if (trace_to_console) {
 			std::osyncstream sync_stream(std::cout);
-			sync_stream << '[' << std::format("{:08x}", thread_tracer.GetCachedThreadID()) << "] " << data;
+			sync_stream << '[' << std::format("{:08x}", thread_tracer.GetCachedThreadID()) << "] " << data << '\n';
 
 			if (should_always_flush_tracing) {
 				sync_stream.flush();

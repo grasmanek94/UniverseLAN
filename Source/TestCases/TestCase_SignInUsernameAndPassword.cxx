@@ -435,6 +435,7 @@ public:
 	}
 };
 
+#if GALAXY_BUILD_FEATURE_HAS_GOGSERVICECONNECTIONSTATELISTENER
 class GogServicesConnectionStateListenerImplGlobal : public galaxy::api::GlobalGogServicesConnectionStateListener
 {
 public:
@@ -450,6 +451,7 @@ public:
 		).c_str());
 	}
 };
+#endif
 
 class LeaderboardEntriesRetrieveListenerImplGlobal : public galaxy::api::GlobalLeaderboardEntriesRetrieveListener
 {
@@ -625,13 +627,24 @@ public:
 	LobbyLeftListenerImplGlobal() = default;
 	virtual ~LobbyLeftListenerImplGlobal() = default;
 
-	virtual void OnLobbyLeft(const GalaxyID& lobbyID, LobbyLeaveReason leaveReason) {
+	virtual void OnLobbyLeft(const GalaxyID& lobbyID
+#if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LEAVE_REASON
+		, LobbyLeaveReason leaveReason
+#endif
+	) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
+#if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LEAVE_REASON
 		trace.write_all(std::format(
 			"lobbyID: {} leaveReason: {}",
 			lobbyID, magic_enum::enum_name(leaveReason)
 		).c_str());
+#else
+		trace.write_all(std::format(
+			"lobbyID: {}",
+			lobbyID
+		).c_str());
+#endif
 	}
 };
 
@@ -641,13 +654,25 @@ public:
 	LobbyListListenerImplGlobal() = default;
 	virtual ~LobbyListListenerImplGlobal() = default;
 
-	virtual void OnLobbyList(uint32_t lobbyCount, LobbyListResult result) {
+	virtual void OnLobbyList(uint32_t lobbyCount
+#if HAS_IMATCHMAKING_LOBBY_LIST_RESULT
+		, LobbyListResult result
+#else
+		, bool ioFailure
+#endif
+	) override {
 		tracer::Trace trace{ "", __FUNCTION__ };
-
+#if HAS_IMATCHMAKING_LOBBY_LIST_RESULT
 		trace.write_all(std::format(
 			"lobbyCount: {} result: {}",
 			lobbyCount, magic_enum::enum_name(result)
 		).c_str());
+#else
+		trace.write_all(std::format(
+			"lobbyCount: {} ioFailure: {}",
+			lobbyCount, ioFailure
+		).c_str());
+#endif
 	}
 };
 
@@ -1200,7 +1225,9 @@ int main()
 	FriendListListenerImplGlobal friendlistlistener{};
 	GameInvitationReceivedListenerImplGlobal gameinvitationreceivedlistener{};
 	GameJoinRequestedListenerImplGlobal gamejoinrequestedlistener{};
+#if GALAXY_BUILD_FEATURE_HAS_GOGSERVICECONNECTIONSTATELISTENER
 	GogServicesConnectionStateListenerImplGlobal gogservicesconnectionstatelistener{};
+#endif
 	LeaderboardEntriesRetrieveListenerImplGlobal leaderboardentriesretrievelistener{};
 	LeaderboardRetrieveListenerImplGlobal leaderboardretrievelistener{};
 	LeaderboardScoreUpdateListenerImplGlobal leaderboardscoreupdatelistener{};

@@ -38,6 +38,11 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
   afvd(ISTATS_LEADERBORDSORTMETHOD1_71_ARG_CHANGE 1.71.0 				)
   afvd(ISTATS_GET_ACHIEVEMENT_COPY              1.71.0 			    	)
   afvd(IUSER_GET_DATA_ACCESSTOKEN_COPY          1.71.0 			    	)
+  
+  afvd(HAS_INOTIFICATIONLISTENER        		1.75.0 					)
+  afvd(HAS_ILOBBYDATARETRIEVELISTENER      		1.75.0 					)
+  afvd(HAS_IGAMEINVITATIONRECEIVEDLISTENER 		1.75.0 					)
+  afvd(IFRIENDS_HAS_ISAVATARRGBAIMAGEAVAILABLE 	1.75.0 					)
 
   # up to here it's up-to-date
   
@@ -47,6 +52,8 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
   afvd(ADDED_RICH_PRESENCE_LISTENERS			1.74.0					)
 
   afvd(HAS_INITOPTIONS 							1.82.0 					)
+
+  afvd(IUTILS_NOTIFICATION_ID_TYPEDEF   		1.92.1					)
 
   afvd(ENCRYPTED_APP_TICKET_CONST 				1.102.0					)
 
@@ -85,6 +92,10 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
   afvd(IFRIENDS_INFORMATIONLISTENERS			1.126.0					)
 
   afvd(IFRIENDS_ISTATS_UPDATE_1_127_0			1.127.0					)
+
+  afvd(HAS_CONNECTION_FAILURE_REASON		    1.129.0					)
+  afvd(HAS_IMATCHMAKING_LOBBY_LIST_RESULT		1.129.0					)
+  afvd(IUTILS_GETNOTIFICATION_1_129_CHANGE		1.129.0					)
 
   afvd(HAS_GAMESERVER_UTILS						1.133.0					)
   afvd(HAS_GOGSERVICECONNECTIONSTATELISTENER	1.133.0					)
