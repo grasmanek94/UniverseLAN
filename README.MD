@@ -32,8 +32,9 @@ UniverseLAN allows you to play locally (e.g. LAN parties) without relying on int
 # What is the status of *UniverseLAN*?
 [UniverseLAN](https://github.com/grasmanek94/UniverseLAN) is in development, and in beta.  
 Do expect bugs, possibly lost save files, updates and fixes.  
-> At this moment in time you are expected to build it yourself to get binaries.  
-> [UniverseLAN](https://github.com/grasmanek94/UniverseLAN) requires a C++20 compatible compiler.  
+> At this moment in time you are expected to build it yourself to get up-to-date binaries.  
+> Older binaries may be available at the '[Releases](https://github.com/grasmanek94/UniverseLAN/releases)' page.  
+> [UniverseLAN](https://github.com/grasmanek94/UniverseLAN) requires a C++20 compatible compiler (VS 2019 16.10+ , GCC 13+).  
 > The internal development name of this project is `LanSupportForDRMFreeGames [LSFDRMFG]`, you might see references to that in the source.  
 
 ### Note
@@ -123,3 +124,11 @@ I don't think so:
   
 1. https://en.wikipedia.org/wiki/Google_LLC_v._Oracle_America,_Inc.
 2. https://softwareengineering.stackexchange.com/questions/216471/how-does-copyrights-apply-to-source-code-header-files
+
+## `Source/DLLs/<version>/gog/`` is missing files? What do I do?
+The tests require the Galaxy.lib and Galaxy.dll files from GOG.  
+You can get any version matching Galaxy.dll from any game that you own.  
+UniverseLAN does not and will not distribute (RED)Galaxy / (RED)Galaxy64 dll files, because it's against copyright / GOG ToS.  
+I don't know if .lib files should be considered API or copyrighted program code, but to play it safe UniverseLAN also does not distribute .lib files.  
+For the time being; if you wish to build the tests, you need to acquire these .lib files from the GOG Galaxy SDK, available in the GOG Galaxy Developer Portal.  
+Building the tests is optional.  
