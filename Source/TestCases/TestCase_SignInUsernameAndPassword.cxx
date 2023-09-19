@@ -63,6 +63,7 @@ public:
 	}
 };
 
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT 
 class ChatRoomMessageSendListenerImplGlobal : public galaxy::api::GlobalChatRoomMessageSendListener
 {
 public:
@@ -153,6 +154,7 @@ public:
 		).c_str());
 	}
 };
+#endif
 
 class ConnectionCloseListenerImplGlobal : public galaxy::api::GlobalConnectionCloseListener
 {
@@ -256,6 +258,7 @@ public:
 	}
 };
 
+#if GALAXY_BUILD_FEATURE_NEW_FRIEND_FEATURES_104_3
 class FriendAddListenerImplGlobal : public galaxy::api::GlobalFriendAddListener
 {
 public:
@@ -382,6 +385,7 @@ public:
 		).c_str());
 	}
 };
+#endif
 
 class FriendListListenerImplGlobal : public galaxy::api::GlobalFriendListListener
 {
@@ -630,6 +634,8 @@ public:
 	virtual void OnLobbyLeft(const GalaxyID& lobbyID
 #if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LEAVE_REASON
 		, LobbyLeaveReason leaveReason
+#else
+		, bool ioFailure
 #endif
 	) {
 		tracer::Trace trace{ "", __FUNCTION__ };
@@ -641,8 +647,8 @@ public:
 		).c_str());
 #else
 		trace.write_all(std::format(
-			"lobbyID: {}",
-			lobbyID
+			"lobbyID: {} ioFailure: {}",
+			lobbyID, ioFailure
 		).c_str());
 #endif
 	}
@@ -655,14 +661,14 @@ public:
 	virtual ~LobbyListListenerImplGlobal() = default;
 
 	virtual void OnLobbyList(uint32_t lobbyCount
-#if HAS_IMATCHMAKING_LOBBY_LIST_RESULT
+#if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LIST_RESULT
 		, LobbyListResult result
 #else
 		, bool ioFailure
 #endif
-	) override {
+	) {
 		tracer::Trace trace{ "", __FUNCTION__ };
-#if HAS_IMATCHMAKING_LOBBY_LIST_RESULT
+#if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LIST_RESULT
 		trace.write_all(std::format(
 			"lobbyCount: {} result: {}",
 			lobbyCount, magic_enum::enum_name(result)
@@ -724,6 +730,7 @@ public:
 	}
 };
 
+#if GALAXY_BUILD_FEATURE_HAS_NAT_FUNCTIONALITY
 class NatTypeDetectionListenerImplGlobal : public galaxy::api::GlobalNatTypeDetectionListener
 {
 public:
@@ -743,6 +750,7 @@ public:
 		tracer::Trace trace{ "", __FUNCTION__ };
 	}
 };
+#endif
 
 class NetworkingListenerImplGlobal : public galaxy::api::GlobalNetworkingListener
 {
@@ -803,6 +811,7 @@ public:
 	}
 };
 
+#if GALAXY_BUILD_FEATURE_OVERLAYSTATE_ENUM
 class OverlayInitializationStateChangeListenerImplGlobal : public galaxy::api::GlobalOverlayInitializationStateChangeListener
 {
 public:
@@ -818,6 +827,7 @@ public:
 		).c_str());
 	}
 };
+
 
 // class OverlayStateChangeListenerImplGlobal : public galaxy::api::GlobalOverlayStateChangeListener
 // {
@@ -841,6 +851,7 @@ public:
 		).c_str());
 	}
 };
+#endif
 
 class PersonaDataChangedListenerImplGlobal : public galaxy::api::GlobalPersonaDataChangedListener
 {
@@ -894,6 +905,7 @@ public:
 	}
 };
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 class RichPresenceRetrieveListenerImplGlobal : public galaxy::api::GlobalRichPresenceRetrieveListener
 {
 public:
@@ -918,6 +930,7 @@ public:
 		).c_str());
 	}
 };
+#endif
 
 class SendInvitationListenerImplGlobal : public galaxy::api::GlobalSendInvitationListener
 {
@@ -944,6 +957,7 @@ public:
 	}
 };
 
+#if GALAXY_BUILD_FEATURE_HAS_ISENTFRIENDINVITATIONLISTRETRIEVELISTENER
 class SentFriendInvitationListRetrieveListenerImplGlobal : public galaxy::api::GlobalSentFriendInvitationListRetrieveListener
 {
 public:
@@ -963,6 +977,7 @@ public:
 		).c_str());
 	}
 };
+#endif
 
 // class ServerNetworkingListenerImplGlobal : public galaxy::api::GlobalServerNetworkingListener
 // {
@@ -1032,6 +1047,7 @@ public:
 	}
 };
 
+#if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 class TelemetryEventSendListenerImplGlobal : public galaxy::api::GlobalTelemetryEventSendListener
 {
 public:
@@ -1056,6 +1072,7 @@ public:
 		).c_str());
 	}
 };
+#endif
 
 class UserDataListenerImplGlobal : public galaxy::api::GlobalUserDataListener
 {
@@ -1068,6 +1085,7 @@ public:
 	}
 };
 
+#if GALAXY_BUILD_FEATURE_HAS_IUSERFINDLISTENER
 class UserFindListenerImplGlobal : public galaxy::api::GlobalUserFindListener
 {
 public:
@@ -1091,7 +1109,9 @@ public:
 		).c_str());
 	}
 };
+#endif
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 class UserInformationRetrieveListenerImplGlobal : public galaxy::api::GlobalUserInformationRetrieveListener
 {
 public:
@@ -1116,6 +1136,7 @@ public:
 		).c_str());
 	}
 };
+#endif
 
 class UserStatsAndAchievementsRetrieveListenerImplGlobal : public galaxy::api::GlobalUserStatsAndAchievementsRetrieveListener
 {
@@ -1200,34 +1221,50 @@ int main()
 
 	galaxy::api::InitOptions options(galaxy::api::CLIENT_ID.data(), galaxy::api::CLIENT_SECRET.data());
 
+#if GALAXY_BUILD_FEATURE_HAS_IGALAXY
+	galaxy::api::IGalaxy* galaxy_api = galaxy::api::GalaxyFactory::CreateInstance();
+
+	galaxy_api->Init(options);
+#else
 	galaxy::api::Init(options);
+#endif
 
 	std::cout << "galaxy::api::Init performed" << std::endl;
 
 	AccessTokenListenerImplGlobal accesstokenlistener{};
 	AchievementChangeListenerImplGlobal achievementchangelistener{};
 	AuthListenerImplGlobal authlistener{};
+
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT 
 	ChatRoomMessageSendListenerImplGlobal chatroommessagesendlistener{};
 	ChatRoomMessagesListenerImplGlobal chatroommessageslistener{};
 	ChatRoomMessagesRetrieveListenerImplGlobal chatroommessagesretrievelistener{};
 	ChatRoomWithUserRetrieveListenerImplGlobal chatroomwithuserretrievelistener{};
+#endif
+
 	ConnectionCloseListenerImplGlobal connectioncloselistener{};
 	ConnectionDataListenerImplGlobal connectiondatalistener{};
 	ConnectionOpenListenerImplGlobal connectionopenlistener{};
 	EncryptedAppTicketListenerImplGlobal encryptedappticketlistener{};
 	FileShareListenerImplGlobal filesharelistener{};
+
+#if GALAXY_BUILD_FEATURE_NEW_FRIEND_FEATURES_104_3
 	FriendAddListenerImplGlobal friendaddlistener{};
 	FriendDeleteListenerImplGlobal frienddeletelistener{};
 	FriendInvitationListRetrieveListenerImplGlobal friendinvitationlistretrievelistener{};
 	FriendInvitationListenerImplGlobal friendinvitationlistener{};
 	FriendInvitationRespondToListenerImplGlobal friendinvitationrespondtolistener{};
 	FriendInvitationSendListenerImplGlobal friendinvitationsendlistener{};
+#endif
+
 	FriendListListenerImplGlobal friendlistlistener{};
 	GameInvitationReceivedListenerImplGlobal gameinvitationreceivedlistener{};
 	GameJoinRequestedListenerImplGlobal gamejoinrequestedlistener{};
+
 #if GALAXY_BUILD_FEATURE_HAS_GOGSERVICECONNECTIONSTATELISTENER
 	GogServicesConnectionStateListenerImplGlobal gogservicesconnectionstatelistener{};
 #endif
+
 	LeaderboardEntriesRetrieveListenerImplGlobal leaderboardentriesretrievelistener{};
 	LeaderboardRetrieveListenerImplGlobal leaderboardretrievelistener{};
 	LeaderboardScoreUpdateListenerImplGlobal leaderboardscoreupdatelistener{};
@@ -1241,26 +1278,53 @@ int main()
 	LobbyMemberStateListenerImplGlobal lobbymemberstatelistener{};
 	LobbyMessageListenerImplGlobal lobbymessagelistener{};
 	LobbyOwnerChangeListenerImplGlobal lobbyownerchangelistener{};
+
+#if GALAXY_BUILD_FEATURE_HAS_NAT_FUNCTIONALITY
 	NatTypeDetectionListenerImplGlobal nattypedetectionlistener{};
+#endif
+
 	NetworkingListenerImplGlobal networkinglistener{};
 	NotificationListenerImplGlobal notificationlistener{};
 	OperationalStateChangeListenerImplGlobal operationalstatechangelistener{};
 	OtherSessionStartListenerImplGlobal othersessionstartlistener{};
+
+#if GALAXY_BUILD_FEATURE_OVERLAYSTATE_ENUM
 	OverlayInitializationStateChangeListenerImplGlobal overlayinitializationstatechangelistener{};
 	OverlayVisibilityChangeListenerImplGlobal overlayvisibilitychangelistener{};
+#endif
+
 	PersonaDataChangedListenerImplGlobal personadatachangedlistener{};
 	RichPresenceChangeListenerImplGlobal richpresencechangelistener{};
 	RichPresenceListenerImplGlobal richpresencelistener{};
+
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 	RichPresenceRetrieveListenerImplGlobal richpresenceretrievelistener{};
+#endif
+
 	SendInvitationListenerImplGlobal sendinvitationlistener{};
+
+#if GALAXY_BUILD_FEATURE_HAS_ISENTFRIENDINVITATIONLISTRETRIEVELISTENER
 	SentFriendInvitationListRetrieveListenerImplGlobal sentfriendinvitationlistretrievelistener{};
+#endif
+
 	SharedFileDownloadListenerImplGlobal sharedfiledownloadlistener{};
 	SpecificUserDataListenerImplGlobal specificuserdatalistener{};
 	StatsAndAchievementsStoreListenerImplGlobal statsandachievementsstorelistener{};
+
+#if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 	TelemetryEventSendListenerImplGlobal telemetryeventsendlistener{};
+#endif
+
 	UserDataListenerImplGlobal userdatalistener{};
+
+#if GALAXY_BUILD_FEATURE_HAS_IUSERFINDLISTENER
 	UserFindListenerImplGlobal userfindlistener{};
+#endif
+
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 	UserInformationRetrieveListenerImplGlobal userinformationretrievelistener{};
+#endif
+
 	UserStatsAndAchievementsRetrieveListenerImplGlobal userstatsandachievementsretrievelistener{};
 	UserTimePlayedRetrieveListenerImplGlobal usertimeplayedretrievelistener{};
 
@@ -1272,11 +1336,26 @@ int main()
 	std::cout << "Listenerd registered" << std::endl;
 
 	auto credentials = USER_CREDENTIALS[0];
+
+#if GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINCREDENTIALS
 	galaxy::api::User()->SignInCredentials(credentials[0].data(), credentials[1].data());
+#else
+#if GALAXY_BUILD_FEATURE_HAS_IGALAXY
+	galaxy_api->GetUser()
+#else
+	galaxy::api::User()
+#endif
+		->SignIn(credentials[0].data(), credentials[1].data());
+#endif
 
 	while (true)
 	{
+#if GALAXY_BUILD_FEATURE_HAS_IGALAXY
+		galaxy_api->ProcessData();
+#else
 		galaxy::api::ProcessData();
+#endif
+
 		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
 	return 0;

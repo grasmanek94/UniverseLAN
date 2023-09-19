@@ -66,6 +66,8 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
 
   afvd(HAS_DISABLEOVERLAYPOPUPS 				1.109.0					)
   afvd(FIND_USER 								1.109.0					)
+  afvd(HAS_ICHATROOMMESSAGERETRIEVELISTENER		1.109.0					)
+  afvd(HAS_IUSERFINDLISTENER            		1.109.0					)
 
   afvd(HAS_NAT_FUNCTIONALITY 					1.113.0					)
   afvd(HAS_USERDATAINFOAVAILABLE 				1.113.2					)
@@ -73,6 +75,7 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
 
   afvd(HAS_CONNECTION_TYPE 						1.114.0					)
   afvd(GetImageRGBA_CHAR_TO_VOID 				1.114.0					)
+  afvd(HAS_ISENTFRIENDINVITATIONLISTRETRIEVELISTENER 1.114.0			)
 
   afvd(HAS_INITOPTIONS_MODERN 					1.120.0					)
   afvd(ALLOCATOR 								1.120.0					)
