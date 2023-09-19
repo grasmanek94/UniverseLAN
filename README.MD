@@ -125,7 +125,7 @@ I don't think so:
 1. https://en.wikipedia.org/wiki/Google_LLC_v._Oracle_America,_Inc.
 2. https://softwareengineering.stackexchange.com/questions/216471/how-does-copyrights-apply-to-source-code-header-files
 
-## `Source/DLLs/<version>/gog/`` is missing files? What do I do?
+## `Source/DLLs/<version>/gog/` is missing files? What do I do?
 The tests require the Galaxy.lib and Galaxy.dll files from GOG.  
 You can get any version matching Galaxy.dll from any game that you own.  
 UniverseLAN does not and will not distribute (RED)Galaxy / (RED)Galaxy64 dll files, because it's against copyright / GOG ToS.  
