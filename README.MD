@@ -132,3 +132,4 @@ UniverseLAN does not and will not distribute (RED)Galaxy / (RED)Galaxy64 dll fil
 I don't know if .lib files should be considered API or copyrighted program code, but to play it safe UniverseLAN also does not distribute .lib files.  
 For the time being; if you wish to build the tests, you need to acquire these .lib files from the GOG Galaxy SDK, available in the GOG Galaxy Developer Portal.  
 Building the tests is optional.  
+> Tip: By creating a project with [wrap_dll](https://github.com/mavenlin/wrap_dll) and providing a valid `(RED)Galaxy(64).dll` you can generate a wrapper project, which when compiled, should yield a compatible .lib file that you can use to build the tests.  
