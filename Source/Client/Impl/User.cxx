@@ -51,7 +51,7 @@ namespace universelan::client {
 		if (intf->config->GetSignedIn()) {
 			listeners->NotifyAll(&IAccessTokenListener::OnAccessTokenChanged);
 			listeners->NotifyAll(listener, &IAuthListener::OnAuthSuccess);
-			listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN |IOperationalStateChangeListener::OPERATIONAL_STATE_LOGGED_ON);
+			listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, (IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN | IOperationalStateChangeListener::OPERATIONAL_STATE_LOGGED_ON));
 			listeners->NotifyAll(&IPersonaDataChangedListener::OnPersonaDataChanged, intf->user->GetGalaxyID(), IPersonaDataChangedListener::PERSONA_CHANGE_NONE);
 			listeners->NotifyAll(&IFriendListListener::OnFriendListRetrieveSuccess);
 		}

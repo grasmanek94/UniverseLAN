@@ -276,6 +276,10 @@ namespace universelan::tracer {
 	}
 
 	void Trace::write_all(const char* const data) {
+		if (!tracing_enabled) {
+			return;
+		}
+
 		auto& log_file = thread_tracer.GetLogFile();
 		if (log_file) {
 			log_file << std::string(thread_tracer.depth, ' ') << data << '\n';
