@@ -25,7 +25,7 @@ public:
 		tracer::Trace trace{ "", __FUNCTION__ };
 
 		trace.write_all(std::format(
-			"lobbyID: {} failureReason: {}",
+			"lobbyID: {} result: {}",
 			lobbyID, magic_enum::enum_name(result)
 		).c_str());
 
