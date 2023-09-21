@@ -97,7 +97,9 @@ int main()
 	RichPresenceRetrieveListenerImplGlobal richpresenceretrievelistener{};
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_ISENTFRIENDINVITATIONLISTRETRIEVELISTENER
 	SendInvitationListenerImplGlobal sendinvitationlistener{};
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_ISENTFRIENDINVITATIONLISTRETRIEVELISTENER
 	SentFriendInvitationListRetrieveListenerImplGlobal sentfriendinvitationlistretrievelistener{};
