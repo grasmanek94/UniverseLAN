@@ -26,11 +26,6 @@ namespace universelan::client {
 		user_data.emplace(intf->config->GetApiGalaxyID(), intf->config->GetLocalUserData());
 		user_data.emplace(GalaxyID(0), intf->config->GetLocalUserData());
 		user_data.emplace(GalaxyID(static_cast<uint64_t>(galaxy::api::IDType::ID_TYPE_USER) << 56), intf->config->GetLocalUserData());
-
-		if (intf->config->GetSignedIn()) {
-			listeners->NotifyAll(&IAuthListener::OnAuthSuccess);
-			listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_LOGGED_ON);
-		}
 	}
 
 	UserImpl::~UserImpl()
@@ -47,15 +42,18 @@ namespace universelan::client {
 	GalaxyID UserImpl::GetGalaxyID() {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
-		return intf->config->GetCustomGalaxyID();
+		return galaxy::api::FromRealID(galaxy::api::IDType::ID_TYPE_USER, intf->config->GetCustomGalaxyID());
 	}
 
 	void UserImpl::SignIn(IAuthListener* const listener) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		if (intf->config->GetSignedIn()) {
+			listeners->NotifyAll(&IAccessTokenListener::OnAccessTokenChanged);
 			listeners->NotifyAll(listener, &IAuthListener::OnAuthSuccess);
-			listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_LOGGED_ON);
+			listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN |IOperationalStateChangeListener::OPERATIONAL_STATE_LOGGED_ON);
+			listeners->NotifyAll(&IPersonaDataChangedListener::OnPersonaDataChanged, intf->user->GetGalaxyID(), IPersonaDataChangedListener::PERSONA_CHANGE_NONE);
+			listeners->NotifyAll(&IFriendListListener::OnFriendListRetrieveSuccess);
 		}
 		else {
 			listeners->NotifyAll(listener, &IAuthListener::OnAuthFailure, IAuthListener::FAILURE_REASON_GALAXY_SERVICE_NOT_AVAILABLE);
