@@ -21,7 +21,7 @@ namespace universelan {
 
 	Lobby::Lobby(GalaxyID owner_id, LobbyType type, uint32_t max_members, bool joinable,
 		LobbyTopologyType lobby_topology_type) :
-		id{ GlobalUniqueID::get() }, owner_id{ owner_id }, max_members{ max_members }, joinable{ joinable },
+		id{ galaxy::api::FromRealID(galaxy::api::IDType::ID_TYPE_LOBBY, GlobalUniqueID::get()) }, owner_id{ owner_id }, max_members{ max_members }, joinable{ joinable },
 		topology_type{ lobby_topology_type }, type{ type }, current_message_id{ 1 }, data{}, user_data{}, messages{} {
 		AddMember(owner_id);
 	}
