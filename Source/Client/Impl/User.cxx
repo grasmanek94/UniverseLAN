@@ -293,11 +293,12 @@ namespace universelan::client {
 
 		intf->client->GetConnection().SendAsync(SetUserDataMessage{ intf->config->GetApiGalaxyID(), key, value });
 
-/*		listeners->NotifyAll(
+		listeners->NotifyAll(
 #if GALAXY_BUILD_FEATURE_USER_DATA_LISTENERS
 			listener,
 #endif
-			&ISpecificUserDataListener::OnSpecificUserDataUpdated, intf->config->GetApiGalaxyID());*/
+			&ISpecificUserDataListener::OnSpecificUserDataUpdated, intf->config->GetApiGalaxyID());
+
 		listeners->NotifyAll(&IUserDataListener::OnUserDataUpdated);
 	}
 

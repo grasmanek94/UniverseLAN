@@ -26,7 +26,7 @@ namespace universelan::client {
 	}
 
 	void UtilsImpl::RegisterForNotification(const char* type) {
-		tracer::Trace trace { nullptr, __FUNCTION__ };
+		tracer::Trace trace { type, __FUNCTION__ };
 	}
 
 	uint32_t UtilsImpl::GetNotification(NotificationID notificationID
