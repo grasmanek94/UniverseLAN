@@ -42,6 +42,7 @@ namespace universelan::client {
 		create_lobby_requests.emplace(request_id, lobbyCreatedListener);
 		create_lobby_entered_requests.emplace(request_id, lobbyEnteredListener);
 #endif
+		listeners->NotifyAll(&INatTypeDetectionListener::OnNatTypeDetectionSuccess, galaxy::api::NatType::NAT_TYPE_PORT_RESTRICTED);
 
 		intf->client->GetConnection().SendAsync(CreateLobbyMessage{ request_id, lobbyType, maxMembers, joinable, lobbyTopologyType });
 	}
@@ -62,6 +63,8 @@ namespace universelan::client {
 
 			listeners->NotifyAll(lobbyCreatedListener, &ILobbyCreatedListener::OnLobbyCreated, joined_lobby->GetID(), LobbyCreateResult::LOBBY_CREATE_RESULT_SUCCESS);
 			listeners->NotifyAll(lobbyEnteredListener, &ILobbyEnteredListener::OnLobbyEntered, joined_lobby->GetID(), LobbyEnterResult::LOBBY_ENTER_RESULT_SUCCESS);
+			
+			// TODO: Real Galaxy doesn't do this, maybe remove?
 			listeners->NotifyAll(&ILobbyMemberStateListener::OnLobbyMemberStateChanged, joined_lobby->GetID(), intf->user->GetGalaxyID(), LobbyMemberStateChange::LOBBY_MEMBER_STATE_CHANGED_ENTERED);
 		}
 		else {
