@@ -20,8 +20,10 @@ function(add_simple_test_case GALAXY_VERSION_NUMBER TEST_CASE_NAME)
   set(CURRENT_TEST_OUTPUT "${CMAKE_SOURCE_DIR}/bin/tests/${GALAXY_VERSION_NUMBER}/${UNIVERSELAN_EXTRA_BIN_FOLDER}")
   set(CURRENT_TEST_REFERENCE_DIR "${GALAXY_DLL_VERSIONS_DIR}/${GALAXY_VERSION_NUMBER}/gog")
 
-  add_executable(${CURRENT_TEST_TARGET} "TestCase_${TEST_CASE_NAME}.cxx" "TestCaseClientDetails.hxx")
-  target_include_directories(${CURRENT_TEST_TARGET} PUBLIC ".")
+  file(GLOB_RECURSE TEST_CASES_HEADERS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/Source/TestCases/Include/*.*")
+
+  add_executable(${CURRENT_TEST_TARGET} "Source/TestCase_${TEST_CASE_NAME}.cxx" ${TEST_CASES_HEADERS})
+  target_include_directories(${CURRENT_TEST_TARGET} PUBLIC "." "Include/")
   target_compile_definitions(${CURRENT_TEST_TARGET} PUBLIC 
     "TEST_CASE=1"
     "TEST_CASE_${TEST_CASE_NAME}=1"
@@ -78,7 +80,7 @@ endfunction()
 set(GALAXY_DLL_VERSIONS_DIR "${CMAKE_SOURCE_DIR}/Source/DLLs")
 SUBDIRLIST(SUBDIRS "${GALAXY_DLL_VERSIONS_DIR}/")
 
-file(GLOB test_cases "TestCase_*.cxx")
+file(GLOB test_cases "Source/TestCase_*.cxx")
 foreach(test_case_file ${test_cases})
   get_filename_component(test_case ${test_case_file} NAME_WE)
   string(REPLACE "TestCase_" "" test_case ${test_case})

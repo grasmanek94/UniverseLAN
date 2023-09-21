@@ -5,12 +5,14 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
   set(UVV "${MAJOR}.${MINOR}.${PATCH}")
 
   #		NAME							START_VERSION END_VERSION
-  afvd(HAS_IGALAXY	 							0.0.0 		1.114.9		)
+  afvd(HAS_IGALAXY	 							1.57.0 		1.114.9		)
+  afvd(HAS_ISERVERNETWORKINGLISTENER			1.57.0		1.134.10	)
 
   afvd(IFRIENDS_HAS_PERSONANAME_AND_AVATARURL	1.59.0					)
 
   afvd(IFRIENDS_ONPERSONADATACHANGED			1.61.0					)
   afvd(IFRIENDS_SET_DEL_CLR_RICHPRESENCE		1.61.0					)
+  afvd(HAS_IRICHPRECENSECHANGELISTENER			1.61.0					)
 
   afvd(HAS_IERRORMANAGER						1.62.0					)
   afvd(FACTORY_RESET_RENAMED_TO_RESETINSTANCE	1.62.0					)
@@ -22,7 +24,7 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
 
   afvd(ENCRYPTED_APP_TICKET 					1.67.0 					)
   afvd(HAS_FRIENDLISTLISTENER 					1.67.0 					)
-  afvd(HAS_IOVERLAYSTATECHANGELISTENER  		1.67.0 					)
+  afvd(HAS_IOVERLAYSTATECHANGELISTENER  		1.67.0 		1.132.1		)
 
   afvd(HAS_GETLEADERBORDENTRYCOUNT				1.68.0 					)
 
@@ -48,10 +50,17 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
   
   afvd(API_HAS_UTILS                            1.73.0 			    	)
   afvd(API_HAS_IAPPS                            1.73.0 			    	)
+  afvd(HAS_SPECIFICUSERDATALISTENER   		    1.73.0 			    	)
 
   afvd(ADDED_RICH_PRESENCE_LISTENERS			1.74.0					)
 
+  afvd(HAS_IUSERTIMEPLAYEDRETRIEVELISTENER		1.76.0					)
+
   afvd(HAS_INITOPTIONS 							1.82.0 					)
+  afvd(HAS_IOTHERSESSIONSTARTLISTENER			1.82.0 					)
+
+  afvd(HAS_ISTORAGE 							1.88.0 					)
+  afvd(HAS_GETCURRENTGAMELANGUAGE				1.88.0 					)
 
   afvd(IUTILS_NOTIFICATION_ID_TYPEDEF   		1.92.1					)
 
@@ -61,6 +70,7 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
 
   afvd(HAS_ICHAT 								1.104.3					)
   afvd(NEW_FRIEND_FEATURES_104_3				1.104.3					)
+  afvd(HAS_FRIENDADDLISTENER					1.104.4					)
 
   afvd(GALAXYID_HAS_IDTYPE 						1.106.0					)
 
@@ -82,6 +92,7 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
   afvd(EXCEPTION_HELPER 						1.120.0					)
   afvd(GAME_SERVER_API 							1.120.0					)
   afvd(NEEDS_DLL_IMPL 							1.120.0					)
+  afvd(HAS_GAMESERVERSERVERNETWORKINGLISTENER	1.120.1		1.134.10	)
 
   afvd(USER_SIGNIN_LISTENERS 					1.121.3					)
 
@@ -113,6 +124,8 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
   afvd(HAS_SIGNINUWP							1.133.0					)
 
   afvd(HAS_ITELEMETRY			 				1.134.0					) 
+
+  afvd(HAS_GAMESERVERNETWORKINGLISTENER			1.135.0					) 
 
   afvd(IUSER_SIGNINEPIC							1.139.5					)
 
