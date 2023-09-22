@@ -80,15 +80,17 @@ Debug (tracing) files can be found in `<Configuration Files Directory>/tracing/<
 :x: - Tested and does not work.  
 :question: - Can't acquire the correct GOG Galaxy SDK version.  
 :left_right_arrow: - Game supports direct connect, LAN or free multiplayer, and as such does not need UniverseLAN.  
+:large_orange_diamond: - Worked before, some commit has broken this game. To be investigated.  
+
 
 | Game       | Status                | Tested GOG Galaxy SDK Version | Notes |
 | :--------- | :-------:             | :---------: | :---------: |
 | Aragami 1  | :white_check_mark:(2) | 1.121.2 | |
 | Forsaken Remastered | :white_check_mark:(3) | 1.124.0.0 | |
 | Guns, Gore & Cannoli 2  | :white_check_mark:(3) | 1.124.0.0 | |
-| Tropico 6 | :white_check_mark:(2)  | 1.139.2 | Also other games are displayed? Game has custom networking? | 
-| MetalSlug3 | :construction:        | 1.100.2 | Can host and join lobby, can't get past character selection screen. |
-| Serious Sams Bogus Detour | :construction: | 1.100.2 | Stuck on "Creating lobby..." or "Joining lobby..." |
+| Tropico 6 | :white_check_mark:(2) <br>:large_orange_diamond:  | 1.139.2 | Also other games are displayed? Game has custom networking?<br> Build 161 worked, build 243 seems to be broken (can't join lobby) | 
+| MetalSlug3 | :white_check_mark:(2)        | 1.100.2 | works since build 243 |
+| Serious Sams Bogus Detour | :construction: | 1.100.2 | Stuck on "Creating lobby..." or "Joining lobby..." <br> Can get into lobby since build 243 but host crashes on start |
 | Alien vs Predator 2000 | :question: |  | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176.2.6? |
 | Homeworld Remastered Collection | :warning:  | | | 
 | Homeworld: Deserts of Kharak | :warning:  | | | 
