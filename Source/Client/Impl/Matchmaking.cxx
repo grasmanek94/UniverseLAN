@@ -42,7 +42,9 @@ namespace universelan::client {
 		create_lobby_requests.emplace(request_id, lobbyCreatedListener);
 		create_lobby_entered_requests.emplace(request_id, lobbyEnteredListener);
 #endif
+#if GALAXY_BUILD_FEATURE_HAS_NAT_FUNCTIONALITY
 		listeners->NotifyAll(&INatTypeDetectionListener::OnNatTypeDetectionSuccess, galaxy::api::NatType::NAT_TYPE_PORT_RESTRICTED);
+#endif
 
 		intf->client->GetConnection().SendAsync(CreateLobbyMessage{ request_id, lobbyType, maxMembers, joinable, lobbyTopologyType });
 	}
