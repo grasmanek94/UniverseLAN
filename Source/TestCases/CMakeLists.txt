@@ -78,6 +78,7 @@ function(add_simple_test_case GALAXY_VERSION_NUMBER TEST_CASE_NAME)
 endfunction()
 
 set(GALAXY_DLL_VERSIONS_DIR "${CMAKE_SOURCE_DIR}/Source/DLLs")
+get_property(PROJECT_GALAXY_VERSION_NUMBER_LIST GLOBAL PROPERTY PROJECT_GALAXY_VERSION_NUMBER_LIST)
 
 file(GLOB test_cases "Source/TestCase_*.cxx")
 foreach(test_case_file ${test_cases})
@@ -87,9 +88,13 @@ foreach(test_case_file ${test_cases})
   message("--- ${test_case}")
 
   FOREACH(GALAXY_VERSION_NUMBER ${PROJECT_GALAXY_VERSION_NUMBER_LIST})
-    set(TOTAL_PATH "${GALAXY_DLL_VERSIONS_DIR}/${GALAXY_VERSION_NUMBER}/${GALAXY_ARCH}")
-    if(EXISTS "${TOTAL_PATH}/CMakeLists.txt")
-      add_simple_test_case("${GALAXY_VERSION_NUMBER}" "${test_case}")
-    endif()
+    #set(TOTAL_PATH "${GALAXY_DLL_VERSIONS_DIR}/${GALAXY_VERSION_NUMBER}/${GALAXY_ARCH}")
+    #if(EXISTS "${TOTAL_PATH}/CMakeLists.txt")
+
+    add_simple_test_case("${GALAXY_VERSION_NUMBER}" "${test_case}")
+
+    #else()
+    #  message("---- !${GALAXY_DLL_VERSIONS_DIR}/${GALAXY_VERSION_NUMBER}/${GALAXY_ARCH}")
+    #endif()
   ENDFOREACH()
 endforeach()
