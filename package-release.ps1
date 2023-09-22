@@ -1,3 +1,17 @@
+if(git status --porcelain |Where {$_ -match '^\?\?'}){
+    echo "Untracked files detected!"
+    pause
+    exit
+} 
+elseif(git status --porcelain |Where {$_ -notmatch '^\?\?'}) {
+    echo "Uncommited changes detected!"
+    pause
+    exit
+}
+else {
+    echo "Packaging releases..."
+}
+
 $subdirs = Get-ChildItem -Directory .\bin\
 $build_number = $(git rev-list HEAD --count)
 $package_folder = "Release"
@@ -29,10 +43,16 @@ foreach ($version in $subdirs)
 
             if(-not(Test-Path ".\$output_folder"))
             {
+                echo "Creating .\$output_folder"
                 New-Item -Path ".\$output_folder" -ItemType Directory -Force > $null
+                echo "Done"
             }
 
+            echo "Archiving '$version_release_dir\' into '.\$output_folder\$resulting_filename'"
             Compress-Archive -Path "$version_release_dir\*" -DestinationPath ".\$output_folder\$resulting_filename"
+            echo "Done"
         }
     }
 }
+
+pause
