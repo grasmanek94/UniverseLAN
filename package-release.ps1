@@ -18,7 +18,7 @@ $package_folder = "Release"
 $output_folder = "release-packages"
 $prefix = "UniverseLAN"
 
-echo $build_number
+echo "Build number: $build_number"
 
 foreach ($version in $subdirs)
 {
