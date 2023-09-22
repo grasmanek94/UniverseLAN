@@ -60,4 +60,12 @@ endif()
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${UNIVERSELAN_EXTRA_BIN_FOLDER}")
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${UNIVERSELAN_EXTRA_BIN_FOLDER}")
 
+SET(LIMIT_VERSIONS_SPECIFIED 0)
+if(NOT LIMIT_VERSIONS)
+  set(LIMIT_VERSIONS "" CACHE STRING "Comma separated list of versions to generate compilation units for. If not specified, projects for all supported versions will be generated")
+else()
+  STRING(REPLACE "," ";" LIMIT_VERSIONS "${LIMIT_VERSIONS}")
+  SET(LIMIT_VERSIONS_SPECIFIED 1)
+endif()
+
 add_subdirectory(Source)
