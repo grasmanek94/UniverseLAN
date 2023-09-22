@@ -1,6 +1,7 @@
 #include "CustomConsole.hxx"
 
 #include <Tracer.hxx>
+#include <Version.hxx>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -10,6 +11,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <string>
 
 namespace universelan::client {
 #ifdef _WIN32
@@ -63,7 +65,7 @@ namespace universelan::client {
 
 		BindStdHandlesToConsole();
 
-		SetConsoleTitleA("UniverseLAN");
+		SetConsoleTitleA(("UniverseLAN Client - Build: " + std::to_string(universelan::Version_Number)).c_str());
 #endif
 	}
 }
