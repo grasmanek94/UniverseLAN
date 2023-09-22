@@ -233,11 +233,9 @@ namespace universelan {
 		}
 
 		Message& entry = message->second;
-
 		senderID = entry.sender;
-		universelan::util::safe_copy_str_n(entry.data, msg, msgLength);
-
-		return std::min(msgLength, (uint32_t)(entry.data.size() + 1));
+	
+		return universelan::util::safe_copy_binary_n(entry.data, msg, msgLength);
 	}
 
 	Lobby::data_t Lobby::GetAllData() const {
