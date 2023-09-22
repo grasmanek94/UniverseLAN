@@ -23,3 +23,4 @@ cmake-x64/
 cmake-linux/
 cmake-linux-x86/
 cmake-linux-x64/
+release-packages/
