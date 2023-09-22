@@ -1,10 +1,13 @@
 #include <TestCaseClientDetails.hxx>
 
 #if GALAXY_BUILD_FEATURE_HAS_IGALAXY
-#define GET_GALAXY_API galaxy_api->
-#define User GetUser
+#define GET_GALAXY_API(what) galaxy_api->Get ## what
+#define GET_GALAXY_API_AS_IS(what) galaxy_api->what
+
+galaxy::api::IGalaxy* galaxy_api = nullptr;
 #else
-#define GET_GALAXY_API galaxy::api::
+#define GET_GALAXY_API(what) galaxy::api::what
+#define GET_GALAXY_API_AS_IS(what) galaxy::api::what
 #endif
 
 #if !GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINCREDENTIALS
@@ -22,7 +25,7 @@ std::unique_ptr<tracer::Trace> trace{ nullptr };
 
 void perform_test() {
 
-	auto matchmaking_ptr = GET_GALAXY_API Matchmaking();
+	auto matchmaking_ptr = GET_GALAXY_API(Matchmaking());
 	
 	matchmaking_ptr->CreateLobby(LobbyType::LOBBY_TYPE_PUBLIC, 4, true, LobbyTopologyType::LOBBY_TOPOLOGY_TYPE_FCM_OWNERSHIP_TRANSITION);
 
@@ -62,10 +65,10 @@ int main()
 	galaxy::api::InitOptions options(galaxy::api::CLIENT_ID.data(), galaxy::api::CLIENT_SECRET.data());
 
 #if GALAXY_BUILD_FEATURE_HAS_IGALAXY
-	galaxy::api::IGalaxy* galaxy_api = galaxy::api::GalaxyFactory::CreateInstance();
+	galaxy_api = galaxy::api::GalaxyFactory::CreateInstance();
 #endif
 
-	GET_GALAXY_API Init(options);
+	GET_GALAXY_API_AS_IS(Init(options));
 
 	trace = std::make_unique<tracer::Trace>("", "main");
 
@@ -158,7 +161,7 @@ int main()
 #endif
 
 	PersonaDataChangedListenerImplGlobal personadatachangedlistener{ [&](GalaxyID userID, uint32_t personaStateChange) {
-		if (personaStateChange != 0 || userID != galaxy::api::User()->GetGalaxyID()) {
+		if (personaStateChange != 0 || userID != GET_GALAXY_API(User())->GetGalaxyID()) {
 			return;
 		}
 		has_person_data_unchanged = true;
@@ -225,12 +228,12 @@ int main()
 
 	auto credentials = USER_CREDENTIALS[0];
 
-	GET_GALAXY_API User()->SignInCredentials(credentials[0].data(), credentials[1].data());
+	GET_GALAXY_API(User())->SignInCredentials(credentials[0].data(), credentials[1].data());
 	bool sub_init_done = false;
 
 	while (true)
 	{
-		GET_GALAXY_API ProcessData();
+		GET_GALAXY_API_AS_IS(ProcessData());
 		if (performed_init && !sub_init_done) {
 			sub_init_done = true;
 

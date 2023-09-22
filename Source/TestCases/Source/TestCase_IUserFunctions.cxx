@@ -1,10 +1,13 @@
 #include <TestCaseClientDetails.hxx>
 
 #if GALAXY_BUILD_FEATURE_HAS_IGALAXY
-#define GET_GALAXY_API galaxy_api->
-#define User GetUser
+#define GET_GALAXY_API(what) galaxy_api->Get ## what
+#define GET_GALAXY_API_AS_IS(what) galaxy_api->what
+
+galaxy::api::IGalaxy* galaxy_api = nullptr;
 #else
-#define GET_GALAXY_API galaxy::api::
+#define GET_GALAXY_API(what) galaxy::api::what
+#define GET_GALAXY_API_AS_IS(what) galaxy::api::what
 #endif
 
 #if !GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINCREDENTIALS
@@ -24,13 +27,19 @@ void perform_test() {
 	char access_token[1024];
 	access_token[0] = '\0';
 
-	auto user_ptr = GET_GALAXY_API User();
+	auto user_ptr = GET_GALAXY_API(User());
 	user_ptr->GetAccessTokenCopy(access_token, sizeof(access_token));
 
 	auto si = user_ptr->SignedIn();
 	auto lo = false; //user_ptr->IsLoggedOn();
 	auto gid = user_ptr->GetGalaxyID();
-	auto iuda = user_ptr->IsUserDataAvailable();
+	auto iuda =
+#if GALAXY_BUILD_FEATURE_HAS_USERDATAINFOAVAILABLE
+		user_ptr->IsUserDataAvailable();
+#else
+		false;
+#endif
+
 	auto gudc = 0; //user_ptr->GetUserDataCount();
 
 	tracer::Trace::write_all(
@@ -69,10 +78,10 @@ int main()
 	galaxy::api::InitOptions options(galaxy::api::CLIENT_ID.data(), galaxy::api::CLIENT_SECRET.data());
 
 #if GALAXY_BUILD_FEATURE_HAS_IGALAXY
-	galaxy::api::IGalaxy* galaxy_api = galaxy::api::GalaxyFactory::CreateInstance();
+	galaxy_api = galaxy::api::GalaxyFactory::CreateInstance();
 #endif
 
-	GET_GALAXY_API Init(options);
+	GET_GALAXY_API_AS_IS(Init(options));
 
 	trace = std::make_unique<tracer::Trace>("", "main");
 
@@ -166,7 +175,7 @@ int main()
 #endif
 
 		PersonaDataChangedListenerImplGlobal personadatachangedlistener{ [&](GalaxyID userID, uint32_t personaStateChange) {
-			if (personaStateChange != 0 || userID != galaxy::api::User()->GetGalaxyID()) {
+			if (personaStateChange != 0 || userID != GET_GALAXY_API(User())->GetGalaxyID()) {
 				return;
 			}
 			has_person_data_unchanged = true;
@@ -233,12 +242,12 @@ int main()
 
 		auto credentials = USER_CREDENTIALS[0];
 
-		GET_GALAXY_API User()->SignInCredentials(credentials[0].data(), credentials[1].data());
+		GET_GALAXY_API(User())->SignInCredentials(credentials[0].data(), credentials[1].data());
 		//bool requested_data = false;
 
 		while (!performed_init)
 		{
-			GET_GALAXY_API ProcessData();
+			GET_GALAXY_API_AS_IS(ProcessData());
 
 			//if (has_signed_in && has_connected && !requested_data) {
 			//	requested_data = true;
@@ -256,7 +265,7 @@ int main()
 
 	while (true)
 	{
-		GET_GALAXY_API ProcessData();
+		GET_GALAXY_API_AS_IS(ProcessData());
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
