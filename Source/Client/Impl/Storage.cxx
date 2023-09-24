@@ -120,7 +120,7 @@ namespace universelan::client {
 			file_upload_requests.emplace(request_id, listener);
 #endif
 			intf->client->GetConnection().SendAsync(FileShareMessage{ request_id, str_file_name, sfu.ReadLocal(str_file_name) });
-			}).detach();
+			}).detach(); // due to this detach
 	}
 
 	void StorageImpl::DownloadSharedFile(SharedFileID sharedFileID
