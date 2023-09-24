@@ -1,8 +1,11 @@
 #pragma once
+
 #include <cstdint>
+
 #include <iostream>
-#include <syncstream>
 #include <source_location>
+#include <string>
+#include <syncstream>
 
 namespace universelan::tracer {
 	template<uint64_t N>
@@ -45,6 +48,8 @@ namespace universelan::tracer {
 
 		static std::ofstream& thread_logger();
 		static std::osyncstream global_logger();
+
 		static void write_all(const char* const data);
+		static void write_all(const std::string& data);
 	};
 }

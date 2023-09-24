@@ -124,6 +124,10 @@ namespace universelan {
 			return (combined / file_name);
 		}
 
+		if (file_name == "/") {
+			return combined;
+		}
+
 		throw std::runtime_error("Security Exception: Path traversal outside sandbox: " + file_name);
 	}
 
@@ -153,7 +157,7 @@ namespace universelan {
 
 		file.seekg(offset);
 		file.read(data, data_length);
-		return (uint32_t)file.tellg();
+		return (uint32_t)file.gcount();
 	}
 
 	std::vector<char> SharedFileUtils::Read(const std::string& root, const std::string& file_name) const {
@@ -185,11 +189,21 @@ namespace universelan {
 	}
 
 	uint32_t SharedFileUtils::GetSize(const std::string& root, const std::string& file_name) const {
-		return (uint32_t)std::filesystem::file_size(GetPath(root, file_name));
+		try {
+			return (uint32_t)std::filesystem::file_size(GetPath(root, file_name));
+		}
+		catch (std::filesystem::filesystem_error) {
+			return 0;
+		}
 	}
 
 	uint32_t SharedFileUtils::GetTimestamp(const std::string& root, const std::string& file_name) const {
-		return (uint32_t)(std::filesystem::last_write_time(GetPath(root, file_name)).time_since_epoch() / std::chrono::seconds(1));
+		try {
+			return (uint32_t)(std::filesystem::last_write_time(GetPath(root, file_name)).time_since_epoch() / std::chrono::seconds(1));
+		}
+		catch (std::filesystem::filesystem_error) {
+			return 0;
+		}
 	}
 
 	uint32_t SharedFileUtils::GetFileCount(const std::string& root) const {

@@ -308,6 +308,10 @@ namespace universelan::tracer {
 		}
 	}
 
+	void Trace::write_all(const std::string& data) {
+		write_all(data.c_str());
+	}
+
 	void Tracer::Enter(const char* const func, const char* const extra, const void* const return_address) {
 		auto& log_file = thread_tracer.GetLogFile();
 		if (log_file) {
