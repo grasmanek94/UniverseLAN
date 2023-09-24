@@ -8,6 +8,8 @@
 #include <mutex>
 #include <stdexcept>
 
+#include <magic_enum/magic_enum.hpp>
+
 namespace universelan::client {
 	using namespace galaxy::api;
 	ListenerRegistrarImpl::ListenerRegistrarImpl(InterfaceInstances* intf, DelayRunner* delay_runner) :
@@ -32,7 +34,7 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		if (listener != nullptr) {
-			std::cout << __FUNCTION__ << ":" << std::dec << listenerType << " @" << std::hex << (size_t)listener << std::dec << std::endl;
+			std::cout << __FUNCTION__ << ":" << std::dec << magic_enum::enum_name((ListenerType)listenerType) << " @" << std::hex << (size_t)listener << std::dec << std::endl;
 
 			lock_t lock{ listeners[listenerType].mtx };
 			listeners[listenerType].set.insert(listener);
@@ -48,7 +50,7 @@ namespace universelan::client {
 
 	bool ListenerRegistrarImpl::ExecuteForListenerType(ListenerType listenerType, std::function<void(const std::set<IGalaxyListener*>& listeners)> code)
 	{
-		tracer::Trace trace{ "1" };
+		tracer::Trace trace{ "1", __FUNCTION__ };
 
 		lock_t lock{ listeners[listenerType].mtx };
 
@@ -64,7 +66,7 @@ namespace universelan::client {
 
 	bool ListenerRegistrarImpl::ExecuteForListenerTypePerEntry(ListenerType listenerType, std::function<void(IGalaxyListener* listeners)> code)
 	{
-		tracer::Trace trace{ "1" };
+		tracer::Trace trace{ "1", __FUNCTION__ };
 
 		lock_t lock{ listeners[listenerType].mtx };
 
@@ -82,7 +84,7 @@ namespace universelan::client {
 
 	bool ListenerRegistrarImpl::ExecuteForListenerType(ListenerType listenerType, IGalaxyListener* extra, std::function<void(const std::set<IGalaxyListener*>& listeners)> code)
 	{
-		tracer::Trace trace{ "2" };
+		tracer::Trace trace{ "2", __FUNCTION__ };
 
 		lock_t lock{ listeners[listenerType].mtx };
 
@@ -109,7 +111,7 @@ namespace universelan::client {
 
 	bool ListenerRegistrarImpl::ExecuteForListenerTypePerEntry(ListenerType listenerType, IGalaxyListener* extra, std::function<void(IGalaxyListener* listeners)> code)
 	{
-		tracer::Trace trace{ "2" };
+		tracer::Trace trace{ "2", __FUNCTION__ };
 
 		lock_t lock{ listeners[listenerType].mtx };
 
