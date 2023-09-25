@@ -52,11 +52,17 @@ Place in `Source/DLLs/<version>/UniverseLAN.def`
 # Instructions
 
 - Replace target game `Galaxy.dll`, `Galaxy64.dll`, `REDGalaxy.dll` or `REDGalaxy64.dll` to use UniverseLAN (check the .dll file properties to view the version information, else make an sha1 checksum and look in [sha1_hashes.txt](ZipFileHasher/sha1_hashes.txt) for the hash to determine the sdk version).
-- Place config files in the working directory of the game
-- Place Server executable where config files are located
+- Place config files in the working directory* of the game
+- Place Server executable where config files are located.
 - Adjust config accordingly (e.g. point to a server address that hosts the UniverseLAN Backend)
 - It's recommended to NOT mix x64 and x86 platforms (e.g. x64 server with x86 game)
-- Do NOT mix different versions due to ABI incompatibility (e.g. 1.148.3.0 client with 1.100.2.0 server or vice versa), GOG does not keep their Galaxy library backwards compatible / upgradeable.
+- Do NOT mix different versions due to ABI incompatibility (e.g. 1.148.3.0 client with 1.100.2.0 server or vice versa), GOG does not keep their Galaxy library backwards compatible / upgradeable.  
+- One machine must host the server, the other machine must be correctly configured to point to the machine hosting the server.  
+- Make sure the Galaxy ID numbers are different (Config.ini).  
+
+> `*` - Usually the working directory is the root directory of the game, or where the .exe file is located. Some games use a proxy launcher .exe in the game root directory like `Game_Name\Launcher.exe`, which launches and executable from a subfolder like `Game_Name\Binaries\Win64\RealGame.exe`, this might indicate that config and server files should be placed in `Game_Name\Binaries\Win64\`.
+
+For developers:  
 - Don't add GOG stdint.h when adding new SDK versions, remove it. If you try it WILL cause errors.
 - It is possible to support Galaxy SDK versions from 1.57 up to the newest ones (1.152.6+).
 - If someone has earlier SDK headers and/or documentation files please share <3
@@ -90,20 +96,19 @@ Debug (tracing) files can be found in `<Configuration Files Directory>/tracing/<
 | Guns, Gore & Cannoli 2  | :white_check_mark:(3) | 1.124.0.0 | |
 | Tropico 6 | :white_check_mark:(2) | 1.139.2 | Also other games are displayed? Game has custom networking?<br> Build 161 worked, build 243 seems to be broken (can't join lobby) <br> Update: The person testing UniverseLAN used an invalid configuration (same generated Galaxy ID numbers), after fixing this configuration issue in Config.ini the person reported the game seems to work on build 243. | 
 | MetalSlug3 | :white_check_mark:(2)        | 1.100.2 | works since build 243 |
+| Serious Sam 4 | :white_check_mark:(2)  | 1.144.1 | works since build 251 | 
 | Serious Sams Bogus Detour | :construction: | 1.100.2 | Stuck on "Creating lobby..." or "Joining lobby..." <br> Can get into lobby since build 243 but host crashes on start |
+| Niffelheim | :construction:  | 1.139.2 | Stuck at "Loading..." (save transfer?) | 
+| Tropico 5 | :construction:  | 1.68.0 | Game just crashes when joining | 
 | Alien vs Predator 2000 | :question: |  | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176.2.6? |
 | Homeworld Remastered Collection | :warning:  | | | 
 | Homeworld: Deserts of Kharak | :warning:  | | | 
 | No Man's Sky | :warning:  | | | 
-| Serious Sam 4 | :warning:  | 1.144.1 | | 
 | Speed Brawl | :warning:  | 1.144.1 | | 
-| Northgard | :warning:  | 1.139.2 | | 
-| Niffelheim | :warning:  | 1.139.2 | | 
 | DUSK | :warning:  | 1.133.6 | | 
 | Tooth and Tail | :warning:  | 1.122.1 | | 
 | Absolver | :warning:  | 1.104.2 | | 
 | Shadow Warrior 2 | :warning: | 1.95.0 | | 
-| Tropico 5 | :warning:  | 1.68.0 | | 
 | Rage of Mages II: Necromancer | :left_right_arrow: | | | 
 | Neverwinter Nights 2 Complete | :left_right_arrow: | | | 
 | Baldur's Gate 3 | :left_right_arrow: | | | 
@@ -113,6 +118,7 @@ Debug (tracing) files can be found in `<Configuration Files Directory>/tracing/<
 | Ticket to Ride | :left_right_arrow:   | 1.139.2 | Tried it with the wrapper and works, but need to create a free Wonder account | 
 | Aragami 2 | :left_right_arrow: | 1.148.3 | Probably does not use GOG Galaxy for networking (doesn't work for private lobbies).<br> Can play on public lobbies without GOG Galaxy or with this patch AFAIK. |
 | Roboquest | :x: | 1.148.3 | Probably does not use GOG Galaxy for networking. |
+| Northgard | :x:  | 1.139.2 | Still thinks the game is offline, custom multiplayer? | 
 
 # Notice
 I'm not affiliated in any way with GOG or CD Projekt RED.  
@@ -135,3 +141,96 @@ I don't know if .lib files should be considered API or copyrighted program code,
 For the time being; if you wish to build the tests, you need to acquire these .lib files from the GOG Galaxy SDK, available in the GOG Galaxy Developer Portal.  
 Building the tests is optional.  
 > Tip: By creating a project with [wrap_dll](https://github.com/mavenlin/wrap_dll) and providing a valid `(RED)Galaxy(64).dll` you can generate a wrapper project, which when compiled, should yield a compatible .lib file that you can use to build the tests.  
+
+## Galaxy SDK Backwards Compatibility List
+These GOG Galaxy SDK versions should work interchangeably.  
+> For Developers: This does not neccesseraly represent version compilation compatibility, for example 1.125 and 1.125.1 are not compile-compatible (due to `uint32_t` to `enum` type change), but should be binary-compatible.  
+
+| SDK Base Version       | Other Compatible Versions | Notable changes |  
+| :--------------------: | :------------------------ | --------------- |  
+| 1.57 | - |
+| 1.59 | 1.60 | Added: <br> `IFriends::AvatarType` <br> `IFriends::GetFriendPersonaName` <br> `IFriends::GetFriendAvatarUrl`
+| 1.61 | - | Added: <br> `IFriends::IPersonaDataChangedListener` <br> `IFriends::IRichPresenceChangeListener` <br> `IFriends::RequestUserInformation` <br> `IFriends::Set/Delete/ClearRichPresence`
+| 1.62 | 1.63 <br> 1.64 | Added: <br> `IUser::IsLoggedOn` <br> `ILeaderboardEntriesRetrieveListener::FAILURE_REASON_NOT_FOUND` <br> `IErrorManager` / `GetErrorManager` <br> Renamed `Reset` to `ResetInstance`
+| 1.65 | 1.66 |
+| 1.67 | - |
+| 1.68 | - |
+| 1.69 | - |
+| 1.70 | - |
+| 1.71 | 1.72 |
+| 1.73 | - |
+| 1.74 | - |
+| 1.75 | - |
+| 1.76 | - |
+| 1.77 | - |
+| 1.78 | 1.79 <br> 1.80 |
+| 1.82 | - |
+| 1.83 | - |
+| 1.84 | 1.85 <br> 1.86 |
+| 1.87 | - |
+| 1.88 | 1.89 <br> 1.90 |
+| 1.91 | 1.92 |
+| 1.92.1 | 1.93 <br> 1.94 <br> 1.95 <br> 1.96 <br> 1.97 <br> 1.98 |
+| 1.99 | - |
+| 1.100 | 1.100.2 <br> 1.101 <br> 1.101.2 <br> 1.101.4 |
+| 1.102 | - |
+| 1.103 | 1.103.1 <br> 1.104 <br> 1.104.1 <br> 1.104.2 |
+| 1.104.3 | - |
+| 1.104.4 | 1.104.5 <br> 1.104.6 <br> 1.105 |
+| 1.106 | 1.107 <br> 1.108 |
+| 1.109 | - |
+| 1.110 | 1.110.1 <br> 1.110.2 <br> 1.110.3 |
+| 1.110.4 | 1.111 <br> 1.111.2 <br> 1.112 <br> 1.112.1 <br> 1.112.2 |
+| 1.113 | - |
+| 1.113.2 | - |
+| 1.113.3 | - |
+| 1.114 | 1.114.1 <br> 1.114.2 <br> 1.114.3 <br> 1.114.4 <br> 1.114.6 <br> 1.114.7 |
+| 1.114.8 | 1.114.9 <br> 1.114.12 |
+| 1.120 | - |
+| 1.120.1 | 1.121 <br> 1.121.1 <br> 1.121.2 |
+| 1.122 | 1.122.1 <br> 1.122.3 <br> 1.122.4 <br> 1.123 <br> 1.123.1 <br> 1.124 |
+| 1.125 | 1.125.1 <br> 1.125.2 |
+| 1.126 | 1.126.1 |
+| 1.127 | - |
+| 1.128 | 1.128.1 <br> 1.128.2 <br> 1.128.3 |
+| 1.129 | 1.130 <br> 1.130.1 |
+| 1.131 | 1.131.1 <br> 1.131.2 <br> 1.131.3 |
+| 1.132 | 1.132.1 |
+| 1.133 | - |
+| 1.133.1 | - |
+| 1.133.3 | 1.133.4 <br> 1.133.5 <br> 1.133.6 <br> 1.133.7 <br> 1.133.9 |
+| 1.134 | 1.134.1 <br> 1.134.2 <br> 1.134.3 <br> 1.134.4 <br> 1.134.5 <br> 1.134.6 <br> 1.134.7 <br> 1.134.8 | Telemetry has been added
+| 1.134.9 | - |
+| 1.134.10 | - |
+| 1.135 | - |
+| 1.136 | 1.136.4 <br> 1.137 <br> 1.137.1 <br> 1.137.2 <br> 1.137.3 <br> 1.137.4 <br> 1.137.5 <br> 1.137.6 <br> 1.138 |
+| 1.138.1 | 1.139 <br> 1.139.1 <br> 1.139.2 <br> 1.139.3 <br> 1.139.4 |
+| 1.139.5 | - |
+| 1.139.6 | - |
+| 1.139.7 | 1.139.8 <br> 1.139.9 |
+| 1.140 | - | Added GalaxyThread (+to InitOptions)
+| 1.141 | 1.142 |
+| 1.143 | 1.143.1 <br> 1.143.2 <br> 1.143.3 <br> 1.144 <br> 1.144.1 <br> 1.144.2 <br> 1.145 <br> 1.145.1 <br> 1.145.2 <br> 1.145.3 <br> 1.145.4 <br> 1.145.5 |
+| 1.146 | 1.147 |
+| 1.147.1 | - |
+| 1.148 | 1.148.1 |
+| 1.148.2 | - | Added GetRichPresenceKeyByIndex/Copy
+| 1.148.3 | 1.148.4 |  
+| 1.148.5 | - | Removed SignInUWB and added SingInXbox
+| 1.148.6 | - | Added CloudStorage
+| 1.148.7 | 1.148.8 <br> 1.148.9 <br> 1.148.10 |  
+| 1.148.11 | 1.148.12 |  
+| 1.148.14 | - |  
+| 1.148.15 | - |  
+| 1.148.16 | 1.148.17 <br> 1.148.18 <br> 1.148.19 <br> 1.148.20 <br> 1.148.21 <br> 1.148.22 <br> 1.148.23 <br> 1.148.25 <br> 1.148.26 <br> 1.149.0 |  
+| 1.149.1 | - |  
+| 1.149.2 | 1.149.3 <br> 1.149.4 <br> 1.149.5 <br> 1.149.6 <br> 1.149.7 <br> 1.149.8 |  
+| 1.149.9 | - |  
+| 1.149.10 | - |  
+| 1.149.11 | - |  
+| 1.149.12 | 1.149.13 <br> 1.149.14 <br> 1.149.15 <br> 1.149.16 | Galaxy/Galaxy64 renamed to REDGalaxy/REDGalaxy64
+| 1.150 | - |  GOG reverted the rename to RED prefix, it's Galaxy/Galaxy64 again.
+| 1.151 | - |  
+| 1.152.1 | - |  
+| 1.152.2 | - |  
+| 1.152.5 | 1.152.6 |  
