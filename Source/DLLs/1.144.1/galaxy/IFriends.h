@@ -669,7 +669,7 @@ namespace galaxy
 			/**
 			 * Checks if the information of specified user is available.
 			 *
-			 * The information can be retrieved by calling RequestUserInformation().
+			 * @pre Retrieve the information by calling RequestUserInformation().
 			 *
 			 * @param [in] userID The ID of the user.
 			 * @return true if the information of the user is available, false otherwise.
@@ -1001,31 +1001,6 @@ namespace galaxy
 			 * @param [in] userID The ID of the user.
 			 */
 			virtual void GetRichPresenceByIndex(uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength, GalaxyID userID = GalaxyID()) = 0;
-
-			/**
-			 * Returns a key from the rich presence storage by index.
-			 *
-			 * @remark This call is not thread-safe as opposed to GetRichPresenceKeyByIndexCopy().
-			 *
-			 * @pre Retrieve the rich presence first by calling RequestRichPresence().
-			 *
-			 * @param [in] index Index as an integer in the range of [0, number of entries).
-			 * @param [in] userID The ID of the user.
-			 * @return The rich presence key under the index of the user.
-			 */
-			virtual const char* GetRichPresenceKeyByIndex(uint32_t index, GalaxyID userID = GalaxyID()) = 0;
-
-			/**
-			 * Copies a key from the rich presence storage by index to a buffer.
-			 *
-			 * @pre Retrieve the rich presence first by calling RequestRichPresence().
-			 *
-			 * @param [in] index Index as an integer in the range of [0, number of entries).
-			 * @param [in, out] buffer The output buffer.
-			 * @param [in] bufferLength The size of the output buffer.
-			 * @param [in] userID The ID of the user.
-			 */
-			virtual void GetRichPresenceKeyByIndexCopy(uint32_t index, char* buffer, uint32_t bufferLength, GalaxyID userID = GalaxyID()) = 0;
 
 			/**
 			 * Shows game invitation dialog that allows to invite users to game.

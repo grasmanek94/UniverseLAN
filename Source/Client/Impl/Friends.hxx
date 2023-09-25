@@ -512,6 +512,33 @@ namespace universelan::client {
 		virtual GetRichPresenceReturnT::type GetRichPresenceByIndex(uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength, GalaxyID userID = GalaxyID()) override;
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_GETRICHPRESENCEKEYBYINDEX
+		/**
+		 * Returns a key from the rich presence storage by index.
+		 *
+		 * @remark This call is not thread-safe as opposed to GetRichPresenceKeyByIndexCopy().
+		 *
+		 * @pre Retrieve the rich presence first by calling RequestRichPresence().
+		 *
+		 * @param [in] index Index as an integer in the range of [0, number of entries).
+		 * @param [in] userID The ID of the user.
+		 * @return The rich presence key under the index of the user.
+		 */
+		virtual const char* GetRichPresenceKeyByIndex(uint32_t index, GalaxyID userID = GalaxyID()) override;
+
+		/**
+		 * Copies a key from the rich presence storage by index to a buffer.
+		 *
+		 * @pre Retrieve the rich presence first by calling RequestRichPresence().
+		 *
+		 * @param [in] index Index as an integer in the range of [0, number of entries).
+		 * @param [in, out] buffer The output buffer.
+		 * @param [in] bufferLength The size of the output buffer.
+		 * @param [in] userID The ID of the user.
+		 */
+		virtual void GetRichPresenceKeyByIndexCopy(uint32_t index, char* buffer, uint32_t bufferLength, GalaxyID userID = GalaxyID()) override;
+#endif
+
 		/**
 		 * Shows game invitation dialog that allows to invite users to game.
 		 *

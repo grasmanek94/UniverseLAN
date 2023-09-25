@@ -490,6 +490,38 @@ namespace universelan::client {
 	}
 
 
+#if GALAXY_BUILD_FEATURE_HAS_GETRICHPRESENCEKEYBYINDEX
+	/**
+	 * Returns a key from the rich presence storage by index.
+	 *
+	 * @remark This call is not thread-safe as opposed to GetRichPresenceKeyByIndexCopy().
+	 *
+	 * @pre Retrieve the rich presence first by calling RequestRichPresence().
+	 *
+	 * @param [in] index Index as an integer in the range of [0, number of entries).
+	 * @param [in] userID The ID of the user.
+	 * @return The rich presence key under the index of the user.
+	 */
+	const char* FriendsImpl::GetRichPresenceKeyByIndex(uint32_t index, GalaxyID userID = GalaxyID()) {
+		return "";
+	}
+
+	/**
+	 * Copies a key from the rich presence storage by index to a buffer.
+	 *
+	 * @pre Retrieve the rich presence first by calling RequestRichPresence().
+	 *
+	 * @param [in] index Index as an integer in the range of [0, number of entries).
+	 * @param [in, out] buffer The output buffer.
+	 * @param [in] bufferLength The size of the output buffer.
+	 * @param [in] userID The ID of the user.
+	 */
+	void FriendsImpl::GetRichPresenceKeyByIndexCopy(uint32_t index, char* buffer, uint32_t bufferLength, GalaxyID userID = GalaxyID()) {
+
+	}
+
+#endif
+
 	void FriendsImpl::ShowOverlayInviteDialog(const char* connectionString) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 

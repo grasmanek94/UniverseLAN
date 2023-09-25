@@ -152,7 +152,7 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
 
   afvd(HAS_SETUSERDATA_ISPECIFICLISTENER		1.138.1					) 
 
-  afvd(IUSER_SIGNINEPIC							1.139.5					)
+  afvd(IUSER_SIGNINEPIC							1.139.5		1.148.2		)
 
   afvd(ITELEMETRY_1_139_6_UPDATE				1.139.6					)
 
@@ -166,6 +166,8 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
   afvd(IUSER_SIGNINXBLIVE						1.143.0					)
 
   afvd(IUSER_SIGNINLAUNCHER						1.146.0					)
+
+  afvd(HAS_GETRICHPRESENCEKEYBYINDEX			1.148.2					)
 
   afvd(HAS_RED_PREFIX							1.149.12	1.149.16	)
 

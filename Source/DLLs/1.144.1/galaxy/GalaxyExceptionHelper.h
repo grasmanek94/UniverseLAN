@@ -16,9 +16,9 @@ class Exception : public ExceptionInterface \
 {\
 public: \
 	explicit Exception(const IError* exception) : message(exception->GetMsg()) {}\
-	virtual const char* GetName() const { return #ExceptionInterface; } \
-	virtual const char* GetMsg() const { return message.c_str(); } \
-	virtual api::IError::Type GetType() const { return ErrorType; } \
+	const char* GetName() const override { return #ExceptionInterface; } \
+	const char* GetMsg() const override { return message.c_str(); } \
+	api::IError::Type GetType() const override { return ErrorType; } \
 \
 private: \
 	const std::string message; \
