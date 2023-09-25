@@ -96,8 +96,8 @@ Debug (tracing) files can be found in `<Configuration Files Directory>/tracing/<
 | Guns, Gore & Cannoli 2  | :white_check_mark:(3) | 1.124.0 | |
 | Tropico 6 | :white_check_mark:(2) | 1.139.2 | Also other games are displayed? Game has custom networking?<br> Build 161 worked, build 243 seems to be broken (can't join lobby) <br> Update: The person testing UniverseLAN used an invalid configuration (same generated Galaxy ID numbers), after fixing this configuration issue in Config.ini the person reported the game seems to work on build 243. | 
 | MetalSlug3 | :white_check_mark:(2)        | 1.100.2 | Works since build 243 |
-| Serious Sam 4 | :white_check_mark:(2)  | 1.144.1 | Works since build 251 | 
-| Tooth and Tail | :white_check_mark:(2)  | 1.122.1 | Works with 1.124.0, tested with build 251 | 
+| Serious Sam 4 | :white_check_mark:(2)  | 1.144.1 | Works since build 256 | 
+| Tooth and Tail | :white_check_mark:(2)  | 1.122.1 | Works with 1.124.0, tested with build 256 | 
 | Serious Sams Bogus Detour | :construction: | 1.100.2 | Stuck on "Creating lobby..." or "Joining lobby..." <br> Can get into lobby since build 243 but host crashes on start |
 | Niffelheim | :construction:  | 1.139.2 | Stuck at "Loading..." (save transfer?) | 
 | Tropico 5 | :construction:  | 1.68.0 | Game just crashes when joining | 
