@@ -502,7 +502,7 @@ namespace universelan::client {
 	 * @param [in] userID The ID of the user.
 	 * @return The rich presence key under the index of the user.
 	 */
-	const char* FriendsImpl::GetRichPresenceKeyByIndex(uint32_t index, GalaxyID userID = GalaxyID()) {
+	const char* FriendsImpl::GetRichPresenceKeyByIndex(uint32_t index, GalaxyID userID) {
 		return "";
 	}
 
@@ -516,7 +516,7 @@ namespace universelan::client {
 	 * @param [in] bufferLength The size of the output buffer.
 	 * @param [in] userID The ID of the user.
 	 */
-	void FriendsImpl::GetRichPresenceKeyByIndexCopy(uint32_t index, char* buffer, uint32_t bufferLength, GalaxyID userID = GalaxyID()) {
+	void FriendsImpl::GetRichPresenceKeyByIndexCopy(uint32_t index, char* buffer, uint32_t bufferLength, GalaxyID userID) {
 
 	}
 
