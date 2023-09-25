@@ -13,7 +13,7 @@ namespace universelan::client {
 	namespace fs = std::filesystem;
 	InterfaceInstances intf_inst;
 
-	void InterfaceInstances::init(const InitOptionsImpl& initOptions) {
+	void InterfaceInstances::init(const InitOptionsModern& initOptions) {
 		if (config == nullptr) {
 			config = std::make_unique<ClientIniData>();
 		}
@@ -46,10 +46,18 @@ namespace universelan::client {
 		networking = std::make_unique<NetworkingImpl>(this);
 		server_networking = std::make_unique<NetworkingImpl>(this);
 		stats = std::make_unique<StatsImpl>(this);
+#if GALAXY_BUILD_FEATURE_HAS_IUTILS
 		utils = std::make_unique<UtilsImpl>(this);
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_IAPPS
 		apps = std::make_unique<AppsImpl>(this);
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 		storage = std::make_unique<StorageImpl>(this);
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
 		custom_networking = std::make_unique<CustomNetworkingImpl>(this);
+#endif
 		logger = std::make_unique<LoggerImpl>(this);
 
 #if (GALAXY_VERSION) > 11240
@@ -91,10 +99,18 @@ namespace universelan::client {
 #endif
 
 		logger = nullptr;
+#if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
 		custom_networking = nullptr;
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 		storage = nullptr;
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_IAPPS
 		apps = nullptr;
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_IUTILS
 		utils = nullptr;
+#endif
 		stats = nullptr;
 		networking = nullptr;
 		server_networking = nullptr;

@@ -12,7 +12,7 @@ namespace universelan {
 	public:
 		uint64_t request_id = 0;
 		galaxy::api::GalaxyID lobby_id = 0;
-		galaxy::api::LobbyType type = galaxy::api::LOBBY_TYPE_PRIVATE;
+		galaxy::api::LobbyType type = galaxy::api::LobbyType::LOBBY_TYPE_PUBLIC;
 		bool success = true;
 #if (GALAXY_VERSION) > 11240
 		galaxy::api::ILobbyDataUpdateListener::FailureReason fail_reason = galaxy::api::ILobbyDataUpdateListener::FAILURE_REASON_UNDEFINED;

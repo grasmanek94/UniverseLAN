@@ -10,7 +10,7 @@ namespace universelan {
 	struct GalaxyIDHash {
 		std::size_t operator()(const galaxy::api::GalaxyID& k) const
 		{
-			return std::hash<uint64_t>()(k.GetRealID());
+			return std::hash<uint64_t>()(k.ToUint64());
 		}
 	};
 }
@@ -48,14 +48,6 @@ namespace galaxy::api {
 
 	inline GalaxyID FromRealID(IDType type, uint64_t value)
 	{
-		/**
-		 * The numerical value used when the instance of GalaxyID is not valid.
-		 */
-		static const uint64_t UNASSIGNED_VALUE = 0;
-
-		assert(type != IDType::ID_TYPE_UNASSIGNED);
-		assert(value != UNASSIGNED_VALUE);
-		assert(static_cast<IDType>(value >> 56) == IDType::ID_TYPE_UNASSIGNED);
-		return GalaxyID(static_cast<uint64_t>(type) << 56 | value);
+		return GalaxyID(static_cast<uint64_t>(type) << 56 | (value & 0xffffffffffffff));
 	}
 }

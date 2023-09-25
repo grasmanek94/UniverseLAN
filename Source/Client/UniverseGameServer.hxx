@@ -1,5 +1,7 @@
 #pragma once
 
+#if GALAXY_BUILD_FEATURE_GAME_SERVER_API
+
 #include "UniverseLAN.hxx"
 
 namespace universelan::client {
@@ -18,7 +20,9 @@ namespace universelan::client {
 
 		INetworking* GameServerNetworking();
 
+#if GALAXY_BUILD_FEATURE_HAS_IUTILS
 		IUtils* GameServerUtils();
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 		ITelemetry* GameServerTelemetry();
@@ -29,3 +33,5 @@ namespace universelan::client {
 		void ProcessGameServerData();
 	};
 }
+
+#endif

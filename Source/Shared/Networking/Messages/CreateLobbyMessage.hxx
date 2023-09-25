@@ -1,5 +1,6 @@
 #pragma once
 
+#include <GalaxyVersionedTypes.hxx>
 #include <Networking/SendableEventMessage.hxx>
 
 #include <GalaxyID.h>

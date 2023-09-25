@@ -624,7 +624,7 @@ namespace universelan {
 
 	bool ClientIniData::IsSelfUserID(galaxy::api::GalaxyID userID) const
 	{
-		return (userID == GetApiGalaxyID()) || (userID == 0);
+		return (userID == GetApiGalaxyID()) || (userID == 0) || (userID == galaxy::api::FromRealID(galaxy::api::IDType::ID_TYPE_USER, 0));
 	}
 
 	void ClientIniData::ResetStatsAndAchievements()

@@ -21,10 +21,18 @@ namespace universelan::client {
 	class MatchmakingImpl;
 	class NetworkingImpl;
 	class StatsImpl;
+#if GALAXY_BUILD_FEATURE_HAS_IUTILS
 	class UtilsImpl;
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_IAPPS
 	class AppsImpl;
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 	class StorageImpl;
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
 	class CustomNetworkingImpl;
+#endif
 	class LoggerImpl;
 
 #if (GALAXY_VERSION) > 11240
@@ -41,17 +49,32 @@ namespace universelan::client {
 		std::unique_ptr<Client>					client = nullptr;
 		std::unique_ptr<UserImpl>				user = nullptr;
 		std::unique_ptr<FriendsImpl>			friends = nullptr;
+
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
 		std::unique_ptr<ChatImpl>				chat = nullptr;
 #endif
+
 		std::unique_ptr<MatchmakingImpl>		matchmaking = nullptr;
 		std::unique_ptr<NetworkingImpl>			networking = nullptr;
 		std::unique_ptr<NetworkingImpl>			server_networking = nullptr;
 		std::unique_ptr<StatsImpl>				stats = nullptr;
+
+#if GALAXY_BUILD_FEATURE_HAS_IUTILS
 		std::unique_ptr<UtilsImpl>				utils = nullptr;
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_IAPPS
 		std::unique_ptr<AppsImpl>				apps = nullptr;
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 		std::unique_ptr<StorageImpl>			storage = nullptr;
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
 		std::unique_ptr<CustomNetworkingImpl>	custom_networking = nullptr;
+#endif
+
 		std::unique_ptr<LoggerImpl>				logger = nullptr;
 
 #if (GALAXY_VERSION) > 11240
@@ -61,7 +84,7 @@ namespace universelan::client {
 		std::unique_ptr<ListenerRegistrarImpl>	notification = nullptr;
 		std::unique_ptr<DelayRunner>			delay_runner = nullptr;
 
-		void init(const InitOptionsImpl& initOptions);
+		void init(const InitOptionsModern& initOptions);
 		void reset();
 
 		~InterfaceInstances();

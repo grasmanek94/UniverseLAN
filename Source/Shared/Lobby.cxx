@@ -13,7 +13,9 @@
 #include <unordered_map>
 
 namespace universelan {
-	using namespace galaxy::api;
+	using galaxy::api::GalaxyID;
+	using galaxy::api::LobbyType;
+	using galaxy::api::LobbyTopologyType;
 
 	Lobby::Lobby() :
 		id{ GlobalUniqueID::get() }, owner_id{}, max_members{}, joinable{}, topology_type{}, type{},
@@ -61,7 +63,7 @@ namespace universelan {
 		}
 	}
 
-	LobbyTopologyType Lobby::GetTopology() const {
+	galaxy::api::LobbyTopologyType Lobby::GetTopology() const {
 		return topology_type;
 	}
 

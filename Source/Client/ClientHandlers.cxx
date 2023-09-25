@@ -19,7 +19,9 @@ namespace universelan::client {
 		std::cout << "Peer connected: " 
 			<< std::hex <<peer->address.host << ":" << std::dec << peer->address.port << std::endl;
 
+#if GALAXY_BUILD_FEATURE_HAS_IUTILS
 		interfaces->utils->ConnectionStateChangeReceived(true);
+#endif
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data)
@@ -29,7 +31,9 @@ namespace universelan::client {
 		std::cout << "Peer disconnected: " 
 			<< std::hex << peer->address.host << ":" << std::dec << peer->address.port << std::endl;
 
+#if GALAXY_BUILD_FEATURE_HAS_IUTILS
 		interfaces->utils->ConnectionStateChangeReceived(false);
+#endif
 
 		connection.Reconnect();
 	}
@@ -116,13 +120,17 @@ namespace universelan::client {
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<FileShareResponseMessage>& data) {
 		tracer::Trace trace{ "::FileShareResponseMessage" };
 
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 		interfaces->storage->FileUploaded(data);
+#endif
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<FileRequestMessage>& data) {
 		tracer::Trace trace{ "::FileRequestMessage" };
 
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 		interfaces->storage->FileDownloaded(data);
+#endif
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<CreateLobbyResponseMessage>& data) {

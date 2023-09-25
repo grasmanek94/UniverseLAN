@@ -23,12 +23,12 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
   afvd(HAS_OPERATIONALSTATECHANGELISTENER		1.65.0					)
 
   afvd(ENCRYPTED_APP_TICKET 					1.67.0 					)
-  afvd(HAS_FRIENDLISTLISTENER 					1.67.0 					)
+  afvd(HAS_IFRIENDLISTLISTENER 					1.67.0 					)
   afvd(HAS_IOVERLAYSTATECHANGELISTENER  		1.67.0 		1.132.1		)
 
   afvd(HAS_GETLEADERBORDENTRYCOUNT				1.68.0 					)
 
-  afvd(HAS_LEADERBOARD_WITH_DETAILS	    		1.68.0 					)
+  afvd(HAS_LEADERBOARD_WITH_DETAILS	    		1.69.0 					)
 
   afvd(HAS_ILEADERBOARDRETRIEVELISTENER    		1.70.0 					)
   afvd(HAS_IACCESSTOKENLISTENER         		1.70.0 					)
@@ -37,10 +37,11 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
   afvd(HAS_GALAXYID_GETREALID            		1.71.0 					)
   afvd(IFRIENDS_GET_FRIEND_PERSONA_AVATAR_COPY  1.71.0 					)
   afvd(IMATCHMAKING_GET_DATA_MEMBER_COPY        1.71.0 					)
-  afvd(ISTATS_LEADERBORDSORTMETHOD1_71_ARG_CHANGE 1.71.0 				)
-  afvd(ISTATS_GET_ACHIEVEMENT_COPY              1.71.0 			    	)
+  afvd(ISTATS_LEADERBORDSORTMETHOD_1_71_ARG_CHANGE 1.71.0 				)
+  afvd(ISTATS_GET_ACHIEVEMENT_LEADERBOARD_COPY	1.71.0 			    	)
   afvd(IUSER_GET_DATA_ACCESSTOKEN_COPY          1.71.0 			    	)
-  
+
+
   afvd(HAS_INOTIFICATIONLISTENER        		1.75.0 					)
   afvd(HAS_ILOBBYDATARETRIEVELISTENER      		1.75.0 					)
   afvd(HAS_IGAMEINVITATIONRECEIVEDLISTENER 		1.75.0 					)
@@ -48,21 +49,39 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
 
   # up to here it's up-to-date
   
-  afvd(API_HAS_UTILS                            1.73.0 			    	)
-  afvd(API_HAS_IAPPS                            1.73.0 			    	)
+  afvd(HAS_IUTILS	                            1.73.0 			    	)
+  afvd(HAS_IAPPS	                            1.73.0 			    	)
   afvd(HAS_SPECIFICUSERDATALISTENER   		    1.73.0 			    	)
+  afvd(HAS_ISENDINVITATIONLISTENER   		    1.73.0 			    	)
+  afvd(HAS_IUSERTIMEPLAYEDRETRIEVELISTENER		1.73.0					)
+  afvd(HAS_1_73_AVATARTYPE_CRITERIA				1.73.0					)
+  afvd(HAS_1_73_LOBBY_FEATURES					1.73.0					)
 
   afvd(ADDED_RICH_PRESENCE_LISTENERS			1.74.0					)
 
+  afvd(HAS_IFRIEND_ISAVATARAVAILABLE			1.75.0					)
+  afvd(HAS_ILOBBYDATARETRIEVELISTENER			1.75.0					)
+  afvd(HAS_INOTIFICATIONLISTENER				1.75.0					)
+  afvd(HAS_IGAMEINVITATIONRECEIVEDLISTENER		1.75.0					)
+
   afvd(HAS_IUSERTIMEPLAYEDRETRIEVELISTENER		1.76.0					)
+  
+  afvd(HAS_SIGNIN_PS4							1.77.0					)
+
+  afvd(HAS_PERSONASTATE_ENUM					1.78.0					)
+  afvd(HAS_LOBBYTOPOLOGYTYPE_ENUM				1.78.0					)
+  afvd(HAS_P2P_SEND_IMMEDIATE					1.78.0					)
 
   afvd(HAS_INITOPTIONS 							1.82.0 					)
   afvd(HAS_IOTHERSESSIONSTARTLISTENER			1.82.0 					)
+  afvd(HAS_REQUESTLOBBYLIST_ARGS_ALLOWFULL		1.82.0 					)
 
   afvd(HAS_ISTORAGE 							1.88.0 					)
   afvd(HAS_GETCURRENTGAMELANGUAGE				1.88.0 					)
 
   afvd(IUTILS_NOTIFICATION_ID_TYPEDEF   		1.92.1					)
+
+  afvd(HAS_ICUSTOMNETWORKING					1.99.0 					)
 
   afvd(ENCRYPTED_APP_TICKET_CONST 				1.102.0					)
 
@@ -96,6 +115,8 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
 
   afvd(USER_SIGNIN_LISTENERS 					1.121.3					)
 
+  afvd(HAS_INITOPTIONS_STORAGEPATH				1.122.0					)
+
   afvd(LOBBY_LISTENERS 							1.124.1					)
   afvd(MATCHMAKING_RESULT_COUNT 				1.124.1					)
   afvd(MATCHMAKING_RET_TYPE_VOID 				1.124.1					)
@@ -125,7 +146,11 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
 
   afvd(HAS_ITELEMETRY			 				1.134.0					) 
 
+  afvd(HAS_REQUESTUSERDATA_ISPECIFICLISTENER	1.134.10				) 
+
   afvd(HAS_GAMESERVERNETWORKINGLISTENER			1.135.0					) 
+
+  afvd(HAS_SETUSERDATA_ISPECIFICLISTENER		1.138.1					) 
 
   afvd(IUSER_SIGNINEPIC							1.139.5					)
 

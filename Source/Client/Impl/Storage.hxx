@@ -1,5 +1,6 @@
-#ifndef UNIVERSELAN_IMPL_STORAGE_H
-#define UNIVERSELAN_IMPL_STORAGE_H
+#pragma once
+
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 
 /**
  * @file

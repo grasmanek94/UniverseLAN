@@ -3,7 +3,10 @@
 #include "UniverseLAN.hxx"
 
 namespace universelan::client {
-	void Init(const InitOptions& initOptions);
+	void Init(const InitOptionsModern& initOptions);
+#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
+	void Init(const galaxy::api::InitOptions& initOptions);
+#endif
 	void Shutdown();
 	IUser* User();
 	IFriends* Friends();

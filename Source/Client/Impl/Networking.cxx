@@ -21,12 +21,16 @@ namespace universelan::client {
 
 		switch (sendType) {
 		case P2P_SEND_RELIABLE:
+#if GALAXY_BUILD_FEATURE_HAS_P2P_SEND_IMMEDIATE
 		case P2P_SEND_RELIABLE_IMMEDIATE:
+#endif
 			flag = ENET_PACKET_FLAG_RELIABLE;
 			break;
 
 		case P2P_SEND_UNRELIABLE:
+#if GALAXY_BUILD_FEATURE_HAS_P2P_SEND_IMMEDIATE
 		case P2P_SEND_UNRELIABLE_IMMEDIATE:
+#endif
 			// no unreliable flag?
 			break;
 		}

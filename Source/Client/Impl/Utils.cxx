@@ -1,3 +1,5 @@
+#if GALAXY_BUILD_FEATURE_HAS_IUTILS
+
 #include "Utils.hxx"
 #include "UniverseLAN.hxx"
 
@@ -86,3 +88,5 @@ namespace universelan::client {
 #endif
 	}
 }
+
+#endif

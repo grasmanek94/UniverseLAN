@@ -1,11 +1,16 @@
 #include "SharedFileUtils.hxx"
 
+#include <GalaxyVersionedTypes.hxx>
+#include <GalaxyApi.h>
+
 #include <exception>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
 
 namespace universelan {
+	using galaxy::api::SharedFileID;
+
 	namespace {
 		std::size_t number_of_files_in_directory(std::filesystem::path path) {
 			using std::filesystem::directory_iterator;
@@ -13,8 +18,6 @@ namespace universelan {
 		}
 
 	}
-
-	using namespace galaxy::api;
 
 	const std::string SharedFileUtils::ROOT_LOCAL = "Local";
 	const std::string SharedFileUtils::ROOT_SHARED = "Shared";
@@ -210,7 +213,7 @@ namespace universelan {
 		return (uint32_t)number_of_files_in_directory(GetPath(root, "/"));
 	}
 
-	galaxy::api::SharedFileID SharedFileUtils::GetSharedIDByIndex(uint32_t index) const {
+	SharedFileID SharedFileUtils::GetSharedIDByIndex(uint32_t index) const {
 		using std::filesystem::directory_iterator;
 
 		auto entries = directory_iterator(GetPath(ROOT_ID_TO_FILENAME, "/"));
@@ -240,7 +243,7 @@ namespace universelan {
 		return std::filesystem::copy_file(GetPath(root_from, file_name), GetPath(root_to, file_name));
 	}
 
-	std::fstream SharedFileUtils::OpenShared(galaxy::api::SharedFileID id, std::ios::openmode mode) const {
+	std::fstream SharedFileUtils::OpenShared(SharedFileID id, std::ios::openmode mode) const {
 		return Open(ROOT_SHARED, GetSharedFileName(id), mode);
 	}
 
@@ -256,7 +259,7 @@ namespace universelan {
 		return Open(ROOT_AVATARS, file_name, mode);
 	}
 
-	std::filesystem::path SharedFileUtils::GetPathShared(galaxy::api::SharedFileID id) const {
+	std::filesystem::path SharedFileUtils::GetPathShared(SharedFileID id) const {
 		return GetPath(ROOT_SHARED, GetSharedFileName(id));
 	}
 
@@ -272,7 +275,7 @@ namespace universelan {
 		return GetPath(ROOT_AVATARS, file_name);
 	}
 
-	bool SharedFileUtils::ExistsShared(galaxy::api::SharedFileID id) const {
+	bool SharedFileUtils::ExistsShared(SharedFileID id) const {
 		return Exists(ROOT_SHARED, GetSharedFileName(id));
 	}
 
@@ -288,7 +291,7 @@ namespace universelan {
 		return Exists(ROOT_AVATARS, file_name);
 	}
 
-	bool SharedFileUtils::RemoveShared(galaxy::api::SharedFileID id) const {
+	bool SharedFileUtils::RemoveShared(SharedFileID id) const {
 		return Remove(ROOT_SHARED, GetSharedFileName(id));
 	}
 
@@ -304,7 +307,7 @@ namespace universelan {
 		return Remove(ROOT_AVATARS, file_name);
 	}
 
-	bool SharedFileUtils::WriteShared(galaxy::api::SharedFileID id, const char* data, size_t data_length) const {
+	bool SharedFileUtils::WriteShared(SharedFileID id, const char* data, size_t data_length) const {
 		return Write(ROOT_SHARED, GetSharedFileName(id), data, data_length);
 	}
 
@@ -320,7 +323,7 @@ namespace universelan {
 		return Write(ROOT_AVATARS, file_name, data, data_length);
 	}
 
-	uint32_t SharedFileUtils::ReadShared(galaxy::api::SharedFileID id, char* data, size_t data_length, size_t offset) const {
+	uint32_t SharedFileUtils::ReadShared(SharedFileID id, char* data, size_t data_length, size_t offset) const {
 		return Read(ROOT_SHARED, GetSharedFileName(id), data, data_length, offset);
 	}
 
@@ -336,7 +339,7 @@ namespace universelan {
 		return Read(ROOT_AVATARS, file_name, data, data_length, offset);
 	}
 
-	std::vector<char> SharedFileUtils::ReadShared(galaxy::api::SharedFileID id) const {
+	std::vector<char> SharedFileUtils::ReadShared(SharedFileID id) const {
 		return Read(ROOT_SHARED, GetSharedFileName(id));
 	}
 
@@ -352,7 +355,7 @@ namespace universelan {
 		return Read(ROOT_AVATARS, file_name);
 	}
 
-	uint32_t SharedFileUtils::GetSizeShared(galaxy::api::SharedFileID id) const {
+	uint32_t SharedFileUtils::GetSizeShared(SharedFileID id) const {
 		return GetSize(ROOT_SHARED, GetSharedFileName(id));
 	}
 
@@ -368,7 +371,7 @@ namespace universelan {
 		return GetSize(ROOT_AVATARS, file_name);
 	}
 
-	uint32_t SharedFileUtils::GetTimestampShared(galaxy::api::SharedFileID id) const {
+	uint32_t SharedFileUtils::GetTimestampShared(SharedFileID id) const {
 		return GetTimestamp(ROOT_SHARED, GetSharedFileName(id));
 	}
 

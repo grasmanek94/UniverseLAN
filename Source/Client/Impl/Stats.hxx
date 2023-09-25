@@ -41,10 +41,12 @@ namespace universelan::client {
 		ListenerRegistrarImpl* listeners;
 
 		ListenersRequestHelper<IUserStatsAndAchievementsRetrieveListener*> specific_user_stats_and_achievements_requests;
+
+#if GALAXY_BUILD_FEATURE_HAS_IUSERTIMEPLAYEDRETRIEVELISTENER
 		ListenersRequestHelper<IUserTimePlayedRetrieveListener*> specific_user_time_played_requests;
+#endif
 
 	public:
-
 		StatsImpl(InterfaceInstances* intf);
 		virtual ~StatsImpl();
 
@@ -203,6 +205,7 @@ namespace universelan::client {
 		 */
 		virtual const char* GetAchievementDisplayName(const char* name) override;
 
+#if GALAXY_BUILD_FEATURE_ISTATS_GET_ACHIEVEMENT_LEADERBOARD_COPY
 		/**
 		 * Copies display name of a specified achievement.
 		 *
@@ -213,6 +216,7 @@ namespace universelan::client {
 		 * @param [in] bufferLength The size of the output buffer.
 		 */
 		virtual void GetAchievementDisplayNameCopy(const char* name, char* buffer, uint32_t bufferLength) override;
+#endif
 
 		/**
 		 * Returns description of a specified achievement.
@@ -226,6 +230,7 @@ namespace universelan::client {
 		 */
 		virtual const char* GetAchievementDescription(const char* name) override;
 
+#if GALAXY_BUILD_FEATURE_ISTATS_GET_ACHIEVEMENT_LEADERBOARD_COPY
 		/**
 		 * Copies description of a specified achievement.
 		 *
@@ -236,6 +241,7 @@ namespace universelan::client {
 		 * @param [in] bufferLength The size of the output buffer.
 		 */
 		virtual void GetAchievementDescriptionCopy(const char* name, char* buffer, uint32_t bufferLength) override;
+#endif
 
 		/**
 		 * Returns visibility status of a specified achievement.
@@ -287,6 +293,7 @@ namespace universelan::client {
 		 */
 		virtual const char* GetLeaderboardDisplayName(const char* name) override;
 
+#if GALAXY_BUILD_FEATURE_ISTATS_GET_ACHIEVEMENT_LEADERBOARD_COPY
 		/**
 		 * Copies display name of a specified leaderboard.
 		 *
@@ -299,6 +306,7 @@ namespace universelan::client {
 		 * @param [in] bufferLength The size of the output buffer.
 		 */
 		virtual void GetLeaderboardDisplayNameCopy(const char* name, char* buffer, uint32_t bufferLength) override;
+#endif
 
 		/**
 		 * Returns sort method of a specified leaderboard.
@@ -424,6 +432,34 @@ namespace universelan::client {
 		 */
 		virtual void GetRequestedLeaderboardEntry(uint32_t index, uint32_t& rank, int32_t& score, GalaxyID& userID) override;
 
+
+		/**
+		 * Updates entry for own user in a specified leaderboard.
+		 *
+		 * This call is asynchronous. Responses come to the ILeaderboardScoreUpdateListener.
+		 *
+		 * @pre Retrieve definition of this particular leaderboard first by calling
+		 * either FindLeaderboard() or FindOrCreateLeaderboard(), or definitions of all existing leaderboards
+		 * by calling RequestLeaderboards().
+		 *
+		 * @pre For this call to work while the user is logged off, the definition of the leaderboard
+		 * must have been retrieved at least once while the user was logged on.
+		 *
+		 * @param [in] name The name of the leaderboard.
+		 * @param [in] score The score to set.
+		 * @param [in] forceUpdate If the update should be performed in case the score is worse than the previous score.
+		 * @param [in] listener The listener for specific operation.
+		 */
+		virtual void SetLeaderboardScore(
+			const char* name
+			, int32_t score
+			, bool forceUpdate = false
+#if (GALAXY_VERSION) > 11240
+			, ILeaderboardScoreUpdateListener* const listener = NULL
+#endif
+		) override;
+
+#if GALAXY_BUILD_FEATURE_HAS_LEADERBOARD_WITH_DETAILS
 		/**
 		 * Returns data with details from the currently processed request for leaderboard entries.
 		 *
@@ -457,32 +493,6 @@ namespace universelan::client {
 			GalaxyID& userID) override;
 
 		/**
-		 * Updates entry for own user in a specified leaderboard.
-		 *
-		 * This call is asynchronous. Responses come to the ILeaderboardScoreUpdateListener.
-		 *
-		 * @pre Retrieve definition of this particular leaderboard first by calling
-		 * either FindLeaderboard() or FindOrCreateLeaderboard(), or definitions of all existing leaderboards
-		 * by calling RequestLeaderboards().
-		 *
-		 * @pre For this call to work while the user is logged off, the definition of the leaderboard
-		 * must have been retrieved at least once while the user was logged on.
-		 *
-		 * @param [in] name The name of the leaderboard.
-		 * @param [in] score The score to set.
-		 * @param [in] forceUpdate If the update should be performed in case the score is worse than the previous score.
-		 * @param [in] listener The listener for specific operation.
-		 */
-		virtual void SetLeaderboardScore(
-			const char* name
-			, int32_t score
-			, bool forceUpdate = false
-#if (GALAXY_VERSION) > 11240
-			, ILeaderboardScoreUpdateListener* const listener = NULL
-#endif
-		) override;
-
-		/**
 		 * Updates entry with details for own user in a specified leaderboard.
 		 *
 		 * This call is asynchronous. Responses come to the ILeaderboardScoreUpdateListener.
@@ -511,6 +521,7 @@ namespace universelan::client {
 			, ILeaderboardScoreUpdateListener* const listener = NULL
 #endif
 		) override;
+#endif
 
 		/**
 		 * Returns the leaderboard entry count for requested leaderboard.
@@ -524,6 +535,7 @@ namespace universelan::client {
 		 */
 		virtual uint32_t GetLeaderboardEntryCount(const char* name) override;
 
+#if GALAXY_BUILD_FEATURE_HAS_ILEADERBOARDRETRIEVELISTENER
 		/**
 		 * Performs a request for definition of a specified leaderboard.
 		 *
@@ -563,7 +575,9 @@ namespace universelan::client {
 			, ILeaderboardRetrieveListener* const listener = NULL
 #endif
 		) override;
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IUSERTIMEPLAYEDRETRIEVELISTENER
 		/**
 		 * Performs a request for user time played.
 		 *
@@ -587,6 +601,7 @@ namespace universelan::client {
 		 * @return The number of seconds played by the specified user.
 		 */
 		virtual uint32_t GetUserTimePlayed(GalaxyID userID = GalaxyID()) override;
+#endif
 
 		void SpecificUserStatsAndAchievementsRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
 		void RequestUserTimePlayedProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);

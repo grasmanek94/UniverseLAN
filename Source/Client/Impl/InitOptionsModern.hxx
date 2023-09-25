@@ -39,11 +39,13 @@ namespace universelan::client {
 		 * @param [in] initOptions InitOptions passed from Init function.
 		 */
 		InitOptionsModern(const InitOptionsImpl& initOptions);
+		InitOptionsModern();
 
 		std::string clientID; ///< The ID of the client.
 		std::string clientSecret; ///< The secret of the client.
 		std::string configFilePath; ///< The path to folder which contains configuration files.
 		std::string storagePath; ///< The path to folder for storing internal SDK data. Used only on Android devices.
+		bool throwExceptions;
 #if GALAXY_BUILD_FEATURE_ALLOCATOR
 		galaxy::api::GalaxyAllocator* galaxyAllocator;
 #endif

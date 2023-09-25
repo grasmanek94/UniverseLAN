@@ -1,3 +1,5 @@
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
+
 #include "Storage.hxx"
 
 #include "UniverseLAN.hxx"
@@ -245,3 +247,5 @@ namespace universelan::client {
 		}
 	}
 }
+
+#endif

@@ -1,6 +1,6 @@
-#ifndef UNIVERSELAN_IMPL_APPS_H
-#define UNIVERSELAN_IMPL_APPS_H
+#pragma once
 
+#if GALAXY_BUILD_FEATURE_HAS_IAPPS
 /**
  * @file
  * Contains data structures and interfaces related to application activities.

@@ -41,4 +41,23 @@ namespace universelan::client {
 		port = initOptions.port;
 #endif
 	}
+
+	InitOptionsModern::InitOptionsModern() :
+		clientID{ "" }
+		, clientSecret{ "" }
+		, configFilePath{ "" }
+		, storagePath{ "" }
+#if GALAXY_BUILD_FEATURE_ALLOCATOR
+		, galaxyAllocator{ nullptr }
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_IGALAXYTHREADFACTORY
+		, galaxyThreadFactory{ nullptr }
+#endif
+#if (GALAXY_VERSION) > 11240
+
+		, host{ "" }
+		, port{ 0 }
+#endif
+
+	{}
 }

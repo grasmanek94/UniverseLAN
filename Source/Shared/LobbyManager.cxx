@@ -8,8 +8,6 @@
 #include <unordered_map>
 
 namespace universelan {
-	using namespace galaxy::api;
-
 	LobbyManager::LobbyManager() : lobbies{} {}
 
 	LobbyManager::lobby_t LobbyManager::CreateLobby(galaxy::api::GalaxyID owner, galaxy::api::LobbyType lobby_type, uint32_t max_members, bool joinable, galaxy::api::LobbyTopologyType lobby_topology_type) {

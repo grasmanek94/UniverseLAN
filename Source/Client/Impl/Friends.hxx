@@ -85,6 +85,8 @@ namespace universelan::client {
 		 */
 		virtual void SetDefaultAvatarCriteria(AvatarCriteriaImpl defaultAvatarCriteria) override;
 #endif
+
+#if GALAXY_BUILD_FEATURE_IFRIENDS_ONPERSONADATACHANGED
 		/**
 		 * Performs a request for information about specified user.
 		 *
@@ -106,11 +108,14 @@ namespace universelan::client {
 		 */
 		virtual void RequestUserInformation(
 			GalaxyID userID
+#if GALAXY_BUILD_FEATURE_HAS_1_73_AVATARTYPE_CRITERIA
 			, AvatarCriteriaImpl avatarCriteria = AVATAR_TYPE_NONE
+#endif
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			, IUserInformationRetrieveListener* const listener = NULL
 #endif
 		) override;
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_USERDATAINFOAVAILABLE
 		/**
@@ -132,6 +137,7 @@ namespace universelan::client {
 		 */
 		virtual const char* GetPersonaName() override;
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_GET_FRIEND_PERSONA_AVATAR_COPY
 		/**
 		 * Copies the user's nickname to a buffer.
 		 *
@@ -139,13 +145,16 @@ namespace universelan::client {
 		 * @param [in] bufferLength The size of the output buffer.
 		 */
 		virtual void GetPersonaNameCopy(char* buffer, uint32_t bufferLength) override;
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_PERSONASTATE_ENUM
 		/**
 		 * Returns the user's state.
 		 *
 		 * @return The state of the user.
 		 */
 		virtual PersonaState GetPersonaState() override;
+#endif
 
 		/**
 		 * Returns the nickname of a specified user.
@@ -159,6 +168,7 @@ namespace universelan::client {
 		 */
 		virtual const char* GetFriendPersonaName(GalaxyID userID) override;
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_GET_FRIEND_PERSONA_AVATAR_COPY
 		/**
 		 * Copies the nickname of a specified user.
 		 *
@@ -169,7 +179,9 @@ namespace universelan::client {
 		 * @param [in] bufferLength The size of the output buffer.
 		 */
 		virtual void GetFriendPersonaNameCopy(GalaxyID userID, char* buffer, uint32_t bufferLength) override;
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_PERSONASTATE_ENUM
 		/**
 		 * Returns the state of a specified user.
 		 *
@@ -179,6 +191,7 @@ namespace universelan::client {
 		 * @return The state of the user.
 		 */
 		virtual PersonaState GetFriendPersonaState(GalaxyID userID)override;
+#endif
 
 		/**
 		 * Returns the URL of the avatar of a specified user.
@@ -193,6 +206,8 @@ namespace universelan::client {
 		 */
 		virtual const char* GetFriendAvatarUrl(GalaxyID userID, AvatarType avatarType) override;
 
+
+#if GALAXY_BUILD_FEATURE_IFRIENDS_GET_FRIEND_PERSONA_AVATAR_COPY
 		/**
 		 * Copies URL of the avatar of a specified user.
 		 *
@@ -204,7 +219,9 @@ namespace universelan::client {
 		 * @param [in] bufferLength The size of the output buffer.
 		 */
 		virtual void GetFriendAvatarUrlCopy(GalaxyID userID, AvatarType avatarType, char* buffer, uint32_t bufferLength) override;
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_1_73_AVATARTYPE_CRITERIA
 		/**
 		 * Returns the ID of the avatar of a specified user.
 		 *
@@ -240,6 +257,7 @@ namespace universelan::client {
 		 * @return true if the specified avatar image is available, false otherwise.
 		 */
 		virtual bool IsFriendAvatarImageRGBAAvailable(GalaxyID userID, AvatarType avatarType) override;
+#endif
 
 		/**
 		 * Performs a request for the user's list of friends.
@@ -509,6 +527,7 @@ namespace universelan::client {
 		 */
 		virtual void ShowOverlayInviteDialog(const char* connectionString) override;
 
+#if GALAXY_BUILD_FEATURE_HAS_ISENDINVITATIONLISTENER
 		/**
 		 * Sends a game invitation without using the overlay.
 		 *
@@ -528,6 +547,7 @@ namespace universelan::client {
 			, ISendInvitationListener* const listener = NULL
 #endif
 		) override;
+#endif
 
 #if GALAXY_BUILD_FEATURE_FIND_USER
 		/**

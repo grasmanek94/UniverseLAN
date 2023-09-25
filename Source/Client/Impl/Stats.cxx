@@ -8,8 +8,10 @@ namespace universelan::client {
 	using namespace galaxy::api;
 	StatsImpl::StatsImpl(InterfaceInstances* intf) :
 		intf{ intf }, listeners{ intf->notification.get() },
-		specific_user_stats_and_achievements_requests{},
-		specific_user_time_played_requests{}
+		specific_user_stats_and_achievements_requests{}
+#if GALAXY_BUILD_FEATURE_HAS_IUSERTIMEPLAYEDRETRIEVELISTENER
+		,specific_user_time_played_requests{}
+#endif
 	{
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 	}
@@ -166,11 +168,13 @@ namespace universelan::client {
 		return name;
 	}
 
+#if GALAXY_BUILD_FEATURE_ISTATS_GET_ACHIEVEMENT_LEADERBOARD_COPY
 	void StatsImpl::GetAchievementDisplayNameCopy(const char* name, char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		universelan::util::safe_copy_str_n(name, buffer, bufferLength);
 	}
+#endif
 
 	const char* StatsImpl::GetAchievementDescription(const char* name) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
@@ -183,6 +187,7 @@ namespace universelan::client {
 		return "";
 	}
 
+#if GALAXY_BUILD_FEATURE_ISTATS_GET_ACHIEVEMENT_LEADERBOARD_COPY
 	void StatsImpl::GetAchievementDescriptionCopy(const char* name, char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
@@ -193,6 +198,7 @@ namespace universelan::client {
 			universelan::util::safe_copy_str_n(desc, buffer, bufferLength);
 		}
 	}
+#endif
 
 	bool StatsImpl::IsAchievementVisible(const char* name) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
@@ -240,11 +246,13 @@ namespace universelan::client {
 		return name;
 	}
 
+#if GALAXY_BUILD_FEATURE_ISTATS_GET_ACHIEVEMENT_LEADERBOARD_COPY
 	void StatsImpl::GetLeaderboardDisplayNameCopy(const char* name, char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		universelan::util::safe_copy_str_n(name, buffer, bufferLength);
 	}
+#endif
 
 	LeaderboardSortMethod StatsImpl::GetLeaderboardSortMethod(const char* name) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
@@ -314,17 +322,6 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 	}
 
-	void StatsImpl::GetRequestedLeaderboardEntryWithDetails(
-		uint32_t index,
-		uint32_t& rank,
-		int32_t& score,
-		void* details,
-		uint32_t detailsSize,
-		uint32_t& outDetailsSize,
-		GalaxyID& userID) {
-		tracer::Trace trace { nullptr, __FUNCTION__ };
-	}
-
 	void StatsImpl::SetLeaderboardScore(
 		const char* name
 		, int32_t score
@@ -333,13 +330,25 @@ namespace universelan::client {
 		, ILeaderboardScoreUpdateListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__ };
+		tracer::Trace trace{ nullptr, __FUNCTION__ };
 
 		listeners->NotifyAll(
 #if (GALAXY_VERSION) > 11240
 			listener,
 #endif
-			&ILeaderboardScoreUpdateListener::OnLeaderboardScoreUpdateFailure, name, score, ILeaderboardScoreUpdateListener::FAILURE_REASON_UNDEFINED);
+			& ILeaderboardScoreUpdateListener::OnLeaderboardScoreUpdateFailure, name, score, ILeaderboardScoreUpdateListener::FAILURE_REASON_UNDEFINED);
+	}
+
+#if GALAXY_BUILD_FEATURE_HAS_LEADERBOARD_WITH_DETAILS
+	void StatsImpl::GetRequestedLeaderboardEntryWithDetails(
+		uint32_t index,
+		uint32_t& rank,
+		int32_t& score,
+		void* details,
+		uint32_t detailsSize,
+		uint32_t& outDetailsSize,
+		GalaxyID& userID) {
+		tracer::Trace trace{ nullptr, __FUNCTION__ };
 	}
 
 	void StatsImpl::SetLeaderboardScoreWithDetails(
@@ -360,6 +369,7 @@ namespace universelan::client {
 #endif
 			&ILeaderboardScoreUpdateListener::OnLeaderboardScoreUpdateFailure, name, score, ILeaderboardScoreUpdateListener::FAILURE_REASON_UNDEFINED);
 	}
+#endif
 
 	uint32_t StatsImpl::GetLeaderboardEntryCount(const char* name) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
@@ -367,6 +377,7 @@ namespace universelan::client {
 		return 0;
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ILEADERBOARDRETRIEVELISTENER
 	void StatsImpl::FindLeaderboard(const char* name
 #if (GALAXY_VERSION) > 11240
 		, ILeaderboardRetrieveListener* const listener
@@ -398,7 +409,9 @@ namespace universelan::client {
 #endif
 			&ILeaderboardRetrieveListener::OnLeaderboardRetrieveFailure, name, ILeaderboardRetrieveListener::FAILURE_REASON_UNDEFINED);
 	}
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IUSERTIMEPLAYEDRETRIEVELISTENER
 	void StatsImpl::RequestUserTimePlayed(GalaxyID userID
 #if (GALAXY_VERSION) > 11240
 		, IUserTimePlayedRetrieveListener* const listener
@@ -425,25 +438,33 @@ namespace universelan::client {
 		}
 	}
 
+	uint32_t StatsImpl::GetUserTimePlayed(GalaxyID userID) {
+		tracer::Trace trace{ nullptr, __FUNCTION__ };
+
+		return intf->user->GetGalaxyUserData(userID)->stats.GetPlayTime();
+	}
+#endif
+
 	void StatsImpl::RequestUserTimePlayedProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
+#if GALAXY_BUILD_FEATURE_HAS_IUSERTIMEPLAYEDRETRIEVELISTENER
 		IUserTimePlayedRetrieveListener* listener = specific_user_time_played_requests.pop(data->request_id);
+#endif
 
 		if (data->found) {
 			auto entry = intf->user->GetGalaxyUserData(data->id);
 			entry->stats = data->asuc;
 
+#if GALAXY_BUILD_FEATURE_HAS_IUSERTIMEPLAYEDRETRIEVELISTENER
 			listeners->NotifyAll(listener, &IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveSuccess, data->id);
 		}
 		else {
 			listeners->NotifyAll(listener, &IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveFailure, data->id, IUserTimePlayedRetrieveListener::FAILURE_REASON_UNDEFINED);
+#endif
+
 		}
 	}
 
-	uint32_t StatsImpl::GetUserTimePlayed(GalaxyID userID) {
-		tracer::Trace trace { nullptr, __FUNCTION__ };
 
-		return intf->user->GetGalaxyUserData(userID)->stats.GetPlayTime();
-	}
 }

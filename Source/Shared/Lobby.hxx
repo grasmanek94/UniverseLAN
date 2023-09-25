@@ -4,6 +4,7 @@
 #include <IMatchmaking.h>
 
 #include <GalaxyID.hxx>
+#include <GalaxyVersionedTypes.hxx>
 
 #include <map>
 #include <memory>
@@ -60,7 +61,7 @@ namespace universelan {
 
 		Lobby();
 		Lobby(galaxy::api::GalaxyID owner_id, galaxy::api::LobbyType type, 
-			uint32_t max_members, bool joinable, galaxy::api::LobbyTopologyType lobby_topology_type);
+			uint32_t max_members, bool joinable, galaxy::api::LobbyTopologyType lobby_topology_type = (galaxy::api::LobbyTopologyType)0);
 		Lobby(const Lobby& chat_room);
 
 	private:

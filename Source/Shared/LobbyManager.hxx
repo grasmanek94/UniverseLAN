@@ -2,10 +2,11 @@
 
 #include "Lobby.hxx"
 
+#include <GalaxyID.hxx>
+#include <GalaxyVersionedTypes.hxx>
+
 #include <GalaxyID.h>
 #include <IMatchmaking.h>
-
-#include <GalaxyID.hxx>
 
 #include <memory>
 #include <unordered_map>

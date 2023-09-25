@@ -1,3 +1,5 @@
+#if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
+
 #include "CustomNetworking.hxx"
 
 #include "UniverseLAN.hxx"
@@ -257,3 +259,5 @@ namespace universelan::client {
 		channel->buffer.erase(channel->buffer.begin(), channel->buffer.begin() + size);
 	}
 }
+
+#endif

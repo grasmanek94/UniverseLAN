@@ -1,3 +1,5 @@
+#if GALAXY_BUILD_FEATURE_GAME_SERVER_API
+
 #include "CustomConsole.hxx"
 #include "UniverseGameServer.hxx"
 
@@ -60,11 +62,13 @@ namespace universelan::client {
 		return gameserver_intf_inst.networking.get();
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_IUTILS
 	IUtils* UniverseGameServer::GameServerUtils() {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		return gameserver_intf_inst.utils.get();
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 	ITelemetry* UniverseGameServer::GameServerTelemetry() {
@@ -98,3 +102,4 @@ namespace universelan::client {
 		}
 	}
 }
+#endif

@@ -40,9 +40,12 @@ namespace universelan::client {
 	}
 #endif
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_ONPERSONADATACHANGED
 	void FriendsImpl::RequestUserInformation(
 		GalaxyID userID
-		, AvatarCriteriaImpl avatarCriteria
+#if GALAXY_BUILD_FEATURE_HAS_1_73_AVATARTYPE_CRITERIA
+		, AvatarCriteriaImpl avatarCriteria // we don't support avatars yet
+#endif
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 		, IUserInformationRetrieveListener* const listener
 #endif
@@ -53,9 +56,7 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			listeners->NotifyAll(listener, &IUserInformationRetrieveListener::OnUserInformationRetrieveSuccess, userID);
 #endif
-#if GALAXY_BUILD_FEATURE_IFRIENDS_ONPERSONADATACHANGED
 			listeners->NotifyAll(&IPersonaDataChangedListener::OnPersonaDataChanged, userID, IPersonaDataChangedListener::PERSONA_CHANGE_NONE);
-#endif
 		}
 		else {
 			uint64_t request_id = MessageUniqueID::get();
@@ -67,6 +68,7 @@ namespace universelan::client {
 			intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ RequestSpecificUserDataMessage::RequestTypeFriends, request_id, userID });
 		}
 	}
+#endif
 
 	void FriendsImpl::RequestUserInformationProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
@@ -107,6 +109,7 @@ namespace universelan::client {
 		return intf_inst.config->GetCustomPersonaName().c_str();
 	}
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_GET_FRIEND_PERSONA_AVATAR_COPY
 	void FriendsImpl::GetPersonaNameCopy(char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
@@ -114,7 +117,9 @@ namespace universelan::client {
 
 		universelan::util::safe_copy_str_n(name, buffer, bufferLength);
 	}
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_PERSONASTATE_ENUM
 	PersonaState FriendsImpl::GetPersonaState() {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
@@ -122,6 +127,7 @@ namespace universelan::client {
 			PERSONA_STATE_ONLINE :
 			PERSONA_STATE_OFFLINE;
 	}
+#endif
 
 	const char* FriendsImpl::GetFriendPersonaName(GalaxyID userID) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
@@ -129,13 +135,16 @@ namespace universelan::client {
 		return intf->user->GetGalaxyUserData(userID)->nickname.c_str();
 	}
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_GET_FRIEND_PERSONA_AVATAR_COPY
 	void FriendsImpl::GetFriendPersonaNameCopy(GalaxyID userID, char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		std::string nickname = intf->user->GetGalaxyUserData(userID)->nickname;
 		universelan::util::safe_copy_str_n(nickname, buffer, bufferLength);
 	}
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_PERSONASTATE_ENUM
 	PersonaState FriendsImpl::GetFriendPersonaState(GalaxyID userID) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
@@ -143,6 +152,7 @@ namespace universelan::client {
 			PERSONA_STATE_ONLINE :
 			PERSONA_STATE_OFFLINE;
 	}
+#endif
 
 	const char* FriendsImpl::GetFriendAvatarUrl(GalaxyID userID, AvatarType avatarType) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
@@ -150,12 +160,15 @@ namespace universelan::client {
 		return "";
 	}
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_GET_FRIEND_PERSONA_AVATAR_COPY
 	void FriendsImpl::GetFriendAvatarUrlCopy(GalaxyID userID, AvatarType avatarType, char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		universelan::util::safe_copy_str_n(GetFriendAvatarUrl(userID, avatarType), buffer, bufferLength);
 	}
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_1_73_AVATARTYPE_CRITERIA
 	uint32_t FriendsImpl::GetFriendAvatarImageID(GalaxyID userID, AvatarType avatarType) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
@@ -164,8 +177,6 @@ namespace universelan::client {
 
 	void FriendsImpl::GetFriendAvatarImageRGBA(GalaxyID userID, AvatarType avatarType, GetImageRGBABufferType* buffer, uint32_t bufferLength) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
-
-
 	}
 
 	bool FriendsImpl::IsFriendAvatarImageRGBAAvailable(GalaxyID userID, AvatarType avatarType) {
@@ -173,6 +184,7 @@ namespace universelan::client {
 
 		return false;
 	}
+#endif
 
 	void FriendsImpl::RequestFriendList(
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
@@ -484,6 +496,7 @@ namespace universelan::client {
 		std::cout << "ShowOverlayInviteDialog\n\t" << connectionString << std::endl;
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ISENDINVITATIONLISTENER
 	void FriendsImpl::SendInvitation(GalaxyID userID, const char* connectionString
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 		, ISendInvitationListener* const listener
@@ -499,6 +512,7 @@ namespace universelan::client {
 #endif
 			&ISendInvitationListener::OnInvitationSendFailure, userID, connectionString, ISendInvitationListener::FAILURE_REASON_RECEIVER_DOES_NOT_ALLOW_INVITING);
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_FIND_USER
 	void FriendsImpl::FindUser(const char* userSpecifier

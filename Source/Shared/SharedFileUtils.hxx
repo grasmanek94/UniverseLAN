@@ -1,5 +1,6 @@
 #pragma once
 
+#include <GalaxyVersionedTypes.hxx>
 #include <IniData.hxx>
 
 #include <GalaxyApi.h>
@@ -12,6 +13,7 @@
 namespace universelan {
 	class SharedFileUtils {
 		std::filesystem::path basepath;
+
 	public:
 		static const std::string ROOT_LOCAL;
 		static const std::string ROOT_SHARED;

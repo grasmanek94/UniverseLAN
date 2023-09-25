@@ -17,7 +17,9 @@ namespace universelan::client {
 	UserImpl::UserImpl(InterfaceInstances* intf) :
 		mtx_user_data{}, intf{ intf },
 		listeners{ intf->notification.get() },
+#if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
 		specific_user_data_requests{},
+#endif
 		user_data{}
 	{
 		tracer::Trace trace { nullptr, __FUNCTION__ };
@@ -49,7 +51,10 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		if (intf->config->GetSignedIn()) {
+#if GALAXY_BUILD_FEATURE_HAS_IACCESSTOKENLISTENER
 			listeners->NotifyAll(&IAccessTokenListener::OnAccessTokenChanged);
+#endif
+
 			listeners->NotifyAll(listener, &IAuthListener::OnAuthSuccess);
 			listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, (IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN | IOperationalStateChangeListener::OPERATIONAL_STATE_LOGGED_ON));
 			listeners->NotifyAll(&IPersonaDataChangedListener::OnPersonaDataChanged, intf->user->GetGalaxyID(), IPersonaDataChangedListener::PERSONA_CHANGE_NONE);
@@ -61,7 +66,7 @@ namespace universelan::client {
 		}
 	}
 
-	void UserImpl::USER_SIGN_IN_STEAM(const void* steamAppTicket, uint32_t steamAppTicketSize, const char* personaName
+	void UserImpl::USER_SIGN_IN_STEAM(const SignInDataPtr_T* steamAppTicket, uint32_t steamAppTicketSize, const char* personaName
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 		, IAuthListener* const listener
 #endif
@@ -81,7 +86,10 @@ namespace universelan::client {
 		SignIn(GET_LISTENER(listener));
 	}
 
-	void UserImpl::USER_SIGN_IN_GALAXY(bool requireOnline
+	void UserImpl::USER_SIGN_IN_GALAXY(
+#if GALAXY_BUILD_FEATURE_HAS_SIGNIN_PS4
+		bool requireOnline
+#endif
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 		, IAuthListener* const listener
 #endif
@@ -91,6 +99,7 @@ namespace universelan::client {
 		SignIn(GET_LISTENER(listener));
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_SIGNIN_WITH_SERVERKEY
 	void UserImpl::USER_SIGN_IN_SERVER_KEY(const char* serverKey
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 		, IAuthListener* const listener
@@ -100,6 +109,7 @@ namespace universelan::client {
 
 		SignIn(GET_LISTENER(listener));
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_GAME_SERVER_API
 	void UserImpl::SignInAnonymous(
@@ -189,6 +199,7 @@ namespace universelan::client {
 		SignIn(GET_LISTENER(listener));
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_SIGNIN_PS4
 	void UserImpl::SignIn(const char* ps4ClientID, const char* ps4TitleID, const char* ps4TitleSecret, uint32_t ps4TitleSecretLength
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 		, IAuthListener* const listener
@@ -200,6 +211,7 @@ namespace universelan::client {
 			SignIn(GET_LISTENER(listener));
 		}
 	}
+#endif
 #endif
 
 
@@ -213,25 +225,34 @@ namespace universelan::client {
 	}
 #endif
 
-	void UserImpl::RequestUserData(GalaxyID userID
-#if GALAXY_BUILD_FEATURE_USER_DATA_LISTENERS
+	void UserImpl::RequestUserData(
+#if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
+		GalaxyID userID
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
 		, ISpecificUserDataListener* const listener
 #endif
 	) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
+#if !GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
+		GalaxyID userID = intf->config->GetApiGalaxyID();
+#endif
+		
 		if (intf->config->IsSelfUserID(userID)) {
+#if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
 			listeners->NotifyAll(
-#if GALAXY_BUILD_FEATURE_USER_DATA_LISTENERS
+#if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
 				listener,
 #endif
 				&ISpecificUserDataListener::OnSpecificUserDataUpdated, userID);
+#endif
 			listeners->NotifyAll(&IUserDataListener::OnUserDataUpdated);
 		}
 		else {
 			uint64_t request_id = MessageUniqueID::get();
 
-#if GALAXY_BUILD_FEATURE_USER_DATA_LISTENERS
+#if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
 			specific_user_data_requests.emplace(request_id, listener);
 #endif
 
@@ -242,17 +263,21 @@ namespace universelan::client {
 	void UserImpl::SpecificUserDataRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
+#if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
 		ISpecificUserDataListener* listener = specific_user_data_requests.pop(data->request_id);
+#endif
 
 		if (data->found) {
 			auto entry = GetGalaxyUserData(data->id);
 			entry->stats = data->asuc;
 			entry->nickname = data->nickname;
-
-			listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, data->id);
 		}
-		else {
-			listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, data->id);
+
+#if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
+		listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, data->id);
+#endif
+		if (intf->config->IsSelfUserID(data->id)) {
+			listeners->NotifyAll(&IUserDataListener::OnUserDataUpdated);
 		}
 	}
 
@@ -268,21 +293,31 @@ namespace universelan::client {
 	}
 #endif
 
-	const char* UserImpl::GetUserData(const char* key, GalaxyID userID) {
+	const char* UserImpl::GetUserData(const char* key
+#if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
+		, GalaxyID userID
+#endif
+	) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
+
+#if !GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
+		GalaxyID userID = intf->config->GetApiGalaxyID();
+#endif
 
 		return GetGalaxyUserData(userID)->stats.GetUserData(key).c_str();
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
 	void UserImpl::GetUserDataCopy(const char* key, char* buffer, uint32_t bufferLength, GalaxyID userID) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		const std::string& str = GetGalaxyUserData(userID)->stats.GetUserData(key);
 		universelan::util::safe_copy_str_n(str, buffer, bufferLength);
 	}
+#endif
 
 	void UserImpl::SetUserData(const char* key, const char* value
-#if GALAXY_BUILD_FEATURE_USER_DATA_LISTENERS
+#if GALAXY_BUILD_FEATURE_HAS_SETUSERDATA_ISPECIFICLISTENER
 		, ISpecificUserDataListener* const listener
 #endif
 	) {
@@ -293,17 +328,27 @@ namespace universelan::client {
 
 		intf->client->GetConnection().SendAsync(SetUserDataMessage{ intf->config->GetApiGalaxyID(), key, value });
 
+#if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
 		listeners->NotifyAll(
-#if GALAXY_BUILD_FEATURE_USER_DATA_LISTENERS
+#if GALAXY_BUILD_FEATURE_HAS_SETUSERDATA_ISPECIFICLISTENER
 			listener,
 #endif
 			&ISpecificUserDataListener::OnSpecificUserDataUpdated, intf->config->GetApiGalaxyID());
+#endif
 
 		listeners->NotifyAll(&IUserDataListener::OnUserDataUpdated);
 	}
 
-	uint32_t UserImpl::GetUserDataCount(GalaxyID userID) {
+	uint32_t UserImpl::GetUserDataCount(
+#if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
+		GalaxyID userID
+#endif
+	) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
+
+#if !GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
+		GalaxyID userID = intf->config->GetApiGalaxyID();
+#endif
 
 		auto entry = GetGalaxyUserData(userID);
 		return entry->stats.run_locked_userdata<uint32_t>([&](auto& map) -> uint32_t {
@@ -311,8 +356,16 @@ namespace universelan::client {
 			});
 	}
 
-	bool UserImpl::GetUserDataByIndex(uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength, GalaxyID userID) {
+	bool UserImpl::GetUserDataByIndex(uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength
+#if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
+		, GalaxyID userID
+#endif
+	) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
+
+#if !GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
+		GalaxyID userID = intf->config->GetApiGalaxyID();
+#endif
 
 		auto entry = GetGalaxyUserData(userID);
 		return entry->stats.run_locked_userdata<bool>([&](auto& map) -> bool {
@@ -329,14 +382,14 @@ namespace universelan::client {
 	}
 
 	void UserImpl::DeleteUserData(const char* key
-#if GALAXY_BUILD_FEATURE_USER_DATA_LISTENERS
+#if GALAXY_BUILD_FEATURE_HAS_SETUSERDATA_ISPECIFICLISTENER
 		, ISpecificUserDataListener* const listener
 #endif
 	) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		SetUserData(key, ""
-#if GALAXY_BUILD_FEATURE_USER_DATA_LISTENERS
+#if GALAXY_BUILD_FEATURE_HAS_SETUSERDATA_ISPECIFICLISTENER
 			, listener
 #endif
 		);
@@ -371,12 +424,15 @@ namespace universelan::client {
 	}
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IOTHERSESSIONSTARTLISTENER
 	SessionID UserImpl::GetSessionID() {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		return (uint64_t)this;
 	}
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IACCESSTOKENLISTENER
 	const char* UserImpl::GetAccessToken() {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
@@ -397,8 +453,10 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		listeners->NotifyAll(&IAccessTokenListener::OnAccessTokenChanged);
+
 		return true;
 	}
+#endif
 
 	void UserImpl::OnlineUserStateChange(const std::shared_ptr<OnlineStatusChangeMessage>& data) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };

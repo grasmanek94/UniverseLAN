@@ -58,6 +58,12 @@ namespace universelan::client {
 		using mutex_t = std::recursive_mutex;
 		using lock_t = std::scoped_lock<mutex_t>;
 
+#if GALAXY_BUILD_FEATURE_HAS_SIGNIN_PS4
+		using SignInDataPtr_T = void;
+#else
+		using SignInDataPtr_T = char;
+#endif
+
 	private:
 		mutable mutex_t mtx_user_data;
 
@@ -65,7 +71,9 @@ namespace universelan::client {
 		ListenerRegistrarImpl* listeners;
 		GalaxyUserData::map_t user_data;
 
+#if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
 		ListenersRequestHelper<ISpecificUserDataListener*> specific_user_data_requests;
+#endif
 
 	public:
 
@@ -136,7 +144,7 @@ namespace universelan::client {
 		 * @param [in] personaName The user's persona name, i.e. the username from Steam.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void USER_SIGN_IN_STEAM(const void* steamAppTicket, uint32_t steamAppTicketSize, const char* personaName
+		virtual void USER_SIGN_IN_STEAM(const SignInDataPtr_T* steamAppTicket, uint32_t steamAppTicketSize, const char* personaName
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 			, IAuthListener* const listener = NULL
 #endif
@@ -154,12 +162,16 @@ namespace universelan::client {
 		 * @param [in] requireOnline Indicates if sing in with Galaxy backend is required.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void USER_SIGN_IN_GALAXY(bool requireOnline = false
+		virtual void USER_SIGN_IN_GALAXY(
+#if GALAXY_BUILD_FEATURE_HAS_SIGNIN_PS4
+			bool requireOnline = false
+#endif
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 			, IAuthListener* const listener = NULL
 #endif
 		) override;
 
+#if GALAXY_BUILD_FEATURE_HAS_SIGNIN_WITH_SERVERKEY
 		/**
 		 * Authenticates the Galaxy Peer with a specified server key.
 		 *
@@ -181,6 +193,7 @@ namespace universelan::client {
 			, IAuthListener* const listener = NULL
 #endif
 		) override;
+#endif
 
 #if GALAXY_BUILD_FEATURE_GAME_SERVER_API
 		/**
@@ -359,6 +372,7 @@ namespace universelan::client {
 #endif
 		);
 
+#if GALAXY_BUILD_FEATURE_HAS_SIGNIN_PS4
 		/**
 		 * Initializes the Galaxy Peer based on PS4 credentials.
 		 *
@@ -381,6 +395,8 @@ namespace universelan::client {
 		) override;
 
 #endif
+#endif
+
 
 		/**
 		 * Retrieves/Refreshes user data storage.
@@ -390,8 +406,11 @@ namespace universelan::client {
 		 * @param [in] userID The ID of the user. It can be omitted when requesting for own data.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void RequestUserData(GalaxyID userID = GalaxyID()
-#if GALAXY_BUILD_FEATURE_USER_DATA_LISTENERS
+		virtual void RequestUserData(
+#if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
+			GalaxyID userID = GalaxyID()
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
 			, ISpecificUserDataListener* const listener = NULL
 #endif
 		) override;
@@ -419,8 +438,13 @@ namespace universelan::client {
 		 * @param [in] userID The ID of the user. It can be omitted when reading own data.
 		 * @return The value of the property, or an empty string if failed.
 		 */
-		virtual const char* GetUserData(const char* key, GalaxyID userID = GalaxyID()) override;
+		virtual const char* GetUserData(const char* key
+#if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
+			, GalaxyID userID = GalaxyID()
+#endif
+		) override;
 
+#if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
 		/**
 		 * Copies an entry from the data storage of current user.
 		 *
@@ -432,6 +456,7 @@ namespace universelan::client {
 		 * @param [in] userID The ID of the user. It can be omitted when reading own data.
 		 */
 		virtual void GetUserDataCopy(const char* key, char* buffer, uint32_t bufferLength, GalaxyID userID = GalaxyID()) override;
+#endif
 
 		/**
 		 * Creates or updates an entry in the user data storage.
@@ -445,7 +470,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void SetUserData(const char* key, const char* value
-#if GALAXY_BUILD_FEATURE_USER_DATA_LISTENERS
+#if GALAXY_BUILD_FEATURE_HAS_SETUSERDATA_ISPECIFICLISTENER
 			, ISpecificUserDataListener* const listener = NULL
 #endif
 		) override;
@@ -458,7 +483,11 @@ namespace universelan::client {
 		 * @param [in] userID The ID of the user. It can be omitted when reading own data.
 		 * @return The number of entries, or 0 if failed.
 		 */
-		virtual uint32_t GetUserDataCount(GalaxyID userID = GalaxyID()) override;
+		virtual uint32_t GetUserDataCount(
+#if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
+			GalaxyID userID = GalaxyID()
+#endif
+		) override;
 
 		/**
 		 * Returns a property from the user data storage by index.
@@ -473,7 +502,11 @@ namespace universelan::client {
 		 * @param [in] userID The ID of the user. It can be omitted when reading own data.
 		 * @return true if succeeded, false when there is no such property.
 		 */
-		virtual bool GetUserDataByIndex(uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength, GalaxyID userID = GalaxyID()) override;
+		virtual bool GetUserDataByIndex(uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength
+#if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
+			, GalaxyID userID = GalaxyID()
+#endif
+		) override;
 
 		/**
 		 * Clears a property of user data storage
@@ -487,7 +520,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void DeleteUserData(const char* key
-#if GALAXY_BUILD_FEATURE_USER_DATA_LISTENERS
+#if GALAXY_BUILD_FEATURE_HAS_SETUSERDATA_ISPECIFICLISTENER
 			, ISpecificUserDataListener* const listener = NULL
 #endif
 		) override;
@@ -541,13 +574,17 @@ namespace universelan::client {
 		 */
 		virtual void GetEncryptedAppTicket(void* encryptedAppTicket, uint32_t maxEncryptedAppTicketSize, uint32_t& currentEncryptedAppTicketSize) override;
 #endif
+
+#if GALAXY_BUILD_FEATURE_HAS_IOTHERSESSIONSTARTLISTENER
 		/**
 		 * Returns the ID of current session.
 		 *
 		 * @return The session ID.
 		 */
 		virtual SessionID GetSessionID() override;
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IACCESSTOKENLISTENER
 		/**
 		 * Returns the access token for current session.
 		 *
@@ -601,6 +638,7 @@ namespace universelan::client {
 			, const char* info = NULL
 #endif
 		) override;
+#endif
 
 		void SpecificUserDataRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
 		void OnlineUserStateChange(const std::shared_ptr<OnlineStatusChangeMessage>& data);

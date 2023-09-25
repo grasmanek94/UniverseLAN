@@ -1,5 +1,6 @@
-#ifndef UNIVERSELAN_IMPL_UTILS_H
-#define UNIVERSELAN_IMPL_UTILS_H
+#pragma once
+
+#if GALAXY_BUILD_FEATURE_HAS_IUTILS
 
 /**
  * @file

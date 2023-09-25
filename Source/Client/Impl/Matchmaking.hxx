@@ -91,7 +91,9 @@ namespace universelan::client {
 		ListenersRequestHelper<ILobbyDataUpdateListener*> set_max_lobby_members_requests;
 		ListenersRequestHelper<ILobbyDataUpdateListener*> set_lobby_type_requests;
 		ListenersRequestHelper<ILobbyDataUpdateListener*> set_lobby_joinable_requests;
+#if GALAXY_BUILD_FEATURE_HAS_ILOBBYDATARETRIEVELISTENER
 		ListenersRequestHelper<ILobbyDataRetrieveListener*> get_lobby_data_requests;
+#endif
 		ListenersRequestHelper<ILobbyDataUpdateListener*> set_lobby_data_requests;
 		ListenersRequestHelper<ILobbyMemberDataUpdateListener*> set_lobby_member_data_requests;
 
@@ -128,8 +130,10 @@ namespace universelan::client {
 		virtual void CreateLobby(
 			LobbyType lobbyType
 			, uint32_t maxMembers
+#if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
 			, bool joinable
 			, LobbyTopologyType lobbyTopologyType
+#endif
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, ILobbyCreatedListener* const lobbyCreatedListener = NULL
 			, ILobbyEnteredListener* const lobbyEnteredListener = NULL
@@ -155,7 +159,10 @@ namespace universelan::client {
 		 * @param [in] allowFullLobbies Are full lobbies allowed.
 		 * @param [in] listener The listener for specific operation call.
 		 */
-		virtual void RequestLobbyList(bool allowFullLobbies = false
+		virtual void RequestLobbyList(
+#if GALAXY_BUILD_FEATURE_HAS_REQUESTLOBBYLIST_ARGS_ALLOWFULL
+			bool allowFullLobbies = false
+#endif
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, ILobbyListListener* const listener = NULL
 #endif
@@ -260,6 +267,7 @@ namespace universelan::client {
 #endif
 		) override;
 
+#if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
 		/**
 		 * Sets the maximum number of users that can be in a specified lobby.
 		 *
@@ -272,6 +280,7 @@ namespace universelan::client {
 				, ILobbyDataUpdateListener* const listener = NULL
 #endif
 			) override;
+#endif
 
 		/**
 		 * Returns the maximum number of users that can be in a specified lobby.
@@ -304,6 +313,7 @@ namespace universelan::client {
 		 */
 		virtual GalaxyID GetLobbyMemberByIndex(GalaxyID lobbyID, uint32_t index) override;
 
+#if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
 		/**
 		 * Sets the type of a specified lobby.
 		 *
@@ -355,7 +365,7 @@ namespace universelan::client {
 		 * @return If the lobby is joinable.
 		 */
 		virtual bool IsLobbyJoinable(GalaxyID lobbyID) override;
-
+#endif
 		/**
 		 * Refreshes info about a specified lobby.
 		 *
@@ -390,6 +400,7 @@ namespace universelan::client {
 		 */
 		virtual const char* GetLobbyData(GalaxyID lobbyID, const char* key) override;
 
+#if GALAXY_BUILD_FEATURE_IMATCHMAKING_GET_DATA_MEMBER_COPY
 		/**
 		 * Copies an entry from the properties of a specified lobby.
 		 *
@@ -404,6 +415,7 @@ namespace universelan::client {
 		 * @param [in] bufferLength The size of the output buffer.
 		 */
 		virtual void GetLobbyDataCopy(GalaxyID lobbyID, const char* key, char* buffer, uint32_t bufferLength) override;
+#endif
 
 		/**
 		 * Creates or updates an entry in the properties of a specified lobby.
@@ -494,6 +506,7 @@ namespace universelan::client {
 		 */
 		virtual const char* GetLobbyMemberData(GalaxyID lobbyID, GalaxyID memberID, const char* key) override;
 
+#if GALAXY_BUILD_FEATURE_IMATCHMAKING_GET_DATA_MEMBER_COPY
 		/**
 		 * Copies an entry from the properties of a specified member
 		 * of a specified lobby.
@@ -511,6 +524,7 @@ namespace universelan::client {
 		 * @param [in] bufferLength The size of the output buffer.
 		 */
 		virtual void GetLobbyMemberDataCopy(GalaxyID lobbyID, GalaxyID memberID, const char* key, char* buffer, uint32_t bufferLength) override;
+#endif
 
 		/**
 		 * Creates or updates an entry in the user's properties (as a lobby member)

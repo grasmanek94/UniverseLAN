@@ -1,3 +1,5 @@
+#if GALAXY_BUILD_FEATURE_HAS_IAPPS
+
 #include "Apps.hxx"
 
 #include "UniverseLAN.hxx"
@@ -32,3 +34,5 @@ namespace universelan::client {
 		universelan::util::safe_copy_str_n(intf->config->GetLanguage(), buffer, bufferLength);
 	}
 }
+
+#endif
