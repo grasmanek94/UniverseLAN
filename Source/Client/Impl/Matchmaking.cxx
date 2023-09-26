@@ -314,6 +314,10 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__ };
 
+#if GALAXY_BUILD_FEATURE_HAS_NAT_FUNCTIONALITY
+		listeners->NotifyAll(&INatTypeDetectionListener::OnNatTypeDetectionSuccess, galaxy::api::NatType::NAT_TYPE_SYMMETRIC);
+#endif
+
 		uint64_t request_id = MessageUniqueID::get();
 
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
