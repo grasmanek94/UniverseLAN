@@ -5,8 +5,14 @@
 #include <ContainerGetByIndex.hxx>
 #include <SafeStringCopy.hxx>
 
+#include <string>
+
 namespace universelan::client {
 	using namespace galaxy::api;
+
+	namespace {
+		const std::string SOME_TOKEN_STRING{ "dGhpcyBpcyBhbiBlbmNyeXB0ZWQgYXBwIHRpY2tldCBmb3IgVW5pdmVyc2VMQU4gbG9jYXRlZCBpbiBVc2VyLmN4eCBpbnNpZGUgdm9pZCBVc2VySW1wbDo6R2V0RW5jcnlwdGVkQXBwVGlja2V0KHZvaWQqIGVuY3J5cHRlZEFwcFRpY2tldCwgdWludDMyX3QgbWF4RW5jcnlwdGVkQXBwVGlja2V0U2l6ZSwgdWludDMyX3QmIGN1cnJlbnRFbmNyeXB0ZWRBcHBUaWNrZXRTaXplKQ==" };
+	}
 
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 #define GET_LISTENER(listener) (listener)
@@ -419,8 +425,7 @@ namespace universelan::client {
 	void UserImpl::GetEncryptedAppTicket(void* encryptedAppTicket, uint32_t maxEncryptedAppTicketSize, uint32_t& currentEncryptedAppTicketSize) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
-		((char*)encryptedAppTicket)[maxEncryptedAppTicketSize - 1] = 0;
-		currentEncryptedAppTicketSize = maxEncryptedAppTicketSize;
+		currentEncryptedAppTicketSize = universelan::util::safe_copy_str_n(SOME_TOKEN_STRING, (char*)encryptedAppTicket, maxEncryptedAppTicketSize);
 	}
 #endif
 
@@ -436,13 +441,13 @@ namespace universelan::client {
 	const char* UserImpl::GetAccessToken() {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
-		return "95959595959595959595959595";
+		return SOME_TOKEN_STRING.c_str();
 	}
 
 	void UserImpl::GetAccessTokenCopy(char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
-		universelan::util::safe_copy_str_n(GetAccessToken(), buffer, bufferLength);
+		universelan::util::safe_copy_str_n(SOME_TOKEN_STRING, buffer, bufferLength);
 	}
 
 	bool UserImpl::ReportInvalidAccessToken(const char* accessToken

@@ -100,7 +100,6 @@ Debug (tracing) files can be found in `<Configuration Files Directory>/tracing/<
 | Tooth and Tail | :white_check_mark:(2)  | 1.122.1 | Works with 1.124.0, tested with build 256 | 
 | Serious Sams Bogus Detour | :construction: | 1.100.2 | Stuck on "Creating lobby..." or "Joining lobby..." <br> Can get into lobby since build 243 but host crashes on start |
 | Niffelheim | :construction:  | 1.139.2 | Stuck at "Loading..." (save transfer?) | 
-| Tropico 5 | :construction:  | 1.68.0 | Game just crashes when joining | 
 | Alien vs Predator 2000 | :question: |  | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176? |
 | Homeworld Remastered Collection | :warning:  | | | 
 | Homeworld: Deserts of Kharak | :warning:  | | | 
@@ -119,6 +118,7 @@ Debug (tracing) files can be found in `<Configuration Files Directory>/tracing/<
 | Aragami 2 | :left_right_arrow: | 1.148.3 | Probably does not use GOG Galaxy for networking (doesn't work for private lobbies).<br> Can play on public lobbies without GOG Galaxy or with this patch AFAIK. |
 | Roboquest | :x: | 1.148.3 | Probably does not use GOG Galaxy for networking. |
 | Northgard | :x:  | 1.139.2 | Still thinks the game is offline, custom multiplayer? | 
+| Tropico 5 | :x:  | 1.68.0 | Game uses an external service for multiplayer? | 
 
 # Notice
 I'm not affiliated in any way with GOG or CD Projekt RED.  
