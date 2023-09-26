@@ -23,13 +23,73 @@ bool performed_init = false;
 bool user_data_received = true;
 std::unique_ptr<tracer::Trace> trace{ nullptr };
 DelayRunner delay_runner{};
-GalaxyID my_lobby_id = 0;
 
-void perform_test() {
-
+void OnLobbyList(uint32_t lobbyCount, LobbyListResult result) {
 	auto matchmaking_ptr = GET_GALAXY_API(Matchmaking());
-	
-	matchmaking_ptr->CreateLobby(LobbyType::LOBBY_TYPE_PUBLIC, 4, true, LobbyTopologyType::LOBBY_TOPOLOGY_TYPE_FCM_OWNERSHIP_TRANSITION);
+
+	tracer::Trace::write_all(
+		std::format(
+			"OnLobbyList lobbyCount: {} result: {}",
+			lobbyCount, magic_enum::enum_name(result)
+		));
+
+	for (uint32_t i = 0; i < lobbyCount; ++i) {
+		GalaxyID lobby_id = matchmaking_ptr->GetLobbyByIndex(i);
+
+		tracer::Trace::write_all(
+			std::format(
+				"i: {} lobby_id: {}",
+				i, lobby_id
+			));
+
+		delay_runner.Add([=]() {
+			matchmaking_ptr->RequestLobbyData(lobby_id);
+		});
+	}
+}
+
+void OnLobbyDataRetrieveSuccess(const GalaxyID& lobbyID) {
+	auto matchmaking_ptr = GET_GALAXY_API(Matchmaking());
+
+	for (auto& data_entry : LOBBY_TEST_DATA) {
+		std::string result{ matchmaking_ptr->GetLobbyData(lobbyID, data_entry[0].data()) };
+
+		tracer::Trace::write_all(
+			std::format(
+				"key: {} value: {} result: {} check: {}",
+				data_entry[0], data_entry[1], result, (data_entry[1] == result)
+			));
+	}
+
+	std::string result{ matchmaking_ptr->GetLobbyData(lobbyID, "timer")};
+
+	tracer::Trace::write_all(
+		std::format(
+			"key: {} value: {}",
+			"timer", result
+		));
+}
+
+void OnLobbyDataUpdated(const GalaxyID& lobbyID, const GalaxyID& memberID) {
+	auto matchmaking_ptr = GET_GALAXY_API(Matchmaking());
+
+	for (auto& data_entry : LOBBY_TEST_DATA) {
+		std::string result{ matchmaking_ptr->GetLobbyData(lobbyID, data_entry[0].data()) };
+
+		tracer::Trace::write_all(
+			std::format(
+				"key: {} value: {} result: {} check: {}",
+				data_entry[0], data_entry[1], result, (data_entry[1] == result)
+			));
+	}
+
+	std::string result{ matchmaking_ptr->GetLobbyData(lobbyID, "timer") };
+
+	tracer::Trace::write_all(
+		std::format(
+			"key: {} value: {}",
+			"timer", result
+		));
 }
 
 void try_init() {
@@ -45,6 +105,12 @@ void try_init() {
 	}
 
 	performed_init = true;
+
+	delay_runner.Add([&]() {
+		auto matchmaking_ptr = GET_GALAXY_API(Matchmaking());
+
+		matchmaking_ptr->RequestLobbyList(true);
+	});
 }
 
 int main()
@@ -119,12 +185,12 @@ int main()
 	LeaderboardRetrieveListenerImplGlobal leaderboardretrievelistener{};
 	LeaderboardScoreUpdateListenerImplGlobal leaderboardscoreupdatelistener{};
 	LeaderboardsRetrieveListenerImplGlobal leaderboardsretrievelistener{};
-	LobbyCreatedListenerImplGlobal lobbycreatedlistener{ };
-	LobbyDataListenerImplGlobal lobbydatalistener{};
-	LobbyDataRetrieveListenerImplGlobal lobbydataretrievelistener{};
+	LobbyCreatedListenerImplGlobal lobbycreatedlistener{};
+	LobbyDataListenerImplGlobal lobbydatalistener{ OnLobbyDataUpdated };
+	LobbyDataRetrieveListenerImplGlobal lobbydataretrievelistener{ OnLobbyDataRetrieveSuccess };
 	LobbyEnteredListenerImplGlobal lobbyenteredlistener{};
 	LobbyLeftListenerImplGlobal lobbyleftlistener{};
-	LobbyListListenerImplGlobal lobbylistlistener{};
+	LobbyListListenerImplGlobal lobbylistlistener{ OnLobbyList };
 	LobbyMemberStateListenerImplGlobal lobbymemberstatelistener{};
 	LobbyMessageListenerImplGlobal lobbymessagelistener{};
 	LobbyOwnerChangeListenerImplGlobal lobbyownerchangelistener{};
@@ -217,7 +283,7 @@ int main()
 	OverlayStateChangeListenerImplGlobal overlaystatechangelistener{};
 #endif
 
-	auto credentials = USER_CREDENTIALS[0];
+	auto credentials = USER_CREDENTIALS[1];
 
 	GET_GALAXY_API(User())->SignInCredentials(credentials[0].data(), credentials[1].data());
 	bool sub_init_done = false;
@@ -230,11 +296,10 @@ int main()
 
 			tracer::Trace::SetTracingEnabled(true);
 			trace = std::make_unique<tracer::Trace>("::INIT", "main");
-
-			perform_test();
 		}
 
 		delay_runner.Run();
+
 		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
 

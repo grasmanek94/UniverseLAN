@@ -21,75 +21,19 @@ bool has_operational_state_change = false;
 bool has_person_data_unchanged = false;
 bool performed_init = false;
 bool user_data_received = true;
+bool lobby_joined = false;
 std::unique_ptr<tracer::Trace> trace{ nullptr };
 DelayRunner delay_runner{};
 
 void OnLobbyList(uint32_t lobbyCount, LobbyListResult result) {
 	auto matchmaking_ptr = GET_GALAXY_API(Matchmaking());
 
-	tracer::Trace::write_all(
-		std::format(
-			"OnLobbyList lobbyCount: {} result: {}",
-			lobbyCount, magic_enum::enum_name(result)
-		));
-
-	for (uint32_t i = 0; i < lobbyCount; ++i) {
-		GalaxyID lobby_id = matchmaking_ptr->GetLobbyByIndex(i);
-
-		tracer::Trace::write_all(
-			std::format(
-				"i: {} lobby_id: {}",
-				i, lobby_id
-			));
-
-		delay_runner.Add([=]() {
-			matchmaking_ptr->RequestLobbyData(lobby_id);
-		});
-	}
-}
-
-void OnLobbyDataRetrieveSuccess(const GalaxyID& lobbyID) {
-	auto matchmaking_ptr = GET_GALAXY_API(Matchmaking());
-
-	for (auto& data_entry : LOBBY_TEST_DATA) {
-		std::string result{ matchmaking_ptr->GetLobbyData(lobbyID, data_entry[0].data()) };
-
-		tracer::Trace::write_all(
-			std::format(
-				"key: {} value: {} result: {} check: {}",
-				data_entry[0], data_entry[1], result, (data_entry[1] == result)
-			));
+	if (!lobbyCount) {
+		return;
 	}
 
-	std::string result{ matchmaking_ptr->GetLobbyData(lobbyID, "timer")};
-
-	tracer::Trace::write_all(
-		std::format(
-			"key: {} value: {}",
-			"timer", result
-		));
-}
-
-void OnLobbyDataUpdated(const GalaxyID& lobbyID, const GalaxyID& memberID) {
-	auto matchmaking_ptr = GET_GALAXY_API(Matchmaking());
-
-	for (auto& data_entry : LOBBY_TEST_DATA) {
-		std::string result{ matchmaking_ptr->GetLobbyData(lobbyID, data_entry[0].data()) };
-
-		tracer::Trace::write_all(
-			std::format(
-				"key: {} value: {} result: {} check: {}",
-				data_entry[0], data_entry[1], result, (data_entry[1] == result)
-			));
-	}
-
-	std::string result{ matchmaking_ptr->GetLobbyData(lobbyID, "timer") };
-
-	tracer::Trace::write_all(
-		std::format(
-			"key: {} value: {}",
-			"timer", result
-		));
+	lobby_joined = true;
+	matchmaking_ptr->JoinLobby(matchmaking_ptr->GetLobbyByIndex(0));
 }
 
 void try_init() {
@@ -186,8 +130,8 @@ int main()
 	LeaderboardScoreUpdateListenerImplGlobal leaderboardscoreupdatelistener{};
 	LeaderboardsRetrieveListenerImplGlobal leaderboardsretrievelistener{};
 	LobbyCreatedListenerImplGlobal lobbycreatedlistener{};
-	LobbyDataListenerImplGlobal lobbydatalistener{ OnLobbyDataUpdated };
-	LobbyDataRetrieveListenerImplGlobal lobbydataretrievelistener{ OnLobbyDataRetrieveSuccess };
+	LobbyDataListenerImplGlobal lobbydatalistener{};
+	LobbyDataRetrieveListenerImplGlobal lobbydataretrievelistener{};
 	LobbyEnteredListenerImplGlobal lobbyenteredlistener{};
 	LobbyLeftListenerImplGlobal lobbyleftlistener{};
 	LobbyListListenerImplGlobal lobbylistlistener{ OnLobbyList };
