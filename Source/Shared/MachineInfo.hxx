@@ -16,6 +16,7 @@ namespace universelan {
 
 		std::string GetLocalMachineName();
 		std::string GetLocalUserName();
+		std::size_t GetProcessID();
 		std::vector<std::string> GetLocalMACs();
 	};
 }

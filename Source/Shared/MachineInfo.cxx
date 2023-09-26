@@ -4,6 +4,8 @@
 #include <Windows.h>
 #include <winsock2.h>
 #include <iphlpapi.h>
+#else
+#include <unistd.h>
 #endif
 
 #include <cstdint>
@@ -89,6 +91,18 @@ namespace universelan {
 		}
 
 		return macs;
+	}
+
+	std::size_t MachineInfo::GetProcessID() {
+		std::size_t process_id = 0;
+
+#ifdef _WIN32
+		process_id = (std::size_t)GetCurrentProcessId();
+#else
+		process_id = (std::size_t)::getpid();
+#endif
+
+		return process_id;
 	}
 
 	static std::string hexStr(const uint8_t* data, int len)

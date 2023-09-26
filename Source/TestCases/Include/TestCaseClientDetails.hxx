@@ -72,6 +72,12 @@ namespace galaxy::api {
 	};
 #endif
 
+	constexpr std::array LOBBY_TEST_DATA = {
+		std::array{"string_test"sv,"abbcccddddz--xyz"sv},
+		std::array{"string_test2"sv,"0123456789"sv},
+		std::array{"reverse"sv,"9876543210"sv},
+		std::array{"long"sv,"00000000000000000000000000000000000000000000000000000000000aaaaaaaaaaaaa0a0a0aaa0a0aa0aa0aa0aa0a0a0aaa0a0a0a0a00000000000000aaaaaaaaaaaaaaaaaa0a0a00a0aa0"sv}
+	};
 }
 
 #include <GalaxyApi.h>
@@ -134,6 +140,7 @@ struct std::formatter<galaxy::api::GalaxyID> : std::formatter<std::string> {
 
 using namespace galaxy::api;
 
+#include "TestCaseDelayRunner.hxx"
 #include "TestCaseAuthListener.hxx"
 #include "TestCaseAccessTokenListener.hxx"
 #include "TestCaseAchievementChangeListener.hxx"

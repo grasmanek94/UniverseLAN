@@ -221,6 +221,8 @@ namespace universelan {
 	{
 		// Config
 		{
+			MachineInfo machine_info;
+
 			CSimpleIniA ini;
 			ini.SetUnicode();
 
@@ -242,13 +244,19 @@ namespace universelan {
 
 			PersonaNameType = ini.GetValue(UserSection.c_str(), "PersonaNameType", "@Custom");
 			CustomPersonaName = ini.GetValue(UserSection.c_str(), "CustomPersonaName", "Player");
+			SuffixPersonaNameTypeResultWithCustomPersonaName = ini.GetBoolValue(UserSection.c_str(), "SuffixPersonaNameTypeResultWithCustomPersonaName", true);
+
 			GalaxyIDType = ini.GetValue(UserSection.c_str(), "GalaxyIDType", "@NetworkAdapterMACHash");
 			CustomGalaxyID = ini.GetLongLongValue(UserSection.c_str(), "CustomGalaxyID", 1);
-			GalaxyIDOffset = ini.GetLongLongValue(UserSection.c_str(), "GalaxyIDOffset", 0);
+
+			if (const_hash(ini.GetValue(UserSection.c_str(), "GalaxyIDOffset", "")) != const_hash("@ProcessID")) {
+				GalaxyIDOffset = ini.GetLongLongValue(UserSection.c_str(), "GalaxyIDOffset", 0);
+			} else {
+				GalaxyIDOffset = machine_info.GetProcessID();
+			}
+
 			Avatar = ini.GetValue(UserSection.c_str(), "Avatar", "me.png");
 			SignedIn = ini.GetBoolValue(UserSection.c_str(), "SignedIn", true);
-
-			MachineInfo machine_info;
 
 			if (const_hash(PersonaNameType) != const_hash("@Custom")) {
 
@@ -258,7 +266,7 @@ namespace universelan {
 						throw std::runtime_error("@WindowsAccountName: No username found");
 					}
 
-					CustomPersonaName = machine_info.GetLocalUserName();
+					CustomPersonaName = machine_info.GetLocalUserName() + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
 					break;
 
 				case const_hash("@WindowsAccountNameHash"):
@@ -266,7 +274,7 @@ namespace universelan {
 						throw std::runtime_error("@WindowsAccountNameHash: No username found");
 					}
 
-					CustomPersonaName = std::to_string(const_hash64(machine_info.GetLocalUserName()));
+					CustomPersonaName = std::to_string(const_hash64(machine_info.GetLocalUserName())) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
 					break;
 
 				case const_hash("@ComputerName"):
@@ -274,7 +282,7 @@ namespace universelan {
 						throw std::runtime_error("@ComputerName: No machine name found");
 					}
 
-					CustomPersonaName = machine_info.GetLocalMachineName();
+					CustomPersonaName = machine_info.GetLocalMachineName() + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
 					break;
 
 				case const_hash("@ComputerNameHash"):
@@ -282,7 +290,7 @@ namespace universelan {
 						throw std::runtime_error("@ComputerNameHash: No machine name found");
 					}
 
-					CustomPersonaName = std::to_string(const_hash64(machine_info.GetLocalMachineName()));
+					CustomPersonaName = std::to_string(const_hash64(machine_info.GetLocalMachineName())) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
 					break;
 
 				case const_hash("@NetworkAdapterMACHash"):
@@ -290,7 +298,11 @@ namespace universelan {
 						throw std::runtime_error("@NetworkAdapterMACHash: No MAC adresses found");
 					}
 
-					CustomPersonaName = std::to_string(const_hash64(machine_info.GetLocalMACs().front()));
+					CustomPersonaName = std::to_string(const_hash64(machine_info.GetLocalMACs().front())) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
+					break;
+
+				case const_hash("@ProcessID"):
+					CustomPersonaName = std::to_string(machine_info.GetProcessID()) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
 					break;
 
 				default:

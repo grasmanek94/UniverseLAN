@@ -110,6 +110,7 @@ namespace universelan {
 		const std::string UserSection = "User";
 		std::string PersonaNameType;
 		std::string CustomPersonaName;
+		bool SuffixPersonaNameTypeResultWithCustomPersonaName;
 		std::string GalaxyIDType;
 		uint64_t CustomGalaxyID;
 		galaxy::api::GalaxyID ApiGalaxyID;
