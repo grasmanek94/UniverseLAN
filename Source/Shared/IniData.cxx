@@ -542,10 +542,18 @@ namespace universelan {
 	bool ClientIniData::IsDLCInstalled(const std::string& name)
 	{
 		auto it = DLCs.find(name);
-		if (it == DLCs.end()) {
-			return DLCs.emplace(name, false).first->second;
+		bool result = false;
+		if (it != DLCs.end()) {
+			result = it->second;
+		} else {
+			result = DLCs.emplace(name, false).first->second;
+
+			if (SaveUnknownDLCIDs) {
+				SaveStatsAndAchievements();
+			}
 		}
-		return it->second;
+
+		return result;
 	}
 
 	void ClientIniData::SaveStatsAndAchievements()
