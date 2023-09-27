@@ -26,7 +26,8 @@ namespace universelan::tracer {
 			RETURN_VALUES = bit<2>(),
 			API_IMPL = bit<3>(),
 			DETAILED = bit<4>(),
-			ICHAT = bit<5>()
+			ICHAT = bit<5>(),
+			NETCLIENT = bit<6>()
 		};
 
 		static bool InitTracing(const char* const log_directory, 
