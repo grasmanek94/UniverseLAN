@@ -4,7 +4,9 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <format>
 #include <functional>
+#include <magic_enum/magic_enum.hpp>
 
 namespace universelan {
 	struct GalaxyIDHash {
@@ -51,3 +53,11 @@ namespace galaxy::api {
 		return GalaxyID(static_cast<uint64_t>(type) << 56 | (value & 0xffffffffffffff));
 	}
 }
+
+template <>
+struct std::formatter<galaxy::api::GalaxyID> : std::formatter<std::string> {
+	auto format(galaxy::api::GalaxyID p, format_context& ctx) const {
+		return formatter<string>::format(
+			std::format("{}({})", p.GetRealID(), magic_enum::enum_name(galaxy::api::GetIDType(p))), ctx);
+	}
+};
