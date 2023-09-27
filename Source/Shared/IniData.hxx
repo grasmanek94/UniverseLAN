@@ -28,6 +28,7 @@ namespace universelan {
 		int MiniDumpVerbosityLevel;
 		bool TracingAlwaysFlush;
 		uint64_t CallTracingFlags;
+		bool TraceToConsole;
 
 		const std::string AuthenticationSection = "Authentication";
 		std::string AuthenticationKey;
@@ -50,6 +51,7 @@ namespace universelan {
 		int GetMiniDumpVerbosityLevel() const;
 		bool ShouldAlwaysFlushTracing() const;
 		uint64_t GetCallTracingFlags() const;
+		bool ShouldTraceToConsole() const;
 
 		const std::chrono::system_clock::time_point BootTime;
 	};

@@ -34,6 +34,8 @@ namespace universelan::client {
 
 		}
 
+		tracer::Trace::SetLogToCout(intf_inst.config->ShouldTraceToConsole());
+
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		if (intf_inst.config->GetEnableConsole()) {

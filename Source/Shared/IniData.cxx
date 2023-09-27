@@ -6,13 +6,14 @@
 #include <magic_enum/magic_enum.hpp>
 #include <Tracer.hxx>
 
+#include <charconv>
+#include <chrono>
 #include <exception>
 #include <filesystem>
 #include <iostream>
 #include <stdexcept>
-#include <string>
 #include <string_view>
-#include <chrono>
+#include <string>
 
 template <>
 struct magic_enum::customize::enum_range<universelan::tracer::Trace::MASK> {
@@ -97,7 +98,13 @@ namespace universelan {
 	{
 		SI_Error rc = ini.LoadFile(filename.c_str());
 		if (rc < 0) {
-			throw std::runtime_error("Cannot load or parse " + filename + ", error: " + std::to_string(rc) + " / " + std::to_string(errno));
+			std::string problem = "Cannot load or parse " + filename + ", error (Return Code / errno): " + std::to_string(rc) + " / " + std::to_string(errno) + "\nWill try to use sane defaults.";
+		//	throw std::runtime_error(problem);
+#ifdef _WIN32
+			MessageBox(NULL, problem.c_str(), "UniverseLAN - Error", 0);
+#else
+			std::cout << "Exception occurred during init: " << problem << std::endl;
+#endif
 		}
 	}
 
@@ -109,14 +116,15 @@ namespace universelan {
 
 		IniData::LoadIni(ini, BootFile);
 
-		GameDataPath = ini.GetValue(StoragePathSection.c_str(), "GameDataPath", "UniverseLAN");
-		ServerDataPath = ini.GetValue(StoragePathSection.c_str(), "ServerDataPath", "UniverseLANServer");
+		GameDataPath = ini.GetValue(StoragePathSection.c_str(), "GameDataPath", "UniverseLANData");
+		ServerDataPath = ini.GetValue(StoragePathSection.c_str(), "ServerDataPath", "UniverseLANServerData");
 		CallTracing = ini.GetBoolValue(TracingSection.c_str(), "CallTracing", true);
 		UnhandledExceptionLogging = ini.GetBoolValue(TracingSection.c_str(), "UnhandledExceptionLogging", true);
 		MiniDumpOnUnhandledException = ini.GetBoolValue(TracingSection.c_str(), "MiniDumpOnUnhandledException", true);
 		MiniDumpVerbosityLevel = ini.GetLongValue(TracingSection.c_str(), "MiniDumpVerbosityLevel", 2);
 		TracingAlwaysFlush = ini.GetBoolValue(TracingSection.c_str(), "AlwaysFlush", true);
 		CallTracingFlags = parse_flags(ini.GetValue(TracingSection.c_str(), "CallTracingFlags", "INFORMATIONAL"));
+		TraceToConsole = ini.GetBoolValue(TracingSection.c_str(), "TraceToConsole", false);
 
 		AuthenticationKey = ini.GetValue(AuthenticationSection.c_str(), "Key", "9g5tA53SLyiNkBTqsX3BmBgy/PPVTU6VGKWNNw3wUIY5nK1C2MOT4UsZ2pauCb8fm5UQSJRijid+w1t9WpDaKQ==");
 	}
@@ -143,6 +151,10 @@ namespace universelan {
 
 	uint64_t IniData::GetCallTracingFlags() const {
 		return CallTracingFlags;
+	}
+
+	bool IniData::ShouldTraceToConsole() const {
+		return TraceToConsole;
 	}
 
 	const std::string& IniData::GetGameDataPath() const
@@ -178,7 +190,7 @@ namespace universelan {
 		AllowFileSharingDownload = ini.GetBoolValue(StoragePathSection.c_str(), "AllowFileSharingDownload", true);
 		AllowFileSharingUpload = ini.GetBoolValue(StoragePathSection.c_str(), "AllowFileSharingUpload", true);
 
-		BindAddress = ini.GetValue(ServerSection.c_str(), "BindAddress", "0.0.0.0");
+		BindAddress = ini.GetValue(ServerSection.c_str(), "BindAddress", "127.0.0.1");
 		Port = (uint16_t)ini.GetLongValue(ServerSection.c_str(), "Port", 19486);
 		MaxConnections = ini.GetLongValue(ServerSection.c_str(), "MaxConnections", 1024);
 		MaxTickRate = ini.GetLongValue(ServerSection.c_str(), "MaxTickRate", 200);
@@ -229,13 +241,13 @@ namespace universelan {
 			IniData::LoadIni(ini, GetPath(ConfigFile));
 
 			Language = ini.GetValue(SettingsSection.c_str(), "Language", "english");
-			EnableAllDLC = ini.GetBoolValue(SettingsSection.c_str(), "EnableAllDLC", false);
+			EnableAllDLC = ini.GetBoolValue(SettingsSection.c_str(), "EnableAllDLC", true);
 			SaveUnknownDLCIDs = ini.GetBoolValue(SettingsSection.c_str(), "SaveUnknownDLCIDs", true);
 			SaveAchievementsAndStats = ini.GetBoolValue(SettingsSection.c_str(), "SaveAchievementsAndStats", true);
 			EnableConsole = ini.GetBoolValue(SettingsSection.c_str(), "EnableConsole", true);
 
 			AllowFileSharingDownload = ini.GetBoolValue(StorageSection.c_str(), "AllowFileSharingDownload", true);
-			AllowFileSharingUpload = ini.GetBoolValue(StorageSection.c_str(), "AllowFileSharingUpload", false);
+			AllowFileSharingUpload = ini.GetBoolValue(StorageSection.c_str(), "AllowFileSharingUpload", true);
 
 			TelemetryStore = ini.GetBoolValue(TelemetrySection.c_str(), "Store", false);
 
@@ -243,7 +255,7 @@ namespace universelan {
 			Port = (uint16_t)ini.GetLongValue(ClientSection.c_str(), "Port", 19486);
 
 			PersonaNameType = ini.GetValue(UserSection.c_str(), "PersonaNameType", "@Custom");
-			CustomPersonaName = ini.GetValue(UserSection.c_str(), "CustomPersonaName", "Player");
+			CustomPersonaName = ini.GetValue(UserSection.c_str(), "CustomPersonaName", "UnknownPlayerName");
 			SuffixPersonaNameTypeResultWithCustomPersonaName = ini.GetBoolValue(UserSection.c_str(), "SuffixPersonaNameTypeResultWithCustomPersonaName", true);
 
 			GalaxyIDType = ini.GetValue(UserSection.c_str(), "GalaxyIDType", "@NetworkAdapterMACHash");
@@ -392,7 +404,20 @@ namespace universelan {
 
 			for (const auto& entry : keys) {
 				if ((entry.pItem != nullptr) && (strlen(entry.pItem) > 0)) {
-					DLCs.emplace(std::string(entry.pItem), ini.GetBoolValue(DLCSection.c_str(), entry.pItem, false));
+					std::string product_id_str = std::string(entry.pItem);
+					uint64_t product_id = 0;
+					auto result = std::from_chars(product_id_str.data(), product_id_str.data() + product_id_str.size(), product_id);
+					
+					switch (result.ec) {
+					case std::errc::invalid_argument:
+					case std::errc::result_out_of_range:
+						std::cerr << "Cannot parse DLC Product ID: " << product_id_str << "\n";
+						break;
+
+					default:
+						DLCs.emplace(product_id, ini.GetBoolValue(DLCSection.c_str(), entry.pItem, false));
+						break;
+					}
 				}
 			}
 		}
