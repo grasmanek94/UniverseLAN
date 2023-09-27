@@ -226,7 +226,7 @@ namespace universelan::tracer {
 		return true;
 	}
 
-	Trace::Trace(const char* const extra, MASK mask, const char* const func) :
+	Trace::Trace(const char* const extra, uint64_t mask, const char* const func) :
 		enabled{ tracing_enabled && ((enabled_tracing_flags & mask) == mask) },
 		func{ func }, extra{ extra }, return_address{ nullptr } {
 		if (!enabled) {
@@ -240,8 +240,8 @@ namespace universelan::tracer {
 	}
 
 	// delegate constructors
-	Trace::Trace(MASK mask, const char* const extra, const char* const func) : Trace{ extra, mask, func } {}
-	Trace::Trace(const char* const extra, const char* const func, MASK mask) : Trace{ extra, mask, func } {}
+	Trace::Trace(uint64_t mask, const char* const extra, const char* const func) : Trace{ extra, mask, func } {}
+	Trace::Trace(const char* const extra, const char* const func, uint64_t mask) : Trace{ extra, mask, func } {}
 
 	Trace::~Trace() {
 		if (!enabled) {
@@ -259,7 +259,7 @@ namespace universelan::tracer {
 		return !enabled;
 	}
 
-	bool Trace::has_flags(MASK mask) const {
+	bool Trace::has_flags(uint64_t mask) const {
 		return enabled && ((enabled_tracing_flags & mask) == mask);
 	}
 

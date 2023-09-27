@@ -24,7 +24,9 @@ namespace universelan::tracer {
 			HIGH_FREQUENCY_CALLS = bit<0>(),
 			ARGUMENTS = bit<1>(),
 			RETURN_VALUES = bit<2>(),
-			API_IMPL = bit<3>()
+			API_IMPL = bit<3>(),
+			DETAILED = bit<4>(),
+			ICHAT = bit<5>()
 		};
 
 		static bool InitTracing(const char* const log_directory, 
@@ -36,15 +38,15 @@ namespace universelan::tracer {
 		static void SetTracingEnabled(bool enabled);
 		static void SetLogToCout(bool enabled);
 
-		Trace(const char* const extra = nullptr, MASK mask = INFORMATIONAL, const char* const func = std::source_location::current().function_name());
-		Trace(MASK mask, const char* const extra = nullptr, const char* const func = std::source_location::current().function_name());
-		Trace(const char* const extra, const char* const func, MASK mask = INFORMATIONAL);
+		Trace(const char* const extra = nullptr, uint64_t mask = INFORMATIONAL, const char* const func = std::source_location::current().function_name());
+		Trace(uint64_t mask, const char* const extra = nullptr, const char* const func = std::source_location::current().function_name());
+		Trace(const char* const extra, const char* const func, uint64_t mask = INFORMATIONAL);
 
 		~Trace();
 
 		explicit operator bool() const;
 		bool operator!() const;
-		bool has_flags(MASK mask) const;
+		bool has_flags(uint64_t mask) const;
 
 		static std::ofstream& thread_logger();
 		static std::osyncstream global_logger();
