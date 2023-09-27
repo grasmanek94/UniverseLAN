@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #endif
 
+#include <format>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -51,6 +52,7 @@ namespace universelan::client {
 
 		if (CustomConsoleEnabled)
 		{
+			trace.write_all("Custom console already enabled, aborting");
 			return;
 		}
 
@@ -65,7 +67,7 @@ namespace universelan::client {
 
 		BindStdHandlesToConsole();
 
-		SetConsoleTitleA(("UniverseLAN Client - Build: " + std::to_string(universelan::Version_Number)).c_str());
+		SetConsoleTitleA(std::format("UniverseLAN Client - Build: {}", universelan::Version_Number).c_str());
 #endif
 	}
 }

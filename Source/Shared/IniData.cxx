@@ -82,7 +82,13 @@ namespace universelan {
 
 			uint64_t flags = 0;
 			for (auto& entry : result) {
-				flags |= magic_enum::enum_cast<tracer::Trace::MASK>(entry).value_or(tracer::Trace::INFORMATIONAL);
+				uint64_t flag = magic_enum::enum_cast<tracer::Trace::MASK>(entry).value_or(tracer::Trace::INFORMATIONAL);
+
+				if (flag == tracer::Trace::TRACE_ALL_FLAGS) {
+					flags |= std::numeric_limits<decltype(flags)>::max();
+				}
+
+				flags |= flag;
 			}
 
 			return flags;

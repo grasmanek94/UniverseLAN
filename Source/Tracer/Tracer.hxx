@@ -9,7 +9,7 @@
 
 namespace universelan::tracer {
 	template<uint64_t N>
-	static constexpr uint64_t bit() { return 1 << N; }
+	static constexpr uint64_t bit() { return 1ULL << N; }
 
 	class Trace
 	{
@@ -19,19 +19,39 @@ namespace universelan::tracer {
 		const char* const extra;
 		const void* return_address;
 	public:
-		enum MASK: uint64_t {
+		enum MASK : uint64_t {
 			INFORMATIONAL = 0,
-			HIGH_FREQUENCY_CALLS = bit<0>(),
+
+			TRACE_ALL_FLAGS = bit<0>(),
+
 			ARGUMENTS = bit<1>(),
 			RETURN_VALUES = bit<2>(),
-			API_IMPL = bit<3>(),
-			DETAILED = bit<4>(),
-			ICHAT = bit<5>(),
-			NETCLIENT = bit<6>()
+			DETAILED = bit<3>(),
+			HIGH_FREQUENCY_CALLS = bit<4>(),
+
+			NETCLIENT = bit<5>(),
+			GALAXYDLL = bit<6>(),
+			GALAXYDLL_GAMESERVERAPI = bit<7>(),
+			LISTENERREGISTRAR = bit<8>(),
+
+			ICHAT = bit<9>(),
+			ICUSTOMNETWORKING = bit<10>(),
+			IERROR = bit<11>(),
+			IFRIENDS = bit<12>(),
+			ILOGGER = bit<13>(),
+			IMATCHMAKING = bit<14>(),
+			INETWORKING = bit<15>(),
+			ISTATS = bit<16>(),
+			ISTORAGE = bit<17>(),
+			ITELEMETRY = bit<18>(),
+			IUSER = bit<19>(),
+			IUTILS = bit<20>(),
+			IGAMESERVERAPI = bit<21>(),
+			IGALAXYTHREAD = bit<22>()
 		};
 
-		static bool InitTracing(const char* const log_directory, 
-			bool in_unhandled_exception_logging, bool in_tracing_enabled, 
+		static bool InitTracing(const char* const log_directory,
+			bool in_unhandled_exception_logging, bool in_tracing_enabled,
 			bool in_mindump_on_unhandled_exception, int minidump_verbosity_level,
 			bool in_should_always_flush_tracing, uint64_t mask = INFORMATIONAL);
 
