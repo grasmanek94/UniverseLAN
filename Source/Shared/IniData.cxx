@@ -251,7 +251,8 @@ namespace universelan {
 
 			if (const_hash(ini.GetValue(UserSection.c_str(), "GalaxyIDOffset", "")) != const_hash("@ProcessID")) {
 				GalaxyIDOffset = ini.GetLongLongValue(UserSection.c_str(), "GalaxyIDOffset", 0);
-			} else {
+			}
+			else {
 				GalaxyIDOffset = machine_info.GetProcessID();
 			}
 
@@ -539,14 +540,15 @@ namespace universelan {
 		return local_user_data->stats.GetPlayTime();
 	}
 
-	bool ClientIniData::IsDLCInstalled(const std::string& name)
+	bool ClientIniData::IsDLCInstalled(uint64_t product_id)
 	{
-		auto it = DLCs.find(name);
+		auto it = DLCs.find(product_id);
 		bool result = false;
 		if (it != DLCs.end()) {
 			result = it->second;
-		} else {
-			result = DLCs.emplace(name, false).first->second;
+		}
+		else {
+			result = DLCs.emplace(product_id, false).first->second;
 
 			if (SaveUnknownDLCIDs) {
 				SaveStatsAndAchievements();
@@ -593,8 +595,8 @@ namespace universelan {
 			IniData::LoadIni(ini, GetPath(DLCFile));
 
 			for (const auto& dlc : DLCs) {
-				std::string name = dlc.first.c_str();
-				ini.SetBoolValue(name.c_str(), "Description", dlc.second);
+				std::string name = std::to_string(dlc.first);
+				ini.SetBoolValue(DLCSection.c_str(), name.c_str(), dlc.second);
 			}
 
 			ini.SaveFile(GetPath(DLCFile).c_str());
@@ -639,12 +641,16 @@ namespace universelan {
 
 	bool ClientIniData::IsSelfUserID(uint64_t userID) const
 	{
-		return (userID == GetCustomGalaxyID()) || (userID == 0);
+		return IsSelfUserID(galaxy::api::GalaxyID(userID));
 	}
 
 	bool ClientIniData::IsSelfUserID(galaxy::api::GalaxyID userID) const
 	{
-		return (userID == GetApiGalaxyID()) || (userID == 0) || (userID == galaxy::api::FromRealID(galaxy::api::IDType::ID_TYPE_USER, 0));
+		return
+			(userID == 0ULL) ||
+			(userID == galaxy::api::FromRealID(galaxy::api::IDType::ID_TYPE_USER, 0ULL)) ||
+			(userID == GetCustomGalaxyID()) ||
+			(userID == GetApiGalaxyID());
 	}
 
 	void ClientIniData::ResetStatsAndAchievements()

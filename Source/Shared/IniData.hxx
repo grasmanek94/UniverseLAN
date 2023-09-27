@@ -123,7 +123,7 @@ namespace universelan {
 
 		const std::string DLCFile = "DLC.ini";
 		const std::string DLCSection = "DLC";
-		std::unordered_map<std::string, bool> DLCs;
+		std::unordered_map<uint64_t, bool> DLCs;
 
 		const std::string StatsFile = "Stats.ini";
 		const std::string MetadataSection = "Metadata";
@@ -162,7 +162,7 @@ namespace universelan {
 		bool GetSignedIn() const;
 		uint32_t GetPlayTime() const;
 
-		bool IsDLCInstalled(const std::string& name);
+		bool IsDLCInstalled(uint64_t name);
 	
 		void SaveStatsAndAchievements();
 
