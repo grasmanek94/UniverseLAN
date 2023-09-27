@@ -21,36 +21,48 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::HIGH_FREQUENCY_CALLS /* Some games call this frequently */};
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format(
-				"productID: {}",
-				productID));
+			trace.write_all(std::format("productID: {}", productID));
 		}
 
-		return intf->config->GetEnableAllDLC() || intf->config->IsDLCInstalled(productID);
+		bool result = intf->config->GetEnableAllDLC() || intf->config->IsDLCInstalled(productID);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+
+		return result;
 	}
 
 	const char* AppsImpl::GetCurrentGameLanguage(ProductID productID) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format(
-				"productID: {}",
-				productID));
+			trace.write_all(std::format("productID: {}", productID));
 		}
 
-		return intf->config->GetLanguage().c_str();
+		const char* language = intf->config->GetLanguage().c_str();
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("language: {}", language));
+		}
+
+		return language;
 	}
 
 	void AppsImpl::GetCurrentGameLanguageCopy(char* buffer, uint32_t bufferLength, ProductID productID) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format(
-				"productID: {}",
-				productID));
+			trace.write_all(std::format("productID: {}", productID));
 		}
 
-		universelan::util::safe_copy_str_n(intf->config->GetLanguage(), buffer, bufferLength);
+		std::string language = intf->config->GetLanguage();
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("language: {}", language));
+		}
+
+		universelan::util::safe_copy_str_n(language, buffer, bufferLength);
 	}
 }
 
