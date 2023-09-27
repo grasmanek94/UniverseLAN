@@ -375,7 +375,9 @@ namespace universelan::client {
 
 		{
 			lock_t lock{ mtx };
-			joined_lobby->RemoveMember(intf->config->GetApiGalaxyID());
+			if (joined_lobby != nullptr) {
+				joined_lobby->RemoveMember(intf->config->GetApiGalaxyID());
+			}
 			joined_lobby = nullptr;
 		}
 
