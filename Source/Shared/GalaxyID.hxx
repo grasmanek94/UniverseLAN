@@ -50,7 +50,12 @@ namespace galaxy::api {
 
 	inline GalaxyID FromRealID(IDType type, uint64_t value)
 	{
-		return GalaxyID(static_cast<uint64_t>(type) << 56 | (value & 0xffffffffffffff));
+		return GalaxyID(static_cast<uint64_t>(type) << 56 | (value & 0xffffffffffffffULL));
+	}
+
+	inline uint64_t GetRealID(const GalaxyID& id)
+	{
+		return id.ToUint64() & 0xffffffffffffffULL;
 	}
 }
 
@@ -58,6 +63,6 @@ template <>
 struct std::formatter<galaxy::api::GalaxyID> : std::formatter<std::string> {
 	auto format(galaxy::api::GalaxyID p, format_context& ctx) const {
 		return formatter<string>::format(
-			std::format("{}({})", p.GetRealID(), magic_enum::enum_name(galaxy::api::GetIDType(p))), ctx);
+			std::format("{}({})", galaxy::api::GetRealID(p), magic_enum::enum_name(galaxy::api::GetIDType(p))), ctx);
 	}
 };
