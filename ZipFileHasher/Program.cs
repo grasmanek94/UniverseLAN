@@ -26,7 +26,7 @@ namespace ZipFileHasher
 
                 foreach (var item in current_present_hashes)
                 {
-                    string endswith = "DevelopmentKit_" + item.Split('=')[1] + ".tar.gz";
+                    string endswith = "DevelopmentKit_" + item.Split(new char[]{'=', '|'})[1] + ".tar.gz";
                     all_entries = all_entries.Where(x => { return !x.EndsWith(endswith); }).ToList();
                 }
             }
@@ -77,28 +77,30 @@ namespace ZipFileHasher
                                 using (MemoryStream memory_stream = new MemoryStream())
                                 {
                                     reader.WriteEntryTo(memory_stream);
+                                    byte[] arr = memory_stream.ToArray();
+
                                     using (SHA1Managed sha1 = new SHA1Managed())
                                     {
-                                        byte[] hash = sha1.ComputeHash(memory_stream.ToArray());
+                                        byte[] hash = sha1.ComputeHash(arr);
                                         StringBuilder formatted = new StringBuilder(2 * hash.Length);
                                         foreach (byte b in hash)
                                         {
                                             formatted.AppendFormat("{0:x2}", b);
                                         }
-                                        string output = string.Format("{0}={1}", formatted.ToString(), dll_version);
+                                        string output = string.Format("{0}={1}|{2}", formatted.ToString(), dll_version, arr.Length);
                                         Console.WriteLine(output);
                                         sha1_hashes += output + "\n";
                                     }
 
                                     using (MD5 md5 = MD5.Create())
                                     {
-                                        byte[] hash = md5.ComputeHash(memory_stream.ToArray());
+                                        byte[] hash = md5.ComputeHash(arr);
                                         StringBuilder formatted = new StringBuilder(2 * hash.Length);
                                         foreach (byte b in hash)
                                         {
                                             formatted.AppendFormat("{0:x2}", b);
                                         }
-                                        string output = string.Format("{0}={1}", formatted.ToString(), dll_version);
+                                        string output = string.Format("{0}={1}|{2}", formatted.ToString(), dll_version, arr.Length);
                                         Console.WriteLine(output);
                                         md5_hashes += output + "\n";
                                     }
@@ -107,7 +109,7 @@ namespace ZipFileHasher
                         }
                     }
                 }
-            }
+            } 
 
             return new string[] { sha1_hashes, md5_hashes };
         }
