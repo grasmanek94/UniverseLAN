@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.IO.MemoryMappedFiles;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace UniverseLanWizard
 {
@@ -14,6 +12,7 @@ namespace UniverseLanWizard
         private GalaxyBinaryCompatibilityMatrix CompatibilityMatrix;
         public bool IsUnityGameDetected { get; private set; }
         public bool IsUnrealEngineGameDetected { get; private set; }
+        private List<string> DownloadedFiles;
 
         public InstallWizardLogic(GalaxyBinaryCompatibilityMatrix compatibility_matrix)
         {
@@ -23,11 +22,25 @@ namespace UniverseLanWizard
         public void ParseInfo(GalaxyGameScanner scanner)
         {
             Actions = new List<InstallWizardAction>();
+            DownloadedFiles = new List<string>();
             IsUnityGameDetected = false;
             IsUnrealEngineGameDetected = false;
 
             ParseMetaInfo(scanner);
             ParseGalaxyDLLInfo(scanner);
+
+            if(IsUnityGameDetected)
+            {
+
+            }
+            else if(IsUnrealEngineGameDetected)
+            {
+
+            }
+            else
+            {
+
+            }
         }
 
         private void ParseGalaxyDLLInfo(GalaxyGameScanner scanner)
@@ -55,9 +68,11 @@ namespace UniverseLanWizard
                     },
 
                     string.Format(
-                        "Rename \"{0}\" to \"{1}\"",
+                        "Rename \"{0}\" ({2}-{3}) to \"{1}\"",
                         file_path,
-                        file_path + ".uvlan.bak"
+                        file_path + ".uvlan.bak",
+                        version_info.version,
+                        version_info.bits.ToString()
                     )
                 ));
 
@@ -69,32 +84,36 @@ namespace UniverseLanWizard
                 }
                 string temp_asset_file = Path.Combine(Path.GetTempPath(), asset_url.Segments.Last());
 
-                Actions.Add(new InstallWizardAction(
-                    () =>
-                    {
-                        SimpleFileDownloader.DownloadFile(asset_url, temp_asset_file);
-                        return true;
-                    },
+                if (!DownloadedFiles.Contains(temp_asset_file))
+                {
+                    DownloadedFiles.Add(temp_asset_file);
+                    Actions.Add(new InstallWizardAction(
+                        () =>
+                        {
+                            SimpleFileDownloader.DownloadFile(asset_url, temp_asset_file);
+                            return true;
+                        },
 
-                    () =>
-                    {
-                        File.Delete(temp_asset_file);
-                        return true;
-                    },
+                        () =>
+                        {
+                            File.Delete(temp_asset_file);
+                            return true;
+                        },
 
-                    string.Format(
-                        "Download \"{0}\" to \"{1}\"",
-                        asset_url.ToString(),
-                        temp_asset_file
-                    ),
+                        string.Format(
+                            "Download \"{0}\" to \"{1}\"",
+                            asset_url.ToString(),
+                            temp_asset_file
+                        ),
 
-                    // cleanup
-                    () =>
-                    {
-                        File.Delete(temp_asset_file);
-                        return true;
-                    }
-                ));
+                        // cleanup
+                        () =>
+                        {
+                            File.Delete(temp_asset_file);
+                            return true;
+                        }
+                    ));
+                }
 
                 // 3) extract correct DLL to the old DLL location
                 Actions.Add(new InstallWizardAction(
