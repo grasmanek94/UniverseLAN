@@ -138,7 +138,13 @@ namespace UniverseLanWizard
         {
             if (Scanner.GetFoundGalaxyDLLsCount() > 0)
             {
-                label_status.Text = "Found Galaxy DLLs.";
+                string versions = "";
+                foreach(var dll_version in Scanner.GetFoundGalaxyDLLs().Values)
+                {
+                    versions += " " + dll_version.version + "-" + dll_version.bits.ToString();
+                }
+
+                label_status.Text = "Found Galaxy DLLs:\n" + versions;
                 label_status.ForeColor = Color.Green;
                 listBox1.DataSource = null;
 
