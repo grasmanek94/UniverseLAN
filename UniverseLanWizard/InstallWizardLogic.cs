@@ -26,8 +26,8 @@ namespace UniverseLanWizard
             IsUnityGameDetected = false;
             IsUnrealEngineGameDetected = false;
 
-            ParseGalaxyDLLInfo(scanner);
             ParseMetaInfo(scanner);
+            ParseGalaxyDLLInfo(scanner);
         }
 
         private void ParseGalaxyDLLInfo(GalaxyGameScanner scanner)
@@ -213,6 +213,16 @@ namespace UniverseLanWizard
 
             IsUnityGameDetected = unity_found_unity_engine_dll && unity_found_assembly_csharp_dll;
             IsUnrealEngineGameDetected = unreal_engine_str_found;
+
+            if(IsUnityGameDetected)
+            {
+                Actions.Add(new InstallWizardAction(() => { return true; }, () => { return true; }, "Detected Unity game"));
+            }
+
+            if (IsUnrealEngineGameDetected)
+            {
+                Actions.Add(new InstallWizardAction(() => { return true; }, () => { return true; }, "Detected Unreal Engine game"));
+            }
         }
     }
 }

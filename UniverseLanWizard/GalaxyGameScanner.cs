@@ -64,7 +64,11 @@ namespace UniverseLanWizard
 
             try
             {
-                var all_files = Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories);
+                var all_files = Directory.EnumerateFiles(directory, "*", new EnumerationOptions
+                { 
+                    IgnoreInaccessible = true,
+                    RecurseSubdirectories = true
+                });
 
                 foreach (string current_file in all_files)
                 {

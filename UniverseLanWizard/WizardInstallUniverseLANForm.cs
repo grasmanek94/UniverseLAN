@@ -3,9 +3,8 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Drawing;
 using System.IO;
-using System.Net;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
-using System.Windows.Controls;
 using System.Windows.Forms;
 
 namespace UniverseLanWizard
@@ -54,7 +53,7 @@ namespace UniverseLanWizard
 
             var fi = new FileInfo(ReleasesJsonFile);
             bool check_for_update = true;
-            if(fi.Exists)
+            if (fi.Exists)
             {
                 var releases_age = fi.LastWriteTime - DateTime.Now;
                 check_for_update = (releases_age.TotalDays >= 1.0);
@@ -80,7 +79,7 @@ namespace UniverseLanWizard
             string latest_release_info_data = File.ReadAllText(ReleasesJsonFile);
             JArray releases_info = JArray.Parse(latest_release_info_data);
 
-            if(releases_info.Count < 1)
+            if (releases_info.Count < 1)
             {
                 MessageBox.Show(string.Format("{0}\\releases.json\n\nDoes not have any releases.", AppBaseDirectory, ReleasesURL), "No release data available", MessageBoxButtons.OK);
                 Application.Exit();
@@ -88,7 +87,7 @@ namespace UniverseLanWizard
 
             var latest_release_info = releases_info.First["assets"];
 
-            foreach(var entry in latest_release_info)
+            foreach (var entry in latest_release_info)
             {
                 var name = entry["name"];
                 var browser_download_url = entry["browser_download_url"];
@@ -102,7 +101,8 @@ namespace UniverseLanWizard
 
         private void Scanner_OnScanStarted(GalaxyGameScanner sender)
         {
-            btn_scan.Invoke(new Action(() => {
+            btn_scan.Invoke(new Action(() =>
+            {
                 btn_scan.Enabled = false;
                 txtbox_game_directory.Enabled = false;
                 btn_browse_game_directory.Enabled = false;
@@ -112,7 +112,8 @@ namespace UniverseLanWizard
 
         private void Scanner_OnScanUpdate(GalaxyGameScanner sender, int files_processed)
         {
-            btn_scan.Invoke(new Action(() => {
+            btn_scan.Invoke(new Action(() =>
+            {
                 label_progress.Text = String.Format("{0} / {1}", sender.GetFoundGalaxyDLLsCount(), sender.CurrentFilesProcessedCount);
             }));
         }
@@ -140,7 +141,7 @@ namespace UniverseLanWizard
             {
                 listBox1.DataSource = null;
                 try
-                {                
+                {
                     InstallActions.ParseInfo(Scanner);
                     listBox1.DataSource = InstallActions.Actions;
 
@@ -157,13 +158,13 @@ namespace UniverseLanWizard
                 {
                     label_status.Text = "Unsupported Galaxy Version:\n" + ex.Message;
                     label_status.ForeColor = Color.OrangeRed;
-                }    
+                }
             }
             else
             {
                 label_status.Text = "No Galaxy DLLs found.";
                 label_status.ForeColor = Color.Red;
-            }        
+            }
         }
 
         private void WizardInstallUniverseLANForm_Load(object sender, EventArgs e)
@@ -172,13 +173,17 @@ namespace UniverseLanWizard
             txtbox_game_directory.Text = Directory.GetCurrentDirectory() + "\\";
         }
 
+        [SupportedOSPlatform("windows")]
         private void btn_browse_game_directory_Click(object sender, EventArgs e)
         {
-            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
-            dialog.IsFolderPicker = true;
+            CommonOpenFileDialog dialog = new()
+            {
+                IsFolderPicker = true
+            };
+
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                txtbox_game_directory.Text = dialog.FileName + "\\";
+                txtbox_game_directory.Text = Path.GetFullPath(dialog.FileName + "\\");
             }
         }
 

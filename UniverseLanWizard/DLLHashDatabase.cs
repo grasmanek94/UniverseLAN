@@ -12,7 +12,7 @@ namespace UniverseLanWizard
     {
         private List<DLLHashEntry> DLLHashEntries = new List<DLLHashEntry>();
         private Dictionary<long, Dictionary<string, DLLHashEntry>> DLLSizeToEntries = new Dictionary<long, Dictionary<string, DLLHashEntry>>();
-        private SHA1Managed SHA1 = new SHA1Managed();
+        private SHA1 SHA1Instance = SHA1.Create();
 
         public DLLHashDatabase(){}
 
@@ -67,7 +67,7 @@ namespace UniverseLanWizard
 
         private string GetHash(string filename)
         {
-            byte[] hash = SHA1.ComputeHash(File.ReadAllBytes(filename));
+            byte[] hash = SHA1Instance.ComputeHash(File.ReadAllBytes(filename));
             StringBuilder formatted = new StringBuilder(2 * hash.Length);
             foreach (byte b in hash)
             {
