@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.RightsManagement;
 
 namespace UniverseLanWizard
 {
@@ -15,6 +16,10 @@ namespace UniverseLanWizard
             ReverseAction = reverse_operation_action;
             Description = description;
             CleanupAction = cleanup_operation_action;
+        }
+
+        override public string ToString() {
+            return Description;
         }
     }
 }

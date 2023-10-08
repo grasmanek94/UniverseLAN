@@ -1,9 +1,11 @@
 ﻿using Microsoft.WindowsAPICodePack.Dialogs;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Forms;
 
 namespace UniverseLanWizard
@@ -104,6 +106,7 @@ namespace UniverseLanWizard
                 btn_scan.Enabled = false;
                 txtbox_game_directory.Enabled = false;
                 btn_browse_game_directory.Enabled = false;
+                label_status.Text = "";
             }));
         }
 
@@ -135,11 +138,25 @@ namespace UniverseLanWizard
         {
             if (Scanner.GetFoundGalaxyDLLsCount() > 0)
             {
-                InstallActions.ParseInfo(Scanner);
+                label_status.Text = "Found Galaxy DLLs.";
+                label_status.ForeColor = Color.Green;
+                listBox1.DataSource = null;
+
+                try
+                {                
+                    InstallActions.ParseInfo(Scanner);
+                    listBox1.DataSource = InstallActions.Actions;
+                }
+                catch (UnsupportedGalaxyVersionException ex)
+                {
+                    label_status.Text = "Unsupported Galaxy Version: " + ex.Message;
+                    label_status.ForeColor = Color.OrangeRed;
+                }    
             }
             else
             {
                 label_status.Text = "No Galaxy DLLs found.";
+                label_status.ForeColor = Color.Red;
             }        
         }
 

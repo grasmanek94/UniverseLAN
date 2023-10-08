@@ -1,19 +1,26 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 
 namespace UniverseLanWizard
 {
     internal class InstallWizardLogic
     {
-        private List<InstallWizardAction> Actions;
+        public List<InstallWizardAction> Actions { get; private set; }
         private GalaxyBinaryCompatibilityMatrix CompatibilityMatrix;
 
         public InstallWizardLogic(GalaxyBinaryCompatibilityMatrix compatibility_matrix)
         {
             CompatibilityMatrix = compatibility_matrix;
+        }
+
+        public void ParseInfo(GalaxyGameScanner scanner)
+        {
+            Actions = new List<InstallWizardAction>();
+            ParseGalaxyDLLInfo(scanner);
+
         }
 
         private void ParseGalaxyDLLInfo(GalaxyGameScanner scanner)
@@ -22,7 +29,7 @@ namespace UniverseLanWizard
             foreach (var galaxy_dll_entry in galaxy_dll_files)
             {
                 string file_path = galaxy_dll_entry.Key;
-                string bare_file_name = Path.GetFileName(file_path); // which DLL file exactly
+                string galaxy_dll_file_name = Path.GetFileName(file_path); // which DLL file exactly
 
                 DLLHashEntry version_info = galaxy_dll_entry.Value;
 
@@ -47,7 +54,7 @@ namespace UniverseLanWizard
                     )
                 ));
 
-                // 2) Get correct UVLan version and place it at the location
+                // 2) Get correct UVLan version
                 Uri asset_url = CompatibilityMatrix.TryGetBinaryCompatibleAssetUrl(version_info.version, version_info.bits);
                 if (asset_url == null)
                 {
@@ -81,14 +88,38 @@ namespace UniverseLanWizard
                         return true;
                     }
                 ));
+
+                // 3) extract correct DLL to the old DLL location
+                Actions.Add(new InstallWizardAction(
+                    () =>
+                    {
+                        using (ZipArchive archive = ZipFile.OpenRead(temp_asset_file))
+                        {
+                            foreach (ZipArchiveEntry entry in archive.Entries)
+                            {
+                                if (entry.FullName.Equals(galaxy_dll_file_name, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    entry.ExtractToFile(file_path);
+                                }
+                            }
+                        }
+                        return true;
+                    },
+
+                    () =>
+                    {
+                        File.Delete(file_path);
+                        return true;
+                    },
+
+                    string.Format(
+                        "Extract \"{0}\\{1}\" to \"{2}\"",
+                        temp_asset_file,
+                        galaxy_dll_file_name,
+                        file_path
+                    )
+                ));
             }
-        }
-
-        public void ParseInfo(GalaxyGameScanner scanner)
-        {
-            Actions = new List<InstallWizardAction>();
-            ParseGalaxyDLLInfo(scanner);
-
         }
     }
 }
