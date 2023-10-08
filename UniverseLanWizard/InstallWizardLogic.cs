@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MS.WindowsAPICodePack.Internal;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -12,6 +13,8 @@ namespace UniverseLanWizard
         private GalaxyBinaryCompatibilityMatrix CompatibilityMatrix;
         public bool IsUnityGameDetected { get; private set; }
         public bool IsUnrealEngineGameDetected { get; private set; }
+        public bool Has32Bit { get; private set; }
+        public bool Has64Bit { get; private set; }
         private List<string> DownloadedFiles;
 
         public InstallWizardLogic(GalaxyBinaryCompatibilityMatrix compatibility_matrix)
@@ -25,13 +28,15 @@ namespace UniverseLanWizard
             DownloadedFiles = new List<string>();
             IsUnityGameDetected = false;
             IsUnrealEngineGameDetected = false;
+            Has32Bit = false;
+            Has64Bit = false;
 
             ParseMetaInfo(scanner);
             ParseGalaxyDLLInfo(scanner);
 
             if(IsUnityGameDetected)
             {
-
+                ParseUnityInfo(scanner);
             }
             else if(IsUnrealEngineGameDetected)
             {
@@ -40,6 +45,129 @@ namespace UniverseLanWizard
             else
             {
 
+            }
+        }
+
+        private void UnpackZIPResults(string destination_path, IEnumerable<ZipArchiveEntry> entries)
+        {
+            foreach (ZipArchiveEntry entry in entries)
+            {
+                string path = Path.Combine(destination_path, entry.FullName);
+                entry.ExtractToFile(path);
+            }
+        }
+
+        private void UnpackUniverseLANFiles(ZipArchive archive, string destination_path)
+        {
+            UnpackZIPResults(destination_path, from curr in archive.Entries
+                                               where Path.GetDirectoryName(curr.FullName) == "UniverseLANData"
+                                               where !string.IsNullOrEmpty(curr.Name)
+                                               select curr);
+
+            UnpackZIPResults(destination_path, from curr in archive.Entries
+                                               where Path.GetDirectoryName(curr.FullName) == "UniverseLANServerData"
+                                               where !string.IsNullOrEmpty(curr.Name)
+                                               select curr);
+
+            UnpackZIPResults(destination_path, from curr in archive.Entries
+                                               where curr.FullName == "UniverseLAN.ini"
+                                               where !string.IsNullOrEmpty(curr.Name)
+                                               select curr);
+
+            if (Has32Bit)
+            {
+                UnpackZIPResults(destination_path, from curr in archive.Entries
+                                                   where curr.FullName == "UniverseLANServer.exe"
+                                                   where !string.IsNullOrEmpty(curr.Name)
+                                                   select curr);
+            }
+
+            if(Has64Bit)
+            {
+                UnpackZIPResults(destination_path, from curr in archive.Entries
+                                                   where curr.FullName == "UniverseLANServer64.exe"
+                                                   where !string.IsNullOrEmpty(curr.Name)
+                                                   select curr);
+            }
+        }
+
+        private void RemoveUniverseLANFiles(string destination_path)
+        {
+            string UniverseLANData = Path.Combine(destination_path, "\\UniverseLANData\\");
+            string UniverseLANServerData = Path.Combine(destination_path, "\\UniverseLANServerData\\");
+            string UniverseLANIni = Path.Combine(destination_path, "\\UniverseLAN.ini");
+            string UniverseLANServerx86 = Path.Combine(destination_path, "\\UniverseLANServer.exe");
+            string UniverseLANServerx64 = Path.Combine(destination_path, "\\UniverseLANServer64.exe");
+
+            Directory.Delete(UniverseLANData, true);
+            Directory.Delete(UniverseLANServerData, true);
+            File.Delete(UniverseLANIni);
+            File.Delete(UniverseLANServerx86);
+            File.Delete(UniverseLANServerx64);
+        }
+
+        private void ParseUnityInfo(GalaxyGameScanner scanner)
+        {
+            if(DownloadedFiles.Count < 1)
+            {
+                return;
+            }
+
+            var dlls = scanner.GetFoundDLLFiles();
+
+            string server_executables = "";
+
+            if (Has32Bit)
+            {
+                server_executables = "UniverseLANServer.exe";
+            }
+
+            if (Has64Bit)
+            {
+                if(server_executables.Length > 0)
+                {
+                    server_executables += ",";
+                }
+
+                server_executables += "UniverseLANServer64.exe";
+            }
+
+            foreach (var dll in dlls)
+            {
+                string file_name = Path.GetFileName(dll).ToLower();
+                if (file_name.Equals("Assembly-CSharp.dll", StringComparison.OrdinalIgnoreCase) && dll.Contains("_Data", StringComparison.OrdinalIgnoreCase))
+                {
+                    string dir = Path.GetDirectoryName(dll);
+                    string game_root_path_relative = Path.Combine(dir, "..\\..\\");
+                    string game_root_path = Path.GetFullPath(game_root_path_relative);
+                    string temp_asset_file = DownloadedFiles.First();
+
+                    // 3) extract UniverseLAN files
+                    Actions.Add(new InstallWizardAction(
+                        () =>
+                        {
+                            using (ZipArchive archive = ZipFile.OpenRead(temp_asset_file))
+                            {
+                                UnpackUniverseLANFiles(archive, game_root_path);
+                            }
+                            return true;
+                        },
+
+                        () =>
+                        {
+                            RemoveUniverseLANFiles(game_root_path);
+
+                            return true;
+                        },
+
+                        string.Format(
+                            "Extract \"{0}\\[UniverseLANData,UniverseLANServerData,UniverseLAN.ini,{1}]\" to \"{2}\"",
+                            temp_asset_file,
+                            server_executables,
+                            game_root_path
+                        )
+                    ));
+                }
             }
         }
 
@@ -82,6 +210,10 @@ namespace UniverseLanWizard
                 {
                     throw new UnsupportedGalaxyVersionException(string.Format("{0}-{1}", version_info.version, version_info.bits.ToString()));
                 }
+
+                Has32Bit |= (version_info.bits == Bitness.x86);
+                Has64Bit |= (version_info.bits == Bitness.x64);
+
                 string temp_asset_file = Path.Combine(Path.GetTempPath(), asset_url.Segments.Last());
 
                 if (!DownloadedFiles.Contains(temp_asset_file))
@@ -215,8 +347,6 @@ namespace UniverseLanWizard
                         unity_found_assembly_csharp_dll = true;
                         break;
                 }
-
-
             }
 
             var exes = scanner.GetFoundExecutables();
