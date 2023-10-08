@@ -40,6 +40,9 @@
     <Reference Include="Microsoft.WindowsAPICodePack.Shell, Version=1.1.5.0, Culture=neutral, PublicKeyToken=8985beaab7ea3f04, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft-WindowsAPICodePack-Shell.1.1.5\lib\net48\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -59,6 +62,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bitness.cs" />
+    <Compile Include="GalaxyBinaryCompatibilityMatrix.cs" />
+    <Compile Include="GalaxyGameScanner.cs" />
+    <Compile Include="InstallWizardAction.cs" />
+    <Compile Include="InstallWizardLogic.cs" />
+    <Compile Include="Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="SimpleFileDownloader.cs" />
+    <Compile Include="UnsupportedGalaxyVersionException.cs" />
     <Compile Include="UnknownBitnessException.cs" />
     <Compile Include="CannotDetermineGalaxyVersionException.cs" />
     <Compile Include="DLLHashDatabase.cs" />
@@ -77,6 +91,10 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="WizardInstallUniverseLANForm.resx">
       <DependentUpon>WizardInstallUniverseLANForm.cs</DependentUpon>
     </EmbeddedResource>

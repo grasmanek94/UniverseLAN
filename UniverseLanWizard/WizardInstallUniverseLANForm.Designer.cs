@@ -32,7 +32,9 @@
             this.btn_browse_game_directory = new System.Windows.Forms.Button();
             this.label_game_directory = new System.Windows.Forms.Label();
             this.table_layout_panel_game_directory = new System.Windows.Forms.TableLayoutPanel();
+            this.label_status = new System.Windows.Forms.Label();
             this.btn_scan = new System.Windows.Forms.Button();
+            this.label_progress = new System.Windows.Forms.Label();
             this.table_layout_panel_game_directory.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -57,7 +59,7 @@
             this.btn_browse_game_directory.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_browse_game_directory.Location = new System.Drawing.Point(803, 3);
             this.btn_browse_game_directory.Name = "btn_browse_game_directory";
-            this.btn_browse_game_directory.Size = new System.Drawing.Size(104, 29);
+            this.btn_browse_game_directory.Size = new System.Drawing.Size(104, 26);
             this.btn_browse_game_directory.TabIndex = 1;
             this.btn_browse_game_directory.Text = "Browse...";
             this.btn_browse_game_directory.UseVisualStyleBackColor = true;
@@ -70,7 +72,7 @@
             this.label_game_directory.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label_game_directory.Location = new System.Drawing.Point(3, 0);
             this.label_game_directory.Name = "label_game_directory";
-            this.label_game_directory.Size = new System.Drawing.Size(104, 35);
+            this.label_game_directory.Size = new System.Drawing.Size(104, 32);
             this.label_game_directory.TabIndex = 2;
             this.label_game_directory.Text = "Game Directory:";
             this.label_game_directory.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -83,29 +85,56 @@
             this.table_layout_panel_game_directory.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.table_layout_panel_game_directory.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.table_layout_panel_game_directory.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.table_layout_panel_game_directory.Controls.Add(this.label_progress, 0, 2);
+            this.table_layout_panel_game_directory.Controls.Add(this.label_status, 0, 2);
             this.table_layout_panel_game_directory.Controls.Add(this.btn_browse_game_directory, 2, 0);
             this.table_layout_panel_game_directory.Controls.Add(this.txtbox_game_directory, 1, 0);
             this.table_layout_panel_game_directory.Controls.Add(this.label_game_directory, 0, 0);
             this.table_layout_panel_game_directory.Controls.Add(this.btn_scan, 2, 1);
             this.table_layout_panel_game_directory.Location = new System.Drawing.Point(12, 12);
             this.table_layout_panel_game_directory.Name = "table_layout_panel_game_directory";
-            this.table_layout_panel_game_directory.RowCount = 2;
-            this.table_layout_panel_game_directory.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.table_layout_panel_game_directory.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.table_layout_panel_game_directory.Size = new System.Drawing.Size(910, 71);
+            this.table_layout_panel_game_directory.RowCount = 3;
+            this.table_layout_panel_game_directory.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33F));
+            this.table_layout_panel_game_directory.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33F));
+            this.table_layout_panel_game_directory.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.34F));
+            this.table_layout_panel_game_directory.Size = new System.Drawing.Size(910, 98);
             this.table_layout_panel_game_directory.TabIndex = 3;
+            // 
+            // label_status
+            // 
+            this.label_status.AutoSize = true;
+            this.label_status.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_status.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label_status.Location = new System.Drawing.Point(113, 64);
+            this.label_status.Name = "label_status";
+            this.label_status.Size = new System.Drawing.Size(684, 34);
+            this.label_status.TabIndex = 6;
+            this.label_status.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // btn_scan
             // 
             this.btn_scan.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btn_scan.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btn_scan.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_scan.Location = new System.Drawing.Point(803, 38);
+            this.btn_scan.Location = new System.Drawing.Point(803, 35);
             this.btn_scan.Name = "btn_scan";
-            this.btn_scan.Size = new System.Drawing.Size(104, 30);
+            this.btn_scan.Size = new System.Drawing.Size(104, 26);
             this.btn_scan.TabIndex = 5;
             this.btn_scan.Text = "Scan";
             this.btn_scan.UseVisualStyleBackColor = true;
+            this.btn_scan.Click += new System.EventHandler(this.btn_scan_Click);
+            // 
+            // label_progress
+            // 
+            this.label_progress.AutoSize = true;
+            this.label_progress.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_progress.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label_progress.Location = new System.Drawing.Point(3, 64);
+            this.label_progress.Name = "label_progress";
+            this.label_progress.Size = new System.Drawing.Size(104, 34);
+            this.label_progress.TabIndex = 7;
+            this.label_progress.Text = "0 / 0";
+            this.label_progress.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // WizardInstallUniverseLANForm
             // 
@@ -130,6 +159,8 @@
         private System.Windows.Forms.Label label_game_directory;
         private System.Windows.Forms.TableLayoutPanel table_layout_panel_game_directory;
         private System.Windows.Forms.Button btn_scan;
+        private System.Windows.Forms.Label label_status;
+        private System.Windows.Forms.Label label_progress;
     }
 }
 

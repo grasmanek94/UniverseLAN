@@ -1,6 +1,6 @@
 ﻿namespace UniverseLanWizard
 {
-    public enum bitness
+    public enum Bitness
     {
         x86,
         x64

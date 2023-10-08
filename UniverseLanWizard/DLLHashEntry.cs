@@ -5,6 +5,6 @@
         public string hash;
         public string version;
         public long size;
-        public bitness bits;
+        public Bitness bits;
     }
 }

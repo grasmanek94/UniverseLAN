@@ -12,7 +12,7 @@ namespace UniverseLanWizard
     {
         private List<DLLHashEntry> DLLHashEntries = new List<DLLHashEntry>();
         private Dictionary<long, Dictionary<string, DLLHashEntry>> DLLSizeToEntries = new Dictionary<long, Dictionary<string, DLLHashEntry>>();
-        private SHA1Managed sha1 = new SHA1Managed();
+        private SHA1Managed SHA1 = new SHA1Managed();
 
         public DLLHashDatabase(){}
 
@@ -38,11 +38,11 @@ namespace UniverseLanWizard
                 switch(data[4])
                 {
                     case "32bit":
-                        entry.bits = bitness.x86;
+                        entry.bits = Bitness.x86;
                         break;
 
                     case "64bit":
-                        entry.bits = bitness.x64;
+                        entry.bits = Bitness.x64;
                         break;
 
                     default:
@@ -67,7 +67,7 @@ namespace UniverseLanWizard
 
         private string GetHash(string filename)
         {
-            byte[] hash = sha1.ComputeHash(File.ReadAllBytes(filename));
+            byte[] hash = SHA1.ComputeHash(File.ReadAllBytes(filename));
             StringBuilder formatted = new StringBuilder(2 * hash.Length);
             foreach (byte b in hash)
             {
@@ -128,11 +128,11 @@ namespace UniverseLanWizard
             switch (type)
             {
                 case MachineType.I386:
-                    entry.bits = bitness.x86;
+                    entry.bits = Bitness.x86;
                     break;
 
                 case MachineType.x64:
-                    entry.bits = bitness.x64;
+                    entry.bits = Bitness.x64;
                     break;
 
                 default:
