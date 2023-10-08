@@ -138,24 +138,24 @@ namespace UniverseLanWizard
         {
             if (Scanner.GetFoundGalaxyDLLsCount() > 0)
             {
-                string versions = "";
-                foreach(var dll_version in Scanner.GetFoundGalaxyDLLs().Values)
-                {
-                    versions += " " + dll_version.version + "-" + dll_version.bits.ToString();
-                }
-
-                label_status.Text = "Found Galaxy DLLs:\n" + versions;
-                label_status.ForeColor = Color.Green;
                 listBox1.DataSource = null;
-
                 try
                 {                
                     InstallActions.ParseInfo(Scanner);
                     listBox1.DataSource = InstallActions.Actions;
+
+                    string versions = "";
+                    foreach (var dll_version in Scanner.GetFoundGalaxyDLLs().Values)
+                    {
+                        versions += " " + dll_version.version + "-" + dll_version.bits.ToString();
+                    }
+
+                    label_status.Text = "Found Galaxy DLLs:\n" + versions;
+                    label_status.ForeColor = Color.Green;
                 }
                 catch (UnsupportedGalaxyVersionException ex)
                 {
-                    label_status.Text = "Unsupported Galaxy Version: " + ex.Message;
+                    label_status.Text = "Unsupported Galaxy Version:\n" + ex.Message;
                     label_status.ForeColor = Color.OrangeRed;
                 }    
             }

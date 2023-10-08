@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.IO.MemoryMappedFiles;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace UniverseLanWizard
 {
@@ -10,6 +12,8 @@ namespace UniverseLanWizard
     {
         public List<InstallWizardAction> Actions { get; private set; }
         private GalaxyBinaryCompatibilityMatrix CompatibilityMatrix;
+        public bool IsUnityGameDetected { get; private set; }
+        public bool IsUnrealEngineGameDetected { get; private set; }
 
         public InstallWizardLogic(GalaxyBinaryCompatibilityMatrix compatibility_matrix)
         {
@@ -19,8 +23,11 @@ namespace UniverseLanWizard
         public void ParseInfo(GalaxyGameScanner scanner)
         {
             Actions = new List<InstallWizardAction>();
-            ParseGalaxyDLLInfo(scanner);
+            IsUnityGameDetected = false;
+            IsUnrealEngineGameDetected = false;
 
+            ParseGalaxyDLLInfo(scanner);
+            ParseMetaInfo(scanner);
         }
 
         private void ParseGalaxyDLLInfo(GalaxyGameScanner scanner)
@@ -120,6 +127,92 @@ namespace UniverseLanWizard
                     )
                 ));
             }
+        }
+
+        // only finds simple ascii matches
+        private bool FindInFile(string file_path, string match)
+        {
+            if(match.Length < 1)
+            {
+                return true;
+            }
+
+            int current_match = 0;
+
+            using (StreamReader sr = new StreamReader(file_path, System.Text.Encoding.ASCII))
+            {
+                while (!sr.EndOfStream)
+                {
+                    char c = (char)sr.Read();
+                    
+                    // ToLower
+                    if (c >= 'A' && c <= 'Z')
+                    {
+                        c += (char)32;
+                    }
+
+                    if (match[current_match] == c)
+                    {
+                        if (++current_match == match.Length)
+                        {
+                            return true;
+                        }
+                    }
+                    else if(current_match != 0)
+                    {
+                        current_match = 0;
+                        if (match[current_match] == c)
+                        {
+                            ++current_match;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private void ParseMetaInfo(GalaxyGameScanner scanner)
+        {
+            var dlls = scanner.GetFoundDLLFiles();
+
+            // Unity
+            bool unity_found_unity_engine_dll = false;
+            bool unity_found_assembly_csharp_dll = false;
+
+            // unreal engine
+            bool unreal_engine_str_found = false;
+
+            foreach (var dll in dlls)
+            {
+                string file_name = Path.GetFileName(dll).ToLower();
+                switch(file_name)
+                {
+                    case "unityengine.dll":
+                        unity_found_unity_engine_dll = true;
+                        break;
+
+                    case "assembly-csharp.dll":
+                        unity_found_assembly_csharp_dll = true;
+                        break;
+                }
+
+
+            }
+
+            var exes = scanner.GetFoundExecutables();
+            foreach (var exe in exes)
+            {
+                string file_name = Path.GetFileName(exe).ToLower();
+
+                if (!unreal_engine_str_found && file_name.EndsWith("-shipping.exe"))
+                {
+                    unreal_engine_str_found = FindInFile(exe, "unrealtype.h");
+                }
+            }
+
+            IsUnityGameDetected = unity_found_unity_engine_dll && unity_found_assembly_csharp_dll;
+            IsUnrealEngineGameDetected = unreal_engine_str_found;
         }
     }
 }

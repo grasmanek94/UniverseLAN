@@ -68,6 +68,7 @@
     <Compile Include="GalaxyGameScanner.cs" />
     <Compile Include="InstallWizardAction.cs" />
     <Compile Include="InstallWizardLogic.cs" />
+    <Compile Include="MachineType.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
