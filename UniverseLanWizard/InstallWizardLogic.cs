@@ -16,6 +16,7 @@ namespace UniverseLanWizard
         public bool Has32Bit { get; private set; }
         public bool Has64Bit { get; private set; }
         private List<string> DownloadedFiles;
+        private List<string> UniverseLANTargets;
 
         public InstallWizardLogic(GalaxyBinaryCompatibilityMatrix compatibility_matrix)
         {
@@ -26,6 +27,7 @@ namespace UniverseLanWizard
         {
             Actions = new List<InstallWizardAction>();
             DownloadedFiles = new List<string>();
+            UniverseLANTargets = new List<string>();
             IsUnityGameDetected = false;
             IsUnrealEngineGameDetected = false;
             Has32Bit = false;
@@ -106,15 +108,8 @@ namespace UniverseLanWizard
             File.Delete(UniverseLANServerx64);
         }
 
-        private void ParseUnityInfo(GalaxyGameScanner scanner)
+        private string GetServerExecutables()
         {
-            if(DownloadedFiles.Count < 1)
-            {
-                return;
-            }
-
-            var dlls = scanner.GetFoundDLLFiles();
-
             string server_executables = "";
 
             if (Has32Bit)
@@ -124,7 +119,7 @@ namespace UniverseLanWizard
 
             if (Has64Bit)
             {
-                if(server_executables.Length > 0)
+                if (server_executables.Length > 0)
                 {
                     server_executables += ",";
                 }
@@ -132,6 +127,17 @@ namespace UniverseLanWizard
                 server_executables += "UniverseLANServer64.exe";
             }
 
+            return server_executables;
+        }
+
+        private void ParseUnityInfo(GalaxyGameScanner scanner)
+        {
+            if(DownloadedFiles.Count < 1)
+            {
+                return;
+            }
+
+            var dlls = scanner.GetFoundDLLFiles();
             foreach (var dll in dlls)
             {
                 string file_name = Path.GetFileName(dll).ToLower();
@@ -140,33 +146,38 @@ namespace UniverseLanWizard
                     string dir = Path.GetDirectoryName(dll);
                     string game_root_path_relative = Path.Combine(dir, "..\\..\\");
                     string game_root_path = Path.GetFullPath(game_root_path_relative);
-                    string temp_asset_file = DownloadedFiles.First();
 
-                    // 3) extract UniverseLAN files
-                    Actions.Add(new InstallWizardAction(
-                        () =>
-                        {
-                            using (ZipArchive archive = ZipFile.OpenRead(temp_asset_file))
+                    if (!UniverseLANTargets.Contains(game_root_path))
+                    {
+                        UniverseLANTargets.Add(game_root_path);
+                        string temp_asset_file = DownloadedFiles.First();
+
+                        // 3) extract UniverseLAN files
+                        Actions.Add(new InstallWizardAction(
+                            () =>
                             {
-                                UnpackUniverseLANFiles(archive, game_root_path);
-                            }
-                            return true;
-                        },
+                                using (ZipArchive archive = ZipFile.OpenRead(temp_asset_file))
+                                {
+                                    UnpackUniverseLANFiles(archive, game_root_path);
+                                }
+                                return true;
+                            },
 
-                        () =>
-                        {
-                            RemoveUniverseLANFiles(game_root_path);
+                            () =>
+                            {
+                                RemoveUniverseLANFiles(game_root_path);
 
-                            return true;
-                        },
+                                return true;
+                            },
 
-                        string.Format(
-                            "Extract \"{0}\\[UniverseLANData,UniverseLANServerData,UniverseLAN.ini,{1}]\" to \"{2}\"",
-                            temp_asset_file,
-                            server_executables,
-                            game_root_path
-                        )
-                    ));
+                            string.Format(
+                                "Extract \"{0}\\[UniverseLANData,UniverseLANServerData,UniverseLAN.ini,{1}]\" to \"{2}\"",
+                                temp_asset_file,
+                                GetServerExecutables(),
+                                game_root_path
+                            )
+                        ));
+                    }
                 }
             }
         }
