@@ -93,10 +93,16 @@ And maybe add some UTF-8 encoded characters here: łakomo
 	}
 
 	for (auto& file : files) {
+		bool status = 
+			(storage_ptr->FileExists(file.first.c_str()) == false) &&
+			(storage_ptr->GetFileSize(file.first.c_str()) == 0)
+		;
+
 		tracer::Trace::write_all(
 			std::format(
-				"File: {} Exists: {} FileSize: {} FileCount: {}",
-				file.first, storage_ptr->FileExists(file.first.c_str()), storage_ptr->GetFileSize(file.first.c_str()), storage_ptr->GetFileCount()
+				"File: {} Exists: {} FileSize: {} FileCount: {} Status: {}",
+				file.first, storage_ptr->FileExists(file.first.c_str()), storage_ptr->GetFileSize(file.first.c_str()), storage_ptr->GetFileCount(),
+				status
 			));
 	}
 
@@ -104,18 +110,20 @@ And maybe add some UTF-8 encoded characters here: łakomo
 
 	for (auto& file : files) {
 		uint32_t read_bytes = storage_ptr->FileRead(file.first.c_str(), buffer, sizeof(buffer));
+		bool status = read_bytes == 0;
 		tracer::Trace::write_all(
 			std::format(
-				"File: {} FileRead: {}",
-				file.first, read_bytes
+				"File: {} FileRead: {} Status: {}",
+				file.first, read_bytes, status
 			));
 	}
 
 	for (auto& file : files) {
+		bool status = storage_ptr->FileExists(file.first.c_str()) == false;
 		tracer::Trace::write_all(
 			std::format(
-				"File: {} Exists: {}",
-				file.first, storage_ptr->FileExists(file.first.c_str())
+				"File: {} Exists: {} Status: {}",
+				file.first, storage_ptr->FileExists(file.first.c_str()), status
 			));
 	}
 
@@ -134,10 +142,15 @@ And maybe add some UTF-8 encoded characters here: łakomo
 	}
 
 	for (auto& file : files) {
+		bool status = 
+			(storage_ptr->FileExists(file.first.c_str()) == true) &&
+			(storage_ptr->GetFileSize(file.first.c_str()) == 21)
+			;
 		tracer::Trace::write_all(
 			std::format(
-				"File: {} Exists: {} FileSize: {}",
-				file.first, storage_ptr->FileExists(file.first.c_str()), storage_ptr->GetFileSize(file.first.c_str())
+				"File: {} Exists: {} FileSize: {} Status: {}",
+				file.first, storage_ptr->FileExists(file.first.c_str()), storage_ptr->GetFileSize(file.first.c_str()),
+				status
 			));
 	}
 
@@ -149,10 +162,13 @@ And maybe add some UTF-8 encoded characters here: łakomo
 		std::memset(buffer, 0xCC, sizeof(buffer));
 
 		uint32_t read_bytes = storage_ptr->FileRead(file.first.c_str(), buffer, sizeof(buffer));
+		bool match = equal(buffer, out);
+		bool check = equal(buffer + read_bytes, 0xCC, sizeof(buffer) - read_bytes);
+		bool status = match && check && (read_bytes == (out.length() + 1));
 		tracer::Trace::write_all(
 			std::format(
-				"File: {} FileRead: {} Match: {} Check: {}",
-				file.first, read_bytes, equal(buffer, out), equal(buffer + read_bytes, 0xCC, sizeof(buffer) - read_bytes)
+				"File: {} FileRead: {} Match: {} Check: {} Status: {}",
+				file.first, read_bytes, match, check, status
 			));
 	}
 
@@ -161,10 +177,11 @@ And maybe add some UTF-8 encoded characters here: łakomo
 	}
 
 	for (auto& file : files) {
+		bool status = storage_ptr->FileExists(file.first.c_str()) == false;
 		tracer::Trace::write_all(
 			std::format(
-				"File: {} Exists: {}",
-				file.first, storage_ptr->FileExists(file.first.c_str())
+				"File: {} Exists: {} Status: {}",
+				file.first, storage_ptr->FileExists(file.first.c_str()), status
 			));
 	}
 
@@ -179,10 +196,17 @@ And maybe add some UTF-8 encoded characters here: łakomo
 	}
 
 	for (auto& file : files) {
+		bool status =
+			(storage_ptr->FileExists(file.first.c_str()) == true) &&
+			(storage_ptr->GetFileSize(file.first.c_str()) == file.second.size()) &&
+			(storage_ptr->GetFileCount() > 1)
+		;
+
 		tracer::Trace::write_all(
 			std::format(
-				"File: {} Exists: {} FileSize: {} FileCount: {}",
-				file.first, storage_ptr->FileExists(file.first.c_str()), storage_ptr->GetFileSize(file.first.c_str()), storage_ptr->GetFileCount()
+				"File: {} Exists: {} FileSize: {} FileCount: {} Status: {}",
+				file.first, storage_ptr->FileExists(file.first.c_str()), storage_ptr->GetFileSize(file.first.c_str()), storage_ptr->GetFileCount(),
+				status
 			));
 	}
 
@@ -198,10 +222,14 @@ And maybe add some UTF-8 encoded characters here: łakomo
 		std::memset(buffer, 0xCC, sizeof(buffer));
 
 		uint32_t read_bytes = storage_ptr->FileRead(file.first.c_str(), buffer, sizeof(buffer));
+		bool match = equal(buffer, file.second);
+		bool check = equal(buffer + read_bytes, 0xCC, sizeof(buffer) - read_bytes);
+		bool status = match && check && (read_bytes == file.second.size());
+
 		tracer::Trace::write_all(
 			std::format(
-				"File: {} FileRead: {} Match: {} Check: {}",
-				file.first, read_bytes, equal(buffer, file.second), equal(buffer + read_bytes, 0xCC, sizeof(buffer) - read_bytes)
+				"File: {} FileRead: {} Match: {} Check: {} Status: {}",
+				file.first, read_bytes, match, check, status
 			));
 	}
 }
