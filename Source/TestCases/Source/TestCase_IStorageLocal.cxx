@@ -35,36 +35,6 @@ file_data_t create_entry(const std::string& data) {
 	return file_data_t{ data.begin(), data.end() };
 }
 
-bool equal(const char* const data, const file_data_t& vec) {
-	for (size_t i = 0; i < vec.size(); ++i) {
-		if ((unsigned char)data[i] != vec[i]) {
-			return false;
-		}
-	}
-
-	return true;
-}
-
-bool equal(const char* const data, unsigned char value, size_t size) {
-	for (size_t i = 0; i < size; ++i) {
-		if ((unsigned char)data[i] != value) {
-			return false;
-		}
-	}
-
-	return true;
-}
-
-bool equal(const char* const data, const std::string& str) {
-	for (size_t i = 0; i < str.length() + 1; ++i) {
-		if (data[i] != str.c_str()[i]) {
-			return false;
-		}
-	}
-
-	return true;
-}
-
 file_map_t files;
 
 void perform_test() {
@@ -162,8 +132,8 @@ And maybe add some UTF-8 encoded characters here: łakomo
 		std::memset(buffer, 0xCC, sizeof(buffer));
 
 		uint32_t read_bytes = storage_ptr->FileRead(file.first.c_str(), buffer, sizeof(buffer));
-		bool match = equal(buffer, out);
-		bool check = equal(buffer + read_bytes, 0xCC, sizeof(buffer) - read_bytes);
+		bool match = compare_equal(buffer, out);
+		bool check = compare_equal(buffer + read_bytes, 0xCC, sizeof(buffer) - read_bytes);
 		bool status = match && check && (read_bytes == (out.length() + 1));
 		tracer::Trace::write_all(
 			std::format(
@@ -222,8 +192,8 @@ And maybe add some UTF-8 encoded characters here: łakomo
 		std::memset(buffer, 0xCC, sizeof(buffer));
 
 		uint32_t read_bytes = storage_ptr->FileRead(file.first.c_str(), buffer, sizeof(buffer));
-		bool match = equal(buffer, file.second);
-		bool check = equal(buffer + read_bytes, 0xCC, sizeof(buffer) - read_bytes);
+		bool match = compare_equal(buffer, file.second);
+		bool check = compare_equal(buffer + read_bytes, 0xCC, sizeof(buffer) - read_bytes);
 		bool status = match && check && (read_bytes == file.second.size());
 
 		tracer::Trace::write_all(

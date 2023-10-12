@@ -74,7 +74,7 @@ void TimerThread() {
 				0x3F,
 				0x00,
 				0x00,
-				0xAA
+				(char)0xAA
 			};
 
 			matchmaking_ptr->SendLobbyMessage(my_lobby_id, data, sizeof(data));

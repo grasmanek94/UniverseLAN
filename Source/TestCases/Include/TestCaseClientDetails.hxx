@@ -5,8 +5,10 @@
 #include <format>
 #include <functional>
 #include <memory>
+#include <string>
 #include <string_view>
 #include <thread>
+#include <vector>
 
 #include <magic_enum/magic_enum.hpp>
 
@@ -139,6 +141,38 @@ struct std::formatter<galaxy::api::GalaxyID> : std::formatter<std::string> {
 };
 
 using namespace galaxy::api;
+
+
+template<typename T>
+bool compare_equal(const char* const data, const std::vector<T>& vec) {
+	for (size_t i = 0; i < vec.size(); ++i) {
+		if ((T)data[i] != vec[i]) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool compare_equal(const char* const data, unsigned char value, size_t size) {
+	for (size_t i = 0; i < size; ++i) {
+		if ((unsigned char)data[i] != value) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool compare_equal(const char* const data, const std::string& str) {
+	for (size_t i = 0; i < str.length() + 1; ++i) {
+		if (data[i] != str.c_str()[i]) {
+			return false;
+		}
+	}
+
+	return true;
+}
 
 #include "TestCaseDelayRunner.hxx"
 #include "TestCaseAuthListener.hxx"
