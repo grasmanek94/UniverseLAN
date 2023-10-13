@@ -116,6 +116,7 @@ Debug (tracing) files can be found in `<Configuration Files Directory>/tracing/<
 | Jazz Jackrabbit 2 Collection | :left_right_arrow: | | | 
 | Ticket to Ride | :left_right_arrow:   | 1.139.2 | Tried it with the wrapper and works, but need to create a free Wonder account | 
 | Aragami 2 | :left_right_arrow: | 1.148.3 | Probably does not use GOG Galaxy for networking (doesn't work for private lobbies).<br> Can play on public lobbies without GOG Galaxy or with this patch AFAIK. |
+| DUSK (DuskWorld) | :left_right_arrow: | 1.133.6 | Uses steam (works without Steam Client) api for free online play, doesn't use GOG Galaxy. |
 | Roboquest | :x: | 1.148.3 | Probably does not use GOG Galaxy for networking. |
 | Northgard | :x:  | 1.139.2 | Still thinks the game is offline, custom multiplayer? | 
 | Tropico 5 | :x:  | 1.68.0 | Game uses an external service for multiplayer? | 
