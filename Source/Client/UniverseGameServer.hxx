@@ -24,7 +24,7 @@ namespace universelan::client {
 		IUtils* GameServerUtils();
 #endif
 
-#if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
+#if GALAXY_BUILD_FEATURE_HAS_GAMESERVERTELEMETRY
 		ITelemetry* GameServerTelemetry();
 #endif
 

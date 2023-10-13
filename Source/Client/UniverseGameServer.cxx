@@ -70,7 +70,7 @@ namespace universelan::client {
 	}
 #endif
 
-#if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
+#if GALAXY_BUILD_FEATURE_HAS_GAMESERVERTELEMETRY
 	ITelemetry* UniverseGameServer::GameServerTelemetry() {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 

@@ -127,7 +127,7 @@ namespace universelan::client {
 	}
 
 	void StatsImpl::StoreStatsAndAchievements(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 		IStatsAndAchievementsStoreListener* const listener
 #endif
 	) {
@@ -138,14 +138,14 @@ namespace universelan::client {
 		intf->client->GetConnection().SendAsync(UserHelloDataMessage{ intf->config->GetLocalUserData()->stats });
 
 		listeners->NotifyAll(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			listener,
 #endif
 			&IStatsAndAchievementsStoreListener::OnUserStatsAndAchievementsStoreSuccess);
 	}
 
 	void StatsImpl::ResetStatsAndAchievements(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 		IStatsAndAchievementsStoreListener* const listener
 #endif
 	) {
@@ -156,7 +156,7 @@ namespace universelan::client {
 		intf->client->GetConnection().SendAsync(UserHelloDataMessage{ intf->config->GetLocalUserData()->stats });
 
 		listeners->NotifyAll(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			listener,
 #endif
 			&IStatsAndAchievementsStoreListener::OnUserStatsAndAchievementsStoreSuccess);
@@ -227,14 +227,14 @@ namespace universelan::client {
 #endif
 
 	void StatsImpl::RequestLeaderboards(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 		ILeaderboardsRetrieveListener* const listener
 #endif
 	) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		listeners->NotifyAll(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			listener,
 #endif
 			&ILeaderboardsRetrieveListener::OnLeaderboardsRetrieveFailure, ILeaderboardsRetrieveListener::FAILURE_REASON_UNDEFINED);
@@ -326,17 +326,17 @@ namespace universelan::client {
 		const char* name
 		, int32_t score
 		, bool forceUpdate
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 		, ILeaderboardScoreUpdateListener* const listener
 #endif
 	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__ };
 
 		listeners->NotifyAll(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			listener,
 #endif
-			& ILeaderboardScoreUpdateListener::OnLeaderboardScoreUpdateFailure, name, score, ILeaderboardScoreUpdateListener::FAILURE_REASON_UNDEFINED);
+			&ILeaderboardScoreUpdateListener::OnLeaderboardScoreUpdateFailure, name, score, ILeaderboardScoreUpdateListener::FAILURE_REASON_UNDEFINED);
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_LEADERBOARD_WITH_DETAILS
@@ -357,14 +357,14 @@ namespace universelan::client {
 		, const void* details
 		, uint32_t detailsSize
 		, bool forceUpdate
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 		, ILeaderboardScoreUpdateListener* const listener
 #endif
 	) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		listeners->NotifyAll(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			listener, 
 #endif
 			&ILeaderboardScoreUpdateListener::OnLeaderboardScoreUpdateFailure, name, score, ILeaderboardScoreUpdateListener::FAILURE_REASON_UNDEFINED);
@@ -379,14 +379,14 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_ILEADERBOARDRETRIEVELISTENER
 	void StatsImpl::FindLeaderboard(const char* name
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 		, ILeaderboardRetrieveListener* const listener
 #endif
 	) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		listeners->NotifyAll(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			listener, 
 #endif
 			&ILeaderboardRetrieveListener::OnLeaderboardRetrieveFailure, name, ILeaderboardRetrieveListener::FAILURE_REASON_UNDEFINED);
@@ -397,14 +397,14 @@ namespace universelan::client {
 		, const char* displayName
 		, const LeaderboardSortMethod& sortMethod
 		, const LeaderboardDisplayType& displayType
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 		, ILeaderboardRetrieveListener* const listener
 #endif
 	) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		listeners->NotifyAll(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			listener, 
 #endif
 			&ILeaderboardRetrieveListener::OnLeaderboardRetrieveFailure, name, ILeaderboardRetrieveListener::FAILURE_REASON_UNDEFINED);
@@ -413,7 +413,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_IUSERTIMEPLAYEDRETRIEVELISTENER
 	void StatsImpl::RequestUserTimePlayed(GalaxyID userID
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 		, IUserTimePlayedRetrieveListener* const listener
 #endif
 	) {
@@ -422,7 +422,7 @@ namespace universelan::client {
 		// no need to refresh play time because it's the diff between 'submitted_time_played + (time_now - connect_time)'
 		if (intf->user->IsGalaxyUserDataPresent(userID)) {
 			listeners->NotifyAll(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 				listener, 
 #endif
 				&IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveSuccess, userID);
@@ -430,7 +430,7 @@ namespace universelan::client {
 		else {
 			uint64_t request_id = MessageUniqueID::get();
 
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			specific_user_time_played_requests.emplace(request_id, listener);
 #endif
 

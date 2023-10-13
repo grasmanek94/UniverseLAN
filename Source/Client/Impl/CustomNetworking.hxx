@@ -95,7 +95,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void OpenConnection(const char* connectionString
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS
 			, IConnectionOpenListener* const listener = NULL
 #endif
 		) override;
@@ -109,7 +109,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void CloseConnection(ConnectionID connectionID
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS
 			, IConnectionCloseListener* const listener = NULL
 #endif
 		) override;

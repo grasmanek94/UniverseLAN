@@ -167,7 +167,7 @@ namespace universelan::client {
 	}
 
 	void CustomNetworkingImpl::OpenConnection(const char* connectionString
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS
 		, IConnectionOpenListener* const listener
 #endif
 	) {
@@ -175,12 +175,8 @@ namespace universelan::client {
 
 		auto channel = std::make_shared<Channel>(this);
 
-		if (channel->connect(connectionString
-#if (GALAXY_VERSION) > 11240
-			, listener
-#else
-			, nullptr
-#endif
+		if (channel->connect(connectionString,
+			BOOST_PP_IF(GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS, listener, nullptr)
 		))
 		{
 			{
@@ -192,7 +188,7 @@ namespace universelan::client {
 	}
 
 	void CustomNetworkingImpl::CloseConnection(ConnectionID connectionID
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS
 		, IConnectionCloseListener* const listener
 #endif
 	) {
@@ -203,9 +199,8 @@ namespace universelan::client {
 			return;
 		}
 
-#if (GALAXY_VERSION) > 11240
-		channel->listener_close = listener;
-#endif
+		channel->listener_close = BOOST_PP_IF(GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS, listener, nullptr);
+
 		if (channel->connection) {
 			channel->connection->close(websocketpp::close::status::normal, "normal");
 		}

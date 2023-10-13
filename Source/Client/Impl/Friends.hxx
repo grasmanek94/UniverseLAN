@@ -604,7 +604,7 @@ namespace universelan::client {
 		 * @return true if the specified user is playing the same game, false otherwise.
 		 */
 
-#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
+#if GALAXY_BUILD_FEATURE_HAS_ISUSERINTHESAMEGAME
 		virtual bool IsUserInTheSameGame(GalaxyID userID) const override;
 #endif
 

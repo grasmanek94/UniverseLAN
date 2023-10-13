@@ -14,7 +14,9 @@ namespace universelan::client {
 
 	StorageImpl::StorageImpl(InterfaceInstances* intf) :
 		intf{ intf }, listeners{ intf->notification.get() },
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
 		file_upload_requests{}, file_download_requests{},
+#endif
 		sfu(intf->config->GetGameDataPath())
 	{
 		tracer::Trace trace { nullptr, __FUNCTION__ };
@@ -86,7 +88,7 @@ namespace universelan::client {
 	}
 
 	void StorageImpl::FileShare(const char* fileName
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
 		, IFileShareListener* const listener
 #endif
 	) {
@@ -94,7 +96,7 @@ namespace universelan::client {
 
 		if (!intf->config->GetAllowFileSharingUpload()) {
 			listeners->NotifyAll(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
 				listener, 
 #endif
 				&IFileShareListener::OnFileShareFailure, fileName, IFileShareListener::FAILURE_REASON_UNDEFINED);
@@ -107,7 +109,7 @@ namespace universelan::client {
 			std::cerr << __FUNCTION__ << " fail: " << fileName << "\n";
 
 			listeners->NotifyAll(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
 				listener, 
 #endif
 				&IFileShareListener::OnFileShareFailure, fileName, IFileShareListener::FAILURE_REASON_UNDEFINED);
@@ -118,7 +120,7 @@ namespace universelan::client {
 		std::thread([=, this, sfu = std::move(sfu), str_file_name = std::move(str_file_name)] {
 			uint64_t request_id = MessageUniqueID::get();
 
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
 			file_upload_requests.emplace(request_id, listener);
 #endif
 			intf->client->GetConnection().SendAsync(FileShareMessage{ request_id, str_file_name, sfu.ReadLocal(str_file_name) });
@@ -126,7 +128,7 @@ namespace universelan::client {
 	}
 
 	void StorageImpl::DownloadSharedFile(SharedFileID sharedFileID
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
 		, ISharedFileDownloadListener* const listener
 #endif
 	) {
@@ -134,7 +136,7 @@ namespace universelan::client {
 
 		if (!intf->config->GetAllowFileSharingDownload()) {
 			listeners->NotifyAll(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
 				listener,
 #endif
 				&ISharedFileDownloadListener::OnSharedFileDownloadFailure, sharedFileID, ISharedFileDownloadListener::FAILURE_REASON_UNDEFINED);
@@ -143,7 +145,7 @@ namespace universelan::client {
 
 		uint64_t request_id = MessageUniqueID::get();
 
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
 		file_download_requests.emplace(request_id, listener);
 #endif
 
@@ -208,17 +210,27 @@ namespace universelan::client {
 			return;
 		}
 
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
 		ISharedFileDownloadListener* listener = file_download_requests.pop(data->request_id);
+#endif
 
 		if (data->data.size() > 0 && sfu.InitSharedFileStorage(data->filename, data->id)) {
 			if (!sfu.WriteShared(data->filename, data->data.data(), data->data.size())) {
 				std::cerr << "FileDownloaded::WriteShared failed\n";
 			}
 
-			listeners->NotifyAll(listener, &ISharedFileDownloadListener::OnSharedFileDownloadSuccess, data->id, data->filename.c_str());
+			listeners->NotifyAll(
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
+				listener, 
+#endif
+				&ISharedFileDownloadListener::OnSharedFileDownloadSuccess, data->id, data->filename.c_str());
 		}
 		else {
-			listeners->NotifyAll(listener, &ISharedFileDownloadListener::OnSharedFileDownloadFailure, data->id, ISharedFileDownloadListener::FAILURE_REASON_UNDEFINED);
+			listeners->NotifyAll(
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
+				listener, 
+#endif
+				&ISharedFileDownloadListener::OnSharedFileDownloadFailure, data->id, ISharedFileDownloadListener::FAILURE_REASON_UNDEFINED);
 		}
 	}
 
@@ -229,7 +241,9 @@ namespace universelan::client {
 			return;
 		}
 
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
 		IFileShareListener* listener = file_upload_requests.pop(data->request_id);
+#endif
 
 		if (data->id != 0) {
 			if (!sfu.InitSharedFileStorage(data->filename, data->id)) {
@@ -240,10 +254,18 @@ namespace universelan::client {
 				std::cerr << "FileUploaded::CopyFromLocalToShared failed\n";
 			}
 
-			listeners->NotifyAll(listener, &IFileShareListener::OnFileShareSuccess, data->filename.c_str(), data->id);
+			listeners->NotifyAll(
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
+				listener, 
+#endif
+				&IFileShareListener::OnFileShareSuccess, data->filename.c_str(), data->id);
 		}
 		else {
-			listeners->NotifyAll(listener, &IFileShareListener::OnFileShareFailure, data->filename.c_str(), IFileShareListener::FAILURE_REASON_UNDEFINED);
+			listeners->NotifyAll(
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
+				listener,
+#endif
+				&IFileShareListener::OnFileShareFailure, data->filename.c_str(), IFileShareListener::FAILURE_REASON_UNDEFINED);
 		}
 	}
 }

@@ -343,15 +343,6 @@ namespace universelan::client {
 		virtual void SignInAnonymousTelemetry(IAuthListener* const listener = NULL) override;
 #endif
 
-		/**
-		 * Signs the Galaxy Peer out.
-		 *
-		 * This call is asynchronous. Responses come to the IAuthListener and IOperationalStateChangeListener.
-		 *
-		 * @remark All pending asynchronous operations will be finished immediately.
-		 * Their listeners will be called with the next call to the ProcessData().
-		 */
-		virtual void SignOut() override;
 #else
 
 		/**
@@ -397,6 +388,17 @@ namespace universelan::client {
 #endif
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_SIGNOUT
+		/**
+		 * Signs the Galaxy Peer out.
+		 *
+		 * This call is asynchronous. Responses come to the IAuthListener and IOperationalStateChangeListener.
+		 *
+		 * @remark All pending asynchronous operations will be finished immediately.
+		 * Their listeners will be called with the next call to the ProcessData().
+		 */
+		virtual void SignOut() override;
+#endif
 
 		/**
 		 * Retrieves/Refreshes user data storage.
@@ -545,6 +547,7 @@ namespace universelan::client {
 #else
 		using RequestEncryptedAppTicketDataT = void;
 #endif
+
 		/**
 		 * Performs a request for an Encrypted App Ticket.
 		 *
@@ -555,7 +558,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RequestEncryptedAppTicket(RequestEncryptedAppTicketDataT* data, uint32_t dataSize
-#if GALAXY_BUILD_FEATURE_USER_DATA_LISTENERS
+#if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
 			, IEncryptedAppTicketListener* const listener = NULL
 #endif
 		) override;

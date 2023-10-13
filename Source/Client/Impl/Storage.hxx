@@ -36,8 +36,10 @@ namespace universelan::client {
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
 
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
 		ListenersRequestHelper<IFileShareListener*> file_upload_requests;
 		ListenersRequestHelper<ISharedFileDownloadListener*> file_download_requests;
+#endif
 
 		SharedFileUtils sfu;
 	public:
@@ -133,7 +135,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void FileShare(const char* fileName
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
 			, IFileShareListener* const listener = NULL
 #endif
 		) override;
@@ -147,7 +149,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void DownloadSharedFile(SharedFileID sharedFileID
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
 			, ISharedFileDownloadListener* const listener = NULL
 #endif
 		) override;

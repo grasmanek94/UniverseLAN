@@ -562,7 +562,7 @@ namespace universelan::client {
 	}
 #endif
 
-#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
+#if GALAXY_BUILD_FEATURE_HAS_ISUSERINTHESAMEGAME
 	bool FriendsImpl::IsUserInTheSameGame(GalaxyID userID) const {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 

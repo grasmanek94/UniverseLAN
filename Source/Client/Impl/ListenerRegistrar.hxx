@@ -27,7 +27,7 @@ namespace universelan::client {
 	struct InterfaceInstances;
 
 	using ListenerTypeImpl =
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_LISTENERTYPE
 		ListenerType;
 #else
 		uint32_t;

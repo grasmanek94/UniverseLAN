@@ -22,7 +22,7 @@ namespace universelan::client {
 	ChatImpl::~ChatImpl() {}
 
 	void ChatImpl::RequestChatRoomWithUser(GalaxyID userID
-#if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS
 		, IChatRoomWithUserRetrieveListener* const listener
 #endif
 	) {
@@ -34,11 +34,11 @@ namespace universelan::client {
 			trace.write_all(std::format(
 				"userID: {} listener: {}",
 				userID,
-				(void*)BOOST_PP_IF(GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER, listener, nullptr)
+				(void*)BOOST_PP_IF(GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS, listener, nullptr)
 			));
 		}
 
-#if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS
 		request_chat_room_with_user_requests.emplace(request_id, listener);
 #endif
 
@@ -80,7 +80,7 @@ namespace universelan::client {
 	}
 
 	void ChatImpl::RequestChatRoomMessages(ChatRoomID chatRoomID, uint32_t limit, ChatMessageID referenceMessageID
-#if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS
 		, IChatRoomMessagesRetrieveListener* const listener
 #endif
 	) {
@@ -90,13 +90,13 @@ namespace universelan::client {
 			trace.write_all(std::format(
 				"chatRoomID: {} limit: {} referenceMessageID: {} listener: {}",
 				chatRoomID, limit, referenceMessageID,
-				(void*)BOOST_PP_IF(GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER, listener, nullptr)
+				(void*)BOOST_PP_IF(GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS, listener, nullptr)
 			));
 		}
 
 		uint64_t request_id = MessageUniqueID::get();
 
-#if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS
 		request_chat_room_messages_requests.emplace(request_id, listener);
 #endif
 
@@ -153,7 +153,7 @@ namespace universelan::client {
 	}
 
 	uint32_t ChatImpl::SendChatRoomMessage(ChatRoomID chatRoomID, const char* msg
-#if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS
 		, IChatRoomMessageSendListener* const listener
 #endif
 	) {
@@ -163,7 +163,7 @@ namespace universelan::client {
 			trace.write_all(std::format(
 				"chatRoomID: {} msg: {} listener: {}",
 				chatRoomID, msg,
-				(void*)BOOST_PP_IF(GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER, listener, nullptr)
+				(void*)BOOST_PP_IF(GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS, listener, nullptr)
 			));
 		}
 
@@ -171,7 +171,7 @@ namespace universelan::client {
 
 		SendToChatRoomMessage message{ request_id, chatRoomID, std::make_shared<ChatMessage>(CHAT_MESSAGE_TYPE_CHAT_MESSAGE, chatRoomID, intf->config->GetApiGalaxyID(), 0UL, msg) };
 
-#if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS
 		send_to_chat_room_requests.emplace(request_id, listener);
 #endif
 

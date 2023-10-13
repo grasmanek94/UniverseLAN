@@ -60,7 +60,7 @@ namespace universelan::client {
 #endif
 		logger = std::make_unique<LoggerImpl>(this);
 
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 		telemetry = std::make_unique<TelemetryImpl>(this);
 #endif
 	}
@@ -94,7 +94,7 @@ namespace universelan::client {
 			client->Stop();
 		}
 
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 		telemetry = nullptr;
 #endif
 

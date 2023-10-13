@@ -220,9 +220,7 @@ namespace universelan::client {
 #endif
 #endif
 
-
-#if GALAXY_BUILD_FEATURE_USER_SIGNIN_CROSSPLATFORM
-
+#if GALAXY_BUILD_FEATURE_HAS_SIGNOUT
 	void UserImpl::SignOut() {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
@@ -409,14 +407,14 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_ENCRYPTED_APP_TICKET
 	void UserImpl::RequestEncryptedAppTicket(RequestEncryptedAppTicketDataT* data, uint32_t dataSize
-#if GALAXY_BUILD_FEATURE_USER_DATA_LISTENERS
+#if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
 		, IEncryptedAppTicketListener* const listener
 #endif
 	) {
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
 		listeners->NotifyAll(
-#if GALAXY_BUILD_FEATURE_USER_DATA_LISTENERS
+#if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
 			listener,
 #endif
 			&IEncryptedAppTicketListener::OnEncryptedAppTicketRetrieveSuccess);

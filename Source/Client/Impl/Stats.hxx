@@ -171,7 +171,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void StoreStatsAndAchievements(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			IStatsAndAchievementsStoreListener* const listener = NULL
 #endif
 		) override;
@@ -188,7 +188,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void ResetStatsAndAchievements(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			IStatsAndAchievementsStoreListener* const listener = NULL
 #endif
 		) override;
@@ -274,7 +274,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RequestLeaderboards(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			ILeaderboardsRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -454,7 +454,7 @@ namespace universelan::client {
 			const char* name
 			, int32_t score
 			, bool forceUpdate = false
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, ILeaderboardScoreUpdateListener* const listener = NULL
 #endif
 		) override;
@@ -517,7 +517,7 @@ namespace universelan::client {
 			, const void* details
 			, uint32_t detailsSize
 			, bool forceUpdate = false
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, ILeaderboardScoreUpdateListener* const listener = NULL
 #endif
 		) override;
@@ -545,7 +545,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void FindLeaderboard(const char* name
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, ILeaderboardRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -571,7 +571,7 @@ namespace universelan::client {
 			, const char* displayName
 			, const LeaderboardSortMethod& sortMethod
 			, const LeaderboardDisplayType& displayType
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, ILeaderboardRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -587,7 +587,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RequestUserTimePlayed(GalaxyID userID = GalaxyID()
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, IUserTimePlayedRetrieveListener* const listener = NULL
 #endif
 		) override;
