@@ -34,7 +34,9 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_IGALAXYTHREADFACTORY
 		galaxyThreadFactory = initOptions.galaxyThreadFactory;
 #endif
+#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_STORAGEPATH
 		storagePath = initOptions.storagePath != nullptr ? initOptions.storagePath : "";
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_HOST_PORT
 		host = initOptions.host != nullptr ? initOptions.host : "";
