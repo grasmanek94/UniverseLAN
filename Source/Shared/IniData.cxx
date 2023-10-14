@@ -76,19 +76,39 @@ namespace universelan {
 			return result;
 		}
 
-
 		uint64_t parse_flags(const std::string& str) {
 			auto result = split(str);
 
 			uint64_t flags = 0;
+			uint64_t disable_flags = 0;
+
 			for (auto& entry : result) {
+				bool disable = entry.starts_with('~') || entry.starts_with('!');
+				if (disable) {
+					entry = trim(entry.substr(1));
+				}
+				
 				uint64_t flag = magic_enum::enum_cast<tracer::Trace::MASK>(entry).value_or(tracer::Trace::INFORMATIONAL);
 
 				if (flag == tracer::Trace::TRACE_ALL_FLAGS) {
-					flags |= std::numeric_limits<decltype(flags)>::max();
+					if (disable) {
+						return 0ULL;
+					} else {
+						flags = std::numeric_limits<decltype(flags)>::max();
+					}
 				}
+				else {
+					if (disable) {
+						disable_flags |= flag;
+					}
+					else {
+						flags |= flag;
+					}
+				}
+			}
 
-				flags |= flag;
+			if (disable_flags) {
+				flags &= ~disable_flags;
 			}
 
 			return flags;
