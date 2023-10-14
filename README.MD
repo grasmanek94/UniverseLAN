@@ -98,6 +98,8 @@ Debug (tracing) files can be found in `<Configuration Files Directory>/tracing/<
 | MetalSlug3 | :white_check_mark:(2)        | 1.100.2 | Works since build 243 |
 | Serious Sam 4 | :white_check_mark:(2)  | 1.144.1 | Works since build 256 | 
 | Tooth and Tail | :white_check_mark:(2)  | 1.122.1 | Works with 1.124.0, tested with build 256 | 
+| Door Kickers - Action Squad | :white_check_mark:(2) | 1.133.6 | Tested with build 287 |
+| Driftland - The Magic Revival | :construction: | 1.133.6 | Both games crash when joining |
 | Serious Sams Bogus Detour | :construction: | 1.100.2 | Stuck on "Creating lobby..." or "Joining lobby..." <br> Can get into lobby since build 243 but host crashes on start |
 | Niffelheim | :construction:  | 1.139.2 | Stuck at "Loading..." (save transfer?) | 
 | Alien vs Predator 2000 | :question: |  | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176? |

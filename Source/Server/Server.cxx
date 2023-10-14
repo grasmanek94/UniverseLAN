@@ -14,20 +14,17 @@ namespace universelan::server {
 	bool Server::KickUnauthenticated(ENetPeer* peer) {
 		peer::ptr pd = peer_mapper.Get(peer);
 
-		if (pd == nullptr) {
-			return false;
-		}
-
-		if (pd->challenge.completed) {
+		if (pd != nullptr && pd->challenge.completed) {
 			return true;
 		}
 
-		std::cout << "Disconnecting Peer("
+		// Action Squad somehow manages to kick itself from the server.
+		/*std::cout << "Disconnecting Peer("
 			<< std::hex << peer->address.host << ":" << std::dec << peer->address.port
 			<< ") due to trying to forbidden access" << std::endl;
 
 		Handle(peer, std::shared_ptr<EventDisconnect>{nullptr});
-		connection.Disconnect(peer);
+		connection.Disconnect(peer);*/
 
 		return false;
 	}
