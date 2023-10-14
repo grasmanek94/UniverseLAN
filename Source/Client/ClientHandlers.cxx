@@ -8,9 +8,15 @@
 namespace universelan::client {
 	using namespace galaxy::api;
 
-	void Client::Handle(ENetPeer* peer, const std::shared_ptr<FileShareMessage>& data) {} // For server only, client uses FileShareResponseMessage
-	void Client::Handle(ENetPeer* peer, const std::shared_ptr<UserHelloDataMessage>& data) {} // For server only
-	void Client::Handle(ENetPeer* peer, const std::shared_ptr<CreateLobbyMessage>& data) {} // For server only, client uses CreateLobbyResponseMessage
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<FileShareMessage>& data) {
+		tracer::Trace trace{ "::FileShareMessage(SHOULDNTHAPPN)", tracer::Trace::NETCLIENT };
+	} // For server only, client uses FileShareResponseMessage
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<UserHelloDataMessage>& data) {
+		tracer::Trace trace{ "::UserHelloDataMessage(SHOULDNTHAPPN)", tracer::Trace::NETCLIENT };
+	} // For server only
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<CreateLobbyMessage>& data) {
+		tracer::Trace trace{ "::CreateLobbyMessage(SHOULDNTHAPPN)", tracer::Trace::NETCLIENT };
+	} // For server only, client uses CreateLobbyResponseMessage
 
 	namespace {
 		void client_log(const universelan::client::InterfaceInstances* const interfaces, tracer::Trace& trace, const std::string& what) {

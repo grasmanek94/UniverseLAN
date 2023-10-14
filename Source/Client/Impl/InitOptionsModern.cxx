@@ -24,7 +24,6 @@ namespace universelan::client {
 #endif
 
 	{
-		
 		clientID = initOptions.clientID;
 		clientSecret = initOptions.clientSecret;
 		configFilePath = initOptions.configFilePath != nullptr ? initOptions.configFilePath : "";

@@ -47,7 +47,10 @@ namespace universelan::tracer {
 			IUSER = bit<19>(),
 			IUTILS = bit<20>(),
 			IGAMESERVERAPI = bit<21>(),
-			IGALAXYTHREAD = bit<22>()
+			IGALAXYTHREAD = bit<22>(),
+			IAPPS = bit<23>(),
+			CUSTOMCONSOLE = bit<24>()
+
 		};
 
 		static bool InitTracing(const char* const log_directory,

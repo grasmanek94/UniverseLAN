@@ -4,10 +4,13 @@ namespace universelan::client {
 	Client::Client(InterfaceInstances* interfaces)
 		: interfaces{ interfaces }, running{ false }, tick_thread{}, connection{}
 	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::NETCLIENT };
+
 		int init_code = connection.GetInitCode();
 
 		if (init_code)
 		{
+			tracer::Trace trace{ ("::Cannot initialize ENET, error code: " + std::to_string(init_code)).c_str(), __FUNCTION__, tracer::Trace::NETCLIENT };
 			// TODO custom exception class
 			throw std::exception(
 #ifdef _WIN32
@@ -18,10 +21,13 @@ namespace universelan::client {
 
 		if (!connection.Create() || !connection.Good())
 		{
-#ifdef _WIN32
+			tracer::Trace trace{ "::ENET host member creation failed", __FUNCTION__, tracer::Trace::NETCLIENT };
 			// TODO custom exception class
-			throw std::exception("ENET host member creation failed");
+			throw std::exception(
+#ifdef _WIN32
+				"ENET host member creation failed"
 #endif
+			);
 		}
 
 		connection.Connect(interfaces->config->GetServerAddress(), interfaces->config->GetPort());
@@ -47,12 +53,13 @@ namespace universelan::client {
 
 	Client::~Client()
 	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::NETCLIENT };
 		Stop();
 	}
 
 	void Client::Start()
 	{
-		tracer::Trace trace { nullptr, __FUNCTION__ };
+		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::NETCLIENT };
 
 		running = true;
 		tick_thread = std::thread{ &Client::Tick, this };
@@ -60,7 +67,7 @@ namespace universelan::client {
 
 	void Client::Stop()
 	{
-		tracer::Trace trace { nullptr, __FUNCTION__ };
+		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::NETCLIENT };
 
 		running = false;
 		if (tick_thread.joinable()) {

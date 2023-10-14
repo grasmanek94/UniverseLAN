@@ -15,7 +15,7 @@ namespace universelan::client {
 	GalaxyThreadImpl::GalaxyThreadImpl(std::thread&& thread) :
 		_thread(std::move(thread))
 	{
-		tracer::Trace trace { nullptr, __FUNCTION__ };
+		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IGALAXYTHREAD };
 	}
 	/**
 	 * Join the thread.
@@ -47,7 +47,7 @@ namespace universelan::client {
 #endif
 
 	GalaxyThreadImpl::~GalaxyThreadImpl() {
-		tracer::Trace trace { nullptr, __FUNCTION__ };
+		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IGALAXYTHREAD };
 
 		/*if (_thread.joinable()) {
 			_thread.join();
@@ -74,14 +74,14 @@ namespace universelan::client {
 	  * @return New thread object.
 	  */
 	IGalaxyThread* GalaxyThreadFactory::SpawnThread(ThreadEntryFunction const entryPoint, ThreadEntryParam param) {
-		tracer::Trace trace { nullptr, __FUNCTION__ };
+		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IGALAXYTHREAD };
 
 		// TODO: use GalaxyAllocator
 		return new GalaxyThreadImpl(std::thread(entryPoint, param));
 	}
 
 	GalaxyThreadFactory::~GalaxyThreadFactory() {
-		tracer::Trace trace { nullptr, __FUNCTION__ };
+		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IGALAXYTHREAD };
 	};
 
 	/** @} */

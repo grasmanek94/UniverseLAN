@@ -6,14 +6,17 @@
 namespace galaxy::api {
 	using namespace universelan;
 	using namespace universelan::client;
+	using namespace universelan::tracer;
 
 	static UniverseGameServer gameserver;
 
 	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE InitGameServer(const InitOptions& initOptions) {
+		Trace trace{ nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL_GAMESERVERAPI };
 		gameserver.InitGameServer(initOptions);
 	}
 
 	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE ShutdownGameServer() {
+		Trace trace{ nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL_GAMESERVERAPI };
 		gameserver.ShutdownGameServer();
 	}
 
