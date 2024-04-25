@@ -315,6 +315,7 @@ namespace universelan::server {
 		peer::ptr pd = peer_mapper.Get(peer);
 
 		if (pd->lobby) {
+			// already in a lobby
 			data->result = LOBBY_ENTER_RESULT_ERROR;
 			connection.Send(peer, data);
 			return;
@@ -348,9 +349,11 @@ namespace universelan::server {
 		// hmm should we include the user itself?
 		auto members = lobby->GetMembers();
 		for (auto& member : members) {
-			auto member_peer = peer_mapper.Get(member);
+			//if (member != pd->id) {
+				auto member_peer = peer_mapper.Get(member);
 
-			connection.Send(member_peer->peer, enter_notification);
+				connection.Send(member_peer->peer, enter_notification);
+			//}
 		}
 	}
 

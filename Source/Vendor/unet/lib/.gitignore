@@ -1,0 +1,8 @@
+# Download these libraries yourself.
+steamworks/*
+galaxy/*
+enet/*
+
+# Steamworks: https://partner.steamgames.com/dashboard
+# Galaxy: https://devportal.gog.com/galaxy/components/sdk
+# Enet: https://stack.mrag.nl/s/8kttcGcH506TIWf

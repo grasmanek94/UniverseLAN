@@ -15,3 +15,4 @@ include(cereal.cmake)
 include(websocketpp.cmake)
 
 include(galaxy.cmake)
+include(unet.cmake)
