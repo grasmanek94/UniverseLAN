@@ -349,7 +349,7 @@ namespace universelan::client {
 		}
 
 		listeners->NotifyAll(listener, &ILobbyEnteredListener::OnLobbyEntered, data->lobby_id, data->result);
-		//listeners->NotifyAll(&ILobbyMemberStateListener::OnLobbyMemberStateChanged, data->lobby_id, intf->user->GetGalaxyID(), LobbyMemberStateChange::LOBBY_MEMBER_STATE_CHANGED_ENTERED);
+		listeners->NotifyAll(&ILobbyMemberStateListener::OnLobbyMemberStateChanged, data->lobby_id, intf->user->GetGalaxyID(), LobbyMemberStateChange::LOBBY_MEMBER_STATE_CHANGED_ENTERED); // TODO: this is probably superfluous (or at least on some version)
 	}
 
 	void MatchmakingImpl::LeaveLobby(GalaxyID lobbyID
