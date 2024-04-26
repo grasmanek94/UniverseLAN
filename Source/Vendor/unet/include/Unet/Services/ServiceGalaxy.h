@@ -4,7 +4,7 @@
 #include <Unet/Service.h>
 #include <Unet/Context.h>
 
-#include <galaxy/GalaxyApi.h>
+#include <GalaxyApi.h>
 
 namespace Unet
 {

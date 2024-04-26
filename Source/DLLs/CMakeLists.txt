@@ -86,6 +86,10 @@ function(define_projects_for_version)
   define_shared(${GALAXY_VERSION})
   define_client(${GALAXY_VERSION})
   define_server(${GALAXY_VERSION} ${GALAXY_VERSION_NUMBER} "${ARCH_ADDITION}")
+  
+  if(BUILD_TEST_CASES)
+    define_unet_library(${GALAXY_VERSION} ${GALAXY_VERSION_NUMBER} "${ARCH_ADDITION}")
+  endif()
 endfunction()
 
 function(add_universelan_executables GALAXY_VERSION_NUMBER)

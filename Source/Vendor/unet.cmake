@@ -22,13 +22,13 @@ function(define_unet_library GALAXY_VERSION GALAXY_VERSION_NUMBER GALAXY_ARCH)
     "${CMAKE_SOURCE_DIR}/Source/Vendor/unet/src/Unet_common.cpp"
     "${CMAKE_SOURCE_DIR}/Source/Vendor/unet/src/Unet.cpp"
     "${CMAKE_SOURCE_DIR}/Source/Vendor/unet/src/Utils.cpp"
-    "${CMAKE_SOURCE_DIR}/Source/Vendor/unet/src/xxhash.cpp"
+#   "${CMAKE_SOURCE_DIR}/Source/Vendor/unet/src/xxhash.cpp" # XXH_PRIVATE_API == not include src!
     "${CMAKE_SOURCE_DIR}/Source/Vendor/unet/src/Services/ServiceGalaxy.cpp"
     "${CMAKE_SOURCE_DIR}/Source/Vendor/unet/src/Results/LobbyListResult.cpp"
    )
   
   target_include_directories(unet-lib-${GALAXY_VERSION} PUBLIC "${CMAKE_SOURCE_DIR}/Source/Vendor/unet/include/" )
-  target_compile_definitions(unet-lib-${GALAXY_VERSION} PUBLIC "UNET_MODULE_GALAXY" )
+  target_compile_definitions(unet-lib-${GALAXY_VERSION} PUBLIC "UNET_MODULE_GALAXY" "XXH_PRIVATE_API" )
   add_version_definitions_to(unet-lib-${GALAXY_VERSION})
 
   target_link_libraries(

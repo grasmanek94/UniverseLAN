@@ -8,8 +8,8 @@ message("-- Adding tests...")
 
 include(credentials.cmake)
 
-function(add_simple_test_case GALAXY_VERSION_NUMBER TEST_CASE_NAME)
-  set(GALAXY_VERSION "${GALAXY_ARCH}-${GALAXY_VERSION_NUMBER}")
+function(add_simple_test_case GALAXY_VERSION_NUMBER TEST_CASE_NAME PREFIX)
+  set(GALAXY_VERSION "${GALAXY_ARCH}-${GALAXY_VERSION_NUMBER}" PARENT_SCOPE)
 
   set(ARCH_ADDITION ${GALAXY_ARCH})
   string(REPLACE "x64" "64" ARCH_ADDITION ${ARCH_ADDITION})
@@ -22,7 +22,7 @@ function(add_simple_test_case GALAXY_VERSION_NUMBER TEST_CASE_NAME)
 
   file(GLOB_RECURSE TEST_CASES_HEADERS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/Source/TestCases/Include/*.*")
 
-  add_executable(${CURRENT_TEST_TARGET} "Source/TestCase_${TEST_CASE_NAME}.cxx" ${TEST_CASES_HEADERS})
+  add_executable(${CURRENT_TEST_TARGET} "${PREFIX}${TEST_CASE_NAME}.cxx" ${TEST_CASES_HEADERS})
   target_include_directories(${CURRENT_TEST_TARGET} PUBLIC "." "Include/")
   target_compile_definitions(${CURRENT_TEST_TARGET} PUBLIC 
     "TEST_CASE=1"
@@ -75,26 +75,46 @@ function(add_simple_test_case GALAXY_VERSION_NUMBER TEST_CASE_NAME)
 
   endif()
 
+  set(CURRENT_TEST_TARGET ${CURRENT_TEST_TARGET} PARENT_SCOPE)
 endfunction()
 
 set(GALAXY_DLL_VERSIONS_DIR "${CMAKE_SOURCE_DIR}/Source/DLLs")
 get_property(PROJECT_GALAXY_VERSION_NUMBER_LIST GLOBAL PROPERTY PROJECT_GALAXY_VERSION_NUMBER_LIST)
 
-file(GLOB test_cases "Source/TestCase_*.cxx")
-foreach(test_case_file ${test_cases})
-  get_filename_component(test_case ${test_case_file} NAME_WE)
-  string(REPLACE "TestCase_" "" test_case ${test_case})
+function(add_test_cases)
+  file(GLOB test_cases "Source/TestCase_*.cxx")
+  foreach(test_case_file ${test_cases})
+    get_filename_component(test_case ${test_case_file} NAME_WE)
+    string(REPLACE "TestCase_" "" test_case ${test_case})
+    
+    message("--- ${test_case}")
   
-  message("--- ${test_case}")
+    FOREACH(GALAXY_VERSION_NUMBER ${PROJECT_GALAXY_VERSION_NUMBER_LIST})
+      #set(TOTAL_PATH "${GALAXY_DLL_VERSIONS_DIR}/${GALAXY_VERSION_NUMBER}/${GALAXY_ARCH}")
+      #if(EXISTS "${TOTAL_PATH}/CMakeLists.txt")
+  
+      add_simple_test_case("${GALAXY_VERSION_NUMBER}" "${test_case}" "Source/TestCase_")
+  
+      #else()
+      #  message("---- !${GALAXY_DLL_VERSIONS_DIR}/${GALAXY_VERSION_NUMBER}/${GALAXY_ARCH}")
+      #endif()
+    ENDFOREACH()
+  endforeach()
+  
+  file(GLOB test_cases "Source-unet/TestCase_unet_*.cxx")
+  foreach(test_case_file ${test_cases})
+    get_filename_component(test_case ${test_case_file} NAME_WE)
+    string(REPLACE "TestCase_" "" test_case ${test_case})
+    
+    message("--- ${test_case}")
+  
+    FOREACH(GALAXY_VERSION_NUMBER ${PROJECT_GALAXY_VERSION_NUMBER_LIST})
+      add_simple_test_case("${GALAXY_VERSION_NUMBER}" "${test_case}"  "Source-unet/TestCase_")
+      target_link_libraries(${CURRENT_TEST_TARGET} PUBLIC 
+        unet-lib-${GALAXY_VERSION}
+      )
+    ENDFOREACH()
+  endforeach()
+endfunction()
 
-  FOREACH(GALAXY_VERSION_NUMBER ${PROJECT_GALAXY_VERSION_NUMBER_LIST})
-    #set(TOTAL_PATH "${GALAXY_DLL_VERSIONS_DIR}/${GALAXY_VERSION_NUMBER}/${GALAXY_ARCH}")
-    #if(EXISTS "${TOTAL_PATH}/CMakeLists.txt")
-
-    add_simple_test_case("${GALAXY_VERSION_NUMBER}" "${test_case}")
-
-    #else()
-    #  message("---- !${GALAXY_DLL_VERSIONS_DIR}/${GALAXY_VERSION_NUMBER}/${GALAXY_ARCH}")
-    #endif()
-  ENDFOREACH()
-endforeach()
+add_test_cases()
