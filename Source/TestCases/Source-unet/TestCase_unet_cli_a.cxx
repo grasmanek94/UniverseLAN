@@ -84,40 +84,40 @@ static bool g_galaxyEnabled = false;
 class TestCallbacks : public Unet::ICallbacks
 {
 public:
-	virtual void OnLogError(const std::string &str) override
+	virtual void OnLogError(const std::string& str) override
 	{
 		LOG_ERROR("%s", str.c_str());
 	}
 
-	virtual void OnLogWarn(const std::string &str) override
+	virtual void OnLogWarn(const std::string& str) override
 	{
 		LOG_WARN("%s", str.c_str());
 	}
 
-	virtual void OnLogInfo(const std::string &str) override
+	virtual void OnLogInfo(const std::string& str) override
 	{
 		LOG_INFO("%s", str.c_str());
 	}
 
-	virtual void OnLogDebug(const std::string &str) override
+	virtual void OnLogDebug(const std::string& str) override
 	{
 #if defined(DEBUG)
 		LOG_DEBUG("%s", str.c_str());
 #endif
 	}
 
-	virtual void OnLobbyCreated(const Unet::CreateLobbyResult &result) override
+	virtual void OnLobbyCreated(const Unet::CreateLobbyResult& result) override
 	{
 		if (result.Code != Unet::Result::OK) {
 			LOG_ERROR("Couldn't create lobby!");
 			return;
 		}
 
-		auto &info = result.CreatedLobby->GetInfo();
+		auto& info = result.CreatedLobby->GetInfo();
 		LOG_FROM_CALLBACK("Lobby created: \"%s\"", info.Name.c_str());
 	}
 
-	virtual void OnLobbyList(const Unet::LobbyListResult &result) override
+	virtual void OnLobbyList(const Unet::LobbyListResult& result) override
 	{
 		if (result.Code != Unet::Result::OK) {
 			LOG_ERROR("Couldn't get lobby list!");
@@ -128,15 +128,15 @@ public:
 
 		LOG_FROM_CALLBACK("%d lobbies: (%d filtered)", (int)result.Lobbies.size(), result.NumFiltered);
 		for (size_t i = 0; i < result.Lobbies.size(); i++) {
-			auto &lobbyInfo = result.Lobbies[i];
+			auto& lobbyInfo = result.Lobbies[i];
 			LOG_FROM_CALLBACK("  [%d] \"%s\" (max %d)", (int)i, lobbyInfo.Name.c_str(), lobbyInfo.MaxPlayers);
-			for (auto &entry : lobbyInfo.EntryPoints) {
+			for (auto& entry : lobbyInfo.EntryPoints) {
 				LOG_FROM_CALLBACK("    %s (0x%016" PRIx64 ")", Unet::GetServiceNameByType(entry.Service), entry.ID);
 			}
 		}
 	}
 
-	virtual void OnLobbyInfoFetched(const Unet::LobbyInfoFetchResult &result) override
+	virtual void OnLobbyInfoFetched(const Unet::LobbyInfoFetchResult& result) override
 	{
 		if (result.Code != Unet::Result::OK) {
 			LOG_ERROR("Couldn't fetch lobby info!");
@@ -156,18 +156,18 @@ public:
 		}
 	}
 
-	virtual void OnLobbyJoined(const Unet::LobbyJoinResult &result) override
+	virtual void OnLobbyJoined(const Unet::LobbyJoinResult& result) override
 	{
 		if (result.Code != Unet::Result::OK) {
 			LOG_ERROR("Couldn't join lobby!");
 			return;
 		}
 
-		auto &info = result.JoinedLobby->GetInfo();
+		auto& info = result.JoinedLobby->GetInfo();
 		LOG_FROM_CALLBACK("Joined lobby: \"%s\"", info.Name.c_str());
 	}
 
-	virtual void OnLobbyLeft(const Unet::LobbyLeftResult &result) override
+	virtual void OnLobbyLeft(const Unet::LobbyLeftResult& result) override
 	{
 		const char* reasonStr = "Undefined";
 		switch (result.Reason) {
@@ -178,7 +178,7 @@ public:
 		LOG_FROM_CALLBACK("Left lobby: %s", reasonStr);
 	}
 
-	virtual void OnLobbyNameChanged(const std::string &oldname, const std::string &newname) override
+	virtual void OnLobbyNameChanged(const std::string& oldname, const std::string& newname) override
 	{
 		LOG_FROM_CALLBACK("Lobby name changed: \"%s\" => \"%s\"", oldname.c_str(), newname.c_str());
 	}
@@ -198,28 +198,30 @@ public:
 		LOG_FROM_CALLBACK("Player left: %s", member->Name.c_str());
 	}
 
-	virtual void OnLobbyDataChanged(const std::string &name) override
+	virtual void OnLobbyDataChanged(const std::string& name) override
 	{
 		auto currentLobby = g_ctx->CurrentLobby();
 		auto value = currentLobby->GetData(name);
 		if (value == "") {
 			LOG_FROM_CALLBACK("Lobby data removed: \"%s\"", name.c_str());
-		} else {
+		}
+		else {
 			LOG_FROM_CALLBACK("Lobby data changed: \"%s\" => \"%s\"", name.c_str(), value.c_str());
 		}
 	}
 
-	virtual void OnLobbyMemberDataChanged(Unet::LobbyMember* member, const std::string &name) override
+	virtual void OnLobbyMemberDataChanged(Unet::LobbyMember* member, const std::string& name) override
 	{
 		auto value = member->GetData(name);
 		if (value == "") {
 			LOG_FROM_CALLBACK("Lobby member data removed: \"%s\"", name.c_str());
-		} else {
+		}
+		else {
 			LOG_FROM_CALLBACK("Lobby member data changed: \"%s\" => \"%s\"", name.c_str(), value.c_str());
 		}
 	}
 
-	virtual void OnLobbyMemberNameChanged(Unet::LobbyMember* member, const std::string &oldname) override
+	virtual void OnLobbyMemberNameChanged(Unet::LobbyMember* member, const std::string& oldname) override
 	{
 		LOG_FROM_CALLBACK("Lobby member changed their name: \"%s\" => \"%s\"", oldname.c_str(), member->Name.c_str());
 	}
@@ -229,7 +231,7 @@ public:
 		LOG_FROM_CALLBACK("%s added file \"%s\"", member->Name.c_str(), file->m_filename.c_str());
 	}
 
-	virtual void OnLobbyFileRemoved(Unet::LobbyMember* member, const std::string &filename) override
+	virtual void OnLobbyFileRemoved(Unet::LobbyMember* member, const std::string& filename) override
 	{
 		LOG_FROM_CALLBACK("%s removed file \"%s\"", member->Name.c_str(), filename.c_str());
 	}
@@ -275,7 +277,8 @@ public:
 	{
 		if (sender == nullptr) {
 			LOG_FROM_CALLBACK("> %s", text);
-		} else {
+		}
+		else {
 			LOG_FROM_CALLBACK("> %s: %s", sender->Name.c_str(), text);
 		}
 	}
@@ -286,7 +289,8 @@ static void RunCallbacks()
 	if (g_galaxyEnabled) {
 		try {
 			galaxy::api::ProcessData();
-		} catch (const galaxy::api::IError &error) {
+		}
+		catch (const galaxy::api::IError& error) {
 			LOG_ERROR("Failed to run Galaxy callbacks: %s", error.GetMsg());
 		}
 	}
@@ -298,7 +302,8 @@ static void RunCallbacks()
 		auto member = g_ctx->CurrentLobby()->GetMember(msg->m_peer);
 		if (member == nullptr) {
 			LOG_ERROR("Received message from a %s ID 0x%016" PRIx64, Unet::GetServiceNameByType(msg->m_peer.Service), msg->m_peer.ID);
-		} else {
+		}
+		else {
 			LOG_INFO("Received message on channel %d: 0x%X bytes from %s ID 0x%016" PRIx64 " (%s)", msg->m_channel, (uint32_t)msg->m_size, Unet::GetServiceNameByType(msg->m_peer.Service), msg->m_peer.ID, member->Name.c_str());
 		}
 	}
@@ -344,7 +349,8 @@ static void InitializeGalaxy()
 		auto credentials = USER_CREDENTIALS[GALAXY_LOGIN_ID];
 
 		GET_GALAXY_API(User())->SignInCredentials(credentials[0].data(), credentials[1].data());
-	} catch (const galaxy::api::IError &error) {
+	}
+	catch (const galaxy::api::IError& error) {
 		LOG_ERROR("Failed to initiailize Galaxy API: %s", error.GetMsg());
 	}
 
@@ -373,24 +379,25 @@ static bool IsKeyPressed()
 #endif
 }
 
-static void HandleCommand(const s2::string &line)
+static void HandleCommand(const s2::string& line)
 {
 	auto parse = line.commandlinesplit();
 
 	if (parse[0] == "") {
 		return;
 
-	} else if (parse[0] == "exit") {
+	}
+	else if (parse[0] == "exit") {
 		g_keepRunning = false;
 
-	} else if (parse[0] == "help") {
+	}
+	else if (parse[0] == "help") {
 		LOG_INFO("Available commands:");
 		LOG_INFO("  exit");
 		LOG_INFO("  help");
 		LOG_INFO("  run <filename>      - Runs commands from a file");
 		LOG_INFO("");
 		LOG_INFO("  enable <name> [...] - Enables a service by the given name, including optional parameters");
-		LOG_INFO("  primary <name>      - Changes the primary service");
 		LOG_INFO("  persona <name>      - Sets your persona name");
 		LOG_INFO("");
 		LOG_INFO("  status              - Prints current network status");
@@ -425,7 +432,8 @@ static void HandleCommand(const s2::string &line)
 		LOG_INFO("");
 		LOG_INFO("Or just hit Enter to run callbacks.");
 
-	} else if (parse[0] == "run" && parse.len() == 2) {
+	}
+	else if (parse[0] == "run" && parse.len() == 2) {
 		auto filename = parse[1];
 		FILE* fh = fopen(filename, "rb");
 		if (fh == nullptr) {
@@ -450,7 +458,8 @@ static void HandleCommand(const s2::string &line)
 
 		fclose(fh);
 
-	} else if (parse[0] == "enable" && parse.len() >= 2) {
+	}
+	else if (parse[0] == "enable" && parse.len() >= 2) {
 		auto serviceName = parse[1];
 		auto serviceType = Unet::GetServiceTypeByName(serviceName);
 
@@ -461,20 +470,13 @@ static void HandleCommand(const s2::string &line)
 				g_ctx->EnableService(Unet::ServiceType::Galaxy);
 			}
 		}
-	} else if (parse[0] == "primary" && parse.len() == 2) {
-		auto serviceName = parse[1];
-		auto serviceType = Unet::GetServiceTypeByName(serviceName);
-		if (serviceType == Unet::ServiceType::None) {
-			LOG_ERROR("Unable to find service by the name of '%s'", serviceName.c_str());
-		} else {
-			g_ctx->SetPrimaryService(serviceType);
-		}
-
-	} else if (parse[0] == "persona" && parse.len() == 2) {
+	}
+	else if (parse[0] == "persona" && parse.len() == 2) {
 		auto nameString = parse[1];
 		g_ctx->SetPersonaName(nameString.c_str());
 
-	} else if (parse[0] == "status") {
+	}
+	else if (parse[0] == "status") {
 		auto status = g_ctx->GetStatus();
 		const char* statusStr = "Undefined";
 		switch (status) {
@@ -493,8 +495,9 @@ static void HandleCommand(const s2::string &line)
 		auto currentLobby = g_ctx->CurrentLobby();
 		if (currentLobby == nullptr) {
 			LOG_INFO("  No lobby");
-		} else {
-			auto &lobbyInfo = currentLobby->GetInfo();
+		}
+		else {
+			auto& lobbyInfo = currentLobby->GetInfo();
 
 			LOG_INFO("  Lobby name: \"%s\"", lobbyInfo.Name.c_str());
 			LOG_INFO("  Lobby host: %s", lobbyInfo.IsHosting ? "true" : "false");
@@ -502,11 +505,11 @@ static void HandleCommand(const s2::string &line)
 			LOG_INFO("  Lobby Guid: %s", unetGuid.c_str());
 
 			LOG_INFO("  Entry points: %d", (int)lobbyInfo.EntryPoints.size());
-			for (auto &entry : lobbyInfo.EntryPoints) {
+			for (auto& entry : lobbyInfo.EntryPoints) {
 				LOG_INFO("    %s (0x%016" PRIx64 ")", Unet::GetServiceNameByType(entry.Service), entry.ID);
 			}
 
-			auto &members = currentLobby->GetMembers();
+			auto& members = currentLobby->GetMembers();
 			LOG_INFO("  Members: %d", (int)members.size());
 			for (auto member : members) {
 				auto memberGuid = member->UnetGuid.str();
@@ -517,7 +520,7 @@ static void HandleCommand(const s2::string &line)
 				LOG_INFO("      %d datas", (int)member->m_data.size());
 
 				LOG_INFO("      %d IDs:", (int)member->IDs.size());
-				for (auto &id : member->IDs) {
+				for (auto& id : member->IDs) {
 					LOG_INFO("        %s (0x%016" PRIx64 ")%s", Unet::GetServiceNameByType(id.Service), id.ID, member->UnetPrimaryService == id.Service ? " Primary" : "");
 				}
 
@@ -528,7 +531,8 @@ static void HandleCommand(const s2::string &line)
 			}
 		}
 
-	} else if (parse[0] == "wait") {
+	}
+	else if (parse[0] == "wait") {
 		LOG_INFO("Entering wait mode. Press any key to stop.");
 
 		while (true) {
@@ -545,7 +549,8 @@ static void HandleCommand(const s2::string &line)
 			}
 		}
 
-	} else if (parse[0] == "create") {
+	}
+	else if (parse[0] == "create") {
 		std::string name = "Unet Test Lobby";
 		if (parse.len() == 2) {
 			name = parse[1];
@@ -558,7 +563,8 @@ static void HandleCommand(const s2::string &line)
 			RunCallbacks();
 		}
 
-	} else if (parse[0] == "fetch" && parse.len() == 3) {
+	}
+	else if (parse[0] == "fetch" && parse.len() == 3) {
 		auto serviceName = parse[1];
 		auto serviceType = Unet::GetServiceTypeByName(serviceName);
 
@@ -570,11 +576,13 @@ static void HandleCommand(const s2::string &line)
 			LOG_ERROR("Unable to begin fetching lobby info.");
 		}
 
-	} else if (parse[0] == "list") {
+	}
+	else if (parse[0] == "list") {
 		Unet::LobbyListFilter filter;
 		g_ctx->GetLobbyList(filter);
 
-	} else if (parse[0] == "setname" && parse.len() == 2) {
+	}
+	else if (parse[0] == "setname" && parse.len() == 2) {
 		auto currentLobby = g_ctx->CurrentLobby();
 		if (currentLobby == nullptr) {
 			LOG_ERROR("Not in a lobby");
@@ -583,7 +591,8 @@ static void HandleCommand(const s2::string &line)
 
 		currentLobby->SetName(parse[1].c_str());
 
-	} else if (parse[0] == "data") {
+	}
+	else if (parse[0] == "data") {
 		std::vector<Unet::LobbyData> lobbyData;
 
 		if (parse.len() == 2) {
@@ -598,10 +607,11 @@ static void HandleCommand(const s2::string &line)
 				return;
 			}
 
-			auto &lobbyInfo = g_lastLobbyList.Lobbies[num];
+			auto& lobbyInfo = g_lastLobbyList.Lobbies[num];
 			lobbyData = g_lastLobbyList.GetLobbyData(lobbyInfo);
 
-		} else {
+		}
+		else {
 			auto currentLobby = g_ctx->CurrentLobby();
 			if (currentLobby == nullptr) {
 				LOG_ERROR("Not in a lobby. Use \"data <num>\" instead.");
@@ -612,11 +622,12 @@ static void HandleCommand(const s2::string &line)
 		}
 
 		LOG_INFO("%d keys:", (int)lobbyData.size());
-		for (auto &data : lobbyData) {
+		for (auto& data : lobbyData) {
 			LOG_INFO("  \"%s\" = \"%s\"", data.Name.c_str(), data.Value.c_str());
 		}
 
-	} else if (parse[0] == "memberdata") {
+	}
+	else if (parse[0] == "memberdata") {
 		auto currentLobby = g_ctx->CurrentLobby();
 		if (currentLobby == nullptr) {
 			LOG_ERROR("Not in a lobby.");
@@ -638,11 +649,12 @@ static void HandleCommand(const s2::string &line)
 		}
 
 		LOG_INFO("%d keys:", (int)member->m_data.size());
-		for (auto &data : member->m_data) {
+		for (auto& data : member->m_data) {
 			LOG_INFO("  \"%s\" = \"%s\"", data.Name.c_str(), data.Value.c_str());
 		}
 
-	} else if (parse[0] == "setdata" && parse.len() == 3) {
+	}
+	else if (parse[0] == "setdata" && parse.len() == 3) {
 		auto currentLobby = g_ctx->CurrentLobby();
 		if (currentLobby == nullptr) {
 			LOG_ERROR("Not in a lobby.");
@@ -659,7 +671,8 @@ static void HandleCommand(const s2::string &line)
 
 		currentLobby->SetData(name.c_str(), value.c_str());
 
-	} else if (parse[0] == "remdata" && parse.len() == 2) {
+	}
+	else if (parse[0] == "remdata" && parse.len() == 2) {
 		auto currentLobby = g_ctx->CurrentLobby();
 		if (currentLobby == nullptr) {
 			LOG_ERROR("Not in a lobby.");
@@ -675,7 +688,8 @@ static void HandleCommand(const s2::string &line)
 
 		currentLobby->RemoveData(name.c_str());
 
-	} else if (parse[0] == "setmemberdata" && parse.len() == 4) {
+	}
+	else if (parse[0] == "setmemberdata" && parse.len() == 4) {
 		auto currentLobby = g_ctx->CurrentLobby();
 		if (currentLobby == nullptr) {
 			LOG_ERROR("Not in a lobby.");
@@ -699,7 +713,8 @@ static void HandleCommand(const s2::string &line)
 
 		member->SetData(name.c_str(), value.c_str());
 
-	} else if (parse[0] == "remmemberdata" && parse.len() == 3) {
+	}
+	else if (parse[0] == "remmemberdata" && parse.len() == 3) {
 		auto currentLobby = g_ctx->CurrentLobby();
 		if (currentLobby == nullptr) {
 			LOG_ERROR("Not in a lobby.");
@@ -722,7 +737,8 @@ static void HandleCommand(const s2::string &line)
 
 		member->RemoveData(name.c_str());
 
-	} else if (parse[0] == "addfile" && parse.len() == 2) {
+	}
+	else if (parse[0] == "addfile" && parse.len() == 2) {
 		if (g_ctx->CurrentLobby() == nullptr) {
 			LOG_ERROR("Not in a lobby.");
 			return;
@@ -733,7 +749,8 @@ static void HandleCommand(const s2::string &line)
 
 		LOG_INFO("Added file \"%s\"", filename.c_str());
 
-	} else if (parse[0] == "delfile" && parse.len() == 2) {
+	}
+	else if (parse[0] == "delfile" && parse.len() == 2) {
 		if (g_ctx->CurrentLobby() == nullptr) {
 			LOG_ERROR("Not in a lobby.");
 			return;
@@ -744,7 +761,8 @@ static void HandleCommand(const s2::string &line)
 
 		LOG_INFO("Removed file \"%s\"", filename.c_str());
 
-	} else if (parse[0] == "download" && parse.len() == 3) {
+	}
+	else if (parse[0] == "download" && parse.len() == 3) {
 		auto currentLobby = g_ctx->CurrentLobby();
 		if (currentLobby == nullptr) {
 			LOG_ERROR("Not in a lobby.");
@@ -776,11 +794,13 @@ static void HandleCommand(const s2::string &line)
 
 		if (file->IsValid()) {
 			LOG_INFO("File received and valid!");
-		} else {
+		}
+		else {
 			LOG_ERROR("File received, but it's not valid!");
 		}
 
-	} else if (parse[0] == "join" && parse.len() == 2) {
+	}
+	else if (parse[0] == "join" && parse.len() == 2) {
 		if (g_lastLobbyList.Code != Unet::Result::OK) {
 			LOG_ERROR("Previous lobby list request failed! Use the \"list\" command again.");
 			return;
@@ -801,7 +821,8 @@ static void HandleCommand(const s2::string &line)
 			RunCallbacks();
 		}
 
-	} else if (parse[0] == "joinleave" && parse.len() == 2) {
+	}
+	else if (parse[0] == "joinleave" && parse.len() == 2) {
 		if (g_lastLobbyList.Code != Unet::Result::OK) {
 			LOG_ERROR("Previous lobby list request failed! Use the \"list\" command again.");
 			return;
@@ -818,7 +839,8 @@ static void HandleCommand(const s2::string &line)
 		LOG_INFO("Join-leaving \"%s\"", lobbyInfo.Name.c_str());
 		g_ctx->JoinLobby(lobbyInfo);
 		g_ctx->LeaveLobby();
-	} else if (parse[0] == "leave") {
+	}
+	else if (parse[0] == "leave") {
 		g_ctx->LeaveLobby();
 
 		LOG_INFO("Leaving lobby");
@@ -827,7 +849,8 @@ static void HandleCommand(const s2::string &line)
 			RunCallbacks();
 		}
 
-	} else if (parse[0] == "outage" && parse.len() == 2) {
+	}
+	else if (parse[0] == "outage" && parse.len() == 2) {
 		s2::string strService = parse[1];
 		Unet::ServiceType service = Unet::GetServiceTypeByName(strService);
 
@@ -838,7 +861,8 @@ static void HandleCommand(const s2::string &line)
 
 		g_ctx->SimulateServiceOutage(service);
 
-	} else if (parse[0] == "kick" && parse.len() == 2) {
+	}
+	else if (parse[0] == "kick" && parse.len() == 2) {
 		int peer = atoi(parse[1]);
 		if (peer == g_ctx->GetLocalPeer()) {
 			LOG_ERROR("You can't kick yourself!");
@@ -859,10 +883,12 @@ static void HandleCommand(const s2::string &line)
 
 		g_ctx->KickMember(member);
 
-	} else if (parse[0] == "chat" && parse.len() == 2) {
+	}
+	else if (parse[0] == "chat" && parse.len() == 2) {
 		g_ctx->SendChat(parse[1]);
 
-	} else if (parse[0] == "send" && parse.len() == 3) {
+	}
+	else if (parse[0] == "send" && parse.len() == 3) {
 		int peer = atoi(parse[1]);
 		int num = atoi(parse[2]);
 
@@ -889,7 +915,8 @@ static void HandleCommand(const s2::string &line)
 
 		LOG_INFO("0x%X reliable bytes sent to peer %d: \"%s\"!", num, member->UnetPeer, member->Name.c_str());
 
-	} else if (parse[0] == "sendu" && parse.len() == 3) {
+	}
+	else if (parse[0] == "sendu" && parse.len() == 3) {
 		int peer = atoi(parse[1]);
 		int num = atoi(parse[2]);
 
@@ -916,7 +943,8 @@ static void HandleCommand(const s2::string &line)
 			LOG_INFO("0x%X unreliable bytes sent to peer %d: \"%s\"!", num, member->UnetPeer, member->Name.c_str());
 		}
 
-	} else if (parse[0] == "stress" && parse.len() == 3) {
+	}
+	else if (parse[0] == "stress" && parse.len() == 3) {
 		int peer = atoi(parse[1]);
 		int sec = atoi(parse[2]);
 
@@ -960,7 +988,8 @@ static void HandleCommand(const s2::string &line)
 			if (rand() % 100 > 70) {
 				// 30% chance to be a medium packet
 				maxSize = maxMediumSize;
-			} else if (rand() % 100 > 90) {
+			}
+			else if (rand() % 100 > 90) {
 				// 10% chance to be a big packet
 				maxSize = maxBigSize;
 			}
@@ -982,7 +1011,8 @@ static void HandleCommand(const s2::string &line)
 
 		free(randomBuffer);
 
-	} else {
+	}
+	else {
 		LOG_ERROR("Unknown command \"%s\"! Try \"help\".", parse[0].c_str());
 	}
 }
@@ -1018,7 +1048,7 @@ static s2::string ReadLine()
 
 		auto currentLobby = g_ctx->CurrentLobby();
 		if (currentLobby != nullptr) {
-			auto &lobbyInfo = currentLobby->GetInfo();
+			auto& lobbyInfo = currentLobby->GetInfo();
 
 			if (lobbyInfo.IsHosting) {
 				termcolor::red();
@@ -1030,7 +1060,8 @@ static s2::string ReadLine()
 			termcolor::green();
 			std::cout << lobbyInfo.Name;
 
-		} else {
+		}
+		else {
 			termcolor::red();
 			std::cout << "No lobby!";
 		}
@@ -1059,27 +1090,18 @@ int main(int argc, const char* argv[])
 
 	for (int i = 1; i < argc; i++) {
 		s2::string arg = argv[i];
-
-		if (arg == "--galaxy") {
-			InitializeGalaxy();
-
-			if (g_galaxyEnabled) {
-				g_ctx->EnableService(Unet::ServiceType::Galaxy);
-			}
-			continue;
-		}
-
-		if (arg == "--primary" && i + 1 < argc) {
-			g_ctx->SetPrimaryService(Unet::GetServiceTypeByName(argv[++i]));
-			continue;
-		}
-
 		delayedCommands.emplace_back(arg);
+	}
+
+	InitializeGalaxy();
+
+	if (g_galaxyEnabled) {
+		g_ctx->EnableService(Unet::ServiceType::Galaxy);
 	}
 
 	RunCallbacks();
 
-	for (auto &cmd : delayedCommands) {
+	for (auto& cmd : delayedCommands) {
 		HandleCommand(cmd);
 		printf("\n");
 	}
