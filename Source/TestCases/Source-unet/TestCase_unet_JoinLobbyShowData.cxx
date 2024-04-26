@@ -1,3 +1,5 @@
+#include <Unet.h>
+
 #include <TestCaseClientDetails.hxx>
 
 #if GALAXY_BUILD_FEATURE_HAS_IGALAXY
@@ -23,7 +25,120 @@ bool performed_init = false;
 bool user_data_received = true;
 bool lobby_joined = false;
 std::unique_ptr<tracer::Trace> trace{ nullptr };
+std::unique_ptr<Unet::IContext> unet_ctx{ nullptr };
 DelayRunner delay_runner{};
+
+
+class UNET : public Unet::ICallbacks
+{
+	virtual void OnLogError(const std::string& str) {
+		tracer::Trace::write_all(std::format(
+			"[UNET] {}: {}",
+			__FUNCTION__,
+			str
+		));
+	}
+
+	virtual void OnLogWarn(const std::string& str) {
+		tracer::Trace::write_all(std::format(
+			"[UNET] {}: {}",
+			__FUNCTION__,
+			str
+		));
+	}
+
+	virtual void OnLogInfo(const std::string& str) {
+		tracer::Trace::write_all(std::format(
+			"[UNET] {}: {}",
+			__FUNCTION__,
+			str
+		));
+	}
+
+	virtual void OnLogDebug(const std::string& str) {
+		tracer::Trace::write_all(std::format(
+			"[UNET] {}: {}",
+			__FUNCTION__,
+			str
+		));
+	}
+
+	// Callbacks for results
+	virtual void OnLobbyCreated(const Unet::CreateLobbyResult& result) {}
+	virtual void OnLobbyList(const Unet::LobbyListResult& result) {
+		
+		tracer::Trace::write_all(
+			std::format(
+				"[UNET] {} lobbyCount: {} result: {}",
+				__FUNCTION__,
+				result.Lobbies.size(), magic_enum::enum_name(result.Code)
+			));
+
+		
+		for (const auto& lobby : result.Lobbies) {
+			tracer::Trace::write_all(
+				std::format(
+					"[UNET] lobby_id: {}",
+					lobby.UnetGuid.str()
+				));
+
+			//delay_runner.Add([=]() {
+			//	matchmaking_ptr->RequestLobbyData(lobby_id);
+			//	});
+		}
+	}
+
+	virtual void OnLobbyInfoFetched(const Unet::LobbyInfoFetchResult& result) {}
+	virtual void OnLobbyJoined(const Unet::LobbyJoinResult& result) {}
+	virtual void OnLobbyLeft(const Unet::LobbyLeftResult& result) {}
+
+	// Lobby change events
+	virtual void OnLobbyNameChanged(const std::string& oldname, const std::string& newname) {}
+	virtual void OnLobbyMaxPlayersChanged(int oldamount, int newamount) {}
+
+	// Lobby member events
+	virtual void OnLobbyPlayerJoined(Unet::LobbyMember* member) {}
+	virtual void OnLobbyPlayerLeft(Unet::LobbyMember* member) {}
+
+	// Lobby data events
+	virtual void OnLobbyDataChanged(const std::string& name) {
+		tracer::Trace::write_all(
+			std::format(
+				"[UNET] key: {} value: {}",
+				name, "??"
+			));
+
+		//if (result.length() > 0 && !lobby_joined) {
+		//	lobby_joined = true;
+		//	tracer::Trace::write_all(
+		//		std::format(
+		//			"Join: {}",
+		//			lobbyID
+		//		));
+		//	matchmaking_ptr->JoinLobby(lobbyID);
+		//}
+	}
+	virtual void OnLobbyMemberDataChanged(Unet::LobbyMember* member, const std::string& name) {}
+
+	// Lobby member info events
+	virtual void OnLobbyMemberNameChanged(Unet::LobbyMember* member, const std::string& oldname) {}
+
+	// Lobby file events
+	virtual void OnLobbyFileAdded(Unet::LobbyMember* member, const Unet::LobbyFile* file) {}
+	virtual void OnLobbyFileRemoved(Unet::LobbyMember* member, const std::string& filename) {}
+	virtual void OnLobbyFileRequested(Unet::LobbyMember* receiver, const Unet::LobbyFile* file) {}
+
+	// Lobby file data sending
+	virtual void OnLobbyFileDataSendProgress(const Unet::OutgoingFileTransfer& transfer) {}
+	virtual void OnLobbyFileDataSendFinished(const Unet::OutgoingFileTransfer& transfer) {}
+
+	// Lobby file data receiving
+	virtual void OnLobbyFileDataReceiveProgress(Unet::LobbyMember* sender, const Unet::LobbyFile* file) {}
+	virtual void OnLobbyFileDataReceiveFinished(Unet::LobbyMember* sender, const Unet::LobbyFile* file, bool isValid) {}
+
+	// Lobby chat
+	virtual void OnLobbyChat(Unet::LobbyMember* sender, const char* text) {}
+};
 
 void OnLobbyList(uint32_t lobbyCount, LobbyListResult result) {
 	auto matchmaking_ptr = GET_GALAXY_API(Matchmaking());
@@ -43,9 +158,9 @@ void OnLobbyList(uint32_t lobbyCount, LobbyListResult result) {
 				i, lobby_id
 			));
 
-		delay_runner.Add([=]() {
-			matchmaking_ptr->RequestLobbyData(lobby_id);
-		});
+		//delay_runner.Add([=]() {
+		//	matchmaking_ptr->RequestLobbyData(lobby_id);
+		//});
 	}
 }
 
@@ -70,15 +185,15 @@ void OnLobbyDataRetrieveSuccess(const GalaxyID& lobbyID) {
 			"timer", result
 		));
 
-	if (result.length() > 0 && !lobby_joined) {
-		lobby_joined = true;
-		tracer::Trace::write_all(
-			std::format(
-				"Join: {}",
-				lobbyID
-			));
-		matchmaking_ptr->JoinLobby(lobbyID);
-	}
+	//if (result.length() > 0 && !lobby_joined) {
+	//	lobby_joined = true;
+	//	tracer::Trace::write_all(
+	//		std::format(
+	//			"Join: {}",
+	//			lobbyID
+	//		));
+	//	matchmaking_ptr->JoinLobby(lobbyID);
+	//}
 }
 
 void OnLobbyDataUpdated(const GalaxyID& lobbyID, const GalaxyID& memberID) {
@@ -118,9 +233,8 @@ void try_init() {
 	performed_init = true;
 
 	delay_runner.Add([&]() {
-		auto matchmaking_ptr = GET_GALAXY_API(Matchmaking());
-
-		matchmaking_ptr->RequestLobbyList(true);
+		Unet::LobbyListFilter filter{};
+		unet_ctx->GetLobbyList(filter);
 	});
 }
 
@@ -294,14 +408,32 @@ int main()
 	OverlayStateChangeListenerImplGlobal overlaystatechangelistener{};
 #endif
 
+	// ... initialize Steam/Galaxy/Enet here ...
 	auto credentials = USER_CREDENTIALS[1];
 
 	GET_GALAXY_API(User())->SignInCredentials(credentials[0].data(), credentials[1].data());
 	bool sub_init_done = false;
 
+	// Create the Unet context
+	unet_ctx = std::make_unique<Unet::IContext>(Unet::CreateContext());
+
+	// Prepare context callbacks
+	unet_ctx->SetCallbacks(new UNET);
+
+	// Initialize the services we'll be using (the first EnableService call will be the "primary" service)
+	unet_ctx->EnableService(Unet::ServiceType::Galaxy);
+
+
+	// Create a lobby
+	unet_ctx->CreateLobby(Unet::LobbyPrivacy::Public, 4, "whatever room");
+
 	while (true)
 	{
 		GET_GALAXY_API_AS_IS(ProcessData());
+
+		// Run callbacks and keep the context updated
+		unet_ctx->RunCallbacks();
+
 		if (performed_init && !sub_init_done) {
 			sub_init_done = true;
 
@@ -313,6 +445,9 @@ int main()
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
+
+	// Leave the lobby if we're still in it
+	//unet_ctx->LeaveLobby();
 
 	return 0;
 }
