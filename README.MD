@@ -77,7 +77,13 @@ Debug (tracing) files can be found in `<Configuration Files Directory>/tracing/<
 ## Linux
 - Requires GCC 13 or newer.  
 - Requires libtbb to be present (libtbb:i386 on 64-bit systems when compiling for x86)  
-  
+   
+   
+# Help! My game and or GOG Galaxy version my game uses is not supported?
+Please [create an issue](https://github.com/grasmanek94/UniverseLAN/issues/new) with the name of the game, game version, and if known the GOG Galaxy SDK version or `Galaxy.dll` / `Galaxy64.dll` sha2 or md5 hash.  
+For games I don't own I need other people to test UniverseLAN development builds.  
+Another option would be to gift the game to people working on UniverseLAN project.  
+
 # List / status of games
 
 :white_check_mark: (N) - Players can play together, tested with N players [(2) would mean 2 clients].  
@@ -87,7 +93,6 @@ Debug (tracing) files can be found in `<Configuration Files Directory>/tracing/<
 :question: - Can't acquire the correct GOG Galaxy SDK version.  
 :left_right_arrow: - Game supports direct connect, LAN or free multiplayer, and as such does not need UniverseLAN.  
 :large_orange_diamond: - Worked before, some commit has broken this game. To be investigated.  
-
 
 | Game       | Status                | Tested GOG Galaxy SDK Version | Notes |
 | :--------- | :-------:             | :---------: | :---------: |
