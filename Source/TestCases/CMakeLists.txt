@@ -9,7 +9,7 @@ message("-- Adding tests...")
 include(credentials.cmake)
 
 function(add_simple_test_case GALAXY_VERSION_NUMBER TEST_CASE_NAME PREFIX)
-  set(GALAXY_VERSION "${GALAXY_ARCH}-${GALAXY_VERSION_NUMBER}" PARENT_SCOPE)
+  set(GALAXY_VERSION "${GALAXY_ARCH}-${GALAXY_VERSION_NUMBER}")
 
   set(ARCH_ADDITION ${GALAXY_ARCH})
   string(REPLACE "x64" "64" ARCH_ADDITION ${ARCH_ADDITION})
