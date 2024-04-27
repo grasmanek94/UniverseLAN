@@ -268,6 +268,21 @@ namespace universelan::client {
 		virtual void SignInEpic(const char* epicAccessToken, const char* epicUsername, IAuthListener* const listener = NULL) override;
 #endif
 
+#if GALAXY_BUILD_FEATURE_IUSER_UWP_TO_XBOX_RENAME
+		/**
+		 * Authenticates the Galaxy Peer based on XBOX GDK credentials.
+		 *
+		 * This call is asynchronous. Responses come to the IAuthListener
+		 * (for all GlobalAuthListener-derived and optional listener passed as argument).
+		 *
+		 * @remark Information about being signed in or signed out also comes to
+		 * the IOperationalStateChangeListener.
+		 *
+		 * @param [in] xboxID The XBOX user ID.
+		 * @param [in] listener The listener for specific operation.
+		 */
+		virtual void SignInXbox(uint64_t xboxID, IAuthListener* const listener = NULL) override;
+#else
 		/**
 		 * Authenticates the Galaxy Peer based on Windows Store authentication
 		 * in Universal Windows Platform application.
@@ -281,6 +296,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		*/
 		virtual void SignInUWP(IAuthListener* const listener = NULL) override;
+#endif
 
 		/**
 		 * Authenticates the Galaxy Peer based on PS4 credentials.

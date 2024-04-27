@@ -153,11 +153,19 @@ namespace universelan::client {
 	}
 #endif
 
+#if GALAXY_BUILD_FEATURE_IUSER_UWP_TO_XBOX_RENAME
+	void UserImpl::SignInXbox(uint64_t xboxID, IAuthListener* const listener) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
+
+		SignIn(listener);
+	}
+#else
 	void UserImpl::SignInUWP(IAuthListener* const listener) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		SignIn(listener);
 	}
+#endif
 
 	void UserImpl::SignInPS4(const char* ps4ClientID, IAuthListener* const listener) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
