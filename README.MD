@@ -131,6 +131,9 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Roboquest | :x: | 1.148.3 | Probably does not use GOG Galaxy for networking. |
 | Northgard | :x:  | 1.139.2 | Still thinks the game is offline, custom multiplayer? | 
 | Tropico 5 | :x:  | 1.68.0 | Game uses an external service for multiplayer? | 
+| Saints Row IV - Re-Elected | :x:  | 1.148.3 | Game uses Epic Online Services for multiplayer probably (stuck after "do you want to sign in?") | 
+
+
 
 # Notice
 I'm not affiliated in any way with GOG or CD Projekt RED.  
