@@ -250,6 +250,7 @@ namespace universelan::client {
 			&IFriendInvitationListRetrieveListener::OnFriendInvitationListRetrieveSuccess);
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ISENTFRIENDINVITATIONLISTRETRIEVELISTENER
 	void FriendsImpl::RequestSentFriendInvitationList(
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 		ISentFriendInvitationListRetrieveListener* const listener
@@ -263,6 +264,7 @@ namespace universelan::client {
 #endif
 			&ISentFriendInvitationListRetrieveListener::OnSentFriendInvitationListRetrieveSuccess);
 	}
+#endif
 
 	uint32_t FriendsImpl::GetFriendInvitationCount() {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };

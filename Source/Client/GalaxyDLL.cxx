@@ -192,11 +192,11 @@ namespace galaxy::api
 	{
 	public:
 		GalaxyImpl() {
-			Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
+			//Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 		}
 
 		virtual ~GalaxyImpl() {
-			Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
+			//Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 		}
 
 #if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
@@ -285,6 +285,12 @@ namespace galaxy::api
 		}
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
+		virtual IChat* GetChat() const override {
+			return universelan::client::Chat();
+		}
+#endif
+
 		virtual IListenerRegistrar* GetListenerRegistrar() const override {
 			return universelan::client::ListenerRegistrar();
 		}
@@ -305,11 +311,11 @@ namespace galaxy::api
 	class ErrorManager : public IErrorManager {
 	public:
 		virtual ~ErrorManager() override {
-			Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
+			//Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 		}
 
 		ErrorManager() {
-			Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
+			//Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 		}
 
 		virtual api::IError* GetLastError() override {
@@ -322,7 +328,7 @@ namespace galaxy::api
 
 	IGalaxy* GalaxyFactory::GetInstance() {
 		if (instance == nullptr) {
-			Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
+			//Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
 			instance = new GalaxyImpl();
 		}
@@ -332,7 +338,7 @@ namespace galaxy::api
 
 	IErrorManager* GalaxyFactory::GetErrorManager() {
 		if (errorManager == nullptr) {
-			Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
+			//Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
 			errorManager = new ErrorManager();
 		}
@@ -342,7 +348,7 @@ namespace galaxy::api
 
 	void GalaxyFactory::ResetInstance() {
 		if (instance != nullptr) {
-			Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
+			//Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
 			delete instance;
 			instance = nullptr;
@@ -351,7 +357,7 @@ namespace galaxy::api
 
 	IGalaxy* GalaxyFactory::CreateInstance() {
 		if (instance == nullptr) {
-			Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
+			//Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
 			instance = new GalaxyImpl();
 		}

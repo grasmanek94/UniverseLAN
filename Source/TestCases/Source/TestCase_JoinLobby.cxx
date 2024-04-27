@@ -25,7 +25,13 @@ bool lobby_joined = false;
 std::unique_ptr<tracer::Trace> trace{ nullptr };
 DelayRunner delay_runner{};
 
-void OnLobbyList(uint32_t lobbyCount, LobbyListResult result) {
+void OnLobbyList(uint32_t lobbyCount
+#if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LIST_RESULT
+	, LobbyListResult result
+#else
+	, bool ioFailure
+#endif
+) {
 	auto matchmaking_ptr = GET_GALAXY_API(Matchmaking());
 
 	if (!lobbyCount) {

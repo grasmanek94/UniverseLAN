@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 function(define_unet_library GALAXY_VERSION GALAXY_VERSION_NUMBER GALAXY_ARCH)
-  #message("-- define_unet_library Version: ${GALAXY_VERSION}")
+  message("-- define_unet_library Version: ${GALAXY_VERSION}")
 
   add_library(unet-lib-${GALAXY_VERSION} 
     "${CMAKE_SOURCE_DIR}/Source/Vendor/unet/src/Context.cpp"
@@ -65,7 +65,7 @@ function(define_unet_library GALAXY_VERSION GALAXY_VERSION_NUMBER GALAXY_ARCH)
   endif()
 
   set_target_properties(unet-lib-${GALAXY_VERSION} PROPERTIES 
-    OUTPUT_NAME "unet-lib-${GALAXY_ARCH}"
+    OUTPUT_NAME "unet-lib${GALAXY_ARCH}"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/test/${GALAXY_VERSION_NUMBER}/${UNIVERSELAN_EXTRA_BIN_FOLDER}"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/test/${GALAXY_VERSION_NUMBER}/${UNIVERSELAN_EXTRA_BIN_FOLDER}"
   )

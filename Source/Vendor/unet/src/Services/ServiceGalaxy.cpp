@@ -2,13 +2,24 @@
 #include <Unet/Services/ServiceGalaxy.h>
 #include <Unet/LobbyPacket.h>
 
-void Unet::LobbyListListener::OnLobbyList(uint32_t lobbyCount, galaxy::api::LobbyListResult result)
+void Unet::LobbyListListener::OnLobbyList(uint32_t lobbyCount
+#if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LIST_RESULT
+	, galaxy::api::LobbyListResult result
+#else
+	, bool result
+#endif
+)
 {
 	m_self->m_ctx->GetCallbacks()->OnLogDebug(strPrintF("[Galaxy] Lobby list received (%d)", (int)lobbyCount));
 
 	m_listDataFetch.clear();
 
-	if (result != galaxy::api::LOBBY_LIST_RESULT_SUCCESS) {
+#if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LIST_RESULT
+	if (result != galaxy::api::LOBBY_LIST_RESULT_SUCCESS)
+#else
+	if (result)
+#endif
+	{
 		m_self->m_requestLobbyList->Code = Result::Error;
 		m_self->m_ctx->GetCallbacks()->OnLogDebug(strPrintF("[Galaxy] Couldn't get lobby list due to error %d", (int)result));
 		return;
@@ -26,9 +37,14 @@ void Unet::LobbyListListener::OnLobbyList(uint32_t lobbyCount, galaxy::api::Lobb
 		}
 
 		try {
-			galaxy::api::Matchmaking()->RequestLobbyData(lobbyId, this);
+			galaxy::api::Matchmaking()->RequestLobbyData(lobbyId
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
+				, this
+#endif
+			);
 			m_listDataFetch.emplace_back(lobbyId);
-		} catch (const galaxy::api::IError &error) {
+		}
+		catch (const galaxy::api::IError& error) {
 			m_self->m_ctx->GetCallbacks()->OnLogDebug(strPrintF("[Galaxy] Couldn't get lobby data: %s", error.GetMsg()));
 		}
 	}
@@ -100,7 +116,7 @@ void Unet::ServiceGalaxy::SimulateOutage()
 		return;
 	}
 
-	auto &lobbyInfo = lobby->GetInfo();
+	auto& lobbyInfo = lobby->GetInfo();
 	auto entryPoint = lobbyInfo.GetEntryPoint(Unet::ServiceType::Galaxy);
 	if (entryPoint == nullptr) {
 		return;
@@ -108,7 +124,8 @@ void Unet::ServiceGalaxy::SimulateOutage()
 
 	try {
 		galaxy::api::Matchmaking()->LeaveLobby(entryPoint->ID);
-	} catch (const galaxy::api::IError &error) {
+	}
+	catch (const galaxy::api::IError& error) {
 		m_ctx->GetCallbacks()->OnLogError(strPrintF("[Galaxy] Failed to simulate outage: %s", error.GetMsg()));
 	}
 }
@@ -144,14 +161,19 @@ void Unet::ServiceGalaxy::CreateLobby(LobbyPrivacy privacy, int maxPlayers)
 	m_requestLobbyCreated = m_ctx->m_callbackCreateLobby.AddServiceRequest(this);
 
 	try {
-		galaxy::api::Matchmaking()->CreateLobby(type, maxPlayers, true, galaxy::api::LOBBY_TOPOLOGY_TYPE_FCM, this);
-	} catch (const galaxy::api::IError &error) {
+		galaxy::api::Matchmaking()->CreateLobby(type, maxPlayers, true, galaxy::api::LOBBY_TOPOLOGY_TYPE_FCM
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
+			, this
+#endif
+		);
+	}
+	catch (const galaxy::api::IError& error) {
 		m_requestLobbyCreated->Code = Result::Error;
 		m_ctx->GetCallbacks()->OnLogDebug(strPrintF("[Galaxy] Failed to create lobby: %s", error.GetMsg()));
 	}
 }
 
-void Unet::ServiceGalaxy::SetLobbyPrivacy(const ServiceID &lobbyId, LobbyPrivacy privacy)
+void Unet::ServiceGalaxy::SetLobbyPrivacy(const ServiceID& lobbyId, LobbyPrivacy privacy)
 {
 	galaxy::api::LobbyType type = galaxy::api::LOBBY_TYPE_PUBLIC;
 	switch (privacy) {
@@ -162,17 +184,19 @@ void Unet::ServiceGalaxy::SetLobbyPrivacy(const ServiceID &lobbyId, LobbyPrivacy
 	assert(lobbyId.Service == ServiceType::Galaxy);
 	try {
 		galaxy::api::Matchmaking()->SetLobbyType(lobbyId.ID, type);
-	} catch (const galaxy::api::IError &error) {
+	}
+	catch (const galaxy::api::IError& error) {
 		m_ctx->GetCallbacks()->OnLogDebug(strPrintF("[Galaxy] Failed to set lobby privacy: %s", error.GetMsg()));
 	}
 }
 
-void Unet::ServiceGalaxy::SetLobbyJoinable(const ServiceID &lobbyId, bool joinable)
+void Unet::ServiceGalaxy::SetLobbyJoinable(const ServiceID& lobbyId, bool joinable)
 {
 	assert(lobbyId.Service == ServiceType::Galaxy);
 	try {
 		galaxy::api::Matchmaking()->SetLobbyJoinable(lobbyId.ID, joinable);
-	} catch (const galaxy::api::IError &error) {
+	}
+	catch (const galaxy::api::IError& error) {
 		m_ctx->GetCallbacks()->OnLogDebug(strPrintF("[Galaxy] Failed to make lobby joinable: %s", error.GetMsg()));
 	}
 }
@@ -182,36 +206,51 @@ void Unet::ServiceGalaxy::GetLobbyList()
 	m_requestLobbyList = m_ctx->m_callbackLobbyList.AddServiceRequest(this);
 
 	try {
-		galaxy::api::Matchmaking()->RequestLobbyList(false, &m_lobbyListListener);
-	} catch (const galaxy::api::IError &error) {
+		galaxy::api::Matchmaking()->RequestLobbyList(false
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
+			, & m_lobbyListListener
+#endif
+		);
+	}
+	catch (const galaxy::api::IError& error) {
 		m_requestLobbyList->Code = Result::Error;
 		m_ctx->GetCallbacks()->OnLogDebug(strPrintF("[Galaxy] Failed to list lobbies: %s", error.GetMsg()));
 	}
 }
 
-bool Unet::ServiceGalaxy::FetchLobbyInfo(const ServiceID &id)
+bool Unet::ServiceGalaxy::FetchLobbyInfo(const ServiceID& id)
 {
 	assert(id.Service == ServiceType::Galaxy);
 
 	try {
-		galaxy::api::Matchmaking()->RequestLobbyData(id.ID, this);
+		galaxy::api::Matchmaking()->RequestLobbyData(id.ID
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
+			, this
+#endif
+		);
 		m_dataFetch.emplace_back(id.ID);
 		return true;
-	} catch (const galaxy::api::IError &error) {
+	}
+	catch (const galaxy::api::IError& error) {
 		m_ctx->GetCallbacks()->OnLogDebug(strPrintF("[Galaxy] Failed to fetch lobby info: %s", error.GetMsg()));
 		return false;
 	}
 }
 
-void Unet::ServiceGalaxy::JoinLobby(const ServiceID &id)
+void Unet::ServiceGalaxy::JoinLobby(const ServiceID& id)
 {
 	assert(id.Service == ServiceType::Galaxy);
 
 	m_requestLobbyJoin = m_ctx->m_callbackLobbyJoin.AddServiceRequest(this);
 
 	try {
-		galaxy::api::Matchmaking()->JoinLobby(id.ID, this);
-	} catch (const galaxy::api::IError &error) {
+		galaxy::api::Matchmaking()->JoinLobby(id.ID
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
+			, this
+#endif
+		);
+	}
+	catch (const galaxy::api::IError& error) {
 		m_requestLobbyJoin->Code = Result::Error;
 		m_ctx->GetCallbacks()->OnLogDebug(strPrintF("[Galaxy] Failed to join lobby: %s", error.GetMsg()));
 	}
@@ -224,7 +263,7 @@ void Unet::ServiceGalaxy::LeaveLobby()
 		return;
 	}
 
-	auto &lobbyInfo = lobby->GetInfo();
+	auto& lobbyInfo = lobby->GetInfo();
 	auto entryPoint = lobbyInfo.GetEntryPoint(Unet::ServiceType::Galaxy);
 	if (entryPoint == nullptr) {
 		return;
@@ -233,49 +272,54 @@ void Unet::ServiceGalaxy::LeaveLobby()
 	m_requestLobbyLeft = m_ctx->m_callbackLobbyLeft.AddServiceRequest(this);
 
 	try {
-		galaxy::api::Matchmaking()->LeaveLobby(entryPoint->ID, this);
-	} catch (const galaxy::api::IError &error) {
+		galaxy::api::Matchmaking()->LeaveLobby(entryPoint->ID
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
+			, this
+#endif
+		);
+	}
+	catch (const galaxy::api::IError& error) {
 		m_requestLobbyLeft->Code = Result::Error;
 		m_ctx->GetCallbacks()->OnLogError(strPrintF("[Galaxy] Failed to leave lobby: %s", error.GetMsg()));
 	}
 }
 
-int Unet::ServiceGalaxy::GetLobbyPlayerCount(const ServiceID &lobbyId)
+int Unet::ServiceGalaxy::GetLobbyPlayerCount(const ServiceID& lobbyId)
 {
 	assert(lobbyId.Service == ServiceType::Galaxy);
 
 	return galaxy::api::Matchmaking()->GetNumLobbyMembers(lobbyId.ID);
 }
 
-void Unet::ServiceGalaxy::SetLobbyMaxPlayers(const ServiceID &lobbyId, int amount)
+void Unet::ServiceGalaxy::SetLobbyMaxPlayers(const ServiceID& lobbyId, int amount)
 {
 	assert(lobbyId.Service == ServiceType::Galaxy);
 
 	galaxy::api::Matchmaking()->SetMaxNumLobbyMembers(lobbyId.ID, amount);
 }
 
-int Unet::ServiceGalaxy::GetLobbyMaxPlayers(const ServiceID &lobbyId)
+int Unet::ServiceGalaxy::GetLobbyMaxPlayers(const ServiceID& lobbyId)
 {
 	assert(lobbyId.Service == ServiceType::Galaxy);
 
 	return (int)galaxy::api::Matchmaking()->GetMaxNumLobbyMembers(lobbyId.ID);
 }
 
-std::string Unet::ServiceGalaxy::GetLobbyData(const ServiceID &lobbyId, const char* name)
+std::string Unet::ServiceGalaxy::GetLobbyData(const ServiceID& lobbyId, const char* name)
 {
 	assert(lobbyId.Service == ServiceType::Galaxy);
 
 	return galaxy::api::Matchmaking()->GetLobbyData(lobbyId.ID, name);
 }
 
-int Unet::ServiceGalaxy::GetLobbyDataCount(const ServiceID &lobbyId)
+int Unet::ServiceGalaxy::GetLobbyDataCount(const ServiceID& lobbyId)
 {
 	assert(lobbyId.Service == ServiceType::Galaxy);
 
 	return galaxy::api::Matchmaking()->GetLobbyDataCount(lobbyId.ID);
 }
 
-Unet::LobbyData Unet::ServiceGalaxy::GetLobbyData(const ServiceID &lobbyId, int index)
+Unet::LobbyData Unet::ServiceGalaxy::GetLobbyData(const ServiceID& lobbyId, int index)
 {
 	assert(lobbyId.Service == ServiceType::Galaxy);
 
@@ -291,21 +335,21 @@ Unet::LobbyData Unet::ServiceGalaxy::GetLobbyData(const ServiceID &lobbyId, int 
 	return ret;
 }
 
-Unet::ServiceID Unet::ServiceGalaxy::GetLobbyHost(const ServiceID &lobbyId)
+Unet::ServiceID Unet::ServiceGalaxy::GetLobbyHost(const ServiceID& lobbyId)
 {
 	assert(lobbyId.Service == ServiceType::Galaxy);
 
 	return ServiceID(ServiceType::Galaxy, galaxy::api::Matchmaking()->GetLobbyOwner(lobbyId.ID).ToUint64());
 }
 
-void Unet::ServiceGalaxy::SetLobbyData(const ServiceID &lobbyId, const char* name, const char* value)
+void Unet::ServiceGalaxy::SetLobbyData(const ServiceID& lobbyId, const char* name, const char* value)
 {
 	assert(lobbyId.Service == ServiceType::Galaxy);
 
 	galaxy::api::Matchmaking()->SetLobbyData(lobbyId.ID, name, value);
 }
 
-void Unet::ServiceGalaxy::RemoveLobbyData(const ServiceID &lobbyId, const char* name)
+void Unet::ServiceGalaxy::RemoveLobbyData(const ServiceID& lobbyId, const char* name)
 {
 	assert(lobbyId.Service == ServiceType::Galaxy);
 
@@ -317,7 +361,7 @@ size_t Unet::ServiceGalaxy::ReliablePacketLimit()
 	return 0;
 }
 
-void Unet::ServiceGalaxy::SendPacket(const ServiceID &peerId, const void* data, size_t size, PacketType type, uint8_t channel)
+void Unet::ServiceGalaxy::SendPacket(const ServiceID& peerId, const void* data, size_t size, PacketType type, uint8_t channel)
 {
 	assert(peerId.Service == ServiceType::Galaxy);
 
@@ -397,14 +441,20 @@ void Unet::ServiceGalaxy::OnLobbyEntered(const galaxy::api::GalaxyID& lobbyID, g
 	m_ctx->GetCallbacks()->OnLogDebug("[Galaxy] Handshake sent");
 }
 
-void Unet::ServiceGalaxy::OnLobbyLeft(const galaxy::api::GalaxyID& lobbyID, LobbyLeaveReason leaveReason)
+void Unet::ServiceGalaxy::OnLobbyLeft(const galaxy::api::GalaxyID& lobbyID
+#if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LIST_RESULT
+	, galaxy::api::LobbyLeaveReason leaveReason
+#else
+, bool result
+#endif
+)
 {
 	auto currentLobby = m_ctx->CurrentLobby();
 	if (currentLobby == nullptr) {
 		return;
 	}
 
-	auto &lobbyInfo = currentLobby->GetInfo();
+	auto& lobbyInfo = currentLobby->GetInfo();
 	auto entryPoint = lobbyInfo.GetEntryPoint(ServiceType::Galaxy);
 	if (entryPoint == nullptr) {
 		return;
@@ -414,9 +464,15 @@ void Unet::ServiceGalaxy::OnLobbyLeft(const galaxy::api::GalaxyID& lobbyID, Lobb
 		return;
 	}
 
-	if (leaveReason == LOBBY_LEAVE_REASON_USER_LEFT) {
+#if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LIST_RESULT
+	if (leaveReason == LOBBY_LEAVE_REASON_USER_LEFT)
+#else
+	if(!result)
+#endif
+	{
 		m_requestLobbyLeft->Code = Result::OK;
-	} else {
+	}
+	else {
 		currentLobby->ServiceDisconnected(ServiceType::Galaxy);
 	}
 }
@@ -428,7 +484,7 @@ void Unet::ServiceGalaxy::OnLobbyMemberStateChanged(const galaxy::api::GalaxyID&
 		return;
 	}
 
-	auto &lobbyInfo = currentLobby->GetInfo();
+	auto& lobbyInfo = currentLobby->GetInfo();
 	auto entryPoint = lobbyInfo.GetEntryPoint(ServiceType::Galaxy);
 	if (entryPoint == nullptr) {
 		return;
@@ -438,9 +494,10 @@ void Unet::ServiceGalaxy::OnLobbyMemberStateChanged(const galaxy::api::GalaxyID&
 		return;
 	}
 
-	if (memberStateChange == galaxy::api::LOBBY_MEMBER_STATE_CHANGED_ENTERED) {
+	if (memberStateChange & galaxy::api::LOBBY_MEMBER_STATE_CHANGED_ENTERED) {
 		m_ctx->GetCallbacks()->OnLogDebug(strPrintF("[Galaxy] Player entered: 0x%016llX", memberID.ToUint64()));
-	} else {
+	}
+	else {
 		m_ctx->GetCallbacks()->OnLogDebug(strPrintF("[Galaxy] Player left: 0x%016llX (code %X)", memberID.ToUint64(), memberStateChange));
 
 		currentLobby->RemoveMemberService(ServiceID(ServiceType::Galaxy, memberID.ToUint64()));

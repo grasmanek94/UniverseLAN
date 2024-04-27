@@ -91,6 +91,7 @@ Debug (tracing) files can be found in `<Configuration Files Directory>/tracing/<
 
 | Game       | Status                | Tested GOG Galaxy SDK Version | Notes |
 | :--------- | :-------:             | :---------: | :---------: |
+| SYNTHETIK: Legion Rising  | :white_check_mark:(2) | 1.113.3 | Works since build 301 |
 | Aragami 1  | :white_check_mark:(2) | 1.121.2 | |
 | Forsaken Remastered | :white_check_mark:(3) | 1.124.0 | |
 | Guns, Gore & Cannoli 2  | :white_check_mark:(3) | 1.124.0 | |

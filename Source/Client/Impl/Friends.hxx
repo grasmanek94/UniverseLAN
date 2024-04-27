@@ -331,6 +331,7 @@ namespace universelan::client {
 #endif
 		) override;
 
+#if GALAXY_BUILD_FEATURE_HAS_ISENTFRIENDINVITATIONLISTRETRIEVELISTENER
 		/**
 		 * Performs a request for the user's list of outgoing friend invitations.
 		 *
@@ -343,6 +344,7 @@ namespace universelan::client {
 			ISentFriendInvitationListRetrieveListener* const listener = NULL
 #endif
 		) override;
+#endif
 
 		/**
 		 * Returns the number of retrieved friend invitations.
