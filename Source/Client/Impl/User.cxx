@@ -48,7 +48,7 @@ namespace universelan::client {
 	}
 
 	GalaxyID UserImpl::GetGalaxyID() {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		return galaxy::api::FromRealID(galaxy::api::IDType::ID_TYPE_USER, intf->config->GetCustomGalaxyID());
 	}
@@ -400,7 +400,7 @@ namespace universelan::client {
 	}
 
 	bool UserImpl::IsLoggedOn() {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		return intf->config->GetSignedIn();
 	}

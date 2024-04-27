@@ -113,9 +113,11 @@ namespace universelan::client {
 	void FriendsImpl::GetPersonaNameCopy(char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		auto name = intf_inst.config->GetCustomPersonaName();
+		if (buffer != nullptr) {
+			auto name = intf_inst.config->GetCustomPersonaName();
 
-		universelan::util::safe_copy_str_n(name, buffer, bufferLength);
+			universelan::util::safe_copy_str_n(name, buffer, bufferLength);
+		}
 	}
 #endif
 
@@ -139,8 +141,10 @@ namespace universelan::client {
 	void FriendsImpl::GetFriendPersonaNameCopy(GalaxyID userID, char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		std::string nickname = intf->user->GetGalaxyUserData(userID)->nickname;
-		universelan::util::safe_copy_str_n(nickname, buffer, bufferLength);
+		if (buffer != nullptr) {
+			std::string nickname = intf->user->GetGalaxyUserData(userID)->nickname;
+			universelan::util::safe_copy_str_n(nickname, buffer, bufferLength);
+		}
 	}
 #endif
 
@@ -313,6 +317,9 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
+		util::safe_fix_null_char_ptr(key);
+		util::safe_fix_null_char_ptr(value);
+
 		intf->config->GetLocalUserData()->stats.SetRichPresence(key, value);
 
 		uint64_t request_id = MessageUniqueID::get();
@@ -330,6 +337,8 @@ namespace universelan::client {
 #endif
 	) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+
+		util::safe_fix_null_char_ptr(key);
 
 		intf->config->GetLocalUserData()->stats.EraseRichPresence(key);
 
@@ -427,14 +436,20 @@ namespace universelan::client {
 	const char* FriendsImpl::GetRichPresence(const char* key, GalaxyID userID) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
+		util::safe_fix_null_char_ptr(key);
+
 		return intf->user->GetGalaxyUserData(userID)->stats.GetRichPresence(key).c_str();
 	}
 
 	void FriendsImpl::GetRichPresenceCopy(const char* key, char* buffer, uint32_t bufferLength, GalaxyID userID) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		std::string value = intf->user->GetGalaxyUserData(userID)->stats.GetRichPresence(key);
-		universelan::util::safe_copy_str_n(value, buffer, bufferLength);
+		util::safe_fix_null_char_ptr(key);
+
+		if (buffer != nullptr) {
+			std::string value = intf->user->GetGalaxyUserData(userID)->stats.GetRichPresence(key);
+			universelan::util::safe_copy_str_n(value, buffer, bufferLength);
+		}
 	}
 
 	uint32_t FriendsImpl::GetRichPresenceCount(GalaxyID userID) {
@@ -456,8 +471,12 @@ namespace universelan::client {
 			}
 
 			auto ref = container_get_by_index(map, index);
-			universelan::util::safe_copy_str_n(ref.first, key, keyLength);
-			universelan::util::safe_copy_str_n(ref.second, value, valueLength);
+			if (key != nullptr) {
+				universelan::util::safe_copy_str_n(ref.first, key, keyLength);
+			}
+			if (value != nullptr) {
+				universelan::util::safe_copy_str_n(ref.second, value, valueLength);
+			}
 
 			return GetRichPresenceReturnT::value_true();
 			});
@@ -529,6 +548,8 @@ namespace universelan::client {
 	void FriendsImpl::ShowOverlayInviteDialog(const char* connectionString) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
+		util::safe_fix_null_char_ptr(connectionString);
+
 		std::cout << "ShowOverlayInviteDialog\n\t" << connectionString << std::endl;
 	}
 
@@ -539,6 +560,8 @@ namespace universelan::client {
 #endif
 	) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+
+		util::safe_fix_null_char_ptr(connectionString);
 
 		// TODO: implement this sometime
 
@@ -557,6 +580,8 @@ namespace universelan::client {
 #endif
 	) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+
+		util::safe_fix_null_char_ptr(userSpecifier);
 
 		listeners->NotifyAll(
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS

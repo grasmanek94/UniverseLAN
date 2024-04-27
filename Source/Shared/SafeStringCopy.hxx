@@ -61,4 +61,11 @@ namespace universelan::util {
 
 		return copy_size;
 	}
+
+	inline const char* safe_fix_null_char_ptr(const char*& value) {
+		if (value == nullptr) {
+			value = "";
+		}
+		return value;
+	}
 }
