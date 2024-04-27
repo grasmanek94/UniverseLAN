@@ -43,6 +43,8 @@ They can use other services or custom networking implementations.
 Such games might not be able to be played together using UniverseLAN wrapper.</small>
 
 # How do you get .def files?
+Check the [`Util README`](https://github.com/grasmanek94/UniverseLAN/blob/master/Util/README.md) folder, or alternatively:
+
 To generate the module definition files, use [wrap_dll](https://github.com/mavenlin/wrap_dll):  
 - `python3 wrap_dll.py Galaxy64.dll`  
 
