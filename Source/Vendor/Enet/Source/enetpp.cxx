@@ -1,7 +1,7 @@
 #include <enet/enetpp.hxx>
 
 NetworkBase::NetworkBase()
-	: address{}, member {nullptr}, event{}
+	: address{}, member{ nullptr }, event{}
 {
 	initialisation_code = enet_initialize();
 	atexit(enet_deinitialize);
@@ -174,4 +174,31 @@ int NetworkClient::Send(const void* data, size_t bytes, _ENetPacketFlag flags)
 int NetworkClient::Send(ENetPacket* packet)
 {
 	return NetworkBase::Send(peer, packet);
+}
+
+extern "C" {
+
+	/** Queues a packet to be sent to all peers associated with the host.
+	@param host host on which to broadcast the packet
+	@param channelID channel on which to broadcast
+	@param packet packet to broadcast
+	*/
+	void
+		enet_host_broadcast_except(ENetHost* host, enet_uint8 channelID, ENetPacket* packet, ENetPeer* except)
+	{
+		ENetPeer* currentPeer;
+
+		for (currentPeer = host->peers;
+			currentPeer < &host->peers[host->peerCount];
+			++currentPeer)
+		{
+			if (currentPeer->state != ENET_PEER_STATE_CONNECTED || currentPeer == except)
+				continue;
+
+			enet_peer_send(currentPeer, channelID, packet);
+		}
+
+		if (packet->referenceCount == 0)
+			enet_packet_destroy(packet);
+	}
 }

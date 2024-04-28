@@ -67,4 +67,9 @@ public:
 
 const size_t MAX_PACKET_SIZE = 32 * 1024;//k bytes
 const size_t MAX_PACKETS_PER_PEER = 512;
+
+extern "C" {
+	ENET_API void       enet_host_broadcast_except(ENetHost*, enet_uint8, ENetPacket*, ENetPeer*);
+}
+
 #endif
