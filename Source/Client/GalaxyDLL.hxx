@@ -19,10 +19,21 @@ namespace universelan::client {
 	INetworking* ServerNetworking();
 
 	IStats* Stats();
+#if GALAXY_BUILD_FEATURE_HAS_IUTILS
 	IUtils* Utils();
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_IAPPS
 	IApps* Apps();
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 	IStorage* Storage();
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE
+	ICloudStorage* CloudStorage();
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
 	ICustomNetworking* CustomNetworking();
+#endif
 	ILogger* Logger();
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 	ITelemetry* Telemetry();

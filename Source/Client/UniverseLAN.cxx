@@ -55,6 +55,9 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 		storage = std::make_unique<StorageImpl>(this);
 #endif
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE
+		cloud_storage = std::make_unique<CloudStorageImpl>(this);
+#endif
 #if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
 		custom_networking = std::make_unique<CustomNetworkingImpl>(this);
 #endif
@@ -104,6 +107,9 @@ namespace universelan::client {
 #endif
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 		storage = nullptr;
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE
+		cloud_storage = nullptr;
 #endif
 #if GALAXY_BUILD_FEATURE_HAS_IAPPS
 		apps = nullptr;

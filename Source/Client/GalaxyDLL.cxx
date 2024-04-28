@@ -8,6 +8,10 @@
 
 #include <Version.hxx>
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 namespace universelan::client {
 	void Init(const InitOptionsModern& initOptions)
 	{
@@ -131,6 +135,15 @@ namespace universelan::client {
 		return intf_inst.storage.get();
 	}
 #endif
+
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE
+	ICloudStorage* CloudStorage() {
+		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
+
+		return intf_inst.cloud_storage.get();
+	}
+#endif
+
 
 #if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
 	ICustomNetworking* CustomNetworking() {

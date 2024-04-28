@@ -30,6 +30,9 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 	class StorageImpl;
 #endif
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE
+	class CloudStorageImpl;
+#endif
 #if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
 	class CustomNetworkingImpl;
 #endif
@@ -69,6 +72,10 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 		std::unique_ptr<StorageImpl>			storage = nullptr;
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE
+		std::unique_ptr<CloudStorageImpl>		cloud_storage = nullptr;
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
@@ -111,6 +118,7 @@ namespace universelan::client {
 
 #include "Impl/Apps.hxx"
 #include "Impl/Chat.hxx"
+#include "Impl/CloudStorage.hxx"
 #include "Impl/CustomNetworking.hxx"
 #include "Impl/Friends.hxx"
 #include "Impl/Logger.hxx"

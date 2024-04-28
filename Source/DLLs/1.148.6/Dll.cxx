@@ -80,6 +80,11 @@ namespace galaxy::api {
 		return universelan::client::Storage();
 	}
 
+	GALAXY_DLL_EXPORT ICloudStorage* GALAXY_CALLTYPE CloudStorage(void)
+	{
+		return universelan::client::CloudStorage();
+	}
+
 	GALAXY_DLL_EXPORT IUser* GALAXY_CALLTYPE User(void)
 	{
 		return universelan::client::User();

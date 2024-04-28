@@ -9,6 +9,10 @@
 #include <string>
 #include <utility>
 
+#ifdef DeleteFile
+#undef DeleteFile
+#endif
+
 namespace universelan::client {
 	using namespace galaxy::api;
 
@@ -31,11 +35,11 @@ namespace universelan::client {
 	}
 
 	uint32_t CloudStorageImpl::GetFileSizeByIndex(uint32_t index) const {
-	
+		return 0;
 	}
 
 	uint32_t CloudStorageImpl::GetFileTimestampByIndex(uint32_t index) const { 
-	
+		return 0;
 	}
 
 	void CloudStorageImpl::GetFile(const char* container, const char* name, void* userParam, WriteFunc writeFunc, ICloudStorageGetFileListener* listener) { 
@@ -51,11 +55,11 @@ namespace universelan::client {
 	}
 
 	const char* CloudStorageImpl::GetFileMetadataKeyByIndex(uint32_t index) const {
-	
+		return "";
 	}
 
 	const char* CloudStorageImpl::GetFileMetadataValueByIndex(uint32_t index) const {
-	
+		return "";
 	}
 
 	void CloudStorageImpl::PutFile(
@@ -82,8 +86,11 @@ namespace universelan::client {
 	) { 
 
 	}
-
-	void CloudStorageImpl::DeleteFile(const char* container, const char* name, ICloudStorageDeleteFileListener* listener) {
+#pragma push_macro("DeleteFile")
+#undef DeleteFile
+	void CloudStorageImpl::DeleteFile(const char* container, const char* name, ICloudStorageDeleteFileListener* listener)
+#pragma pop_macro ("DeleteFile")
+	{
 
 	}
 }

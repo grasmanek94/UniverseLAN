@@ -225,7 +225,13 @@ namespace universelan::client {
 		 * @param [in] name The name of the file in cloud storage.
 		 * @param [in] listener The listener for the specific operation.
 		 */
+
+		// Windows.h woes..
+#pragma push_macro("DeleteFile")
+#undef DeleteFile
 		virtual void DeleteFile(const char* container, const char* name, ICloudStorageDeleteFileListener* listener) override;
+#pragma pop_macro ("DeleteFile")
+
 	};
 
 	/** @} */
