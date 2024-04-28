@@ -192,6 +192,8 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
 
   afvd(IUSER_UWP_TO_XBOX_RENAME					1.148.5					)
 
+  afvd(HAS_ICLOUDSTORAGE						1.148.6					)
+
   afvd(HAS_RED_PREFIX							1.149.12	1.149.16	)
 
   afvd(NEAR_FILTER_ENUM 						9.999.0					) # disabled because it's not really present? bug in SDK?

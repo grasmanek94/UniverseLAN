@@ -8,8 +8,7 @@
 #include <syncstream>
 
 namespace universelan::tracer {
-	template<uint64_t N>
-	static constexpr uint64_t bit() { return 1ULL << N; }
+	static constexpr uint64_t bit(uint64_t N) { return 1ULL << N; }
 
 	class Trace
 	{
@@ -22,35 +21,35 @@ namespace universelan::tracer {
 		enum MASK : uint64_t {
 			INFORMATIONAL = 0,
 
-			TRACE_ALL_FLAGS = bit<0>(),
+			TRACE_ALL_FLAGS = bit(0),
 
-			ARGUMENTS = bit<1>(),
-			RETURN_VALUES = bit<2>(),
-			DETAILED = bit<3>(),
-			HIGH_FREQUENCY_CALLS = bit<4>(),
+			ARGUMENTS = bit(1),
+			RETURN_VALUES = bit(2),
+			DETAILED = bit(3),
+			HIGH_FREQUENCY_CALLS = bit(4),
 
-			NETCLIENT = bit<5>(),
-			GALAXYDLL = bit<6>(),
-			GALAXYDLL_GAMESERVERAPI = bit<7>(),
-			LISTENERREGISTRAR = bit<8>(),
+			NETCLIENT = bit(5),
+			GALAXYDLL = bit(6),
+			GALAXYDLL_GAMESERVERAPI = bit(7),
+			LISTENERREGISTRAR = bit(8),
 
-			ICHAT = bit<9>(),
-			ICUSTOMNETWORKING = bit<10>(),
-			IERROR = bit<11>(),
-			IFRIENDS = bit<12>(),
-			ILOGGER = bit<13>(),
-			IMATCHMAKING = bit<14>(),
-			INETWORKING = bit<15>(),
-			ISTATS = bit<16>(),
-			ISTORAGE = bit<17>(),
-			ITELEMETRY = bit<18>(),
-			IUSER = bit<19>(),
-			IUTILS = bit<20>(),
-			IGAMESERVERAPI = bit<21>(),
-			IGALAXYTHREAD = bit<22>(),
-			IAPPS = bit<23>(),
-			CUSTOMCONSOLE = bit<24>()
-
+			ICHAT = bit(9),
+			ICUSTOMNETWORKING = bit(10),
+			IERROR = bit(11),
+			IFRIENDS = bit(12),
+			ILOGGER = bit(13),
+			IMATCHMAKING = bit(14),
+			INETWORKING = bit(15),
+			ISTATS = bit(16),
+			ISTORAGE = bit(17),
+			ITELEMETRY = bit(18),
+			IUSER = bit(19),
+			IUTILS = bit(20),
+			IGAMESERVERAPI = bit(21),
+			IGALAXYTHREAD = bit(22),
+			IAPPS = bit(23),
+			CUSTOMCONSOLE = bit(24),
+			ICLOUDSTORAGE = bit(25)
 		};
 
 		static bool InitTracing(const char* const log_directory,
