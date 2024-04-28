@@ -96,6 +96,7 @@ enet_host_create (const ENetAddress * address, size_t peerCount, size_t channelL
     host -> totalSentPackets = 0;
     host -> totalReceivedData = 0;
     host -> totalReceivedPackets = 0;
+    host -> totalQueued = 0;
 
     host -> connectedPeers = 0;
     host -> bandwidthLimitedPeers = 0;
@@ -123,9 +124,8 @@ enet_host_create (const ENetAddress * address, size_t peerCount, size_t channelL
 
        enet_list_clear (& currentPeer -> acknowledgements);
        enet_list_clear (& currentPeer -> sentReliableCommands);
-       enet_list_clear (& currentPeer -> sentUnreliableCommands);
-       enet_list_clear (& currentPeer -> outgoingReliableCommands);
-       enet_list_clear (& currentPeer -> outgoingUnreliableCommands);
+       enet_list_clear (& currentPeer -> outgoingCommands);
+       enet_list_clear (& currentPeer -> outgoingSendReliableCommands);
        enet_list_clear (& currentPeer -> dispatchedCommands);
 
        enet_peer_reset (currentPeer);
@@ -159,6 +159,16 @@ enet_host_destroy (ENetHost * host)
 
     enet_free (host -> peers);
     enet_free (host);
+}
+
+enet_uint32
+enet_host_random (ENetHost * host)
+{
+    /* Mulberry32 by Tommy Ettinger */
+    enet_uint32 n = (host -> randomSeed += 0x6D2B79F5U);
+    n = (n ^ (n >> 15)) * (n | 1U);
+    n ^= n + (n ^ (n >> 7)) * (n | 61U);
+    return n ^ (n >> 14);
 }
 
 /** Initiates a connection to a foreign host.
@@ -200,7 +210,8 @@ enet_host_connect (ENetHost * host, const ENetAddress * address, size_t channelC
     currentPeer -> channelCount = channelCount;
     currentPeer -> state = ENET_PEER_STATE_CONNECTING;
     currentPeer -> address = * address;
-    currentPeer -> connectID = ++ host -> randomSeed;
+    currentPeer -> connectID = enet_host_random (host);
+    currentPeer -> mtu = host -> mtu;
 
     if (host -> outgoingBandwidth == 0)
       currentPeer -> windowSize = ENET_PROTOCOL_MAXIMUM_WINDOW_SIZE;
@@ -274,30 +285,6 @@ enet_host_broadcast (ENetHost * host, enet_uint8 channelID, ENetPacket * packet)
 
     if (packet -> referenceCount == 0)
       enet_packet_destroy (packet);
-}
-
-/** Queues a packet to be sent to all peers associated with the host.
-@param host host on which to broadcast the packet
-@param channelID channel on which to broadcast
-@param packet packet to broadcast
-*/
-void
-enet_host_broadcast_except(ENetHost * host, enet_uint8 channelID, ENetPacket * packet, ENetPeer* except)
-{
-	ENetPeer * currentPeer;
-
-	for (currentPeer = host->peers;
-	currentPeer < &host->peers[host->peerCount];
-		++currentPeer)
-	{
-		if (currentPeer->state != ENET_PEER_STATE_CONNECTED || currentPeer == except)
-			continue;
-
-		enet_peer_send(currentPeer, channelID, packet);
-	}
-
-	if (packet->referenceCount == 0)
-		enet_packet_destroy(packet);
 }
 
 /** Sets the packet compressor the host should use to compress and decompress packets.

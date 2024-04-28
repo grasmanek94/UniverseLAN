@@ -278,7 +278,6 @@ constexpr int SI_FILE = -3;     //!< File error (see errno for detail error)
 # define SI_WCHAR_T     UChar
 #endif
 
-
 // ---------------------------------------------------------------------------
 //                              MAIN TEMPLATE CLASS
 // ---------------------------------------------------------------------------
@@ -3536,6 +3535,7 @@ public:
 #endif
 
 #include <windows.h>
+
 #ifdef SI_NO_MBCS
 # define SI_NoCase   SI_GenericNoCase
 #else // !SI_NO_MBCS
@@ -3548,6 +3548,7 @@ public:
  * SI_NoCase class instead.
  */
 #include <mbstring.h>
+
 template<class SI_CHAR>
 struct SI_NoCase {
     bool operator()(const SI_CHAR * pLeft, const SI_CHAR * pRight) const {
