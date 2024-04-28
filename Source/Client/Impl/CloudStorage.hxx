@@ -182,7 +182,27 @@ namespace universelan::client {
 			ICloudStoragePutFileListener* listener,
 			const char* const* metadataKeys = NULL,
 			const char* const* metadataValues = NULL
-		) override;
+		)
+#if !GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
+			override
+#endif
+			;
+
+		virtual void PutFile(
+			const char* container,
+			const char* name,
+			void* userParam,
+			ReadFunc readFunc,
+			RewindFunc rewindFunc,
+			ICloudStoragePutFileListener* listener,
+			const char* const* metadataKeys,
+			const char* const* metadataValues,
+			uint32_t timeStamp
+		)
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
+			override
+#endif
+			;
 
 		/**
 		 * Upload a file to the cloud storage
@@ -214,7 +234,26 @@ namespace universelan::client {
 			ICloudStoragePutFileListener* listener,
 			const char* const* metadataKeys = NULL,
 			const char* const* metadataValues = NULL
-		)  override;
+		)
+#if !GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
+			override
+#endif
+			;
+
+		virtual void PutFile(
+			const char* container,
+			const char* name,
+			const void* buffer,
+			uint32_t bufferLength,
+			ICloudStoragePutFileListener* listener,
+			const char* const* metadataKeys,
+			const char* const* metadataValues,
+			uint32_t timeStamp
+		)
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
+			override
+#endif
+			;
 
 		/**
 		 * Delete a file from cloud storage

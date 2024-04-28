@@ -188,13 +188,47 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
 
   afvd(IUSER_SIGNINLAUNCHER						1.146.0					)
 
+# from here onwards it's also up-to-date 100%
+
   afvd(HAS_GETRICHPRESENCEKEYBYINDEX			1.148.2					)
 
   afvd(IUSER_UWP_TO_XBOX_RENAME					1.148.5					)
 
   afvd(HAS_ICLOUDSTORAGE						1.148.6					)
 
+  afvd(HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP		1.148.7					)
+  afvd(HAS_IUSER_REFRESHTOKEN					1.148.7					)
+
+  afvd(HAS_ICLOUDSTORAGE_GETFILEHASHBYINDEX		1.148.11				)
+
+  afvd(HAS_ICLOUDSTORAGE_SAVEGAME				1.148.14				)
+
+  afvd(HAS_ICLOUDSTORAGE_PUTDELETE_HASH			1.148.15				) # this version should be binary compatible up to and including 1.149.0, and also 1.150.0!
+
+  afvd(HAS_INITOPTIONS_GAMESERVICEPLATFORM		1.149.1		1.149.16	)
+
+  afvd(HAS_IUSER_REPORTGAMEOWNERSHIP			1.149.2		1.149.16	)
+
+  afvd(HAS_GAMERSERVICEPLATFORM_TOKEN			1.149.9		1.149.16	)
+
+  afvd(HAS_GAMERSERVICEPLATFORM_TOKEN_LENGTH	1.149.10	1.149.16	)
+
+  afvd(HAS_ITELEMETRY_GENERATEUUIDSTR			1.149.11	1.149.16	)
+
   afvd(HAS_RED_PREFIX							1.149.12	1.149.16	)
+
+  afvd(HAS_SHUTDOWNOPTIONS						1.151.0					)
+  afvd(HAS_IAPPS_LANGUAGECODE					1.151.0					)
+  
+  afvd(HAS_IUSER_AUTHORIZATION_IDTOKEN			1.152.1					)
+
+  afvd(HAS_IAPPS_ISDLCOWNED						1.152.2					)
+
+  afvd(HAS_IUSER_OPENID							1.152.5					)
+
+  afvd(HAS_IUSER_SIGNINGALAXY_TIMEOUT			1.152.8					)
+
+  afvd(HAS_ISTATS_ACHIEVEMENTSNUMBER			1.152.10				)
 
   afvd(NEAR_FILTER_ENUM 						9.999.0					) # disabled because it's not really present? bug in SDK?
   

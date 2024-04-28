@@ -20,6 +20,7 @@ namespace universelan {
 	}
 
 	const std::string SharedFileUtils::ROOT_LOCAL = "Local";
+	const std::string SharedFileUtils::ROOT_LOCAL = "Cloud";
 	const std::string SharedFileUtils::ROOT_SHARED = "Shared";
 	const std::string SharedFileUtils::ROOT_AVATARS = "Avatars";
 	const std::string SharedFileUtils::ROOT_LOGGING = "Logging";

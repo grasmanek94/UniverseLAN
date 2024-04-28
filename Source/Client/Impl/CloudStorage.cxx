@@ -70,9 +70,36 @@ namespace universelan::client {
 		RewindFunc rewindFunc,
 		ICloudStoragePutFileListener* listener,
 		const char* const* metadataKeys,
+		const char* const* metadataValues,
+		uint32_t timeStamp
+	) {
+
+	}
+
+	void CloudStorageImpl::PutFile(
+		const char* container,
+		const char* name,
+		const void* buffer,
+		uint32_t bufferLength,
+		ICloudStoragePutFileListener* listener,
+		const char* const* metadataKeys,
+		const char* const* metadataValues,
+		uint32_t timeStamp
+	) {
+
+	}
+
+	void CloudStorageImpl::PutFile(
+		const char* container,
+		const char* name,
+		void* userParam,
+		ReadFunc readFunc,
+		RewindFunc rewindFunc,
+		ICloudStoragePutFileListener* listener,
+		const char* const* metadataKeys,
 		const char* const* metadataValues
 	) { 
-	
+		PutFile(container, name, userParam, readFunc, rewindFunc, listener, metadataKeys, metadataValues, 0);
 	}
 
 	void CloudStorageImpl::PutFile(
@@ -84,8 +111,9 @@ namespace universelan::client {
 		const char* const* metadataKeys,
 		const char* const* metadataValues
 	) { 
-
+		PutFile(container, name, buffer, bufferLength, listener, metadataKeys, metadataValues, 0);
 	}
+
 #pragma push_macro("DeleteFile")
 #undef DeleteFile
 	void CloudStorageImpl::DeleteFile(const char* container, const char* name, ICloudStorageDeleteFileListener* listener)

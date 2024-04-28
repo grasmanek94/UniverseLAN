@@ -16,6 +16,7 @@ namespace universelan {
 
 	public:
 		static const std::string ROOT_LOCAL;
+		static const std::string ROOT_CLOUD;
 		static const std::string ROOT_SHARED;
 		static const std::string ROOT_AVATARS;
 		static const std::string ROOT_LOGGING;
