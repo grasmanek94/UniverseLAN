@@ -15,6 +15,8 @@
 #include <string_view>
 #include <string>
 
+#include <SimpleIni.h>
+
 template <>
 struct magic_enum::customize::enum_range<universelan::tracer::Trace::MASK> {
 	static constexpr bool is_flags = true;
@@ -113,25 +115,25 @@ namespace universelan {
 
 			return flags;
 		}
+
+		void LoadIni(CSimpleIniA& ini, const std::string& filename)
+		{
+			SI_Error rc = ini.LoadFile(filename.c_str());
+			if (rc < 0) {
+				std::string problem = "Cannot load or parse " + filename + ", error (Return Code / errno): " + std::to_string(rc) + " / " + std::to_string(errno) + "\nWill try to use sane defaults.";
+				//	throw std::runtime_error(problem);
+#ifdef _WIN32
+				MessageBox(NULL, problem.c_str(), "UniverseLAN - Error", 0);
+#else
+				std::cout << "Exception occurred during init: " << problem << std::endl;
+#endif
+			}
+		}
 	}
 
 	std::string IniData::GetPath(std::string base, const std::string& filename)
 	{
 		return (std::filesystem::path(base) / filename).string();
-	}
-
-	void IniData::LoadIni(CSimpleIniA& ini, const std::string& filename)
-	{
-		SI_Error rc = ini.LoadFile(filename.c_str());
-		if (rc < 0) {
-			std::string problem = "Cannot load or parse " + filename + ", error (Return Code / errno): " + std::to_string(rc) + " / " + std::to_string(errno) + "\nWill try to use sane defaults.";
-		//	throw std::runtime_error(problem);
-#ifdef _WIN32
-			MessageBox(NULL, problem.c_str(), "UniverseLAN - Error", 0);
-#else
-			std::cout << "Exception occurred during init: " << problem << std::endl;
-#endif
-		}
 	}
 
 	IniData::IniData() :
@@ -140,7 +142,7 @@ namespace universelan {
 		CSimpleIniA ini;
 		ini.SetUnicode();
 
-		IniData::LoadIni(ini, BootFile);
+		LoadIni(ini, BootFile);
 
 		GameDataPath = ini.GetValue(StoragePathSection.c_str(), "GameDataPath", "UniverseLANData");
 		ServerDataPath = ini.GetValue(StoragePathSection.c_str(), "ServerDataPath", "UniverseLANServerData");
@@ -211,7 +213,7 @@ namespace universelan {
 		CSimpleIniA ini;
 		ini.SetUnicode();
 
-		IniData::LoadIni(ini, GetPath(ConfigFile));
+		LoadIni(ini, GetPath(ConfigFile));
 
 		AllowFileSharingDownload = ini.GetBoolValue(StoragePathSection.c_str(), "AllowFileSharingDownload", true);
 		AllowFileSharingUpload = ini.GetBoolValue(StoragePathSection.c_str(), "AllowFileSharingUpload", true);
@@ -264,7 +266,7 @@ namespace universelan {
 			CSimpleIniA ini;
 			ini.SetUnicode();
 
-			IniData::LoadIni(ini, GetPath(ConfigFile));
+			LoadIni(ini, GetPath(ConfigFile));
 
 			Language = ini.GetValue(SettingsSection.c_str(), "Language", "english");
 			EnableAllDLC = ini.GetBoolValue(SettingsSection.c_str(), "EnableAllDLC", true);
@@ -392,7 +394,7 @@ namespace universelan {
 			CSimpleIniA ini;
 			ini.SetUnicode();
 
-			IniData::LoadIni(ini, GetPath(AchievementsFile));
+			LoadIni(ini, GetPath(AchievementsFile));
 
 			CSimpleIniA::TNamesDepend sections;
 			ini.GetAllSections(sections);
@@ -422,7 +424,7 @@ namespace universelan {
 			CSimpleIniA ini;
 			ini.SetUnicode();
 
-			IniData::LoadIni(ini, GetPath(DLCFile));
+			LoadIni(ini, GetPath(DLCFile));
 
 			// get all keys in a section
 			CSimpleIniA::TNamesDepend keys;
@@ -453,7 +455,7 @@ namespace universelan {
 			CSimpleIniA ini;
 			ini.SetUnicode();
 
-			IniData::LoadIni(ini, GetPath(StatsFile));
+			LoadIni(ini, GetPath(StatsFile));
 
 			local_user_data->stats.SetPlayTime(ini.GetLongValue(MetadataSection.c_str(), "PlayTime", 0));
 
@@ -476,7 +478,7 @@ namespace universelan {
 			CSimpleIniA ini;
 			ini.SetUnicode();
 
-			IniData::LoadIni(ini, GetPath(UserDataFile));
+			LoadIni(ini, GetPath(UserDataFile));
 
 			// get all keys in a section
 			CSimpleIniA::TNamesDepend keys;
@@ -617,7 +619,7 @@ namespace universelan {
 			CSimpleIniA ini;
 			ini.SetUnicode();
 
-			IniData::LoadIni(ini, GetPath(AchievementsFile));
+			LoadIni(ini, GetPath(AchievementsFile));
 
 			local_user_data->stats.run_locked_achievements<void>([&](auto& Achievements) {
 				for (auto& achievement : Achievements) {
@@ -643,7 +645,7 @@ namespace universelan {
 			CSimpleIniA ini;
 			ini.SetUnicode();
 
-			IniData::LoadIni(ini, GetPath(DLCFile));
+			LoadIni(ini, GetPath(DLCFile));
 
 			for (const auto& dlc : DLCs) {
 				std::string name = std::to_string(dlc.first);
@@ -659,7 +661,7 @@ namespace universelan {
 			CSimpleIniA ini;
 			ini.SetUnicode();
 
-			IniData::LoadIni(ini, GetPath(StatsFile));
+			LoadIni(ini, GetPath(StatsFile));
 
 			ini.SetLongValue(MetadataSection.c_str(), "PlayTime", local_user_data->stats.GetPlayTime());
 
@@ -678,7 +680,7 @@ namespace universelan {
 			CSimpleIniA ini;
 			ini.SetUnicode();
 
-			IniData::LoadIni(ini, GetPath(UserDataFile));
+			LoadIni(ini, GetPath(UserDataFile));
 
 			local_user_data->stats.run_locked_userdata<void>([&](auto& UserData) {
 				for (const auto& user_data : UserData) {

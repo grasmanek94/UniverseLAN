@@ -3,7 +3,6 @@
 #include "GalaxyUserData.hxx"
 
 #include <GalaxyID.h>
-#include <SimpleIni.h>
 
 #include <chrono>
 #include <memory>
@@ -35,7 +34,6 @@ namespace universelan {
 
 	protected:
 		static std::string GetPath(std::string base, const std::string& filename);
-		static void LoadIni(CSimpleIniA& ini, const std::string& filename);
 
 	public:
 		IniData();
