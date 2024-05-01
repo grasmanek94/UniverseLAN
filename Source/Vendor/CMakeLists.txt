@@ -9,6 +9,7 @@ add_subdirectory(StackWalker)
 endif()
 
 include(simpleini.cmake)
+include(miniz-cpp.cmake)
 include(magic_enum.cmake)
 
 include(cereal.cmake)
