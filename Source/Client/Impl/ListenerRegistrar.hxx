@@ -8,19 +8,23 @@
  * Contains data structures and interfaces related to callback listeners.
  */
 
+#include "NotificationParamScopeExtender.hxx"
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <GalaxyExport.h>
 
 #include <IListenerRegistrar.h>
+#include <GalaxyApi.h>
 
 #include <array>
+#include <concepts>
 #include <functional>
 #include <mutex>
+#include <optional>
 #include <set>
+#include <string>
 #include <unordered_map>
-
-#include <GalaxyApi.h>
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -32,7 +36,6 @@ namespace universelan::client {
 #else
 		uint32_t;
 #endif
-
 	/**
 	 * The class that enables and disables global registration of the instances of
 	 * specific listeners. You can either use it explicitly, or implicitly by
@@ -122,7 +125,7 @@ namespace universelan::client {
 				T* casted_listener = (T*)(listener);
 				assert(casted_listener != nullptr);
 
-				std::invoke(std::forward<FuncT>(Function), casted_listener, std::forward<ArgTypes>(Arguments)...);
+				std::invoke(std::forward<FuncT>(Function), casted_listener, notification_param_push_identity(Arguments)...);
 				});
 		}
 
@@ -139,7 +142,7 @@ namespace universelan::client {
 				BaseT* casted_listener = (BaseT*)(listener);
 				assert(casted_listener != nullptr);
 
-				std::invoke(std::forward<FuncT>(Function), casted_listener, std::forward<ArgTypes>(Arguments)...);
+				std::invoke(std::forward<FuncT>(Function), casted_listener, notification_param_push_identity(Arguments)...);
 				});
 		}
 
@@ -175,7 +178,7 @@ namespace universelan::client {
 #endif
 
 		template <typename... ArgTypes>
-		void NotifyAll(ArgTypes&&... Arguments)
+		void NotifyAll(ArgTypes... Arguments)
 		{
 #ifndef NDEBUG
 			this->NotifyAllNowSimulate(std::forward<decltype(Arguments)>(Arguments)...);
@@ -183,7 +186,7 @@ namespace universelan::client {
 
 			delay_runner->Add(std::bind_front([this](auto&&... args) {
 				this->NotifyAllNow(std::forward<decltype(args)>(args)...);
-				}, std::forward<ArgTypes>(Arguments)...));
+				}, notification_param_extend_life<decltype(Arguments)>(std::move(Arguments))...));
 		}
 	};
 
