@@ -16,6 +16,17 @@ namespace universelan {
 			using std::filesystem::directory_iterator;
 			return std::distance(directory_iterator(path), directory_iterator{});
 		}
+
+		template <typename T>
+		std::vector<std::filesystem::path> generic_list_files(const std::filesystem::path& search_root_path) {
+			std::vector<std::filesystem::path> file_list;
+			auto entries = T(search_root_path);
+			for (auto& entry : entries) {
+				auto relative_path = std::filesystem::relative(entry, search_root_path);
+				file_list.push_back(relative_path);
+			}
+			return file_list;
+		}
 	}
 
 	const std::filesystem::path SharedFileUtils::ROOT_LOCAL = "Local";
@@ -239,19 +250,18 @@ namespace universelan {
 		return "";
 	}
 
-	std::vector<std::filesystem::path> SharedFileUtils::GetDirectoryFileList(const std::filesystem::path& root, const std::filesystem::path& directory) const
+	std::vector<std::filesystem::path> SharedFileUtils::GetDirectoryFileList(const std::filesystem::path& root, const std::filesystem::path& directory, bool recurse) const
 	{
-		std::vector<std::filesystem::path> file_list;
 		using std::filesystem::recursive_directory_iterator;
+		using std::filesystem::directory_iterator;
 
 		auto search_root_path = GetPath(root, directory);
-		auto entries = recursive_directory_iterator(search_root_path);
-		for (auto& entry : entries) {
-			auto relative_path = std::filesystem::relative(entry, search_root_path);
-			file_list.push_back(relative_path);
+
+		if (recurse) {
+			return generic_list_files<recursive_directory_iterator>(search_root_path);
 		}
 
-		return file_list;
+		return generic_list_files<directory_iterator>(search_root_path);
 	}
 
 	bool SharedFileUtils::Copy(const std::filesystem::path& root_from, const std::filesystem::path& root_to, const std::filesystem::path& file_name) const {
@@ -502,9 +512,22 @@ namespace universelan {
 		return (uint32_t)si.available;
 	}
 
-	std::vector<std::filesystem::path> SharedFileUtils::GetDirectoryFileListCloud(const std::filesystem::path& container) const
+	uint32_t SharedFileUtils::GetUsedDiskSpace() const
 	{
-		return GetDirectoryFileList(GetPath(ROOT_CLOUD, container), "/");
+		std::error_code ec;
+		const std::filesystem::space_info si = std::filesystem::space(basepath, ec);
+		auto used = si.capacity - si.available;
+
+		if (used >= std::numeric_limits<uint32_t>::max()) {
+			return 0;
+		}
+
+		return (uint32_t)used;
+	}
+
+	std::vector<std::filesystem::path> SharedFileUtils::GetDirectoryFileListCloud(const std::filesystem::path& container, bool recurse) const
+	{
+		return GetDirectoryFileList(GetPath(ROOT_CLOUD, container), "/", recurse);
 	}
 
 	std::filesystem::path SharedFileUtils::FilterBadFilenameChars(std::filesystem::path file_name) {

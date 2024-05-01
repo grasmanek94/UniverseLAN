@@ -25,9 +25,6 @@ namespace universelan::client {
 	}
 
 	void CloudStorageImpl::GetFileList(const char* container, ICloudStorageGetFileListListener* listener) {
-		uint32_t total_disk_space = sfu.GetTotalDiskSpace();
-		uint32_t used_disk_space = total_disk_space - sfu.GetAvailableDiskSpace();
-
 		last_container = SharedFileUtils::FilterBadFilenameChars(util::safe_fix_null_char_ptr(container));
 		container_file_list = sfu.GetDirectoryFileListCloud(last_container);
 
@@ -35,8 +32,8 @@ namespace universelan::client {
 			listener,
 			&ICloudStorageGetFileListListener::OnGetFileListSuccess,
 			(uint32_t)container_file_list.size(),
-			total_disk_space,
-			used_disk_space);
+			sfu.GetTotalDiskSpace(),
+			sfu.GetUsedDiskSpace());
 	}
 
 	const char* CloudStorageImpl::GetFileNameByIndex(uint32_t index) const {
@@ -45,7 +42,12 @@ namespace universelan::client {
 			return nullptr;
 		}
 
-		return container_file_list[index].string().c_str();
+		static thread_local char buffer[256];
+
+		std::string name = container_file_list[index].string();
+		universelan::util::safe_copy_str_n(name, buffer, sizeof(buffer));
+
+		return buffer;
 	}
 
 	uint32_t CloudStorageImpl::GetFileSizeByIndex(uint32_t index) const {

@@ -119,9 +119,10 @@ namespace universelan {
 
 		uint32_t GetTotalDiskSpace() const;
 		uint32_t GetAvailableDiskSpace() const;
+		uint32_t GetUsedDiskSpace() const;
 
-		std::vector<std::filesystem::path> GetDirectoryFileListCloud(const std::filesystem::path& container) const;
-		std::vector<std::filesystem::path> GetDirectoryFileList(const std::filesystem::path& root, const std::filesystem::path& directory) const;
+		std::vector<std::filesystem::path> GetDirectoryFileListCloud(const std::filesystem::path& container, bool recurse = false) const;
+		std::vector<std::filesystem::path> GetDirectoryFileList(const std::filesystem::path& root, const std::filesystem::path& directory, bool recurse = false) const;
 	};
 
 	inline bool inside_basepath(
