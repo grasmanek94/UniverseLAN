@@ -16,11 +16,11 @@ namespace universelan {
 			using std::filesystem::directory_iterator;
 			return std::distance(directory_iterator(path), directory_iterator{});
 		}
-
 	}
 
 	const std::string SharedFileUtils::ROOT_LOCAL = "Local";
-	const std::string SharedFileUtils::ROOT_LOCAL = "Cloud";
+	const std::string SharedFileUtils::ROOT_CLOUD = "Cloud/files";
+	const std::string SharedFileUtils::ROOT_CLOUD_METADATA = "Cloud/metadata";
 	const std::string SharedFileUtils::ROOT_SHARED = "Shared";
 	const std::string SharedFileUtils::ROOT_AVATARS = "Avatars";
 	const std::string SharedFileUtils::ROOT_LOGGING = "Logging";
@@ -124,15 +124,14 @@ namespace universelan {
 	std::filesystem::path SharedFileUtils::GetPath(const std::string& root, const std::string& file_name) const {
 		std::filesystem::path combined(basepath / root);
 
-		if (inside_basepath(combined, file_name)) {
-			return (combined / file_name);
-		}
+		return sandbox_secure_path_concat(combined, file_name);
+	}
 
-		if (file_name == "/") {
-			return combined;
-		}
+	std::filesystem::path SharedFileUtils::GetPath(const std::string& root, const std::string& container, const std::string& file_name) const {
+		std::filesystem::path combined(basepath / root);
+		std::filesystem::path contained_file_name(std::filesystem::path(container) / file_name);
 
-		throw std::runtime_error("Security Exception: Path traversal outside sandbox: " + file_name);
+		return sandbox_secure_path_concat(combined, contained_file_name);
 	}
 
 	bool SharedFileUtils::Exists(const std::string& root, const std::string& file_name) const {
@@ -237,7 +236,7 @@ namespace universelan {
 			}
 		}
 
-		return ".";
+		return "";
 	}
 
 	bool SharedFileUtils::Copy(const std::string& root_from, const std::string& root_to, const std::string& file_name) const {
@@ -276,6 +275,10 @@ namespace universelan {
 		return GetPath(ROOT_AVATARS, file_name);
 	}
 
+	std::filesystem::path SharedFileUtils::GetPathCloud(const std::string& container, const std::string& file_name)  const {
+		return GetPath(ROOT_CLOUD, container, file_name);
+	}
+
 	bool SharedFileUtils::ExistsShared(SharedFileID id) const {
 		return Exists(ROOT_SHARED, GetSharedFileName(id));
 	}
@@ -290,6 +293,10 @@ namespace universelan {
 
 	bool SharedFileUtils::ExistsAvatar(const std::string& file_name) const {
 		return Exists(ROOT_AVATARS, file_name);
+	}
+
+	bool SharedFileUtils::ExistsCloud(const std::string& container, const std::string& file_name) const {
+		return Exists(GetPath(ROOT_CLOUD, container).string(), file_name);
 	}
 
 	bool SharedFileUtils::RemoveShared(SharedFileID id) const {
@@ -308,6 +315,10 @@ namespace universelan {
 		return Remove(ROOT_AVATARS, file_name);
 	}
 
+	bool SharedFileUtils::RemoveCloud(const std::string& container, const std::string& file_name) const {
+		return Remove(GetPath(ROOT_CLOUD, container).string(), file_name);
+	}
+
 	bool SharedFileUtils::WriteShared(SharedFileID id, const char* data, size_t data_length) const {
 		return Write(ROOT_SHARED, GetSharedFileName(id), data, data_length);
 	}
@@ -322,6 +333,10 @@ namespace universelan {
 
 	bool SharedFileUtils::WriteAvatar(const std::string& file_name, const char* data, size_t data_length) const {
 		return Write(ROOT_AVATARS, file_name, data, data_length);
+	}
+
+	bool SharedFileUtils::WriteCloud(const std::string& container, const std::string& file_name, const char* data, size_t data_length) const {
+		return Write(GetPath(ROOT_CLOUD, container).string(), file_name, data, data_length);
 	}
 
 	uint32_t SharedFileUtils::ReadShared(SharedFileID id, char* data, size_t data_length, size_t offset) const {
@@ -340,6 +355,10 @@ namespace universelan {
 		return Read(ROOT_AVATARS, file_name, data, data_length, offset);
 	}
 
+	uint32_t SharedFileUtils::ReadCloud(const std::string& container, const std::string& file_name, char* data, size_t data_length, size_t offset) const {
+		return Read(GetPath(ROOT_CLOUD, container).string(), file_name, data, data_length);
+	}
+
 	std::vector<char> SharedFileUtils::ReadShared(SharedFileID id) const {
 		return Read(ROOT_SHARED, GetSharedFileName(id));
 	}
@@ -354,6 +373,10 @@ namespace universelan {
 
 	std::vector<char> SharedFileUtils::ReadAvatar(const std::string& file_name) const {
 		return Read(ROOT_AVATARS, file_name);
+	}
+
+	std::vector<char> SharedFileUtils::ReadCloud(const std::string& container, const std::string& file_name) const {
+		return Read(GetPath(ROOT_CLOUD, container).string(), file_name);
 	}
 
 	uint32_t SharedFileUtils::GetSizeShared(SharedFileID id) const {
@@ -372,6 +395,10 @@ namespace universelan {
 		return GetSize(ROOT_AVATARS, file_name);
 	}
 
+	uint32_t SharedFileUtils::GetSizeCloud(const std::string& container, const std::string& file_name) const {
+		return GetSize(GetPath(ROOT_CLOUD, container).string(), file_name);
+	}
+
 	uint32_t SharedFileUtils::GetTimestampShared(SharedFileID id) const {
 		return GetTimestamp(ROOT_SHARED, GetSharedFileName(id));
 	}
@@ -388,6 +415,10 @@ namespace universelan {
 		return GetTimestamp(ROOT_AVATARS, file_name);
 	}
 
+	uint32_t SharedFileUtils::GetTimestampCloud(const std::string& container, const std::string& file_name) const {
+		return GetTimestamp(GetPath(ROOT_CLOUD, container).string(), file_name);
+	}
+
 	uint32_t SharedFileUtils::GetFileCountShared() const {
 		return GetFileCount(ROOT_SHARED);
 	}
@@ -400,6 +431,10 @@ namespace universelan {
 		return GetFileCount(ROOT_AVATARS);
 	}
 
+	uint32_t SharedFileUtils::GetFileCountCloud(const std::string& container) const {
+		return GetFileCount(GetPath(ROOT_CLOUD, container).string());
+	}
+
 	std::string SharedFileUtils::GetFileNameByIndexShared(uint32_t index) const {
 		return GetFileNameByIndex(ROOT_SHARED, index);
 	}
@@ -410,6 +445,10 @@ namespace universelan {
 
 	std::string SharedFileUtils::GetFileNameByIndexAvatar(uint32_t index) const {
 		return GetFileNameByIndex(ROOT_AVATARS, index);
+	}
+
+	std::string SharedFileUtils::GetFileNameByIndexCloud(const std::string& container, uint32_t index) const {
+		return GetFileNameByIndex(GetPath(ROOT_CLOUD, container).string(), index);
 	}
 
 	bool SharedFileUtils::CopyFromLocalToShared(const std::string& file_name) const {
@@ -426,5 +465,40 @@ namespace universelan {
 
 	bool SharedFileUtils::UnlinkSharedFileStorage(const std::string& filename) const {
 		return UnlinkSharedFileStorage(filename, GetSharedFileID(filename));
+	}
+
+	uint32_t SharedFileUtils::GetTotalDiskSpace() const {
+		std::error_code ec;
+		const std::filesystem::space_info si = std::filesystem::space(basepath, ec);
+		if (si.capacity >= std::numeric_limits<uint32_t>::max()) {
+			return std::numeric_limits<uint32_t>::max();
+		}
+
+		return si.capacity;
+	}
+
+	uint32_t SharedFileUtils::GetAvailableDiskSpace() const {
+		std::error_code ec;
+		const std::filesystem::space_info si = std::filesystem::space(basepath, ec);
+		if (si.available >= std::numeric_limits<uint32_t>::max()) {
+			return std::numeric_limits<uint32_t>::max();
+		}
+
+		return si.available;
+	}
+
+	std::string SharedFileUtils::FilterBadFilenameChars(std::string file_name) {
+		// keep this sorted for more performance (helps cpu predictor)
+		constexpr static const char bad_chars[] = { '"', '*' , '/', ':', '<', '>', '?', '\\', '|' };
+
+		for (char& c : file_name) {
+			for (const char b : bad_chars) {
+				if (c < 32 || b == c) {
+					c = '_';
+				}
+			}
+		}
+
+		return file_name;
 	}
 }

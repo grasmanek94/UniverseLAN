@@ -9,15 +9,13 @@
 #include <string>
 #include <utility>
 
-#ifdef DeleteFile
-#undef DeleteFile
-#endif
-
 namespace universelan::client {
 	using namespace galaxy::api;
 
 	CloudStorageImpl::CloudStorageImpl(InterfaceInstances* intf) :
-		intf{ intf }, listeners{ intf->notification.get() }
+		intf{ intf }, listeners{ intf->notification.get() },
+		sfu(intf->config->GetGameDataPath()), last_container{ "" },
+		container_file_list{}
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 	}
@@ -27,31 +25,103 @@ namespace universelan::client {
 	}
 
 	void CloudStorageImpl::GetFileList(const char* container, ICloudStorageGetFileListListener* listener) {
-	
+		uint32_t total_disk_space = sfu.GetTotalDiskSpace();
+		uint32_t used_disk_space = total_disk_space - sfu.GetAvailableDiskSpace();
+
+		last_container = SharedFileUtils::FilterBadFilenameChars(util::safe_fix_null_char_ptr(container));
+		container_file_list.clear();
+
+		using std::filesystem::directory_iterator;
+
+		auto entries = directory_iterator(sfu.GetPath(sfu.ROOT_CLOUD, last_container));
+		for (auto& entry : entries) {
+			container_file_list.push_back(entry.path().filename().string());
+		}
+
+		listeners->NotifyAll(
+			listener,
+			&ICloudStorageGetFileListListener::OnGetFileListSuccess,
+			(uint32_t)container_file_list.size(),
+			total_disk_space,
+			used_disk_space);
 	}
 
 	const char* CloudStorageImpl::GetFileNameByIndex(uint32_t index) const {
-		return "";
+
+		if (index >= container_file_list.size()) {
+			return nullptr;
+		}
+
+		return container_file_list[index].c_str();
 	}
 
 	uint32_t CloudStorageImpl::GetFileSizeByIndex(uint32_t index) const {
-		return 0;
+		if (index >= container_file_list.size()) {
+			return 0;
+		}
+
+		return sfu.GetSizeCloud(last_container, container_file_list[index]);
 	}
 
-	uint32_t CloudStorageImpl::GetFileTimestampByIndex(uint32_t index) const { 
-		return 0;
+	uint32_t CloudStorageImpl::GetFileTimestampByIndex(uint32_t index) const {
+		if (index >= container_file_list.size()) {
+			return 0;
+		}
+
+		return sfu.GetTimestampCloud(last_container, container_file_list[index]);
 	}
 
-	void CloudStorageImpl::GetFile(const char* container, const char* name, void* userParam, WriteFunc writeFunc, ICloudStorageGetFileListener* listener) { 
-	
+	void CloudStorageImpl::GetFile(const char* container, const char* name, void* userParam, WriteFunc writeFunc, ICloudStorageGetFileListener* listener) {
+		if (name == nullptr) {
+			listeners->NotifyAll(
+				listener,
+				&ICloudStorageGetFileListener::OnGetFileFailure, container, name, ICloudStorageGetFileListener::FAILURE_REASON_UNDEFINED);
+
+			return;
+		}
+
+		if (writeFunc == nullptr) {
+			listeners->NotifyAll(
+				listener,
+				&ICloudStorageGetFileListener::OnGetFileFailure, container, name, ICloudStorageGetFileListener::FAILURE_REASON_WRITE_FUNC_ERROR);
+
+			return;
+		}
+
+		std::string container_str = SharedFileUtils::FilterBadFilenameChars(util::safe_fix_null_char_ptr(container));
+
+		if (!sfu.ExistsCloud(container_str, name)) {
+			listeners->NotifyAll(
+				listener,
+				&ICloudStorageGetFileListener::OnGetFileFailure, container, name, ICloudStorageGetFileListener::FAILURE_REASON_NOT_FOUND);
+
+			return;
+		}
+
+		std::string file_name{ name };
+
+		intf->delay_runner->Add([=, this] {
+			auto data{ sfu.ReadCloud(container_str, file_name) };
+			if (writeFunc(userParam, data.data(), (uint32_t)data.size()) < 0) {
+				this->listeners->NotifyAllNow(
+					listener,
+					&ICloudStorageGetFileListener::OnGetFileFailure, container_str.c_str(), name, ICloudStorageGetFileListener::FAILURE_REASON_WRITE_FUNC_ERROR);
+
+				return;
+			}}
+		);
 	}
 
-	void CloudStorageImpl::GetFile(const char* container, const char* name, void* buffer, uint32_t bufferLength, ICloudStorageGetFileListener* listener) { 
-	
+	void CloudStorageImpl::GetFile(const char* container, const char* name, void* buffer, uint32_t bufferLength, ICloudStorageGetFileListener* listener) {
+		listeners->NotifyAll(
+			listener,
+			&ICloudStorageGetFileListener::OnGetFileFailure, container, name, ICloudStorageGetFileListener::FAILURE_REASON_UNDEFINED);
 	}
 
-	void CloudStorageImpl::GetFileMetadata(const char* container, const char* name, ICloudStorageGetFileListener* listener) { 
-	
+	void CloudStorageImpl::GetFileMetadata(const char* container, const char* name, ICloudStorageGetFileListener* listener) {
+		listeners->NotifyAll(
+			listener,
+			&ICloudStorageGetFileListener::OnGetFileFailure, container, name, ICloudStorageGetFileListener::FAILURE_REASON_UNDEFINED);
 	}
 
 	const char* CloudStorageImpl::GetFileMetadataKeyByIndex(uint32_t index) const {
@@ -73,7 +143,9 @@ namespace universelan::client {
 		const char* const* metadataValues,
 		uint32_t timeStamp
 	) {
-
+		listeners->NotifyAll(
+			listener,
+			&ICloudStoragePutFileListener::OnPutFileFailure, container, name, ICloudStoragePutFileListener::FAILURE_REASON_UNDEFINED);
 	}
 
 	void CloudStorageImpl::PutFile(
@@ -86,7 +158,9 @@ namespace universelan::client {
 		const char* const* metadataValues,
 		uint32_t timeStamp
 	) {
-
+		listeners->NotifyAll(
+			listener,
+			&ICloudStoragePutFileListener::OnPutFileFailure, container, name, ICloudStoragePutFileListener::FAILURE_REASON_UNDEFINED);
 	}
 
 	void CloudStorageImpl::PutFile(
@@ -98,7 +172,7 @@ namespace universelan::client {
 		ICloudStoragePutFileListener* listener,
 		const char* const* metadataKeys,
 		const char* const* metadataValues
-	) { 
+	) {
 		PutFile(container, name, userParam, readFunc, rewindFunc, listener, metadataKeys, metadataValues, 0);
 	}
 
@@ -110,7 +184,7 @@ namespace universelan::client {
 		ICloudStoragePutFileListener* listener,
 		const char* const* metadataKeys,
 		const char* const* metadataValues
-	) { 
+	) {
 		PutFile(container, name, buffer, bufferLength, listener, metadataKeys, metadataValues, 0);
 	}
 

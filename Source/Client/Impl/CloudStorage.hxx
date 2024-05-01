@@ -12,11 +12,14 @@
 //#include <Networking/Messages/FileRequestMessage.hxx>
 //#include <Networking/Messages/FileShareMessage.hxx>
 //#include <Networking/Messages/FileShareResponseMessage.hxx>
-//#include <SharedFileUtils.hxx>
+#include <SharedFileUtils.hxx>
 
 #include <ICloudStorage.h>
 #include <GalaxyID.h>
 #include <IListenerRegistrar.h>
+
+#include <string>
+#include <vector>
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -35,6 +38,10 @@ namespace universelan::client {
 	private:
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
+
+		SharedFileUtils sfu;
+		std::string last_container;
+		std::vector<std::string> container_file_list;
 
 	public:
 		CloudStorageImpl(InterfaceInstances* intf);
@@ -270,7 +277,6 @@ namespace universelan::client {
 #undef DeleteFile
 		virtual void DeleteFile(const char* container, const char* name, ICloudStorageDeleteFileListener* listener) override;
 #pragma pop_macro ("DeleteFile")
-
 	};
 
 	/** @} */
