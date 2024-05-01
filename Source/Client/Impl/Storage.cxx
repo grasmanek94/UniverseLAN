@@ -83,7 +83,7 @@ namespace universelan::client {
 	void StorageImpl::GetFileNameCopyByIndex(uint32_t index, char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 
-		std::string path = sfu.GetFileNameByIndexLocal(index);
+		std::string path = sfu.GetFileNameByIndexLocal(index).string();
 		universelan::util::safe_copy_str_n(path, buffer, bufferLength);
 	}
 
@@ -163,7 +163,7 @@ namespace universelan::client {
 	void StorageImpl::GetSharedFileNameCopy(SharedFileID sharedFileID, char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 
-		std::string name = sfu.GetSharedFileName(sharedFileID);
+		std::string name = sfu.GetSharedFileName(sharedFileID).string();
 		universelan::util::safe_copy_str_n(name, buffer, bufferLength);
 	}
 

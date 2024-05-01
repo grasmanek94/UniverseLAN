@@ -18,6 +18,7 @@
 #include <GalaxyID.h>
 #include <IListenerRegistrar.h>
 
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -40,8 +41,8 @@ namespace universelan::client {
 		ListenerRegistrarImpl* listeners;
 
 		SharedFileUtils sfu;
-		std::string last_container;
-		std::vector<std::string> container_file_list;
+		std::filesystem::path last_container;
+		std::vector<std::filesystem::path> container_file_list;
 
 	public:
 		CloudStorageImpl(InterfaceInstances* intf);

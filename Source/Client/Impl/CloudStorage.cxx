@@ -29,14 +29,7 @@ namespace universelan::client {
 		uint32_t used_disk_space = total_disk_space - sfu.GetAvailableDiskSpace();
 
 		last_container = SharedFileUtils::FilterBadFilenameChars(util::safe_fix_null_char_ptr(container));
-		container_file_list.clear();
-
-		using std::filesystem::directory_iterator;
-
-		auto entries = directory_iterator(sfu.GetPath(sfu.ROOT_CLOUD, last_container));
-		for (auto& entry : entries) {
-			container_file_list.push_back(entry.path().filename().string());
-		}
+		container_file_list = sfu.GetDirectoryFileListCloud(last_container);
 
 		listeners->NotifyAll(
 			listener,
@@ -52,7 +45,7 @@ namespace universelan::client {
 			return nullptr;
 		}
 
-		return container_file_list[index].c_str();
+		return container_file_list[index].string().c_str();
 	}
 
 	uint32_t CloudStorageImpl::GetFileSizeByIndex(uint32_t index) const {
@@ -60,7 +53,7 @@ namespace universelan::client {
 			return 0;
 		}
 
-		return sfu.GetSizeCloud(last_container, container_file_list[index]);
+		return sfu.GetSizeCloud(last_container, container_file_list[index].string());
 	}
 
 	uint32_t CloudStorageImpl::GetFileTimestampByIndex(uint32_t index) const {
@@ -68,7 +61,7 @@ namespace universelan::client {
 			return 0;
 		}
 
-		return sfu.GetTimestampCloud(last_container, container_file_list[index]);
+		return sfu.GetTimestampCloud(last_container, container_file_list[index].string());
 	}
 
 	void CloudStorageImpl::GetFile(const char* container, const char* name, void* userParam, WriteFunc writeFunc, ICloudStorageGetFileListener* listener) {
@@ -88,7 +81,7 @@ namespace universelan::client {
 			return;
 		}
 
-		std::string container_str = SharedFileUtils::FilterBadFilenameChars(util::safe_fix_null_char_ptr(container));
+		std::filesystem::path container_str = SharedFileUtils::FilterBadFilenameChars(util::safe_fix_null_char_ptr(container));
 
 		if (!sfu.ExistsCloud(container_str, name)) {
 			listeners->NotifyAll(
@@ -105,7 +98,7 @@ namespace universelan::client {
 			if (writeFunc(userParam, data.data(), (uint32_t)data.size()) < 0) {
 				this->listeners->NotifyAllNow(
 					listener,
-					&ICloudStorageGetFileListener::OnGetFileFailure, container_str.c_str(), name, ICloudStorageGetFileListener::FAILURE_REASON_WRITE_FUNC_ERROR);
+					&ICloudStorageGetFileListener::OnGetFileFailure, container_str.string().c_str(), name, ICloudStorageGetFileListener::FAILURE_REASON_WRITE_FUNC_ERROR);
 
 				return;
 			}}
