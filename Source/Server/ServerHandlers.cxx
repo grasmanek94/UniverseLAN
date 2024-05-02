@@ -266,7 +266,7 @@ namespace universelan::server {
 
 		if (data->id != 0) {
 			data->data = sfu.ReadShared(data->id);
-			data->filename = sfu.GetSharedFileName(data->id);
+			data->filename = sfu.GetSharedFileName(data->id).string();
 		}
 		else if (data->filename.size() != 0) {
 			data->data = sfu.ReadShared(data->filename);
