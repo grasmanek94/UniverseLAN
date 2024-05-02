@@ -112,17 +112,17 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Serious Sams Bogus Detour             | :construction:            | 1.100.2                       | Stuck on "Creating lobby..." or "Joining lobby..." <br> Can get into lobby since build 243 but host crashes on start |
 | Niffelheim                            | :construction:            | 1.139.2                       | Stuck at "Loading..." (save transfer?) | 
 | Alien vs Predator 2000                | :question:                |                               | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176? |
-| Homeworld Remastered Collection       | :warning:                 |                               | | 
 | Homeworld: Deserts of Kharak          | :warning:                 |                               | | 
 | No Man's Sky                          | :warning:                 | 1.148.3                       | | 
 | Speed Brawl                           | :warning:                 | 1.144.1                       | | 
 | Shadow Warrior 2                      | :warning:                 | 1.95.0                        | | 
-| Rage of Mages II: Necromancer         | :left_right_arrow:        |                               | | 
-| Neverwinter Nights 2 Complete         | :left_right_arrow:        |                               | | 
-| Baldur's Gate 3                       | :left_right_arrow:        |                               | | 
-| Heroes of Might and Magic 3           | :left_right_arrow:        |                               | | 
-| Empire Earth 3                        | :left_right_arrow:        |                               | | 
-| Jazz Jackrabbit 2 Collection          | :left_right_arrow:        |                               | | 
+| Rage of Mages II: Necromancer         | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
+| Neverwinter Nights 2 Complete         | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
+| Baldur's Gate 3                       | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
+| Heroes of Might and Magic 3           | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
+| Empire Earth 3                        | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
+| Jazz Jackrabbit 2 Collection          | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
+| Homeworld Remastered Collection       | :left_right_arrow:        | 1.77                          | Has native LAN for all three games when launching HomeworldRM.exe | 
 | Ticket to Ride                        | :left_right_arrow:        | 1.139.2                       | Tried it with the wrapper and works, but need to create a free Wonder account | 
 | Aragami 2                             | :left_right_arrow:        | 1.148.3                       | Probably does not use GOG Galaxy for networking (doesn't work for private lobbies).<br> Can play on public lobbies without GOG Galaxy or with this patch AFAIK. |
 | DUSK (DuskWorld)                      | :left_right_arrow:        | 1.133.6                       | Uses steam (works without Steam Client) api for free online play, doesn't use GOG Galaxy. |
