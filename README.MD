@@ -111,11 +111,11 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Driftland - The Magic Revival         | :construction:            | 1.133.6                       | Both games crash when joining |
 | Serious Sams Bogus Detour             | :construction:            | 1.100.2                       | Stuck on "Creating lobby..." or "Joining lobby..." <br> Can get into lobby since build 243 but host crashes on start |
 | Niffelheim                            | :construction:            | 1.139.2                       | Stuck at "Loading..." (save transfer?) | 
-| Alien vs Predator 2000                | :question:                |                               | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176? |
-| Homeworld: Deserts of Kharak          | :warning:                 | 1.101                         | | 
-| No Man's Sky                          | :warning:                 | 1.148.3                       | | 
+| Homeworld: Deserts of Kharak          | :construction:            | 1.101                         | Tested with 1.100.2. Can't create a lobby somehow. | 
+| No Man's Sky                          | :construction:            | 1.148.3                       | Doesn't work yet, no 'friends' or hosts show up. | 
 | Speed Brawl                           | :warning:                 | 1.144.1                       | | 
 | Shadow Warrior 2                      | :warning:                 | 1.95.0                        | | 
+| Alien vs Predator 2000                | :question:                |                               | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176? |
 | Rage of Mages II: Necromancer         | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
 | Neverwinter Nights 2 Complete         | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
 | Baldur's Gate 3                       | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
