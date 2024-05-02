@@ -116,6 +116,8 @@ namespace universelan {
 		bool CopyFromSharedToLocal(const std::filesystem::path& file_name) const;
 
 		static std::filesystem::path FilterBadFilenameChars(std::filesystem::path file_name);
+		static bool HasBadFilenameChars(const char* file_name);
+		static bool HasBadFilenameChars(std::filesystem::path file_name);
 
 		uint32_t GetTotalDiskSpace() const;
 		uint32_t GetAvailableDiskSpace() const;

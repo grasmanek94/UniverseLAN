@@ -546,4 +546,40 @@ namespace universelan {
 
 		return fixed_filename;
 	}
+
+	bool SharedFileUtils::HasBadFilenameChars(const char* file_name) {
+		if (file_name == nullptr || (*file_name) == '\0') {
+			return true;
+		}
+
+		// keep this sorted for more performance (helps cpu predictor)
+		constexpr static const char bad_chars[] = { '"', '*' , '/', ':', '<', '>', '?', '\\', '|' };
+
+		char c = *file_name;
+		while(c) {
+			for (const char b : bad_chars) {
+				if (c < 32 || b == c) {
+					return true;
+				}
+			}
+			c = *(++file_name);
+		}
+
+		return false;
+	}
+
+	bool SharedFileUtils::HasBadFilenameChars(std::filesystem::path file_name) {
+		// keep this sorted for more performance (helps cpu predictor)
+		constexpr static const char bad_chars[] = { '"', '*' , '/', ':', '<', '>', '?', '\\', '|' };
+
+		for (char c : file_name.string()) {
+			for (const char b : bad_chars) {
+				if (c < 32 || b == c) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
 }
