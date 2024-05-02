@@ -290,7 +290,7 @@ namespace universelan::client {
 		lock_t lock{ mtx };
 		auto chat_room = chatroom_manager.GetChatRoom(chatRoomID);
 		if (chat_room != nullptr) {
-			auto user_id = container_get_by_index(chat_room->GetMembers(), index);
+			auto user_id = container_get_by_index(chat_room->GetMembers(), index, GalaxyID(0));
 
 			if (trace.has_flags(tracer::Trace::RETURN_VALUES | tracer::Trace::HIGH_FREQUENCY_CALLS)) {
 				trace.write_all(std::format("UserID: {}", user_id));

@@ -17,6 +17,8 @@
 #include <GalaxyID.h>
 #include <IListenerRegistrar.h>
 
+#include <set>
+
 namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_GetImageRGBA_CHAR_TO_VOID
@@ -62,6 +64,8 @@ namespace universelan::client {
 		ListenersRequestHelper<IRichPresenceChangeListener*> rich_presence_change_requests;
 
 		AvatarCriteriaImpl avatar_criteria;
+
+		std::set<GalaxyID> online_friends;
 	public:
 
 		FriendsImpl(InterfaceInstances* intf);
@@ -613,6 +617,8 @@ namespace universelan::client {
 		void RequestUserInformationProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
 		void RichPresenceChangeMessageProcessed(const std::shared_ptr<RichPresenceChangeMessage>& data);
 		void RequestRichPresenceProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
+
+		void ChangeOnlineStatus(GalaxyID userID, bool isOnline);
 	};
 
 	/** @} */

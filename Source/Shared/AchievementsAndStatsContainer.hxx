@@ -57,25 +57,25 @@ namespace universelan {
 		AchievementsAndStatsContainer(const AchievementsAndStatsContainer& other);
 
 		template<typename T>
-		T run_locked_achievements(std::function<T(map_t<AchievementData>&)> func) {
+		T run_locked_achievements(std::function<T(achievements_t&)> func) {
 			lock_t lock(mtx_achievements);
 			return func(Achievements);
 		}
 
 		template<typename T>
-		T  run_locked_stats(std::function<T(map_t<StatsDataContainer>&)> func) {
+		T  run_locked_stats(std::function<T(stats_t&)> func) {
 			lock_t lock(mtx_stats);
 			return func(Stats);
 		}
 
 		template<typename T>
-		T  run_locked_userdata(std::function<T(map_t<std::string>&)> func) {
+		T  run_locked_userdata(std::function<T(user_data_t&)> func) {
 			lock_t lock(mtx_userdata);
 			return func(UserData);
 		}
 
 		template<typename T>
-		T  run_locked_richpresence(std::function<T(map_t<std::string>&)> func) {
+		T  run_locked_richpresence(std::function<T(user_data_t&)> func) {
 			lock_t lock(mtx_richpresence);
 			return func(RichPresence);
 		}

@@ -300,11 +300,12 @@ namespace universelan::client {
 
 		lock_t lock{ mtx };
 
-		if (lobby_list_filtered.size() < index) {
+		auto ref = container_get_by_index(lobby_list_filtered, index);
+		if (!ref) {
 			return 0;
 		}
 
-		return container_get_by_index(lobby_list_filtered, index).first;
+		return ref->first;
 	}
 
 	void MatchmakingImpl::JoinLobby(GalaxyID lobbyID

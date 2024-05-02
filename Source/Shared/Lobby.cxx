@@ -44,13 +44,7 @@ namespace universelan {
 	}
 
 	Lobby::data_by_index_t Lobby::GetDataByIndex(const data_t& data, size_t index) {
-		if (data.size() < index) {
-			return data_by_index_t{ {},{} };
-		}
-
-		auto entry = container_get_by_index(data, index);
-
-		return data_by_index_t{ entry.first, entry.second };
+		return container_get_by_index(data, index, data_by_index_t{ {},{} });
 	}
 
 	void Lobby::SetData(data_t& data, const char* key, const char* value) {
@@ -120,11 +114,12 @@ namespace universelan {
 	}
 
 	GalaxyID Lobby::GetMemberByIndex(size_t index) const {
-		if (user_data.size() < index) {
+		auto ref = container_get_by_index(user_data, index);
+		if (!ref) {
 			return 0;
 		}
 
-		return container_get_by_index(user_data, index).first;
+		return ref->first;
 	}
 
 	void Lobby::SetType(LobbyType value) {

@@ -381,13 +381,13 @@ namespace universelan::client {
 
 		auto entry = GetGalaxyUserData(userID);
 		return entry->stats.run_locked_userdata<bool>([&](auto& map) -> bool {
-			if (map.size() < index) {
+			auto ref = container_get_by_index(map, index);
+			if (!ref) {
 				return false;
 			}
-
-			auto ref = container_get_by_index(map, index);
-			universelan::util::safe_copy_str_n(ref.first, key, keyLength);
-			universelan::util::safe_copy_str_n(ref.second, value, valueLength);
+	
+			universelan::util::safe_copy_str_n(ref->first, key, keyLength);
+			universelan::util::safe_copy_str_n(ref->second, value, valueLength);
 
 			return true;
 			});
@@ -473,6 +473,8 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		GetGalaxyUserData(data->id)->online = data->online;
+
+		intf->friends->ChangeOnlineStatus(data->id, data->online);
 	}
 
 	void UserImpl::SetUserDataMessageReceived(const std::shared_ptr<SetUserDataMessage>& data) {
