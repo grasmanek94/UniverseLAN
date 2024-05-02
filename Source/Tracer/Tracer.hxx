@@ -49,7 +49,9 @@ namespace universelan::tracer {
 			IGALAXYTHREAD = bit(22),
 			IAPPS = bit(23),
 			CUSTOMCONSOLE = bit(24),
-			ICLOUDSTORAGE = bit(25)
+			ICLOUDSTORAGE = bit(25),
+
+			NOTIFICATION_INVOCATIONS = bit(26)
 		};
 
 		static bool InitTracing(const char* const log_directory,

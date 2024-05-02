@@ -10,6 +10,8 @@
 
 #include "NotificationParamScopeExtender.hxx"
 
+#include <Tracer.hxx>
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <GalaxyExport.h>
@@ -120,6 +122,9 @@ namespace universelan::client {
 		template <class FuncT, class... ArgTypes>
 		bool NotifyAllNow(FuncT&& Function, ArgTypes&&... Arguments) {
 			using T = extract_class_from_member_function_ptr<FuncT>::type;
+
+			tracer::Trace trace{ "::nl", tracer::Trace::NOTIFICATION_INVOCATIONS };
+
 			return ExecuteForListenerTypePerEntry((ListenerType)T::GetListenerType(), [&](IGalaxyListener* listener) {
 				//T* casted_listener = dynamic_cast<T*>(listener);
 				T* casted_listener = (T*)(listener);
@@ -137,6 +142,8 @@ namespace universelan::client {
 				return NotifyAllNow(std::forward<FuncT>(Function), std::forward<ArgTypes>(Arguments)...);
 			}
 
+			tracer::Trace trace{ "::hl", tracer::Trace::NOTIFICATION_INVOCATIONS };
+
 			return ExecuteForListenerTypePerEntry((ListenerType)BaseT::GetListenerType(), one_time_specific_listener, [&](IGalaxyListener* listener) {
 				//BaseT* casted_listener = dynamic_cast<BaseT*>(listener);
 				BaseT* casted_listener = (BaseT*)(listener);
@@ -150,6 +157,9 @@ namespace universelan::client {
 		template <class FuncT, class... ArgTypes>
 		bool NotifyAllNowSimulate(FuncT&& Function, ArgTypes&&... Arguments) {
 			using T = extract_class_from_member_function_ptr<FuncT>::type;
+
+			tracer::Trace trace{ "::nl", tracer::Trace::NOTIFICATION_INVOCATIONS };
+
 			return ExecuteForListenerTypePerEntry((ListenerType)T::GetListenerType(), [&](IGalaxyListener* listener) {
 				T* casted_listener = (T*)(listener);
 
@@ -167,6 +177,8 @@ namespace universelan::client {
 				return NotifyAllNowSimulate(std::forward<FuncT>(Function), std::forward<ArgTypes>(Arguments)...);
 			}
 
+			tracer::Trace trace{ "::hl", tracer::Trace::NOTIFICATION_INVOCATIONS };
+
 			return ExecuteForListenerTypePerEntry((ListenerType)BaseT::GetListenerType(), one_time_specific_listener, [&](IGalaxyListener* listener) {
 				BaseT* casted_listener = (BaseT*)(listener);
 
@@ -180,6 +192,8 @@ namespace universelan::client {
 		template <typename... ArgTypes>
 		void NotifyAll(ArgTypes... Arguments)
 		{
+			tracer::Trace trace{ nullptr, tracer::Trace::NOTIFICATION_INVOCATIONS };
+
 #ifndef NDEBUG
 			this->NotifyAllNowSimulate(std::forward<decltype(Arguments)>(Arguments)...);
 #endif
