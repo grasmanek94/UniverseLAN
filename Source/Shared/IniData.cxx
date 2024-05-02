@@ -2,6 +2,7 @@
 
 #include "ConstHash.hxx"
 #include "MachineInfo.hxx"
+#include "ConsoleCoutRedirector.hxx"
 
 #include <magic_enum/magic_enum.hpp>
 #include <Tracer.hxx>
@@ -11,6 +12,8 @@
 #include <exception>
 #include <filesystem>
 #include <iostream>
+#include <memory>
+#include <sstream>
 #include <stdexcept>
 #include <string_view>
 #include <string>

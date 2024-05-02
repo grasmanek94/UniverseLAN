@@ -6,6 +6,8 @@
 #include "CustomConsole.hxx"
 #include "UniverseLAN.hxx"
 
+#include <ConsoleCoutRedirector.hxx>
+
 #include <Version.hxx>
 
 #ifdef _WIN32
@@ -15,6 +17,8 @@
 namespace universelan::client {
 	void Init(const InitOptionsModern& initOptions)
 	{
+		console::Redirector::get()->capture_tee();
+
 #ifdef _WIN32
 		{
 			TCHAR szFileName[MAX_PATH];
@@ -45,6 +49,8 @@ namespace universelan::client {
 		if (intf_inst.config->GetEnableConsole()) {
 			EnableCustomConsole();
 		}
+
+		console::Redirector::get()->release();
 
 		std::cout << " == UniverseLAN Client == " << std::endl;
 		std::cout << "Build: " << Version_Number << std::endl;
