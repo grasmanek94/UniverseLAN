@@ -159,91 +159,91 @@ Building the tests is optional.
 These GOG Galaxy SDK versions should work interchangeably.  
 > For Developers: This does not neccesseraly represent version compilation compatibility, for example 1.125 and 1.125.1 are not compile-compatible (due to `uint32_t` to `enum` type change), but should be binary-compatible.  
 
-| SDK Base Version       | Other Compatible Versions | Notable changes |  
-| :--------------------: | :------------------------ | --------------- |  
-| 1.57 | - |
-| 1.59 | 1.60 | Added: <br> `IFriends::AvatarType` <br> `IFriends::GetFriendPersonaName` <br> `IFriends::GetFriendAvatarUrl`
-| 1.61 | - | Added: <br> `IFriends::IPersonaDataChangedListener` <br> `IFriends::IRichPresenceChangeListener` <br> `IFriends::RequestUserInformation` <br> `IFriends::Set/Delete/ClearRichPresence`
-| 1.62 | 1.63 <br> 1.64 | Added: <br> `IUser::IsLoggedOn` <br> `ILeaderboardEntriesRetrieveListener::FAILURE_REASON_NOT_FOUND` <br> `IErrorManager` / `GetErrorManager` <br> Renamed `Reset` to `ResetInstance`
-| 1.65 | 1.66 |
-| 1.67 | - |
-| 1.68 | - |
-| 1.69 | - |
-| 1.70 | - |
-| 1.71 | 1.72 |
-| 1.73 | - |
-| 1.74 | - |
-| 1.75 | - |
-| 1.76 | - |
-| 1.77 | - |
-| 1.78 | 1.79 <br> 1.80 |
-| 1.82 | - |
-| 1.83 | - |
-| 1.84 | 1.85 <br> 1.86 |
-| 1.87 | - |
-| 1.88 | 1.89 <br> 1.90 |
-| 1.91 | 1.92 |
-| 1.92.1 | 1.93 <br> 1.94 <br> 1.95 <br> 1.96 <br> 1.97 <br> 1.98 |
-| 1.99 | - |
-| 1.100 | 1.100.2 <br> 1.101 <br> 1.101.2 <br> 1.101.4 |
-| 1.102 | - |
-| 1.103 | 1.103.1 <br> 1.104 <br> 1.104.1 <br> 1.104.2 |
-| 1.104.3 | - |
-| 1.104.4 | 1.104.5 <br> 1.104.6 <br> 1.105 |
-| 1.106 | 1.107 <br> 1.108 |
-| 1.109 | - |
-| 1.110 | 1.110.1 <br> 1.110.2 <br> 1.110.3 |
-| 1.110.4 | 1.111 <br> 1.111.2 <br> 1.112 <br> 1.112.1 <br> 1.112.2 |
-| 1.113 | - |
-| 1.113.2 | - |
-| 1.113.3 | - |
-| 1.114 | 1.114.1 <br> 1.114.2 <br> 1.114.3 <br> 1.114.4 <br> 1.114.6 <br> 1.114.7 |
-| 1.114.8 | 1.114.9 <br> 1.114.12 |
-| 1.120 | - |
-| 1.120.1 | 1.121 <br> 1.121.1 <br> 1.121.2 |
-| 1.122 | 1.122.1 <br> 1.122.3 <br> 1.122.4 <br> 1.123 <br> 1.123.1 <br> 1.124 |
-| 1.125 | 1.125.1 <br> 1.125.2 |
-| 1.126 | 1.126.1 |
-| 1.127 | - |
-| 1.128 | 1.128.1 <br> 1.128.2 <br> 1.128.3 |
-| 1.129 | 1.130 <br> 1.130.1 |
-| 1.131 | 1.131.1 <br> 1.131.2 <br> 1.131.3 |
-| 1.132 | 1.132.1 |
-| 1.133 | - |
-| 1.133.1 | - |
-| 1.133.3 | 1.133.4 <br> 1.133.5 <br> 1.133.6 <br> 1.133.7 <br> 1.133.9 |
-| 1.134 | 1.134.1 <br> 1.134.2 <br> 1.134.3 <br> 1.134.4 <br> 1.134.5 <br> 1.134.6 <br> 1.134.7 <br> 1.134.8 | Telemetry has been added
-| 1.134.9 | - |
-| 1.134.10 | - |
-| 1.135 | - |
-| 1.136 | 1.136.4 <br> 1.137 <br> 1.137.1 <br> 1.137.2 <br> 1.137.3 <br> 1.137.4 <br> 1.137.5 <br> 1.137.6 <br> 1.138 |
-| 1.138.1 | 1.139 <br> 1.139.1 <br> 1.139.2 <br> 1.139.3 <br> 1.139.4 |
-| 1.139.5 | - |
-| 1.139.6 | - |
-| 1.139.7 | 1.139.8 <br> 1.139.9 |
-| 1.140 | - | Added GalaxyThread (+to InitOptions)
-| 1.141 | 1.142 |
-| 1.143 | 1.143.1 <br> 1.143.2 <br> 1.143.3 <br> 1.144 <br> 1.144.1 <br> 1.144.2 <br> 1.145 <br> 1.145.1 <br> 1.145.2 <br> 1.145.3 <br> 1.145.4 <br> 1.145.5 |
-| 1.146 | 1.147 |
-| 1.147.1 | - |
-| 1.148 | 1.148.1 |
-| 1.148.2 | - | Added GetRichPresenceKeyByIndex/Copy
-| 1.148.3 | 1.148.4 |  
-| 1.148.5 | - | Removed SignInUWB and added SingInXbox
-| 1.148.6 | - | Added CloudStorage
-| 1.148.7 | 1.148.8 <br> 1.148.9 <br> 1.148.10 |  
-| 1.148.11 | 1.148.12 |  
-| 1.148.14 | - |  
-| 1.148.15 | - |  
-| 1.148.16 | 1.148.17 <br> 1.148.18 <br> 1.148.19 <br> 1.148.20 <br> 1.148.21 <br> 1.148.22 <br> 1.148.23 <br> 1.148.25 <br> 1.148.26 <br> 1.149.0 |  
-| 1.149.1 | - |  
-| 1.149.2 | 1.149.3 <br> 1.149.4 <br> 1.149.5 <br> 1.149.6 <br> 1.149.7 <br> 1.149.8 |  
-| 1.149.9 | - |  
-| 1.149.10 | - |  
-| 1.149.11 | - |  
-| 1.149.12 | 1.149.13 <br> 1.149.14 <br> 1.149.15 <br> 1.149.16 | Galaxy/Galaxy64 renamed to REDGalaxy/REDGalaxy64
-| 1.150 | - |  GOG reverted the rename to RED prefix, it's Galaxy/Galaxy64 again.
-| 1.151 | - |  
-| 1.152.1 | - |  
-| 1.152.2 | - |  
-| 1.152.5 | 1.152.6 |  
+| SDK Base Version          | Other Compatible Versions | Notable changes |  
+| :--------------------:    | :------------------------ | --------------- |  
+| 1.57                      | - |
+| 1.59                      | 1.60 | Added: <br> `IFriends::AvatarType` <br> `IFriends::GetFriendPersonaName` <br> `IFriends::GetFriendAvatarUrl`
+| 1.61                      | - | Added: <br> `IFriends::IPersonaDataChangedListener` <br> `IFriends::IRichPresenceChangeListener` <br> `IFriends::RequestUserInformation` <br> `IFriends::Set/Delete/ClearRichPresence`
+| 1.62                      | 1.63 <br> 1.64 | Added: <br> `IUser::IsLoggedOn` <br> `ILeaderboardEntriesRetrieveListener::FAILURE_REASON_NOT_FOUND` <br> `IErrorManager` / `GetErrorManager` <br> Renamed `Reset` to `ResetInstance`
+| 1.65                      | 1.66 |
+| 1.67                      | - |
+| 1.68                      | - |
+| 1.69                      | - |
+| 1.70                      | - |
+| 1.71                      | 1.72 |
+| 1.73                      | - |
+| 1.74                      | - |
+| 1.75                      | - |
+| 1.76                      | - |
+| 1.77                      | - |
+| 1.78                      | 1.79 <br> 1.80 |
+| 1.82                      | - |
+| 1.83                      | - |
+| 1.84                      | 1.85 <br> 1.86 |
+| 1.87                      | - |
+| 1.88                      | 1.89 <br> 1.90 |
+| 1.91                      | 1.92 |
+| 1.92.1                    | 1.93 <br> 1.94 <br> 1.95 <br> 1.96 <br> 1.97 <br> 1.98 |
+| 1.99                      | - |
+| 1.100                     | 1.100.2 <br> 1.101 <br> 1.101.2 <br> 1.101.4 |
+| 1.102                     | - |
+| 1.103                     | 1.103.1 <br> 1.104 <br> 1.104.1 <br> 1.104.2 |
+| 1.104.3                   | - |
+| 1.104.4                   | 1.104.5 <br> 1.104.6 <br> 1.105 |
+| 1.106                     | 1.107 <br> 1.108 |
+| 1.109                     | - |
+| 1.110                     | 1.110.1 <br> 1.110.2 <br> 1.110.3 |
+| 1.110.4                   | 1.111 <br> 1.111.2 <br> 1.112 <br> 1.112.1 <br> 1.112.2 |
+| 1.113                     | - |
+| 1.113.2                   | - |
+| 1.113.3                   | - |
+| 1.114                     | 1.114.1 <br> 1.114.2 <br> 1.114.3 <br> 1.114.4 <br> 1.114.6 <br> 1.114.7 |
+| 1.114.8                   | 1.114.9 <br> 1.114.12 |
+| 1.120                     | - |
+| 1.120.1                   | 1.121 <br> 1.121.1 <br> 1.121.2 |
+| 1.122                     | 1.122.1 <br> 1.122.3 <br> 1.122.4 <br> 1.123 <br> 1.123.1 <br> 1.124 |
+| 1.125                     | 1.125.1 <br> 1.125.2 |
+| 1.126                     | 1.126.1 |
+| 1.127                     | - |
+| 1.128                     | 1.128.1 <br> 1.128.2 <br> 1.128.3 |
+| 1.129                     | 1.130 <br> 1.130.1 |
+| 1.131                     | 1.131.1 <br> 1.131.2 <br> 1.131.3 |
+| 1.132                     | 1.132.1 |
+| 1.133                     | - |
+| 1.133.1                   | - |
+| 1.133.3                   | 1.133.4 <br> 1.133.5 <br> 1.133.6 <br> 1.133.7 <br> 1.133.9 |
+| 1.134                     | 1.134.1 <br> 1.134.2 <br> 1.134.3 <br> 1.134.4 <br> 1.134.5 <br> 1.134.6 <br> 1.134.7 <br> 1.134.8 | Telemetry has been added
+| 1.134.9                   | - |
+| 1.134.10                  | - |
+| 1.135                     | - |
+| 1.136                     | 1.136.4 <br> 1.137 <br> 1.137.1 <br> 1.137.2 <br> 1.137.3 <br> 1.137.4 <br> 1.137.5 <br> 1.137.6 <br> 1.138 |
+| 1.138.1                   | 1.139 <br> 1.139.1 <br> 1.139.2 <br> 1.139.3 <br> 1.139.4 |
+| 1.139.5                   | - |
+| 1.139.6                   | - |
+| 1.139.7                   | 1.139.8 <br> 1.139.9 |
+| 1.140                     | - | Added GalaxyThread (+to InitOptions)
+| 1.141                     | 1.142 |
+| 1.143                     | 1.143.1 <br> 1.143.2 <br> 1.143.3 <br> 1.144 <br> 1.144.1 <br> 1.144.2 <br> 1.145 <br> 1.145.1 <br> 1.145.2 <br> 1.145.3 <br> 1.145.4 <br> 1.145.5 |
+| 1.146                     | 1.147 |
+| 1.147.1                   | - |
+| 1.148                     | 1.148.1 |
+| 1.148.2                   | - | Added GetRichPresenceKeyByIndex/Copy
+| 1.148.3                   | 1.148.4 |  
+| 1.148.5                   | - | Removed SignInUWB and added SingInXbox
+| 1.148.6                   | - | Added CloudStorage
+| 1.148.7                   | 1.148.8 <br> 1.148.9 <br> 1.148.10 |  
+| 1.148.11                  | 1.148.12 |  
+| 1.148.14                  | - |  
+| 1.148.15                  | - |  
+| 1.148.16                  | 1.148.17 <br> 1.148.18 <br> 1.148.19 <br> 1.148.20 <br> 1.148.21 <br> 1.148.22 <br> 1.148.23 <br> 1.148.25 <br> 1.148.26 <br> 1.149.0 |  
+| 1.149.1                   | - |  
+| 1.149.2                   | 1.149.3 <br> 1.149.4 <br> 1.149.5 <br> 1.149.6 <br> 1.149.7 <br> 1.149.8 |  
+| 1.149.9                   | - |  
+| 1.149.10                  | - |  
+| 1.149.11                  | - |  
+| 1.149.12                  | 1.149.13 <br> 1.149.14 <br> 1.149.15 <br> 1.149.16 | Galaxy/Galaxy64 renamed to REDGalaxy/REDGalaxy64
+| 1.150                     | - |  GOG reverted the rename to RED prefix, it's Galaxy/Galaxy64 again.
+| 1.151                     | - |  
+| 1.152.1                   | - |  
+| 1.152.2                   | - |  
+| 1.152.5                   | 1.152.6 |  
