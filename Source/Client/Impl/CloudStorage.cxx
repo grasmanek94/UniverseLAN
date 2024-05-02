@@ -25,7 +25,9 @@ namespace universelan::client {
 	}
 
 	void CloudStorageImpl::GetFileList(const char* container, ICloudStorageGetFileListListener* listener) {
-		last_container = SharedFileUtils::FilterBadFilenameChars(util::safe_fix_null_char_ptr(container));
+		util::safe_fix_null_char_ptr(container);
+
+		last_container = SharedFileUtils::FilterBadFilenameChars(container);
 		container_file_list = sfu.GetDirectoryFileListCloud(last_container);
 
 		listeners->NotifyAll(

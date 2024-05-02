@@ -566,7 +566,9 @@ namespace universelan::client {
 	void FriendsImpl::ShowOverlayInviteDialog(const char* connectionString) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		std::cout << "ShowOverlayInviteDialog\n\t" << util::safe_fix_null_char_ptr(connectionString) << std::endl;
+		util::safe_fix_null_char_ptr(connectionString);
+
+		std::cout << "ShowOverlayInviteDialog\n\t" << connectionString << std::endl;
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_ISENDINVITATIONLISTENER
@@ -576,7 +578,6 @@ namespace universelan::client {
 #endif
 	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
-
 
 		if (!online_friends.contains(userID)) {
 			listeners->NotifyAll(
@@ -627,9 +628,11 @@ namespace universelan::client {
 
 		if (isOnline) {
 			online_friends.insert(userID);
+			listeners->NotifyAll(&IFriendAddListener::OnFriendAdded, userID, IFriendAddListener::INVITATION_DIRECTION_INCOMING);
 		}
 		else {
 			online_friends.erase(userID);
+			listeners->NotifyAll(&IFriendDeleteListener::OnFriendDeleteSuccess, userID);
 		}
 	}
 }
