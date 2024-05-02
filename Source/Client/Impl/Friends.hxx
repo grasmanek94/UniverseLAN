@@ -12,6 +12,7 @@
 
 #include <Networking/Messages/RequestSpecificUserDataMessage.hxx>
 #include <Networking/Messages/RichPresenceChangeMessage.hxx>
+#include <Networking/Messages/InvitationMessage.hxx>
 
 #include <IFriends.h>
 #include <GalaxyID.h>
@@ -619,6 +620,9 @@ namespace universelan::client {
 		void RequestRichPresenceProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
 
 		void ChangeOnlineStatus(GalaxyID userID, bool isOnline);
+
+		void InvitationReceived(const std::shared_ptr<InvitationMessage>& data);
+
 	};
 
 	/** @} */

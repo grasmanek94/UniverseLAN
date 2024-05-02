@@ -142,6 +142,8 @@ namespace universelan {
 		CSimpleIniA ini;
 		ini.SetUnicode();
 
+		std::cout << "Opening global config located at '" << std::filesystem::current_path() / BootFile << "'" << std::endl;
+
 		LoadIni(ini, BootFile);
 
 		GameDataPath = ini.GetValue(StoragePathSection.c_str(), "GameDataPath", "UniverseLANData");
@@ -213,6 +215,8 @@ namespace universelan {
 		CSimpleIniA ini;
 		ini.SetUnicode();
 
+		std::cout << "Opening Server config located at '" << std::filesystem::current_path() / GetPath(ConfigFile) << "'" << std::endl;
+
 		LoadIni(ini, GetPath(ConfigFile));
 
 		AllowFileSharingDownload = ini.GetBoolValue(StoragePathSection.c_str(), "AllowFileSharingDownload", true);
@@ -266,6 +270,8 @@ namespace universelan {
 			CSimpleIniA ini;
 			ini.SetUnicode();
 
+			std::cout << "Opening Client config located at '" << std::filesystem::current_path() / GetPath(ConfigFile) << "'" << std::endl;
+
 			LoadIni(ini, GetPath(ConfigFile));
 
 			Language = ini.GetValue(SettingsSection.c_str(), "Language", "english");
@@ -298,6 +304,7 @@ namespace universelan {
 
 			Avatar = ini.GetValue(UserSection.c_str(), "Avatar", "me.png");
 			SignedIn = ini.GetBoolValue(UserSection.c_str(), "SignedIn", true);
+			AutoAcceptGameInvitations = ini.GetBoolValue(UserSection.c_str(), "AutoAcceptGameInvitations", true);
 
 			if (const_hash(PersonaNameType) != const_hash("@Custom")) {
 
@@ -727,5 +734,10 @@ namespace universelan {
 	const GalaxyUserData::ptr_t& ClientIniData::GetLocalUserData() const
 	{
 		return local_user_data;
+	}
+
+	bool ClientIniData::AutoAcceptGameInvitationsEnabled() const
+	{
+		return AutoAcceptGameInvitations;
 	}
 }

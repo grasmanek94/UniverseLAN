@@ -730,4 +730,20 @@ namespace universelan::server {
 		return true;
 	}
 #endif
+
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<InvitationMessage>& data) {
+		tracer::Trace trace{ "::InvitationMessage" };
+
+		REQUIRES_AUTHENTICATION(peer);
+
+		peer::ptr pd = peer_mapper.Get(peer);
+		peer::ptr target = peer_mapper.Get(data->user_id);
+
+		if (!target) {
+			return;
+		}
+
+		data->user_id = pd->id;
+		connection.Send(target->peer, data);
+	}
 }

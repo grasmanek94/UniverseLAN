@@ -136,6 +136,8 @@ namespace universelan {
 		const std::string UserDataSection = "UserData";
 		// container see local_user_data
 
+		bool AutoAcceptGameInvitations;
+
 		std::string GetPath(const std::string& filename) const;
 
 	public:
@@ -172,5 +174,7 @@ namespace universelan {
 		void ResetStatsAndAchievements();
 
 		const GalaxyUserData::ptr_t& GetLocalUserData() const;
+
+		bool AutoAcceptGameInvitationsEnabled() const;
 	};
 }

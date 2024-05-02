@@ -564,7 +564,7 @@ namespace universelan::client {
 #endif
 
 	void FriendsImpl::ShowOverlayInviteDialog(const char* connectionString) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ connectionString, __FUNCTION__, tracer::Trace::IFRIENDS };
 
 		util::safe_fix_null_char_ptr(connectionString);
 
@@ -577,7 +577,7 @@ namespace universelan::client {
 		, ISendInvitationListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ connectionString, __FUNCTION__, tracer::Trace::IFRIENDS };
 
 		if (!online_friends.contains(userID)) {
 			listeners->NotifyAll(
@@ -588,7 +588,7 @@ namespace universelan::client {
 			return;
 		}
 
-		// TODO: implement this sometime
+		intf->client->GetConnection().SendAsync(InvitationMessage{ MessageUniqueID::get(), userID, util::safe_fix_null_char_ptr_ret(connectionString)});
 
 		listeners->NotifyAll(
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
@@ -634,5 +634,16 @@ namespace universelan::client {
 			online_friends.erase(userID);
 			listeners->NotifyAll(&IFriendDeleteListener::OnFriendDeleteSuccess, userID);
 		}
+	}
+
+	void FriendsImpl::InvitationReceived(const std::shared_ptr<InvitationMessage>& data)
+	{
+#if GALAXY_BUILD_FEATURE_HAS_ISENDINVITATIONLISTENER
+		listeners->NotifyAll(&IGameInvitationReceivedListener::OnGameInvitationReceived, data->user_id, data->connection_string.c_str());
+
+		if (intf->config->AutoAcceptGameInvitationsEnabled()) {
+			listeners->NotifyAll(&IGameJoinRequestedListener::OnGameJoinRequested, data->user_id, data->connection_string.c_str());
+		}
+#endif
 	}
 }

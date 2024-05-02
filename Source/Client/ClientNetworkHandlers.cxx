@@ -249,4 +249,11 @@ namespace universelan::client {
 
 		interfaces->friends->RichPresenceChangeMessageProcessed(data);
 	}
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<InvitationMessage>& data)
+	{
+		tracer::Trace trace{ "::InvitationMessage", tracer::Trace::NETCLIENT };
+
+		interfaces->friends->InvitationReceived(data);
+	}
 }

@@ -9,6 +9,7 @@
 #include "Messages/FileRequestMessage.hxx"
 #include "Messages/FileShareMessage.hxx"
 #include "Messages/FileShareResponseMessage.hxx"
+#include "Messages/InvitationMessage.hxx"
 #include "Messages/JoinLobbyMessage.hxx"
 #include "Messages/KeyChallengeMessage.hxx"
 #include "Messages/LeaveLobbyMessage.hxx"
@@ -68,7 +69,7 @@ namespace universelan {
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(SetLobbyMemberDataMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(SetLobbyTypeMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(SetUserDataMessage); \
+	SHARED_NETWORK_IMPLEMENT_CASE_FOR(InvitationMessage); \
 	SHARED_NETWORK_IMPLEMENT_ICHAT \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(UserHelloDataMessage)
-
 }

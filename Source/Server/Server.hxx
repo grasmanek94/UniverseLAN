@@ -44,6 +44,7 @@ namespace universelan::server {
 		virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data) override;
 		virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data) override;
 
+	// Here all 'virtual void Handle(ENetPeer* peer, const std::shared_ptr<T>&data) override; are declared
 #include <Networking/MessageHandlersDeclareOverride.hxx>
 
 		bool HandleMemberLobbyLeave(ENetPeer* peer, bool disconnected);
