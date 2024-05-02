@@ -1,0 +1,375 @@
+#ifndef GALAXY_I_STORAGE_H
+#define GALAXY_I_STORAGE_H
+
+/**
+ * @file
+ * Contains data structures and interfaces related to storage activities
+ */
+
+#include "GalaxyID.h"
+#include "IListenerRegistrar.h"
+
+namespace galaxy
+{
+	namespace api
+	{
+		/**
+		 * @addtogroup api
+		 * @{
+		 */
+
+		/**
+		 * Listener for the event of completing synchronization of the file storage.
+		 */
+		class IStorageSynchronizationListener : public GalaxyTypeAwareListener<STORAGE_SYNCHRONIZATION>
+		{
+		public:
+
+			/**
+			 * Notification for the event of a success in synchronization of the storage.
+			 */
+			virtual void OnStorageSynchronizationSuccess() = 0;
+
+			/**
+			 * The reason of a failure in synchronization of the storage.
+			 */
+			enum FailureReason
+			{
+				FAILURE_REASON_UNDEFINED, ///< Unspecified error.
+				FAILURE_REASON_CONNECTION_FAILURE ///< Unable to communicate with backend services.
+			};
+
+			/**
+			 * Notification for the event of a failure in synchronization of the storage.
+			 *
+			 * @param failureReason The cause of the failure.
+			 */
+			virtual void OnStorageSynchronizationFailure(FailureReason failureReason) = 0;
+		};
+
+		/**
+		 * Globally self-registering version of IStorageSynchronizationListener.
+		 */
+		typedef SelfRegisteringListener<IStorageSynchronizationListener> GlobalStorageSynchronizationListener;
+
+		/**
+		 * ID of a shared file.
+		 */
+		typedef uint64_t SharedFileID;
+
+		/**
+		 * Listener for the event of sharing a file.
+		 */
+		class IFileShareListener : public GalaxyTypeAwareListener<FILE_SHARE>
+		{
+		public:
+
+			/**
+			 * Notification for the event of a success in sharing a file.
+			 *
+			 * @param filename The name of the file.
+			 * @param sharedFileID The ID of the file.
+			 */
+			virtual void OnFileShareSuccess(const char* filename, SharedFileID sharedFileID) = 0;
+
+			/**
+			 * The reason of a failure in sharing a file.
+			 */
+			enum FailureReason
+			{
+				FAILURE_REASON_UNDEFINED ///< Unspecified error.
+			};
+
+			/**
+			 * Notification for the event of a failure in sharing a file.
+			 *
+			 * @param filename The name of the file.
+			 * @param failureReason The cause of the failure.
+			 */
+			virtual void OnFileShareFailure(const char* filename, FailureReason failureReason) = 0;
+		};
+
+		/**
+		 * Globally self-registering version of IFileShareListener.
+		 */
+		typedef SelfRegisteringListener<IFileShareListener> GlobalFileShareListener;
+
+		/**
+		 * Listener for the event of downloading a shared file.
+		 */
+		class ISharedFileDownloadListener : public GalaxyTypeAwareListener<SHARED_FILE_DOWNLOAD>
+		{
+		public:
+
+			/**
+			 * Notification for the event of a success in downloading a shared file.
+			 *
+			 * @param sharedFileID The ID of the file.
+			 * @param filename The name of the file.
+			 */
+			virtual void OnSharedFileDownloadSuccess(SharedFileID sharedFileID, const char* filename) = 0;
+
+			/**
+			 * The reason of a failure in downloading a shared file.
+			 */
+			enum FailureReason
+			{
+				FAILURE_REASON_UNDEFINED ///< Unspecified error.
+			};
+
+			/**
+			 * Notification for the event of a failure in downloading a shared file.
+			 *
+			 * @param sharedFileID The ID of the file.
+			 * @param failureReason The cause of the failure.
+			 */
+			virtual void OnSharedFileDownloadFailure(SharedFileID sharedFileID, FailureReason failureReason) = 0;
+		};
+
+		/**
+		 * Globally self-registering version of ISharedFileDownloadListener.
+		 */
+		typedef SelfRegisteringListener<ISharedFileDownloadListener> GlobalSharedFileDownloadListener;
+
+		/**
+		 * The interface for managing of cloud storage files.
+		 */
+		class IStorage
+		{
+		public:
+
+			virtual ~IStorage()
+			{
+			}
+
+			/**
+			 * Performs storage synchronization process.
+			 * This method should be call before calling any other method of IStorage interface.
+			 *
+			 * @remark This method is experimental and should not be used in production environment.
+			 *
+			 * This call is asynchronous. Responses come to the IStorageSynchronizationListener.
+			 */
+			virtual void Synchronize() = 0;
+
+			/**
+			 * Writes data into the file.
+			 *
+			 * @remark Synchronize the storage first by calling Synchronize().
+			 * @remark This method is experimental and should not be used in production environment.
+			 *
+			 * @param filename The name of the file.
+			 * @param data The data to write.
+			 * @param dataSize The size of the data to write.
+			 */
+			virtual void FileWrite(const char* filename, const void* data, uint32_t dataSize) = 0;
+
+			/**
+			 * Reads file content into the buffer.
+			 *
+			 * @remark Synchronize the storage first by calling Synchronize().
+			 * @remark This method is experimental and should not be used in production environment.
+			 *
+			 * @param filename The name of the file.
+			 * @param data The output buffer.
+			 * @param dataSize The size of the output buffer.
+			 * @return The number of bytes written to the buffer.
+			 */
+			virtual uint32_t FileRead(const char* filename, void* data, uint32_t dataSize) = 0;
+
+			/**
+			 * Deletes the file.
+			 *
+			 * @remark Synchronize the storage first by calling Synchronize().
+			 * @remark This method is experimental and should not be used in production environment.
+			 *
+			 * @param filename The name of the file.
+			 */
+			virtual void FileDelete(const char* filename) = 0;
+
+			/**
+			 * Returns if the file exists
+			 *
+			 * @remark Synchronize the storage first by calling Synchronize().
+			 * @remark This method is experimental and should not be used in production environment.
+			 *
+			 * @param filename The name of the file.
+			 * @return If the file exist.
+			 */
+			virtual bool FileExists(const char* filename) = 0;
+
+			/**
+			 * Returns the size of the file.
+			 *
+			 * @remark Synchronize the storage first by calling Synchronize().
+			 * @remark This method is experimental and should not be used in production environment.
+			 *
+			 * @param filename The name of the file.
+			 * @return The size of the file.
+			 */
+			virtual uint32_t GetFileSize(const char* filename) = 0;
+
+			/**
+			 * Returns the timestamp of the last file modification.
+			 *
+			 * @remark Synchronize the storage first by calling Synchronize().
+			 * @remark This method is experimental and should not be used in production environment.
+			 *
+			 * @param filename The name of the file.
+			 * @return The time of file's last modification.
+			 */
+			virtual uint32_t GetFileTimestamp(const char* filename) = 0;
+
+			/**
+			 * Returns number of the files in the storage.
+			 *
+			 * @remark Synchronize the storage first by calling Synchronize().
+			 * @remark This method is experimental and should not be used in production environment.
+			 *
+			 * @return The number of the files in the storage.
+			 */
+			virtual uint32_t GetFileCount() = 0;
+
+			/**
+			 * Returns name of the file.
+			 *
+			 * @remark Synchronize the storage first by calling Synchronize().
+			 * @remark This method is experimental and should not be used in production environment.
+			 *
+			 * @param index Index as an integer in the range of [0, number of files).
+			 * @return The name of the file.
+			 */
+			virtual const char* GetFileNameByIndex(uint32_t index) = 0;
+
+			/**
+			 * Copies the name of the file to a buffer.
+			 *
+			 * @remark Synchronize the storage first by calling Synchronize().
+			 * @remark This method is experimental and should not be used in production environment.
+			 *
+			 * @param index Index as an integer in the range of [0, number of files).
+			 * @param buffer The output buffer.
+			 * @param bufferLength The size of the output buffer.
+			 */
+			virtual void GetFileNameCopyByIndex(uint32_t index, char* buffer, uint32_t bufferLength) = 0;
+
+			/**
+			 * Uploads the file for sharing.
+			 *
+			 * This call is asynchronous. Responses come to the IFileShareListener.
+			 *
+			 * @remark Synchronize the storage first by calling Synchronize().
+			 * @remark This method is experimental and should not be used in production environment.
+			 *
+			 * @param filename The name of the file.
+			 */
+			virtual void FileShare(const char* filename) = 0;
+
+			/**
+ 			 * Downloads previously shared file.
+			 *
+			 * This call is asynchronous. Responses come to the ISharedFileDownloadListener.
+			 *
+			 * @remark Synchronize the storage first by calling Synchronize().
+			 * @remark This method is experimental and should not be used in production environment.
+			 *
+			 * @param sharedFileID The ID of the shared file.
+			 */
+			virtual void DownloadSharedFile(SharedFileID sharedFileID) = 0;
+
+			/**
+			 * Gets name of downloaded shared file.
+			 *
+			 * @remark Download the file first by calling DownloadSharedFile().
+			 * @remark This method is experimental and should not be used in production environment.
+			 *
+			 * @param sharedFileID The ID of the shared file.
+			 * @return The name of the shared file.
+			 */
+			virtual const char* GetSharedFileName(SharedFileID sharedFileID) = 0;
+
+			/**
+			 * Copies the name of downloaded shared file to a buffer.
+			 *
+			 * @remark Download the file first by calling DownloadSharedFile().
+			 * @remark This method is experimental and should not be used in production environment.
+			 *
+			 * @param sharedFileID The ID of the shared file.
+			 * @param buffer The output buffer.
+			 * @param bufferLength The size of the output buffer.
+			 */
+			virtual void GetSharedFileNameCopy(SharedFileID sharedFileID, char* buffer, uint32_t bufferLength) = 0;
+
+			/**
+			 * Gets size of downloaded shared file.
+			 *
+			 * @remark Download the file first by calling DownloadSharedFile().
+			 * @remark This method is experimental and should not be used in production environment.
+			 *
+			 * @param sharedFileID The ID of the shared file.
+			 * @return The size of the shared file.
+			 */
+			virtual uint32_t GetSharedFileSize(SharedFileID sharedFileID) = 0;
+
+			/**
+			 * Gets the owner of downloaded shared file.
+			 *
+			 * @remark Download the file first by calling DownloadSharedFile().
+			 * @remark This method is experimental and should not be used in production environment.
+			 *
+			 * @param sharedFileID The ID of the shared file.
+			 * @return The owner of the shared file.
+			 */
+			virtual GalaxyID GetSharedFileOwner(SharedFileID sharedFileID) = 0;
+
+			/**
+			 * Reads downloaded shared file content into the buffer.
+			 *
+			 * @remark Download the file first by calling DownloadSharedFile().
+			 * @remark This method is experimental and should not be used in production environment.
+			 *
+			 * @param sharedFileID The ID of the shared file.
+			 * @param data The output buffer.
+			 * @param dataSize The size of the output buffer.
+			 * @param offset The number of bytes to skip from the beginning of the file.
+			 * @return The number of bytes written to the buffer.
+			 */
+			virtual uint32_t SharedFileRead(SharedFileID sharedFileID, void* data, uint32_t dataSize, uint32_t offset = 0) = 0;
+
+			/**
+			 * Closes downloaded shared file and frees the memory.
+			 *
+			 * The content of the file will not be available until next download.
+			 *
+			 * @remark Download the file first by calling DownloadSharedFile().
+			 * @remark This method is experimental and should not be used in production environment.
+			 *
+			 * @param sharedFileID The ID of the shared file.
+			 */
+			virtual void SharedFileClose(SharedFileID sharedFileID) = 0;
+
+			/**
+		 	 * Returns the number of open downloaded shared files.
+			 *
+			 * @remark This method is experimental and should not be used in production environment.
+			 *
+ 			 * @return The number of open downloaded shared files.
+			 */
+			virtual uint32_t GetDownloadedSharedFileCount() = 0;
+
+			/**
+			 * Returns the ID of the open downloaded shared file.
+			 *
+			 * @remark This method is experimental and should not be used in production environment.
+			 *
+			 * @param index Index as an integer in the range of [0, number of open downloaded shared files).
+			 * @return The ID of the shared file.
+			 */
+			virtual SharedFileID GetDownloadedSharedFileByIndex(uint32_t index) = 0;
+		};
+
+		/** @} */
+		}
+	}
+
+#endif

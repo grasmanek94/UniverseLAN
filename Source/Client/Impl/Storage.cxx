@@ -26,6 +26,13 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_SYNCHRONIZE
+	void StorageImpl::Synchronize() {
+		listeners->NotifyAll(
+			&IStorageSynchronizationListener::OnStorageSynchronizationSuccess);
+	}
+#endif
+
 	void StorageImpl::FileWrite(const char* fileName, const void* data, uint32_t dataSize) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 

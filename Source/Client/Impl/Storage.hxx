@@ -46,6 +46,17 @@ namespace universelan::client {
 		StorageImpl(InterfaceInstances* intf);
 		virtual ~StorageImpl();
 
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_SYNCHRONIZE
+		/**
+		 * Performs storage synchronization process.
+		 * This method should be call before calling any other method of IStorage interface.
+		 *
+		 * @remark This method is experimental and should not be used in production environment.
+		 *
+		 * This call is asynchronous. Responses come to the IStorageSynchronizationListener.
+		 */
+		virtual void Synchronize() override;
+#endif
 		/**
 		 * Writes data into the file.
 		 *

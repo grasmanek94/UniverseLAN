@@ -78,6 +78,7 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
 
   afvd(HAS_ISTORAGE 							1.88.0 					)
   afvd(HAS_GETCURRENTGAMELANGUAGE				1.88.0 					)
+  afvd(HAS_ISTORAGE_SYNCHRONIZE					1.88.0 		1.99.0		)
 
   afvd(IUTILS_NOTIFICATION_ID_TYPEDEF   		1.92.1					)
 
