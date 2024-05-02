@@ -145,7 +145,7 @@ namespace universelan {
 		CSimpleIniA ini;
 		ini.SetUnicode();
 
-		std::cout << "Opening global config located at '" << std::filesystem::current_path() / BootFile << "'" << std::endl;
+		std::cout << "Opening Global config located at " << std::filesystem::current_path() / BootFile << std::endl;
 
 		LoadIni(ini, BootFile);
 
@@ -218,7 +218,7 @@ namespace universelan {
 		CSimpleIniA ini;
 		ini.SetUnicode();
 
-		std::cout << "Opening Server config located at '" << std::filesystem::current_path() / GetPath(ConfigFile) << "'" << std::endl;
+		std::cout << "Opening Server config located at " << std::filesystem::current_path() / GetPath(ConfigFile) << std::endl;
 
 		LoadIni(ini, GetPath(ConfigFile));
 
@@ -268,12 +268,12 @@ namespace universelan {
 	{
 		// Config
 		{
+			std::cout << "Opening Client config located at " << std::filesystem::current_path() / GetPath(ConfigFile) << std::endl;
+
 			MachineInfo machine_info;
 
 			CSimpleIniA ini;
 			ini.SetUnicode();
-
-			std::cout << "Opening Client config located at '" << std::filesystem::current_path() / GetPath(ConfigFile) << "'" << std::endl;
 
 			LoadIni(ini, GetPath(ConfigFile));
 
