@@ -96,44 +96,42 @@ Another option would be to gift the game to people working on UniverseLAN projec
 :left_right_arrow: - Game supports direct connect, LAN or free multiplayer, and as such does not need UniverseLAN.  
 :large_orange_diamond: - Worked before, some commit has broken this game. To be investigated.  
 
-| Game       | Status                | Tested GOG Galaxy SDK Version | Notes |
-| :--------- | :-------:             | :---------: | :---------: |
-| Phantom Doctrine  | :white_check_mark:(2) | 1.124.0 | Must apply `set OPENSSL_ia32cap=:~0x20000000` on newer CPU's for this game to start without crashing.<br> This issue is not caused by UniverseLAN or GOG, but OpenSSL / Unity.<br> Tested with build 301 |
-| SYNTHETIK: Legion Rising  | :white_check_mark:(2) | 1.113.3 | Works since build 301 |
-| Aragami 1  | :white_check_mark:(2) | 1.121.2 | |
-| Forsaken Remastered | :white_check_mark:(3) | 1.124.0 | |
-| Guns, Gore & Cannoli 2  | :white_check_mark:(3) | 1.124.0 | |
-| Tropico 6 | :white_check_mark:(2) | 1.139.2 | Also other games are displayed? Game has custom networking?<br> Build 161 worked, build 243 seems to be broken (can't join lobby) <br> Update: The person testing UniverseLAN used an invalid configuration (same generated Galaxy ID numbers), after fixing this configuration issue in Config.ini the person reported the game seems to work on build 243. | 
-| MetalSlug3 | :white_check_mark:(2)        | 1.100.2 | Works since build 243 |
-| Serious Sam 4 | :white_check_mark:(2)  | 1.144.1 | Works since build 256 | 
-| Tooth and Tail | :white_check_mark:(2)  | 1.122.1 | Works with 1.124.0, tested with build 256 | 
-| Door Kickers - Action Squad | :white_check_mark:(2) | 1.133.6 | Tested with build 287 |
-| Driftland - The Magic Revival | :construction: | 1.133.6 | Both games crash when joining |
-| Serious Sams Bogus Detour | :construction: | 1.100.2 | Stuck on "Creating lobby..." or "Joining lobby..." <br> Can get into lobby since build 243 but host crashes on start |
-| Niffelheim | :construction:  | 1.139.2 | Stuck at "Loading..." (save transfer?) | 
-| Alien vs Predator 2000 | :question: |  | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176? |
-| Homeworld Remastered Collection | :warning:  | | | 
-| Homeworld: Deserts of Kharak | :warning:  | | | 
-| No Man's Sky | :warning:  | | | 
-| Speed Brawl | :warning:  | 1.144.1 | | 
-| DUSK | :warning:  | 1.133.6 | | 
-| Absolver | :warning:  | 1.104.2 | | 
-| Shadow Warrior 2 | :warning: | 1.95.0 | | 
-| Rage of Mages II: Necromancer | :left_right_arrow: | | | 
-| Neverwinter Nights 2 Complete | :left_right_arrow: | | | 
-| Baldur's Gate 3 | :left_right_arrow: | | | 
-| Heroes of Might and Magic 3 | :left_right_arrow: | | | 
-| Empire Earth 3 | :left_right_arrow: | | | 
-| Jazz Jackrabbit 2 Collection | :left_right_arrow: | | | 
-| Ticket to Ride | :left_right_arrow:   | 1.139.2 | Tried it with the wrapper and works, but need to create a free Wonder account | 
-| Aragami 2 | :left_right_arrow: | 1.148.3 | Probably does not use GOG Galaxy for networking (doesn't work for private lobbies).<br> Can play on public lobbies without GOG Galaxy or with this patch AFAIK. |
-| DUSK (DuskWorld) | :left_right_arrow: | 1.133.6 | Uses steam (works without Steam Client) api for free online play, doesn't use GOG Galaxy. |
-| Roboquest | :x: | 1.148.3 | Probably does not use GOG Galaxy for networking. |
-| Northgard | :x:  | 1.139.2 | Still thinks the game is offline, custom multiplayer? | 
-| Tropico 5 | :x:  | 1.68.0 | Game uses an external service for multiplayer? | 
-| Saints Row IV - Re-Elected | :x:  | 1.148.3 | Game uses Epic Online Services for multiplayer probably (stuck after "do you want to sign in?") | 
-
-
+| Game                                  | Status                    | Tested GOG Galaxy SDK Version | Notes |
+| :---------                            | :-------:                 | :---------:                   | :---------: |
+| Phantom Doctrine                      | :white_check_mark:(2)     | 1.124.0                       | Must apply `set OPENSSL_ia32cap=:~0x20000000` on newer CPU's for this game to start without crashing.<br> This issue is not caused by UniverseLAN or GOG, but OpenSSL / Unity.<br> Tested with build 301 |
+| SYNTHETIK: Legion Rising              | :white_check_mark:(2)     | 1.113.3                       | Works since build 301 |
+| Aragami 1                             | :white_check_mark:(2)     | 1.121.2                       | |
+| Forsaken Remastered                   | :white_check_mark:(3)     | 1.124.0                       | |
+| Guns, Gore & Cannoli 2                | :white_check_mark:(3)     | 1.124.0                       | |
+| Tropico 6                             | :white_check_mark:(2)     | 1.139.2                       | Also other games are displayed? Game has custom networking?<br> Build 161 worked, build 243 seems to be broken (can't join lobby) <br> Update: The person testing UniverseLAN used an invalid configuration (same generated Galaxy ID numbers), after fixing this configuration issue in Config.ini the person reported the game seems to work on build 243. | 
+| MetalSlug3                            | :white_check_mark:(2)     | 1.100.2                       | Works since build 243 |
+| Serious Sam 4                         | :white_check_mark:(2)     | 1.144.1                       | Works since build 256 | 
+| Tooth and Tail                        | :white_check_mark:(2)     | 1.122.1                       | Works with 1.124.0, tested with build 256 | 
+| Door Kickers - Action Squad           | :white_check_mark:(2)     | 1.133.6                       | Tested with build 287 |
+| Driftland - The Magic Revival         | :construction:            | 1.133.6                       | Both games crash when joining |
+| Serious Sams Bogus Detour             | :construction:            | 1.100.2                       | Stuck on "Creating lobby..." or "Joining lobby..." <br> Can get into lobby since build 243 but host crashes on start |
+| Niffelheim                            | :construction:            | 1.139.2                       | Stuck at "Loading..." (save transfer?) | 
+| Alien vs Predator 2000                | :question:                |                               | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176? |
+| Homeworld Remastered Collection       | :warning:                 |                               | | 
+| Homeworld: Deserts of Kharak          | :warning:                 |                               | | 
+| No Man's Sky                          | :warning:                 | 1.148.3                       | | 
+| Speed Brawl                           | :warning:                 | 1.144.1                       | | 
+| Shadow Warrior 2                      | :warning:                 | 1.95.0                        | | 
+| Rage of Mages II: Necromancer         | :left_right_arrow:        |                               | | 
+| Neverwinter Nights 2 Complete         | :left_right_arrow:        |                               | | 
+| Baldur's Gate 3                       | :left_right_arrow:        |                               | | 
+| Heroes of Might and Magic 3           | :left_right_arrow:        |                               | | 
+| Empire Earth 3                        | :left_right_arrow:        |                               | | 
+| Jazz Jackrabbit 2 Collection          | :left_right_arrow:        |                               | | 
+| Ticket to Ride                        | :left_right_arrow:        | 1.139.2                       | Tried it with the wrapper and works, but need to create a free Wonder account | 
+| Aragami 2                             | :left_right_arrow:        | 1.148.3                       | Probably does not use GOG Galaxy for networking (doesn't work for private lobbies).<br> Can play on public lobbies without GOG Galaxy or with this patch AFAIK. |
+| DUSK (DuskWorld)                      | :left_right_arrow:        | 1.133.6                       | Uses steam (works without Steam Client) api for free online play, doesn't use GOG Galaxy. |
+| Absolver                              | :x:                       | 1.104.2                       | EAC is preventing usage of UniverseLAN, without EAC multiplayer is disabled | 
+| DUSK                                  | :x:                       | 1.133.6                       | No multiplayer --> DuskWorld | 
+| Roboquest                             | :x:                       | 1.148.3                       | Probably does not use GOG Galaxy for networking. |
+| Northgard                             | :x:                       | 1.139.2                       | Still thinks the game is offline, custom multiplayer? | 
+| Tropico 5                             | :x:                       | 1.68.0                        | Game uses an external service for multiplayer? | 
+| Saints Row IV - Re-Elected            | :x:                       | 1.148.3                       | Game uses Epic Online Services for multiplayer probably (stuck after "do you want to sign in?") | 
 
 # Notice
 I'm not affiliated in any way with GOG or CD Projekt RED.  
