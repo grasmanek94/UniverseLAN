@@ -123,7 +123,7 @@ namespace universelan::client {
 		bool NotifyAllNow(FuncT&& Function, ArgTypes&&... Arguments) {
 			using T = extract_class_from_member_function_ptr<FuncT>::type;
 
-			tracer::Trace trace{ "::nl", tracer::Trace::NOTIFICATION_INVOCATIONS };
+			tracer::Trace trace{ "::nl", __FUNCTION__, tracer::Trace::NOTIFICATION_INVOCATIONS };
 
 			return ExecuteForListenerTypePerEntry((ListenerType)T::GetListenerType(), [&](IGalaxyListener* listener) {
 				//T* casted_listener = dynamic_cast<T*>(listener);
@@ -142,7 +142,7 @@ namespace universelan::client {
 				return NotifyAllNow(std::forward<FuncT>(Function), std::forward<ArgTypes>(Arguments)...);
 			}
 
-			tracer::Trace trace{ "::hl", tracer::Trace::NOTIFICATION_INVOCATIONS };
+			tracer::Trace trace{ "::hl", __FUNCTION__, tracer::Trace::NOTIFICATION_INVOCATIONS };
 
 			return ExecuteForListenerTypePerEntry((ListenerType)BaseT::GetListenerType(), one_time_specific_listener, [&](IGalaxyListener* listener) {
 				//BaseT* casted_listener = dynamic_cast<BaseT*>(listener);
@@ -158,7 +158,7 @@ namespace universelan::client {
 		bool NotifyAllNowSimulate(FuncT&& Function, ArgTypes&&... Arguments) {
 			using T = extract_class_from_member_function_ptr<FuncT>::type;
 
-			tracer::Trace trace{ "::nl", tracer::Trace::NOTIFICATION_INVOCATIONS };
+			tracer::Trace trace{ "::nl", __FUNCTION__, tracer::Trace::NOTIFICATION_INVOCATIONS };
 
 			return ExecuteForListenerTypePerEntry((ListenerType)T::GetListenerType(), [&](IGalaxyListener* listener) {
 				T* casted_listener = (T*)(listener);
@@ -177,7 +177,7 @@ namespace universelan::client {
 				return NotifyAllNowSimulate(std::forward<FuncT>(Function), std::forward<ArgTypes>(Arguments)...);
 			}
 
-			tracer::Trace trace{ "::hl", tracer::Trace::NOTIFICATION_INVOCATIONS };
+			tracer::Trace trace{ "::hl", __FUNCTION__, tracer::Trace::NOTIFICATION_INVOCATIONS };
 
 			return ExecuteForListenerTypePerEntry((ListenerType)BaseT::GetListenerType(), one_time_specific_listener, [&](IGalaxyListener* listener) {
 				BaseT* casted_listener = (BaseT*)(listener);

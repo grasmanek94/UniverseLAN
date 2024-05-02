@@ -628,11 +628,15 @@ namespace universelan::client {
 
 		if (isOnline) {
 			online_friends.insert(userID);
+#if GALAXY_BUILD_FEATURE_HAS_FRIENDADDLISTENER
 			listeners->NotifyAll(&IFriendAddListener::OnFriendAdded, userID, IFriendAddListener::INVITATION_DIRECTION_INCOMING);
+#endif
 		}
 		else {
 			online_friends.erase(userID);
+#if GALAXY_BUILD_FEATURE_HAS_FRIENDADDLISTENER
 			listeners->NotifyAll(&IFriendDeleteListener::OnFriendDeleteSuccess, userID);
+#endif
 		}
 	}
 
