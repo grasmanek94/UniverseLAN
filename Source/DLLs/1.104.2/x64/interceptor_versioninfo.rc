@@ -1,0 +1,23 @@
+1 VERSIONINFO
+ FILEVERSION 1, 104, 2, 0
+ PRODUCTVERSION 1, 104, 2, 0
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "CompanyName", "grasmanek94/UniverseLAN"
+            VALUE "FileDescription", "UniverseLAN Galaxy SDK Call Logger - https://github.com/grasmanek94/UniverseLAN"
+            VALUE "FileVersion","1, 104, 2, 0"
+            VALUE "InternalName", "universelan"
+            VALUE "LegalCopyright", "UniverseLAN 2022 - 2024"
+            VALUE "OriginalFilename", "Galaxy-x64-1.104.2-interceptor.dll"
+            VALUE "ProductName", "UniverseLAN Galaxy SDK Call Logger"
+            VALUE "ProductVersion","1, 104, 2, 0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
