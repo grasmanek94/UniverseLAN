@@ -5,10 +5,13 @@
  * Includes all other files that are needed to work with the Galaxy library.
  */
 
+#include <GalaxyExport.h>
+
 #include "Impl/InitOptionsModern.hxx"
 
 #include <IniData.hxx>
 
+#include <functional>
 #include <memory>
 
 namespace universelan::client {
@@ -45,6 +48,10 @@ namespace universelan::client {
 
 	// interface instances;
 	struct InterfaceInstances {
+		std::function<GALAXY_DLL_EXPORT void GALAXY_CALLTYPE(struct InitOptionsImpl const& initOptions)> real_init;
+		std::function<GALAXY_DLL_EXPORT void GALAXY_CALLTYPE(void)> real_process_data;
+		std::function<GALAXY_DLL_EXPORT void GALAXY_CALLTYPE(void)> real_shutdown;
+
 		std::unique_ptr<ClientIniData>			config = nullptr;
 		std::unique_ptr<InitOptionsModern>		init_options = nullptr;
 		std::unique_ptr<UserImpl>				user = nullptr;
@@ -88,6 +95,7 @@ namespace universelan::client {
 		std::unique_ptr<ListenerRegistrarImpl>	notification = nullptr;
 
 		void init(const InitOptionsModern& initOptions);
+		void init_gameserver(const InitOptionsModern& initOptions);
 		void reset();
 
 		~InterfaceInstances();

@@ -1,13 +1,16 @@
 #ifndef UNIVERSELAN_IMPL_LISTENER_H
 #define UNIVERSELAN_IMPL_LISTENER_H
 
-#include <stdint.h>
+#include <GalaxyExport.h>
 
 #include <IListenerRegistrar.h>
 
+#include <GalaxyFunctional.hxx>
+
+#include <stdint.h>
+
 namespace universelan::client {
 	using namespace galaxy::api;
-	struct InterfaceInstances;
 
 	using ListenerTypeImpl =
 #if GALAXY_BUILD_FEATURE_HAS_LISTENERTYPE
@@ -22,12 +25,16 @@ namespace universelan::client {
 	 */
 	class ListenerRegistrarImpl : public IListenerRegistrar
 	{
+	public:
+		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT IListenerRegistrar* GALAXY_CALLTYPE(void)>>;
+		using FuncPtr = FuncT::PTR;
+
 	private:
-		InterfaceInstances* intf;
+		FuncT::F intf;
 
 	public:
 
-		ListenerRegistrarImpl(InterfaceInstances* intf);
+		ListenerRegistrarImpl(FuncT::F intf);
 		virtual ~ListenerRegistrarImpl();
 
 		/**

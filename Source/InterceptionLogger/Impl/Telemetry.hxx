@@ -1,11 +1,13 @@
 #pragma once
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 
+#include <GalaxyFunctional.hxx>
+
+#include <GalaxyExport.h>
 #include <ITelemetry.h>
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	struct InterfaceInstances;
 
 	/**
 	 * @addtogroup api
@@ -17,13 +19,16 @@ namespace universelan::client {
 	  */
 	class TelemetryImpl : public ITelemetry
 	{
-	
+	public:
+		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT ITelemetry* GALAXY_CALLTYPE(void)>>;
+		using FuncPtr = FuncT::PTR;
+
 	private:
-		InterfaceInstances* intf;
+		FuncT::F intf;
 
 	public:
 
-		TelemetryImpl(InterfaceInstances* intf);
+		TelemetryImpl(FuncT::F intf);
 		virtual ~TelemetryImpl();
 
 		/**

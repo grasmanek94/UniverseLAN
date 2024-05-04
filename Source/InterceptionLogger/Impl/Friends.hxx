@@ -1,13 +1,15 @@
 #ifndef UNIVERSELAN_IMPL_FRIENDS_H
 #define UNIVERSELAN_IMPL_FRIENDS_H
 
+#include <GalaxyExport.h>
+#include <IFriends.h>
+
 #include <DynamicReturn.hxx>
 
-#include <IFriends.h>
+#include <GalaxyFunctional.hxx>
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	struct InterfaceInstances;
 
 #if GALAXY_BUILD_FEATURE_GetImageRGBA_CHAR_TO_VOID
 	using GetImageRGBABufferType = void;
@@ -37,12 +39,15 @@ namespace universelan::client {
 	  */
 	class FriendsImpl : public IFriends
 	{
+	public:
+		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT IFriends* GALAXY_CALLTYPE(void)>>;
+		using FuncPtr = FuncT::PTR;
+
 	private:
-		InterfaceInstances* intf;
+		FuncT::F intf;
 
 	public:
-
-		FriendsImpl(InterfaceInstances* intf);
+		FriendsImpl(FuncT::F intf);
 		virtual ~FriendsImpl();
 
 #if GALAXY_BUILD_FEATURE_HAS_CONNECTION_TYPE

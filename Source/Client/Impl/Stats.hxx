@@ -60,7 +60,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RequestUserStatsAndAchievements(GalaxyID userID = GalaxyID()
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, IUserStatsAndAchievementsRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -353,7 +353,7 @@ namespace universelan::client {
 			const char* name
 			, uint32_t rangeStart
 			, uint32_t rangeEnd
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, ILeaderboardEntriesRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -385,7 +385,7 @@ namespace universelan::client {
 			, uint32_t countBefore
 			, uint32_t countAfter
 			, GalaxyID userID = GalaxyID()
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, ILeaderboardEntriesRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -408,7 +408,7 @@ namespace universelan::client {
 			  const char* name
 			, GalaxyID* userArray
 			, uint32_t userArraySize
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, ILeaderboardEntriesRetrieveListener* const listener = NULL
 #endif
 		) override;

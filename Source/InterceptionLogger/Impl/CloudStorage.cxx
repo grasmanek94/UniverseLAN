@@ -2,8 +2,8 @@
 
 #include "CloudStorage.hxx"
 
+#include <GalaxyID.hxx>
 #include <Tracer.hxx>
-#include <GalaxyDLL.hxx>
 #include <SafeStringCopy.hxx>
 
 #include <magic_enum/magic_enum.hpp>
@@ -13,7 +13,7 @@
 namespace universelan::client {
 	using namespace galaxy::api;
 
-	CloudStorageImpl::CloudStorageImpl(InterfaceInstances* intf) : intf{ intf }
+	CloudStorageImpl::CloudStorageImpl(FuncT::F intf) : intf{ intf }
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 	}
@@ -30,7 +30,7 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
-		RealGalaxyDLL_CloudStorage()->GetFileList(container, listener);
+		intf()->GetFileList(container, listener);
 	}
 
 	const char* CloudStorageImpl::GetFileNameByIndex(uint32_t index) const {
@@ -40,7 +40,7 @@ namespace universelan::client {
 			trace.write_all(std::format("index: {}", index));
 		}
 
-		auto result = RealGalaxyDLL_CloudStorage()->GetFileNameByIndex(index);
+		auto result = intf()->GetFileNameByIndex(index);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
@@ -56,7 +56,7 @@ namespace universelan::client {
 			trace.write_all(std::format("index: {}", index));
 		}
 
-		auto result = RealGalaxyDLL_CloudStorage()->GetFileSizeByIndex(index);
+		auto result = intf()->GetFileSizeByIndex(index);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -72,7 +72,7 @@ namespace universelan::client {
 			trace.write_all(std::format("index: {}", index));
 		}
 
-		auto result = RealGalaxyDLL_CloudStorage()->GetFileTimestampByIndex(index);
+		auto result = intf()->GetFileTimestampByIndex(index);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -92,7 +92,7 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
-		RealGalaxyDLL_CloudStorage()->GetFile(container, name, userParam, writeFunc, listener);
+		intf()->GetFile(container, name, userParam, writeFunc, listener);
 	}
 
 	void CloudStorageImpl::GetFile(const char* container, const char* name, void* buffer, uint32_t bufferLength, ICloudStorageGetFileListener* listener) {
@@ -106,7 +106,7 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
-		RealGalaxyDLL_CloudStorage()->GetFile(container, name, buffer, bufferLength, listener);
+		intf()->GetFile(container, name, buffer, bufferLength, listener);
 	}
 
 	void CloudStorageImpl::GetFileMetadata(const char* container, const char* name, ICloudStorageGetFileListener* listener) {
@@ -118,7 +118,7 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
-		RealGalaxyDLL_CloudStorage()->GetFileMetadata(container, name, listener);
+		intf()->GetFileMetadata(container, name, listener);
 	}
 
 	const char* CloudStorageImpl::GetFileMetadataKeyByIndex(uint32_t index) const {
@@ -128,7 +128,7 @@ namespace universelan::client {
 			trace.write_all(std::format("index: {}", index));
 		}
 
-		auto result = RealGalaxyDLL_CloudStorage()->GetFileMetadataKeyByIndex(index);
+		auto result = intf()->GetFileMetadataKeyByIndex(index);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
@@ -144,7 +144,7 @@ namespace universelan::client {
 			trace.write_all(std::format("index: {}", index));
 		}
 
-		auto result = RealGalaxyDLL_CloudStorage()->GetFileMetadataValueByIndex(index);
+		auto result = intf()->GetFileMetadataValueByIndex(index);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
@@ -189,7 +189,7 @@ namespace universelan::client {
 			}
 		}
 
-		RealGalaxyDLL_CloudStorage()->PutFile(container, name, userParam, readFunc, rewindFunc, listener, metadataKeys, metadataValues, timeStamp);
+		intf()->PutFile(container, name, userParam, readFunc, rewindFunc, listener, metadataKeys, metadataValues, timeStamp);
 	}
 
 	void CloudStorageImpl::PutFile(
@@ -226,7 +226,7 @@ namespace universelan::client {
 			}
 		}
 
-		RealGalaxyDLL_CloudStorage()->PutFile(container, name, buffer, bufferLength, listener, metadataKeys, metadataValues, timeStamp);
+		intf()->PutFile(container, name, buffer, bufferLength, listener, metadataKeys, metadataValues, timeStamp);
 	}
 
 	void CloudStorageImpl::PutFile(
@@ -266,7 +266,7 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
-		RealGalaxyDLL_CloudStorage()->DeleteFile(container, name, listener);
+		intf()->DeleteFile(container, name, listener);
 	}
 #pragma pop_macro ("DeleteFile")
 }

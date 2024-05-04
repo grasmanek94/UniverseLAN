@@ -2,6 +2,7 @@
 
 #include "Chat.hxx"
 
+#include <GalaxyID.hxx>
 #include <Tracer.hxx>
 #include <SafeStringCopy.hxx>
 
@@ -101,7 +102,7 @@ namespace universelan::client {
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
 			trace.write_all(std::format("messageID: {}", messageID));
-			trace.write_all(std::format("messageType: {}", messageType));
+			trace.write_all(std::format("messageType: {}", magic_enum::enum_name(messageType)));
 			trace.write_all(std::format("senderID: {}", senderID));
 			trace.write_all(std::format("sendTime: {}", sendTime));
 			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));

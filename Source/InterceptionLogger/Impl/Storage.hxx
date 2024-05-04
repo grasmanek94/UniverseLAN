@@ -2,19 +2,25 @@
 
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 
+#include <GalaxyFunctional.hxx>
+
+#include <GalaxyExport.h>
 #include <IStorage.h>
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	struct InterfaceInstances;
 
 	class StorageImpl : public IStorage
 	{
-	private:
-		InterfaceInstances* intf;
-	
 	public:
-		StorageImpl(InterfaceInstances* intf);
+		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT IStorage* GALAXY_CALLTYPE(void)>>;
+		using FuncPtr = FuncT::PTR;
+
+	private:
+		FuncT::F intf;
+
+	public:
+		StorageImpl(FuncT::F intf);
 		virtual ~StorageImpl();
 
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_SYNCHRONIZE

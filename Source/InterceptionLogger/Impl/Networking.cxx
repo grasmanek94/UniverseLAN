@@ -1,7 +1,7 @@
 #include "Networking.hxx"
 
+#include <GalaxyID.hxx>
 #include <Tracer.hxx>
-#include <GalaxyDLL.hxx>
 #include <SafeStringCopy.hxx>
 
 #include <magic_enum/magic_enum.hpp>
@@ -10,7 +10,7 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	NetworkingImpl::NetworkingImpl(InterfaceInstances* intf) : intf{ intf }
+	NetworkingImpl::NetworkingImpl(FuncT::F intf) : intf{ intf }
 	{
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::INETWORKING };
 	}
@@ -31,7 +31,7 @@ namespace universelan::client {
 			trace.write_all(std::format("channel: {}", channel));
 		}
 
-		auto result = RealGalaxyDLL_Networking()->SendP2PPacket(galaxyID, data, dataSize, sendType, channel);
+		auto result = intf()->SendP2PPacket(galaxyID, data, dataSize, sendType, channel);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -50,7 +50,7 @@ namespace universelan::client {
 			trace.write_all(std::format("channel: {}", channel));
 		}
 
-		auto result = RealGalaxyDLL_Networking()->PeekP2PPacket(dest, destSize, outMsgSize, outGalaxyID, channel);
+		auto result = intf()->PeekP2PPacket(dest, destSize, outMsgSize, outGalaxyID, channel);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -73,7 +73,7 @@ namespace universelan::client {
 			trace.write_all(std::format("channel: {}", channel));
 		}
 
-		auto result = RealGalaxyDLL_Networking()->ReadP2PPacket(dest, destSize, outMsgSize, outGalaxyID, channel);
+		auto result = intf()->ReadP2PPacket(dest, destSize, outMsgSize, outGalaxyID, channel);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -94,7 +94,7 @@ namespace universelan::client {
 			trace.write_all(std::format("channel: {}", channel));
 		}
 
-		auto result = RealGalaxyDLL_Networking()->IsP2PPacketAvailable(outMsgSize, channel);
+		auto result = intf()->IsP2PPacketAvailable(outMsgSize, channel);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -113,7 +113,7 @@ namespace universelan::client {
 			trace.write_all(std::format("channel: {}", channel));
 		}
 
-		RealGalaxyDLL_Networking()->PopP2PPacket(channel);
+		intf()->PopP2PPacket(channel);
 	}
 
 	int NetworkingImpl::GetPingWith(GalaxyID galaxyID) {
@@ -123,7 +123,7 @@ namespace universelan::client {
 			trace.write_all(std::format("galaxyID: {}", galaxyID));
 		}
 
-		auto result = RealGalaxyDLL_Networking()->GetPingWith(galaxyID);
+		auto result = intf()->GetPingWith(galaxyID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -136,13 +136,13 @@ namespace universelan::client {
 	void NetworkingImpl::RequestNatTypeDetection() {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::INETWORKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		RealGalaxyDLL_Networking()->RequestNatTypeDetection();
+		intf()->RequestNatTypeDetection();
 	}
 
 	NatType NetworkingImpl::GetNatType() {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::INETWORKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		auto result = RealGalaxyDLL_Networking()->GetNatType();
+		auto result = intf()->GetNatType();
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));
@@ -160,7 +160,7 @@ namespace universelan::client {
 			trace.write_all(std::format("userID: {}", userID));
 		}
 
-		auto result = RealGalaxyDLL_Networking()->GetConnectionType(userID);
+		auto result = intf()->GetConnectionType(userID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));

@@ -2,8 +2,8 @@
 
 #include "Storage.hxx"
 
+#include <GalaxyID.hxx>
 #include <Tracer.hxx>
-#include <GalaxyDLL.hxx>
 #include <SafeStringCopy.hxx>
 
 #include <magic_enum/magic_enum.hpp>
@@ -13,7 +13,7 @@
 namespace universelan::client {
 	using namespace galaxy::api;
 
-	StorageImpl::StorageImpl(InterfaceInstances* intf) : intf{ intf }
+	StorageImpl::StorageImpl(FuncT::F intf) : intf{ intf }
 	{
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 	}
@@ -24,8 +24,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_SYNCHRONIZE
 	void StorageImpl::Synchronize() {
-		listeners->NotifyAll(
-			&IStorageSynchronizationListener::OnStorageSynchronizationSuccess);
+
 	}
 #endif
 

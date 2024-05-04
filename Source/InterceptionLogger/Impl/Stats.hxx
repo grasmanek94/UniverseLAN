@@ -1,11 +1,13 @@
 #ifndef UNIVERSELAN_IMPL_STATS_H
 #define UNIVERSELAN_IMPL_STATS_H
 
+#include <GalaxyFunctional.hxx>
+
+#include <GalaxyExport.h>
 #include <IStats.h>
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	struct InterfaceInstances;
 
 	/**
 	 * @addtogroup api
@@ -17,11 +19,15 @@ namespace universelan::client {
 	  */
 	class StatsImpl : public IStats
 	{
+	public:
+		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT IStats* GALAXY_CALLTYPE(void)>>;
+		using FuncPtr = FuncT::PTR;
+
 	private:
-		InterfaceInstances* intf;
+		FuncT::F intf;
 
 	public:
-		StatsImpl(InterfaceInstances* intf);
+		StatsImpl(FuncT::F intf);
 		virtual ~StatsImpl();
 
 		/**

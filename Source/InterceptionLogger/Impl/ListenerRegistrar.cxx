@@ -1,7 +1,7 @@
 #include "ListenerRegistrar.hxx"
 
+#include <GalaxyID.hxx>
 #include <Tracer.hxx>
-#include <GalaxyDLL.hxx>
 #include <SafeStringCopy.hxx>
 
 #include <magic_enum/magic_enum.hpp>
@@ -10,7 +10,7 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	ListenerRegistrarImpl::ListenerRegistrarImpl(InterfaceInstances* intf)
+	ListenerRegistrarImpl::ListenerRegistrarImpl(FuncT::F intf) : intf{intf}
 	{
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
 	}
@@ -32,7 +32,7 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
-		RealGalaxyDLL_ListenerRegistrar()->Register(listenerType, listener);
+		intf()->Register(listenerType, listener);
 	}
 
 	void ListenerRegistrarImpl::Unregister(ListenerTypeImpl listenerType, IGalaxyListener* listener) {
@@ -47,6 +47,6 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
-		RealGalaxyDLL_ListenerRegistrar()->Unregister(listenerType, listener);
+		intf()->Unregister(listenerType, listener);
 	}
 }

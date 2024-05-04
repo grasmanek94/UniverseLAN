@@ -2,18 +2,19 @@
 
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS
 
+#include <GalaxyFunctional.hxx>
+
+#include <GalaxyExport.h>
 #include <IUtils.h>
 
 namespace universelan::client {
+	using namespace galaxy::api;
 
 #if GALAXY_BUILD_FEATURE_GetImageRGBA_CHAR_TO_VOID
 	using GetImageRGBABufferType = void;
 #else
 	using GetImageRGBABufferType = unsigned char;
 #endif
-
-	using namespace galaxy::api;
-	struct InterfaceInstances;
 
 	/**
 	 * @addtogroup api
@@ -25,11 +26,15 @@ namespace universelan::client {
 	  */
 	class UtilsImpl : public IUtils
 	{
+	public:
+		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT IUtils* GALAXY_CALLTYPE(void)>>;
+		using FuncPtr = FuncT::PTR;
+
 	private:
-		InterfaceInstances* intf;
+		FuncT::F intf;
 
 	public:
-		UtilsImpl(InterfaceInstances* intf);
+		UtilsImpl(FuncT::F intf);
 		virtual ~UtilsImpl();
 
 		/**

@@ -1,13 +1,15 @@
 #ifndef UNIVERSELAN_IMPL_MATCHMAKING_H
 #define UNIVERSELAN_IMPL_MATCHMAKING_H
 
-#include <DynamicReturn.hxx>
+#include <GalaxyFunctional.hxx>
 
+#include <GalaxyExport.h>
 #include <IMatchmaking.h>
+
+#include <DynamicReturn.hxx>
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	struct InterfaceInstances;
 
 #if GALAXY_BUILD_FEATURE_SEND_LOBBY_MESSAGE_CHAR_TO_VOID
 	using SEND_LOBBY_MESSAGE_DATA_T = const void;
@@ -28,11 +30,15 @@ namespace universelan::client {
 
 	class MatchmakingImpl : public IMatchmaking
 	{
+	public:
+		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT IMatchmaking* GALAXY_CALLTYPE(void)>>;
+		using FuncPtr = FuncT::PTR;
+
 	private:
-		InterfaceInstances* intf;
+		FuncT::F intf;
 
 	public:
-		MatchmakingImpl(InterfaceInstances* intf);
+		MatchmakingImpl(FuncT::F intf);
 		virtual ~MatchmakingImpl();
 
 		/**

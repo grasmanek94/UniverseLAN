@@ -2,8 +2,8 @@
 
 #include "Utils.hxx"
 
+#include <GalaxyID.hxx>
 #include <Tracer.hxx>
-#include <GalaxyDLL.hxx>
 #include <SafeStringCopy.hxx>
 
 #include <magic_enum/magic_enum.hpp>
@@ -12,7 +12,7 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	UtilsImpl::UtilsImpl(InterfaceInstances* intf) : intf{ intf }
+	UtilsImpl::UtilsImpl(FuncT::F intf) : intf{ intf }
 	{
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUTILS };
 	}
@@ -29,7 +29,7 @@ namespace universelan::client {
 			trace.write_all(std::format("imageID: {}", imageID));
 		}
 
-		RealGalaxyDLL_Utils()->GetImageSize(imageID, width, height);
+		intf()->GetImageSize(imageID, width, height);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("width: {}", width));
@@ -46,7 +46,7 @@ namespace universelan::client {
 			trace.write_all(std::format("bufferLength: {}", bufferLength));
 		}
 
-		RealGalaxyDLL_Utils()->GetImageRGBA(imageID, buffer, bufferLength);
+		intf()->GetImageRGBA(imageID, buffer, bufferLength);
 	}
 
 	void UtilsImpl::RegisterForNotification(const char* type) {
@@ -56,7 +56,7 @@ namespace universelan::client {
 			trace.write_all(std::format("type: {}", util::safe_fix_null_char_ptr_annotate_ret(type)));
 		}
 
-		RealGalaxyDLL_Utils()->RegisterForNotification(type);
+		intf()->RegisterForNotification(type);
 	}
 
 	uint32_t UtilsImpl::GetNotification(NotificationID notificationID
@@ -74,7 +74,7 @@ namespace universelan::client {
 			trace.write_all(std::format("contentSize: {}", contentSize));
 		}
 
-		auto result = RealGalaxyDLL_Utils()->GetNotification(notificationID
+		auto result = intf()->GetNotification(notificationID
 #if (GALAXY_VERSION) > 11240
 			, consumable
 #endif
@@ -99,14 +99,14 @@ namespace universelan::client {
 			trace.write_all(std::format("url: {}", util::safe_fix_null_char_ptr_annotate_ret(url)));
 		}
 
-		RealGalaxyDLL_Utils()->ShowOverlayWithWebPage(url);
+		intf()->ShowOverlayWithWebPage(url);
 	}
 
 #if GALAXY_BUILD_FEATURE_OVERLAYSTATE_ENUM
 	bool UtilsImpl::IsOverlayVisible() {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUTILS };
 
-		auto result = RealGalaxyDLL_Utils()->IsOverlayVisible();
+		auto result = intf()->IsOverlayVisible();
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -118,7 +118,7 @@ namespace universelan::client {
 	OverlayState UtilsImpl::GetOverlayState() {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUTILS };
 
-		auto result = RealGalaxyDLL_Utils()->GetOverlayState();
+		auto result = intf()->GetOverlayState();
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));
@@ -136,7 +136,7 @@ namespace universelan::client {
 			trace.write_all(std::format("popupGroup: {}", util::safe_fix_null_char_ptr_annotate_ret(popupGroup)));
 		}
 
-		RealGalaxyDLL_Utils()->DisableOverlayPopups(popupGroup);
+		intf()->DisableOverlayPopups(popupGroup);
 	}
 #endif
 
@@ -144,7 +144,7 @@ namespace universelan::client {
 	GogServicesConnectionState UtilsImpl::GetGogServicesConnectionState() {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUTILS };
 
-		auto result = RealGalaxyDLL_Utils()->GetGogServicesConnectionState();
+		auto result = intf()->GetGogServicesConnectionState();
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));

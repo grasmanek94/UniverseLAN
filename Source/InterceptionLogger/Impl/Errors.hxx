@@ -6,22 +6,28 @@
  * Contains classes representing exceptions.
  */
 
+#include <GalaxyExport.h>
 #include <Errors.h>
+
+#include <GalaxyFunctional.hxx>
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	struct InterfaceInstances;
 
 	 /**
 	  * Base interface for exceptions.
 	  */
 	class Error : public IError
 	{
+	public:
+		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT IError* GALAXY_CALLTYPE(void)>>;
+		using FuncPtr = FuncT::PTR;
+
 	private:
-		InterfaceInstances* intf;
+		FuncT::F intf;
 
 	public:
-		Error(InterfaceInstances* intf);
+		Error(FuncT::F intf);
 
 		virtual ~Error();
 

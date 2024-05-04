@@ -1,6 +1,9 @@
 #ifndef UNIVERSELAN_IMPL_USER_H
 #define UNIVERSELAN_IMPL_USER_H
 
+#include <GalaxyFunctional.hxx>
+
+#include <GalaxyExport.h>
 #include <IUser.h>
 
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_CROSSPLATFORM
@@ -23,7 +26,6 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	struct InterfaceInstances;
 
 	/**
 	 * @addtogroup api
@@ -43,13 +45,15 @@ namespace universelan::client {
 		using SignInDataPtr_T = char;
 #endif
 
+		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT IUser* GALAXY_CALLTYPE(void)>>;
+		using FuncPtr = FuncT::PTR;
+
 	private:
-	
-		InterfaceInstances* intf;
-	
+		FuncT::F intf;
+
 	public:
 
-		UserImpl(InterfaceInstances* intf);
+		UserImpl(FuncT::F intf);
 		virtual ~UserImpl();
 
 		void SignIn(IAuthListener* const listener);

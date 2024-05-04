@@ -8,7 +8,6 @@
 
 #include <stdexcept>
 #include <functional>
-#include <memory>
 #include <string>
 
 namespace universelan
@@ -24,7 +23,7 @@ namespace universelan
 			;
 
 		HANDLE_T RealGalaxyDLL = nullptr;
-		std::unique_ptr<SharedLibUtils> instance = nullptr;
+		SharedLibUtils* instance = nullptr;
 	}
 
 	SharedLibUtils::SharedLibUtils() {
@@ -62,7 +61,7 @@ namespace universelan
 
 	void* SharedLibUtils::get_func_ptr(const char* name) {
 		if (!instance) {
-			instance = std::make_unique<SharedLibUtils>();
+			instance = new SharedLibUtils();
 		}
 
 		void* func = (void*)

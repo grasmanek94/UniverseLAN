@@ -6,12 +6,13 @@
  * Contains data structures and interfaces related to communicating with other
  * Galaxy Peers.
  */
+#include <GalaxyFunctional.hxx>
 
+#include <GalaxyExport.h>
 #include <INetworking.h>
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	struct InterfaceInstances;
 
 	/**
 	 * @addtogroup api
@@ -23,12 +24,16 @@ namespace universelan::client {
 	  */
 	class NetworkingImpl : public INetworking
 	{
+	public:
+		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT INetworking* GALAXY_CALLTYPE(void)>>;
+		using FuncPtr = FuncT::PTR;
+
 	private:
-		InterfaceInstances* intf;
+		FuncT::F intf;
 
 	public:
 
-		NetworkingImpl(InterfaceInstances* intf);
+		NetworkingImpl(FuncT::F intf);
 		virtual ~NetworkingImpl();
 
 		/**

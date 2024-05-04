@@ -18,6 +18,16 @@ namespace universelan::client {
 		void interceptor_make_unique(std::unique_ptr<T>& ptr, const char* name) {
 			ptr = std::make_unique<T>(SharedLibUtils::get_func<T::FuncPtr>(name));
 		}
+
+		template <typename T>
+		void interceptor_make_unique(std::unique_ptr<T>& ptr, InterfaceInstances* t) {
+			ptr = std::make_unique<T>(t);
+		}
+
+		template <typename T>
+		void assign_func(std::function<T>& ptr, const char* name) {
+			ptr = SharedLibUtils::get_func<T*>(name);
+		}
 	}
 
 	void InterfaceInstances::init(const InitOptionsModern& initOptions) {
@@ -41,7 +51,9 @@ namespace universelan::client {
 
 		init_options = std::make_unique<InitOptionsModern>(initOptions);
 
-		auto real_init = SharedLibUtils::get_func<std::function<GALAXY_DLL_EXPORT void GALAXY_CALLTYPE(struct InitOptions const& initOptions)>>("Init");
+		assign_func(real_init, "Init");
+		assign_func(real_process_data, "ProcessData");
+		assign_func(real_shutdown, "Shutdown");
 
 		if (config->OverrideInitKeysEnabled()) {
 			init_options->clientID = config->GetOverrideInitKeyId();
@@ -49,48 +61,52 @@ namespace universelan::client {
 		}
 
 		interceptor_make_unique(notification, "ListenerRegistrar");
-
 		interceptor_make_unique(user, "User");
 		interceptor_make_unique(friends, "Friends");
-#if GALAXY_BUILD_FEATURE_HAS_ICHAT
-		interceptor_make_unique(chat, "Chat");
-#endif
 		interceptor_make_unique(matchmaking, "MatchMaking");
 		interceptor_make_unique(networking, "Networking");
 		interceptor_make_unique(server_networking, "ServerNetworking");
 		interceptor_make_unique(stats, "Stats");
+		interceptor_make_unique(logger, this);
+
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
+		interceptor_make_unique(chat, "Chat");
+#endif
+
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS
 		interceptor_make_unique(utils, "Utils");
 #endif
+
 #if GALAXY_BUILD_FEATURE_HAS_IAPPS
 		interceptor_make_unique(apps, "Apps");
 #endif
+
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 		interceptor_make_unique(storage, "Storage");
 #endif
+
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE
 		interceptor_make_unique(cloud_storage, "CloudStorage");
 #endif
+
 #if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
 		interceptor_make_unique(custom_networking, "CustomNetworking");
 #endif
-		interceptor_make_unique(logger, "Logger");
+		
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 		interceptor_make_unique(telemetry, "Telemetry");
 #endif
 
-		galaxy::api::InitOptions classic_init_options{
-			init_options->clientID.c_str(),
-			init_options->clientSecret.c_str(),
-			init_options->configFilePath.c_str(),
-			init_options->galaxyAllocator,
-			init_options->storagePath.c_str(),
-			init_options->host.c_str(),
-			init_options->port,
-			init_options->galaxyThreadFactory
-		};
+		//const InitOptionsImpl classic_init_options = *init_options;
 
-		real_init(classic_init_options);
+		//real_init(classic_init_options);
+
+		if (config->OverrideSignInEnabled()) {
+			user->USER_SIGN_IN_CREDENTIALS(
+				config->GetOverrideSignInId().c_str(),
+				config->GetOverrideSignInPassword().c_str()
+			);
+		}
 	}
 
 	InterfaceInstances::~InterfaceInstances() {
@@ -111,6 +127,10 @@ namespace universelan::client {
 			config->ShouldAlwaysFlushTracing(),
 			config->GetCallTracingFlags()
 		);
+
+		real_init = nullptr;
+		real_process_data = nullptr;
+		real_shutdown = nullptr;
 
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 		telemetry = nullptr;

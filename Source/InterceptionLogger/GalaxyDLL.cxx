@@ -171,13 +171,14 @@ namespace universelan::client {
 	void ProcessData() {
 		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
-		if (intf_inst.client != nullptr) {
-			intf_inst.client->ProcessEvents();
-		}
+		intf_inst.real_process_data();
+		//if (intf_inst.client != nullptr) {
+		//	intf_inst.client->ProcessEvents();
+		//}
 
-		if (intf_inst.delay_runner != nullptr) {
-			intf_inst.delay_runner->Run();
-		}
+		//if (intf_inst.delay_runner != nullptr) {
+		//	intf_inst.delay_runner->Run();
+		//}
 	}
 
 	IListenerRegistrar* ListenerRegistrar() {

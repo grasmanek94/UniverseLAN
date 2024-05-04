@@ -1,7 +1,7 @@
 #include "User.hxx"
 
+#include <GalaxyID.hxx>
 #include <Tracer.hxx>
-#include <GalaxyDLL.hxx>
 #include <SafeStringCopy.hxx>
 
 #include <magic_enum/magic_enum.hpp>
@@ -17,7 +17,7 @@ namespace universelan::client {
 #define GET_LISTENER(listener) ((IAuthListener* const)nullptr)
 #endif
 
-	UserImpl::UserImpl(InterfaceInstances* intf) : intf{ intf }
+	UserImpl::UserImpl(FuncT::F intf) : intf{ intf }
 	{
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
 	}

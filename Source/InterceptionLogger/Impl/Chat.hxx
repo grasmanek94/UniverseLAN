@@ -7,10 +7,10 @@
  * with other Galaxy Users.
  */
 
+#include <GalaxyFunctional.hxx>
+
 #include <GalaxyExport.h>
 #include <IChat.h>
-
-#include <GalaxyFunctional.hxx>
 
 namespace universelan::client {
 	using namespace galaxy::api;

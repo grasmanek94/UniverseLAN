@@ -8,11 +8,13 @@
  * @warning This API is experimental and can be changed or removed in following releases.
  */
 
+#include <GalaxyExport.h>
 #include <ICustomNetworking.h>
+
+#include <GalaxyFunctional.hxx>
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	struct InterfaceInstances;
 
 	/**
 	 * @addtogroup api
@@ -24,12 +26,16 @@ namespace universelan::client {
 	  */
 	class CustomNetworkingImpl : public ICustomNetworking
 	{
+	public:
+		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT ICustomNetworking* GALAXY_CALLTYPE(void)>>;
+		using FuncPtr = FuncT::PTR;
+
 	private:
-		InterfaceInstances* intf;
+		FuncT::F intf;
 
 	public:
 
-		CustomNetworkingImpl(InterfaceInstances* intf);
+		CustomNetworkingImpl(FuncT::F intf);
 		virtual ~CustomNetworkingImpl() override;
 
 		/**

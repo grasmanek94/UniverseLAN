@@ -2,11 +2,13 @@
 
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE
 
+#include <GalaxyExport.h>
 #include <ICloudStorage.h>
+
+#include <GalaxyFunctional.hxx>
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	struct InterfaceInstances;
 
 	/**
 	 * @addtogroup api
@@ -18,11 +20,15 @@ namespace universelan::client {
 	  */
 	class CloudStorageImpl : public ICloudStorage
 	{
+	public:
+		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT ICloudStorage* GALAXY_CALLTYPE(void)>>;
+		using FuncPtr = FuncT::PTR;
+
 	private:
-		InterfaceInstances* intf;
+		FuncT::F intf;
 
 	public:
-		CloudStorageImpl(InterfaceInstances* intf);
+		CloudStorageImpl(FuncT::F intf);
 		virtual ~CloudStorageImpl();
 
 

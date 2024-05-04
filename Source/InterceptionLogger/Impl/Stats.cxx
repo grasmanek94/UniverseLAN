@@ -1,7 +1,7 @@
 #include "Stats.hxx"
 
+#include <GalaxyID.hxx>
 #include <Tracer.hxx>
-#include <GalaxyDLL.hxx>
 #include <SafeStringCopy.hxx>
 
 #include <magic_enum/magic_enum.hpp>
@@ -10,7 +10,7 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	StatsImpl::StatsImpl(InterfaceInstances* intf) : intf{ intf }
+	StatsImpl::StatsImpl(FuncT::F intf) : intf{ intf }
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 	}
@@ -34,7 +34,7 @@ namespace universelan::client {
 #endif
 		}
 
-		RealGalaxyDLL_Stats()->RequestUserStatsAndAchievements(userID
+		intf()->RequestUserStatsAndAchievements(userID
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, listener
 #endif	
@@ -49,7 +49,7 @@ namespace universelan::client {
 			trace.write_all(std::format("userID: {}", userID));
 		}
 
-		auto result = RealGalaxyDLL_Stats()->GetStatInt(name, userID);
+		auto result = intf()->GetStatInt(name, userID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -66,7 +66,7 @@ namespace universelan::client {
 			trace.write_all(std::format("userID: {}", userID));
 		}
 
-		auto result = RealGalaxyDLL_Stats()->GetStatFloat(name, userID);
+		auto result = intf()->GetStatFloat(name, userID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -83,7 +83,7 @@ namespace universelan::client {
 			trace.write_all(std::format("value: {}", value));
 		}
 
-		RealGalaxyDLL_Stats()->SetStatInt(name, value);
+		intf()->SetStatInt(name, value);
 	}
 
 	void StatsImpl::SetStatFloat(const char* name, float value) {
@@ -94,7 +94,7 @@ namespace universelan::client {
 			trace.write_all(std::format("value: {}", value));
 		}
 
-		RealGalaxyDLL_Stats()->SetStatFloat(name, value);
+		intf()->SetStatFloat(name, value);
 	}
 
 	void StatsImpl::UpdateAvgRateStat(const char* name, float countThisSession, double sessionLength) {
@@ -106,7 +106,7 @@ namespace universelan::client {
 			trace.write_all(std::format("sessionLength: {}", sessionLength));
 		}
 
-		RealGalaxyDLL_Stats()->UpdateAvgRateStat(name, countThisSession, sessionLength);
+		intf()->UpdateAvgRateStat(name, countThisSession, sessionLength);
 	}
 
 	void StatsImpl::GetAchievement(const char* name, bool& unlocked, uint32_t& unlockTime, GalaxyID userID) {
@@ -117,7 +117,7 @@ namespace universelan::client {
 			trace.write_all(std::format("userID: {}", userID));
 		}
 
-		RealGalaxyDLL_Stats()->GetAchievement(name, unlocked, unlockTime, userID);
+		intf()->GetAchievement(name, unlocked, unlockTime, userID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("unlocked: {}", unlocked));
@@ -132,7 +132,7 @@ namespace universelan::client {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
 		}
 
-		RealGalaxyDLL_Stats()->SetAchievement(name);
+		intf()->SetAchievement(name);
 	}
 
 	void StatsImpl::ClearAchievement(const char* name) {
@@ -142,7 +142,7 @@ namespace universelan::client {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
 		}
 
-		RealGalaxyDLL_Stats()->ClearAchievement(name);
+		intf()->ClearAchievement(name);
 	}
 
 	void StatsImpl::StoreStatsAndAchievements(
@@ -159,7 +159,7 @@ namespace universelan::client {
 
 		}
 
-		RealGalaxyDLL_Stats()->StoreStatsAndAchievements();
+		intf()->StoreStatsAndAchievements();
 	}
 
 	void StatsImpl::ResetStatsAndAchievements(
@@ -176,7 +176,7 @@ namespace universelan::client {
 
 		}
 
-		RealGalaxyDLL_Stats()->ResetStatsAndAchievements(
+		intf()->ResetStatsAndAchievements(
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			listener
 #endif
@@ -190,7 +190,7 @@ namespace universelan::client {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
 		}
 
-		auto result = RealGalaxyDLL_Stats()->GetAchievementDisplayName(name);
+		auto result = intf()->GetAchievementDisplayName(name);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
@@ -209,7 +209,7 @@ namespace universelan::client {
 			trace.write_all(std::format("bufferLength: {}", bufferLength));
 		}
 
-		RealGalaxyDLL_Stats()->GetAchievementDisplayNameCopy(name, buffer, bufferLength);
+		intf()->GetAchievementDisplayNameCopy(name, buffer, bufferLength);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
@@ -224,7 +224,7 @@ namespace universelan::client {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
 		}
 
-		auto result = RealGalaxyDLL_Stats()->GetAchievementDescription(name);
+		auto result = intf()->GetAchievementDescription(name);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
@@ -243,7 +243,7 @@ namespace universelan::client {
 			trace.write_all(std::format("bufferLength: {}", bufferLength));
 		}
 
-		RealGalaxyDLL_Stats()->GetAchievementDescriptionCopy(name, buffer, bufferLength);
+		intf()->GetAchievementDescriptionCopy(name, buffer, bufferLength);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
@@ -258,7 +258,7 @@ namespace universelan::client {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
 		}
 
-		auto result = RealGalaxyDLL_Stats()->IsAchievementVisible(name);
+		auto result = intf()->IsAchievementVisible(name);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -275,7 +275,7 @@ namespace universelan::client {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
 		}
 
-		auto result = RealGalaxyDLL_Stats()->IsAchievementVisibleWhileLocked(name);
+		auto result = intf()->IsAchievementVisibleWhileLocked(name);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -299,7 +299,7 @@ namespace universelan::client {
 
 		}
 
-		RealGalaxyDLL_Stats()->RequestLeaderboards(
+		intf()->RequestLeaderboards(
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			listener
 #endif	
@@ -313,7 +313,7 @@ namespace universelan::client {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
 		}
 
-		auto result = RealGalaxyDLL_Stats()->GetLeaderboardDisplayName(name);
+		auto result = intf()->GetLeaderboardDisplayName(name);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
@@ -332,7 +332,7 @@ namespace universelan::client {
 			trace.write_all(std::format("bufferLength: {}", bufferLength));
 		}
 
-		RealGalaxyDLL_Stats()->GetLeaderboardDisplayNameCopy(name, buffer, bufferLength);
+		intf()->GetLeaderboardDisplayNameCopy(name, buffer, bufferLength);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
@@ -347,7 +347,7 @@ namespace universelan::client {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
 		}
 
-		auto result = RealGalaxyDLL_Stats()->GetLeaderboardSortMethod(name);
+		auto result = intf()->GetLeaderboardSortMethod(name);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));
@@ -363,7 +363,7 @@ namespace universelan::client {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
 		}
 
-		auto result = RealGalaxyDLL_Stats()->GetLeaderboardDisplayType(name);
+		auto result = intf()->GetLeaderboardDisplayType(name);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));
@@ -391,7 +391,7 @@ namespace universelan::client {
 #endif
 		}
 
-		RealGalaxyDLL_Stats()->RequestLeaderboardEntriesGlobal(name, rangeStart, rangeEnd
+		intf()->RequestLeaderboardEntriesGlobal(name, rangeStart, rangeEnd
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, listener
 #endif	
@@ -419,7 +419,7 @@ namespace universelan::client {
 #endif
 		}
 
-		RealGalaxyDLL_Stats()->RequestLeaderboardEntriesAroundUser(name, countBefore, countAfter, userID
+		intf()->RequestLeaderboardEntriesAroundUser(name, countBefore, countAfter, userID
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, listener
 #endif	
@@ -450,7 +450,7 @@ namespace universelan::client {
 			}
 		}
 
-		RealGalaxyDLL_Stats()->RequestLeaderboardEntriesForUsers(name, userArray, userArraySize
+		intf()->RequestLeaderboardEntriesForUsers(name, userArray, userArraySize
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, listener
 #endif	
@@ -464,7 +464,7 @@ namespace universelan::client {
 			trace.write_all(std::format("index: {}", index));
 		}
 
-		RealGalaxyDLL_Stats()->GetRequestedLeaderboardEntry(index, rank, score, userID);
+		intf()->GetRequestedLeaderboardEntry(index, rank, score, userID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("rank: {}", rank));
@@ -492,7 +492,7 @@ namespace universelan::client {
 #endif
 		}
 
-		RealGalaxyDLL_Stats()->SetLeaderboardScore(name, score, forceUpdate
+		intf()->SetLeaderboardScore(name, score, forceUpdate
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, listener
 #endif	
@@ -516,7 +516,7 @@ namespace universelan::client {
 			trace.write_all(std::format("detailsSize: {}", detailsSize));
 		}
 
-		RealGalaxyDLL_Stats()->GetRequestedLeaderboardEntryWithDetails(index, rank, score, details, detailsSize, outDetailsSize, userID);
+		intf()->GetRequestedLeaderboardEntryWithDetails(index, rank, score, details, detailsSize, outDetailsSize, userID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("rank: {}", rank));
@@ -549,7 +549,7 @@ namespace universelan::client {
 #endif
 		}
 
-		RealGalaxyDLL_Stats()->SetLeaderboardScoreWithDetails(name, score, details, detailsSize, forceUpdate
+		intf()->SetLeaderboardScoreWithDetails(name, score, details, detailsSize, forceUpdate
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, listener
 #endif	
@@ -564,7 +564,7 @@ namespace universelan::client {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
 		}
 
-		auto result = RealGalaxyDLL_Stats()->GetLeaderboardEntryCount(name);
+		auto result = intf()->GetLeaderboardEntryCount(name);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -588,7 +588,7 @@ namespace universelan::client {
 #endif
 		}
 
-		RealGalaxyDLL_Stats()->FindLeaderboard(name
+		intf()->FindLeaderboard(name
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, listener
 #endif	
@@ -616,7 +616,7 @@ namespace universelan::client {
 #endif
 		}
 
-		RealGalaxyDLL_Stats()->FindOrCreateLeaderboard(name, displayName, sortMethod, displayType
+		intf()->FindOrCreateLeaderboard(name, displayName, sortMethod, displayType
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, listener
 #endif	
@@ -644,7 +644,7 @@ namespace universelan::client {
 #endif
 		}
 
-		RealGalaxyDLL_Stats()->RequestUserTimePlayed(userID
+		intf()->RequestUserTimePlayed(userID
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, listener
 #endif	
@@ -658,7 +658,7 @@ namespace universelan::client {
 			trace.write_all(std::format("userID: {}", userID));
 		}
 
-		auto result = RealGalaxyDLL_Stats()->GetUserTimePlayed(userID);
+		auto result = intf()->GetUserTimePlayed(userID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));

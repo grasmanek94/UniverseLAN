@@ -2,8 +2,8 @@
 
 #include "CustomNetworking.hxx"
 
+#include <GalaxyID.hxx>
 #include <Tracer.hxx>
-#include <GalaxyDLL.hxx>
 #include <SafeStringCopy.hxx>
 
 #include <magic_enum/magic_enum.hpp>
@@ -13,7 +13,7 @@
 namespace universelan::client {
 	using namespace galaxy::api;
 	
-	CustomNetworkingImpl::CustomNetworkingImpl(InterfaceInstances* intf) : intf{intf}
+	CustomNetworkingImpl::CustomNetworkingImpl(FuncT::F intf) : intf{intf}
 	{
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ICUSTOMNETWORKING };
 	}
@@ -37,7 +37,7 @@ namespace universelan::client {
 #endif
 		}
 
-		RealGalaxyDLL_CustomNetworking()->OpenConnection(connectionString
+		intf()->OpenConnection(connectionString
 #if GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS
 			, listener
 #endif
@@ -58,7 +58,7 @@ namespace universelan::client {
 #endif
 		}
 
-		RealGalaxyDLL_CustomNetworking()->CloseConnection(connectionID
+		intf()->CloseConnection(connectionID
 #if GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS
 			, listener
 #endif
@@ -72,7 +72,7 @@ namespace universelan::client {
 			trace.write_all(std::format("connectionID: {}", connectionID));
 		}
 
-		auto result = RealGalaxyDLL_CustomNetworking()->GetAvailableDataSize(connectionID);
+		auto result = intf()->GetAvailableDataSize(connectionID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -90,7 +90,7 @@ namespace universelan::client {
 			trace.write_all(std::format("dataSize: {}", dataSize));
 		}
 
-		RealGalaxyDLL_CustomNetworking()->PeekData(connectionID, dest, dataSize);
+		intf()->PeekData(connectionID, dest, dataSize);
 	}
 
 	void CustomNetworkingImpl::ReadData(ConnectionID connectionID, void* dest, uint32_t dataSize) {
@@ -102,7 +102,7 @@ namespace universelan::client {
 			trace.write_all(std::format("dataSize: {}", dataSize));
 		}
 
-		RealGalaxyDLL_CustomNetworking()->ReadData(connectionID, dest, dataSize);
+		intf()->ReadData(connectionID, dest, dataSize);
 	}
 
 	void CustomNetworkingImpl::PopData(ConnectionID connectionID, uint32_t dataSize) {
@@ -113,7 +113,7 @@ namespace universelan::client {
 			trace.write_all(std::format("dataSize: {}", dataSize));
 		}
 
-		RealGalaxyDLL_CustomNetworking()->PopData(connectionID, dataSize);
+		intf()->PopData(connectionID, dataSize);
 	}
 }
 

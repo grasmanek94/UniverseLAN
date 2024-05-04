@@ -56,6 +56,8 @@ namespace universelan::client {
 		std::string host; ///< The local IP address this peer would bind to.
 		uint16_t port; ///< The local port used to communicate with GOG Galaxy Multiplayer server and other players.
 #endif
+
+		operator const InitOptionsImpl() const;
 	};
 
 	/** @} */

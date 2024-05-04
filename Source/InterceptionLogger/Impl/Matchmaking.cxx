@@ -1,7 +1,7 @@
 #include "Matchmaking.hxx"
 
+#include <GalaxyID.hxx>
 #include <Tracer.hxx>
-#include <GalaxyDLL.hxx>
 #include <SafeStringCopy.hxx>
 
 #include <magic_enum/magic_enum.hpp>
@@ -10,7 +10,7 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	MatchmakingImpl::MatchmakingImpl(InterfaceInstances* intf) : intf{intf}
+	MatchmakingImpl::MatchmakingImpl(FuncT::F intf) : intf{intf}
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
 	}
@@ -46,7 +46,7 @@ namespace universelan::client {
 #endif
 		}
 
-		RealGalaxyDLL_Matchmaking()->CreateLobby(lobbyType, maxMembers
+		intf()->CreateLobby(lobbyType, maxMembers
 #if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
 			, joinable
 			, lobbyTopologyType
@@ -77,7 +77,7 @@ namespace universelan::client {
 #endif	
 		}
 
-		RealGalaxyDLL_Matchmaking()->RequestLobbyList(
+		intf()->RequestLobbyList(
 #if GALAXY_BUILD_FEATURE_HAS_REQUESTLOBBYLIST_ARGS_ALLOWFULL
 			allowFullLobbies
 #endif
@@ -95,7 +95,7 @@ namespace universelan::client {
 			trace.write_all(std::format("limit: {}", limit));
 		}
 
-		RealGalaxyDLL_Matchmaking()->AddRequestLobbyListResultCountFilter(limit);
+		intf()->AddRequestLobbyListResultCountFilter(limit);
 	}
 #endif
 
@@ -108,7 +108,7 @@ namespace universelan::client {
 			trace.write_all(std::format("comparisonType: {}", magic_enum::enum_name(comparisonType)));
 		}
 
-		RealGalaxyDLL_Matchmaking()->AddRequestLobbyListStringFilter(keyToMatch, valueToMatch, comparisonType);
+		intf()->AddRequestLobbyListStringFilter(keyToMatch, valueToMatch, comparisonType);
 	}
 
 	void MatchmakingImpl::AddRequestLobbyListNumericalFilter(const char* keyToMatch, int32_t valueToMatch, LobbyComparisonType comparisonType) {
@@ -120,7 +120,7 @@ namespace universelan::client {
 			trace.write_all(std::format("comparisonType: {}", magic_enum::enum_name(comparisonType)));
 		}
 
-		RealGalaxyDLL_Matchmaking()->AddRequestLobbyListNumericalFilter(keyToMatch, valueToMatch, comparisonType);
+		intf()->AddRequestLobbyListNumericalFilter(keyToMatch, valueToMatch, comparisonType);
 	}
 
 	void MatchmakingImpl::AddRequestLobbyListNearValueFilter(const char* keyToMatch, int32_t valueToBeCloseTo) {
@@ -131,7 +131,7 @@ namespace universelan::client {
 			trace.write_all(std::format("valueToBeCloseTo: {}", valueToBeCloseTo));
 		}
 
-		RealGalaxyDLL_Matchmaking()->AddRequestLobbyListNearValueFilter(keyToMatch, valueToBeCloseTo);
+		intf()->AddRequestLobbyListNearValueFilter(keyToMatch, valueToBeCloseTo);
 	}
 
 	GalaxyID MatchmakingImpl::GetLobbyByIndex(uint32_t index) {
@@ -141,7 +141,7 @@ namespace universelan::client {
 			trace.write_all(std::format("index: {}", index));
 		}
 
-		auto result = RealGalaxyDLL_Matchmaking()->GetLobbyByIndex(index);
+		auto result = intf()->GetLobbyByIndex(index);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -164,7 +164,7 @@ namespace universelan::client {
 #endif
 		}
 
-		RealGalaxyDLL_Matchmaking()->JoinLobby(lobbyID
+		intf()->JoinLobby(lobbyID
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, listener
 #endif
@@ -185,7 +185,7 @@ namespace universelan::client {
 #endif
 		}
 
-		RealGalaxyDLL_Matchmaking()->LeaveLobby(lobbyID
+		intf()->LeaveLobby(lobbyID
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, listener
 #endif
@@ -212,7 +212,7 @@ namespace universelan::client {
 #if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 		auto result =
 #endif
-			RealGalaxyDLL_Matchmaking()->SetMaxNumLobbyMembers(lobbyID, maxNumLobbyMembers
+			intf()->SetMaxNumLobbyMembers(lobbyID, maxNumLobbyMembers
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 				, listener
 #endif
@@ -235,7 +235,7 @@ namespace universelan::client {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
 		}
 
-		auto result = RealGalaxyDLL_Matchmaking()->GetMaxNumLobbyMembers(lobbyID);
+		auto result = intf()->GetMaxNumLobbyMembers(lobbyID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -251,7 +251,7 @@ namespace universelan::client {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
 		}
 
-		auto result = RealGalaxyDLL_Matchmaking()->GetNumLobbyMembers(lobbyID);
+		auto result = intf()->GetNumLobbyMembers(lobbyID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -268,7 +268,7 @@ namespace universelan::client {
 			trace.write_all(std::format("index: {}", index));
 		}
 
-		auto result = RealGalaxyDLL_Matchmaking()->GetLobbyMemberByIndex(lobbyID, index);
+		auto result = intf()->GetLobbyMemberByIndex(lobbyID, index);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -297,7 +297,7 @@ namespace universelan::client {
 #if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 		auto result =
 #endif
-			RealGalaxyDLL_Matchmaking()->SetLobbyType(lobbyID, lobbyType
+			intf()->SetLobbyType(lobbyID, lobbyType
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 				, listener
 #endif
@@ -321,7 +321,7 @@ namespace universelan::client {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
 		}
 
-		auto result = RealGalaxyDLL_Matchmaking()->GetLobbyType(lobbyID);
+		auto result = intf()->GetLobbyType(lobbyID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));
@@ -350,7 +350,7 @@ namespace universelan::client {
 #if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 		auto result =
 #endif
-			RealGalaxyDLL_Matchmaking()->SetLobbyJoinable(lobbyID, joinable
+			intf()->SetLobbyJoinable(lobbyID, joinable
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 				, listener
 #endif
@@ -374,7 +374,7 @@ namespace universelan::client {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
 		}
 
-		auto result = RealGalaxyDLL_Matchmaking()->IsLobbyJoinable(lobbyID);
+		auto result = intf()->IsLobbyJoinable(lobbyID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -402,7 +402,7 @@ namespace universelan::client {
 #if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 		auto result =
 #endif
-			RealGalaxyDLL_Matchmaking()->RequestLobbyData(lobbyID
+			intf()->RequestLobbyData(lobbyID
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 				, listener
 #endif
@@ -425,7 +425,7 @@ namespace universelan::client {
 			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
 		}
 
-		auto result = RealGalaxyDLL_Matchmaking()->GetLobbyData(lobbyID, key);
+		auto result = intf()->GetLobbyData(lobbyID, key);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
@@ -445,7 +445,7 @@ namespace universelan::client {
 			trace.write_all(std::format("bufferLength: {}", bufferLength));
 		}
 
-		RealGalaxyDLL_Matchmaking()->GetLobbyDataCopy(lobbyID, key, buffer, bufferLength);
+		intf()->GetLobbyDataCopy(lobbyID, key, buffer, bufferLength);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
@@ -473,7 +473,7 @@ namespace universelan::client {
 #if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 		auto result =
 #endif
-			RealGalaxyDLL_Matchmaking()->SetLobbyData(lobbyID, key, value
+			intf()->SetLobbyData(lobbyID, key, value
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 				, listener
 #endif
@@ -495,7 +495,7 @@ namespace universelan::client {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
 		}
 
-		auto result = RealGalaxyDLL_Matchmaking()->GetLobbyDataCount(lobbyID);
+		auto result = intf()->GetLobbyDataCount(lobbyID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -516,7 +516,7 @@ namespace universelan::client {
 			trace.write_all(std::format("valueLength: {}", valueLength));
 		}
 
-		auto result = RealGalaxyDLL_Matchmaking()->GetLobbyDataByIndex(lobbyID, index, key, keyLength, value, valueLength);
+		auto result = intf()->GetLobbyDataByIndex(lobbyID, index, key, keyLength, value, valueLength);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -547,7 +547,7 @@ namespace universelan::client {
 #if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 		auto result =
 #endif
-			RealGalaxyDLL_Matchmaking()->DeleteLobbyData(lobbyID, key
+			intf()->DeleteLobbyData(lobbyID, key
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 				, listener
 #endif
@@ -571,7 +571,7 @@ namespace universelan::client {
 			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
 		}
 
-		auto result = RealGalaxyDLL_Matchmaking()->GetLobbyMemberData(lobbyID, memberID, key);
+		auto result = intf()->GetLobbyMemberData(lobbyID, memberID, key);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
@@ -592,7 +592,7 @@ namespace universelan::client {
 			trace.write_all(std::format("bufferLength: {}", bufferLength));
 		}
 
-		RealGalaxyDLL_Matchmaking()->GetLobbyMemberDataCopy(lobbyID, memberID, key, buffer, bufferLength);
+		intf()->GetLobbyMemberDataCopy(lobbyID, memberID, key, buffer, bufferLength);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
@@ -616,7 +616,7 @@ namespace universelan::client {
 #endif
 		}
 
-		RealGalaxyDLL_Matchmaking()->SetLobbyMemberData(lobbyID, key, value
+		intf()->SetLobbyMemberData(lobbyID, key, value
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, listener
 #endif
@@ -631,7 +631,7 @@ namespace universelan::client {
 			trace.write_all(std::format("memberID: {}", memberID));
 		}
 
-		auto result = RealGalaxyDLL_Matchmaking()->GetLobbyMemberDataCount(lobbyID, memberID);
+		auto result = intf()->GetLobbyMemberDataCount(lobbyID, memberID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -653,7 +653,7 @@ namespace universelan::client {
 			trace.write_all(std::format("valueLength: {}", valueLength));
 		}
 
-		auto result = RealGalaxyDLL_Matchmaking()->GetLobbyMemberDataByIndex(lobbyID, memberID, index, key, keyLength, value, valueLength);
+		auto result = intf()->GetLobbyMemberDataByIndex(lobbyID, memberID, index, key, keyLength, value, valueLength);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -679,7 +679,7 @@ namespace universelan::client {
 #endif
 		}
 
-			RealGalaxyDLL_Matchmaking()->DeleteLobbyMemberData(lobbyID, key
+			intf()->DeleteLobbyMemberData(lobbyID, key
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 				, listener
 #endif
@@ -693,7 +693,7 @@ namespace universelan::client {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
 		}
 
-		auto result = RealGalaxyDLL_Matchmaking()->GetLobbyOwner(lobbyID);
+		auto result = intf()->GetLobbyOwner(lobbyID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -708,10 +708,10 @@ namespace universelan::client {
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
 			trace.write_all(std::format("data: {}", (void*)data));
-			trace.write_all(std::format("dataSize: {}", (void*)dataSize));
+			trace.write_all(std::format("dataSize: {}", dataSize));
 		}
 
-		auto result = RealGalaxyDLL_Matchmaking()->SendLobbyMessage(lobbyID, data, dataSize);
+		auto result = intf()->SendLobbyMessage(lobbyID, data, dataSize);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -725,12 +725,12 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("messageID: {}", (void*)messageID));
+			trace.write_all(std::format("messageID: {}", messageID));
 			trace.write_all(std::format("msg: {}", (void*)msg));
 			trace.write_all(std::format("msgLength: {}", msgLength));
 		}
 
-		auto result = RealGalaxyDLL_Matchmaking()->GetLobbyMessage(lobbyID, messageID, senderID, msg, msgLength);
+		auto result = intf()->GetLobbyMessage(lobbyID, messageID, senderID, msg, msgLength);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));

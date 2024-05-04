@@ -6,10 +6,10 @@
  * Contains data structures and interfaces related to application activities.
  */
 
+#include <GalaxyFunctional.hxx>
+
 #include <GalaxyExport.h>
 #include <IApps.h>
-
-#include <GalaxyFunctional.hxx>
 
 namespace universelan::client {
 	using namespace galaxy::api;

@@ -22,7 +22,7 @@ namespace universelan::client {
 	}
 
 	void StatsImpl::RequestUserStatsAndAchievements(GalaxyID userID
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 		, IUserStatsAndAchievementsRetrieveListener* const listener
 #endif
 	) {
@@ -30,7 +30,7 @@ namespace universelan::client {
 
 		if (intf->config->IsSelfUserID(userID)) {
 			listeners->NotifyAll(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 				listener,
 #endif
 				&IUserStatsAndAchievementsRetrieveListener::OnUserStatsAndAchievementsRetrieveSuccess, userID);
@@ -38,7 +38,7 @@ namespace universelan::client {
 		else {
 			uint64_t request_id = MessageUniqueID::get();
 
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			specific_user_stats_and_achievements_requests.emplace(request_id, listener);
 #endif
 
@@ -270,14 +270,14 @@ namespace universelan::client {
 		const char* name
 		, uint32_t rangeStart
 		, uint32_t rangeEnd
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 		, ILeaderboardEntriesRetrieveListener* const listener
 #endif
 	) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		listeners->NotifyAll(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			listener,
 #endif
 			&ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
@@ -288,14 +288,14 @@ namespace universelan::client {
 		, uint32_t countBefore
 		, uint32_t countAfter
 		, GalaxyID userID
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 		, ILeaderboardEntriesRetrieveListener* const listener
 #endif
 	) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		listeners->NotifyAll(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			listener,
 #endif
 			&ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
@@ -305,14 +305,14 @@ namespace universelan::client {
 		const char* name
 		, GalaxyID* userArray
 		, uint32_t userArraySize
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 		, ILeaderboardEntriesRetrieveListener* const listener
 #endif
 	) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		listeners->NotifyAll(
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			listener, 
 #endif
 			&ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
