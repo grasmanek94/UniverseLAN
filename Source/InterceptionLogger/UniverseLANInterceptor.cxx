@@ -37,7 +37,7 @@ namespace universelan::client {
 		}
 
 		tracer::Trace::InitTracing(
-			(fs::path(config->GetGameDataPath()) / "Interceptor").string().c_str(),
+			(fs::path(config->GetGameDataPath()) / "Interceptor" / "Tracing").string().c_str(),
 			config->IsUnhandledExceptionLoggingEnabled(),
 			config->IsCallTracingEnabled(),
 			config->CreateMiniDumpOnUnhandledException(),

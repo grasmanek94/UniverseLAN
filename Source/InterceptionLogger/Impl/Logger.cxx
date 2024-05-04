@@ -37,9 +37,15 @@ namespace universelan::client {
 
 		int count = counter.fetch_add(1);
 
-		path << (std::filesystem::path(intf->config->GetGameDataPath()) / "InterceptorLogging" / "L").string()
+		path << (std::filesystem::path(intf->config->GetGameDataPath()) / "Interceptor" / "Logging" / "L").string()
 			<< std::put_time(&tm, "%Y-%m-%d_%H-%M-%S")
 			<< "-" << std::this_thread::get_id() << "-" << count << ".log";
+
+		auto full_fs_path = std::filesystem::path(path.str());
+
+		if (!std::filesystem::create_directories(full_fs_path.remove_filename())) {
+			std::cerr << "Failed to create logging directory: " << full_fs_path.remove_filename() << std::endl;
+		}
 
 		logfile = std::ofstream{ path.str() };
 		if (!logfile) {
