@@ -11,12 +11,17 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
+
+	namespace {
+		const auto TraceContext = tracer::Trace::IAPPS;
+	}
+
 	AppsImpl::AppsImpl(FuncT::F intf) : intf{ intf } {}
 
 	AppsImpl::~AppsImpl() {}
 
 	bool AppsImpl::IsDlcInstalled(ProductID productID) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IAPPS | tracer::Trace::HIGH_FREQUENCY_CALLS /* Some games call this frequently */};
+		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS /* Some games call this frequently */};
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("productID: {}", productID));
@@ -32,7 +37,7 @@ namespace universelan::client {
 	}
 
 	const char* AppsImpl::GetCurrentGameLanguage(ProductID productID) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IAPPS };
+		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("productID: {}", productID));
@@ -48,7 +53,7 @@ namespace universelan::client {
 	}
 
 	void AppsImpl::GetCurrentGameLanguageCopy(char* buffer, uint32_t bufferLength, ProductID productID) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IAPPS };
+		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("buffer: {}", (void*)buffer));

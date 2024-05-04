@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "UniverseLAN.hxx"
+#include "UniverseLANInterceptor.hxx"
 
 namespace universelan::client {
 	void Init(const InitOptionsModern& initOptions);

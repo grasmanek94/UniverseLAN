@@ -11,6 +11,10 @@
 namespace universelan::client {
 	using namespace galaxy::api;
 
+	namespace {
+		const auto TraceContext = tracer::Trace::IERROR;
+	}
+
 	Error::Error(FuncT::F intf)
 	{
 	}
@@ -20,7 +24,7 @@ namespace universelan::client {
 	}
 
 	const char* Error::GetName() const {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IERROR | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		auto result = intf()->GetName();
 
@@ -32,7 +36,7 @@ namespace universelan::client {
 	}
 
 	const char* Error::GetMsg() const {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IERROR | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		auto result = intf()->GetMsg();
 
@@ -44,7 +48,7 @@ namespace universelan::client {
 	}
 
 	IError::Type Error::GetType() const {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IERROR | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		auto result = intf()->GetType();
 

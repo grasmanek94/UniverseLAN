@@ -12,15 +12,19 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	
+
+	namespace {
+		const auto TraceContext = tracer::Trace::ICUSTOMNETWORKING;
+	}
+
 	CustomNetworkingImpl::CustomNetworkingImpl(FuncT::F intf) : intf{intf}
 	{
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ICUSTOMNETWORKING };
+		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 	}
 
 	CustomNetworkingImpl::~CustomNetworkingImpl()
 	{
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ICUSTOMNETWORKING };
+		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 	}
 
 	void CustomNetworkingImpl::OpenConnection(const char* connectionString
@@ -28,7 +32,7 @@ namespace universelan::client {
 		, IConnectionOpenListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ICUSTOMNETWORKING };
+		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("connectionString: {}", util::safe_fix_null_char_ptr_annotate_ret(connectionString)));
@@ -49,7 +53,7 @@ namespace universelan::client {
 		, IConnectionCloseListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICUSTOMNETWORKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("connectionID: {}", connectionID));
@@ -65,8 +69,20 @@ namespace universelan::client {
 		);
 	}
 
+	void CustomNetworkingImpl::SendData(ConnectionID connectionID, const void* data, uint32_t dataSize) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("connectionID: {}", connectionID));
+			trace.write_all(std::format("data: {}", (void*)data));
+			trace.write_all(std::format("dataSize: {}", dataSize));
+		}
+
+		intf()->SendData(connectionID, data, dataSize);
+	}
+
 	uint32_t CustomNetworkingImpl::GetAvailableDataSize(ConnectionID connectionID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICUSTOMNETWORKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("connectionID: {}", connectionID));
@@ -82,7 +98,7 @@ namespace universelan::client {
 	}
 
 	void CustomNetworkingImpl::PeekData(ConnectionID connectionID, void* dest, uint32_t dataSize) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICUSTOMNETWORKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("connectionID: {}", connectionID));
@@ -94,7 +110,7 @@ namespace universelan::client {
 	}
 
 	void CustomNetworkingImpl::ReadData(ConnectionID connectionID, void* dest, uint32_t dataSize) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICUSTOMNETWORKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("connectionID: {}", connectionID));
@@ -106,7 +122,7 @@ namespace universelan::client {
 	}
 
 	void CustomNetworkingImpl::PopData(ConnectionID connectionID, uint32_t dataSize) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICUSTOMNETWORKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("connectionID: {}", connectionID));

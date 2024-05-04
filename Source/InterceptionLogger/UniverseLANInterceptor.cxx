@@ -1,4 +1,4 @@
-﻿#include "UniverseLAN.hxx"
+﻿#include "UniverseLANInterceptor.hxx"
 
 #include "SharedLibUtils.hxx"
 
@@ -16,7 +16,7 @@ namespace universelan::client {
 	namespace {
 		template <typename T>
 		void interceptor_make_unique(std::unique_ptr<T>& ptr, const char* name) {
-			ptr = std::make_unique<T>(SharedLibUtils::get_func<T::FuncPtr>(name));
+			ptr = std::make_unique<T>(SharedLibUtils::get_func<typename T::FuncPtr>(name));
 		}
 
 		template <typename T>

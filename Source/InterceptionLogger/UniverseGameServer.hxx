@@ -2,7 +2,7 @@
 
 #if GALAXY_BUILD_FEATURE_GAME_SERVER_API
 
-#include "UniverseLAN.hxx"
+#include "UniverseLANInterceptor.hxx"
 
 namespace universelan::client {
 	class UniverseGameServer {

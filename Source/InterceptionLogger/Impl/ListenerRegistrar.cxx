@@ -10,18 +10,23 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
+
+	namespace {
+		const auto TraceContext = tracer::Trace::LISTENERREGISTRAR;
+	}
+
 	ListenerRegistrarImpl::ListenerRegistrarImpl(FuncT::F intf) : intf{intf}
 	{
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
+		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 	}
 
 	ListenerRegistrarImpl::~ListenerRegistrarImpl()
 	{
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
+		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 	}
 
 	void ListenerRegistrarImpl::Register(ListenerTypeImpl listenerType, IGalaxyListener* listener) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
+		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_HAS_LISTENERTYPE
@@ -36,7 +41,7 @@ namespace universelan::client {
 	}
 
 	void ListenerRegistrarImpl::Unregister(ListenerTypeImpl listenerType, IGalaxyListener* listener) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
+		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_HAS_LISTENERTYPE

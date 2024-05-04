@@ -27,6 +27,7 @@ namespace universelan::client {
 	{
 	public:
 		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT IChat* GALAXY_CALLTYPE(void)>>;
+		using FuncPtr = typename FuncT::PTR;
 
 	private:
 		FuncT::PTR intf;

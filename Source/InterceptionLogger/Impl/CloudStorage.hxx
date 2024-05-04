@@ -22,7 +22,7 @@ namespace universelan::client {
 	{
 	public:
 		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT ICloudStorage* GALAXY_CALLTYPE(void)>>;
-		using FuncPtr = FuncT::PTR;
+		using FuncPtr = typename FuncT::PTR;
 
 	private:
 		FuncT::F intf;

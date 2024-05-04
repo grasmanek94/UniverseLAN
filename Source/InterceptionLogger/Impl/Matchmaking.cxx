@@ -10,13 +10,18 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
+
+	namespace {
+		const auto TraceContext = tracer::Trace::IMATCHMAKING;
+	}
+
 	MatchmakingImpl::MatchmakingImpl(FuncT::F intf) : intf{intf}
 	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 	}
 
 	MatchmakingImpl::~MatchmakingImpl() {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 	}
 
 	void MatchmakingImpl::CreateLobby(
@@ -31,7 +36,7 @@ namespace universelan::client {
 		, ILobbyEnteredListener* const lobbyEnteredListener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyType: {}", magic_enum::enum_name(lobbyType)));
@@ -66,7 +71,7 @@ namespace universelan::client {
 		, ILobbyListListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_HAS_REQUESTLOBBYLIST_ARGS_ALLOWFULL
@@ -89,7 +94,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_MATCHMAKING_RESULT_COUNT
 	void MatchmakingImpl::AddRequestLobbyListResultCountFilter(uint32_t limit) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("limit: {}", limit));
@@ -100,7 +105,7 @@ namespace universelan::client {
 #endif
 
 	void MatchmakingImpl::AddRequestLobbyListStringFilter(const char* keyToMatch, const char* valueToMatch, LobbyComparisonType comparisonType) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("keyToMatch: {}", util::safe_fix_null_char_ptr_annotate_ret(keyToMatch)));
@@ -112,7 +117,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::AddRequestLobbyListNumericalFilter(const char* keyToMatch, int32_t valueToMatch, LobbyComparisonType comparisonType) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("keyToMatch: {}", util::safe_fix_null_char_ptr_annotate_ret(keyToMatch)));
@@ -124,7 +129,7 @@ namespace universelan::client {
 	}
 
 	void MatchmakingImpl::AddRequestLobbyListNearValueFilter(const char* keyToMatch, int32_t valueToBeCloseTo) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("keyToMatch: {}", util::safe_fix_null_char_ptr_annotate_ret(keyToMatch)));
@@ -135,7 +140,7 @@ namespace universelan::client {
 	}
 
 	GalaxyID MatchmakingImpl::GetLobbyByIndex(uint32_t index) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("index: {}", index));
@@ -155,7 +160,7 @@ namespace universelan::client {
 		, ILobbyEnteredListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -176,7 +181,7 @@ namespace universelan::client {
 		, ILobbyLeftListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -199,7 +204,7 @@ namespace universelan::client {
 #endif
 	)
 	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -229,7 +234,7 @@ namespace universelan::client {
 #endif
 
 	uint32_t MatchmakingImpl::GetMaxNumLobbyMembers(GalaxyID lobbyID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -245,7 +250,7 @@ namespace universelan::client {
 	}
 
 	uint32_t MatchmakingImpl::GetNumLobbyMembers(GalaxyID lobbyID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -261,7 +266,7 @@ namespace universelan::client {
 	}
 
 	GalaxyID MatchmakingImpl::GetLobbyMemberByIndex(GalaxyID lobbyID, uint32_t index) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -284,7 +289,7 @@ namespace universelan::client {
 #endif
 	)
 	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -315,7 +320,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
 	LobbyType MatchmakingImpl::GetLobbyType(GalaxyID lobbyID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -337,7 +342,7 @@ namespace universelan::client {
 #endif
 	)
 	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -368,7 +373,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
 	bool MatchmakingImpl::IsLobbyJoinable(GalaxyID lobbyID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -390,7 +395,7 @@ namespace universelan::client {
 #endif
 	)
 	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -418,7 +423,7 @@ namespace universelan::client {
 	}
 
 	const char* MatchmakingImpl::GetLobbyData(GalaxyID lobbyID, const char* key) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -436,7 +441,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_IMATCHMAKING_GET_DATA_MEMBER_COPY
 	void MatchmakingImpl::GetLobbyDataCopy(GalaxyID lobbyID, const char* key, char* buffer, uint32_t bufferLength) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -459,7 +464,7 @@ namespace universelan::client {
 #endif
 	)
 	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -489,7 +494,7 @@ namespace universelan::client {
 	}
 
 	uint32_t MatchmakingImpl::GetLobbyDataCount(GalaxyID lobbyID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -505,7 +510,7 @@ namespace universelan::client {
 	}
 
 	bool MatchmakingImpl::GetLobbyDataByIndex(GalaxyID lobbyID, uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -534,7 +539,7 @@ namespace universelan::client {
 #endif
 	)
 	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -563,7 +568,7 @@ namespace universelan::client {
 	}
 
 	const char* MatchmakingImpl::GetLobbyMemberData(GalaxyID lobbyID, GalaxyID memberID, const char* key) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -582,7 +587,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_IMATCHMAKING_GET_DATA_MEMBER_COPY
 	void MatchmakingImpl::GetLobbyMemberDataCopy(GalaxyID lobbyID, GalaxyID memberID, const char* key, char* buffer, uint32_t bufferLength) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -605,7 +610,7 @@ namespace universelan::client {
 		, ILobbyMemberDataUpdateListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -624,7 +629,7 @@ namespace universelan::client {
 	}
 
 	uint32_t MatchmakingImpl::GetLobbyMemberDataCount(GalaxyID lobbyID, GalaxyID memberID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -641,7 +646,7 @@ namespace universelan::client {
 	}
 
 	bool MatchmakingImpl::GetLobbyMemberDataByIndex(GalaxyID lobbyID, GalaxyID memberID, uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -669,7 +674,7 @@ namespace universelan::client {
 		, ILobbyMemberDataUpdateListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -687,7 +692,7 @@ namespace universelan::client {
 	}
 
 	GalaxyID MatchmakingImpl::GetLobbyOwner(GalaxyID lobbyID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -703,7 +708,7 @@ namespace universelan::client {
 	}
 
 	bool MatchmakingImpl::SendLobbyMessage(GalaxyID lobbyID, SEND_LOBBY_MESSAGE_DATA_T* data, uint32_t dataSize) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
@@ -721,7 +726,7 @@ namespace universelan::client {
 	}
 
 	uint32_t MatchmakingImpl::GetLobbyMessage(GalaxyID lobbyID, uint32_t messageID, GalaxyID& senderID, char* msg, uint32_t msgLength) {
-		tracer::Trace trace{ nullptr, __FUNCTION__,  tracer::Trace::IMATCHMAKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__,  TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));

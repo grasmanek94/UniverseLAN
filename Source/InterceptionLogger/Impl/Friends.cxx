@@ -10,19 +10,24 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
+
+	namespace {
+		const auto TraceContext = tracer::Trace::IFRIENDS;
+	}
+
 	FriendsImpl::FriendsImpl(FuncT::F intf) : intf{ intf }
 	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 	}
 
 	FriendsImpl::~FriendsImpl()
 	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_CONNECTION_TYPE
 	AvatarCriteriaImpl FriendsImpl::GetDefaultAvatarCriteria() {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		auto result = intf()->GetDefaultAvatarCriteria();
 
@@ -34,7 +39,7 @@ namespace universelan::client {
 	}
 
 	void FriendsImpl::SetDefaultAvatarCriteria(AvatarCriteriaImpl defaultAvatarCriteria) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("defaultAvatarCriteria: {}", defaultAvatarCriteria));
@@ -54,7 +59,7 @@ namespace universelan::client {
 		, IUserInformationRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
@@ -79,7 +84,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_USERDATAINFOAVAILABLE
 	bool FriendsImpl::IsUserInformationAvailable(GalaxyID userID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
@@ -96,7 +101,7 @@ namespace universelan::client {
 #endif
 
 	const char* FriendsImpl::GetPersonaName() {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		auto result = intf()->GetPersonaName();
 
@@ -109,7 +114,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_GET_FRIEND_PERSONA_AVATAR_COPY
 	void FriendsImpl::GetPersonaNameCopy(char* buffer, uint32_t bufferLength) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("buffer: {}", (void*)buffer));
@@ -126,7 +131,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_PERSONASTATE_ENUM
 	PersonaState FriendsImpl::GetPersonaState() {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		auto result = intf()->GetPersonaState();
 
@@ -140,7 +145,7 @@ namespace universelan::client {
 #endif
 
 	const char* FriendsImpl::GetFriendPersonaName(GalaxyID userID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
@@ -157,7 +162,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_GET_FRIEND_PERSONA_AVATAR_COPY
 	void FriendsImpl::GetFriendPersonaNameCopy(GalaxyID userID, char* buffer, uint32_t bufferLength) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
@@ -175,7 +180,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_PERSONASTATE_ENUM
 	PersonaState FriendsImpl::GetFriendPersonaState(GalaxyID userID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
@@ -192,7 +197,7 @@ namespace universelan::client {
 #endif
 
 	const char* FriendsImpl::GetFriendAvatarUrl(GalaxyID userID, AvatarType avatarType) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
@@ -210,7 +215,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_GET_FRIEND_PERSONA_AVATAR_COPY
 	void FriendsImpl::GetFriendAvatarUrlCopy(GalaxyID userID, AvatarType avatarType, char* buffer, uint32_t bufferLength) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
@@ -229,7 +234,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_1_73_AVATARTYPE_CRITERIA
 	uint32_t FriendsImpl::GetFriendAvatarImageID(GalaxyID userID, AvatarType avatarType) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
@@ -246,7 +251,7 @@ namespace universelan::client {
 	}
 
 	void FriendsImpl::GetFriendAvatarImageRGBA(GalaxyID userID, AvatarType avatarType, GetImageRGBABufferType* buffer, uint32_t bufferLength) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
@@ -259,7 +264,7 @@ namespace universelan::client {
 	}
 
 	bool FriendsImpl::IsFriendAvatarImageRGBAAvailable(GalaxyID userID, AvatarType avatarType) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
@@ -281,7 +286,7 @@ namespace universelan::client {
 		IFriendListListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
@@ -298,7 +303,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_ADDED_RICH_PRESENCE_LISTENERS
 	bool FriendsImpl::IsFriend(GalaxyID userID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
@@ -315,7 +320,7 @@ namespace universelan::client {
 #endif
 
 	uint32_t FriendsImpl::GetFriendCount() {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		auto result = intf()->GetFriendCount();
 
@@ -327,7 +332,7 @@ namespace universelan::client {
 	}
 
 	GalaxyID FriendsImpl::GetFriendByIndex(uint32_t index) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("index: {}", index));
@@ -349,7 +354,7 @@ namespace universelan::client {
 		, IFriendInvitationSendListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
@@ -370,7 +375,7 @@ namespace universelan::client {
 		IFriendInvitationListRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
@@ -391,7 +396,7 @@ namespace universelan::client {
 		ISentFriendInvitationListRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
@@ -408,7 +413,7 @@ namespace universelan::client {
 #endif
 
 	uint32_t FriendsImpl::GetFriendInvitationCount() {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		auto result = intf()->GetFriendInvitationCount();
 
@@ -420,7 +425,7 @@ namespace universelan::client {
 	}
 
 	void FriendsImpl::GetFriendInvitationByIndex(uint32_t index, GalaxyID& userID, uint32_t& sendTime) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("index: {}", index));
@@ -439,7 +444,7 @@ namespace universelan::client {
 		, IFriendInvitationRespondToListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
@@ -461,7 +466,7 @@ namespace universelan::client {
 		, IFriendDeleteListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
@@ -484,7 +489,7 @@ namespace universelan::client {
 		, IRichPresenceChangeListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
@@ -506,7 +511,7 @@ namespace universelan::client {
 		, IRichPresenceChangeListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
@@ -527,7 +532,7 @@ namespace universelan::client {
 		IRichPresenceChangeListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
@@ -548,7 +553,7 @@ namespace universelan::client {
 		, IRichPresenceRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
@@ -565,7 +570,7 @@ namespace universelan::client {
 	}
 
 	const char* FriendsImpl::GetRichPresence(const char* key, GalaxyID userID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
@@ -582,7 +587,7 @@ namespace universelan::client {
 	}
 
 	void FriendsImpl::GetRichPresenceCopy(const char* key, char* buffer, uint32_t bufferLength, GalaxyID userID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
@@ -599,7 +604,7 @@ namespace universelan::client {
 	}
 
 	uint32_t FriendsImpl::GetRichPresenceCount(GalaxyID userID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
@@ -615,7 +620,7 @@ namespace universelan::client {
 	}
 
 	GetRichPresenceReturnT::type FriendsImpl::GetRichPresenceByIndex(uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength, GalaxyID userID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("index: {}", index));
@@ -647,7 +652,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_GETRICHPRESENCEKEYBYINDEX
 	const char* FriendsImpl::GetRichPresenceKeyByIndex(uint32_t index, GalaxyID userID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("index: {}", index));
@@ -664,7 +669,7 @@ namespace universelan::client {
 	}
 
 	void FriendsImpl::GetRichPresenceKeyByIndexCopy(uint32_t index, char* buffer, uint32_t bufferLength, GalaxyID userID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("index: {}", index));
@@ -683,7 +688,7 @@ namespace universelan::client {
 #endif
 
 	void FriendsImpl::ShowOverlayInviteDialog(const char* connectionString) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("connectionString: {}", util::safe_fix_null_char_ptr_annotate_ret(connectionString)));
@@ -698,7 +703,7 @@ namespace universelan::client {
 		, ISendInvitationListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
@@ -722,7 +727,7 @@ namespace universelan::client {
 		, IUserFindListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userSpecifier: {}", util::safe_fix_null_char_ptr_annotate_ret(userSpecifier)));
@@ -741,7 +746,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_ISUSERINTHESAMEGAME
 	bool FriendsImpl::IsUserInTheSameGame(GalaxyID userID) const {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));

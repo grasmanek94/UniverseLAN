@@ -13,17 +13,21 @@
 namespace universelan::client {
 	using namespace galaxy::api;
 
+	namespace {
+		const auto TraceContext = tracer::Trace::ICLOUDSTORAGE;
+	}
+
 	CloudStorageImpl::CloudStorageImpl(FuncT::F intf) : intf{ intf }
 	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 	}
 
 	CloudStorageImpl::~CloudStorageImpl() {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 	}
 
 	void CloudStorageImpl::GetFileList(const char* container, ICloudStorageGetFileListListener* listener) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
@@ -34,7 +38,7 @@ namespace universelan::client {
 	}
 
 	const char* CloudStorageImpl::GetFileNameByIndex(uint32_t index) const {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("index: {}", index));
@@ -50,7 +54,7 @@ namespace universelan::client {
 	}
 
 	uint32_t CloudStorageImpl::GetFileSizeByIndex(uint32_t index) const {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("index: {}", index));
@@ -66,7 +70,7 @@ namespace universelan::client {
 	}
 
 	uint32_t CloudStorageImpl::GetFileTimestampByIndex(uint32_t index) const {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("index: {}", index));
@@ -82,7 +86,7 @@ namespace universelan::client {
 	}
 
 	void CloudStorageImpl::GetFile(const char* container, const char* name, void* userParam, WriteFunc writeFunc, ICloudStorageGetFileListener* listener) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
@@ -96,7 +100,7 @@ namespace universelan::client {
 	}
 
 	void CloudStorageImpl::GetFile(const char* container, const char* name, void* buffer, uint32_t bufferLength, ICloudStorageGetFileListener* listener) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
@@ -110,7 +114,7 @@ namespace universelan::client {
 	}
 
 	void CloudStorageImpl::GetFileMetadata(const char* container, const char* name, ICloudStorageGetFileListener* listener) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
@@ -122,7 +126,7 @@ namespace universelan::client {
 	}
 
 	const char* CloudStorageImpl::GetFileMetadataKeyByIndex(uint32_t index) const {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("index: {}", index));
@@ -138,7 +142,7 @@ namespace universelan::client {
 	}
 
 	const char* CloudStorageImpl::GetFileMetadataValueByIndex(uint32_t index) const {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("index: {}", index));
@@ -164,7 +168,7 @@ namespace universelan::client {
 		const char* const* metadataValues,
 		uint32_t timeStamp
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
@@ -202,7 +206,7 @@ namespace universelan::client {
 		const char* const* metadataValues,
 		uint32_t timeStamp
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
@@ -258,7 +262,7 @@ namespace universelan::client {
 #undef DeleteFile
 	void CloudStorageImpl::DeleteFile(const char* container, const char* name, ICloudStorageDeleteFileListener* listener)
 	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));

@@ -4,7 +4,7 @@
  */
 
 #include "CustomConsole.hxx"
-#include "UniverseLAN.hxx"
+#include "UniverseLANInterceptor.hxx"
 
 #include <ConsoleCoutRedirector.hxx>
 

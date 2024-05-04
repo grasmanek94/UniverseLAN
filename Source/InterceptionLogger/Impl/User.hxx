@@ -46,7 +46,7 @@ namespace universelan::client {
 #endif
 
 		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT IUser* GALAXY_CALLTYPE(void)>>;
-		using FuncPtr = FuncT::PTR;
+		using FuncPtr = typename FuncT::PTR;
 
 	private:
 		FuncT::F intf;
@@ -55,8 +55,6 @@ namespace universelan::client {
 
 		UserImpl(FuncT::F intf);
 		virtual ~UserImpl();
-
-		void SignIn(IAuthListener* const listener);
 
 		/**
 		 * Checks if the user is signed in to Galaxy.

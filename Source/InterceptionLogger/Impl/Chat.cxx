@@ -12,6 +12,11 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
+
+	namespace {
+		const auto TraceContext = tracer::Trace::ICHAT;
+	}
+
 	ChatImpl::ChatImpl(FuncT::PTR intf) : intf{ intf } {}
 
 	ChatImpl::~ChatImpl() {}
@@ -21,7 +26,7 @@ namespace universelan::client {
 		, IChatRoomWithUserRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICHAT };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
@@ -42,7 +47,7 @@ namespace universelan::client {
 		, IChatRoomMessagesRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICHAT };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("chatRoomID: {}", chatRoomID));
@@ -65,7 +70,7 @@ namespace universelan::client {
 		, IChatRoomMessageSendListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICHAT };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("chatRoomID: {}", chatRoomID));
@@ -89,7 +94,7 @@ namespace universelan::client {
 	}
 
 	uint32_t ChatImpl::GetChatRoomMessageByIndex(uint32_t index, ChatMessageID& messageID, ChatMessageType& messageType, GalaxyID& senderID, uint32_t& sendTime, char* buffer, uint32_t bufferLength) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICHAT };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("index: {}", index));
@@ -112,7 +117,7 @@ namespace universelan::client {
 	}
 
 	uint32_t ChatImpl::GetChatRoomMemberCount(ChatRoomID chatRoomID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICHAT };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("chatRoomID: {}", chatRoomID));
@@ -128,7 +133,7 @@ namespace universelan::client {
 	}
 
 	GalaxyID ChatImpl::GetChatRoomMemberUserIDByIndex(ChatRoomID chatRoomID, uint32_t index) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICHAT };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("chatRoomID: {}", chatRoomID));
@@ -145,7 +150,7 @@ namespace universelan::client {
 	}
 
 	uint32_t ChatImpl::GetChatRoomUnreadMessageCount(ChatRoomID chatRoomID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICHAT };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("chatRoomID: {}", chatRoomID));
@@ -161,7 +166,7 @@ namespace universelan::client {
 	}
 
 	void ChatImpl::MarkChatRoomAsRead(ChatRoomID chatRoomID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICHAT };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("chatRoomID: {}", chatRoomID));

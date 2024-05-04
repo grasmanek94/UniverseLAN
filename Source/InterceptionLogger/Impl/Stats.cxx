@@ -10,14 +10,19 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
+
+	namespace {
+		const auto TraceContext = tracer::Trace::ISTATS;
+	}
+
 	StatsImpl::StatsImpl(FuncT::F intf) : intf{ intf }
 	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 	}
 
 	StatsImpl::~StatsImpl()
 	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 	}
 
 	void StatsImpl::RequestUserStatsAndAchievements(GalaxyID userID
@@ -25,7 +30,7 @@ namespace universelan::client {
 		, IUserStatsAndAchievementsRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
@@ -42,7 +47,7 @@ namespace universelan::client {
 	}
 
 	int32_t StatsImpl::GetStatInt(const char* name, GalaxyID userID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -59,7 +64,7 @@ namespace universelan::client {
 	}
 
 	float StatsImpl::GetStatFloat(const char* name, GalaxyID userID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -76,7 +81,7 @@ namespace universelan::client {
 	}
 
 	void StatsImpl::SetStatInt(const char* name, int32_t value) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -87,7 +92,7 @@ namespace universelan::client {
 	}
 
 	void StatsImpl::SetStatFloat(const char* name, float value) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -98,7 +103,7 @@ namespace universelan::client {
 	}
 
 	void StatsImpl::UpdateAvgRateStat(const char* name, float countThisSession, double sessionLength) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -110,7 +115,7 @@ namespace universelan::client {
 	}
 
 	void StatsImpl::GetAchievement(const char* name, bool& unlocked, uint32_t& unlockTime, GalaxyID userID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -126,7 +131,7 @@ namespace universelan::client {
 	}
 
 	void StatsImpl::SetAchievement(const char* name) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -136,7 +141,7 @@ namespace universelan::client {
 	}
 
 	void StatsImpl::ClearAchievement(const char* name) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -150,7 +155,7 @@ namespace universelan::client {
 		IStatsAndAchievementsStoreListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
@@ -167,7 +172,7 @@ namespace universelan::client {
 		IStatsAndAchievementsStoreListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
@@ -184,7 +189,7 @@ namespace universelan::client {
 	}
 
 	const char* StatsImpl::GetAchievementDisplayName(const char* name) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -201,7 +206,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_ISTATS_GET_ACHIEVEMENT_LEADERBOARD_COPY
 	void StatsImpl::GetAchievementDisplayNameCopy(const char* name, char* buffer, uint32_t bufferLength) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -218,7 +223,7 @@ namespace universelan::client {
 #endif
 
 	const char* StatsImpl::GetAchievementDescription(const char* name) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -235,7 +240,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_ISTATS_GET_ACHIEVEMENT_LEADERBOARD_COPY
 	void StatsImpl::GetAchievementDescriptionCopy(const char* name, char* buffer, uint32_t bufferLength) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -252,7 +257,7 @@ namespace universelan::client {
 #endif
 
 	bool StatsImpl::IsAchievementVisible(const char* name) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -269,7 +274,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_ISTATS_UPDATE_1_127_0
 	bool StatsImpl::IsAchievementVisibleWhileLocked(const char* name) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -290,7 +295,7 @@ namespace universelan::client {
 		ILeaderboardsRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
@@ -307,7 +312,7 @@ namespace universelan::client {
 	}
 
 	const char* StatsImpl::GetLeaderboardDisplayName(const char* name) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -324,7 +329,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_ISTATS_GET_ACHIEVEMENT_LEADERBOARD_COPY
 	void StatsImpl::GetLeaderboardDisplayNameCopy(const char* name, char* buffer, uint32_t bufferLength) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -341,7 +346,7 @@ namespace universelan::client {
 #endif
 
 	LeaderboardSortMethod StatsImpl::GetLeaderboardSortMethod(const char* name) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -357,7 +362,7 @@ namespace universelan::client {
 	}
 
 	LeaderboardDisplayType StatsImpl::GetLeaderboardDisplayType(const char* name) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -380,7 +385,7 @@ namespace universelan::client {
 		, ILeaderboardEntriesRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -407,7 +412,7 @@ namespace universelan::client {
 		, ILeaderboardEntriesRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -434,7 +439,7 @@ namespace universelan::client {
 		, ILeaderboardEntriesRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -458,7 +463,7 @@ namespace universelan::client {
 	}
 
 	void StatsImpl::GetRequestedLeaderboardEntry(uint32_t index, uint32_t& rank, int32_t& score, GalaxyID& userID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 		
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("index: {}", index));
@@ -481,7 +486,7 @@ namespace universelan::client {
 		, ILeaderboardScoreUpdateListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -508,7 +513,7 @@ namespace universelan::client {
 		uint32_t detailsSize,
 		uint32_t& outDetailsSize,
 		GalaxyID& userID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("index: {}", index));
@@ -536,7 +541,7 @@ namespace universelan::client {
 		, ILeaderboardScoreUpdateListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -558,7 +563,7 @@ namespace universelan::client {
 #endif
 
 	uint32_t StatsImpl::GetLeaderboardEntryCount(const char* name) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -579,7 +584,7 @@ namespace universelan::client {
 		, ILeaderboardRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -604,7 +609,7 @@ namespace universelan::client {
 		, ILeaderboardRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
@@ -635,7 +640,7 @@ namespace universelan::client {
 		, IUserTimePlayedRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
@@ -652,7 +657,7 @@ namespace universelan::client {
 	}
 
 	uint32_t StatsImpl::GetUserTimePlayed(GalaxyID userID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
