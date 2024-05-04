@@ -100,8 +100,8 @@ namespace Unet
 		virtual void OnLobbyCreated(const galaxy::api::GalaxyID& lobbyID, galaxy::api::LobbyCreateResult result) override;
 		virtual void OnLobbyEntered(const galaxy::api::GalaxyID& lobbyID, galaxy::api::LobbyEnterResult result) override;
 		virtual void OnLobbyLeft(const galaxy::api::GalaxyID& lobbyID
-#if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LIST_RESULT
-			, galaxy::api::LobbyLeaveReason leaveReason
+#if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LEAVE_REASON
+			, galaxy::api::ILobbyLeftListener::LobbyLeaveReason leaveReason
 #else
 			, bool ioFailure
 #endif

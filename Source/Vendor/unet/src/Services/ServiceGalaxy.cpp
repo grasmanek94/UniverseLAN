@@ -440,10 +440,9 @@ void Unet::ServiceGalaxy::OnLobbyEntered(const galaxy::api::GalaxyID& lobbyID, g
 
 	m_ctx->GetCallbacks()->OnLogDebug("[Galaxy] Handshake sent");
 }
-
 void Unet::ServiceGalaxy::OnLobbyLeft(const galaxy::api::GalaxyID& lobbyID
-#if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LIST_RESULT
-	, galaxy::api::LobbyLeaveReason leaveReason
+#if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LEAVE_REASON
+	, galaxy::api::ILobbyLeftListener::LobbyLeaveReason leaveReason
 #else
 , bool result
 #endif
@@ -464,7 +463,7 @@ void Unet::ServiceGalaxy::OnLobbyLeft(const galaxy::api::GalaxyID& lobbyID
 		return;
 	}
 
-#if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LIST_RESULT
+#if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LEAVE_REASON
 	if (leaveReason == LOBBY_LEAVE_REASON_USER_LEFT)
 #else
 	if(!result)
