@@ -2,135 +2,155 @@
 
 #include "CloudStorage.hxx"
 
-#include "UniverseLAN.hxx"
-
+#include <Tracer.hxx>
+#include <GalaxyDLL.hxx>
 #include <SafeStringCopy.hxx>
 
-#include <string>
-#include <utility>
+#include <magic_enum/magic_enum.hpp>
+
+#include <format>
 
 namespace universelan::client {
 	using namespace galaxy::api;
 
-	CloudStorageImpl::CloudStorageImpl(InterfaceInstances* intf) :
-		intf{ intf }, listeners{ intf->notification.get() },
-		sfu(intf->config->GetGameDataPath()), last_container{ "" },
-		container_file_list{}
+	CloudStorageImpl::CloudStorageImpl(InterfaceInstances* intf) : intf{ intf }
 	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 	}
 
 	CloudStorageImpl::~CloudStorageImpl() {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 	}
 
 	void CloudStorageImpl::GetFileList(const char* container, ICloudStorageGetFileListListener* listener) {
-		util::safe_fix_null_char_ptr(container);
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
-		last_container = SharedFileUtils::FilterBadFilenameChars(container);
-		container_file_list = sfu.GetDirectoryFileListCloud(last_container);
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
+			trace.write_all(std::format("listener: {}", (void*)listener));
+		}
 
-		listeners->NotifyAll(
-			listener,
-			&ICloudStorageGetFileListListener::OnGetFileListSuccess,
-			(uint32_t)container_file_list.size(),
-			sfu.GetTotalDiskSpace(),
-			sfu.GetUsedDiskSpace());
+		RealGalaxyDLL_CloudStorage()->GetFileList(container, listener);
 	}
 
 	const char* CloudStorageImpl::GetFileNameByIndex(uint32_t index) const {
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
-		if (index >= container_file_list.size()) {
-			return nullptr;
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("index: {}", index));
 		}
 
-		static thread_local char buffer[256];
+		auto result = RealGalaxyDLL_CloudStorage()->GetFileNameByIndex(index);
 
-		std::string name = container_file_list[index].string();
-		universelan::util::safe_copy_str_n(name, buffer, sizeof(buffer));
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+		}
 
-		return buffer;
+		return result;
 	}
 
 	uint32_t CloudStorageImpl::GetFileSizeByIndex(uint32_t index) const {
-		if (index >= container_file_list.size()) {
-			return 0;
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("index: {}", index));
 		}
 
-		return sfu.GetSizeCloud(last_container, container_file_list[index]);
+		auto result = RealGalaxyDLL_CloudStorage()->GetFileSizeByIndex(index);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+
+		return result;
 	}
 
 	uint32_t CloudStorageImpl::GetFileTimestampByIndex(uint32_t index) const {
-		if (index >= container_file_list.size()) {
-			return 0;
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("index: {}", index));
 		}
 
-		return sfu.GetTimestampCloud(last_container, container_file_list[index]);
+		auto result = RealGalaxyDLL_CloudStorage()->GetFileTimestampByIndex(index);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+
+		return result;
 	}
 
 	void CloudStorageImpl::GetFile(const char* container, const char* name, void* userParam, WriteFunc writeFunc, ICloudStorageGetFileListener* listener) {
-		if (SharedFileUtils::HasBadFilenameChars(container) || SharedFileUtils::HasBadFilenameChars(name)) {
-			listeners->NotifyAll(
-				listener,
-				&ICloudStorageGetFileListener::OnGetFileFailure, container, name, ICloudStorageGetFileListener::FAILURE_REASON_UNDEFINED);
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
-			return;
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("userParam: {}", userParam));
+			trace.write_all(std::format("writeFunc: {}", (void*)writeFunc));
+			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
-		if (writeFunc == nullptr) {
-			listeners->NotifyAll(
-				listener,
-				&ICloudStorageGetFileListener::OnGetFileFailure, container, name, ICloudStorageGetFileListener::FAILURE_REASON_WRITE_FUNC_ERROR);
-
-			return;
-		}
-
-		if (!sfu.ExistsCloud(container, name)) {
-			listeners->NotifyAll(
-				listener,
-				&ICloudStorageGetFileListener::OnGetFileFailure, container, name, ICloudStorageGetFileListener::FAILURE_REASON_NOT_FOUND);
-
-			return;
-		}
-
-		std::filesystem::path container_str = container;
-		std::filesystem::path file_name = name;
-
-		intf->delay_runner->Add([=, this] {
-			auto data{ sfu.ReadCloud(container_str, file_name) };
-			if (writeFunc(userParam, data.data(), (uint32_t)data.size()) < 0) {
-				this->listeners->NotifyAllNow(
-					listener,
-					&ICloudStorageGetFileListener::OnGetFileFailure, container_str.string().c_str(), file_name.string().c_str(), ICloudStorageGetFileListener::FAILURE_REASON_WRITE_FUNC_ERROR);
-
-				return;
-			}
-
-			int metadata_count = 0;
-			this->listeners->NotifyAllNow(
-				listener,
-				&ICloudStorageGetFileListener::OnGetFileSuccess, container_str.string().c_str(), file_name.string().c_str(), (uint32_t)data.size(), metadata_count);
-		});
+		RealGalaxyDLL_CloudStorage()->GetFile(container, name, userParam, writeFunc, listener);
 	}
 
 	void CloudStorageImpl::GetFile(const char* container, const char* name, void* buffer, uint32_t bufferLength, ICloudStorageGetFileListener* listener) {
-		listeners->NotifyAll(
-			listener,
-			&ICloudStorageGetFileListener::OnGetFileFailure, container, name, ICloudStorageGetFileListener::FAILURE_REASON_UNDEFINED);
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("buffer: {}", buffer));
+			trace.write_all(std::format("bufferLength: {}", (void*)bufferLength));
+			trace.write_all(std::format("listener: {}", (void*)listener));
+		}
+
+		RealGalaxyDLL_CloudStorage()->GetFile(container, name, buffer, bufferLength, listener);
 	}
 
 	void CloudStorageImpl::GetFileMetadata(const char* container, const char* name, ICloudStorageGetFileListener* listener) {
-		listeners->NotifyAll(
-			listener,
-			&ICloudStorageGetFileListener::OnGetFileFailure, container, name, ICloudStorageGetFileListener::FAILURE_REASON_UNDEFINED);
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("listener: {}", (void*)listener));
+		}
+
+		RealGalaxyDLL_CloudStorage()->GetFileMetadata(container, name, listener);
 	}
 
 	const char* CloudStorageImpl::GetFileMetadataKeyByIndex(uint32_t index) const {
-		return "";
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("index: {}", index));
+		}
+
+		auto result = RealGalaxyDLL_CloudStorage()->GetFileMetadataKeyByIndex(index);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+		}
+
+		return result;
 	}
 
 	const char* CloudStorageImpl::GetFileMetadataValueByIndex(uint32_t index) const {
-		return "";
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("index: {}", index));
+		}
+
+		auto result = RealGalaxyDLL_CloudStorage()->GetFileMetadataValueByIndex(index);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+		}
+
+		return result;
 	}
 
 	void CloudStorageImpl::PutFile(
@@ -144,9 +164,32 @@ namespace universelan::client {
 		const char* const* metadataValues,
 		uint32_t timeStamp
 	) {
-		listeners->NotifyAll(
-			listener,
-			&ICloudStoragePutFileListener::OnPutFileFailure, container, name, ICloudStoragePutFileListener::FAILURE_REASON_UNDEFINED);
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("userParam: {}", userParam));
+			trace.write_all(std::format("readFunc: {}", (void*)readFunc));
+			trace.write_all(std::format("rewindFunc: {}", (void*)rewindFunc));
+			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all(std::format("metadataKeys: {}", (void*)metadataKeys));
+			trace.write_all(std::format("metadataValues: {}", (void*)metadataValues));
+			trace.write_all(std::format("timeStamp: {}", timeStamp));
+
+			if (metadataKeys != nullptr && metadataValues != nullptr) {
+				int index = 0;
+				while (metadataKeys[index] && metadataValues[index]) {
+					trace.write_all(std::format("[METADATA] {}: {}",
+						util::safe_fix_null_char_ptr_annotate_ret(metadataKeys[index]),
+						util::safe_fix_null_char_ptr_annotate_ret(metadataValues[index])
+					));
+					++index;
+				}	
+			}
+		}
+
+		RealGalaxyDLL_CloudStorage()->PutFile(container, name, userParam, readFunc, rewindFunc, listener, metadataKeys, metadataValues, timeStamp);
 	}
 
 	void CloudStorageImpl::PutFile(
@@ -159,9 +202,31 @@ namespace universelan::client {
 		const char* const* metadataValues,
 		uint32_t timeStamp
 	) {
-		listeners->NotifyAll(
-			listener,
-			&ICloudStoragePutFileListener::OnPutFileFailure, container, name, ICloudStoragePutFileListener::FAILURE_REASON_UNDEFINED);
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("buffer: {}", buffer));
+			trace.write_all(std::format("bufferLength: {}", bufferLength));
+			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all(std::format("metadataKeys: {}", (void*)metadataKeys));
+			trace.write_all(std::format("metadataValues: {}", (void*)metadataValues));
+			trace.write_all(std::format("timeStamp: {}", timeStamp));
+
+			if (metadataKeys != nullptr && metadataValues != nullptr) {
+				int index = 0;
+				while (metadataKeys[index] && metadataValues[index]) {
+					trace.write_all(std::format("[METADATA] {}: {}",
+						util::safe_fix_null_char_ptr_annotate_ret(metadataKeys[index]),
+						util::safe_fix_null_char_ptr_annotate_ret(metadataValues[index])
+					));
+					++index;
+				}
+			}
+		}
+
+		RealGalaxyDLL_CloudStorage()->PutFile(container, name, buffer, bufferLength, listener, metadataKeys, metadataValues, timeStamp);
 	}
 
 	void CloudStorageImpl::PutFile(
@@ -192,10 +257,18 @@ namespace universelan::client {
 #pragma push_macro("DeleteFile")
 #undef DeleteFile
 	void CloudStorageImpl::DeleteFile(const char* container, const char* name, ICloudStorageDeleteFileListener* listener)
-#pragma pop_macro ("DeleteFile")
 	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("listener: {}", (void*)listener));
+		}
+
+		RealGalaxyDLL_CloudStorage()->DeleteFile(container, name, listener);
 	}
+#pragma pop_macro ("DeleteFile")
 }
 
 #endif

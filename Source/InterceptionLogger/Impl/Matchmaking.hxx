@@ -1,26 +1,9 @@
 #ifndef UNIVERSELAN_IMPL_MATCHMAKING_H
 #define UNIVERSELAN_IMPL_MATCHMAKING_H
 
-/**
- * @file
- * Contains data structures and interfaces related to matchmaking.
- */
-
-#include "ListenerRegistrar.hxx"
-
 #include <DynamicReturn.hxx>
-#include <LobbyManager.hxx>
-#include <Networking/Messages.hxx>
 
 #include <IMatchmaking.h>
-#include <GalaxyID.h>
-#include <IListenerRegistrar.h>
-
-#include <memory>
-#include <mutex>
-#include <string>
-#include <variant>
-#include <vector>
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -43,70 +26,12 @@ namespace universelan::client {
 	using ILobbyMemberDataUpdateListener = ILobbyDataListener;
 #endif
 
-	/**
-	 * @addtogroup api
-	 * @{
-	 */
-
-	 /**
-	  * The interface for managing game lobbies.
-	  */
 	class MatchmakingImpl : public IMatchmaking
 	{
-	public:
-		using mutex_t = std::recursive_mutex;
-		using lock_t = std::scoped_lock<mutex_t>;
-
-		using filter_value_t = std::variant<int32_t, std::string>;
-
-		struct filter_entry_t {
-			filter_value_t value;
-			LobbyComparisonType comparison_type;
-		};
-
-		struct filter_combined_t {
-			std::string key;
-			filter_entry_t filter;
-		};
-
-		using filter_container_t = std::vector<filter_combined_t>;
-
-		struct LobbyFilters {
-			filter_container_t filters;
-			uint32_t max_entries;
-			bool allow_full;
-		};
-
-		using lobby_filters_ptr = std::shared_ptr<LobbyFilters>;
-
 	private:
 		InterfaceInstances* intf;
-		ListenerRegistrarImpl* listeners;
-
-		ListenersRequestHelper<ILobbyCreatedListener*> create_lobby_requests;
-		ListenersRequestHelper<ILobbyEnteredListener*> create_lobby_entered_requests;
-		ListenersRequestHelper<ILobbyListListener*> list_lobbies_requests;
-		ListenersRequestHelper<ILobbyEnteredListener*> join_lobby_requests;
-		ListenersRequestHelper<ILobbyLeftListener*> leave_lobby_requests;
-		ListenersRequestHelper<ILobbyDataUpdateListener*> set_max_lobby_members_requests;
-		ListenersRequestHelper<ILobbyDataUpdateListener*> set_lobby_type_requests;
-		ListenersRequestHelper<ILobbyDataUpdateListener*> set_lobby_joinable_requests;
-#if GALAXY_BUILD_FEATURE_HAS_ILOBBYDATARETRIEVELISTENER
-		ListenersRequestHelper<ILobbyDataRetrieveListener*> get_lobby_data_requests;
-#endif
-		ListenersRequestHelper<ILobbyDataUpdateListener*> set_lobby_data_requests;
-		ListenersRequestHelper<ILobbyMemberDataUpdateListener*> set_lobby_member_data_requests;
-
-		mutex_t mtx;
-		LobbyManager::lobbies_t lobby_list;
-		LobbyFilters lobby_list_filters;
-		LobbyManager::lobbies_t lobby_list_filtered;
-		LobbyManager::lobby_t joined_lobby;
-
-		ListenersRequestHelper<lobby_filters_ptr> lobby_list_filtered_requests;
 
 	public:
-
 		MatchmakingImpl(InterfaceInstances* intf);
 		virtual ~MatchmakingImpl();
 
@@ -634,20 +559,6 @@ namespace universelan::client {
 		 * @return The number of bytes written to the buffer.
 		 */
 		virtual uint32_t GetLobbyMessage(GalaxyID lobbyID, uint32_t messageID, GalaxyID& senderID, char* msg, uint32_t msgLength) override;
-
-		virtual void CreateLobbyProcessed(const std::shared_ptr<CreateLobbyResponseMessage>& data);
-		virtual void RequestLobbyListProcessed(const std::shared_ptr<RequestLobbyListMessage>& data);
-		virtual void JoinLobbyProcessed(const std::shared_ptr<JoinLobbyMessage>& data);
-		virtual void LeaveLobbyProcessed(const std::shared_ptr<LeaveLobbyMessage>& data);
-		virtual void SetLobbyMaxMembersProcessed(const std::shared_ptr<SetLobbyMaxMembersMessage>& data);
-		virtual void SetLobbyTypeProcessed(const std::shared_ptr<SetLobbyTypeMessage>& data);
-		virtual void SetLobbyJoinableProcessed(const std::shared_ptr<SetLobbyJoinableMessage>& data);
-		virtual void RequestLobbyDataProcessed(const std::shared_ptr<RequestLobbyDataMessage>& data);
-		virtual void SetLobbyDataProcessed(const std::shared_ptr<SetLobbyDataMessage>& data);
-		virtual void SetLobbyMemberDataProcessed(const std::shared_ptr<SetLobbyMemberDataMessage>& data);
-		virtual void SendLobbyMessageProcessed(const std::shared_ptr<SendToLobbyMessage>& data);
-		virtual void LobbyMemberStateChange(const std::shared_ptr<LobbyMemberStateChangeMessage>& data);
-		virtual void LobbyOwnerChange(const std::shared_ptr<LobbyOwnerChangeMessage>& data);
 	};
 
 	/** @} */

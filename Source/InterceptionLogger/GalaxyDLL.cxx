@@ -52,13 +52,8 @@ namespace universelan::client {
 
 		console::Redirector::get()->release();
 
-		std::cout << " == UniverseLAN Client == " << std::endl;
+		std::cout << " == UniverseLAN Logger == " << std::endl;
 		std::cout << "Build: " << Version_Number << std::endl;
-		std::cout << "Using username: " << intf_inst.config->GetCustomPersonaName() << std::endl;
-		std::cout << "Using key: " << const_hash64(intf_inst.config->GetAuthenticationKey()) << std::endl;
-		std::cout << "Using GalaxyID: " << intf_inst.config->GetCustomGalaxyID() << std::endl;
-
-		intf_inst.client->Start();
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS

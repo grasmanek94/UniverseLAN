@@ -96,7 +96,7 @@ namespace universelan {
 		bool SaveAchievementsAndStats;
 		bool EnableConsole;
 
-		const std::string StorageSection = "Settings";
+		const std::string StorageSection = "Storage";
 		bool AllowFileSharingDownload;
 		bool AllowFileSharingUpload;
 
@@ -118,6 +118,17 @@ namespace universelan {
 		std::string Avatar;
 		bool SignedIn;
 
+		bool AutoAcceptGameInvitations;
+
+		const std::string InterceptorSection = "Interceptor";
+		bool OverrideInitKeys;
+		std::string OverrideInitKeyId;
+		std::string OverrideInitKeySecret;
+
+		bool OverrideSignIn;
+		std::string OverrideSignInId;
+		std::string OverrideSignInPassword;
+
 		const std::string AchievementsFile = "Achievements.ini";
 		GalaxyUserData::ptr_t local_user_data;
 
@@ -136,7 +147,6 @@ namespace universelan {
 		const std::string UserDataSection = "UserData";
 		// container see local_user_data
 
-		bool AutoAcceptGameInvitations;
 
 		std::string GetPath(const std::string& filename) const;
 
@@ -176,5 +186,14 @@ namespace universelan {
 		const GalaxyUserData::ptr_t& GetLocalUserData() const;
 
 		bool AutoAcceptGameInvitationsEnabled() const;
+
+		bool OverrideInitKeysEnabled() const;
+		std::string GetOverrideInitKeyId() const;
+		std::string GetOverrideInitKeySecret() const;
+
+		bool OverrideSignInEnabled() const;
+		std::string GetOverrideSignInId() const;
+		std::string GetOverrideSignInPassword() const;
+
 	};
 }

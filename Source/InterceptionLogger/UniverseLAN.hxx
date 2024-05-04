@@ -12,7 +12,6 @@
 #include <memory>
 
 namespace universelan::client {
-	class Client;
 	class UserImpl;
 	class FriendsImpl;
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
@@ -43,13 +42,11 @@ namespace universelan::client {
 #endif
 
 	class ListenerRegistrarImpl;
-	class DelayRunner;
 
 	// interface instances;
 	struct InterfaceInstances {
 		std::unique_ptr<ClientIniData>			config = nullptr;
 		std::unique_ptr<InitOptionsModern>		init_options = nullptr;
-		std::unique_ptr<Client>					client = nullptr;
 		std::unique_ptr<UserImpl>				user = nullptr;
 		std::unique_ptr<FriendsImpl>			friends = nullptr;
 
@@ -89,7 +86,6 @@ namespace universelan::client {
 #endif
 
 		std::unique_ptr<ListenerRegistrarImpl>	notification = nullptr;
-		std::unique_ptr<DelayRunner>			delay_runner = nullptr;
 
 		void init(const InitOptionsModern& initOptions);
 		void reset();
@@ -109,10 +105,8 @@ namespace universelan::client {
 #include <GalaxyGameServerApi.h>
 #endif
 
-#include "Client.hxx"
 #include "CustomConsole.hxx"
 
-#include "Impl/DelayRunner.hxx"
 #include "Impl/Errors.hxx"
 #include "Impl/ListenerRegistrar.hxx"
 

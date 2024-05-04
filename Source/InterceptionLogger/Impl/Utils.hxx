@@ -2,15 +2,7 @@
 
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS
 
-/**
- * @file
- * Contains data structures and interfaces related to common activities.
- */
-
-#include "ListenerRegistrar.hxx"
-
 #include <IUtils.h>
-#include <IListenerRegistrar.h>
 
 namespace universelan::client {
 
@@ -35,10 +27,8 @@ namespace universelan::client {
 	{
 	private:
 		InterfaceInstances* intf;
-		ListenerRegistrarImpl* listeners;
 
 	public:
-
 		UtilsImpl(InterfaceInstances* intf);
 		virtual ~UtilsImpl();
 
@@ -158,8 +148,6 @@ namespace universelan::client {
 #if (GALAXY_VERSION) > 11240
 		virtual GogServicesConnectionState GetGogServicesConnectionState() override;
 #endif
-
-		virtual void ConnectionStateChangeReceived(bool connected);
 	};
 
 	/** @} */

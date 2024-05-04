@@ -1,20 +1,7 @@
 #pragma once
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 
-/**
- * @file
- * Contains data structures and interfaces related to telemetry.
- */
-
-#include "ListenerRegistrar.hxx"
-
 #include <ITelemetry.h>
-#include <IListenerRegistrar.h>
-
-#include <atomic>
-#include <fstream>
-#include <mutex>
-#include <string>
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -30,17 +17,9 @@ namespace universelan::client {
 	  */
 	class TelemetryImpl : public ITelemetry
 	{
-	public:
-		using mtx_t = std::recursive_mutex;
-		using lock_t = std::scoped_lock<mtx_t>;
-
+	
 	private:
 		InterfaceInstances* intf;
-		ListenerRegistrarImpl* listeners;
-		mtx_t mtx;
-		std::ofstream telemetry_file;
-		std::atomic_uint32_t counter;
-		std::string visit_id;
 
 	public:
 

@@ -1,22 +1,7 @@
 #ifndef UNIVERSELAN_IMPL_STATS_H
 #define UNIVERSELAN_IMPL_STATS_H
 
-/**
- * @file
- * Contains data structures and interfaces related to statistics, achievements and leaderboards.
- */
-
-#include "ListenerRegistrar.hxx"
-
-#include <Networking/Messages/RequestSpecificUserDataMessage.hxx>
-
 #include <IStats.h>
-#include <IListenerRegistrar.h>
-#include <GalaxyID.h>
-#include <IniData.hxx>
-
-#include <map>
-#include <string>
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -32,19 +17,8 @@ namespace universelan::client {
 	  */
 	class StatsImpl : public IStats
 	{
-	public:
-		using mutex_t = std::recursive_mutex;
-		using lock_t = std::scoped_lock<mutex_t>;
-
 	private:
 		InterfaceInstances* intf;
-		ListenerRegistrarImpl* listeners;
-
-		ListenersRequestHelper<IUserStatsAndAchievementsRetrieveListener*> specific_user_stats_and_achievements_requests;
-
-#if GALAXY_BUILD_FEATURE_HAS_IUSERTIMEPLAYEDRETRIEVELISTENER
-		ListenersRequestHelper<IUserTimePlayedRetrieveListener*> specific_user_time_played_requests;
-#endif
 
 	public:
 		StatsImpl(InterfaceInstances* intf);
@@ -60,7 +34,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void RequestUserStatsAndAchievements(GalaxyID userID = GalaxyID()
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, IUserStatsAndAchievementsRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -353,7 +327,7 @@ namespace universelan::client {
 			const char* name
 			, uint32_t rangeStart
 			, uint32_t rangeEnd
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, ILeaderboardEntriesRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -385,7 +359,7 @@ namespace universelan::client {
 			, uint32_t countBefore
 			, uint32_t countAfter
 			, GalaxyID userID = GalaxyID()
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, ILeaderboardEntriesRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -408,7 +382,7 @@ namespace universelan::client {
 			  const char* name
 			, GalaxyID* userArray
 			, uint32_t userArraySize
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, ILeaderboardEntriesRetrieveListener* const listener = NULL
 #endif
 		) override;
@@ -602,9 +576,6 @@ namespace universelan::client {
 		 */
 		virtual uint32_t GetUserTimePlayed(GalaxyID userID = GalaxyID()) override;
 #endif
-
-		void SpecificUserStatsAndAchievementsRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
-		void RequestUserTimePlayedProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
 	};
 
 	/** @} */

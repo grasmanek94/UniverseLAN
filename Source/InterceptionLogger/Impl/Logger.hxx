@@ -33,8 +33,6 @@ namespace universelan::client {
 		mtx_t mtx;
 		std::ofstream logfile;
 
-		void Log(const char* type, const char* format, ...);
-
 	public:
 		LoggerImpl(InterfaceInstances* intf);
 

@@ -2,18 +2,16 @@
 
 #include "Apps.hxx"
 
-#include "UniverseLAN.hxx"
-
-#include <IniData.hxx>
+#include <Tracer.hxx>
 #include <SafeStringCopy.hxx>
 
-#include <algorithm>
+#include <magic_enum/magic_enum.hpp>
+
 #include <format>
-#include <string>
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	AppsImpl::AppsImpl(InterfaceInstances* intf) : intf{ intf } {}
+	AppsImpl::AppsImpl(FuncT::F intf) : intf{ intf } {}
 
 	AppsImpl::~AppsImpl() {}
 
@@ -24,7 +22,7 @@ namespace universelan::client {
 			trace.write_all(std::format("productID: {}", productID));
 		}
 
-		bool result = intf->config->GetEnableAllDLC() || intf->config->IsDLCInstalled(productID);
+		auto result = intf()->IsDlcInstalled(productID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -40,7 +38,7 @@ namespace universelan::client {
 			trace.write_all(std::format("productID: {}", productID));
 		}
 
-		const char* language = intf->config->GetLanguage().c_str();
+		auto language = intf()->GetCurrentGameLanguage(productID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("language: {}", language));
@@ -53,16 +51,16 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IAPPS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("buffer: {}", (void*)buffer));
+			trace.write_all(std::format("bufferLength: {}", bufferLength));
 			trace.write_all(std::format("productID: {}", productID));
 		}
 
-		std::string language = intf->config->GetLanguage();
+		intf()->GetCurrentGameLanguageCopy(buffer, bufferLength, productID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("language: {}", language));
+			trace.write_all(std::format("language: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
 		}
-
-		universelan::util::safe_copy_str_n(language, buffer, bufferLength);
 	}
 }
 

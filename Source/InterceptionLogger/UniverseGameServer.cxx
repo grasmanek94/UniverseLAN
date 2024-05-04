@@ -32,11 +32,6 @@ namespace universelan::client {
 
 		std::cout << " == UniverseLAN GameServer == " << std::endl;
 		std::cout << "Version: " << Version_Number << std::endl;
-		std::cout << "Using username: " << gameserver_intf_inst.config->GetCustomPersonaName() << std::endl;
-		std::cout << "Using key: " << const_hash64(intf_inst.config->GetAuthenticationKey()) << std::endl;
-		std::cout << "Using GalaxyID: " << gameserver_intf_inst.config->GetCustomGalaxyID() << std::endl;
-
-		gameserver_intf_inst.client->Start();
 	}
 	void UniverseGameServer::ShutdownGameServer() {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL_GAMESERVERAPI };

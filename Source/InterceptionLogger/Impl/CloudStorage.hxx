@@ -2,25 +2,7 @@
 
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE
 
-/**
- * @file
- * Contains data structures and interfaces related to storage activities.
- */
-
-#include "ListenerRegistrar.hxx"
-
-//#include <Networking/Messages/FileRequestMessage.hxx>
-//#include <Networking/Messages/FileShareMessage.hxx>
-//#include <Networking/Messages/FileShareResponseMessage.hxx>
-#include <SharedFileUtils.hxx>
-
 #include <ICloudStorage.h>
-#include <GalaxyID.h>
-#include <IListenerRegistrar.h>
-
-#include <filesystem>
-#include <string>
-#include <vector>
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -38,11 +20,6 @@ namespace universelan::client {
 	{
 	private:
 		InterfaceInstances* intf;
-		ListenerRegistrarImpl* listeners;
-
-		SharedFileUtils sfu;
-		std::filesystem::path last_container;
-		std::vector<std::filesystem::path> container_file_list;
 
 	public:
 		CloudStorageImpl(InterfaceInstances* intf);

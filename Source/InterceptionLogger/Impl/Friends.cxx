@@ -1,23 +1,16 @@
 #include "Friends.hxx"
 
-#include "UniverseLAN.hxx"
-
-#include <ContainerGetByIndex.hxx>
+#include <Tracer.hxx>
+#include <GalaxyDLL.hxx>
 #include <SafeStringCopy.hxx>
 
-#include <algorithm>
+#include <magic_enum/magic_enum.hpp>
+
+#include <format>
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	FriendsImpl::FriendsImpl(InterfaceInstances* intf) :
-		intf{ intf }, listeners{ intf->notification.get() },
-#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-		user_information_requests{},
-		retrieve_rich_presence_requests{},
-#endif
-		rich_presence_change_requests{},
-		avatar_criteria{ 0 },
-		online_friends{}
+	FriendsImpl::FriendsImpl()
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 	}
@@ -31,13 +24,23 @@ namespace universelan::client {
 	AvatarCriteriaImpl FriendsImpl::GetDefaultAvatarCriteria() {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		return avatar_criteria;
+		auto result = RealGalaxyDLL_Friends()->GetDefaultAvatarCriteria();
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+
+		return result;
 	}
 
 	void FriendsImpl::SetDefaultAvatarCriteria(AvatarCriteriaImpl defaultAvatarCriteria) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		avatar_criteria = defaultAvatarCriteria;
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("defaultAvatarCriteria: {}", defaultAvatarCriteria));
+		}
+
+		RealGalaxyDLL_Friends()->SetDefaultAvatarCriteria(defaultAvatarCriteria);
 	}
 #endif
 
@@ -45,7 +48,7 @@ namespace universelan::client {
 	void FriendsImpl::RequestUserInformation(
 		GalaxyID userID
 #if GALAXY_BUILD_FEATURE_HAS_1_73_AVATARTYPE_CRITERIA
-		, AvatarCriteriaImpl avatarCriteria // we don't support avatars yet
+		, AvatarCriteriaImpl avatarCriteria
 #endif
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 		, IUserInformationRetrieveListener* const listener
@@ -53,71 +56,70 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		if (intf->config->IsSelfUserID(userID)) {
-#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listeners->NotifyAll(listener, &IUserInformationRetrieveListener::OnUserInformationRetrieveSuccess, userID);
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
+#if GALAXY_BUILD_FEATURE_HAS_1_73_AVATARTYPE_CRITERIA
+			trace.write_all(std::format("avatarCriteria: {}", avatarCriteria));
 #endif
-			listeners->NotifyAll(&IPersonaDataChangedListener::OnPersonaDataChanged, userID, IPersonaDataChangedListener::PERSONA_CHANGE_NONE);
-		}
-		else {
-			uint64_t request_id = MessageUniqueID::get();
-
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			user_information_requests.emplace(request_id, listener);
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-
-			intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ RequestSpecificUserDataMessage::RequestTypeFriends, request_id, userID });
 		}
+
+		RealGalaxyDLL_Friends()->RequestUserInformation(userID
+#if GALAXY_BUILD_FEATURE_HAS_1_73_AVATARTYPE_CRITERIA
+			, avatarCriteria
+#endif
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
+			, listener
+#endif
+		);
 	}
 #endif
-
-	void FriendsImpl::RequestUserInformationProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
-
-#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-		IUserInformationRetrieveListener* listener = user_information_requests.pop(data->request_id);
-#endif
-
-		if (data->found) {
-			auto entry = intf->user->GetGalaxyUserData(data->id);
-			entry->stats = data->asuc;
-			entry->nickname = data->nickname;
-#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listeners->NotifyAll(listener, &IUserInformationRetrieveListener::OnUserInformationRetrieveSuccess, data->id);
-#endif
-		}
-		else {
-#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listeners->NotifyAll(listener, &IUserInformationRetrieveListener::OnUserInformationRetrieveFailure, data->id, IUserInformationRetrieveListener::FAILURE_REASON_UNDEFINED);
-#endif
-		}
-#if GALAXY_BUILD_FEATURE_IFRIENDS_ONPERSONADATACHANGED
-		listeners->NotifyAll(&IPersonaDataChangedListener::OnPersonaDataChanged, data->id, IPersonaDataChangedListener::PERSONA_CHANGE_NONE);
-#endif
-	}
 
 #if GALAXY_BUILD_FEATURE_HAS_USERDATAINFOAVAILABLE
 	bool FriendsImpl::IsUserInformationAvailable(GalaxyID userID) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		return intf->user->IsUserDataAvailable(userID);
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
+		}
+
+		auto result = RealGalaxyDLL_Friends()->IsUserInformationAvailable(userID);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+
+		return result;
 	}
 #endif
 
 	const char* FriendsImpl::GetPersonaName() {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		return intf_inst.config->GetCustomPersonaName().c_str();
+		auto result = RealGalaxyDLL_Friends()->GetPersonaName();
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+		}
+
+		return result;
 	}
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_GET_FRIEND_PERSONA_AVATAR_COPY
 	void FriendsImpl::GetPersonaNameCopy(char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		if (buffer != nullptr) {
-			auto name = intf_inst.config->GetCustomPersonaName();
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("buffer: {}", (void*)buffer));
+			trace.write_all(std::format("bufferLength: {}", bufferLength));
+		}
 
-			universelan::util::safe_copy_str_n(name, buffer, bufferLength);
+		RealGalaxyDLL_Friends()->GetPersonaNameCopy(buffer, bufferLength);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
 		}
 	}
 #endif
@@ -126,25 +128,47 @@ namespace universelan::client {
 	PersonaState FriendsImpl::GetPersonaState() {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		return intf->client->IsConnected() ?
-			PERSONA_STATE_ONLINE :
-			PERSONA_STATE_OFFLINE;
+		auto result = RealGalaxyDLL_Friends()->GetPersonaState();
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));
+		}
+
+		return result;
+
 	}
 #endif
 
 	const char* FriendsImpl::GetFriendPersonaName(GalaxyID userID) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		return intf->user->GetGalaxyUserData(userID)->nickname.c_str();
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
+		}
+
+		auto result = RealGalaxyDLL_Friends()->GetFriendPersonaName(userID);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+		}
+
+		return result;
 	}
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_GET_FRIEND_PERSONA_AVATAR_COPY
 	void FriendsImpl::GetFriendPersonaNameCopy(GalaxyID userID, char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		if (buffer != nullptr) {
-			std::string nickname = intf->user->GetGalaxyUserData(userID)->nickname;
-			universelan::util::safe_copy_str_n(nickname, buffer, bufferLength);
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all(std::format("buffer: {}", (void*)buffer));
+			trace.write_all(std::format("bufferLength: {}", bufferLength));
+		}
+
+		RealGalaxyDLL_Friends()->GetFriendPersonaNameCopy(userID, buffer, bufferLength);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
 		}
 	}
 #endif
@@ -153,23 +177,53 @@ namespace universelan::client {
 	PersonaState FriendsImpl::GetFriendPersonaState(GalaxyID userID) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		return intf->user->GetGalaxyUserData(userID)->online ?
-			PERSONA_STATE_ONLINE :
-			PERSONA_STATE_OFFLINE;
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
+		}
+
+		auto result = RealGalaxyDLL_Friends()->GetFriendPersonaState(userID);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));
+		}
+
+		return result;
 	}
 #endif
 
 	const char* FriendsImpl::GetFriendAvatarUrl(GalaxyID userID, AvatarType avatarType) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		return "";
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all(std::format("avatarType: {}", avatarType));
+		}
+
+		auto result = RealGalaxyDLL_Friends()->GetFriendAvatarUrl(userID, avatarType);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+		}
+
+		return result;
 	}
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_GET_FRIEND_PERSONA_AVATAR_COPY
 	void FriendsImpl::GetFriendAvatarUrlCopy(GalaxyID userID, AvatarType avatarType, char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		universelan::util::safe_copy_str_n(GetFriendAvatarUrl(userID, avatarType), buffer, bufferLength);
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all(std::format("avatarType: {}", avatarType));
+			trace.write_all(std::format("buffer: {}", (void*)buffer));
+			trace.write_all(std::format("bufferLength: {}", bufferLength));
+		}
+
+		RealGalaxyDLL_Friends()->GetFriendAvatarUrlCopy(userID, avatarType, buffer, bufferLength);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
+		}
 	}
 #endif
 
@@ -177,17 +231,48 @@ namespace universelan::client {
 	uint32_t FriendsImpl::GetFriendAvatarImageID(GalaxyID userID, AvatarType avatarType) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		return 0;
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all(std::format("avatarType: {}", avatarType));
+		}
+
+		auto result = RealGalaxyDLL_Friends()->GetFriendAvatarImageID(userID, avatarType);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+
+		return result;
 	}
 
 	void FriendsImpl::GetFriendAvatarImageRGBA(GalaxyID userID, AvatarType avatarType, GetImageRGBABufferType* buffer, uint32_t bufferLength) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all(std::format("avatarType: {}", avatarType));
+			trace.write_all(std::format("buffer: {}", (void*)buffer));
+			trace.write_all(std::format("bufferLength: {}", bufferLength));
+		}
+
+		RealGalaxyDLL_Friends()->GetFriendAvatarImageRGBA(userID, avatarType, buffer, bufferLength);
 	}
 
 	bool FriendsImpl::IsFriendAvatarImageRGBAAvailable(GalaxyID userID, AvatarType avatarType) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		return false;
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all(std::format("avatarType: {}", avatarType));
+		}
+
+		auto result = RealGalaxyDLL_Friends()->IsFriendAvatarImageRGBAAvailable(userID, avatarType);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+
+		return result;
 	}
 #endif
 
@@ -198,31 +283,63 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		listeners->NotifyAll(
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listener,
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-			& IFriendListListener::OnFriendListRetrieveSuccess);
+		}
+
+		RealGalaxyDLL_Friends()->RequestFriendList(
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
+			listener
+#endif
+		);
 	}
 
 #if GALAXY_BUILD_FEATURE_ADDED_RICH_PRESENCE_LISTENERS
 	bool FriendsImpl::IsFriend(GalaxyID userID) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		return false;
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
+		}
+
+		auto result = RealGalaxyDLL_Friends()->IsFriend(userID);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+
+		return result;
 	}
 #endif
 
 	uint32_t FriendsImpl::GetFriendCount() {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		return (uint32_t)online_friends.size();
+		auto result = RealGalaxyDLL_Friends()->GetFriendCount();
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+
+		return result;
 	}
 
 	GalaxyID FriendsImpl::GetFriendByIndex(uint32_t index) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		return container_get_by_index(online_friends, index, GalaxyID(0));
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("index: {}", index));
+		}
+
+		auto result = RealGalaxyDLL_Friends()->GetFriendByIndex(index);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+
+		return result;
 	}
 
 #if GALAXY_BUILD_FEATURE_NEW_FRIEND_FEATURES_104_3
@@ -234,11 +351,18 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		listeners->NotifyAll(
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listener,
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-			& IFriendInvitationSendListener::OnFriendInvitationSendSuccess, userID);
+		}
+
+		RealGalaxyDLL_Friends()->SendFriendInvitation(userID
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
+			, listener
+#endif
+		);
 	}
 
 	void FriendsImpl::RequestFriendInvitationList(
@@ -248,11 +372,17 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		listeners->NotifyAll(
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listener,
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-			& IFriendInvitationListRetrieveListener::OnFriendInvitationListRetrieveSuccess);
+		}
+
+		RealGalaxyDLL_Friends()->RequestFriendInvitationList(
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
+			listener
+#endif
+		);
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_ISENTFRIENDINVITATIONLISTRETRIEVELISTENER
@@ -263,22 +393,45 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		listeners->NotifyAll(
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listener,
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-			& ISentFriendInvitationListRetrieveListener::OnSentFriendInvitationListRetrieveSuccess);
+		}
+
+		RealGalaxyDLL_Friends()->RequestSentFriendInvitationList(
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
+			listener
+#endif
+		);
 	}
 #endif
 
 	uint32_t FriendsImpl::GetFriendInvitationCount() {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		return 0;
+		auto result = RealGalaxyDLL_Friends()->GetFriendInvitationCount();
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+
+		return result;
 	}
 
 	void FriendsImpl::GetFriendInvitationByIndex(uint32_t index, GalaxyID& userID, uint32_t& sendTime) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("index: {}", index));
+		}
+
+		RealGalaxyDLL_Friends()->GetFriendInvitationByIndex(index, userID, sendTime);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all(std::format("sendTime: {}", sendTime));
+		}
 	}
 
 	void FriendsImpl::RespondToFriendInvitation(GalaxyID userID, bool accept
@@ -288,11 +441,19 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		listeners->NotifyAll(
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all(std::format("accept: {}", accept));
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listener,
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-			& IFriendInvitationRespondToListener::OnFriendInvitationRespondToFailure, userID, IFriendInvitationRespondToListener::FAILURE_REASON_USER_ALREADY_FRIEND);
+		}
+
+		RealGalaxyDLL_Friends()->RespondToFriendInvitation(userID, accept
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
+			, listener
+#endif	
+		);
 	}
 
 	void FriendsImpl::DeleteFriend(GalaxyID userID
@@ -302,11 +463,18 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		listeners->NotifyAll(
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listener,
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-			& IFriendDeleteListener::OnFriendDeleteFailure, userID, IFriendDeleteListener::FAILURE_REASON_UNDEFINED);
+		}
+
+		RealGalaxyDLL_Friends()->DeleteFriend(userID
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
+			, listener
+#endif	
+		);
 	}
 
 #endif
@@ -318,18 +486,19 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		util::safe_fix_null_char_ptr(key);
-		util::safe_fix_null_char_ptr(value);
-
-		intf->config->GetLocalUserData()->stats.SetRichPresence(key, value);
-
-		uint64_t request_id = MessageUniqueID::get();
-
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
+			trace.write_all(std::format("value: {}", util::safe_fix_null_char_ptr_annotate_ret(value)));
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-		rich_presence_change_requests.emplace(request_id, listener);
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
+		}
 
-		intf->client->GetConnection().SendAsync(RichPresenceChangeMessage{ request_id, 0, RichPresenceChangeMessage::ACTION_SET, key, value });
+		RealGalaxyDLL_Friends()->SetRichPresence(key, value
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
+			, listener
+#endif	
+		);
 	}
 
 	void FriendsImpl::DeleteRichPresence(const char* key
@@ -337,19 +506,20 @@ namespace universelan::client {
 		, IRichPresenceChangeListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		util::safe_fix_null_char_ptr(key);
-
-		intf->config->GetLocalUserData()->stats.EraseRichPresence(key);
-
-		uint64_t request_id = MessageUniqueID::get();
-
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-		rich_presence_change_requests.emplace(request_id, listener);
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
+		}
 
-		intf->client->GetConnection().SendAsync(RichPresenceChangeMessage{ request_id, 0, RichPresenceChangeMessage::ACTION_DELETE, key });
+		RealGalaxyDLL_Friends()->DeleteRichPresence(key
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
+			, listener
+#endif	
+		);
 	}
 
 	void FriendsImpl::ClearRichPresence(
@@ -357,55 +527,19 @@ namespace universelan::client {
 		IRichPresenceChangeListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		intf->config->GetLocalUserData()->stats.ClearRichPresence();
-
-		uint64_t request_id = MessageUniqueID::get();
-
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-		rich_presence_change_requests.emplace(request_id, listener);
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-
-		intf->client->GetConnection().SendAsync(RichPresenceChangeMessage{ request_id, 0, RichPresenceChangeMessage::ACTION_CLEAR });
-	}
-
-	void FriendsImpl::RichPresenceChangeMessageProcessed(const std::shared_ptr<RichPresenceChangeMessage>& data) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
-
-		if (intf->config->IsSelfUserID(data->id)) {
-			IRichPresenceChangeListener* listener = rich_presence_change_requests.pop(data->request_id);
-
-			if (data->success) {
-				listeners->NotifyAll(listener, &IRichPresenceChangeListener::OnRichPresenceChangeSuccess);
-#if GALAXY_BUILD_FEATURE_ADDED_RICH_PRESENCE_LISTENERS
-				listeners->NotifyAll(&IRichPresenceListener::OnRichPresenceUpdated, intf->config->GetApiGalaxyID());
-#endif
-			}
-			else {
-				listeners->NotifyAll(listener, &IRichPresenceChangeListener::OnRichPresenceChangeFailure, IRichPresenceChangeListener::FAILURE_REASON_UNDEFINED);
-			}
-			return;
 		}
-		else if (data->success) {
-			auto entry = intf->user->GetGalaxyUserData(data->id);
-			switch (data->action) {
-			case RichPresenceChangeMessage::ACTION_SET:
-				entry->stats.SetRichPresence(data->key, data->value);
-				break;
 
-			case RichPresenceChangeMessage::ACTION_DELETE:
-				entry->stats.EraseRichPresence(data->key);
-				break;
-
-			case RichPresenceChangeMessage::ACTION_CLEAR:
-				entry->stats.ClearRichPresence();
-				break;
-
-			case RichPresenceChangeMessage::ACTION_NONE:
-				break;
-			}
-		}
+		RealGalaxyDLL_Friends()->ClearRichPresence(
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
+			listener
+#endif	
+		);
 	}
 
 #if GALAXY_BUILD_FEATURE_ADDED_RICH_PRESENCE_LISTENERS
@@ -414,161 +548,148 @@ namespace universelan::client {
 		, IRichPresenceRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		if (intf->config->IsSelfUserID(userID)) {
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listeners->NotifyAll(listener, &IRichPresenceRetrieveListener::OnRichPresenceRetrieveSuccess, userID);
-#endif
-#if GALAXY_BUILD_FEATURE_ADDED_RICH_PRESENCE_LISTENERS
-			listeners->NotifyAll(&IRichPresenceListener::OnRichPresenceUpdated, userID);
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
 		}
-		else {
-			uint64_t request_id = MessageUniqueID::get();
-#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			retrieve_rich_presence_requests.emplace(request_id, listener);
-#endif
 
-			intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ RequestSpecificUserDataMessage::RequestTypeRichPresence, request_id, userID });
-		}
+		RealGalaxyDLL_Friends()->RequestRichPresence(userID
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
+			, listener
+#endif	
+		);
 	}
 
 	const char* FriendsImpl::GetRichPresence(const char* key, GalaxyID userID) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		util::safe_fix_null_char_ptr(key);
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
+			trace.write_all(std::format("userID: {}", userID));
+		}
 
-		return intf->user->GetGalaxyUserData(userID)->stats.GetRichPresence(key).c_str();
+		auto result = RealGalaxyDLL_Friends()->GetRichPresence(key, userID);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+		}
+
+		return result;
 	}
 
 	void FriendsImpl::GetRichPresenceCopy(const char* key, char* buffer, uint32_t bufferLength, GalaxyID userID) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		util::safe_fix_null_char_ptr(key);
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
+			trace.write_all(std::format("buffer: {}", (void*)buffer));
+			trace.write_all(std::format("bufferLength: {}", bufferLength));
+			trace.write_all(std::format("userID: {}", userID));
+		}
 
-		if (buffer != nullptr) {
-			std::string value = intf->user->GetGalaxyUserData(userID)->stats.GetRichPresence(key);
-			universelan::util::safe_copy_str_n(value, buffer, bufferLength);
+		RealGalaxyDLL_Friends()->GetRichPresenceCopy(key, buffer, bufferLength, userID);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
 		}
 	}
 
 	uint32_t FriendsImpl::GetRichPresenceCount(GalaxyID userID) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		auto entry = intf->user->GetGalaxyUserData(userID);
-		return entry->stats.run_locked_richpresence<uint32_t>([&](auto& map) -> uint32_t {
-			return (uint32_t)map.size();
-			});
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
+		}
+
+		auto result = RealGalaxyDLL_Friends()->GetRichPresenceCount(userID);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+
+		return result;
 	}
 
 	GetRichPresenceReturnT::type FriendsImpl::GetRichPresenceByIndex(uint32_t index, char* key, uint32_t keyLength, char* value, uint32_t valueLength, GalaxyID userID) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		auto entry = intf->user->GetGalaxyUserData(userID);
-		return entry->stats.run_locked_richpresence<GetRichPresenceReturnT::type>([&](auto& map) -> GetRichPresenceReturnT::type {
-			auto ref = container_get_by_index(map, index);
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("index: {}", index));
+			trace.write_all(std::format("key: {}", (void*)key));
+			trace.write_all(std::format("keyLength: {}", keyLength));
+			trace.write_all(std::format("key: {}", (void*)value));
+			trace.write_all(std::format("keyLength: {}", valueLength));
+			trace.write_all(std::format("userID: {}", userID));
+		}
 
-			if (!ref) {
-				return GetRichPresenceReturnT::value_false();
-			}
+#if !GALAXY_BUILD_FEATURE_IFRIENDS_ISTATS_UPDATE_1_127_0
+		auto result =
+#endif
+		RealGalaxyDLL_Friends()->GetRichPresenceByIndex(index, key, keyLength, value, valueLength, userID);
 
-			if (key != nullptr) {
-				universelan::util::safe_copy_str_n(ref->first, key, keyLength);
-			}
-			if (value != nullptr) {
-				universelan::util::safe_copy_str_n(ref->second, value, valueLength);
-			}
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+#if !GALAXY_BUILD_FEATURE_IFRIENDS_ISTATS_UPDATE_1_127_0
+			trace.write_all(std::format("result: {}", result));
+#endif
+			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate(key, keyLength)));
+			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate(value, valueLength)));
+		}
 
-			return GetRichPresenceReturnT::value_true();
-			});
+#if !GALAXY_BUILD_FEATURE_IFRIENDS_ISTATS_UPDATE_1_127_0
+		return result;
+#endif
 	}
 #endif
-
-	void FriendsImpl::RequestRichPresenceProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
-
-#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-		IRichPresenceRetrieveListener* listener = retrieve_rich_presence_requests.pop(data->request_id);
-#endif
-
-		if (data->found) {
-			auto entry = intf->user->GetGalaxyUserData(data->id);
-			entry->stats = data->asuc;
-			entry->nickname = data->nickname;
-
-#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listeners->NotifyAll(listener, &IRichPresenceRetrieveListener::OnRichPresenceRetrieveSuccess, data->id);
-#endif
-#if GALAXY_BUILD_FEATURE_ADDED_RICH_PRESENCE_LISTENERS
-			listeners->NotifyAll(&IRichPresenceListener::OnRichPresenceUpdated, data->id);
-#endif
-
-		}
-		else {
-#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listeners->NotifyAll(listener, &IRichPresenceRetrieveListener::OnRichPresenceRetrieveFailure, data->id, IRichPresenceRetrieveListener::FAILURE_REASON_UNDEFINED);
-#endif
-		}
-	}
 
 #if GALAXY_BUILD_FEATURE_HAS_GETRICHPRESENCEKEYBYINDEX
-	/**
-	 * Returns a key from the rich presence storage by index.
-	 *
-	 * @remark This call is not thread-safe as opposed to GetRichPresenceKeyByIndexCopy().
-	 *
-	 * @pre Retrieve the rich presence first by calling RequestRichPresence().
-	 *
-	 * @param [in] index Index as an integer in the range of [0, number of entries).
-	 * @param [in] userID The ID of the user.
-	 * @return The rich presence key under the index of the user.
-	 */
 	const char* FriendsImpl::GetRichPresenceKeyByIndex(uint32_t index, GalaxyID userID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		auto entry = intf->user->GetGalaxyUserData(userID);
-		return entry->stats.run_locked_richpresence<const char*>([&](auto& map) -> const char* {
-			auto ref = container_get_by_index(map, index);
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("index: {}", index));
+			trace.write_all(std::format("userID: {}", userID));
+		}
 
-			if (!ref) {
-				return "";
-			}
+		auto result = RealGalaxyDLL_Friends()->GetRichPresenceKeyByIndex(index, userID);
 
-			return ref->first.c_str();
-			});
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+		}
+
+		return result;
 	}
 
-	/**
-	 * Copies a key from the rich presence storage by index to a buffer.
-	 *
-	 * @pre Retrieve the rich presence first by calling RequestRichPresence().
-	 *
-	 * @param [in] index Index as an integer in the range of [0, number of entries).
-	 * @param [in, out] buffer The output buffer.
-	 * @param [in] bufferLength The size of the output buffer.
-	 * @param [in] userID The ID of the user.
-	 */
 	void FriendsImpl::GetRichPresenceKeyByIndexCopy(uint32_t index, char* buffer, uint32_t bufferLength, GalaxyID userID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		auto entry = intf->user->GetGalaxyUserData(userID);
-		entry->stats.run_locked_richpresence<void>([&](auto& map) -> void {
-			auto ref = container_get_by_index(map, index);
-			if (ref && buffer != nullptr) {
-				universelan::util::safe_copy_str_n(ref->first, buffer, bufferLength);
-			}
-			});
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("index: {}", index));
+			trace.write_all(std::format("buffer: {}", (void*)buffer));
+			trace.write_all(std::format("bufferLength: {}", bufferLength));
+			trace.write_all(std::format("userID: {}", userID));
+		}
+
+		RealGalaxyDLL_Friends()->GetPersonaNameCopy(buffer, bufferLength);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
+		}
 	}
 
 #endif
 
 	void FriendsImpl::ShowOverlayInviteDialog(const char* connectionString) {
-		tracer::Trace trace{ connectionString, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		util::safe_fix_null_char_ptr(connectionString);
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("connectionString: {}", util::safe_fix_null_char_ptr_annotate_ret(connectionString)));
+		}
 
-		std::cout << "ShowOverlayInviteDialog\n\t" << connectionString << std::endl;
+		RealGalaxyDLL_Friends()->ShowOverlayInviteDialog(connectionString);
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_ISENDINVITATIONLISTENER
@@ -577,24 +698,21 @@ namespace universelan::client {
 		, ISendInvitationListener* const listener
 #endif
 	) {
-		tracer::Trace trace{ connectionString, __FUNCTION__, tracer::Trace::IFRIENDS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		if (!online_friends.contains(userID)) {
-			listeners->NotifyAll(
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all(std::format("connectionString: {}", util::safe_fix_null_char_ptr_annotate_ret(connectionString)));
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-				listener,
-#endif
-				& ISendInvitationListener::OnInvitationSendFailure, userID, connectionString, ISendInvitationListener::FAILURE_REASON_RECEIVER_DOES_NOT_ALLOW_INVITING);
-			return;
+			trace.write_all(std::format("listener: {}", (void*)listener));
+#endif	
 		}
 
-		intf->client->GetConnection().SendAsync(InvitationMessage{ MessageUniqueID::get(), userID, util::safe_fix_null_char_ptr_ret(connectionString)});
-
-		listeners->NotifyAll(
+		RealGalaxyDLL_Friends()->SendInvitation(userID, connectionString
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listener,
-#endif
-			& ISendInvitationListener::OnInvitationSendSuccess, userID, connectionString);
+			, listener
+#endif	
+		);
 	}
 #endif
 
@@ -606,11 +724,18 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		listeners->NotifyAll(
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userSpecifier: {}", util::safe_fix_null_char_ptr_annotate_ret(userSpecifier)));
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listener,
-#endif
-			& IUserFindListener::OnUserFindFailure, userSpecifier, IUserFindListener::FAILURE_REASON_UNDEFINED);
+			trace.write_all(std::format("listener: {}", (void*)listener));
+#endif	
+		}
+
+		RealGalaxyDLL_Friends()->FindUser(userSpecifier
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
+			, listener
+#endif	
+		);
 	}
 #endif
 
@@ -618,36 +743,17 @@ namespace universelan::client {
 	bool FriendsImpl::IsUserInTheSameGame(GalaxyID userID) const {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		return online_friends.contains(userID);
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
+		}
+
+		auto result = RealGalaxyDLL_Friends()->IsUserInTheSameGame(userID);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+
+		return result;
 	}
 #endif
-
-	void FriendsImpl::ChangeOnlineStatus(GalaxyID userID, bool isOnline)
-	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
-
-		if (isOnline) {
-			online_friends.insert(userID);
-#if GALAXY_BUILD_FEATURE_HAS_FRIENDADDLISTENER
-			listeners->NotifyAll(&IFriendAddListener::OnFriendAdded, userID, IFriendAddListener::INVITATION_DIRECTION_INCOMING);
-#endif
-		}
-		else {
-			online_friends.erase(userID);
-#if GALAXY_BUILD_FEATURE_HAS_FRIENDADDLISTENER
-			listeners->NotifyAll(&IFriendDeleteListener::OnFriendDeleteSuccess, userID);
-#endif
-		}
-	}
-
-	void FriendsImpl::InvitationReceived(const std::shared_ptr<InvitationMessage>& data)
-	{
-#if GALAXY_BUILD_FEATURE_HAS_ISENDINVITATIONLISTENER
-		listeners->NotifyAll(&IGameInvitationReceivedListener::OnGameInvitationReceived, data->user_id, data->connection_string.c_str());
-
-		if (intf->config->AutoAcceptGameInvitationsEnabled()) {
-			listeners->NotifyAll(&IGameJoinRequestedListener::OnGameJoinRequested, data->user_id, data->connection_string.c_str());
-		}
-#endif
-	}
 }

@@ -1,12 +1,16 @@
 #include "Networking.hxx"
 
-#include "UniverseLAN.hxx"
+#include <Tracer.hxx>
+#include <GalaxyDLL.hxx>
+#include <SafeStringCopy.hxx>
+
+#include <magic_enum/magic_enum.hpp>
+
+#include <format>
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	NetworkingImpl::NetworkingImpl(InterfaceInstances* intf) :
-		intf{ intf }, listeners{ intf->notification.get() },
-		buffer{}
+	NetworkingImpl::NetworkingImpl(InterfaceInstances* intf) : intf{ intf }
 	{
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::INETWORKING };
 	}
@@ -17,123 +21,152 @@ namespace universelan::client {
 	}
 
 	bool NetworkingImpl::SendP2PPacket(GalaxyID galaxyID, const void* data, uint32_t dataSize, P2PSendType sendType, uint8_t channel) {
-		ENetPacketFlag flag{};
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::INETWORKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		switch (sendType) {
-		case P2P_SEND_RELIABLE:
-#if GALAXY_BUILD_FEATURE_HAS_P2P_SEND_IMMEDIATE
-		case P2P_SEND_RELIABLE_IMMEDIATE:
-#endif
-			flag = ENET_PACKET_FLAG_RELIABLE;
-			break;
-
-		case P2P_SEND_UNRELIABLE:
-#if GALAXY_BUILD_FEATURE_HAS_P2P_SEND_IMMEDIATE
-		case P2P_SEND_UNRELIABLE_IMMEDIATE:
-#endif
-			// no unreliable flag?
-			break;
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("galaxyID: {}", galaxyID));
+			trace.write_all(std::format("data: {}", data));
+			trace.write_all(std::format("dataSize: {}", dataSize));
+			trace.write_all(std::format("sendType: {}", magic_enum::enum_name(sendType)));
+			trace.write_all(std::format("channel: {}", channel));
 		}
 
-		intf->client->GetConnection().SendAsync(P2PNetworkPacketMessage{ galaxyID, channel, sendType, (const char*)data, dataSize }, flag);
+		auto result = RealGalaxyDLL_Networking()->SendP2PPacket(galaxyID, data, dataSize, sendType, channel);
 
-		return true;
-	}
-
-	bool NetworkingImpl::GetP2PPacket(void* dest, uint32_t destSize, uint32_t* outMsgSize, GalaxyID& outGalaxyID, uint8_t channel, bool pop) {
-		channels_array::value_type& channel_var = buffer[channel];
-		packet_t packet{ nullptr };
-		{
-			lock_t lock{ channel_var.mtx };
-			if (channel_var.packets.empty()) {
-				return false;
-			}
-
-			packet = channel_var.packets.front();
-			if (pop) {
-				channel_var.packets.pop();
-			}
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
 		}
 
-		assert(packet != nullptr);
-
-		outGalaxyID = packet->id;
-		*outMsgSize = std::min((uint32_t)packet->data.size(), destSize);
-		std::copy_n(packet->data.begin(), *outMsgSize, (char*)dest);
-
-		return true;
+		return result;
 	}
 
 	bool NetworkingImpl::PeekP2PPacket(void* dest, uint32_t destSize, uint32_t* outMsgSize, GalaxyID& outGalaxyID, uint8_t channel) {
-		return GetP2PPacket(dest, destSize, outMsgSize, outGalaxyID, channel, false);
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::INETWORKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("dest: {}", dest));
+			trace.write_all(std::format("destSize: {}", destSize));
+			trace.write_all(std::format("outMsgSize(addr): {}", (void*)outMsgSize));
+			trace.write_all(std::format("channel: {}", channel));
+		}
+
+		auto result = RealGalaxyDLL_Networking()->PeekP2PPacket(dest, destSize, outMsgSize, outGalaxyID, channel);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+			if (outMsgSize) {
+				trace.write_all(std::format("outMsgSize: {}", *outMsgSize));
+			}
+			trace.write_all(std::format("outGalaxyID: {}", outGalaxyID));
+		}
+
+		return result;
 	}
 
 	bool NetworkingImpl::ReadP2PPacket(void* dest, uint32_t destSize, uint32_t* outMsgSize, GalaxyID& outGalaxyID, uint8_t channel) {
-		return GetP2PPacket(dest, destSize, outMsgSize, outGalaxyID, channel, true);
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::INETWORKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("dest: {}", dest));
+			trace.write_all(std::format("destSize: {}", destSize));
+			trace.write_all(std::format("outMsgSize(addr): {}", (void*)outMsgSize));
+			trace.write_all(std::format("channel: {}", channel));
+		}
+
+		auto result = RealGalaxyDLL_Networking()->ReadP2PPacket(dest, destSize, outMsgSize, outGalaxyID, channel);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+			if (outMsgSize) {
+				trace.write_all(std::format("outMsgSize: {}", *outMsgSize));
+			}
+			trace.write_all(std::format("outGalaxyID: {}", outGalaxyID));
+		}
+
+		return result;
 	}
 
 	bool NetworkingImpl::IsP2PPacketAvailable(uint32_t* outMsgSize, uint8_t channel) {
-		channels_array::value_type& channel_var = buffer[channel];
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::INETWORKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		lock_t lock{ channel_var.mtx };
-		if(channel_var.packets.empty()) {
-			return false;
-		} 
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("outMsgSize(addr): {}", (void*)outMsgSize));
+			trace.write_all(std::format("channel: {}", channel));
+		}
 
-		*outMsgSize = (int32_t)channel_var.packets.front()->data.size();
-		return true;
+		auto result = RealGalaxyDLL_Networking()->IsP2PPacketAvailable(outMsgSize, channel);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+			if (outMsgSize) {
+				trace.write_all(std::format("outMsgSize: {}", *outMsgSize));
+			}
+		}
+
+		return result;
 	}
 
 	void NetworkingImpl::PopP2PPacket(uint8_t channel) {
-		channels_array::value_type& channel_var = buffer[channel];
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::INETWORKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		lock_t lock{ channel_var.mtx };
-		channel_var.packets.pop();
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("channel: {}", channel));
+		}
+
+		RealGalaxyDLL_Networking()->PopP2PPacket(channel);
 	}
 
 	int NetworkingImpl::GetPingWith(GalaxyID galaxyID) {
-		return -1;
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::INETWORKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("galaxyID: {}", galaxyID));
+		}
+
+		auto result = RealGalaxyDLL_Networking()->GetPingWith(galaxyID);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+
+		return result;
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_NAT_FUNCTIONALITY
 	void NetworkingImpl::RequestNatTypeDetection() {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::INETWORKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::INETWORKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		listeners->NotifyAll(
-			&INatTypeDetectionListener::OnNatTypeDetectionSuccess,
-			NAT_TYPE_NONE);
+		RealGalaxyDLL_Networking()->RequestNatTypeDetection();
 	}
 
 	NatType NetworkingImpl::GetNatType() {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::INETWORKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::INETWORKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		return NAT_TYPE_NONE;
+		auto result = RealGalaxyDLL_Networking()->GetNatType();
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));
+		}
+
+		return result;
 	}
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_CONNECTION_TYPE
 	ConnectionType NetworkingImpl::GetConnectionType(GalaxyID userID) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::INETWORKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::INETWORKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		return CONNECTION_TYPE_DIRECT;
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
+		}
+
+		auto result = RealGalaxyDLL_Networking()->GetConnectionType(userID);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));
+		}
+
+		return result;
 	}
 #endif
-
-	void NetworkingImpl::AddPacket(const NetworkingImpl::packet_t& packet) {
-		if (!packet) {
-			return;
-		}
-
-		// locked operation
-		{
-			channels_array::value_type& channel_var = buffer[packet->channel];
-
-			lock_t lock{ channel_var.mtx };
-			channel_var.packets.push(packet);
-		}
-
-		if (listeners->NotifyAllNow(&INetworkingListener::OnP2PPacketAvailable, (uint32_t)packet->data.size(), packet->channel)) {
-			PopP2PPacket(packet->channel);
-		}
-	}
 }

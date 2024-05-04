@@ -16,11 +16,6 @@ namespace universelan::client {
 	 * @{
 	 */
 
-	 /**
-	  * The ID of the DLC.
-	  */
-	typedef uint64_t ProductID;
-
 	/**
 	 * The interface for managing application activities.
 	 *

@@ -7,19 +7,7 @@
  * Galaxy Peers.
  */
 
-#include "ListenerRegistrar.hxx"
-
-#include <Networking/Messages/P2PNetworkPacketMessage.hxx>
-
 #include <INetworking.h>
-#include <IListenerRegistrar.h>
-#include <GalaxyID.h>
-
-#include <array>
-#include <atomic>
-#include <limits>
-#include <mutex>
-#include <queue>
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -35,27 +23,8 @@ namespace universelan::client {
 	  */
 	class NetworkingImpl : public INetworking
 	{
-	public:
-		using mutex_t = std::recursive_mutex;
-		using lock_t = std::scoped_lock<mutex_t>;
-		using packet_t = std::shared_ptr<const P2PNetworkPacketMessage>;
-
-		using packet_vector_t = std::queue<packet_t>;
-
-		struct ProtectedChannel {
-			mutex_t mtx;
-			packet_vector_t packets;
-
-			ProtectedChannel() : mtx{}, packets{} {}
-		};
-
-		using channels_array = std::array<ProtectedChannel, std::numeric_limits<uint8_t>::max()>;
-
 	private:
 		InterfaceInstances* intf;
-		ListenerRegistrarImpl* listeners;
-
-		channels_array buffer;
 
 	public:
 
@@ -226,8 +195,6 @@ namespace universelan::client {
 		 */
 		virtual ConnectionType GetConnectionType(GalaxyID userID) override;
 #endif
-		virtual void AddPacket(const packet_t& packet);
-		virtual bool GetP2PPacket(void* dest, uint32_t destSize, uint32_t* outMsgSize, GalaxyID& outGalaxyID, uint8_t channel, bool pop);
 	};
 
 	/** @} */

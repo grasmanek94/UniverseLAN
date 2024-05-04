@@ -1,35 +1,19 @@
 #ifndef UNIVERSELAN_IMPL_FRIENDS_H
 #define UNIVERSELAN_IMPL_FRIENDS_H
 
-/**
- * @file
- * Contains data structures and interfaces related to social activities.
- */
-
-#include "ListenerRegistrar.hxx"
-
 #include <DynamicReturn.hxx>
 
-#include <Networking/Messages/RequestSpecificUserDataMessage.hxx>
-#include <Networking/Messages/RichPresenceChangeMessage.hxx>
-#include <Networking/Messages/InvitationMessage.hxx>
-
 #include <IFriends.h>
-#include <GalaxyID.h>
-#include <IListenerRegistrar.h>
-
-#include <set>
 
 namespace universelan::client {
+	using namespace galaxy::api;
+	struct InterfaceInstances;
 
 #if GALAXY_BUILD_FEATURE_GetImageRGBA_CHAR_TO_VOID
 	using GetImageRGBABufferType = void;
 #else
 	using GetImageRGBABufferType = unsigned char;
 #endif
-
-	using namespace galaxy::api;
-	struct InterfaceInstances;
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 	using AvatarCriteriaImpl = AvatarCriteria;
@@ -55,18 +39,7 @@ namespace universelan::client {
 	{
 	private:
 		InterfaceInstances* intf;
-		ListenerRegistrarImpl* listeners;
 
-#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-		ListenersRequestHelper<IUserInformationRetrieveListener*> user_information_requests;
-		ListenersRequestHelper<IRichPresenceRetrieveListener*> retrieve_rich_presence_requests;
-#endif
-
-		ListenersRequestHelper<IRichPresenceChangeListener*> rich_presence_change_requests;
-
-		AvatarCriteriaImpl avatar_criteria;
-
-		std::set<GalaxyID> online_friends;
 	public:
 
 		FriendsImpl(InterfaceInstances* intf);
@@ -614,15 +587,6 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_ISUSERINTHESAMEGAME
 		virtual bool IsUserInTheSameGame(GalaxyID userID) const override;
 #endif
-
-		void RequestUserInformationProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
-		void RichPresenceChangeMessageProcessed(const std::shared_ptr<RichPresenceChangeMessage>& data);
-		void RequestRichPresenceProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
-
-		void ChangeOnlineStatus(GalaxyID userID, bool isOnline);
-
-		void InvitationReceived(const std::shared_ptr<InvitationMessage>& data);
-
 	};
 
 	/** @} */

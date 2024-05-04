@@ -92,13 +92,14 @@ namespace universelan {
 				if (disable) {
 					entry = trim(entry.substr(1));
 				}
-				
+
 				uint64_t flag = magic_enum::enum_cast<tracer::Trace::MASK>(entry).value_or(tracer::Trace::INFORMATIONAL);
 
 				if (flag == tracer::Trace::TRACE_ALL_FLAGS) {
 					if (disable) {
 						return 0ULL;
-					} else {
+					}
+					else {
 						flags = std::numeric_limits<decltype(flags)>::max();
 					}
 				}
@@ -309,6 +310,15 @@ namespace universelan {
 			SignedIn = ini.GetBoolValue(UserSection.c_str(), "SignedIn", true);
 			AutoAcceptGameInvitations = ini.GetBoolValue(UserSection.c_str(), "AutoAcceptGameInvitations", true);
 
+			OverrideInitKeys = ini.GetBoolValue(InterceptorSection.c_str(), "OverrideInitKeys", false);
+			OverrideSignIn = ini.GetBoolValue(InterceptorSection.c_str(), "OverrideSignIn", false);
+
+			OverrideInitKeyId = ini.GetValue(InterceptorSection.c_str(), "OverrideInitKeyId", "0");
+			OverrideInitKeySecret = ini.GetValue(InterceptorSection.c_str(), "OverrideInitKeySecret", "0");
+
+			OverrideSignInId = ini.GetValue(InterceptorSection.c_str(), "OverrideSignInId", "0");
+			OverrideSignInPassword = ini.GetValue(InterceptorSection.c_str(), "OverrideSignInPassword", "0");
+
 			if (const_hash(PersonaNameType) != const_hash("@Custom")) {
 
 				switch (const_hash(PersonaNameType)) {
@@ -445,7 +455,7 @@ namespace universelan {
 					std::string product_id_str = std::string(entry.pItem);
 					uint64_t product_id = 0;
 					auto result = std::from_chars(product_id_str.data(), product_id_str.data() + product_id_str.size(), product_id);
-					
+
 					switch (result.ec) {
 					case std::errc::invalid_argument:
 					case std::errc::result_out_of_range:
@@ -742,5 +752,29 @@ namespace universelan {
 	bool ClientIniData::AutoAcceptGameInvitationsEnabled() const
 	{
 		return AutoAcceptGameInvitations;
+	}
+
+	bool ClientIniData::OverrideInitKeysEnabled() const {
+		return OverrideInitKeys;
+	}
+
+	std::string ClientIniData::GetOverrideInitKeyId() const {
+		return OverrideInitKeyId;
+	}
+
+	std::string ClientIniData::GetOverrideInitKeySecret() const {
+		return OverrideInitKeySecret;
+	}
+
+	bool ClientIniData::OverrideSignInEnabled() const {
+		return OverrideSignIn;
+	}
+
+	std::string ClientIniData::GetOverrideSignInId() const {
+		return OverrideSignInId;
+	}
+
+	std::string ClientIniData::GetOverrideSignInPassword() const {
+		return OverrideSignInPassword;
 	}
 }

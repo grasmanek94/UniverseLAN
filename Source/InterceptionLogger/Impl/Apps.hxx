@@ -5,35 +5,35 @@
  * @file
  * Contains data structures and interfaces related to application activities.
  */
+
+#include <GalaxyExport.h>
 #include <IApps.h>
+
+#include <GalaxyFunctional.hxx>
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	struct InterfaceInstances;
-
 	/**
 	 * @addtogroup api
 	 * @{
 	 */
-
 	 /**
-	  * The ID of the DLC.
+	  * The interface for managing application activities.
+	  *
+	  * @remark This interface is fully functional in any situation when
+	  * Init() reports an error.
 	  */
-	typedef uint64_t ProductID;
-
-	/**
-	 * The interface for managing application activities.
-	 *
-	 * @remark This interface is fully functional in any situation when
-	 * Init() reports an error.
-	 */
 	class AppsImpl : public IApps
 	{
+	public:
+		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT IApps* GALAXY_CALLTYPE(void)>>;
+		using FuncPtr = FuncT::PTR;
+
 	private:
-		InterfaceInstances* intf;
+		FuncT::F intf;
 
 	public:
-		AppsImpl(InterfaceInstances* intf);
+		AppsImpl(FuncT::F intf);
 
 		virtual ~AppsImpl() override;
 
@@ -63,7 +63,6 @@ namespace universelan::client {
 		 */
 		virtual void GetCurrentGameLanguageCopy(char* buffer, uint32_t bufferLength, ProductID productID = 0) override;
 	};
-
 	/** @} */
 }
 

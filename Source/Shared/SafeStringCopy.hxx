@@ -75,4 +75,18 @@ namespace universelan::util {
 		}
 		return value;
 	}
+
+	inline const char* safe_fix_null_char_ptr_annotate_ret(const char* value) {
+		if (value == nullptr) {
+			return "!!(nullptr)";
+		}
+		return value;
+	}
+
+	inline std::string safe_fix_null_char_ptr_annotate(const char* buffer, uint32_t buffer_len) {
+		if (buffer == nullptr) {
+			return "!!(nullptr)";
+		}
+		return std::string(buffer, std::min((size_t)buffer_len, strnlen_s(buffer, buffer_len)));
+	}
 }

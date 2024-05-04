@@ -1,129 +1,148 @@
 #include "Stats.hxx"
 
-#include "UniverseLAN.hxx"
-
+#include <Tracer.hxx>
+#include <GalaxyDLL.hxx>
 #include <SafeStringCopy.hxx>
+
+#include <magic_enum/magic_enum.hpp>
+
+#include <format>
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	StatsImpl::StatsImpl(InterfaceInstances* intf) :
-		intf{ intf }, listeners{ intf->notification.get() },
-		specific_user_stats_and_achievements_requests{}
-#if GALAXY_BUILD_FEATURE_HAS_IUSERTIMEPLAYEDRETRIEVELISTENER
-		,specific_user_time_played_requests{}
-#endif
+	StatsImpl::StatsImpl(InterfaceInstances* intf) : intf{ intf }
 	{
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 	}
 
 	StatsImpl::~StatsImpl()
 	{
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 	}
 
 	void StatsImpl::RequestUserStatsAndAchievements(GalaxyID userID
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 		, IUserStatsAndAchievementsRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		if (intf->config->IsSelfUserID(userID)) {
-			listeners->NotifyAll(
-#if (GALAXY_VERSION) > 11240
-				listener,
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-				&IUserStatsAndAchievementsRetrieveListener::OnUserStatsAndAchievementsRetrieveSuccess, userID);
 		}
-		else {
-			uint64_t request_id = MessageUniqueID::get();
 
-#if (GALAXY_VERSION) > 11240
-			specific_user_stats_and_achievements_requests.emplace(request_id, listener);
-#endif
-
-			intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ RequestSpecificUserDataMessage::RequestTypeAchievementsAndStats, request_id, userID });
-		}
-	}
-
-	void StatsImpl::SpecificUserStatsAndAchievementsRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
-
-		IUserStatsAndAchievementsRetrieveListener* listener = specific_user_stats_and_achievements_requests.pop(data->request_id);
-
-		if (data->found) {
-			auto entry = intf->user->GetGalaxyUserData(data->id);
-			entry->stats = data->asuc;
-
-			listeners->NotifyAll(listener, &IUserStatsAndAchievementsRetrieveListener::OnUserStatsAndAchievementsRetrieveSuccess, data->id);
-		}
-		else {
-			listeners->NotifyAll(listener, &IUserStatsAndAchievementsRetrieveListener::OnUserStatsAndAchievementsRetrieveFailure, data->id, IUserStatsAndAchievementsRetrieveListener::FAILURE_REASON_UNDEFINED);
-		}
+		RealGalaxyDLL_Stats()->RequestUserStatsAndAchievements(userID
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
+			, listener
+#endif	
+		);
 	}
 
 	int32_t StatsImpl::GetStatInt(const char* name, GalaxyID userID) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		return intf->user->GetGalaxyUserData(userID)->stats.GetStat(name).i;
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("userID: {}", userID));
+		}
+
+		auto result = RealGalaxyDLL_Stats()->GetStatInt(name, userID);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+
+		return result;
 	}
 
 	float StatsImpl::GetStatFloat(const char* name, GalaxyID userID) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		return intf->user->GetGalaxyUserData(userID)->stats.GetStat(name).f;
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("userID: {}", userID));
+		}
+
+		auto result = RealGalaxyDLL_Stats()->GetStatFloat(name, userID);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+
+		return result;
 	}
 
 	void StatsImpl::SetStatInt(const char* name, int32_t value) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		intf->config->GetLocalUserData()->stats.SetStat(name, value);
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("value: {}", value));
+		}
+
+		RealGalaxyDLL_Stats()->SetStatInt(name, value);
 	}
 
 	void StatsImpl::SetStatFloat(const char* name, float value) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		intf->config->GetLocalUserData()->stats.SetStat(name, value);
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("value: {}", value));
+		}
+
+		RealGalaxyDLL_Stats()->SetStatFloat(name, value);
 	}
 
 	void StatsImpl::UpdateAvgRateStat(const char* name, float countThisSession, double sessionLength) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		intf->config->GetLocalUserData()->stats.SetStat(name, (float)(intf->config->GetLocalUserData()->stats.GetStat(name).f + (countThisSession / sessionLength)));
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("countThisSession: {}", countThisSession));
+			trace.write_all(std::format("sessionLength: {}", sessionLength));
+		}
+
+		RealGalaxyDLL_Stats()->UpdateAvgRateStat(name, countThisSession, sessionLength);
 	}
 
 	void StatsImpl::GetAchievement(const char* name, bool& unlocked, uint32_t& unlockTime, GalaxyID userID) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		auto* data = intf->user->GetGalaxyUserData(userID)->stats.GetAchievementData(name);
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("userID: {}", userID));
+		}
 
-		if (data) {
-			unlocked = data->GetUnlocked();
-			unlockTime = data->GetUnlockTime();
+		RealGalaxyDLL_Stats()->GetAchievement(name, unlocked, unlockTime, userID);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("unlocked: {}", unlocked));
+			trace.write_all(std::format("unlockTime: {}", unlockTime));
 		}
 	}
 
 	void StatsImpl::SetAchievement(const char* name) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		auto* data = intf->config->GetLocalUserData()->stats.GetAchievementData(name);
-
-		if (data) {
-			data->SetUnlocked(true);
-			data->SetUnlockTimeNow();
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
 		}
 
-		listeners->NotifyAll(&IAchievementChangeListener::OnAchievementUnlocked, name);
+		RealGalaxyDLL_Stats()->SetAchievement(name);
 	}
 
 	void StatsImpl::ClearAchievement(const char* name) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		auto* data = intf->config->GetLocalUserData()->stats.GetAchievementData(name);
-		if (data) {
-			data->SetUnlocked(false);
-			data->SetUnlockTime(0);
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
 		}
+
+		RealGalaxyDLL_Stats()->ClearAchievement(name);
 	}
 
 	void StatsImpl::StoreStatsAndAchievements(
@@ -131,17 +150,16 @@ namespace universelan::client {
 		IStatsAndAchievementsStoreListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		intf->config->SaveStatsAndAchievements();
-
-		intf->client->GetConnection().SendAsync(UserHelloDataMessage{ intf->config->GetLocalUserData()->stats });
-
-		listeners->NotifyAll(
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			listener,
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-			&IStatsAndAchievementsStoreListener::OnUserStatsAndAchievementsStoreSuccess);
+
+		}
+
+		RealGalaxyDLL_Stats()->StoreStatsAndAchievements();
 	}
 
 	void StatsImpl::ResetStatsAndAchievements(
@@ -149,80 +167,121 @@ namespace universelan::client {
 		IStatsAndAchievementsStoreListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		intf->config->ResetStatsAndAchievements();
-
-		intf->client->GetConnection().SendAsync(UserHelloDataMessage{ intf->config->GetLocalUserData()->stats });
-
-		listeners->NotifyAll(
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			listener,
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-			&IStatsAndAchievementsStoreListener::OnUserStatsAndAchievementsStoreSuccess);
+
+		}
+
+		RealGalaxyDLL_Stats()->ResetStatsAndAchievements(
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
+			listener
+#endif
+		);
 	}
 
 	const char* StatsImpl::GetAchievementDisplayName(const char* name) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		return name;
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+		}
+
+		auto result = RealGalaxyDLL_Stats()->GetAchievementDisplayName(name);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+		}
+
+		return result;
 	}
 
 #if GALAXY_BUILD_FEATURE_ISTATS_GET_ACHIEVEMENT_LEADERBOARD_COPY
 	void StatsImpl::GetAchievementDisplayNameCopy(const char* name, char* buffer, uint32_t bufferLength) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		universelan::util::safe_copy_str_n(name, buffer, bufferLength);
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("buffer: {}", (void*)buffer));
+			trace.write_all(std::format("bufferLength: {}", bufferLength));
+		}
+
+		RealGalaxyDLL_Stats()->GetAchievementDisplayNameCopy(name, buffer, bufferLength);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
+		}
 	}
 #endif
 
 	const char* StatsImpl::GetAchievementDescription(const char* name) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		auto* data = intf->config->GetLocalUserData()->stats.GetAchievementData(name);
-		if (data) {
-			return data->GetDescription().c_str();
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
 		}
 
-		return "";
+		auto result = RealGalaxyDLL_Stats()->GetAchievementDescription(name);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+		}
+
+		return result;
 	}
 
 #if GALAXY_BUILD_FEATURE_ISTATS_GET_ACHIEVEMENT_LEADERBOARD_COPY
 	void StatsImpl::GetAchievementDescriptionCopy(const char* name, char* buffer, uint32_t bufferLength) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		auto* data = intf->config->GetLocalUserData()->stats.GetAchievementData(name);
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("buffer: {}", (void*)buffer));
+			trace.write_all(std::format("bufferLength: {}", bufferLength));
+		}
 
-		if (data) {
-			const std::string& desc = data->GetDescription();
-			universelan::util::safe_copy_str_n(desc, buffer, bufferLength);
+		RealGalaxyDLL_Stats()->GetAchievementDescriptionCopy(name, buffer, bufferLength);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
 		}
 	}
 #endif
 
 	bool StatsImpl::IsAchievementVisible(const char* name) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		auto* data = intf->config->GetLocalUserData()->stats.GetAchievementData(name);
-
-		if (data) {
-			return data->GetVisible();
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
 		}
 
-		return false;
+		auto result = RealGalaxyDLL_Stats()->IsAchievementVisible(name);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+
+		return result;
 	}
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_ISTATS_UPDATE_1_127_0
 	bool StatsImpl::IsAchievementVisibleWhileLocked(const char* name) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		auto* data = intf->config->GetLocalUserData()->stats.GetAchievementData(name);
-
-		if (data) {
-			return data->GetVisibleWhileLocked();
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
 		}
 
-		return false;
+		auto result = RealGalaxyDLL_Stats()->IsAchievementVisibleWhileLocked(name);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+
+		return result;
 	}
 #endif
 
@@ -231,56 +290,112 @@ namespace universelan::client {
 		ILeaderboardsRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		listeners->NotifyAll(
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			listener,
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-			&ILeaderboardsRetrieveListener::OnLeaderboardsRetrieveFailure, ILeaderboardsRetrieveListener::FAILURE_REASON_UNDEFINED);
+
+		}
+
+		RealGalaxyDLL_Stats()->RequestLeaderboards(
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
+			listener
+#endif	
+		);
 	}
 
 	const char* StatsImpl::GetLeaderboardDisplayName(const char* name) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		return name;
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+		}
+
+		auto result = RealGalaxyDLL_Stats()->GetLeaderboardDisplayName(name);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+		}
+
+		return result;
 	}
 
 #if GALAXY_BUILD_FEATURE_ISTATS_GET_ACHIEVEMENT_LEADERBOARD_COPY
 	void StatsImpl::GetLeaderboardDisplayNameCopy(const char* name, char* buffer, uint32_t bufferLength) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		universelan::util::safe_copy_str_n(name, buffer, bufferLength);
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("buffer: {}", (void*)buffer));
+			trace.write_all(std::format("bufferLength: {}", bufferLength));
+		}
+
+		RealGalaxyDLL_Stats()->GetLeaderboardDisplayNameCopy(name, buffer, bufferLength);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
+		}
 	}
 #endif
 
 	LeaderboardSortMethod StatsImpl::GetLeaderboardSortMethod(const char* name) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		return LEADERBOARD_SORT_METHOD_NONE;
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+		}
+
+		auto result = RealGalaxyDLL_Stats()->GetLeaderboardSortMethod(name);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));
+		}
+
+		return result;
 	}
 
 	LeaderboardDisplayType StatsImpl::GetLeaderboardDisplayType(const char* name) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		return LEADERBOARD_DISPLAY_TYPE_NONE;
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+		}
+
+		auto result = RealGalaxyDLL_Stats()->GetLeaderboardDisplayType(name);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));
+		}
+
+		return result;
 	}
 
 	void StatsImpl::RequestLeaderboardEntriesGlobal(
 		const char* name
 		, uint32_t rangeStart
 		, uint32_t rangeEnd
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 		, ILeaderboardEntriesRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		listeners->NotifyAll(
-#if (GALAXY_VERSION) > 11240
-			listener,
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("rangeStart: {}", rangeStart));
+			trace.write_all(std::format("rangeEnd: {}", rangeEnd));
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-			&ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
+		}
+
+		RealGalaxyDLL_Stats()->RequestLeaderboardEntriesGlobal(name, rangeStart, rangeEnd
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
+			, listener
+#endif	
+		);
 	}
 
 	void StatsImpl::RequestLeaderboardEntriesAroundUser(
@@ -288,38 +403,74 @@ namespace universelan::client {
 		, uint32_t countBefore
 		, uint32_t countAfter
 		, GalaxyID userID
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 		, ILeaderboardEntriesRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		listeners->NotifyAll(
-#if (GALAXY_VERSION) > 11240
-			listener,
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("countBefore: {}", countBefore));
+			trace.write_all(std::format("countAfter: {}", countAfter));
+			trace.write_all(std::format("userID: {}", userID));
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-			&ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
+		}
+
+		RealGalaxyDLL_Stats()->RequestLeaderboardEntriesAroundUser(name, countBefore, countAfter, userID
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
+			, listener
+#endif	
+		);
 	}
 
 	void StatsImpl::RequestLeaderboardEntriesForUsers(
 		const char* name
 		, GalaxyID* userArray
 		, uint32_t userArraySize
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 		, ILeaderboardEntriesRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		listeners->NotifyAll(
-#if (GALAXY_VERSION) > 11240
-			listener, 
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("userArray: {}", (void*)userArray));
+			trace.write_all(std::format("userArraySize: {}", userArraySize));
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-			&ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
+			if ((userArray != nullptr) && (userArraySize > 0)) {
+				for (uint32_t i = 0; i < userArraySize; ++i) {
+					trace.write_all(std::format("userArray[{}]: {}", i, userArray[i]));
+				}
+			}
+		}
+
+		RealGalaxyDLL_Stats()->RequestLeaderboardEntriesForUsers(name, userArray, userArraySize
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
+			, listener
+#endif	
+		);
 	}
 
 	void StatsImpl::GetRequestedLeaderboardEntry(uint32_t index, uint32_t& rank, int32_t& score, GalaxyID& userID) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("index: {}", index));
+		}
+
+		RealGalaxyDLL_Stats()->GetRequestedLeaderboardEntry(index, rank, score, userID);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("rank: {}", rank));
+			trace.write_all(std::format("score: {}", score));
+			trace.write_all(std::format("userID: {}", userID));
+		}
 	}
 
 	void StatsImpl::SetLeaderboardScore(
@@ -332,11 +483,20 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		listeners->NotifyAll(
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("score: {}", score));
+			trace.write_all(std::format("forceUpdate: {}", forceUpdate));
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			listener,
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-			&ILeaderboardScoreUpdateListener::OnLeaderboardScoreUpdateFailure, name, score, ILeaderboardScoreUpdateListener::FAILURE_REASON_UNDEFINED);
+		}
+
+		RealGalaxyDLL_Stats()->SetLeaderboardScore(name, score, forceUpdate
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
+			, listener
+#endif	
+		);
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_LEADERBOARD_WITH_DETAILS
@@ -349,6 +509,21 @@ namespace universelan::client {
 		uint32_t& outDetailsSize,
 		GalaxyID& userID) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("index: {}", index));
+			trace.write_all(std::format("details: {}", details));
+			trace.write_all(std::format("detailsSize: {}", detailsSize));
+		}
+
+		RealGalaxyDLL_Stats()->GetRequestedLeaderboardEntryWithDetails(index, rank, score, details, detailsSize, outDetailsSize, userID);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("rank: {}", rank));
+			trace.write_all(std::format("score: {}", score));
+			trace.write_all(std::format("outDetailsSize: {}", outDetailsSize));
+			trace.write_all(std::format("userID: {}", userID));
+		}
 	}
 
 	void StatsImpl::SetLeaderboardScoreWithDetails(
@@ -361,20 +536,41 @@ namespace universelan::client {
 		, ILeaderboardScoreUpdateListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		listeners->NotifyAll(
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("score: {}", score));
+			trace.write_all(std::format("details: {}", details));
+			trace.write_all(std::format("detailsSize: {}", detailsSize));
+			trace.write_all(std::format("forceUpdate: {}", forceUpdate));
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			listener, 
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-			&ILeaderboardScoreUpdateListener::OnLeaderboardScoreUpdateFailure, name, score, ILeaderboardScoreUpdateListener::FAILURE_REASON_UNDEFINED);
+		}
+
+		RealGalaxyDLL_Stats()->SetLeaderboardScoreWithDetails(name, score, details, detailsSize, forceUpdate
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
+			, listener
+#endif	
+		);
 	}
 #endif
 
 	uint32_t StatsImpl::GetLeaderboardEntryCount(const char* name) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		return 0;
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+		}
+
+		auto result = RealGalaxyDLL_Stats()->GetLeaderboardEntryCount(name);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+
+		return result;
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_ILEADERBOARDRETRIEVELISTENER
@@ -383,13 +579,20 @@ namespace universelan::client {
 		, ILeaderboardRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		listeners->NotifyAll(
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			listener, 
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-			&ILeaderboardRetrieveListener::OnLeaderboardRetrieveFailure, name, ILeaderboardRetrieveListener::FAILURE_REASON_UNDEFINED);
+		}
+
+		RealGalaxyDLL_Stats()->FindLeaderboard(name
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
+			, listener
+#endif	
+		);
 	}
 
 	void StatsImpl::FindOrCreateLeaderboard(
@@ -401,13 +604,28 @@ namespace universelan::client {
 		, ILeaderboardRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		listeners->NotifyAll(
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("displayName: {}", util::safe_fix_null_char_ptr_annotate_ret(displayName)));
+			trace.write_all(std::format("sortMethod: {}", magic_enum::enum_name(sortMethod)));
+			trace.write_all(std::format("displayType: {}", magic_enum::enum_name(displayType)));
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			listener, 
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-			&ILeaderboardRetrieveListener::OnLeaderboardRetrieveFailure, name, ILeaderboardRetrieveListener::FAILURE_REASON_UNDEFINED);
+		}
+
+		RealGalaxyDLL_Stats()->FindOrCreateLeaderboard(name, displayName, sortMethod, displayType
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
+			, listener
+#endif	
+		);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("sortMethod: {}", magic_enum::enum_name(sortMethod)));
+			trace.write_all(std::format("displayType: {}", magic_enum::enum_name(displayType)));
+		}
 	}
 #endif
 
@@ -417,54 +635,36 @@ namespace universelan::client {
 		, IUserTimePlayedRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		// no need to refresh play time because it's the diff between 'submitted_time_played + (time_now - connect_time)'
-		if (intf->user->IsGalaxyUserDataPresent(userID)) {
-			listeners->NotifyAll(
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-				listener, 
+			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-				&IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveSuccess, userID);
 		}
-		else {
-			uint64_t request_id = MessageUniqueID::get();
 
+		RealGalaxyDLL_Stats()->RequestUserTimePlayed(userID
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			specific_user_time_played_requests.emplace(request_id, listener);
-#endif
-
-			intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ RequestSpecificUserDataMessage::RequestTypePlayTime, request_id, userID });
-		}
+			, listener
+#endif	
+		);
 	}
 
 	uint32_t StatsImpl::GetUserTimePlayed(GalaxyID userID) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		return intf->user->GetGalaxyUserData(userID)->stats.GetPlayTime();
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
+		}
+
+		auto result = RealGalaxyDLL_Stats()->GetUserTimePlayed(userID);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+
+		return result;
 	}
 #endif
-
-	void StatsImpl::RequestUserTimePlayedProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
-
-#if GALAXY_BUILD_FEATURE_HAS_IUSERTIMEPLAYEDRETRIEVELISTENER
-		IUserTimePlayedRetrieveListener* listener = specific_user_time_played_requests.pop(data->request_id);
-#endif
-
-		if (data->found) {
-			auto entry = intf->user->GetGalaxyUserData(data->id);
-			entry->stats = data->asuc;
-
-#if GALAXY_BUILD_FEATURE_HAS_IUSERTIMEPLAYEDRETRIEVELISTENER
-			listeners->NotifyAll(listener, &IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveSuccess, data->id);
-		}
-		else {
-			listeners->NotifyAll(listener, &IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveFailure, data->id, IUserTimePlayedRetrieveListener::FAILURE_REASON_UNDEFINED);
-#endif
-
-		}
-	}
-
-
 }

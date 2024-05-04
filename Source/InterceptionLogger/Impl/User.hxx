@@ -1,26 +1,7 @@
 #ifndef UNIVERSELAN_IMPL_USER_H
 #define UNIVERSELAN_IMPL_USER_H
 
-/**
- * @file
- * Contains data structures and interfaces related to user account.
- */
-#include "ListenerRegistrar.hxx"
-
-#include <GalaxyUserData.hxx>
-
-#include <Networking/Messages/RequestSpecificUserDataMessage.hxx>
-#include <Networking/Messages/OnlineStatusChangeMessage.hxx>
-#include <Networking/Messages/SetUserDataMessage.hxx>
-
 #include <IUser.h>
-#include <GalaxyID.h>
-#include <IListenerRegistrar.h>
-
-#include <functional>
-#include <memory>
-#include <mutex>
-#include <unordered_map>
 
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_CROSSPLATFORM
 
@@ -55,9 +36,7 @@ namespace universelan::client {
 	class UserImpl : public IUser
 	{
 	public:
-		using mutex_t = std::recursive_mutex;
-		using lock_t = std::scoped_lock<mutex_t>;
-
+	
 #if GALAXY_BUILD_FEATURE_HAS_SIGNIN_PS4
 		using SignInDataPtr_T = void;
 #else
@@ -65,16 +44,9 @@ namespace universelan::client {
 #endif
 
 	private:
-		mutable mutex_t mtx_user_data;
-
+	
 		InterfaceInstances* intf;
-		ListenerRegistrarImpl* listeners;
-		GalaxyUserData::map_t user_data;
-
-#if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
-		ListenersRequestHelper<ISpecificUserDataListener*> specific_user_data_requests;
-#endif
-
+	
 	public:
 
 		UserImpl(InterfaceInstances* intf);
@@ -658,13 +630,6 @@ namespace universelan::client {
 #endif
 		) override;
 #endif
-
-		void SpecificUserDataRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
-		void OnlineUserStateChange(const std::shared_ptr<OnlineStatusChangeMessage>& data);
-		void SetUserDataMessageReceived(const std::shared_ptr<SetUserDataMessage>& data);
-
-		GalaxyUserData::ptr_t GetGalaxyUserData(GalaxyID userID);
-		bool IsGalaxyUserDataPresent(GalaxyID userID) const;
 	};
 
 	/** @} */

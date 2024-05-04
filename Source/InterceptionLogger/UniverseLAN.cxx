@@ -1,6 +1,6 @@
 ﻿#include "UniverseLAN.hxx"
 
-#include "Client.hxx"
+#include "SharedLibUtils.hxx"
 
 #include <IniData.hxx>
 #include <Tracer.hxx>
@@ -13,13 +13,20 @@ namespace universelan::client {
 	namespace fs = std::filesystem;
 	InterfaceInstances intf_inst;
 
+	namespace {
+		template <typename T>
+		void interceptor_make_unique(std::unique_ptr<T>& ptr, const char* name) {
+			ptr = std::make_unique<T>(SharedLibUtils::get_func<T::FuncPtr>(name));
+		}
+	}
+
 	void InterfaceInstances::init(const InitOptionsModern& initOptions) {
 		if (config == nullptr) {
 			config = std::make_unique<ClientIniData>();
 		}
 
 		tracer::Trace::InitTracing(
-			(fs::path(config->GetGameDataPath()) / "Tracing").string().c_str(),
+			(fs::path(config->GetGameDataPath()) / "Interceptor").string().c_str(),
 			config->IsUnhandledExceptionLoggingEnabled(),
 			config->IsCallTracingEnabled(),
 			config->CreateMiniDumpOnUnhandledException(),
@@ -32,48 +39,62 @@ namespace universelan::client {
 
 		tracer::Trace trace { nullptr, __FUNCTION__ };
 
-		delay_runner = std::make_unique<DelayRunner>(); // No 'this' on purpose
-
 		init_options = std::make_unique<InitOptionsModern>(initOptions);
-		notification = std::make_unique<ListenerRegistrarImpl>(this, delay_runner.get());
-		client = std::make_unique<Client>(this);
-		user = std::make_unique<UserImpl>(this);
-		friends = std::make_unique<FriendsImpl>(this);
+
+		auto real_init = SharedLibUtils::get_func<std::function<GALAXY_DLL_EXPORT void GALAXY_CALLTYPE(struct InitOptions const& initOptions)>>("Init");
+
+		if (config->OverrideInitKeysEnabled()) {
+			init_options->clientID = config->GetOverrideInitKeyId();
+			init_options->clientSecret = config->GetOverrideInitKeySecret();
+		}
+
+		interceptor_make_unique(notification, "ListenerRegistrar");
+
+		interceptor_make_unique(user, "User");
+		interceptor_make_unique(friends, "Friends");
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
-		chat = std::make_unique<ChatImpl>(this);
+		interceptor_make_unique(chat, "Chat");
 #endif
-		matchmaking = std::make_unique<MatchmakingImpl>(this);
-		networking = std::make_unique<NetworkingImpl>(this);
-		server_networking = std::make_unique<NetworkingImpl>(this);
-		stats = std::make_unique<StatsImpl>(this);
+		interceptor_make_unique(matchmaking, "MatchMaking");
+		interceptor_make_unique(networking, "Networking");
+		interceptor_make_unique(server_networking, "ServerNetworking");
+		interceptor_make_unique(stats, "Stats");
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS
-		utils = std::make_unique<UtilsImpl>(this);
+		interceptor_make_unique(utils, "Utils");
 #endif
 #if GALAXY_BUILD_FEATURE_HAS_IAPPS
-		apps = std::make_unique<AppsImpl>(this);
+		interceptor_make_unique(apps, "Apps");
 #endif
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
-		storage = std::make_unique<StorageImpl>(this);
+		interceptor_make_unique(storage, "Storage");
 #endif
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE
-		cloud_storage = std::make_unique<CloudStorageImpl>(this);
+		interceptor_make_unique(cloud_storage, "CloudStorage");
 #endif
 #if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
-		custom_networking = std::make_unique<CustomNetworkingImpl>(this);
+		interceptor_make_unique(custom_networking, "CustomNetworking");
 #endif
-		logger = std::make_unique<LoggerImpl>(this);
-
+		interceptor_make_unique(logger, "Logger");
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
-		telemetry = std::make_unique<TelemetryImpl>(this);
+		interceptor_make_unique(telemetry, "Telemetry");
 #endif
+
+		galaxy::api::InitOptions classic_init_options{
+			init_options->clientID.c_str(),
+			init_options->clientSecret.c_str(),
+			init_options->configFilePath.c_str(),
+			init_options->galaxyAllocator,
+			init_options->storagePath.c_str(),
+			init_options->host.c_str(),
+			init_options->port,
+			init_options->galaxyThreadFactory
+		};
+
+		real_init(classic_init_options);
 	}
 
 	InterfaceInstances::~InterfaceInstances() {
 		tracer::Trace::SetTracingEnabled(false);
-
-		if (client) {
-			client->Stop();
-		}
 	}
 
 	void InterfaceInstances::reset() {
@@ -82,7 +103,7 @@ namespace universelan::client {
 		}
 
 		tracer::Trace::InitTracing(
-			(fs::path(config->GetGameDataPath()) / "Tracing").string().c_str(),
+			(fs::path(config->GetGameDataPath()) / "Interceptor").string().c_str(),
 			config->IsUnhandledExceptionLoggingEnabled(),
 			config->IsCallTracingEnabled(),
 			config->CreateMiniDumpOnUnhandledException(),
@@ -90,12 +111,6 @@ namespace universelan::client {
 			config->ShouldAlwaysFlushTracing(),
 			config->GetCallTracingFlags()
 		);
-
-		delay_runner = nullptr;
-
-		if (client) {
-			client->Stop();
-		}
 
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 		telemetry = nullptr;
@@ -127,7 +142,6 @@ namespace universelan::client {
 		friends = nullptr;
 		user = nullptr;
 		init_options = nullptr;
-		client = nullptr;
 		notification = nullptr;
 	}
 }

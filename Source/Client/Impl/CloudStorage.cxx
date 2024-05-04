@@ -17,11 +17,11 @@ namespace universelan::client {
 		sfu(intf->config->GetGameDataPath()), last_container{ "" },
 		container_file_list{}
 	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 	}
 
 	CloudStorageImpl::~CloudStorageImpl() {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 	}
 
 	void CloudStorageImpl::GetFileList(const char* container, ICloudStorageGetFileListListener* listener) {

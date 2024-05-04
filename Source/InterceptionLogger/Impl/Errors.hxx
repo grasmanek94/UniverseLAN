@@ -7,17 +7,21 @@
  */
 
 #include <Errors.h>
-#include <GalaxyExport.h>
 
 namespace universelan::client {
 	using namespace galaxy::api;
+	struct InterfaceInstances;
 
 	 /**
 	  * Base interface for exceptions.
 	  */
 	class Error : public IError
 	{
+	private:
+		InterfaceInstances* intf;
+
 	public:
+		Error(InterfaceInstances* intf);
 
 		virtual ~Error();
 
@@ -42,61 +46,6 @@ namespace universelan::client {
 		 */
 		virtual Type GetType() const override;
 	};
-
-	/**
-	 * The exception thrown when calling Galaxy interfaces while
-	 * the user is not signed in and thus not authorized for any interaction.
-	 */
-	class UnauthorizedAccessError : public Error
-	{
-		/**
-		 * Returns the type of the error.
-		 *
-		 * @return The type of the error.
-		 */
-		virtual Type GetType() const override;
-	};
-
-	/**
-	 * The exception thrown to report that a method was called with an invalid argument.
-	 */
-	class InvalidArgumentError : public Error
-	{
-		/**
-		 * Returns the type of the error.
-		 *
-		 * @return The type of the error.
-		 */
-		virtual Type GetType() const override;
-	};
-
-	/**
-	 * The exception thrown to report that a method was called while the callee is in
-	 * an invalid state, i.e. should not have been called the way it was at that time.
-	 */
-	class InvalidStateError : public Error
-	{
-		/**
-		 * Returns the type of the error.
-		 *
-		 * @return The type of the error.
-		 */
-		virtual Type GetType() const override;
-	};
-
-	/**
-	 * The exception thrown to report errors that can only be detected during runtime.
-	 */
-	class RuntimeError : public Error
-	{
-		/**
-		 * Returns the type of the error.
-		 *
-		 * @return The type of the error.
-		 */
-		virtual Type GetType() const override;
-	};
-
 	/** @} */
 }
 
