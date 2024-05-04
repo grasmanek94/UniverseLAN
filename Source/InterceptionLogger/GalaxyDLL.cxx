@@ -56,7 +56,7 @@ namespace universelan::client {
 
 		console::Redirector::get()->release();
 
-		std::cout << " == UniverseLAN Client == " << std::endl;
+		std::cout << " == UniverseLAN Interceptor == " << std::endl;
 		std::cout << "Build: " << Version_Number << std::endl;
 	}
 
@@ -104,11 +104,13 @@ namespace universelan::client {
 		return universe_client_api.networking.get();
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKINGLISTENER
 	INetworking* ServerNetworking() {
 		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
 		return universe_client_api.server_networking.get();
 	}
+#endif
 
 	IStats* Stats() {
 		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };

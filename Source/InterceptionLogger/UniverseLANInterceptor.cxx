@@ -17,7 +17,7 @@ namespace universelan::client {
 	namespace {
 		template <typename T>
 		void interceptor_make_unique(std::unique_ptr<T>& ptr, const char* name) {
-			ptr = std::make_unique<T>(SharedLibUtils::get_func<typename T::FuncPtr>(name));
+			ptr = std::make_unique<T>(SharedLibUtils::get_func<typename T::FuncPtr>(SharedLibUtils::get_function_match(name)));
 		}
 
 		template <typename T>
@@ -27,7 +27,7 @@ namespace universelan::client {
 
 		template <typename T>
 		void assign_func(std::function<T>& ptr, const char* name) {
-			ptr = SharedLibUtils::get_func<T*>(name);
+			ptr = SharedLibUtils::get_func<T*>(SharedLibUtils::get_function_match(name));
 		}
 	}
 
@@ -52,50 +52,54 @@ namespace universelan::client {
 
 		init_options = std::make_unique<InitOptionsModern>(initOptions);
 
-		assign_func(real_init, (gameserver ? "InitGameServer" : "Init"));
-		assign_func(real_process_data, (gameserver ? "ProcessGameServerData" : "ProcessData"));
-		assign_func(real_shutdown, (gameserver ? "ShutdownGameServer" : "Shutdown"));
+		assign_func(real_init, (gameserver ? "?InitGameServer@api@galaxy@" : "?Init@api@galaxy@"));
+		assign_func(real_process_data, (gameserver ? "?ProcessGameServerData" : "?ProcessData@api@galaxy@"));
+		assign_func(real_shutdown, (gameserver ? "?ShutdownGameServer@api@galaxy@" : "?Shutdown@api@galaxy@"));
 
 		if (config->OverrideInitKeysEnabled()) {
 			init_options->clientID = config->GetOverrideInitKeyId();
 			init_options->clientSecret = config->GetOverrideInitKeySecret();
 		}
 
-		interceptor_make_unique(notification, (gameserver ? "GameServerListenerRegistrar" : "ListenerRegistrar"));
-		interceptor_make_unique(user, (gameserver ? "GameServerUser" : "User"));
-		interceptor_make_unique(friends, "Friends");
-		interceptor_make_unique(matchmaking, (gameserver ? "GameServerMatchmaking" : "MatchMaking"));
-		interceptor_make_unique(networking, (gameserver ? "GameServerNetworking" : "Networking"));
-		interceptor_make_unique(server_networking, "ServerNetworking");
-		interceptor_make_unique(stats, "Stats");
-		interceptor_make_unique(logger, this); // (gameserver ? "GameServerLogger" : "Logger")
+		interceptor_make_unique(notification, (gameserver ? "?GameServerListenerRegistrar@api@galaxy@" : "?ListenerRegistrar@api@galaxy@"));
+		interceptor_make_unique(user, (gameserver ? "?GameServerUser@api@galaxy@" : "?User@api@galaxy@"));
+		interceptor_make_unique(friends, "?Friends@api@galaxy@");
+		interceptor_make_unique(matchmaking, (gameserver ? "?GameServerMatchmaking@api@galaxy@" : "?Matchmaking@api@galaxy@"));
+		interceptor_make_unique(networking, (gameserver ? "?GameServerNetworking@api@galaxy@" : "?Networking@api@galaxy@"));
+
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKINGLISTENER
+		interceptor_make_unique(server_networking, "?ServerNetworking@api@galaxy@");
+#endif
+
+		interceptor_make_unique(stats, "?Stats@api@galaxy@");
+		interceptor_make_unique(logger, this); // (gameserver ? "?GameServerLogger@api@galaxy@" : "?Logger@api@galaxy@")
 
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
-		interceptor_make_unique(chat, "Chat");
+		interceptor_make_unique(chat, "?Chat@api@galaxy@");
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS
-		interceptor_make_unique(utils, (gameserver ? "GameServerUtils" : "Utils"));
+		interceptor_make_unique(utils, (gameserver ? "?GameServerUtils@api@galaxy@" : "?Utils@api@galaxy@"));
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_IAPPS
-		interceptor_make_unique(apps, "Apps");
+		interceptor_make_unique(apps, "?Apps@api@galaxy@");
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
-		interceptor_make_unique(storage, "Storage");
+		interceptor_make_unique(storage, "?Storage@api@galaxy@");
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE
-		interceptor_make_unique(cloud_storage, "CloudStorage");
+		interceptor_make_unique(cloud_storage, "?CloudStorage@api@galaxy@");
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
-		interceptor_make_unique(custom_networking, "CustomNetworking");
+		interceptor_make_unique(custom_networking, "?CustomNetworking@api@galaxy@");
 #endif
 		
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
-		interceptor_make_unique(telemetry, (gameserver ? "GameServerTelemetry" : "Telemetry"));
+		interceptor_make_unique(telemetry, (gameserver ? "?GameServerTelemetry@api@galaxy@" : "?Telemetry@api@galaxy@"));
 #endif
 
 		real_init(init_options->ToClassicOptions());
@@ -153,7 +157,9 @@ namespace universelan::client {
 #endif
 		stats = nullptr;
 		networking = nullptr;
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKINGLISTENER
 		server_networking = nullptr;
+#endif
 		matchmaking = nullptr;
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
 		chat = nullptr;

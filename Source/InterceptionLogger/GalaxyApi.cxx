@@ -73,10 +73,12 @@ namespace galaxy::api {
 		return universelan::client::Networking();
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKINGLISTENER
 	GALAXY_DLL_EXPORT INetworking* GALAXY_CALLTYPE ServerNetworking(void)
 	{
 		return universelan::client::ServerNetworking();
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 	GALAXY_DLL_EXPORT ITelemetry* GALAXY_CALLTYPE Telemetry(void) {

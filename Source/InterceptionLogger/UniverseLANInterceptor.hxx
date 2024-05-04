@@ -44,10 +44,13 @@ namespace universelan::client {
 		std::unique_ptr<ListenerRegistrarImpl>	notification = nullptr;
 		std::unique_ptr<MatchmakingImpl>		matchmaking = nullptr;
 		std::unique_ptr<NetworkingImpl>			networking = nullptr;
-		std::unique_ptr<NetworkingImpl>			server_networking = nullptr;
 		std::unique_ptr<StatsImpl>				stats = nullptr;
 		std::unique_ptr<Error>					error = nullptr;
 		std::unique_ptr<LoggerImpl>				logger = nullptr;
+
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKINGLISTENER
+		std::unique_ptr<NetworkingImpl>			server_networking = nullptr;
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
 		std::unique_ptr<ChatImpl>				chat = nullptr;

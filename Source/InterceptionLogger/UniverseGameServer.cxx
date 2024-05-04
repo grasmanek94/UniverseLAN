@@ -31,7 +31,7 @@ namespace universelan::client {
 			EnableCustomConsole();
 		}
 
-		std::cout << " == UniverseLAN GameServer == " << std::endl;
+		std::cout << " == UniverseLAN GameServer Interceptor == " << std::endl;
 		std::cout << "Version: " << Version_Number << std::endl;
 	}
 	void UniverseGameServer::ShutdownGameServer() {
