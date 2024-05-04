@@ -1,5 +1,7 @@
 ﻿#include "UniverseLANInterceptor.hxx"
 
+#include "Impl/InitOptionsModern.hxx"
+
 #include "SharedLibUtils.hxx"
 
 #include <IniData.hxx>
@@ -11,7 +13,6 @@
 namespace universelan::client {
 	using namespace galaxy::api;
 	namespace fs = std::filesystem;
-	InterfaceInstances intf_inst;
 
 	namespace {
 		template <typename T>
@@ -30,7 +31,7 @@ namespace universelan::client {
 		}
 	}
 
-	void InterfaceInstances::init(const InitOptionsModern& initOptions) {
+	void InterfaceInstances::init(const InitOptionsModern& initOptions, bool gameserver) {
 		if (config == nullptr) {
 			config = std::make_unique<ClientIniData>();
 		}
@@ -51,30 +52,30 @@ namespace universelan::client {
 
 		init_options = std::make_unique<InitOptionsModern>(initOptions);
 
-		assign_func(real_init, "Init");
-		assign_func(real_process_data, "ProcessData");
-		assign_func(real_shutdown, "Shutdown");
+		assign_func(real_init, (gameserver ? "InitGameServer" : "Init"));
+		assign_func(real_process_data, (gameserver ? "ProcessGameServerData" : "ProcessData"));
+		assign_func(real_shutdown, (gameserver ? "ShutdownGameServer" : "Shutdown"));
 
 		if (config->OverrideInitKeysEnabled()) {
 			init_options->clientID = config->GetOverrideInitKeyId();
 			init_options->clientSecret = config->GetOverrideInitKeySecret();
 		}
 
-		interceptor_make_unique(notification, "ListenerRegistrar");
-		interceptor_make_unique(user, "User");
+		interceptor_make_unique(notification, (gameserver ? "GameServerListenerRegistrar" : "ListenerRegistrar"));
+		interceptor_make_unique(user, (gameserver ? "GameServerUser" : "User"));
 		interceptor_make_unique(friends, "Friends");
-		interceptor_make_unique(matchmaking, "MatchMaking");
-		interceptor_make_unique(networking, "Networking");
+		interceptor_make_unique(matchmaking, (gameserver ? "GameServerMatchmaking" : "MatchMaking"));
+		interceptor_make_unique(networking, (gameserver ? "GameServerNetworking" : "Networking"));
 		interceptor_make_unique(server_networking, "ServerNetworking");
 		interceptor_make_unique(stats, "Stats");
-		interceptor_make_unique(logger, this);
+		interceptor_make_unique(logger, this); // (gameserver ? "GameServerLogger" : "Logger")
 
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
 		interceptor_make_unique(chat, "Chat");
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS
-		interceptor_make_unique(utils, "Utils");
+		interceptor_make_unique(utils, (gameserver ? "GameServerUtils" : "Utils"));
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_IAPPS
@@ -94,12 +95,10 @@ namespace universelan::client {
 #endif
 		
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
-		interceptor_make_unique(telemetry, "Telemetry");
+		interceptor_make_unique(telemetry, (gameserver ? "GameServerTelemetry" : "Telemetry"));
 #endif
 
-		//const InitOptionsImpl classic_init_options = *init_options;
-
-		//real_init(classic_init_options);
+		real_init(init_options->ToClassicOptions());
 
 		if (config->OverrideSignInEnabled()) {
 			user->USER_SIGN_IN_CREDENTIALS(

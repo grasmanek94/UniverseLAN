@@ -4,6 +4,7 @@
 #include "UniverseGameServer.hxx"
 
 #include <Version.hxx>
+#include <Tracer.hxx>
 
 #include <GalaxyApi.h>
 
@@ -22,7 +23,7 @@ namespace universelan::client {
 	}
 
 	void UniverseGameServer::InitGameServer(const InitOptions& initOptions) {
-		gameserver_intf_inst.init(initOptions);
+		gameserver_intf_inst.init(initOptions, true);
 
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL_GAMESERVERAPI };
 
@@ -37,6 +38,8 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL_GAMESERVERAPI };
 
 		gameserver_intf_inst.reset();
+
+		gameserver_intf_inst.real_shutdown();
 	}
 
 	IUser* UniverseGameServer::GameServerUser() {
@@ -88,13 +91,7 @@ namespace universelan::client {
 	void UniverseGameServer::ProcessGameServerData() {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL_GAMESERVERAPI };
 
-		//if (gameserver_intf_inst.client != nullptr) {
-		//	gameserver_intf_inst.client->ProcessEvents();
-		//}
-
-		//if (gameserver_intf_inst.delay_runner != nullptr) {
-		//	gameserver_intf_inst.delay_runner->Run();
-		//}
+		gameserver_intf_inst.real_process_data();
 	}
 }
 #endif

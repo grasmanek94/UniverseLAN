@@ -62,7 +62,7 @@ namespace universelan::client {
 
 	{}
 
-	InitOptionsModern::operator const InitOptionsImpl() const
+	InitOptionsImpl InitOptionsModern::ToClassicOptions() const
 	{
 		return InitOptionsImpl{
 		clientID.c_str()

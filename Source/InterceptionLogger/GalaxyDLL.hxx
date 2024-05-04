@@ -42,4 +42,6 @@ namespace universelan::client {
 	void ProcessData();
 	IListenerRegistrar* ListenerRegistrar();
 	const IError* GetError();
+
+	uint32_t load();
 }

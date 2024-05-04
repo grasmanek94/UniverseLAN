@@ -1,6 +1,7 @@
 #if GALAXY_BUILD_FEATURE_GAME_SERVER_API
 #include "UniverseGameServer.hxx"
 
+#include <Tracer.hxx>
 #include <GalaxyApi.h>
 
 namespace galaxy::api {

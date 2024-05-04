@@ -2,6 +2,8 @@
 
 #include "UniverseLANInterceptor.hxx"
 
+#include <Tracer.hxx>
+
 #include <atomic>
 #include <cstdarg>
 #include <filesystem>

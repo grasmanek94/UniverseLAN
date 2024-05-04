@@ -5,9 +5,11 @@
 
 #include "CustomConsole.hxx"
 #include "UniverseLANInterceptor.hxx"
+#include "GalaxyFunctional.hxx"
 
 #include <ConsoleCoutRedirector.hxx>
-
+#include <SharedLibUtils.hxx>
+#include <Tracer.hxx>
 #include <Version.hxx>
 
 #ifdef _WIN32
@@ -15,6 +17,8 @@
 #endif
 
 namespace universelan::client {
+	InterfaceInstances universe_client_api;
+
 	void Init(const InitOptionsModern& initOptions)
 	{
 		console::Redirector::get()->capture_tee();
@@ -30,7 +34,7 @@ namespace universelan::client {
 
 		try
 		{
-			intf_inst.init(initOptions);
+			universe_client_api.init(initOptions);
 		}
 		catch (std::exception& ex) {
 
@@ -42,17 +46,17 @@ namespace universelan::client {
 
 		}
 
-		tracer::Trace::SetLogToCout(intf_inst.config->ShouldTraceToConsole());
+		tracer::Trace::SetLogToCout(universe_client_api.config->ShouldTraceToConsole());
 
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
-		if (intf_inst.config->GetEnableConsole()) {
+		if (universe_client_api.config->GetEnableConsole()) {
 			EnableCustomConsole();
 		}
 
 		console::Redirector::get()->release();
 
-		std::cout << " == UniverseLAN Logger == " << std::endl;
+		std::cout << " == UniverseLAN Client == " << std::endl;
 		std::cout << "Build: " << Version_Number << std::endl;
 	}
 
@@ -65,58 +69,58 @@ namespace universelan::client {
 	void Shutdown() {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
-		intf_inst.reset();
+		universe_client_api.reset();
 	}
 
 	IUser* User() {
 		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
-		return intf_inst.user.get();
+		return universe_client_api.user.get();
 	}
 
 	IFriends* Friends() {
 		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
-		return intf_inst.friends.get();
+		return universe_client_api.friends.get();
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
 	IChat* Chat() {
 		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
-		return intf_inst.chat.get();
+		return universe_client_api.chat.get();
 	}
 #endif
 
 	IMatchmaking* Matchmaking() {
 		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
-		return intf_inst.matchmaking.get();
+		return universe_client_api.matchmaking.get();
 	}
 
 	INetworking* Networking() {
 		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
-		return intf_inst.networking.get();
+		return universe_client_api.networking.get();
 	}
 
 	INetworking* ServerNetworking() {
 		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
-		return intf_inst.server_networking.get();
+		return universe_client_api.server_networking.get();
 	}
 
 	IStats* Stats() {
 		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
-		return intf_inst.stats.get();
+		return universe_client_api.stats.get();
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS
 	IUtils* Utils() {
 		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
-		return intf_inst.utils.get();
+		return universe_client_api.utils.get();
 	}
 #endif
 
@@ -124,7 +128,7 @@ namespace universelan::client {
 	IApps* Apps() {
 		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
-		return intf_inst.apps.get();
+		return universe_client_api.apps.get();
 	}
 
 #endif
@@ -133,7 +137,7 @@ namespace universelan::client {
 	IStorage* Storage() {
 		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
-		return intf_inst.storage.get();
+		return universe_client_api.storage.get();
 	}
 #endif
 
@@ -141,7 +145,7 @@ namespace universelan::client {
 	ICloudStorage* CloudStorage() {
 		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
-		return intf_inst.cloud_storage.get();
+		return universe_client_api.cloud_storage.get();
 	}
 #endif
 
@@ -150,41 +154,34 @@ namespace universelan::client {
 	ICustomNetworking* CustomNetworking() {
 		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
-		return intf_inst.custom_networking.get();
+		return universe_client_api.custom_networking.get();
 	}
 #endif
 
 	ILogger* Logger() {
 		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
-		return intf_inst.logger.get();
+		return universe_client_api.logger.get();
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 	ITelemetry* Telemetry() {
 		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
-		return intf_inst.telemetry.get();
+		return universe_client_api.telemetry.get();
 	}
 #endif
 
 	void ProcessData() {
 		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
-		intf_inst.real_process_data();
-		//if (intf_inst.client != nullptr) {
-		//	intf_inst.client->ProcessEvents();
-		//}
-
-		//if (intf_inst.delay_runner != nullptr) {
-		//	intf_inst.delay_runner->Run();
-		//}
+		universe_client_api.real_process_data();
 	}
 
 	IListenerRegistrar* ListenerRegistrar() {
 		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
-		return intf_inst.notification.get();
+		return universe_client_api.notification.get();
 	}
 
 	/*
@@ -193,7 +190,15 @@ namespace universelan::client {
 	const IError* GetError() {
 		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
-		return nullptr;
+		return universe_client_api.error.get();
+	}
+
+	uint32_t load() {
+		if (!universe_client_api.real_load) {
+			universe_client_api.real_load = SharedLibUtils::get_func<functional::xt<decltype(universe_client_api.real_load)>::PTR>("load");
+		}
+
+		return universe_client_api.real_load();
 	}
 }
 
@@ -381,9 +386,3 @@ namespace galaxy::api
 	}
 }
 #endif
-
-extern "C" GALAXY_DLL_EXPORT uint32_t load() {
-	universelan::tracer::Trace trace { nullptr, __FUNCTION__, universelan::tracer::Trace::GALAXYDLL };
-
-	return 0;
-}
