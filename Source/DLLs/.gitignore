@@ -2,6 +2,7 @@ versioninfo.rc
 client_versioninfo.rc
 dllhost_versioninfo.rc
 server_versioninfo.rc
+interceptor_versioninfo.rc
 Galaxy.dll
 Galaxy.lib
 REDGalaxy.dll

@@ -5,6 +5,7 @@
 #include <GalaxyID.hxx>
 #include <Tracer.hxx>
 #include <SafeStringCopy.hxx>
+#include <IniData.hxx>
 
 #include <magic_enum/magic_enum.hpp>
 
@@ -23,10 +24,12 @@ namespace universelan::client {
 #define GET_LISTENER(listener) ((IAuthListener* const)nullptr)
 #endif
 
-	UserImpl::UserImpl(FuncT::F intf, IListenerRegistrar* notifications) :
+	UserImpl::UserImpl(FuncT::F intf, IListenerRegistrar* notifications, ClientIniData* config) :
 		intf{ intf },
 		notifications{ notifications },
-		listeners{ notifications } {
+		listeners{ notifications },
+		config{ config },
+		tried_signin{ false } {
 		listeners.AddListener<AuthListener>();
 		listeners.AddListener<OtherSessionStartListener>();
 		listeners.AddListener<OperationalStateChangeListener>();
@@ -47,6 +50,14 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
+		}
+
+		if (!tried_signin && config->OverrideSignInEnabled()) {
+			tried_signin = true;
+			intf()->USER_SIGN_IN_CREDENTIALS(
+				config->GetOverrideSignInId().c_str(),
+				config->GetOverrideSignInPassword().c_str()
+			);
 		}
 
 		return result;
@@ -359,6 +370,8 @@ namespace universelan::client {
 	void UserImpl::SignOut() {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 	
+		tried_signin = false;
+
 		intf()->SignOut();
 	}
 #endif

@@ -4,6 +4,7 @@
 #include "Listeners/UserListener.hxx"
 
 #include <GalaxyFunctional.hxx>
+#include <IniData.hxx>
 #include <ListenersContainer.hxx>
 
 #include <GalaxyExport.h>
@@ -56,10 +57,11 @@ namespace universelan::client {
 		FuncT::F intf;
 		IListenerRegistrar* notifications;
 		ListenersContainer listeners;
+		ClientIniData* config;
+		bool tried_signin;
 
 	public:
-
-		UserImpl(FuncT::F intf, IListenerRegistrar* notifications);
+		UserImpl(FuncT::F intf, IListenerRegistrar* notifications, ClientIniData* config);
 		virtual ~UserImpl();
 
 		/**

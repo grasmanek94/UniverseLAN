@@ -23,9 +23,16 @@ namespace universelan::client {
 		}
 
 		template <typename T, typename U>
-		T::FuncPtr interceptor_make_unique(std::unique_ptr<T>& ptr, const char* name, U* listener_registerar) {
+		T::FuncPtr interceptor_make_unique(std::unique_ptr<T>& ptr, const char* name, U listener_registerar) {
 			typename T::FuncPtr real_func = SharedLibUtils::get_func<typename T::FuncPtr>(SharedLibUtils::get_function_match(name));
 			ptr = std::make_unique<T>(real_func, listener_registerar);
+			return real_func;
+		}
+
+		template <typename T, typename U, typename W>
+		T::FuncPtr interceptor_make_unique(std::unique_ptr<T>& ptr, const char* name, U listener_registerar, W additional) {
+			typename T::FuncPtr real_func = SharedLibUtils::get_func<typename T::FuncPtr>(SharedLibUtils::get_function_match(name));
+			ptr = std::make_unique<T>(real_func, listener_registerar, additional);
 			return real_func;
 		}
 
@@ -76,7 +83,7 @@ namespace universelan::client {
 		auto real_notification = real_notification_ptr();
 
 		interceptor_make_unique(error, "?GetError@api@galaxy@");
-		interceptor_make_unique(user, (gameserver ? "?GameServerUser@api@galaxy@" : "?User@api@galaxy@"), real_notification);
+		interceptor_make_unique(user, (gameserver ? "?GameServerUser@api@galaxy@" : "?User@api@galaxy@"), real_notification, config.get());
 		interceptor_make_unique(friends, "?Friends@api@galaxy@", real_notification);
 		interceptor_make_unique(matchmaking, (gameserver ? "?GameServerMatchmaking@api@galaxy@" : "?Matchmaking@api@galaxy@"), real_notification);
 		interceptor_make_unique(networking, (gameserver ? "?GameServerNetworking@api@galaxy@" : "?Networking@api@galaxy@"), real_notification);
@@ -117,12 +124,12 @@ namespace universelan::client {
 #endif
 
 		// TODO: improve this
-		if (config->OverrideSignInEnabled()) {
-			user->USER_SIGN_IN_CREDENTIALS(
-				config->GetOverrideSignInId().c_str(),
-				config->GetOverrideSignInPassword().c_str()
-			);
-		}
+		// if (config->OverrideSignInEnabled()) {
+		// 	user->USER_SIGN_IN_CREDENTIALS(
+		// 		config->GetOverrideSignInId().c_str(),
+		// 		config->GetOverrideSignInPassword().c_str()
+		// 	);
+		// }
 	}
 
 	InterfaceInstances::~InterfaceInstances() {
