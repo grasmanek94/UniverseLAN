@@ -90,6 +90,7 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
 
   afvd(HAS_ICHAT 								1.104.3					)
   afvd(NEW_FRIEND_FEATURES_104_3				1.104.3					)
+
   afvd(HAS_FRIENDADDLISTENER					1.104.4					)
 
   afvd(GALAXYID_HAS_IDTYPE 						1.106.0					)

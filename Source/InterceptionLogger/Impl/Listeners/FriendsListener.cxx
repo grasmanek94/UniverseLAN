@@ -25,6 +25,7 @@ namespace universelan::client {
 		}
 	}
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 	void UserInformationRetrieveListener::OnUserInformationRetrieveSuccess(GalaxyID userID)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -43,6 +44,7 @@ namespace universelan::client {
 			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
 		}
 	}
+#endif
 
 	void FriendListListener::OnFriendListRetrieveSuccess()
 	{
@@ -58,6 +60,7 @@ namespace universelan::client {
 		}
 	}
 
+#if GALAXY_BUILD_FEATURE_NEW_FRIEND_FEATURES_104_3
 	void FriendInvitationSendListener::OnFriendInvitationSendSuccess(GalaxyID userID)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -83,20 +86,6 @@ namespace universelan::client {
 	}
 
 	void FriendInvitationListRetrieveListener::OnFriendInvitationListRetrieveFailure(FailureReason failureReason)
-	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
-
-		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
-		}
-	}
-
-	void SentFriendInvitationListRetrieveListener::OnSentFriendInvitationListRetrieveSuccess()
-	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
-	}
-
-	void SentFriendInvitationListRetrieveListener::OnSentFriendInvitationListRetrieveFailure(FailureReason failureReason)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
@@ -135,16 +124,6 @@ namespace universelan::client {
 		}
 	}
 
-	void FriendAddListener::OnFriendAdded(GalaxyID userID, InvitationDirection invitationDirection)
-	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
-
-		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("invitationDirection: {}", magic_enum::enum_name(invitationDirection)));
-		}
-	}
-
 	void FriendDeleteListener::OnFriendDeleteSuccess(GalaxyID userID)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -163,6 +142,36 @@ namespace universelan::client {
 			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
 		}
 	}
+
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_ISENTFRIENDINVITATIONLISTRETRIEVELISTENER
+	void SentFriendInvitationListRetrieveListener::OnSentFriendInvitationListRetrieveSuccess()
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+	}
+
+	void SentFriendInvitationListRetrieveListener::OnSentFriendInvitationListRetrieveFailure(FailureReason failureReason)
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+		}
+	}
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_FRIENDADDLISTENER
+	void FriendAddListener::OnFriendAdded(GalaxyID userID, InvitationDirection invitationDirection)
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all(std::format("invitationDirection: {}", magic_enum::enum_name(invitationDirection)));
+		}
+	}
+#endif
 
 	void RichPresenceChangeListener::OnRichPresenceChangeSuccess()
 	{
@@ -187,6 +196,7 @@ namespace universelan::client {
 		}
 	}
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 	void RichPresenceRetrieveListener::OnRichPresenceRetrieveSuccess(GalaxyID userID)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -205,6 +215,7 @@ namespace universelan::client {
 			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
 		}
 	}
+#endif
 
 	void GameJoinRequestedListener::OnGameJoinRequested(GalaxyID userID, const char* connectionString)
 	{
@@ -247,6 +258,7 @@ namespace universelan::client {
 		}
 	}
 
+#if GALAXY_BUILD_FEATURE_FIND_USER
 	void UserFindListener::OnUserFindSuccess(const char* userSpecifier, GalaxyID userID)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -266,4 +278,6 @@ namespace universelan::client {
 			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
 		}
 	}
+#endif
+
 }

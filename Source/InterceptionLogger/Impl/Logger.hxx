@@ -10,9 +10,12 @@
 #include <fstream>
 #include <mutex>
 
+namespace universelan {
+	class ClientIniData;
+}
+
 namespace universelan::client {
 	using namespace galaxy::api;
-	struct InterfaceInstances;
 
 	/**
 	 * @addtogroup api
@@ -29,12 +32,12 @@ namespace universelan::client {
 		using lock_t = std::scoped_lock<mtx_t>;
 
 	private:
-		InterfaceInstances* intf;
+		ClientIniData* config;
 		mtx_t mtx;
 		std::ofstream logfile;
 
 	public:
-		LoggerImpl(InterfaceInstances* intf);
+		LoggerImpl(ClientIniData* config);
 
 		virtual ~LoggerImpl() override;
 

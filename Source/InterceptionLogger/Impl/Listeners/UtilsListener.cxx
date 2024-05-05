@@ -17,6 +17,7 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::IUTILS;
 	}
 
+#if GALAXY_BUILD_FEATURE_OVERLAYSTATE_ENUM
 	void OverlayVisibilityChangeListener::OnOverlayVisibilityChanged(bool overlayVisible)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -34,6 +35,7 @@ namespace universelan::client {
 			trace.write_all(std::format("overlayState: {}", magic_enum::enum_name(overlayState)));
 		}
 	}
+#endif
 
 	void NotificationListener::OnNotificationReceived(NotificationID notificationID, uint32_t typeLength, uint32_t contentSize)
 	{
@@ -46,6 +48,7 @@ namespace universelan::client {
 		}
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_GOGSERVICECONNECTIONSTATELISTENER
 	void GogServicesConnectionStateListener::OnConnectionStateChange(GogServicesConnectionState connectionState)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -54,6 +57,7 @@ namespace universelan::client {
 			trace.write_all(std::format("connectionState: {}", magic_enum::enum_name(connectionState)));
 		}
 	}
+#endif
 }
 
 #endif

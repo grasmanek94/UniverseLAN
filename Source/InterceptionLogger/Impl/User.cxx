@@ -679,7 +679,11 @@ namespace universelan::client {
 #endif
 		}
 
-		auto result = intf()->ReportInvalidAccessToken(accessToken, info);
+		auto result = intf()->ReportInvalidAccessToken(accessToken
+#if GALAXY_BUILD_FEATURE_USER_ACCESS_TOKEN_INFO
+			, info
+#endif
+		);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));

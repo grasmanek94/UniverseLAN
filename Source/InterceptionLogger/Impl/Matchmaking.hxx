@@ -26,11 +26,6 @@ namespace universelan::client {
 	using MATCHMAKING_RET_TYPE = universelan::util::dynamic_return<bool>;
 #endif
 
-#if !GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-	using ILobbyDataUpdateListener = ILobbyDataListener;
-	using ILobbyMemberDataUpdateListener = ILobbyDataListener;
-#endif
-
 	class MatchmakingImpl : public IMatchmaking
 	{
 	public:

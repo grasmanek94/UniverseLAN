@@ -12,6 +12,7 @@ namespace universelan::client {
 		, clientSecret{ "" }
 		, configFilePath{ "" }
 		, storagePath{ "" }
+		, galaxyPeerPath{ "" }
 #if GALAXY_BUILD_FEATURE_ALLOCATOR
 		, galaxyAllocator{ nullptr }
 #endif
@@ -22,7 +23,7 @@ namespace universelan::client {
 		, host{ "" }
 		, port{ 0 }
 #endif
-		, throwExceptions{false}
+		, throwExceptions{ true }
 	{
 		clientID = initOptions.clientID;
 		clientSecret = initOptions.clientSecret;
@@ -64,22 +65,32 @@ namespace universelan::client {
 
 	InitOptionsImpl InitOptionsModern::ToClassicOptions() const
 	{
+#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS	
 		return InitOptionsImpl{
-		clientID.c_str()
-		,clientSecret.c_str()
-		,configFilePath.c_str()
+			clientID.c_str()
+			,clientSecret.c_str()
+			,galaxyPeerPath.c_str()
+			,throwExceptions
+			,configFilePath.c_str()
+		};
+#else 
+		return InitOptionsImpl{
+			clientID.c_str()
+			,clientSecret.c_str()
+			,configFilePath.c_str()
 #if GALAXY_BUILD_FEATURE_ALLOCATOR
-		,galaxyAllocator
+			,galaxyAllocator
 #endif
-		,(storagePath.length() > 0 ? storagePath.c_str() : nullptr)
+			,(storagePath.length() > 0 ? storagePath.c_str() : nullptr)
 #if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_HOST_PORT
-		,(host.length() > 0 ? host.c_str() : nullptr)
-		,port
-
+			,(host.length() > 0 ? host.c_str() : nullptr)
+			,port
 #endif
 #if GALAXY_BUILD_FEATURE_HAS_IGALAXYTHREADFACTORY
-		, galaxyThreadFactory
+			, galaxyThreadFactory
 #endif
 		};
+#endif
+
 	}
 }

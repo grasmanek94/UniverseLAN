@@ -26,12 +26,14 @@ namespace universelan::client {
 		listeners.AddListener<LobbyEnteredListener>();
 		listeners.AddListener<LobbyLeftListener>();
 		listeners.AddListener<LobbyDataListener>();
-		listeners.AddListener<LobbyDataUpdateListener>();
-		listeners.AddListener<LobbyMemberDataUpdateListener>();
 		listeners.AddListener<LobbyDataRetrieveListener>();
 		listeners.AddListener<LobbyMemberStateListener>();
 		listeners.AddListener<LobbyOwnerChangeListener>();
 		listeners.AddListener<LobbyMessageListener>();
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
+		listeners.AddListener<LobbyDataUpdateListener>();
+		listeners.AddListener<LobbyMemberDataUpdateListener>();
+#endif
 	}
 
 	MatchmakingImpl::~MatchmakingImpl() {

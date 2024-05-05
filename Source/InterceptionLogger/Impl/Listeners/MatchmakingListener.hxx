@@ -2,6 +2,8 @@
 
 #include <IMatchmaking.h>
 
+#include <GalaxyVersionedTypes.hxx>
+
 namespace universelan::client {
 	using namespace galaxy::api;
 
@@ -9,6 +11,7 @@ namespace universelan::client {
 	{
 	public:
 		virtual void OnLobbyList(uint32_t lobbyCount, LobbyListResult result);
+		virtual void OnLobbyList(uint32_t lobbyCount, bool ioFailure);
 	};
 
 	class LobbyCreatedListener : public ILobbyCreatedListener
@@ -27,6 +30,7 @@ namespace universelan::client {
 	{
 	public:
 		virtual void OnLobbyLeft(const GalaxyID& lobbyID, LobbyLeaveReason leaveReason);
+		virtual void OnLobbyLeft(const GalaxyID& lobbyID, bool ioFailure);
 	};
 
 	class LobbyDataListener : public ILobbyDataListener
@@ -35,6 +39,7 @@ namespace universelan::client {
 		virtual void OnLobbyDataUpdated(const GalaxyID& lobbyID, const GalaxyID& memberID);
 	};
 
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 	class LobbyDataUpdateListener : public ILobbyDataUpdateListener
 	{
 	public:
@@ -48,6 +53,7 @@ namespace universelan::client {
 		virtual void OnLobbyMemberDataUpdateSuccess(const GalaxyID& lobbyID, const GalaxyID& memberID);
 		virtual void OnLobbyMemberDataUpdateFailure(const GalaxyID& lobbyID, const GalaxyID& memberID, FailureReason failureReason);
 	};
+#endif
 
 	class LobbyDataRetrieveListener : public ILobbyDataRetrieveListener
 	{

@@ -1,3 +1,5 @@
+#if !GALAXY_BUILD_FEATURE_HAS_IGALAXY
+
 #include "UniverseLANInterceptor.hxx"
 
 #include <Tracer.hxx>
@@ -114,3 +116,5 @@ namespace galaxy::api {
 extern "C" GALAXY_DLL_EXPORT uint32_t load() {
 	return universelan::client::load();
 }
+
+#endif

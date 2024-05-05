@@ -1,7 +1,6 @@
 #include "Logger.hxx"
 
-#include "UniverseLANInterceptor.hxx"
-
+#include <IniData.hxx>
 #include <Tracer.hxx>
 
 #include <atomic>
@@ -19,8 +18,8 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::ILOGGER;
 	}
 
-	LoggerImpl::LoggerImpl(InterfaceInstances* intf) :
-		intf{ intf }, mtx{}, logfile{}
+	LoggerImpl::LoggerImpl(ClientIniData* config) :
+		config{ config }, mtx{}, logfile{}
 	{
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
@@ -37,7 +36,7 @@ namespace universelan::client {
 
 		int count = counter.fetch_add(1);
 
-		path << (std::filesystem::path(intf->config->GetGameDataPath()) / "Interceptor" / "Logging" / "L").string()
+		path << (std::filesystem::path(config->GetGameDataPath()) / "Interceptor" / "Logging" / "L").string()
 			<< std::put_time(&tm, "%Y-%m-%d_%H-%M-%S")
 			<< "-" << std::this_thread::get_id() << "-" << count << ".log";
 

@@ -288,7 +288,7 @@ static void RunCallbacks()
 {
 	if (g_galaxyEnabled) {
 		try {
-			galaxy::api::ProcessData();
+			GET_GALAXY_API_AS_IS(ProcessData());
 		}
 		catch (const galaxy::api::IError& error) {
 			LOG_ERROR("Failed to run Galaxy callbacks: %s", error.GetMsg());
@@ -357,7 +357,7 @@ static void InitializeGalaxy()
 	g_galaxyEnabled = true;
 
 	LOG_INFO("Waiting for Galaxy sign in...");
-	while (g_galaxyEnabled && !galaxy::api::User()->SignedIn()) {
+	while (g_galaxyEnabled && !GET_GALAXY_API(User())->SignedIn()) {
 		RunCallbacks();
 	}
 }
@@ -1121,7 +1121,8 @@ int main(int argc, const char* argv[])
 	if (g_authListener != nullptr) {
 		delete g_authListener;
 	}
-	galaxy::api::Shutdown();
+
+	GET_GALAXY_API_AS_IS(Shutdown());
 
 	return 0;
 }

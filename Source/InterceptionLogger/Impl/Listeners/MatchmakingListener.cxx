@@ -24,6 +24,15 @@ namespace universelan::client {
 			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));
 		}
 	}
+
+	void LobbyListListener::OnLobbyList(uint32_t lobbyCount, bool ioFailure) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("lobbyCount: {}", lobbyCount));
+			trace.write_all(std::format("ioFailure: {}", ioFailure));
+		}
+	}
 	
 	void LobbyCreatedListener::OnLobbyCreated(const GalaxyID& lobbyID, LobbyCreateResult result)
 	{
@@ -55,6 +64,16 @@ namespace universelan::client {
 		}
 	}
 
+	void LobbyLeftListener::OnLobbyLeft(const GalaxyID& lobbyID, bool ioFailure)
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("lobbyID: {}", lobbyID));
+			trace.write_all(std::format("ioFailure: {}", ioFailure));
+		}
+	}
+
 	void LobbyDataListener::OnLobbyDataUpdated(const GalaxyID& lobbyID, const GalaxyID& memberID)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -65,6 +84,7 @@ namespace universelan::client {
 		}
 	}
 
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 	void LobbyDataUpdateListener::OnLobbyDataUpdateSuccess(const GalaxyID& lobbyID)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -104,6 +124,7 @@ namespace universelan::client {
 			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
 		}
 	}
+#endif
 
 	void LobbyDataRetrieveListener::OnLobbyDataRetrieveSuccess(const GalaxyID& lobbyID)
 	{

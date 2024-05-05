@@ -25,8 +25,8 @@ namespace universelan::client {
 		template<typename T>
 		void AddListener() {
 			T* listener = new T();
-			listeners.emplace(listener, T::GetListenerType());
-			RegisterListener(listener, T::GetListenerType());
+			listeners.emplace(listener, (ListenerType)T::GetListenerType());
+			RegisterListener(listener, (ListenerType)T::GetListenerType());
 		}
 	};
 }

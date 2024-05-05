@@ -67,7 +67,7 @@ namespace universelan::client {
 
 		BindStdHandlesToConsole();
 
-		SetConsoleTitleA(std::format("UniverseLAN Client - Build: {}", universelan::Version_Number).c_str());
+		SetConsoleTitleA(std::format("UniverseLAN - Build: {}", universelan::Version_Number).c_str());
 #endif
 	}
 }

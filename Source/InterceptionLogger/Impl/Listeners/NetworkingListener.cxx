@@ -25,6 +25,7 @@ namespace universelan::client {
 		}
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_NAT_FUNCTIONALITY
 	void NatTypeDetectionListener::OnNatTypeDetectionSuccess(NatType natType)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -38,4 +39,5 @@ namespace universelan::client {
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 	}
+#endif
 }

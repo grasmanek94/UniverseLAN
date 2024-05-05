@@ -23,10 +23,14 @@ namespace universelan::client {
 		intf{ intf },
 		notifications{ notifications },
 		listeners{ notifications } {
+		listeners.AddListener<NotificationListener>();
+#if GALAXY_BUILD_FEATURE_OVERLAYSTATE_ENUM
 		listeners.AddListener<OverlayVisibilityChangeListener>();
 		listeners.AddListener<OverlayInitializationStateChangeListener>();
-		listeners.AddListener<NotificationListener>();
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_GOGSERVICECONNECTIONSTATELISTENER
 		listeners.AddListener<GogServicesConnectionStateListener>();
+#endif
 	}
 
 	UtilsImpl::~UtilsImpl() {

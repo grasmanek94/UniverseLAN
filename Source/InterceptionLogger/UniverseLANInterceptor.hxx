@@ -32,7 +32,19 @@
 
 namespace universelan::client {
 	struct InterfaceInstances {
+
+#if GALAXY_BUILD_FEATURE_HAS_IGALAXY
+		std::function<GALAXY_DLL_EXPORT galaxy::api::IGalaxy* GALAXY_CALLTYPE(void)> real_factory_create_instance = nullptr;
+		std::function<GALAXY_DLL_EXPORT galaxy::api::IErrorManager* GALAXY_CALLTYPE(void)> real_factory_get_error_manager = nullptr;
+		std::function<GALAXY_DLL_EXPORT galaxy::api::IGalaxy* GALAXY_CALLTYPE(void)> real_factory_get_instance = nullptr;
+		std::function<GALAXY_DLL_EXPORT void GALAXY_CALLTYPE(void)> real_factory_reset_instance = nullptr;
+
+		galaxy::api::IGalaxy* real_igalaxy_instance;
+		galaxy::api::IErrorManager* real_ierror_manager;
+#endif
+
 		std::function<GALAXY_DLL_EXPORT void GALAXY_CALLTYPE(InitOptionsImpl const& initOptions)> real_init = nullptr;
+
 		std::function<GALAXY_DLL_EXPORT void GALAXY_CALLTYPE(void)> real_process_data = nullptr;
 		std::function<GALAXY_DLL_EXPORT void GALAXY_CALLTYPE(void)> real_shutdown = nullptr;
 		std::function<GALAXY_DLL_EXPORT uint32_t (void)> real_load = nullptr;

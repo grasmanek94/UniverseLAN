@@ -22,22 +22,36 @@ namespace universelan::client {
 		notifications{ notifications },
 		listeners{ notifications } {
 		listeners.AddListener<PersonaDataChangedListener>();
-		listeners.AddListener<UserInformationRetrieveListener>();
-		listeners.AddListener<FriendListListener>();
-		listeners.AddListener<FriendInvitationSendListener>();
-		listeners.AddListener<FriendInvitationListRetrieveListener>();
-		listeners.AddListener<SentFriendInvitationListRetrieveListener>();
-		listeners.AddListener<FriendInvitationListener>();
-		listeners.AddListener<FriendInvitationRespondToListener>();
-		listeners.AddListener<FriendAddListener>();
-		listeners.AddListener<FriendDeleteListener>();
-		listeners.AddListener<RichPresenceChangeListener>();
-		listeners.AddListener<RichPresenceListener>();
-		listeners.AddListener<RichPresenceRetrieveListener>();
 		listeners.AddListener<GameJoinRequestedListener>();
 		listeners.AddListener<GameInvitationReceivedListener>();
 		listeners.AddListener<SendInvitationListener>();
+		listeners.AddListener<FriendListListener>();
+		listeners.AddListener<RichPresenceChangeListener>();
+		listeners.AddListener<RichPresenceListener>();
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
+		listeners.AddListener<UserInformationRetrieveListener>();
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_ISENTFRIENDINVITATIONLISTRETRIEVELISTENER
+		listeners.AddListener<FriendInvitationListRetrieveListener>();
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_FRIENDADDLISTENER
+		listeners.AddListener<FriendAddListener>();
+#endif
+#if GALAXY_BUILD_FEATURE_NEW_FRIEND_FEATURES_104_3
+		listeners.AddListener<FriendInvitationSendListener>();
+		listeners.AddListener<SentFriendInvitationListRetrieveListener>();
+		listeners.AddListener<FriendInvitationListener>();
+		listeners.AddListener<FriendInvitationRespondToListener>();
+		listeners.AddListener<FriendDeleteListener>();
+#endif
+
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
+		listeners.AddListener<RichPresenceRetrieveListener>();
+#endif
+
+#if GALAXY_BUILD_FEATURE_FIND_USER
 		listeners.AddListener<UserFindListener>();
+#endif
 	}
 
 	FriendsImpl::~FriendsImpl() {
@@ -116,7 +130,7 @@ namespace universelan::client {
 		}
 
 		return result;
-	}
+}
 #endif
 
 	const char* FriendsImpl::GetPersonaName() {
@@ -311,7 +325,7 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-		}
+	}
 
 		intf()->RequestFriendList(
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
@@ -537,7 +551,7 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-		}
+	}
 
 		intf()->DeleteRichPresence(key
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
@@ -557,7 +571,7 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-		}
+	}
 
 		intf()->ClearRichPresence(
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
@@ -579,7 +593,7 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
-		}
+	}
 
 		intf()->RequestRichPresence(userID
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
@@ -653,7 +667,7 @@ namespace universelan::client {
 #if !GALAXY_BUILD_FEATURE_IFRIENDS_ISTATS_UPDATE_1_127_0
 		auto result =
 #endif
-		intf()->GetRichPresenceByIndex(index, key, keyLength, value, valueLength, userID);
+			intf()->GetRichPresenceByIndex(index, key, keyLength, value, valueLength, userID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 #if !GALAXY_BUILD_FEATURE_IFRIENDS_ISTATS_UPDATE_1_127_0

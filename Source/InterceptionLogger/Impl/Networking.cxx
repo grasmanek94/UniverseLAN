@@ -22,7 +22,9 @@ namespace universelan::client {
 		notifications{ notifications },
 		listeners{ notifications } {
 		listeners.AddListener<NetworkingListener>();
+#if GALAXY_BUILD_FEATURE_HAS_NAT_FUNCTIONALITY
 		listeners.AddListener<NatTypeDetectionListener>();
+#endif
 	}
 
 	NetworkingImpl::~NetworkingImpl() {
