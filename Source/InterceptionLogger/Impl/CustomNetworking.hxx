@@ -8,10 +8,14 @@
  * @warning This API is experimental and can be changed or removed in following releases.
  */
 
+#include "Listeners/ChatListener.hxx"
+
 #include <GalaxyFunctional.hxx>
+#include <ListenersContainer.hxx>
 
 #include <GalaxyExport.h>
 #include <ICustomNetworking.h>
+#include <IListenerRegistrar.h>
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -33,6 +37,7 @@ namespace universelan::client {
 	private:
 		FuncT::F intf;
 		IListenerRegistrar* notifications;
+		ListenersContainer listeners;
 
 	public:
 

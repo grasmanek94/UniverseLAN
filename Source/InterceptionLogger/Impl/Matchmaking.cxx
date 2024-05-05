@@ -1,5 +1,7 @@
 #include "Matchmaking.hxx"
 
+#include "Listeners/MatchmakingListener.hxx"
+
 #include <GalaxyID.hxx>
 #include <Tracer.hxx>
 #include <SafeStringCopy.hxx>
@@ -15,8 +17,26 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::IMATCHMAKING;
 	}
 
-	MatchmakingImpl::MatchmakingImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
-	MatchmakingImpl::~MatchmakingImpl() {}
+	MatchmakingImpl::MatchmakingImpl(FuncT::F intf, IListenerRegistrar* notifications) :
+		intf{ intf },
+		notifications{ notifications },
+		listeners{ notifications } {
+		listeners.AddListener<LobbyListListener>();
+		listeners.AddListener<LobbyCreatedListener>();
+		listeners.AddListener<LobbyEnteredListener>();
+		listeners.AddListener<LobbyLeftListener>();
+		listeners.AddListener<LobbyDataListener>();
+		listeners.AddListener<LobbyDataUpdateListener>();
+		listeners.AddListener<LobbyMemberDataUpdateListener>();
+		listeners.AddListener<LobbyDataRetrieveListener>();
+		listeners.AddListener<LobbyMemberStateListener>();
+		listeners.AddListener<LobbyOwnerChangeListener>();
+		listeners.AddListener<LobbyMessageListener>();
+	}
+
+	MatchmakingImpl::~MatchmakingImpl() {
+		listeners.UnregisterAllListeners();
+	}
 
 	void MatchmakingImpl::CreateLobby(
 		LobbyType lobbyType

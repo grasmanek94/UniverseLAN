@@ -1,7 +1,10 @@
 #ifndef UNIVERSELAN_IMPL_USER_H
 #define UNIVERSELAN_IMPL_USER_H
 
+#include "Listeners/UserListener.hxx"
+
 #include <GalaxyFunctional.hxx>
+#include <ListenersContainer.hxx>
 
 #include <GalaxyExport.h>
 #include <IListenerRegistrar.h>
@@ -52,6 +55,7 @@ namespace universelan::client {
 	private:
 		FuncT::F intf;
 		IListenerRegistrar* notifications;
+		ListenersContainer listeners;
 
 	public:
 

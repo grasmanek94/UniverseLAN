@@ -1,8 +1,11 @@
 #ifndef UNIVERSELAN_IMPL_FRIENDS_H
 #define UNIVERSELAN_IMPL_FRIENDS_H
 
+#include "Listeners/FriendsListener.hxx"
+
 #include <DynamicReturn.hxx>
 #include <GalaxyFunctional.hxx>
+#include <ListenersContainer.hxx>
 
 #include <GalaxyExport.h>
 #include <IFriends.h>
@@ -46,6 +49,7 @@ namespace universelan::client {
 	private:
 		FuncT::F intf;
 		IListenerRegistrar* notifications;
+		ListenersContainer listeners;
 
 	public:
 		FriendsImpl(FuncT::F intf, IListenerRegistrar* notifications);

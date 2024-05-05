@@ -1,5 +1,7 @@
 #include "Friends.hxx"
 
+#include "Listeners/FriendsListener.hxx"
+
 #include <GalaxyID.hxx>
 #include <Tracer.hxx>
 #include <SafeStringCopy.hxx>
@@ -15,8 +17,32 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::IFRIENDS;
 	}
 
-	FriendsImpl::FriendsImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
-	FriendsImpl::~FriendsImpl() {}
+	FriendsImpl::FriendsImpl(FuncT::F intf, IListenerRegistrar* notifications) :
+		intf{ intf },
+		notifications{ notifications },
+		listeners{ notifications } {
+		listeners.AddListener<PersonaDataChangedListener>();
+		listeners.AddListener<UserInformationRetrieveListener>();
+		listeners.AddListener<FriendListListener>();
+		listeners.AddListener<FriendInvitationSendListener>();
+		listeners.AddListener<FriendInvitationListRetrieveListener>();
+		listeners.AddListener<SentFriendInvitationListRetrieveListener>();
+		listeners.AddListener<FriendInvitationListener>();
+		listeners.AddListener<FriendInvitationRespondToListener>();
+		listeners.AddListener<FriendAddListener>();
+		listeners.AddListener<FriendDeleteListener>();
+		listeners.AddListener<RichPresenceChangeListener>();
+		listeners.AddListener<RichPresenceListener>();
+		listeners.AddListener<RichPresenceRetrieveListener>();
+		listeners.AddListener<GameJoinRequestedListener>();
+		listeners.AddListener<GameInvitationReceivedListener>();
+		listeners.AddListener<SendInvitationListener>();
+		listeners.AddListener<UserFindListener>();
+	}
+
+	FriendsImpl::~FriendsImpl() {
+		listeners.UnregisterAllListeners();
+	}
 
 #if GALAXY_BUILD_FEATURE_HAS_CONNECTION_TYPE
 	AvatarCriteriaImpl FriendsImpl::GetDefaultAvatarCriteria() {

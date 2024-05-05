@@ -2,7 +2,10 @@
 
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS
 
+#include "Listeners/UtilsListener.hxx"
+
 #include <GalaxyFunctional.hxx>
+#include <ListenersContainer.hxx>
 
 #include <GalaxyExport.h>
 #include <IListenerRegistrar.h>
@@ -34,6 +37,7 @@ namespace universelan::client {
 	private:
 		FuncT::F intf;
 		IListenerRegistrar* notifications;
+		ListenersContainer listeners;
 
 	public:
 		UtilsImpl(FuncT::F intf, IListenerRegistrar* notifications);

@@ -1,7 +1,10 @@
 #pragma once
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 
+#include "Listeners/TelemetryListener.hxx"
+
 #include <GalaxyFunctional.hxx>
+#include <ListenersContainer.hxx>
 
 #include <GalaxyExport.h>
 #include <IListenerRegistrar.h>
@@ -27,6 +30,7 @@ namespace universelan::client {
 	private:
 		FuncT::F intf;
 		IListenerRegistrar* notifications;
+		ListenersContainer listeners;
 
 	public:
 

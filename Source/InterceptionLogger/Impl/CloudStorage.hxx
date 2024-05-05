@@ -2,7 +2,10 @@
 
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE
 
+#include "Listeners/CloudStorageListener.hxx"
+
 #include <GalaxyFunctional.hxx>
+#include <ListenersContainer.hxx>
 
 #include <GalaxyExport.h>
 #include <ICloudStorage.h>
@@ -28,6 +31,7 @@ namespace universelan::client {
 	private:
 		FuncT::F intf;
 		IListenerRegistrar* notifications;
+		ListenersContainer listeners;
 
 	public:
 		CloudStorageImpl(FuncT::F intf, IListenerRegistrar* notifications);

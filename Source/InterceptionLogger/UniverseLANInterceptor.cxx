@@ -16,13 +16,17 @@ namespace universelan::client {
 
 	namespace {
 		template <typename T>
-		void interceptor_make_unique(std::unique_ptr<T>& ptr, const char* name) {
-			ptr = std::make_unique<T>(SharedLibUtils::get_func<typename T::FuncPtr>(SharedLibUtils::get_function_match(name)));
+		T::FuncPtr interceptor_make_unique(std::unique_ptr<T>& ptr, const char* name) {
+			typename T::FuncPtr real_func = SharedLibUtils::get_func<typename T::FuncPtr>(SharedLibUtils::get_function_match(name));
+			ptr = std::make_unique<T>(real_func);
+			return real_func;
 		}
 
 		template <typename T, typename U>
-		void interceptor_make_unique(std::unique_ptr<T>& ptr, const char* name, U* listener_registerar) {
-			ptr = std::make_unique<T>(SharedLibUtils::get_func<typename T::FuncPtr>(SharedLibUtils::get_function_match(name)), listener_registerar);
+		T::FuncPtr interceptor_make_unique(std::unique_ptr<T>& ptr, const char* name, U* listener_registerar) {
+			typename T::FuncPtr real_func = SharedLibUtils::get_func<typename T::FuncPtr>(SharedLibUtils::get_function_match(name));
+			ptr = std::make_unique<T>(real_func, listener_registerar);
+			return real_func;
 		}
 
 		template <typename T>
@@ -57,59 +61,62 @@ namespace universelan::client {
 
 		init_options = std::make_unique<InitOptionsModern>(initOptions);
 
-		assign_func(real_init, (gameserver ? "?InitGameServer@api@galaxy@" : "?Init@api@galaxy@"));
-		assign_func(real_process_data, (gameserver ? "?ProcessGameServerData" : "?ProcessData@api@galaxy@"));
-		assign_func(real_shutdown, (gameserver ? "?ShutdownGameServer@api@galaxy@" : "?Shutdown@api@galaxy@"));
-
 		if (config->OverrideInitKeysEnabled()) {
 			init_options->clientID = config->GetOverrideInitKeyId();
 			init_options->clientSecret = config->GetOverrideInitKeySecret();
 		}
 
-		interceptor_make_unique(notification, (gameserver ? "?GameServerListenerRegistrar@api@galaxy@" : "?ListenerRegistrar@api@galaxy@"));
-		interceptor_make_unique(error, "?GetError@api@galaxy@");
-		interceptor_make_unique(user, (gameserver ? "?GameServerUser@api@galaxy@" : "?User@api@galaxy@"), notification.get());
-		interceptor_make_unique(friends, "?Friends@api@galaxy@", notification.get());
-		interceptor_make_unique(matchmaking, (gameserver ? "?GameServerMatchmaking@api@galaxy@" : "?Matchmaking@api@galaxy@"), notification.get());
-		interceptor_make_unique(networking, (gameserver ? "?GameServerNetworking@api@galaxy@" : "?Networking@api@galaxy@"), notification.get());
-
-#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKINGLISTENER
-		interceptor_make_unique(server_networking, "?ServerNetworking@api@galaxy@", notification.get());
-#endif
-
-		interceptor_make_unique(stats, "?Stats@api@galaxy@", notification.get());
-		interceptor_make_unique(logger, this); // (gameserver ? "?GameServerLogger@api@galaxy@" : "?Logger@api@galaxy@")
-
-#if GALAXY_BUILD_FEATURE_HAS_ICHAT
-		interceptor_make_unique(chat, "?Chat@api@galaxy@", notification.get());
-#endif
-
-#if GALAXY_BUILD_FEATURE_HAS_IUTILS
-		interceptor_make_unique(utils, (gameserver ? "?GameServerUtils@api@galaxy@" : "?Utils@api@galaxy@"), notification.get());
-#endif
-
-#if GALAXY_BUILD_FEATURE_HAS_IAPPS
-		interceptor_make_unique(apps, "?Apps@api@galaxy@", notification.get());
-#endif
-
-#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
-		interceptor_make_unique(storage, "?Storage@api@galaxy@", notification.get());
-#endif
-
-#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE
-		interceptor_make_unique(cloud_storage, "?CloudStorage@api@galaxy@", notification.get());
-#endif
-
-#if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
-		interceptor_make_unique(custom_networking, "?CustomNetworking@api@galaxy@", notification.get());
-#endif
-		
-#if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
-		interceptor_make_unique(telemetry, (gameserver ? "?GameServerTelemetry@api@galaxy@" : "?Telemetry@api@galaxy@"), notification.get());
-#endif
+		assign_func(real_init, (gameserver ? "?InitGameServer@api@galaxy@" : "?Init@api@galaxy@"));
+		assign_func(real_process_data, (gameserver ? "?ProcessGameServerData" : "?ProcessData@api@galaxy@"));
+		assign_func(real_shutdown, (gameserver ? "?ShutdownGameServer@api@galaxy@" : "?Shutdown@api@galaxy@"));
 
 		real_init(init_options->ToClassicOptions());
 
+		auto real_notification_ptr = interceptor_make_unique(notification, (gameserver ? "?GameServerListenerRegistrar@api@galaxy@" : "?ListenerRegistrar@api@galaxy@"));
+		auto real_notification = real_notification_ptr();
+
+		interceptor_make_unique(error, "?GetError@api@galaxy@");
+		interceptor_make_unique(user, (gameserver ? "?GameServerUser@api@galaxy@" : "?User@api@galaxy@"), real_notification);
+		interceptor_make_unique(friends, "?Friends@api@galaxy@", real_notification);
+		interceptor_make_unique(matchmaking, (gameserver ? "?GameServerMatchmaking@api@galaxy@" : "?Matchmaking@api@galaxy@"), real_notification);
+		interceptor_make_unique(networking, (gameserver ? "?GameServerNetworking@api@galaxy@" : "?Networking@api@galaxy@"), real_notification);
+
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKINGLISTENER
+		interceptor_make_unique(server_networking, "?ServerNetworking@api@galaxy@", real_notification);
+#endif
+
+		interceptor_make_unique(stats, "?Stats@api@galaxy@", real_notification);
+		interceptor_make_unique(logger, this); // (gameserver ? "?GameServerLogger@api@galaxy@" : "?Logger@api@galaxy@")
+
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
+		interceptor_make_unique(chat, "?Chat@api@galaxy@", real_notification);
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_IUTILS
+		interceptor_make_unique(utils, (gameserver ? "?GameServerUtils@api@galaxy@" : "?Utils@api@galaxy@"), real_notification);
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_IAPPS
+		interceptor_make_unique(apps, "?Apps@api@galaxy@", real_notification);
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
+		interceptor_make_unique(storage, "?Storage@api@galaxy@", real_notification);
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE
+		interceptor_make_unique(cloud_storage, "?CloudStorage@api@galaxy@", real_notification);
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
+		interceptor_make_unique(custom_networking, "?CustomNetworking@api@galaxy@", real_notification);
+#endif
+		
+#if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
+		interceptor_make_unique(telemetry, (gameserver ? "?GameServerTelemetry@api@galaxy@" : "?Telemetry@api@galaxy@"), real_notification);
+#endif
+
+		// TODO: improve this
 		if (config->OverrideSignInEnabled()) {
 			user->USER_SIGN_IN_CREDENTIALS(
 				config->GetOverrideSignInId().c_str(),

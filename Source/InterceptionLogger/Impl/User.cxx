@@ -1,5 +1,7 @@
 #include "User.hxx"
 
+#include "Listeners/UserListener.hxx"
+
 #include <GalaxyID.hxx>
 #include <Tracer.hxx>
 #include <SafeStringCopy.hxx>
@@ -21,8 +23,22 @@ namespace universelan::client {
 #define GET_LISTENER(listener) ((IAuthListener* const)nullptr)
 #endif
 
-	UserImpl::UserImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
-	UserImpl::~UserImpl() {}
+	UserImpl::UserImpl(FuncT::F intf, IListenerRegistrar* notifications) :
+		intf{ intf },
+		notifications{ notifications },
+		listeners{ notifications } {
+		listeners.AddListener<AuthListener>();
+		listeners.AddListener<OtherSessionStartListener>();
+		listeners.AddListener<OperationalStateChangeListener>();
+		listeners.AddListener<UserDataListener>();
+		listeners.AddListener<SpecificUserDataListener>();
+		listeners.AddListener<EncryptedAppTicketListener>();
+		listeners.AddListener<AccessTokenListener>();
+	}
+
+	UserImpl::~UserImpl() {
+		listeners.UnregisterAllListeners();
+	}
 
 	bool UserImpl::SignedIn() {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };

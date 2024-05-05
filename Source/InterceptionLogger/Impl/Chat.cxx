@@ -2,6 +2,8 @@
 
 #include "Chat.hxx"
 
+#include "Listeners/ChatListener.hxx"
+
 #include <GalaxyID.hxx>
 #include <Tracer.hxx>
 #include <SafeStringCopy.hxx>
@@ -17,9 +19,19 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::ICHAT;
 	}
 
-	ChatImpl::ChatImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
+	ChatImpl::ChatImpl(FuncT::F intf, IListenerRegistrar* notifications) :
+		intf{ intf },
+		notifications{ notifications },
+		listeners{ notifications } {
+		listeners.AddListener<ChatRoomWithUserRetrieveListener>();
+		listeners.AddListener<ChatRoomMessageSendListener>();
+		listeners.AddListener<ChatRoomMessagesListener>();
+		listeners.AddListener<ChatRoomMessagesRetrieveListener>();
+	}
 
-	ChatImpl::~ChatImpl() {}
+	ChatImpl::~ChatImpl() {
+		listeners.UnregisterAllListeners();
+	}
 
 	void ChatImpl::RequestChatRoomWithUser(GalaxyID userID
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS

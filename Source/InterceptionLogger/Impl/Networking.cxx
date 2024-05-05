@@ -1,5 +1,7 @@
 #include "Networking.hxx"
 
+#include "Listeners/NetworkingListener.hxx"
+
 #include <GalaxyID.hxx>
 #include <Tracer.hxx>
 #include <SafeStringCopy.hxx>
@@ -15,8 +17,17 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::INETWORKING;
 	}
 
-	NetworkingImpl::NetworkingImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
-	NetworkingImpl::~NetworkingImpl() {}
+	NetworkingImpl::NetworkingImpl(FuncT::F intf, IListenerRegistrar* notifications) : 
+		intf{ intf },
+		notifications{ notifications },
+		listeners{ notifications } {
+		listeners.AddListener<NetworkingListener>();
+		listeners.AddListener<NatTypeDetectionListener>();
+	}
+
+	NetworkingImpl::~NetworkingImpl() {
+		listeners.UnregisterAllListeners();
+	}
 
 	bool NetworkingImpl::SendP2PPacket(GalaxyID galaxyID, const void* data, uint32_t dataSize, P2PSendType sendType, uint8_t channel) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };

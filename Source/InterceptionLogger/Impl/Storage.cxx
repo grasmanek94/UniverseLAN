@@ -2,6 +2,8 @@
 
 #include "Storage.hxx"
 
+#include "Listeners/StorageListener.hxx"
+
 #include <GalaxyID.hxx>
 #include <Tracer.hxx>
 #include <SafeStringCopy.hxx>
@@ -17,8 +19,17 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::ISTORAGE;
 	}
 
-	StorageImpl::StorageImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
-	StorageImpl::~StorageImpl() {}
+	StorageImpl::StorageImpl(FuncT::F intf, IListenerRegistrar* notifications) :
+		intf{ intf },
+		notifications{ notifications },
+		listeners{ notifications } {
+		listeners.AddListener<FileShareListener>();
+		listeners.AddListener<SharedFileDownloadListener>();
+	}
+
+	StorageImpl::~StorageImpl() {
+		listeners.UnregisterAllListeners();
+	}
 
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_SYNCHRONIZE
 	void StorageImpl::Synchronize() {

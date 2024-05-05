@@ -6,7 +6,10 @@
  * Contains data structures and interfaces related to communicating with other
  * Galaxy Peers.
  */
+#include "Listeners/NetworkingListener.hxx"
+
 #include <GalaxyFunctional.hxx>
+#include <ListenersContainer.hxx>
 
 #include <GalaxyExport.h>
 #include <IListenerRegistrar.h>
@@ -32,6 +35,7 @@ namespace universelan::client {
 	private:
 		FuncT::F intf;
 		IListenerRegistrar* notifications;
+		ListenersContainer listeners;
 
 	public:
 

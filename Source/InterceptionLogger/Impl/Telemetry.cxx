@@ -2,6 +2,8 @@
 
 #include "Telemetry.hxx"
 
+#include "Listeners/TelemetryListener.hxx"
+
 #include <GalaxyID.hxx>
 #include <Tracer.hxx>
 #include <SafeStringCopy.hxx>
@@ -17,8 +19,16 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::ITELEMETRY;
 	}
 
-	TelemetryImpl::TelemetryImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
-	TelemetryImpl::~TelemetryImpl() {}
+	TelemetryImpl::TelemetryImpl(FuncT::F intf, IListenerRegistrar* notifications) :
+		intf{ intf },
+		notifications{ notifications },
+		listeners{ notifications } {
+		listeners.AddListener<TelemetryEventSendListener>();
+	}
+
+	TelemetryImpl::~TelemetryImpl() {
+		listeners.UnregisterAllListeners();
+	}
 
 	void TelemetryImpl::AddStringParam(const char* name, const char* value) {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };

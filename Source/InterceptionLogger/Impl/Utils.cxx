@@ -2,6 +2,8 @@
 
 #include "Utils.hxx"
 
+#include "Listeners/UtilsListener.hxx"
+
 #include <GalaxyID.hxx>
 #include <Tracer.hxx>
 #include <SafeStringCopy.hxx>
@@ -17,8 +19,19 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::IUTILS;
 	}
 
-	UtilsImpl::UtilsImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
-	UtilsImpl::~UtilsImpl() {}
+	UtilsImpl::UtilsImpl(FuncT::F intf, IListenerRegistrar* notifications) :
+		intf{ intf },
+		notifications{ notifications },
+		listeners{ notifications } {
+		listeners.AddListener<OverlayVisibilityChangeListener>();
+		listeners.AddListener<OverlayInitializationStateChangeListener>();
+		listeners.AddListener<NotificationListener>();
+		listeners.AddListener<GogServicesConnectionStateListener>();
+	}
+
+	UtilsImpl::~UtilsImpl() {
+		listeners.UnregisterAllListeners();
+	}
 
 	void UtilsImpl::GetImageSize(uint32_t imageID, int32_t& width, int32_t& height) {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };

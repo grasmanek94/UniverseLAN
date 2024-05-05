@@ -1,7 +1,10 @@
 #ifndef UNIVERSELAN_IMPL_STATS_H
 #define UNIVERSELAN_IMPL_STATS_H
 
+#include "Listeners/StatsListener.hxx"
+
 #include <GalaxyFunctional.hxx>
+#include <ListenersContainer.hxx>
 
 #include <GalaxyExport.h>
 #include <IListenerRegistrar.h>
@@ -27,6 +30,7 @@ namespace universelan::client {
 	private:
 		FuncT::F intf;
 		IListenerRegistrar* notifications;
+		ListenersContainer listeners;
 
 	public:
 		StatsImpl(FuncT::F intf, IListenerRegistrar* notifications);

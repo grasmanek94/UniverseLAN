@@ -7,7 +7,10 @@
  * with other Galaxy Users.
  */
 
+#include "Listeners/ChatListener.hxx"
+
 #include <GalaxyFunctional.hxx>
+#include <ListenersContainer.hxx>
 
 #include <GalaxyExport.h>
 #include <IChat.h>
@@ -33,6 +36,7 @@ namespace universelan::client {
 	private:
 		FuncT::F intf;
 		IListenerRegistrar* notifications;
+		ListenersContainer listeners;
 
 	public:
 

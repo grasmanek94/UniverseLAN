@@ -1,8 +1,11 @@
 #ifndef UNIVERSELAN_IMPL_MATCHMAKING_H
 #define UNIVERSELAN_IMPL_MATCHMAKING_H
 
+#include "Listeners/MatchmakingListener.hxx"
+
 #include <GalaxyFunctional.hxx>
 #include <DynamicReturn.hxx>
+#include <ListenersContainer.hxx>
 
 #include <GalaxyExport.h>
 #include <IListenerRegistrar.h>
@@ -37,6 +40,7 @@ namespace universelan::client {
 	private:
 		FuncT::F intf;
 		IListenerRegistrar* notifications;
+		ListenersContainer listeners;
 
 	public:
 		MatchmakingImpl(FuncT::F intf, IListenerRegistrar* notifications);

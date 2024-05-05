@@ -2,6 +2,8 @@
 
 #include "CustomNetworking.hxx"
 
+#include "Listeners/CustomNetworkingListener.hxx"
+
 #include <GalaxyID.hxx>
 #include <Tracer.hxx>
 #include <SafeStringCopy.hxx>
@@ -17,9 +19,18 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::ICUSTOMNETWORKING;
 	}
 
-	CustomNetworkingImpl::CustomNetworkingImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
+	CustomNetworkingImpl::CustomNetworkingImpl(FuncT::F intf, IListenerRegistrar* notifications) :
+		intf{ intf },
+		notifications{ notifications },
+		listeners{ notifications } {
+		listeners.AddListener<ConnectionOpenListener>();
+		listeners.AddListener<ConnectionCloseListener>();
+		listeners.AddListener<ConnectionDataListener>();
+	}
 
-	CustomNetworkingImpl::~CustomNetworkingImpl() {}
+	CustomNetworkingImpl::~CustomNetworkingImpl() { 
+		listeners.UnregisterAllListeners();
+	}
 
 	void CustomNetworkingImpl::OpenConnection(const char* connectionString
 #if GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS

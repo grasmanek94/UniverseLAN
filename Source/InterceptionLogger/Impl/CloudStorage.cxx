@@ -2,6 +2,8 @@
 
 #include "CloudStorage.hxx"
 
+#include "Listeners/CloudStorageListener.hxx"
+
 #include <GalaxyID.hxx>
 #include <Tracer.hxx>
 #include <SafeStringCopy.hxx>
@@ -17,9 +19,19 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::ICLOUDSTORAGE;
 	}
 
-	CloudStorageImpl::CloudStorageImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
+	CloudStorageImpl::CloudStorageImpl(FuncT::F intf, IListenerRegistrar* notifications) :
+		intf{ intf },
+		notifications{ notifications },
+		listeners{ notifications } {
+		listeners.AddListener<ChatRoomWithUserRetrieveListener>();
+		listeners.AddListener<ChatRoomMessageSendListener>();
+		listeners.AddListener<ChatRoomMessagesListener>();
+		listeners.AddListener<ChatRoomMessagesRetrieveListener>();
+	}
 
-	CloudStorageImpl::~CloudStorageImpl() {}
+	CloudStorageImpl::~CloudStorageImpl() {
+		listeners.UnregisterAllListeners();
+	}
 
 	void CloudStorageImpl::GetFileList(const char* container, ICloudStorageGetFileListListener* listener) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };

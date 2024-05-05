@@ -1,5 +1,7 @@
 #include "Stats.hxx"
 
+#include "Listeners/StatsListener.hxx"
+
 #include <GalaxyID.hxx>
 #include <Tracer.hxx>
 #include <SafeStringCopy.hxx>
@@ -15,8 +17,23 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::ISTATS;
 	}
 
-	StatsImpl::StatsImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
-	StatsImpl::~StatsImpl() {}
+	StatsImpl::StatsImpl(FuncT::F intf, IListenerRegistrar* notifications) :
+		intf{ intf },
+		notifications{ notifications },
+		listeners{ notifications } {
+		listeners.AddListener<UserStatsAndAchievementsRetrieveListener>();
+		listeners.AddListener<StatsAndAchievementsStoreListener>();
+		listeners.AddListener<AchievementChangeListener>();
+		listeners.AddListener<LeaderboardsRetrieveListener>();
+		listeners.AddListener<LeaderboardEntriesRetrieveListener>();
+		listeners.AddListener<LeaderboardScoreUpdateListener>();
+		listeners.AddListener<LeaderboardRetrieveListener>();
+		listeners.AddListener<UserTimePlayedRetrieveListener>();
+	}
+
+	StatsImpl::~StatsImpl() {
+		listeners.UnregisterAllListeners();
+	}
 
 	void StatsImpl::RequestUserStatsAndAchievements(GalaxyID userID
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125

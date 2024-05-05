@@ -2,7 +2,10 @@
 
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 
+#include "Listeners/StorageListener.hxx"
+
 #include <GalaxyFunctional.hxx>
+#include <ListenersContainer.hxx>
 
 #include <GalaxyExport.h>
 #include <IListenerRegistrar.h>
@@ -20,6 +23,7 @@ namespace universelan::client {
 	private:
 		FuncT::F intf;
 		IListenerRegistrar* notifications;
+		ListenersContainer listeners;
 
 	public:
 		StorageImpl(FuncT::F intf, IListenerRegistrar* notifications);
