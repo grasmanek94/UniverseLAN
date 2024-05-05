@@ -58,7 +58,6 @@ namespace universelan::client {
 		IListenerRegistrar* notifications;
 		ListenersContainer listeners;
 		ClientIniData* config;
-		bool tried_signin;
 
 	public:
 		UserImpl(FuncT::F intf, IListenerRegistrar* notifications, ClientIniData* config);

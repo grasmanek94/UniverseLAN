@@ -28,8 +28,7 @@ namespace universelan::client {
 		intf{ intf },
 		notifications{ notifications },
 		listeners{ notifications },
-		config{ config },
-		tried_signin{ false } {
+		config{ config } {
 		listeners.AddListener<AuthListener>();
 		listeners.AddListener<OtherSessionStartListener>();
 		listeners.AddListener<OperationalStateChangeListener>();
@@ -44,7 +43,7 @@ namespace universelan::client {
 	}
 
 	bool UserImpl::SignedIn() {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		auto result = intf()->SignedIn();
 
@@ -52,19 +51,11 @@ namespace universelan::client {
 			trace.write_all(std::format("result: {}", result));
 		}
 
-		if (!tried_signin && config->OverrideSignInEnabled()) {
-			tried_signin = true;
-			intf()->USER_SIGN_IN_CREDENTIALS(
-				config->GetOverrideSignInId().c_str(),
-				config->GetOverrideSignInPassword().c_str()
-			);
-		}
-
 		return result;
 	}
 
 	GalaxyID UserImpl::GetGalaxyID() {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		auto result = intf()->GetGalaxyID();
 
@@ -80,7 +71,7 @@ namespace universelan::client {
 		, IAuthListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("steamAppTicket: {}", (void*)steamAppTicket));
@@ -103,12 +94,12 @@ namespace universelan::client {
 		, IAuthListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("login: {}", util::safe_fix_null_char_ptr_annotate_ret(login)));
 			trace.write_all(std::format("password: {}", (void*)password)); // Only print pw address
-			
+
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
@@ -129,7 +120,7 @@ namespace universelan::client {
 		, IAuthListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("requireOnline: {}", requireOnline));
@@ -137,14 +128,26 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif
 		}
-		intf()->USER_SIGN_IN_GALAXY(
+
+		if (config->OverrideSignInEnabled()) {
+			intf()->USER_SIGN_IN_CREDENTIALS(
+				config->GetOverrideSignInId().c_str(),
+				config->GetOverrideSignInPassword().c_str()
+#if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
+				, listener
+#endif
+			);
+		}
+		else {
+			intf()->USER_SIGN_IN_GALAXY(
 #if GALAXY_BUILD_FEATURE_HAS_SIGNIN_PS4
-			requireOnline
+				requireOnline
 #endif
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-			, listener
+				, listener
 #endif	
-		);
+			);
+		}
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_SIGNIN_WITH_SERVERKEY
@@ -153,7 +156,7 @@ namespace universelan::client {
 		, IAuthListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("serverKey: {}", util::safe_fix_null_char_ptr_annotate_ret(serverKey)));
@@ -175,7 +178,7 @@ namespace universelan::client {
 		IAuthListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
@@ -192,7 +195,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_CROSSPLATFORM
 	void UserImpl::SignInToken(const char* refreshToken, IAuthListener* const listener) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("refreshToken: {}", util::safe_fix_null_char_ptr_annotate_ret(refreshToken)));
@@ -209,7 +212,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_IUSER_SIGNINLAUNCHER
 	void UserImpl::SignInLauncher(IAuthListener* const listener) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
@@ -226,7 +229,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_IUSER_SIGNINEPIC
 	void UserImpl::SignInEpic(const char* epicAccessToken, const char* epicUsername, IAuthListener* const listener) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("epicAccessToken: {}", util::safe_fix_null_char_ptr_annotate_ret(epicAccessToken)));
@@ -261,14 +264,14 @@ namespace universelan::client {
 	}
 #else
 	void UserImpl::SignInUWP(IAuthListener* const listener) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		intf()->SignInUWP(listener);
 	}
 #endif
 
 	void UserImpl::SignInPS4(const char* ps4ClientID, IAuthListener* const listener) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("ps4ClientID: {}", util::safe_fix_null_char_ptr_annotate_ret(ps4ClientID)));
@@ -279,7 +282,7 @@ namespace universelan::client {
 	}
 
 	void UserImpl::SignInXB1(const char* xboxOneUserID, IAuthListener* const listener) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("xboxOneUserID: {}", util::safe_fix_null_char_ptr_annotate_ret(xboxOneUserID)));
@@ -291,7 +294,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_IUSER_SIGNINXBLIVE
 	void UserImpl::SignInXBLive(const char* token, const char* signature, const char* marketplaceID, const char* locale, IAuthListener* const listener) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("token: {}", util::safe_fix_null_char_ptr_annotate_ret(token)));
@@ -307,7 +310,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_ITELEMETRY_1_139_6_UPDATE
 	void UserImpl::SignInAnonymousTelemetry(IAuthListener* const listener) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("listener: {}", (void*)listener));
@@ -324,7 +327,7 @@ namespace universelan::client {
 		, IAuthListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("xboxOneUserID: {}", xboxOneUserID));
@@ -345,7 +348,7 @@ namespace universelan::client {
 		, IAuthListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("ps4ClientID: {}", util::safe_fix_null_char_ptr_annotate_ret(ps4ClientID)));
@@ -368,9 +371,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_SIGNOUT
 	void UserImpl::SignOut() {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
-	
-		tried_signin = false;
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		intf()->SignOut();
 	}
@@ -384,7 +385,7 @@ namespace universelan::client {
 		, ISpecificUserDataListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
@@ -407,7 +408,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_USERDATAINFOAVAILABLE
 	bool UserImpl::IsUserDataAvailable(GalaxyID userID) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
@@ -428,7 +429,7 @@ namespace universelan::client {
 		, GalaxyID userID
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
@@ -452,7 +453,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
 	void UserImpl::GetUserDataCopy(const char* key, char* buffer, uint32_t bufferLength, GalaxyID userID) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
@@ -474,7 +475,7 @@ namespace universelan::client {
 		, ISpecificUserDataListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
@@ -496,7 +497,7 @@ namespace universelan::client {
 		GalaxyID userID
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
@@ -522,7 +523,7 @@ namespace universelan::client {
 		, GalaxyID userID
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("index: {}", index));
@@ -555,7 +556,7 @@ namespace universelan::client {
 		, ISpecificUserDataListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
@@ -572,7 +573,7 @@ namespace universelan::client {
 	}
 
 	bool UserImpl::IsLoggedOn() {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		auto result = intf()->IsLoggedOn();
 
@@ -589,7 +590,7 @@ namespace universelan::client {
 		, IEncryptedAppTicketListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("data: {}", (void*)data));
@@ -607,7 +608,7 @@ namespace universelan::client {
 	}
 
 	void UserImpl::GetEncryptedAppTicket(void* encryptedAppTicket, uint32_t maxEncryptedAppTicketSize, uint32_t& currentEncryptedAppTicketSize) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("encryptedAppTicket: {}", (void*)encryptedAppTicket));
@@ -624,7 +625,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_IOTHERSESSIONSTARTLISTENER
 	SessionID UserImpl::GetSessionID() {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		auto result = intf()->GetSessionID();
 
@@ -638,7 +639,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_IACCESSTOKENLISTENER
 	const char* UserImpl::GetAccessToken() {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		auto result = intf()->GetAccessToken();
 
@@ -650,7 +651,7 @@ namespace universelan::client {
 	}
 
 	void UserImpl::GetAccessTokenCopy(char* buffer, uint32_t bufferLength) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("buffer: {}", (void*)buffer));
@@ -669,7 +670,7 @@ namespace universelan::client {
 		, const char* info
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("accessToken: {}", util::safe_fix_null_char_ptr_annotate_ret(accessToken)));
