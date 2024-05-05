@@ -5,6 +5,7 @@
 #include <GalaxyFunctional.hxx>
 
 #include <GalaxyExport.h>
+#include <IListenerRegistrar.h>
 #include <IStorage.h>
 
 namespace universelan::client {
@@ -18,9 +19,10 @@ namespace universelan::client {
 
 	private:
 		FuncT::F intf;
+		IListenerRegistrar* notifications;
 
 	public:
-		StorageImpl(FuncT::F intf);
+		StorageImpl(FuncT::F intf, IListenerRegistrar* notifications);
 		virtual ~StorageImpl();
 
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_SYNCHRONIZE

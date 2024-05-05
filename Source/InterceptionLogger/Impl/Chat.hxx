@@ -11,6 +11,7 @@
 
 #include <GalaxyExport.h>
 #include <IChat.h>
+#include <IListenerRegistrar.h>
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -30,11 +31,12 @@ namespace universelan::client {
 		using FuncPtr = typename FuncT::PTR;
 
 	private:
-		FuncT::PTR intf;
+		FuncT::F intf;
+		IListenerRegistrar* notifications;
 
 	public:
 
-		ChatImpl(FuncT::PTR intf);
+		ChatImpl(FuncT::F intf, IListenerRegistrar* notifications);
 		virtual ~ChatImpl();
 
 		/**

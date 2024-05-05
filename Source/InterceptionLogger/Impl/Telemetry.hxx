@@ -4,6 +4,7 @@
 #include <GalaxyFunctional.hxx>
 
 #include <GalaxyExport.h>
+#include <IListenerRegistrar.h>
 #include <ITelemetry.h>
 
 namespace universelan::client {
@@ -25,10 +26,11 @@ namespace universelan::client {
 
 	private:
 		FuncT::F intf;
+		IListenerRegistrar* notifications;
 
 	public:
 
-		TelemetryImpl(FuncT::F intf);
+		TelemetryImpl(FuncT::F intf, IListenerRegistrar* notifications);
 		virtual ~TelemetryImpl();
 
 		/**

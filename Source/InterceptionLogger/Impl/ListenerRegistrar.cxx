@@ -15,15 +15,8 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::LISTENERREGISTRAR;
 	}
 
-	ListenerRegistrarImpl::ListenerRegistrarImpl(FuncT::F intf) : intf{intf}
-	{
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
-	}
-
-	ListenerRegistrarImpl::~ListenerRegistrarImpl()
-	{
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
-	}
+	ListenerRegistrarImpl::ListenerRegistrarImpl(FuncT::F intf) : intf{ intf } {}
+	ListenerRegistrarImpl::~ListenerRegistrarImpl() {}
 
 	void ListenerRegistrarImpl::Register(ListenerTypeImpl listenerType, IGalaxyListener* listener) {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };

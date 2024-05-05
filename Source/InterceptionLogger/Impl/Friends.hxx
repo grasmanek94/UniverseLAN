@@ -1,12 +1,12 @@
 #ifndef UNIVERSELAN_IMPL_FRIENDS_H
 #define UNIVERSELAN_IMPL_FRIENDS_H
 
+#include <DynamicReturn.hxx>
+#include <GalaxyFunctional.hxx>
+
 #include <GalaxyExport.h>
 #include <IFriends.h>
-
-#include <DynamicReturn.hxx>
-
-#include <GalaxyFunctional.hxx>
+#include <IListenerRegistrar.h>
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -45,9 +45,10 @@ namespace universelan::client {
 
 	private:
 		FuncT::F intf;
+		IListenerRegistrar* notifications;
 
 	public:
-		FriendsImpl(FuncT::F intf);
+		FriendsImpl(FuncT::F intf, IListenerRegistrar* notifications);
 		virtual ~FriendsImpl();
 
 #if GALAXY_BUILD_FEATURE_HAS_CONNECTION_TYPE

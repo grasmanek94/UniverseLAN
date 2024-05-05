@@ -15,15 +15,8 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::IFRIENDS;
 	}
 
-	FriendsImpl::FriendsImpl(FuncT::F intf) : intf{ intf }
-	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
-	}
-
-	FriendsImpl::~FriendsImpl()
-	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
-	}
+	FriendsImpl::FriendsImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
+	FriendsImpl::~FriendsImpl() {}
 
 #if GALAXY_BUILD_FEATURE_HAS_CONNECTION_TYPE
 	AvatarCriteriaImpl FriendsImpl::GetDefaultAvatarCriteria() {

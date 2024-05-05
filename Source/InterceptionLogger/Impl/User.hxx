@@ -4,6 +4,7 @@
 #include <GalaxyFunctional.hxx>
 
 #include <GalaxyExport.h>
+#include <IListenerRegistrar.h>
 #include <IUser.h>
 
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_CROSSPLATFORM
@@ -50,10 +51,11 @@ namespace universelan::client {
 
 	private:
 		FuncT::F intf;
+		IListenerRegistrar* notifications;
 
 	public:
 
-		UserImpl(FuncT::F intf);
+		UserImpl(FuncT::F intf, IListenerRegistrar* notifications);
 		virtual ~UserImpl();
 
 		/**

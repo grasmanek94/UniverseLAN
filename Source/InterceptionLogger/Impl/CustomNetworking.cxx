@@ -17,15 +17,9 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::ICUSTOMNETWORKING;
 	}
 
-	CustomNetworkingImpl::CustomNetworkingImpl(FuncT::F intf) : intf{intf}
-	{
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
-	}
+	CustomNetworkingImpl::CustomNetworkingImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
 
-	CustomNetworkingImpl::~CustomNetworkingImpl()
-	{
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
-	}
+	CustomNetworkingImpl::~CustomNetworkingImpl() {}
 
 	void CustomNetworkingImpl::OpenConnection(const char* connectionString
 #if GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS

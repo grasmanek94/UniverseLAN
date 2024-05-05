@@ -2,11 +2,11 @@
 #define UNIVERSELAN_IMPL_MATCHMAKING_H
 
 #include <GalaxyFunctional.hxx>
+#include <DynamicReturn.hxx>
 
 #include <GalaxyExport.h>
+#include <IListenerRegistrar.h>
 #include <IMatchmaking.h>
-
-#include <DynamicReturn.hxx>
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -36,9 +36,10 @@ namespace universelan::client {
 
 	private:
 		FuncT::F intf;
+		IListenerRegistrar* notifications;
 
 	public:
-		MatchmakingImpl(FuncT::F intf);
+		MatchmakingImpl(FuncT::F intf, IListenerRegistrar* notifications);
 		virtual ~MatchmakingImpl();
 
 		/**

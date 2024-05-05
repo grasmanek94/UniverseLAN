@@ -15,15 +15,8 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::ISTATS;
 	}
 
-	StatsImpl::StatsImpl(FuncT::F intf) : intf{ intf }
-	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
-	}
-
-	StatsImpl::~StatsImpl()
-	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
-	}
+	StatsImpl::StatsImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
+	StatsImpl::~StatsImpl() {}
 
 	void StatsImpl::RequestUserStatsAndAchievements(GalaxyID userID
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125

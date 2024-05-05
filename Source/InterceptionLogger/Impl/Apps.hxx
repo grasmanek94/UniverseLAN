@@ -10,6 +10,7 @@
 
 #include <GalaxyExport.h>
 #include <IApps.h>
+#include <IListenerRegistrar.h>
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -31,9 +32,10 @@ namespace universelan::client {
 
 	private:
 		FuncT::F intf;
+		IListenerRegistrar* notifications;
 
 	public:
-		AppsImpl(FuncT::F intf);
+		AppsImpl(FuncT::F intf, IListenerRegistrar* notifications);
 
 		virtual ~AppsImpl() override;
 

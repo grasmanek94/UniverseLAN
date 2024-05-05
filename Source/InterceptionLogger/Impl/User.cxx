@@ -21,15 +21,8 @@ namespace universelan::client {
 #define GET_LISTENER(listener) ((IAuthListener* const)nullptr)
 #endif
 
-	UserImpl::UserImpl(FuncT::F intf) : intf{ intf }
-	{
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
-	}
-
-	UserImpl::~UserImpl()
-	{
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
-	}
+	UserImpl::UserImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
+	UserImpl::~UserImpl() {}
 
 	bool UserImpl::SignedIn() {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };

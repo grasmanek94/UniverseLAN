@@ -6,10 +6,10 @@
  * Contains classes representing exceptions.
  */
 
+#include <GalaxyFunctional.hxx>
+
 #include <GalaxyExport.h>
 #include <Errors.h>
-
-#include <GalaxyFunctional.hxx>
 
 namespace universelan::client {
 	using namespace galaxy::api;

@@ -15,15 +15,8 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::INETWORKING;
 	}
 
-	NetworkingImpl::NetworkingImpl(FuncT::F intf) : intf{ intf }
-	{
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
-	}
-
-	NetworkingImpl::~NetworkingImpl()
-	{
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
-	}
+	NetworkingImpl::NetworkingImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
+	NetworkingImpl::~NetworkingImpl() {}
 
 	bool NetworkingImpl::SendP2PPacket(GalaxyID galaxyID, const void* data, uint32_t dataSize, P2PSendType sendType, uint8_t channel) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };

@@ -8,10 +8,10 @@
  * @warning This API is experimental and can be changed or removed in following releases.
  */
 
+#include <GalaxyFunctional.hxx>
+
 #include <GalaxyExport.h>
 #include <ICustomNetworking.h>
-
-#include <GalaxyFunctional.hxx>
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -32,10 +32,11 @@ namespace universelan::client {
 
 	private:
 		FuncT::F intf;
+		IListenerRegistrar* notifications;
 
 	public:
 
-		CustomNetworkingImpl(FuncT::F intf);
+		CustomNetworkingImpl(FuncT::F intf, IListenerRegistrar* notifications);
 		virtual ~CustomNetworkingImpl() override;
 
 		/**

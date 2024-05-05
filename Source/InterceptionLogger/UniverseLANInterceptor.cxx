@@ -20,6 +20,11 @@ namespace universelan::client {
 			ptr = std::make_unique<T>(SharedLibUtils::get_func<typename T::FuncPtr>(SharedLibUtils::get_function_match(name)));
 		}
 
+		template <typename T, typename U>
+		void interceptor_make_unique(std::unique_ptr<T>& ptr, const char* name, U* listener_registerar) {
+			ptr = std::make_unique<T>(SharedLibUtils::get_func<typename T::FuncPtr>(SharedLibUtils::get_function_match(name)), listener_registerar);
+		}
+
 		template <typename T>
 		void interceptor_make_unique(std::unique_ptr<T>& ptr, InterfaceInstances* t) {
 			ptr = std::make_unique<T>(t);
@@ -62,44 +67,45 @@ namespace universelan::client {
 		}
 
 		interceptor_make_unique(notification, (gameserver ? "?GameServerListenerRegistrar@api@galaxy@" : "?ListenerRegistrar@api@galaxy@"));
-		interceptor_make_unique(user, (gameserver ? "?GameServerUser@api@galaxy@" : "?User@api@galaxy@"));
-		interceptor_make_unique(friends, "?Friends@api@galaxy@");
-		interceptor_make_unique(matchmaking, (gameserver ? "?GameServerMatchmaking@api@galaxy@" : "?Matchmaking@api@galaxy@"));
-		interceptor_make_unique(networking, (gameserver ? "?GameServerNetworking@api@galaxy@" : "?Networking@api@galaxy@"));
+		interceptor_make_unique(error, "?GetError@api@galaxy@");
+		interceptor_make_unique(user, (gameserver ? "?GameServerUser@api@galaxy@" : "?User@api@galaxy@"), notification.get());
+		interceptor_make_unique(friends, "?Friends@api@galaxy@", notification.get());
+		interceptor_make_unique(matchmaking, (gameserver ? "?GameServerMatchmaking@api@galaxy@" : "?Matchmaking@api@galaxy@"), notification.get());
+		interceptor_make_unique(networking, (gameserver ? "?GameServerNetworking@api@galaxy@" : "?Networking@api@galaxy@"), notification.get());
 
 #if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKINGLISTENER
-		interceptor_make_unique(server_networking, "?ServerNetworking@api@galaxy@");
+		interceptor_make_unique(server_networking, "?ServerNetworking@api@galaxy@", notification.get());
 #endif
 
-		interceptor_make_unique(stats, "?Stats@api@galaxy@");
+		interceptor_make_unique(stats, "?Stats@api@galaxy@", notification.get());
 		interceptor_make_unique(logger, this); // (gameserver ? "?GameServerLogger@api@galaxy@" : "?Logger@api@galaxy@")
 
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
-		interceptor_make_unique(chat, "?Chat@api@galaxy@");
+		interceptor_make_unique(chat, "?Chat@api@galaxy@", notification.get());
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS
-		interceptor_make_unique(utils, (gameserver ? "?GameServerUtils@api@galaxy@" : "?Utils@api@galaxy@"));
+		interceptor_make_unique(utils, (gameserver ? "?GameServerUtils@api@galaxy@" : "?Utils@api@galaxy@"), notification.get());
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_IAPPS
-		interceptor_make_unique(apps, "?Apps@api@galaxy@");
+		interceptor_make_unique(apps, "?Apps@api@galaxy@", notification.get());
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
-		interceptor_make_unique(storage, "?Storage@api@galaxy@");
+		interceptor_make_unique(storage, "?Storage@api@galaxy@", notification.get());
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE
-		interceptor_make_unique(cloud_storage, "?CloudStorage@api@galaxy@");
+		interceptor_make_unique(cloud_storage, "?CloudStorage@api@galaxy@", notification.get());
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
-		interceptor_make_unique(custom_networking, "?CustomNetworking@api@galaxy@");
+		interceptor_make_unique(custom_networking, "?CustomNetworking@api@galaxy@", notification.get());
 #endif
 		
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
-		interceptor_make_unique(telemetry, (gameserver ? "?GameServerTelemetry@api@galaxy@" : "?Telemetry@api@galaxy@"));
+		interceptor_make_unique(telemetry, (gameserver ? "?GameServerTelemetry@api@galaxy@" : "?Telemetry@api@galaxy@"), notification.get());
 #endif
 
 		real_init(init_options->ToClassicOptions());
@@ -138,7 +144,7 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 		telemetry = nullptr;
 #endif
-
+		error = nullptr;
 		logger = nullptr;
 #if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
 		custom_networking = nullptr;

@@ -16,7 +16,7 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::IAPPS;
 	}
 
-	AppsImpl::AppsImpl(FuncT::F intf) : intf{ intf } {}
+	AppsImpl::AppsImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
 
 	AppsImpl::~AppsImpl() {}
 

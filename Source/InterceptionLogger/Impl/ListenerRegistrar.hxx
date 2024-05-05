@@ -1,11 +1,10 @@
 #ifndef UNIVERSELAN_IMPL_LISTENER_H
 #define UNIVERSELAN_IMPL_LISTENER_H
 
-#include <GalaxyExport.h>
-
-#include <IListenerRegistrar.h>
-
 #include <GalaxyFunctional.hxx>
+
+#include <GalaxyExport.h>
+#include <IListenerRegistrar.h>
 
 #include <stdint.h>
 

@@ -73,63 +73,45 @@ namespace universelan::client {
 	}
 
 	IUser* User() {
-		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
-
 		return universe_client_api.user.get();
 	}
 
 	IFriends* Friends() {
-		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
-
 		return universe_client_api.friends.get();
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
 	IChat* Chat() {
-		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
-
 		return universe_client_api.chat.get();
 	}
 #endif
 
 	IMatchmaking* Matchmaking() {
-		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
-
 		return universe_client_api.matchmaking.get();
 	}
 
 	INetworking* Networking() {
-		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
-
 		return universe_client_api.networking.get();
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKINGLISTENER
 	INetworking* ServerNetworking() {
-		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
-
 		return universe_client_api.server_networking.get();
 	}
 #endif
 
 	IStats* Stats() {
-		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
-
 		return universe_client_api.stats.get();
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS
 	IUtils* Utils() {
-		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
-
 		return universe_client_api.utils.get();
 	}
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_IAPPS
 	IApps* Apps() {
-		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
-
 		return universe_client_api.apps.get();
 	}
 
@@ -137,16 +119,12 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 	IStorage* Storage() {
-		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
-
 		return universe_client_api.storage.get();
 	}
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE
 	ICloudStorage* CloudStorage() {
-		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
-
 		return universe_client_api.cloud_storage.get();
 	}
 #endif
@@ -154,35 +132,25 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
 	ICustomNetworking* CustomNetworking() {
-		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
-
 		return universe_client_api.custom_networking.get();
 	}
 #endif
 
 	ILogger* Logger() {
-		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
-
 		return universe_client_api.logger.get();
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 	ITelemetry* Telemetry() {
-		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
-
 		return universe_client_api.telemetry.get();
 	}
 #endif
 
 	void ProcessData() {
-		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
-
 		universe_client_api.real_process_data();
 	}
 
 	IListenerRegistrar* ListenerRegistrar() {
-		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
-
 		return universe_client_api.notification.get();
 	}
 
@@ -190,8 +158,6 @@ namespace universelan::client {
 	* Seems this gets called after each ProcessData call.
 	*/
 	const IError* GetError() {
-		//tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
-
 		return universe_client_api.error.get();
 	}
 

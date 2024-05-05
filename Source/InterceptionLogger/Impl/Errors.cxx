@@ -15,13 +15,8 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::IERROR;
 	}
 
-	Error::Error(FuncT::F intf)
-	{
-	}
-
-	Error::~Error()
-	{
-	}
+	Error::Error(FuncT::F intf) : intf{ intf } {}
+	Error::~Error(){}
 
 	const char* Error::GetName() const {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };

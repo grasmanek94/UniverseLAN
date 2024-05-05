@@ -17,15 +17,8 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::ITELEMETRY;
 	}
 
-	TelemetryImpl::TelemetryImpl(FuncT::F intf) : intf{ intf }
-	{
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
-	}
-
-	TelemetryImpl::~TelemetryImpl()
-	{
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
-	}
+	TelemetryImpl::TelemetryImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
+	TelemetryImpl::~TelemetryImpl() {}
 
 	void TelemetryImpl::AddStringParam(const char* name, const char* value) {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };

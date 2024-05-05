@@ -17,14 +17,8 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::ISTORAGE;
 	}
 
-	StorageImpl::StorageImpl(FuncT::F intf) : intf{ intf }
-	{
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
-	}
-
-	StorageImpl::~StorageImpl() {
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
-	}
+	StorageImpl::StorageImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
+	StorageImpl::~StorageImpl() {}
 
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_SYNCHRONIZE
 	void StorageImpl::Synchronize() {

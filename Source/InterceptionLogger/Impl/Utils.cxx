@@ -17,15 +17,8 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::IUTILS;
 	}
 
-	UtilsImpl::UtilsImpl(FuncT::F intf) : intf{ intf }
-	{
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
-	}
-
-	UtilsImpl::~UtilsImpl()
-	{
-		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
-	}
+	UtilsImpl::UtilsImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
+	UtilsImpl::~UtilsImpl() {}
 
 	void UtilsImpl::GetImageSize(uint32_t imageID, int32_t& width, int32_t& height) {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };

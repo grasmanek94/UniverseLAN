@@ -17,14 +17,9 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::ICLOUDSTORAGE;
 	}
 
-	CloudStorageImpl::CloudStorageImpl(FuncT::F intf) : intf{ intf }
-	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
-	}
+	CloudStorageImpl::CloudStorageImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
 
-	CloudStorageImpl::~CloudStorageImpl() {
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
-	}
+	CloudStorageImpl::~CloudStorageImpl() {}
 
 	void CloudStorageImpl::GetFileList(const char* container, ICloudStorageGetFileListListener* listener) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };

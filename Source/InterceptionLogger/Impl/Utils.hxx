@@ -5,6 +5,7 @@
 #include <GalaxyFunctional.hxx>
 
 #include <GalaxyExport.h>
+#include <IListenerRegistrar.h>
 #include <IUtils.h>
 
 namespace universelan::client {
@@ -32,9 +33,10 @@ namespace universelan::client {
 
 	private:
 		FuncT::F intf;
+		IListenerRegistrar* notifications;
 
 	public:
-		UtilsImpl(FuncT::F intf);
+		UtilsImpl(FuncT::F intf, IListenerRegistrar* notifications);
 		virtual ~UtilsImpl();
 
 		/**

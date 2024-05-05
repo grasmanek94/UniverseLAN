@@ -15,14 +15,8 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::IMATCHMAKING;
 	}
 
-	MatchmakingImpl::MatchmakingImpl(FuncT::F intf) : intf{intf}
-	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
-	}
-
-	MatchmakingImpl::~MatchmakingImpl() {
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
-	}
+	MatchmakingImpl::MatchmakingImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
+	MatchmakingImpl::~MatchmakingImpl() {}
 
 	void MatchmakingImpl::CreateLobby(
 		LobbyType lobbyType

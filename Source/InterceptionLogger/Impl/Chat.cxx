@@ -17,7 +17,7 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::ICHAT;
 	}
 
-	ChatImpl::ChatImpl(FuncT::PTR intf) : intf{ intf } {}
+	ChatImpl::ChatImpl(FuncT::F intf, IListenerRegistrar* notifications) : intf{ intf }, notifications{ notifications } {}
 
 	ChatImpl::~ChatImpl() {}
 
