@@ -1,3 +1,7 @@
+#if GALAXY_BUILD_FEATURE_HAS_IGALAXY
+
+#define CLIENT_FACTORY
+
 #include <GalaxyFactory.h>
 
 namespace galaxy::api {
@@ -14,7 +18,6 @@ namespace galaxy::api {
 		GalaxyFactory::CreateInstance()->Init(clientID, clientSecret, throwExceptions);
 	}
 
-#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
 	/**
 	 * Calls IGalaxy::Init() on the singleton instance of IGalaxy.
 	 *
@@ -24,7 +27,6 @@ namespace galaxy::api {
 	{
 		GalaxyFactory::CreateInstance()->Init(initOptions);
 	}
-#endif
 
 	/**
 	 * Calls IGalaxy::InitLocal() on the singleton instance of IGalaxy.
@@ -146,7 +148,6 @@ namespace galaxy::api {
 		return GalaxyFactory::GetInstance()->GetStats();
 	}
 
-#if GALAXY_BUILD_FEATURE_HAS_IUTILS
 	/**
 	 * Calls IGalaxy::GetUtils() on the singleton instance of IGalaxy.
 	 *
@@ -159,9 +160,7 @@ namespace galaxy::api {
 
 		return GalaxyFactory::GetInstance()->GetUtils();
 	}
-#endif
 
-#if GALAXY_BUILD_FEATURE_HAS_IAPPS
 	/**
 	 * Calls IGalaxy::GetApps() on the singleton instance of IGalaxy.
 	 *
@@ -174,9 +173,7 @@ namespace galaxy::api {
 
 		return GalaxyFactory::GetInstance()->GetApps();
 	}
-#endif
 
-#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 	/**
 	 * Calls IGalaxy::GetStorage() on the singleton instance of IGalaxy.
 	 *
@@ -189,9 +186,7 @@ namespace galaxy::api {
 
 		return GalaxyFactory::GetInstance()->GetStorage();
 	}
-#endif
 
-#if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
 	/**
 	* Calls IGalaxy::GetCustomNetworking() on the singleton instance of IGalaxy.
 	*
@@ -204,7 +199,6 @@ namespace galaxy::api {
 
 		return GalaxyFactory::GetInstance()->GetCustomNetworking();
 	}
-#endif
 
 	/**
 	 * Calls IGalaxy::GetListenerRegistrar() on the singleton instance of IGalaxy.
@@ -242,3 +236,4 @@ namespace galaxy::api {
 		return GalaxyFactory::GetErrorManager()->GetLastError();
 	}
 }
+#endif

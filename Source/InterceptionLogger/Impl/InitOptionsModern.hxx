@@ -48,16 +48,23 @@ namespace universelan::client {
 		std::string galaxyPeerPath;
 
 		bool throwExceptions;
+
 #if GALAXY_BUILD_FEATURE_ALLOCATOR
-		galaxy::api::GalaxyAllocator* galaxyAllocator;
+		galaxy::api::GalaxyAllocator*
+#else
+		void*
 #endif
+			galaxyAllocator;
+
 #if GALAXY_BUILD_FEATURE_HAS_IGALAXYTHREADFACTORY
-		galaxy::api::IGalaxyThreadFactory* galaxyThreadFactory; ///< The custom thread factory used by GOG Galaxy SDK to spawn internal threads.
+		galaxy::api::IGalaxyThreadFactory*
+#else 
+		void*
 #endif
-#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_HOST_PORT
+			galaxyThreadFactory; ///< The custom thread factory used by GOG Galaxy SDK to spawn internal threads.
+
 		std::string host; ///< The local IP address this peer would bind to.
 		uint16_t port; ///< The local port used to communicate with GOG Galaxy Multiplayer server and other players.
-#endif
 
 		InitOptionsImpl ToClassicOptions() const;
 	};

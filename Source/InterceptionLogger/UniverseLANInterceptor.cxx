@@ -7,6 +7,10 @@
 #include <IniData.hxx>
 #include <Tracer.hxx>
 
+#if GALAXY_BUILD_FEATURE_HAS_IGALAXY
+#include <Errors.h>
+#endif
+
 #include <filesystem>
 #include <memory>
 
@@ -130,7 +134,12 @@ namespace universelan::client {
 		real_ierror_manager = real_factory_get_error_manager();
 
 		real_init = [&](InitOptionsImpl const& initOptions) -> void {
-			real_igalaxy_instance->Init(initOptions);
+			try {
+				real_igalaxy_instance->Init(initOptions);
+			}
+			catch (const IError& error) {
+				std::cerr << "Error: " << error.GetMsg() << std::endl;
+			}
 		};
 
 		real_process_data = std::bind(&IGalaxy::ProcessData, real_igalaxy_instance);
@@ -148,7 +157,7 @@ namespace universelan::client {
 		matchmaking = std::make_unique<MatchmakingImpl>(std::bind(&IGalaxy::GetMatchmaking, real_igalaxy_instance), real_notification);
 		networking = std::make_unique<NetworkingImpl>(std::bind(&IGalaxy::GetNetworking, real_igalaxy_instance), real_notification);
 
-#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKINGLISTENER
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
 		server_networking = std::make_unique<NetworkingImpl>(std::bind(&IGalaxy::GetServerNetworking, real_igalaxy_instance), real_notification);
 #endif
 
@@ -200,7 +209,7 @@ namespace universelan::client {
 		interceptor_make_unique(matchmaking, (gameserver ? "?GameServerMatchmaking@api@galaxy@" : "?Matchmaking@api@galaxy@"), real_notification);
 		interceptor_make_unique(networking, (gameserver ? "?GameServerNetworking@api@galaxy@" : "?Networking@api@galaxy@"), real_notification);
 
-#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKINGLISTENER
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
 		interceptor_make_unique(server_networking, "?ServerNetworking@api@galaxy@", real_notification);
 #endif
 
@@ -283,7 +292,7 @@ namespace universelan::client {
 #endif
 		stats = nullptr;
 		networking = nullptr;
-#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKINGLISTENER
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
 		server_networking = nullptr;
 #endif
 		matchmaking = nullptr;

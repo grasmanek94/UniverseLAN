@@ -38,11 +38,6 @@ namespace universelan::client {
 	using MATCHMAKING_RET_TYPE = universelan::util::dynamic_return<bool>;
 #endif
 
-#if !GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-	using ILobbyDataUpdateListener = ILobbyDataListener;
-	using ILobbyMemberDataUpdateListener = ILobbyDataListener;
-#endif
-
 	/**
 	 * @addtogroup api
 	 * @{
@@ -88,14 +83,19 @@ namespace universelan::client {
 		ListenersRequestHelper<ILobbyListListener*> list_lobbies_requests;
 		ListenersRequestHelper<ILobbyEnteredListener*> join_lobby_requests;
 		ListenersRequestHelper<ILobbyLeftListener*> leave_lobby_requests;
+
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		ListenersRequestHelper<ILobbyDataUpdateListener*> set_max_lobby_members_requests;
 		ListenersRequestHelper<ILobbyDataUpdateListener*> set_lobby_type_requests;
 		ListenersRequestHelper<ILobbyDataUpdateListener*> set_lobby_joinable_requests;
+		ListenersRequestHelper<ILobbyDataUpdateListener*> set_lobby_data_requests;
+		ListenersRequestHelper<ILobbyMemberDataUpdateListener*> set_lobby_member_data_requests;
+#endif
+
 #if GALAXY_BUILD_FEATURE_HAS_ILOBBYDATARETRIEVELISTENER
 		ListenersRequestHelper<ILobbyDataRetrieveListener*> get_lobby_data_requests;
 #endif
-		ListenersRequestHelper<ILobbyDataUpdateListener*> set_lobby_data_requests;
-		ListenersRequestHelper<ILobbyMemberDataUpdateListener*> set_lobby_member_data_requests;
+
 
 		mutex_t mtx;
 		LobbyManager::lobbies_t lobby_list;

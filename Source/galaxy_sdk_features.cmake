@@ -6,7 +6,7 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
 
   #		NAME							START_VERSION END_VERSION
   afvd(HAS_IGALAXY	 							1.57.0 		1.114.9		)
-  afvd(HAS_ISERVERNETWORKINGLISTENER			1.57.0		1.134.10	)
+  afvd(HAS_ISERVERNETWORKING		        	1.57.0		1.134.10	)
 
   afvd(IFRIENDS_HAS_PERSONANAME_AND_AVATARURL	1.59.0					)
 
@@ -41,14 +41,6 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
   afvd(ISTATS_GET_ACHIEVEMENT_LEADERBOARD_COPY	1.71.0 			    	)
   afvd(IUSER_GET_DATA_ACCESSTOKEN_COPY          1.71.0 			    	)
 
-
-  afvd(HAS_INOTIFICATIONLISTENER        		1.75.0 					)
-  afvd(HAS_ILOBBYDATARETRIEVELISTENER      		1.75.0 					)
-  afvd(HAS_IGAMEINVITATIONRECEIVEDLISTENER 		1.75.0 					)
-  afvd(IFRIENDS_HAS_ISAVATARRGBAIMAGEAVAILABLE 	1.75.0 					)
-
-  # up to here it's up-to-date
-  
   afvd(HAS_IUTILS	                            1.73.0 			    	)
   afvd(HAS_IAPPS	                            1.73.0 			    	)
   afvd(HAS_SPECIFICUSERDATALISTENER   		    1.73.0 			    	)
@@ -58,11 +50,14 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
   afvd(HAS_1_73_LOBBY_FEATURES					1.73.0					)
 
   afvd(ADDED_RICH_PRESENCE_LISTENERS			1.74.0					)
+  
+  # up to here it's up-to-date
 
+  afvd(HAS_INOTIFICATIONLISTENER        		1.75.0 					)
+  afvd(HAS_ILOBBYDATARETRIEVELISTENER      		1.75.0 					)
+  afvd(HAS_IGAMEINVITATIONRECEIVEDLISTENER 		1.75.0 					)
+  afvd(IFRIENDS_HAS_ISAVATARRGBAIMAGEAVAILABLE 	1.75.0 					)
   afvd(HAS_IFRIEND_ISAVATARAVAILABLE			1.75.0					)
-  afvd(HAS_ILOBBYDATARETRIEVELISTENER			1.75.0					)
-  afvd(HAS_INOTIFICATIONLISTENER				1.75.0					)
-  afvd(HAS_IGAMEINVITATIONRECEIVEDLISTENER		1.75.0					)
 
   afvd(HAS_IUSERTIMEPLAYEDRETRIEVELISTENER		1.76.0					)
   
@@ -75,6 +70,7 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
   afvd(HAS_INITOPTIONS 							1.82.0 					)
   afvd(HAS_IOTHERSESSIONSTARTLISTENER			1.82.0 					)
   afvd(HAS_REQUESTLOBBYLIST_ARGS_ALLOWFULL		1.82.0 					)
+  afvd(HAS_INITOPTIONS_GALAXYPEERPATH      		1.82.0 		1.120.0 	)
 
   afvd(HAS_ISTORAGE 							1.88.0 					)
   afvd(HAS_GETCURRENTGAMELANGUAGE				1.88.0 					)

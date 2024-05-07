@@ -435,7 +435,8 @@ static void HandleCommand(const s2::string& line)
 	}
 	else if (parse[0] == "run" && parse.len() == 2) {
 		auto filename = parse[1];
-		FILE* fh = fopen(filename, "rb");
+		FILE* fh = nullptr;
+		fopen_s(&fh, filename, "rb");
 		if (fh == nullptr) {
 			LOG_ERROR("Couldn't find file \"%s\"", filename.c_str());
 			return;

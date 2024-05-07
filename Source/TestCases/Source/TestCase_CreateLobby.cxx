@@ -59,7 +59,12 @@ int main()
 	galaxy_api = galaxy::api::GalaxyFactory::CreateInstance();
 #endif
 
-	GET_GALAXY_API_AS_IS(Init(options));
+	try {
+		GET_GALAXY_API_AS_IS(Init(options));
+	}
+	catch (const IError& err) {
+		std::cerr << err.GetMsg() << std::endl;
+	}
 
 	trace = std::make_unique<tracer::Trace>("", "main");
 
@@ -209,7 +214,7 @@ int main()
 	UserTimePlayedRetrieveListenerImplGlobal usertimeplayedretrievelistener{};
 #endif
 
-#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKINGLISTENER
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
 	ServerNetworkingListenerImplGlobal servernetworkinglistener{};
 #endif
 

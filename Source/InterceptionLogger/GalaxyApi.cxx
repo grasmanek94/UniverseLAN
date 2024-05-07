@@ -75,7 +75,7 @@ namespace galaxy::api {
 		return universelan::client::Networking();
 	}
 
-#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKINGLISTENER
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
 	GALAXY_DLL_EXPORT INetworking* GALAXY_CALLTYPE ServerNetworking(void)
 	{
 		return universelan::client::ServerNetworking();

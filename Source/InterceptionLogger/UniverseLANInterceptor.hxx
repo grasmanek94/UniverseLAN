@@ -60,7 +60,7 @@ namespace universelan::client {
 		std::unique_ptr<Error>					error = nullptr;
 		std::unique_ptr<LoggerImpl>				logger = nullptr;
 
-#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKINGLISTENER
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
 		std::unique_ptr<NetworkingImpl>			server_networking = nullptr;
 #endif
 

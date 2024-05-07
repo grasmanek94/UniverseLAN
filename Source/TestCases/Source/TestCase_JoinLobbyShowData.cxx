@@ -297,7 +297,7 @@ int main()
 	UserTimePlayedRetrieveListenerImplGlobal usertimeplayedretrievelistener{};
 #endif
 
-#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKINGLISTENER
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
 	ServerNetworkingListenerImplGlobal servernetworkinglistener{};
 #endif
 

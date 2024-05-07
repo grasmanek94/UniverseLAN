@@ -66,7 +66,6 @@ function(add_version_rc)
   SET(IN_VERSION_RC_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/versioninfo.rc.cmake.in)
 
   prep_version_rc(universelan-client-${GALAXY_VERSION} "Client" "Galaxy-${GALAXY_VERSION}.dll" "client")
-  prep_version_rc(universelan-dllhost-${GALAXY_VERSION} "Dll Test Host" "UniverseLANDLLHost-${GALAXY_VERSION}.exe" "dllhost")
   prep_version_rc(universelan-server-${GALAXY_VERSION} "Server" "UniverseLANServer-${GALAXY_VERSION}.exe" "server")
   if(BUILD_INTERCEPTOR)
     prep_version_rc(universelan-interceptor-${GALAXY_VERSION} "Galaxy SDK Call Logger" "Galaxy-${GALAXY_VERSION}-interceptor.dll" "interceptor")
@@ -96,21 +95,9 @@ function(add_universelan_executables GALAXY_VERSION_NUMBER)
   set(MODULE_DEFINITION_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/${GALAXY_ARCH}/UniverseLAN.def)
   set(DLL_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/Dll.cxx)
   set(FACTORY_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/Factory.cxx)
-  set(DLL_HOST_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/DllHost.cxx)
-  set(FACTORY_HOST_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/FactoryHost.cxx)
-
-  if(BUILD_INTERCEPTOR)
-    set(DLL_INTERCEPTOR_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/DllInterceptionLogger.cxx)
-    set(FACTORY_INTERCEPTOR_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/FactoryInterceptionLogger.cxx)
-  endif()
 
   set(UNIVERSELAN_OUT_TYPE "DLL")
   set(UNIVERSELAN_SOURCE_CLIENT "${DLL_FILE}")
-  set(UNIVERSELAN_SOURCE_HOST "${DLL_HOST_FILE}")
-
-  if(BUILD_INTERCEPTOR)
-    set(UNIVERSELAN_SOURCE_INTERCEPTOR "${DLL_INTERCEPTOR_FILE}")
-  endif()
 
   set(UNIVERSELAN_SDK_INCL_DIR "${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/")
 
@@ -118,10 +105,6 @@ function(add_universelan_executables GALAXY_VERSION_NUMBER)
     # Switch to FACTORY type if this is not a DLL type
     set(UNIVERSELAN_OUT_TYPE "FACTORY")
     set(UNIVERSELAN_SOURCE_CLIENT "${FACTORY_FILE}")
-    set(UNIVERSELAN_SOURCE_HOST "${FACTORY_HOST_FILE}")
-    if(BUILD_INTERCEPTOR)
-      set(UNIVERSELAN_SOURCE_INTERCEPTOR "${FACTORY_INTERCEPTOR_FILE}")
-    endif()
   endif()
 
   if(NOT EXISTS "${MODULE_DEFINITION_FILE}")
@@ -153,21 +136,9 @@ function(add_universelan_executables GALAXY_VERSION_NUMBER)
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/${UNIVERSELAN_EXTRA_BIN_FOLDER}"
   )
 
-  # Create a simple DLL/SO host
-  add_executable(universelan-dllhost-${GALAXY_VERSION} WIN32 "${UNIVERSELAN_SOURCE_HOST}")
-  target_include_directories(universelan-dllhost-${GALAXY_VERSION} PUBLIC "${UNIVERSELAN_SDK_INCL_DIR}")
-  target_compile_definitions(universelan-dllhost-${GALAXY_VERSION} PUBLIC "HOST_${UNIVERSELAN_OUT_TYPE}")
-  target_link_libraries(universelan-dllhost-${GALAXY_VERSION} PUBLIC universelan-client-${GALAXY_VERSION} )
-  set_target_properties(universelan-dllhost-${GALAXY_VERSION} PROPERTIES 
-    OUTPUT_NAME "UniverseLANDllHost${ARCH_ADDITION}"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/${UNIVERSELAN_EXTRA_BIN_FOLDER}"
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/${UNIVERSELAN_EXTRA_BIN_FOLDER}"
-  )
-  set_property(TARGET universelan-dllhost-${GALAXY_VERSION} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${GALAXY_VERSION_NUMBER}/Debug/")
-
   if(BUILD_INTERCEPTOR)
     # Create SDK call interceptor / logger .DLL / Shared library
-    add_library(universelan-interceptor-${GALAXY_VERSION} SHARED "${UNIVERSELAN_SOURCE_INTERCEPTOR}" "${MODULE_DEFINITION_FILE}")
+    add_library(universelan-interceptor-${GALAXY_VERSION} SHARED "${UNIVERSELAN_SOURCE_CLIENT}" "${MODULE_DEFINITION_FILE}")
     target_include_directories(universelan-interceptor-${GALAXY_VERSION} PUBLIC "${UNIVERSELAN_SDK_INCL_DIR}")
     target_compile_definitions(universelan-interceptor-${GALAXY_VERSION} PUBLIC "INTERCEPTOR_${UNIVERSELAN_OUT_TYPE}")
     target_link_libraries(universelan-interceptor-${GALAXY_VERSION} PUBLIC universelan-interception-logger-lib-${GALAXY_VERSION} )
@@ -183,7 +154,6 @@ function(add_universelan_executables GALAXY_VERSION_NUMBER)
 
   if(NOT MSVC)
     target_link_options(universelan-client-${GALAXY_VERSION} PRIVATE -static-libgcc -static-libstdc++)
-    target_link_options(universelan-dllhost-${GALAXY_VERSION} PRIVATE -static-libgcc -static-libstdc++)
   endif()
 
   # add version.rc

@@ -96,7 +96,7 @@ namespace universelan::client {
 		return universe_client_api.networking.get();
 	}
 
-#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKINGLISTENER
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
 	INetworking* ServerNetworking() {
 		return universe_client_api.server_networking.get();
 	}

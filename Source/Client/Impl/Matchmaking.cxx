@@ -11,12 +11,14 @@ namespace universelan::client {
 	MatchmakingImpl::MatchmakingImpl(InterfaceInstances* intf) :
 		intf{ intf }, listeners{ intf->notification.get() },
 		create_lobby_requests{}, create_lobby_entered_requests{}, list_lobbies_requests{},
-		join_lobby_requests{}, leave_lobby_requests{}, set_max_lobby_members_requests{},
-		set_lobby_type_requests{}, set_lobby_joinable_requests{},
+		join_lobby_requests{}, leave_lobby_requests{}, 
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
+		set_max_lobby_members_requests{}, set_lobby_type_requests{}, set_lobby_joinable_requests{},
+		set_lobby_data_requests{}, set_lobby_member_data_requests{},
+#endif
 #if GALAXY_BUILD_FEATURE_HAS_ILOBBYDATARETRIEVELISTENER
 		get_lobby_data_requests{},
 #endif
-		set_lobby_data_requests{}, set_lobby_member_data_requests{},
 		mtx{}, lobby_list{}, lobby_list_filters{ {}, 250, true },
 		lobby_list_filtered{}, joined_lobby{}, lobby_list_filtered_requests{}
 	{
@@ -418,7 +420,10 @@ namespace universelan::client {
 
 		uint64_t request_id = MessageUniqueID::get();
 
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		auto listener = set_max_lobby_members_requests.pop(request_id);
+#endif
+
 		if (data->success) {
 			{
 				lock_t lock{ mtx };
@@ -507,7 +512,10 @@ namespace universelan::client {
 
 		uint64_t request_id = MessageUniqueID::get();
 
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		auto listener = set_lobby_type_requests.pop(request_id);
+#endif
+
 		if (data->success) {
 			{
 				lock_t lock{ mtx };
@@ -570,7 +578,10 @@ namespace universelan::client {
 
 		uint64_t request_id = MessageUniqueID::get();
 
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		auto listener = set_lobby_joinable_requests.pop(request_id);
+#endif
+
 		if (data->success) {
 			{
 				lock_t lock{ mtx };
@@ -708,7 +719,9 @@ namespace universelan::client {
 	void MatchmakingImpl::SetLobbyDataProcessed(const std::shared_ptr<SetLobbyDataMessage>& data) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
 
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		auto listener = set_lobby_data_requests.pop(data->request_id);
+#endif
 
 		if (data->success) {
 			{
@@ -833,7 +846,9 @@ namespace universelan::client {
 	void MatchmakingImpl::SetLobbyMemberDataProcessed(const std::shared_ptr<SetLobbyMemberDataMessage>& data) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
 
+#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		auto listener = set_lobby_member_data_requests.pop(data->request_id);
+#endif
 
 		if (data->success) {
 			{

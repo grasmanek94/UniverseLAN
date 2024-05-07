@@ -1,3 +1,7 @@
+#if GALAXY_BUILD_FEATURE_NEEDS_DLL_IMPL
+
+#define CLIENT_DLL
+
 #include <GalaxyDLL.hxx>
 
 namespace galaxy::api {
@@ -15,21 +19,27 @@ namespace galaxy::api {
 	{
 		universelan::client::Shutdown();
 	}
-
+	
+#if GALAXY_BUILD_FEATURE_HAS_IAPPS
 	GALAXY_DLL_EXPORT IApps* GALAXY_CALLTYPE Apps(void)
 	{
 		return universelan::client::Apps();
 	}
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT
 	GALAXY_DLL_EXPORT IChat* GALAXY_CALLTYPE Chat(void)
 	{
 		return universelan::client::Chat();
 	}
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
 	GALAXY_DLL_EXPORT ICustomNetworking* GALAXY_CALLTYPE CustomNetworking(void)
 	{
 		return universelan::client::CustomNetworking();
 	}
+#endif
 
 	GALAXY_DLL_EXPORT IFriends* GALAXY_CALLTYPE Friends(void)
 	{
@@ -61,32 +71,53 @@ namespace galaxy::api {
 		return universelan::client::Networking();
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
 	GALAXY_DLL_EXPORT INetworking* GALAXY_CALLTYPE ServerNetworking(void)
 	{
 		return universelan::client::ServerNetworking();
 	}
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 	GALAXY_DLL_EXPORT ITelemetry* GALAXY_CALLTYPE Telemetry(void) {
 		return universelan::client::Telemetry();
 	}
+#endif
 
 	GALAXY_DLL_EXPORT IStats* GALAXY_CALLTYPE Stats(void)
 	{
 		return universelan::client::Stats();
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 	GALAXY_DLL_EXPORT IStorage* GALAXY_CALLTYPE Storage(void)
 	{
 		return universelan::client::Storage();
 	}
+#endif
 
 	GALAXY_DLL_EXPORT IUser* GALAXY_CALLTYPE User(void)
 	{
 		return universelan::client::User();
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_IUTILS
 	GALAXY_DLL_EXPORT IUtils* GALAXY_CALLTYPE Utils(void)
 	{
 		return universelan::client::Utils();
 	}
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE
+	GALAXY_DLL_EXPORT ICloudStorage* GALAXY_CALLTYPE CloudStorage(void)
+	{
+		return universelan::client::CloudStorage();
+	}
+#endif
 }
+
+extern "C" GALAXY_DLL_EXPORT uint32_t load() {
+	return universelan::client::load();
+}
+
+#endif
