@@ -126,12 +126,13 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Ticket to Ride                        | :left_right_arrow:        | 1.139.2                       | Tried it with the wrapper and works, but need to create a free Wonder account | 
 | Aragami 2                             | :left_right_arrow:        | 1.148.3                       | Probably does not use GOG Galaxy for networking (doesn't work for private lobbies).<br> Can play on public lobbies without GOG Galaxy or with this patch AFAIK. |
 | DUSK (DuskWorld)                      | :left_right_arrow:        | 1.133.6                       | Uses steam (works without Steam Client) api for free online play, doesn't use GOG Galaxy. |
+| Mount & Blade II - Bannerlord         | :x:                       | 1.144.1                       | Uses Epic Online Services, not Galaxy
 | Absolver                              | :x:                       | 1.104.2                       | EAC is preventing usage of UniverseLAN, without EAC multiplayer is disabled | 
 | DUSK                                  | :x:                       | 1.133.6                       | No multiplayer --> DuskWorld | 
 | Roboquest                             | :x:                       | 1.148.3                       | Probably does not use GOG Galaxy for networking. |
 | Northgard                             | :x:                       | 1.139.2                       | Still thinks the game is offline, custom multiplayer? | 
 | Tropico 5                             | :x:                       | 1.68.0                        | Game uses an external service for multiplayer? | 
-| Saints Row IV - Re-Elected            | :x:                       | 1.148.3                       | Game uses Epic Online Services for multiplayer probably (stuck after "do you want to sign in?") | 
+| Saints Row IV - Re-Elected            | :x:                       | 1.148.3                       | Uses Epic Online Services for multiplayer probably (stuck after "do you want to sign in?") | 
 
 # Notice
 I'm not affiliated in any way with GOG or CD Projekt RED.  
