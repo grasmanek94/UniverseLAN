@@ -25,3 +25,4 @@ cmake-linux-x86/
 cmake-linux-x64/
 release-packages/
 cmake-x*custom*.bat
+ConfigInterceptor*/
