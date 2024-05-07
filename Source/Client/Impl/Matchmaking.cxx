@@ -352,7 +352,7 @@ namespace universelan::client {
 		}
 
 		listeners->NotifyAll(listener, &ILobbyEnteredListener::OnLobbyEntered, data->lobby_id, data->result);
-		listeners->NotifyAll(&ILobbyMemberStateListener::OnLobbyMemberStateChanged, data->lobby_id, intf->user->GetGalaxyID(), LobbyMemberStateChange::LOBBY_MEMBER_STATE_CHANGED_ENTERED); // TODO: this is probably superfluous (or at least on some version)
+		//listeners->NotifyAll(&ILobbyMemberStateListener::OnLobbyMemberStateChanged, data->lobby_id, intf->user->GetGalaxyID(), LobbyMemberStateChange::LOBBY_MEMBER_STATE_CHANGED_ENTERED); // TODO: this is probably superfluous (or at least on some version)
 	}
 
 	void MatchmakingImpl::LeaveLobby(GalaxyID lobbyID
@@ -840,7 +840,7 @@ namespace universelan::client {
 		set_lobby_member_data_requests.emplace(request_id, listener);
 #endif
 
-		intf->client->GetConnection().SendAsync(SetLobbyMemberDataMessage{ request_id, 0, lobbyID, key, value });
+		intf->client->GetConnection().SendAsync(SetLobbyMemberDataMessage{ request_id, lobbyID, 0, key, value });
 	}
 
 	void MatchmakingImpl::SetLobbyMemberDataProcessed(const std::shared_ptr<SetLobbyMemberDataMessage>& data) {
