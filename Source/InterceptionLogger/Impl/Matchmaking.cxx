@@ -588,7 +588,7 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("lobbyID: {}", memberID));
+			trace.write_all(std::format("memberID: {}", memberID));
 			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
 		}
 
@@ -607,7 +607,7 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("lobbyID: {}", memberID));
+			trace.write_all(std::format("memberID: {}", memberID));
 			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
 			trace.write_all(std::format("buffer: {}", (void*)buffer));
 			trace.write_all(std::format("bufferLength: {}", bufferLength));
