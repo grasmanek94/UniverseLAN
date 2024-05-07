@@ -53,4 +53,9 @@ namespace universelan::client {
 
 		return result;
 	}
+
+	bool Error::HasError() const
+	{
+		return intf() != nullptr;
+	}
 }

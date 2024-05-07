@@ -51,6 +51,8 @@ namespace universelan::client {
 		 * @return The type of the error.
 		 */
 		virtual Type GetType() const override;
+
+		virtual bool HasError() const;
 	};
 	/** @} */
 }

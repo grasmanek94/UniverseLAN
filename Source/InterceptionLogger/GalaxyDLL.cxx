@@ -160,6 +160,10 @@ namespace universelan::client {
 	* Seems this gets called after each ProcessData call.
 	*/
 	const IError* GetError() {
+		if (!universe_client_api.error || !universe_client_api.error->HasError()) {
+			return nullptr;
+		}
+
 		return universe_client_api.error.get();
 	}
 
