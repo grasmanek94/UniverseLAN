@@ -209,9 +209,17 @@ namespace galaxy::api
 		 */
 		virtual const IError* GetError() const = 0;
 
+
+#ifndef _DEBUG
+		IGalaxy();
+#endif
 		IGalaxy(IGalaxy const& other);
 		IGalaxy& operator=(IGalaxy const& other);
 	};
+
+#ifndef _DEBUG
+	IGalaxy::IGalaxy() {}
+#endif
 
 	IGalaxy::IGalaxy(IGalaxy const& other)
 	{
