@@ -70,29 +70,26 @@ namespace universelan::server {
 
 		if (pd->challenge.Validate(*data) && data->id.IsValid()) {
 			auto entry = user_data.emplace(data->id, std::make_shared<GalaxyUserData>(data->id));
-			if (entry.second) {
-				pd->id = data->id;
-				if (pd->link(data->id)) {
-					tracer::Trace validated{ "::challenge.Validate" };
+			if (entry.second && pd->link(data->id)) {
+				tracer::Trace validated{ "::challenge.Validate" };
 
-					pd->user_data = entry.first->second;
+				pd->user_data = entry.first->second;
 
-					unauthenticated_peers.erase(peer);
-					connection.Send(peer, ConnectionAcceptedMessage{});
-					connection.Broadcast(OnlineStatusChangeMessage{ pd->id, true }, peer);
+				unauthenticated_peers.erase(peer);
+				connection.Send(peer, ConnectionAcceptedMessage{});
+				connection.Broadcast(OnlineStatusChangeMessage{ pd->id, true }, peer);
 
-					for (auto& online_peer : peer_mapper.connected_peers) {
-						if (peer != online_peer) {
-							peer::ptr online_member = peer_mapper.Get(online_peer);
-							if (online_member->id.IsValid()) {
-								connection.Send(peer, OnlineStatusChangeMessage{ online_member->id, true });
-							}
+				for (auto& online_peer : peer_mapper.connected_peers) {
+					if (peer != online_peer) {
+						peer::ptr online_member = peer_mapper.Get(online_peer);
+						if (online_member->id.IsValid()) {
+							connection.Send(peer, OnlineStatusChangeMessage{ online_member->id, true });
 						}
 					}
-
-					std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") KeyChallengeMessage ACCEPT" << std::endl;
-					return;
 				}
+
+				std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") KeyChallengeMessage ACCEPT" << std::endl;
+				return;
 			}
 		}
 
