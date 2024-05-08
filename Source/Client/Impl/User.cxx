@@ -23,12 +23,13 @@ namespace universelan::client {
 	UserImpl::UserImpl(InterfaceInstances* intf) :
 		mtx_user_data{}, intf{ intf },
 		listeners{ intf->notification.get() },
+		user_data{}, logged_on{ false }, connected{ false },
 #if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
 		specific_user_data_requests{},
 #endif
-		user_data{}
+		waiting_auth_listeners{}
 	{
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		// add local user
 		user_data.emplace(intf->config->GetApiGalaxyID(), intf->config->GetLocalUserData());
@@ -38,33 +39,38 @@ namespace universelan::client {
 
 	UserImpl::~UserImpl()
 	{
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 	}
 
 	bool UserImpl::SignedIn() {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		return intf->config->GetSignedIn();
 	}
 
 	GalaxyID UserImpl::GetGalaxyID() {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		return galaxy::api::FromRealID(galaxy::api::IDType::ID_TYPE_USER, intf->config->GetCustomGalaxyID());
 	}
 
 	void UserImpl::SignIn(IAuthListener* const listener) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		if (intf->config->GetSignedIn()) {
+			if (logged_on) {
 #if GALAXY_BUILD_FEATURE_HAS_IACCESSTOKENLISTENER
-			listeners->NotifyAll(&IAccessTokenListener::OnAccessTokenChanged);
+				listeners->NotifyAll(&IAccessTokenListener::OnAccessTokenChanged);
 #endif
-
-			listeners->NotifyAll(listener, &IAuthListener::OnAuthSuccess);
-			listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, (IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN | IOperationalStateChangeListener::OPERATIONAL_STATE_LOGGED_ON));
-			listeners->NotifyAll(&IPersonaDataChangedListener::OnPersonaDataChanged, intf->user->GetGalaxyID(), IPersonaDataChangedListener::PERSONA_CHANGE_NONE);
-			listeners->NotifyAll(&IFriendListListener::OnFriendListRetrieveSuccess);
+				listeners->NotifyAll(listener, &IAuthListener::OnAuthSuccess);
+				listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, (IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN | IOperationalStateChangeListener::OPERATIONAL_STATE_LOGGED_ON));
+				listeners->NotifyAll(&IPersonaDataChangedListener::OnPersonaDataChanged, intf->user->GetGalaxyID(), IPersonaDataChangedListener::PERSONA_CHANGE_NONE);
+				listeners->NotifyAll(&IFriendListListener::OnFriendListRetrieveSuccess);
+			}
+			else if (listener != nullptr) {
+				lock_t lock{ mtx_waiting_auth_listeners };
+				waiting_auth_listeners.insert(listener);
+			}
 		}
 		else {
 			listeners->NotifyAll(listener, &IAuthListener::OnAuthFailure, IAuthListener::FAILURE_REASON_GALAXY_SERVICE_NOT_AVAILABLE);
@@ -77,7 +83,7 @@ namespace universelan::client {
 		, IAuthListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		SignIn(GET_LISTENER(listener));
 	}
@@ -87,7 +93,7 @@ namespace universelan::client {
 		, IAuthListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		SignIn(GET_LISTENER(listener));
 	}
@@ -100,7 +106,7 @@ namespace universelan::client {
 		, IAuthListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		SignIn(GET_LISTENER(listener));
 	}
@@ -111,7 +117,7 @@ namespace universelan::client {
 		, IAuthListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		SignIn(GET_LISTENER(listener));
 	}
@@ -123,7 +129,7 @@ namespace universelan::client {
 		IAuthListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		SignIn(GET_LISTENER(listener));
 	}
@@ -131,14 +137,14 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_CROSSPLATFORM
 	void UserImpl::SignInToken(const char* refreshToken, IAuthListener* const listener) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		SignIn(listener);
 	}
 
 #if GALAXY_BUILD_FEATURE_IUSER_SIGNINLAUNCHER
 	void UserImpl::SignInLauncher(IAuthListener* const listener) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		SignIn(listener);
 	}
@@ -146,7 +152,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_IUSER_SIGNINEPIC
 	void UserImpl::SignInEpic(const char* epicAccessToken, const char* epicUsername, IAuthListener* const listener) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 		if (epicAccessToken != nullptr && epicUsername != nullptr) {
 			SignIn(listener);
 		}
@@ -161,14 +167,14 @@ namespace universelan::client {
 	}
 #else
 	void UserImpl::SignInUWP(IAuthListener* const listener) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		SignIn(listener);
 	}
 #endif
 
 	void UserImpl::SignInPS4(const char* ps4ClientID, IAuthListener* const listener) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		if (ps4ClientID != nullptr) {
 			SignIn(listener);
@@ -176,7 +182,7 @@ namespace universelan::client {
 	}
 
 	void UserImpl::SignInXB1(const char* xboxOneUserID, IAuthListener* const listener) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		if (xboxOneUserID != nullptr) {
 			SignIn(listener);
@@ -185,7 +191,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_IUSER_SIGNINXBLIVE
 	void UserImpl::SignInXBLive(const char* token, const char* signature, const char* marketplaceID, const char* locale, IAuthListener* const listener) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		if (token != nullptr && signature != nullptr && marketplaceID != nullptr && locale != nullptr) {
 			SignIn(listener);
@@ -195,7 +201,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_ITELEMETRY_1_139_6_UPDATE
 	void UserImpl::SignInAnonymousTelemetry(IAuthListener* const listener) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		SignIn(listener);
 	}
@@ -208,7 +214,7 @@ namespace universelan::client {
 		, IAuthListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		SignIn(GET_LISTENER(listener));
 	}
@@ -219,7 +225,7 @@ namespace universelan::client {
 		, IAuthListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		if (ps4ClientID != nullptr && ps4TitleID != nullptr && ps4TitleSecret != nullptr) {
 			SignIn(GET_LISTENER(listener));
@@ -230,7 +236,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_SIGNOUT
 	void UserImpl::SignOut() {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		listeners->NotifyAll(&IAuthListener::OnAuthLost);
 		listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN);
@@ -245,19 +251,19 @@ namespace universelan::client {
 		, ISpecificUserDataListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 #if !GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
 		GalaxyID userID = intf->config->GetApiGalaxyID();
 #endif
-		
+
 		if (intf->config->IsSelfUserID(userID)) {
 #if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
 			listeners->NotifyAll(
 #if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
 				listener,
 #endif
-				&ISpecificUserDataListener::OnSpecificUserDataUpdated, userID);
+				& ISpecificUserDataListener::OnSpecificUserDataUpdated, userID);
 #endif
 			listeners->NotifyAll(&IUserDataListener::OnUserDataUpdated);
 		}
@@ -273,7 +279,7 @@ namespace universelan::client {
 	}
 
 	void UserImpl::SpecificUserDataRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 #if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
 		ISpecificUserDataListener* listener = specific_user_data_requests.pop(data->request_id);
@@ -295,7 +301,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_USERDATAINFOAVAILABLE
 	bool UserImpl::IsUserDataAvailable(GalaxyID userID) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		if (intf->config->IsSelfUserID(userID)) {
 			return true;
@@ -310,7 +316,7 @@ namespace universelan::client {
 		, GalaxyID userID
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 #if !GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
 		GalaxyID userID = intf->config->GetApiGalaxyID();
@@ -321,7 +327,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
 	void UserImpl::GetUserDataCopy(const char* key, char* buffer, uint32_t bufferLength, GalaxyID userID) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		const std::string& str = GetGalaxyUserData(userID)->stats.GetUserData(key);
 		universelan::util::safe_copy_str_n(str, buffer, bufferLength);
@@ -333,7 +339,7 @@ namespace universelan::client {
 		, ISpecificUserDataListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		intf->config->GetLocalUserData()->stats.SetUserData(key, value);
 		intf->config->SaveStatsAndAchievements();
@@ -345,7 +351,7 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_SETUSERDATA_ISPECIFICLISTENER
 			listener,
 #endif
-			&ISpecificUserDataListener::OnSpecificUserDataUpdated, intf->config->GetApiGalaxyID());
+			& ISpecificUserDataListener::OnSpecificUserDataUpdated, intf->config->GetApiGalaxyID());
 #endif
 
 		listeners->NotifyAll(&IUserDataListener::OnUserDataUpdated);
@@ -356,7 +362,7 @@ namespace universelan::client {
 		GalaxyID userID
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 #if !GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
 		GalaxyID userID = intf->config->GetApiGalaxyID();
@@ -373,7 +379,7 @@ namespace universelan::client {
 		, GalaxyID userID
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 #if !GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
 		GalaxyID userID = intf->config->GetApiGalaxyID();
@@ -385,7 +391,7 @@ namespace universelan::client {
 			if (!ref) {
 				return false;
 			}
-	
+
 			universelan::util::safe_copy_str_n(ref->first, key, keyLength);
 			universelan::util::safe_copy_str_n(ref->second, value, valueLength);
 
@@ -398,7 +404,7 @@ namespace universelan::client {
 		, ISpecificUserDataListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		SetUserData(key, ""
 #if GALAXY_BUILD_FEATURE_HAS_SETUSERDATA_ISPECIFICLISTENER
@@ -408,9 +414,9 @@ namespace universelan::client {
 	}
 
 	bool UserImpl::IsLoggedOn() {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		return intf->config->GetSignedIn();
+		return logged_on && SignedIn();
 	}
 
 #if GALAXY_BUILD_FEATURE_ENCRYPTED_APP_TICKET
@@ -419,17 +425,17 @@ namespace universelan::client {
 		, IEncryptedAppTicketListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		listeners->NotifyAll(
 #if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
 			listener,
 #endif
-			&IEncryptedAppTicketListener::OnEncryptedAppTicketRetrieveSuccess);
+			& IEncryptedAppTicketListener::OnEncryptedAppTicketRetrieveSuccess);
 	}
 
 	void UserImpl::GetEncryptedAppTicket(void* encryptedAppTicket, uint32_t maxEncryptedAppTicketSize, uint32_t& currentEncryptedAppTicketSize) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		currentEncryptedAppTicketSize = universelan::util::safe_copy_str_n(SOME_TOKEN_STRING, (char*)encryptedAppTicket, maxEncryptedAppTicketSize);
 	}
@@ -437,7 +443,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_IOTHERSESSIONSTARTLISTENER
 	SessionID UserImpl::GetSessionID() {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		return (uint64_t)this;
 	}
@@ -445,13 +451,13 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_IACCESSTOKENLISTENER
 	const char* UserImpl::GetAccessToken() {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		return SOME_TOKEN_STRING.c_str();
 	}
 
 	void UserImpl::GetAccessTokenCopy(char* buffer, uint32_t bufferLength) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		universelan::util::safe_copy_str_n(SOME_TOKEN_STRING, buffer, bufferLength);
 	}
@@ -461,7 +467,7 @@ namespace universelan::client {
 		, const char* info
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		listeners->NotifyAll(&IAccessTokenListener::OnAccessTokenChanged);
 
@@ -470,7 +476,7 @@ namespace universelan::client {
 #endif
 
 	void UserImpl::OnlineUserStateChange(const std::shared_ptr<OnlineStatusChangeMessage>& data) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		GetGalaxyUserData(data->id)->online = data->online;
 
@@ -482,7 +488,7 @@ namespace universelan::client {
 	}
 
 	GalaxyUserData::ptr_t UserImpl::GetGalaxyUserData(GalaxyID userID) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		if (intf->config->IsSelfUserID(userID)) {
 			return intf->config->GetLocalUserData();
@@ -498,7 +504,7 @@ namespace universelan::client {
 	}
 
 	bool UserImpl::IsGalaxyUserDataPresent(GalaxyID userID) const {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUSER };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		if (intf->config->IsSelfUserID(userID)) {
 			return true;
@@ -511,5 +517,60 @@ namespace universelan::client {
 		}
 
 		return false;
+	}
+
+	void UserImpl::RunForAllWaitingAuthListeners(std::function<void(IGalaxyListener*)> function) {
+		std::set<IGalaxyListener*> copy_waiting_auth_listeners;
+
+		{
+			lock_t lock{ mtx_waiting_auth_listeners };
+			copy_waiting_auth_listeners = waiting_auth_listeners;
+			waiting_auth_listeners.clear();
+		}
+
+		for (auto& listener : copy_waiting_auth_listeners) {
+			function(listener);
+		}
+	}
+
+	void UserImpl::ConnectionStateChangeReceived(bool connection_state, bool key_challenge_accepted) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUTILS };
+
+		logged_on = key_challenge_accepted;
+		connected = connection_state;
+
+		if (!SignedIn()) {
+			RunForAllWaitingAuthListeners([&](IGalaxyListener* listener) {
+				listeners->NotifyAllSpecificOnly(listener, &IAuthListener::OnAuthFailure, IAuthListener::FAILURE_REASON_GALAXY_SERVICE_NOT_AVAILABLE);
+			});
+
+			listeners->NotifyAll(&IAuthListener::OnAuthFailure, IAuthListener::FAILURE_REASON_GALAXY_SERVICE_NOT_AVAILABLE);
+			listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN);
+			return;
+		}
+
+		if (key_challenge_accepted) {
+			// Connected & Can exchange messages
+#if GALAXY_BUILD_FEATURE_HAS_IACCESSTOKENLISTENER
+			listeners->NotifyAll(&IAccessTokenListener::OnAccessTokenChanged);
+#endif
+			RunForAllWaitingAuthListeners([&](IGalaxyListener* listener) {
+				listeners->NotifyAllSpecificOnly(listener, &IAuthListener::OnAuthSuccess);
+				});
+
+			listeners->NotifyAll(&IAuthListener::OnAuthSuccess);
+			listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, (IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN | IOperationalStateChangeListener::OPERATIONAL_STATE_LOGGED_ON));
+			listeners->NotifyAll(&IPersonaDataChangedListener::OnPersonaDataChanged, intf->user->GetGalaxyID(), IPersonaDataChangedListener::PERSONA_CHANGE_NONE);
+			listeners->NotifyAll(&IFriendListListener::OnFriendListRetrieveSuccess);
+		}
+		else if (connection_state) {
+			// Connected
+			//listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, (IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN));
+		}
+		else {
+			// Disconnected
+			listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, (IOperationalStateChangeListener::OperationalState::OPERATIONAL_STATE_SIGNED_IN));
+		}
+
 	}
 }

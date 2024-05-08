@@ -20,6 +20,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <set>
 #include <unordered_map>
 
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_CROSSPLATFORM
@@ -66,10 +67,16 @@ namespace universelan::client {
 
 	private:
 		mutable mutex_t mtx_user_data;
+		mutable mutex_t mtx_waiting_auth_listeners;
 
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
 		GalaxyUserData::map_t user_data;
+		bool logged_on;
+		bool connected;
+		std::set<IGalaxyListener*> waiting_auth_listeners;
+
+		void RunForAllWaitingAuthListeners(std::function<void(IGalaxyListener*)> function);
 
 #if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
 		ListenersRequestHelper<ISpecificUserDataListener*> specific_user_data_requests;
@@ -662,6 +669,7 @@ namespace universelan::client {
 		void SpecificUserDataRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
 		void OnlineUserStateChange(const std::shared_ptr<OnlineStatusChangeMessage>& data);
 		void SetUserDataMessageReceived(const std::shared_ptr<SetUserDataMessage>& data);
+		void ConnectionStateChangeReceived(bool connection_state, bool key_challenge_accepted);
 
 		GalaxyUserData::ptr_t GetGalaxyUserData(GalaxyID userID);
 		bool IsGalaxyUserDataPresent(GalaxyID userID) const;

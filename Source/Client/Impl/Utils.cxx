@@ -71,7 +71,7 @@ namespace universelan::client {
 	GogServicesConnectionState UtilsImpl::GetGogServicesConnectionState() {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUTILS };
 
-		return intf->client->IsConnected() ?
+		return intf->user->IsLoggedOn() ?
 			GOG_SERVICES_CONNECTION_STATE_CONNECTED :
 			GOG_SERVICES_CONNECTION_STATE_DISCONNECTED;
 	}

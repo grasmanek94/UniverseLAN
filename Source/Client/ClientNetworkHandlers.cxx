@@ -40,6 +40,8 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS
 		interfaces->utils->ConnectionStateChangeReceived(true);
 #endif
+
+		interfaces->user->ConnectionStateChangeReceived(true, false);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data)
@@ -51,6 +53,8 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS
 		interfaces->utils->ConnectionStateChangeReceived(false);
 #endif
+
+		interfaces->user->ConnectionStateChangeReceived(false, false);
 
 		connection.Reconnect();
 	}
@@ -80,6 +84,8 @@ namespace universelan::client {
 			interfaces->config->GetLocalUserData()->stats,
 			interfaces->config->GetCustomPersonaName()
 			});
+
+		interfaces->user->ConnectionStateChangeReceived(true, true);
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<RequestSpecificUserDataMessage>& data)

@@ -153,6 +153,25 @@ namespace universelan::client {
 				});
 		}
 
+		template <typename T, class FuncT, class... ArgTypes>
+		bool NotifyAllNowSpecificOnly(T* one_time_specific_listener, FuncT&& Function, ArgTypes&&... Arguments) {
+			using BaseT = extract_class_from_member_function_ptr<FuncT>::type;
+
+			if (one_time_specific_listener == nullptr) {
+				return false;
+			}
+
+			tracer::Trace trace{ "::so", __FUNCTION__, tracer::Trace::NOTIFICATION_INVOCATIONS };
+
+			BaseT* casted_listener = (BaseT*)(one_time_specific_listener);
+			assert(casted_listener != nullptr);
+
+			std::invoke(std::forward<FuncT>(Function), casted_listener, notification_param_push_identity(Arguments)...);
+
+			return true;
+		}
+
+
 #ifndef NDEBUG
 		template <class FuncT, class... ArgTypes>
 		bool NotifyAllNowSimulate(FuncT&& Function, ArgTypes&&... Arguments) {
@@ -200,6 +219,16 @@ namespace universelan::client {
 
 			delay_runner->Add(std::bind_front([this](auto&&... args) {
 				this->NotifyAllNow(std::forward<decltype(args)>(args)...);
+				}, notification_param_extend_life<decltype(Arguments)>(std::move(Arguments))...));
+		}
+
+		template <typename... ArgTypes>
+		void NotifyAllSpecificOnly(ArgTypes... Arguments)
+		{
+			tracer::Trace trace{ nullptr, tracer::Trace::NOTIFICATION_INVOCATIONS };
+
+			delay_runner->Add(std::bind_front([this](auto&&... args) {
+				this->NotifyAllNowSpecificOnly(std::forward<decltype(args)>(args)...);
 				}, notification_param_extend_life<decltype(Arguments)>(std::move(Arguments))...));
 		}
 	};
