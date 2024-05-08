@@ -12,11 +12,14 @@
 
 namespace universelan::server {
 	bool Server::KickUnauthenticated(ENetPeer* peer) {
+
 		peer::ptr pd = peer_mapper.Get(peer);
 
 		if (pd != nullptr && pd->challenge.completed) {
 			return true;
 		}
+
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::SERVER_UNAUTHENTICATED };
 
 		// Action Squad somehow manages to kick itself from the server.
 		/*std::cout << "Disconnecting Peer("

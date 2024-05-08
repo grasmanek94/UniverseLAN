@@ -51,7 +51,8 @@ namespace universelan::tracer {
 			CUSTOMCONSOLE = bit(24),
 			ICLOUDSTORAGE = bit(25),
 
-			NOTIFICATION_INVOCATIONS = bit(26)
+			NOTIFICATION_INVOCATIONS = bit(26),
+			SERVER_UNAUTHENTICATED = bit(27)
 		};
 
 		static bool InitTracing(const char* const log_directory,

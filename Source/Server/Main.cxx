@@ -25,7 +25,7 @@ int main()
 	std::cout << "Build: " << universelan::Version_Number << std::endl;
 
 #ifdef _WIN32
-	SetConsoleTitleA(("UniverseLAN Client - Build: " + std::to_string(universelan::Version_Number)).c_str());
+	SetConsoleTitleA(("UniverseLAN Server - Build: " + std::to_string(universelan::Version_Number)).c_str());
 #endif
 
 	server = std::make_unique<Server>();
