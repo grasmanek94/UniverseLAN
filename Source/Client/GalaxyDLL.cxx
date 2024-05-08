@@ -7,6 +7,7 @@
 #include "UniverseLAN.hxx"
 
 #include <ConsoleCoutRedirector.hxx>
+#include <GalaxyID.hxx>
 
 #include <Version.hxx>
 
@@ -57,7 +58,7 @@ namespace universelan::client {
 		std::cout << "Using username: " << intf_inst.config->GetCustomPersonaName() << std::endl;
 		std::cout << "Using key: " << const_hash64(intf_inst.config->GetAuthenticationKey()) << std::endl;
 
-		auto real_galaxy_id = galaxy::api::GalaxyID::FromRealID(galaxy::api::GalaxyID::ID_TYPE_USER, intf_inst.config->GetCustomGalaxyID());
+		auto real_galaxy_id = galaxy::api::FromRealID(galaxy::api::IDType::ID_TYPE_USER, intf_inst.config->GetCustomGalaxyID());
 		std::cout << "Using GalaxyID: " << intf_inst.config->GetCustomGalaxyID() << " (" << real_galaxy_id.ToUint64() << ")" << std::endl;
 
 		intf_inst.client->Start();
