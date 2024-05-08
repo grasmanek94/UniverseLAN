@@ -80,6 +80,12 @@ namespace universelan::server {
 					unauthenticated_peers.erase(peer);
 					connection.Send(peer, ConnectionAcceptedMessage{});
 					connection.Broadcast(OnlineStatusChangeMessage{ pd->id, true }, peer);
+					
+					for (auto& online_peer : peer_mapper.connected_peers) {
+						peer::ptr online_member = peer_mapper.Get(online_peer);
+						connection.Send(peer, OnlineStatusChangeMessage{ online_member->id, true });
+
+					}
 
 					std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") KeyChallengeMessage ACCEPT" << std::endl;
 					return;
