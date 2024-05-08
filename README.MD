@@ -114,6 +114,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Serious Sams Bogus Detour             | :construction:            | 1.100.2                       | Can join lobby since build 360 and start game, but both players stuck on black "Loading..." screen |
 | Niffelheim                            | :construction:            | 1.139.2                       | Stuck at "Loading..." (save transfer?) | 
 | Homeworld: Deserts of Kharak          | :construction:            | 1.101                         | Tested with 1.100.2. After build 362 lobbies can now be created, but connecting doesn't work. | 
+| Ancestors Legacy                      | :construction:            | 1.133.6                       | Requires Leaderboards features to be implemented | 
 | Alien vs Predator 2000                | :question:                |                               | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176? |
 | Rage of Mages II: Necromancer         | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
 | Neverwinter Nights 2 Complete         | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
