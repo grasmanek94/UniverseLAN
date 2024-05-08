@@ -628,7 +628,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		lock_t lock(mtx_online_friends);
-		return online_friends.contains(userID);
+		return (userID == intf->user->GetGalaxyID()) || online_friends.contains(userID);
 	}
 #endif
 

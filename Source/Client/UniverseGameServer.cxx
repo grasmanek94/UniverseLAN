@@ -34,10 +34,13 @@ namespace universelan::client {
 		std::cout << "Version: " << Version_Number << std::endl;
 		std::cout << "Using username: " << gameserver_intf_inst.config->GetCustomPersonaName() << std::endl;
 		std::cout << "Using key: " << const_hash64(intf_inst.config->GetAuthenticationKey()) << std::endl;
-		std::cout << "Using GalaxyID: " << gameserver_intf_inst.config->GetCustomGalaxyID() << std::endl;
+
+		auto real_galaxy_id = galaxy::api::GalaxyID::FromRealID(galaxy::api::GalaxyID::ID_TYPE_USER, gameserver_intf_inst.config->GetCustomGalaxyID());
+		std::cout << "Using GalaxyID: " << gameserver_intf_inst.config->GetCustomGalaxyID() << " (" << real_galaxy_id.ToUint64() << ")" << std::endl;
 
 		gameserver_intf_inst.client->Start();
 	}
+
 	void UniverseGameServer::ShutdownGameServer() {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL_GAMESERVERAPI };
 
