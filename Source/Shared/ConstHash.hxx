@@ -26,4 +26,17 @@ namespace universelan {
 	inline constexpr uint64_t const_hash64_data(const char* data, size_t size, const uint64_t value = 0xcbf29ce484222325) noexcept {
 		return (size == 0) ? value : const_hash64_data(&data[1], size - 1, (value ^ uint64_t(data[0])) * 0x100000001b3);
 	}
+
+	inline uint64_t const_hash64_data_loop(const char* data, size_t size, uint64_t value = 0xcbf29ce484222325) noexcept {
+		if (size == 0) {
+			return value;
+		}
+
+		for (size_t i = 0; i < size; ++i) {
+			value ^= uint64_t(data[i]);
+			value *= 0x100000001b3;
+		}
+
+		return value;
+	}
 }
