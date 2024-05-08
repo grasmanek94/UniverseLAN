@@ -1,6 +1,5 @@
 #pragma once
 
-#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
 #include "P2PNetworkPacketMessage.hxx"
 
 namespace universelan {
@@ -27,4 +26,3 @@ namespace universelan {
 		virtual ~P2PServerNetworkPacketMessage() {}
 	};
 }
-#endif

@@ -121,7 +121,9 @@ namespace universelan::client {
 #endif
 		stats = nullptr;
 		networking = nullptr;
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
 		server_networking = nullptr;
+#endif
 		matchmaking = nullptr;
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
 		chat = nullptr;
