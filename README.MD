@@ -116,6 +116,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Homeworld: Deserts of Kharak          | :construction:            | 1.101                         | Tested with 1.100.2. After build 362 lobbies can now be created, but connecting doesn't work. | 
 | Ancestors Legacy                      | :construction:            | 1.133.6                       | Requires Leaderboards features to be implemented | 
 | Ashes of the Singularity - Escalation | :construction:            | 1.100.2                       | Requires .exe patches to patch out modification checks so that entering lobby is possible, unfortunately both players are seen as 'Host' and other side doesn't 'see' clicking 'ready'. UniverseLAN needs to support .exe patching, and the both players being 'host' needs to be analyzed and fixed. |
+| Warhammer: Chaosbane                  | :construction:            | 1.139.2                       | When joining: "Unable to establish a connection", looks like lobby "gets closed" when trying to join? | 
 | Alien vs Predator 2000                | :question:                |                               | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176? |
 | Rage of Mages II: Necromancer         | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
 | Neverwinter Nights 2 Complete         | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 

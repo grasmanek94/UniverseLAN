@@ -145,55 +145,55 @@ namespace universelan::client {
 
 			switch (comparison_type) {
 			case LOBBY_COMPARISON_TYPE_EQUAL:
-				if (compare_str && (value_str != specified_str)) {
+				if (compare_str && !(value_str == specified_str)) {
 					add = false;
 				}
-				else if (!compare_str && (value_i != specified_i)) {
+				else if (!compare_str && !(value_i == specified_i)) {
 					add = false;
 				}
 				break;
 
 			case LOBBY_COMPARISON_TYPE_NOT_EQUAL:
-				if (compare_str && (value_str == specified_str)) {
+				if (compare_str && !(value_str != specified_str)) {
 					add = false;
 				}
-				else if (!compare_str && (value_i == specified_i)) {
+				else if (!compare_str && !(value_i != specified_i)) {
 					add = false;
 				}
 				break;
 
 			case LOBBY_COMPARISON_TYPE_GREATER:
-				if (compare_str && (value_str > specified_str)) {
+				if (compare_str && !(value_str > specified_str)) {
 					add = false;
 				}
-				else if (!compare_str && (value_i > specified_i)) {
+				else if (!compare_str && !(value_i > specified_i)) {
 					add = false;
 				}
 				break;
 
 			case LOBBY_COMPARISON_TYPE_GREATER_OR_EQUAL:
-				if (compare_str && (value_str >= specified_str)) {
+				if (compare_str && !(value_str >= specified_str)) {
 					add = false;
 				}
-				else if (!compare_str && (value_i >= specified_i)) {
+				else if (!compare_str && !(value_i >= specified_i)) {
 					add = false;
 				}
 				break;
 
 			case LOBBY_COMPARISON_TYPE_LOWER:
-				if (compare_str && (value_str < specified_str)) {
+				if (compare_str && !(value_str < specified_str)) {
 					add = false;
 				}
-				else if (!compare_str && (value_i < specified_i)) {
+				else if (!compare_str && !(value_i < specified_i)) {
 					add = false;
 				}
 				break;
 
 			case LOBBY_COMPARISON_TYPE_LOWER_OR_EQUAL:
-				if (compare_str && (value_str <= specified_str)) {
+				if (compare_str && !(value_str <= specified_str)) {
 					add = false;
 				}
-				else if (!compare_str && (value_i <= specified_i)) {
+				else if (!compare_str && !(value_i <= specified_i)) {
 					add = false;
 				}
 				break;
