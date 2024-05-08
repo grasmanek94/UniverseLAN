@@ -299,11 +299,20 @@ namespace universelan {
 			GalaxyIDType = ini.GetValue(UserSection.c_str(), "GalaxyIDType", "@NetworkAdapterMACHash");
 			CustomGalaxyID = ini.GetLongLongValue(UserSection.c_str(), "CustomGalaxyID", 1);
 
-			if (const_hash(ini.GetValue(UserSection.c_str(), "GalaxyIDOffset", "")) != const_hash("@ProcessID")) {
-				GalaxyIDOffset = ini.GetLongLongValue(UserSection.c_str(), "GalaxyIDOffset", 0);
-			}
-			else {
+			auto GalaxyIDOffsetString = ini.GetValue(UserSection.c_str(), "GalaxyIDOffset", "");
+			switch (const_hash(GalaxyIDOffsetString)) {
+			case const_hash("@ProcessID"): 
 				GalaxyIDOffset = machine_info.GetProcessID();
+				break;
+
+			case const_hash("@DebugID"):
+				GalaxyIDOffset = machine_info.GetDebugID();
+				break;
+
+			default:
+				GalaxyIDOffset = ini.GetLongLongValue(UserSection.c_str(), "GalaxyIDOffset", 0);
+				break;
+			
 			}
 
 			Avatar = ini.GetValue(UserSection.c_str(), "Avatar", "me.png");
@@ -364,6 +373,10 @@ namespace universelan {
 
 				case const_hash("@ProcessID"):
 					CustomPersonaName = std::to_string(machine_info.GetProcessID()) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
+					break;
+
+				case const_hash("@DebugID"):
+					CustomPersonaName = std::to_string(machine_info.GetDebugID()) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
 					break;
 
 				default:

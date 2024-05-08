@@ -10,10 +10,25 @@
 
 #include <cstdint>
 #include <iomanip>
+#include <mutex>
 #include <sstream>
 #include <string>
 
 namespace universelan {
+#ifdef _WIN32
+	namespace {
+#pragma data_seg(".universelanclientapimultiprocessdebugcounter") 
+		volatile DWORD processes[16] = {
+			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+		};
+
+		// From testing it looks like this is fine/works... but I'm not sure
+		std::mutex mtx_processes;
+#pragma data_seg()
+#pragma comment(linker, "/section:.universelanclientapimultiprocessdebugcounter,rws")
+	}
+#endif
+
 	MachineInfo::MachineInfo() :
 		machine_name{ "" }, user_name{ "" }, macs{}
 	{
@@ -172,5 +187,62 @@ namespace universelan {
 		}
 		return nAddressCount;
 	}
+
+
+	static int IsPidRunning(DWORD pid)
+	{
+		HANDLE hProcess;
+		DWORD exitCode;
+
+		//Special case for PID 0 System Idle Process
+		if (pid == 0) {
+			return 1;
+		}
+
+		//skip testing bogus PIDs
+		if (pid < 0) {
+			return 0;
+		}
+
+		hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, false, pid);
+		if (NULL == hProcess) {
+			//invalid parameter means PID isn't in the system
+			if (GetLastError() == ERROR_INVALID_PARAMETER) {
+				return 0;
+			}
+
+			//some other error with OpenProcess
+			return -1;
+		}
+
+		if (GetExitCodeProcess(hProcess, &exitCode)) {
+			CloseHandle(hProcess);
+			return (exitCode == STILL_ACTIVE);
+		}
+
+		//error in GetExitCodeProcess()
+		CloseHandle(hProcess);
+		return -1;
+	}
 #endif
+
+	int MachineInfo::GetDebugID() {
+#ifdef _WIN32
+		std::scoped_lock<std::mutex> lock{ mtx_processes };
+
+		for (int i = 0; i < 16; ++i) {
+			if (processes[i] == GetCurrentProcessId()) {
+				return i;
+			}
+	}
+
+		for (int i = 0; i < 16; ++i) {
+			if (processes[i] == 0 || !IsPidRunning(processes[i])) {
+				processes[i] = GetCurrentProcessId();
+				return i;
+			}
+		}		
+#endif
+		return -1;
+	}
 }
