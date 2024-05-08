@@ -21,6 +21,7 @@
 
 #include <array>
 #include <concepts>
+#include <format>
 #include <functional>
 #include <mutex>
 #include <optional>
@@ -125,6 +126,10 @@ namespace universelan::client {
 
 			tracer::Trace trace{ "::nl", __FUNCTION__, tracer::Trace::NOTIFICATION_INVOCATIONS };
 
+			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::ARGUMENTS)) {
+				trace.write_all(std::format("FuncT: {}", typeid(FuncT).name()));
+			}
+
 			return ExecuteForListenerTypePerEntry((ListenerType)T::GetListenerType(), [&](IGalaxyListener* listener) {
 				//T* casted_listener = dynamic_cast<T*>(listener);
 				T* casted_listener = (T*)(listener);
@@ -143,6 +148,10 @@ namespace universelan::client {
 			}
 
 			tracer::Trace trace{ "::hl", __FUNCTION__, tracer::Trace::NOTIFICATION_INVOCATIONS };
+
+			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::ARGUMENTS)) {
+				trace.write_all(std::format("FuncT: {}", typeid(FuncT).name()));
+			}
 
 			return ExecuteForListenerTypePerEntry((ListenerType)BaseT::GetListenerType(), one_time_specific_listener, [&](IGalaxyListener* listener) {
 				//BaseT* casted_listener = dynamic_cast<BaseT*>(listener);
