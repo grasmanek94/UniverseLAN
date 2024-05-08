@@ -2,6 +2,7 @@
 
 #include "Listeners/NetworkingListener.hxx"
 
+#include <ConstHash.hxx>
 #include <GalaxyID.hxx>
 #include <Tracer.hxx>
 #include <SafeStringCopy.hxx>
@@ -15,6 +16,14 @@ namespace universelan::client {
 
 	namespace {
 		const auto TraceContext = tracer::Trace::INETWORKING;
+
+		std::string bytes_to_hex(const void* data, uint32_t dataSize) {
+			std::string hex;
+			for (uint32_t i = 0; i < dataSize; ++i) {
+				hex += std::format("{:02x}", ((const unsigned char*)data)[i]);
+			}
+			return hex;
+		}
 	}
 
 	NetworkingImpl::NetworkingImpl(FuncT::F intf, IListenerRegistrar* notifications) : 
@@ -40,6 +49,11 @@ namespace universelan::client {
 			trace.write_all(std::format("dataSize: {}", dataSize));
 			trace.write_all(std::format("sendType: {}", magic_enum::enum_name(sendType)));
 			trace.write_all(std::format("channel: {}", channel));
+			trace.write_all(std::format("data_hash: {:x}", const_hash64_data((const char*)data, dataSize)));
+
+			if (trace.has_flags(tracer::Trace::NETWORK_P2P_CONTENTS)) {
+				trace.write_all(std::format("data_contents: {}", bytes_to_hex(data, dataSize)));
+			}
 		}
 
 		auto result = intf()->SendP2PPacket(galaxyID, data, dataSize, sendType, channel);
@@ -68,12 +82,18 @@ namespace universelan::client {
 			if (outMsgSize) {
 				trace.write_all(std::format("outMsgSize: {}", *outMsgSize));
 			}
+
 			trace.write_all(std::format("outGalaxyID: {}", outGalaxyID));
+			trace.write_all(std::format("data_hash: {:x}", const_hash64_data((const char*)dest, *outMsgSize)));
+
+			if (trace.has_flags(tracer::Trace::NETWORK_P2P_CONTENTS)) {
+				trace.write_all(std::format("data_contents: {}", bytes_to_hex(dest, *outMsgSize)));
+			}
 		}
 
 		return result;
 	}
-
+	
 	bool NetworkingImpl::ReadP2PPacket(void* dest, uint32_t destSize, uint32_t* outMsgSize, GalaxyID& outGalaxyID, uint8_t channel) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
@@ -91,7 +111,13 @@ namespace universelan::client {
 			if (outMsgSize) {
 				trace.write_all(std::format("outMsgSize: {}", *outMsgSize));
 			}
+
 			trace.write_all(std::format("outGalaxyID: {}", outGalaxyID));
+			trace.write_all(std::format("data_hash: {:x}", const_hash64_data((const char*)dest, *outMsgSize)));
+			
+			if (trace.has_flags(tracer::Trace::NETWORK_P2P_CONTENTS)) {
+				trace.write_all(std::format("data_contents: {}", bytes_to_hex(dest, *outMsgSize)));
+			}
 		}
 
 		return result;

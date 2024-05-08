@@ -5,10 +5,23 @@
 #include <Networking/Networking.hxx>
 #include <Tracer.hxx>
 
+#include <format>
+#include <string>
+
 #define REQUIRES_AUTHENTICATION(peer) {if(!KickUnauthenticated(peer)) { return; }}
 
 namespace universelan::server {
 	using namespace galaxy::api;
+
+	namespace {
+		std::string bytes_to_hex(const void* data, uint32_t dataSize) {
+			std::string hex;
+			for (uint32_t i = 0; i < dataSize; ++i) {
+				hex += std::format("{:02x}", ((const unsigned char*)data)[i]);
+			}
+			return hex;
+		}
+	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAcceptedMessage>& data) { tracer::Trace trace{ "::ConnectionAcceptedMessage" }; REQUIRES_AUTHENTICATION(peer); /* Not handled in server */ }
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<FileShareResponseMessage>& data) { tracer::Trace trace{ "::FileShareResponseMessage" }; REQUIRES_AUTHENTICATION(peer); }
@@ -229,6 +242,12 @@ namespace universelan::server {
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<P2PNetworkPacketMessage>& data) {
 		REQUIRES_AUTHENTICATION(peer);
 
+		tracer::Trace trace{ "::P2PNetworkPacketMessage", __FUNCTION__, tracer::Trace::INETWORKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
+
+		if (trace.has_flags(tracer::Trace::NETWORK_P2P_CONTENTS)) {
+			trace.write_all(std::format("data_contents: {}", bytes_to_hex(data->data.data(), data->data.size())));
+		}
+
 		peer::ptr pd = peer_mapper.Get(peer);
 		peer::ptr target_pd{ nullptr };
 
@@ -258,12 +277,12 @@ namespace universelan::server {
 #if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
 		if (send_server_message) {
 			connection.Send(target_pd->peer, P2PServerNetworkPacketMessage{ *data });
-			return;		
+			return;
 		}
 #endif
 
 		connection.Send(target_pd->peer, *data);
-	}
+		}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<FileShareMessage>& data) {
 		tracer::Trace trace{ "::FileShareMessage" };
@@ -793,4 +812,4 @@ namespace universelan::server {
 		data->user_id = pd->id;
 		connection.Send(target->peer, data);
 	}
-}
+	}
