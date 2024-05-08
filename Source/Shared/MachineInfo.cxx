@@ -14,20 +14,12 @@
 #include <sstream>
 #include <string>
 
-namespace universelan {
-#ifdef _WIN32
-	namespace {
-#pragma data_seg(".universelanclientapimultiprocessdebugcounter") 
-		volatile DWORD processes[16] = {
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-		};
+#include <boost/interprocess/allocators/allocator.hpp>
+#include <boost/interprocess/containers/vector.hpp>
+#include <boost/interprocess/managed_shared_memory.hpp>
+#include <boost/interprocess/sync/interprocess_mutex.hpp>
 
-		// From testing it looks like this is fine/works... but I'm not sure
-		std::mutex mtx_processes;
-#pragma data_seg()
-#pragma comment(linker, "/section:.universelanclientapimultiprocessdebugcounter,rws")
-	}
-#endif
+namespace universelan {
 
 	MachineInfo::MachineInfo() :
 		machine_name{ "" }, user_name{ "" }, macs{}
@@ -188,7 +180,6 @@ namespace universelan {
 		return nAddressCount;
 	}
 
-
 	static int IsPidRunning(DWORD pid)
 	{
 		HANDLE hProcess;
@@ -224,25 +215,39 @@ namespace universelan {
 		CloseHandle(hProcess);
 		return -1;
 	}
+#else
+	static int IsPidRunning(int pid) {
+		return (getpgid(pid) >= 0);
+	}
 #endif
+
+	namespace bip = boost::interprocess;
+	using Seg = bip::managed_shared_memory;
+	template <typename T> using Alloc = bip::allocator<T, Seg::segment_manager>;
+	template <typename T> using Vec = bip::vector<T, Alloc<T>>;
 
 	int MachineInfo::GetDebugID() {
-#ifdef _WIN32
-		std::scoped_lock<std::mutex> lock{ mtx_processes };
+		const static auto   id_ = ".universelanclientapimultiprocessdebugcounter";
+		const static auto   max_entries_ = 16;
+		static bip::managed_shared_memory sm(bip::open_or_create, id_, 0x1000);
 
-		for (int i = 0; i < 16; ++i) {
-			if (processes[i] == GetCurrentProcessId()) {
+		static Vec<int>& processes = *sm.find_or_construct<Vec<int>>("universelanprocesses-data")(max_entries_, 0, sm.get_segment_manager());
+		static boost::interprocess::interprocess_mutex* mutex = sm.find_or_construct<boost::interprocess::interprocess_mutex>("universelanprocesses-mutex")();
+
+		boost::interprocess::scoped_lock< boost::interprocess::interprocess_mutex> lock(*mutex);
+
+		for (int i = 0; i < max_entries_; ++i) {
+			if (processes[i] == boost::interprocess::ipcdetail::get_current_process_id()) {
 				return i;
 			}
-	}
+		}
 
-		for (int i = 0; i < 16; ++i) {
+		for (int i = 0; i < max_entries_; ++i) {
 			if (processes[i] == 0 || !IsPidRunning(processes[i])) {
-				processes[i] = GetCurrentProcessId();
+				processes[i] = boost::interprocess::ipcdetail::get_current_process_id();
 				return i;
 			}
-		}		
-#endif
+		}
 		return -1;
 	}
 }
