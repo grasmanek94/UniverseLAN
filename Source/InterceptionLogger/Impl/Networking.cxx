@@ -30,7 +30,9 @@ namespace universelan::client {
 		intf{ intf },
 		notifications{ notifications },
 		listeners{ notifications } {
-		listeners.AddListener<NetworkingListener>();
+		tracer::Trace trace{ "::WARNING: NetworkingListener disabled due to introducing bugs with PeekPacket", __FUNCTION__, TraceContext };
+
+		//listeners.AddListener<NetworkingListener>();
 #if GALAXY_BUILD_FEATURE_HAS_NAT_FUNCTIONALITY
 		listeners.AddListener<NatTypeDetectionListener>();
 #endif
@@ -49,7 +51,7 @@ namespace universelan::client {
 			trace.write_all(std::format("dataSize: {}", dataSize));
 			trace.write_all(std::format("sendType: {}", magic_enum::enum_name(sendType)));
 			trace.write_all(std::format("channel: {}", channel));
-			trace.write_all(std::format("data_hash: {:x}", const_hash64_data((const char*)data, dataSize)));
+			trace.write_all(std::format("data_hash: {:x}", const_hash64_data_loop((const char*)data, dataSize)));
 
 			if (trace.has_flags(tracer::Trace::NETWORK_P2P_CONTENTS)) {
 				trace.write_all(std::format("data_contents: {}", bytes_to_hex(data, dataSize)));
@@ -84,10 +86,12 @@ namespace universelan::client {
 			}
 
 			trace.write_all(std::format("outGalaxyID: {}", outGalaxyID));
-			trace.write_all(std::format("data_hash: {:x}", const_hash64_data((const char*)dest, *outMsgSize)));
+			if (outMsgSize) {
+				trace.write_all(std::format("data_hash: {:x}", const_hash64_data_loop((const char*)dest, *outMsgSize)));
 
-			if (trace.has_flags(tracer::Trace::NETWORK_P2P_CONTENTS)) {
-				trace.write_all(std::format("data_contents: {}", bytes_to_hex(dest, *outMsgSize)));
+				if (trace.has_flags(tracer::Trace::NETWORK_P2P_CONTENTS)) {
+					trace.write_all(std::format("data_contents: {}", bytes_to_hex(dest, *outMsgSize)));
+				}
 			}
 		}
 
@@ -113,10 +117,11 @@ namespace universelan::client {
 			}
 
 			trace.write_all(std::format("outGalaxyID: {}", outGalaxyID));
-			trace.write_all(std::format("data_hash: {:x}", const_hash64_data((const char*)dest, *outMsgSize)));
-			
-			if (trace.has_flags(tracer::Trace::NETWORK_P2P_CONTENTS)) {
-				trace.write_all(std::format("data_contents: {}", bytes_to_hex(dest, *outMsgSize)));
+			if (outMsgSize) {
+				trace.write_all(std::format("data_hash: {:x}", const_hash64_data_loop((const char*)dest, *outMsgSize)));
+				if (trace.has_flags(tracer::Trace::NETWORK_P2P_CONTENTS)) {
+					trace.write_all(std::format("data_contents: {}", bytes_to_hex(dest, *outMsgSize)));
+				}
 			}
 		}
 

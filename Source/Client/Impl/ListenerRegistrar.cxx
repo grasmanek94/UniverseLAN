@@ -88,7 +88,6 @@ namespace universelan::client {
 
 			auto& temp_set_ref = listeners[listenerType].set;
 
-
 			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
 				trace.write_all(std::format("temp_set_ref.size(): ", temp_set_ref.size()));
 			}
