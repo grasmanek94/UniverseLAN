@@ -214,7 +214,8 @@ namespace universelan::client {
 			tracer::Trace trace{ nullptr, tracer::Trace::NOTIFICATION_INVOCATIONS };
 
 #ifndef NDEBUG
-			this->NotifyAllNowSimulate(std::forward<decltype(Arguments)>(Arguments)...);
+			// this is handy for catching invalid parameters to a later invocation
+			//this->NotifyAllNowSimulate(std::forward<decltype(Arguments)>(Arguments)...);
 #endif
 
 			delay_runner->Add(std::bind_front([this](auto&&... args) {

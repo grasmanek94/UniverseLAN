@@ -4,6 +4,7 @@
 
 #include <Tracer.hxx>
 
+#include <format>
 #include <iostream>
 #include <mutex>
 #include <stdexcept>
@@ -16,33 +17,43 @@ namespace universelan::client {
 		intf{ intf }, delay_runner{ delay_runner },
 		listeners{}
 	{
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
 	}
 
 	ListenerRegistrarImpl::~ListenerRegistrarImpl()
 	{
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
 
 		for (int t = LISTENER_TYPE_BEGIN; t < LISTENER_TYPE_END; ++t) {
 			if (listeners[t].set.size()) {
-				std::cerr << "Listeners have not been unregistered: " << t << '\n';
+				std::cerr << "Listeners have not been unregistered: " << magic_enum::enum_name((ListenerType)t) << '\n';
 			}
 		}
 	}
 
 	void ListenerRegistrarImpl::Register(ListenerTypeImpl listenerType, IGalaxyListener* listener) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
 
-		if (listener != nullptr) {
-			std::cout << __FUNCTION__ << ":" << std::dec << magic_enum::enum_name((ListenerType)listenerType) << " @" << std::hex << (size_t)listener << std::dec << std::endl;
-
-			lock_t lock{ listeners[listenerType].mtx };
-			listeners[listenerType].set.insert(listener);
+		if (listener == nullptr) {
+			return;
 		}
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType)));
+			trace.write_all(std::format("listener: {}", (void*)listener));
+		}
+
+		lock_t lock{ listeners[listenerType].mtx };
+		listeners[listenerType].set.insert(listener);
 	}
 
 	void ListenerRegistrarImpl::Unregister(ListenerTypeImpl listenerType, IGalaxyListener* listener) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType)));
+			trace.write_all(std::format("listener: {}", (void*)listener));
+		}
 
 		lock_t lock{ listeners[listenerType].mtx };
 		listeners[listenerType].set.erase(listener);
@@ -50,13 +61,47 @@ namespace universelan::client {
 
 	bool ListenerRegistrarImpl::ExecuteForListenerType(ListenerType listenerType, std::function<void(const std::set<IGalaxyListener*>& listeners)> code)
 	{
-		tracer::Trace trace{ "1", __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
+		tracer::Trace trace{ "1s", __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
 
-		lock_t lock{ listeners[listenerType].mtx };
+		if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType)));
+		}
 
-		listener_set& set = listeners[listenerType].set;
-		if (set.size() == 0) {
+		if (code == nullptr) {
+			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
+				trace.write_all("code == nullptr");
+			}
 			return false;
+		}
+
+		listener_set set;
+		{
+			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
+				trace.write_all("locking...");
+			}
+
+			lock_t lock{ listeners[listenerType].mtx };
+
+			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
+				trace.write_all("...locked");
+			}
+
+			auto& temp_set_ref = listeners[listenerType].set;
+
+
+			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
+				trace.write_all(std::format("temp_set_ref.size(): ", temp_set_ref.size()));
+			}
+
+			if (temp_set_ref.size() == 0) {
+				return false;
+			}
+
+			set = temp_set_ref; // COPY
+
+			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
+				trace.write_all(std::format("set.size(): ", temp_set_ref.size()));
+			}
 		}
 
 		code(set);
@@ -64,69 +109,117 @@ namespace universelan::client {
 		return true;
 	}
 
-	bool ListenerRegistrarImpl::ExecuteForListenerTypePerEntry(ListenerType listenerType, std::function<void(IGalaxyListener* listeners)> code)
+	bool ListenerRegistrarImpl::ExecuteForListenerTypePerEntry(ListenerType listenerType, std::function<void(IGalaxyListener* listener)> code)
 	{
 		tracer::Trace trace{ "1", __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
 
-		lock_t lock{ listeners[listenerType].mtx };
+		if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType)));
+		}
 
-		listener_set& set = listeners[listenerType].set;
-		if (set.size() == 0) {
+		if (code == nullptr) {
+			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
+				trace.write_all("code == nullptr");
+			}
 			return false;
 		}
 
-		for (auto& entry : set) {
-			code(entry);
-		}
+		return ExecuteForListenerType(listenerType, [&](const std::set<IGalaxyListener*>& listeners) -> void {
+			for (auto& entry : listeners) {
+				tracer::Trace trace2{ "1", "[loop lambda]", tracer::Trace::LISTENERREGISTRAR };
 
-		return true;
+				if (trace2.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
+					trace2.write_all(std::format("code(entry): {}", (void*)entry));
+				}
+
+				code(entry);
+			}
+			});
 	}
 
 	bool ListenerRegistrarImpl::ExecuteForListenerType(ListenerType listenerType, IGalaxyListener* extra, std::function<void(const std::set<IGalaxyListener*>& listeners)> code)
 	{
-		tracer::Trace trace{ "2", __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
+		tracer::Trace trace{ "2s", __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
 
-		lock_t lock{ listeners[listenerType].mtx };
-
-		listener_set& set = listeners[listenerType].set;
-		bool added = false;
-		if (extra != nullptr) {
-			added = set.emplace(extra).second;
+		if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType)));
 		}
 
-		if (set.size() == 0) {
-			assert(added == false);
-
+		if (extra == nullptr && code == nullptr) {
+			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
+				trace.write_all("extra == nullptr && code == nullptr");
+			}
 			return false;
+		}
+
+		listener_set set;
+		{
+			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
+				trace.write_all("locking...");
+			}
+
+			lock_t lock{ listeners[listenerType].mtx };
+
+			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
+				trace.write_all("...locked");
+			}
+
+			auto& temp_set_ref = listeners[listenerType].set;
+
+			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
+				trace.write_all(std::format("temp_set_ref.size(): ", temp_set_ref.size()));
+			}
+
+			if (set.size() == 0 && extra == nullptr) {
+
+				if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
+					trace.write_all("set.size() == 0 && extra == nullptr");
+				}
+
+				return false;
+			}
+
+			set = temp_set_ref; // COPY
+
+			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
+				trace.write_all(std::format("set.size(): ", temp_set_ref.size()));
+			}
+		}
+
+		if (extra != nullptr) {
+			set.insert(extra);
 		}
 
 		code(set);
 
-		if (added) {
-			set.erase(extra);
-		}
-
 		return true;
 	}
 
-	bool ListenerRegistrarImpl::ExecuteForListenerTypePerEntry(ListenerType listenerType, IGalaxyListener* extra, std::function<void(IGalaxyListener* listeners)> code)
+	bool ListenerRegistrarImpl::ExecuteForListenerTypePerEntry(ListenerType listenerType, IGalaxyListener* extra, std::function<void(IGalaxyListener* listener)> code)
 	{
 		tracer::Trace trace{ "2", __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
 
-		lock_t lock{ listeners[listenerType].mtx };
-
-		listener_set& set = listeners[listenerType].set;
-
-		if (extra != nullptr) {
-			code(extra);
+		if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType)));
 		}
 
-		for (auto& entry : set) {
-			if ((entry != extra) && (entry != nullptr)) {
+		if (extra == nullptr && code == nullptr) {
+			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
+				trace.write_all("extra == nullptr && code == nullptr");
+			}
+			return false;
+		}
+
+		return ExecuteForListenerType(listenerType, extra, [&](const std::set<IGalaxyListener*>& listeners) -> void {
+			for (auto& entry : listeners) {
+				tracer::Trace trace2{ "2", "[loop lambda]", tracer::Trace::LISTENERREGISTRAR};
+
+				if (trace2.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
+					trace2.write_all(std::format("code(entry): {}", (void*)entry));
+				}
+
 				code(entry);
 			}
-		}
-
-		return (set.size() > 0) || (extra != nullptr);
+			});
 	}
 }
