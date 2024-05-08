@@ -674,7 +674,7 @@ namespace universelan::client {
 			trace.write_all(std::format("result: {}", result));
 #endif
 			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate(key, keyLength)));
-			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate(value, valueLength)));
+			trace.write_all(std::format("value: {}", util::safe_fix_null_char_ptr_annotate(value, valueLength)));
 		}
 
 #if !GALAXY_BUILD_FEATURE_IFRIENDS_ISTATS_UPDATE_1_127_0
