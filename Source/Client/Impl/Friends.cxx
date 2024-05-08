@@ -153,7 +153,8 @@ namespace universelan::client {
 	PersonaState FriendsImpl::GetFriendPersonaState(GalaxyID userID) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		return intf->user->GetGalaxyUserData(userID)->online ?
+		lock_t lock(mtx_online_friends);
+		return (online_friends.find(userID) != online_friends.end()) ?
 			PERSONA_STATE_ONLINE :
 			PERSONA_STATE_OFFLINE;
 	}
@@ -216,12 +217,14 @@ namespace universelan::client {
 	uint32_t FriendsImpl::GetFriendCount() {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
+		lock_t lock(mtx_online_friends);
 		return (uint32_t)online_friends.size();
 	}
 
 	GalaxyID FriendsImpl::GetFriendByIndex(uint32_t index) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
+		lock_t lock(mtx_online_friends);
 		return container_get_by_index(online_friends, index, GalaxyID(0));
 	}
 
@@ -579,7 +582,13 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ connectionString, __FUNCTION__, tracer::Trace::IFRIENDS };
 
-		if (!online_friends.contains(userID)) {
+		bool contains = false;
+		{
+			lock_t lock(mtx_online_friends);
+			contains = online_friends.contains(userID);
+		}
+
+		if (!contains) {
 			listeners->NotifyAll(
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 				listener,
@@ -618,6 +627,7 @@ namespace universelan::client {
 	bool FriendsImpl::IsUserInTheSameGame(GalaxyID userID) const {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
+		lock_t lock(mtx_online_friends);
 		return online_friends.contains(userID);
 	}
 #endif
@@ -627,13 +637,19 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
 		if (isOnline) {
-			online_friends.insert(userID);
+			{
+				lock_t lock(mtx_online_friends);
+				online_friends.insert(userID);
+			}
 #if GALAXY_BUILD_FEATURE_HAS_FRIENDADDLISTENER
 			listeners->NotifyAll(&IFriendAddListener::OnFriendAdded, userID, IFriendAddListener::INVITATION_DIRECTION_INCOMING);
 #endif
 		}
 		else {
-			online_friends.erase(userID);
+			{
+				lock_t lock(mtx_online_friends);
+				online_friends.erase(userID);
+			}
 #if GALAXY_BUILD_FEATURE_HAS_FRIENDADDLISTENER
 			listeners->NotifyAll(&IFriendDeleteListener::OnFriendDeleteSuccess, userID);
 #endif

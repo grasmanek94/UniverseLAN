@@ -18,6 +18,7 @@
 #include <GalaxyID.h>
 #include <IListenerRegistrar.h>
 
+#include <mutex>
 #include <set>
 
 namespace universelan::client {
@@ -53,6 +54,10 @@ namespace universelan::client {
 	  */
 	class FriendsImpl : public IFriends
 	{
+	public:
+		using mutex_t = std::recursive_mutex;
+		using lock_t = std::scoped_lock<mutex_t>;
+
 	private:
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
@@ -66,6 +71,7 @@ namespace universelan::client {
 
 		AvatarCriteriaImpl avatar_criteria;
 
+		mutable mutex_t mtx_online_friends;
 		std::set<GalaxyID> online_friends;
 	public:
 
