@@ -659,8 +659,8 @@ namespace universelan::client {
 			trace.write_all(std::format("index: {}", index));
 			trace.write_all(std::format("key: {}", (void*)key));
 			trace.write_all(std::format("keyLength: {}", keyLength));
-			trace.write_all(std::format("key: {}", (void*)value));
-			trace.write_all(std::format("keyLength: {}", valueLength));
+			trace.write_all(std::format("value: {}", (void*)value));
+			trace.write_all(std::format("valueLength: {}", valueLength));
 			trace.write_all(std::format("userID: {}", userID));
 		}
 
