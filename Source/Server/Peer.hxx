@@ -12,6 +12,7 @@
 
 #include <cstdint>
 #include <chrono>
+#include <unordered_map>
 
 namespace universelan::server::peer {
 	class Data;
@@ -56,8 +57,12 @@ namespace universelan::server::peer {
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
 		ChatRoomManager::chatrooms_t chat_rooms;
 #endif
-		LobbyManager::lobby_t lobby;
+		LobbyManager::lobbies_t lobbies;
 
 		bool link(const galaxy::api::GalaxyID& id);
+		LobbyManager::lobby_t GetLobby(const galaxy::api::GalaxyID& lobby_id) const;
+		bool AddLobby(const LobbyManager::lobby_t& lobby);
+		bool RemoveLobby(const galaxy::api::GalaxyID& lobby_id);
+		bool RemoveLobby(const LobbyManager::lobby_t& lobby);
 	};
 }

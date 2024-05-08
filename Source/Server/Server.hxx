@@ -47,7 +47,8 @@ namespace universelan::server {
 	// Here all 'virtual void Handle(ENetPeer* peer, const std::shared_ptr<T>&data) override; are declared
 #include <Networking/MessageHandlersDeclareOverride.hxx>
 
-		bool HandleMemberLobbyLeave(ENetPeer* peer, bool disconnected);
+		bool HandleMemberLobbyLeave(ENetPeer* peer, const galaxy::api::GalaxyID& lobby_id, bool disconnected);
+		bool HandleMemberAllLobbiesLeave(ENetPeer* peer, bool disconnected);
 
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
 		bool HandleMemberChatLeave(ENetPeer* peer);

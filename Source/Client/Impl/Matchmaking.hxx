@@ -19,6 +19,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 #include <variant>
 #include <vector>
 
@@ -101,7 +102,7 @@ namespace universelan::client {
 		LobbyManager::lobbies_t lobby_list;
 		LobbyFilters lobby_list_filters;
 		LobbyManager::lobbies_t lobby_list_filtered;
-		LobbyManager::lobby_t joined_lobby;
+		LobbyManager::lobbies_t joined_lobbies;
 
 		ListenersRequestHelper<lobby_filters_ptr> lobby_list_filtered_requests;
 

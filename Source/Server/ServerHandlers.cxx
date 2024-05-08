@@ -22,7 +22,7 @@ namespace universelan::server {
 		tracer::Trace trace{ "::EventConnect" };
 
 		peer->data = nullptr;
-		std::cout << "Peer(" 
+		std::cout << "Peer("
 			<< std::hex << peer->address.host << ":" << std::dec << peer->address.port
 			<< ") EventConnect" << std::endl;
 
@@ -36,7 +36,7 @@ namespace universelan::server {
 	{
 		tracer::Trace trace{ "::EventDisconnect" };
 
-		std::cout << "Peer(" 
+		std::cout << "Peer("
 			<< std::hex << peer->address.host << ":" << std::dec << peer->address.port
 			<< ") EventDisconnect" << std::endl;
 
@@ -44,7 +44,7 @@ namespace universelan::server {
 
 		peer::ptr pd = peer_mapper.Get(peer);
 		if (pd) {
-			HandleMemberLobbyLeave(peer, true);
+			HandleMemberAllLobbiesLeave(peer, true);
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
 			HandleMemberChatLeave(peer);
 #endif
@@ -63,7 +63,7 @@ namespace universelan::server {
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<KeyChallengeMessage>& data)
 	{
-		tracer::Trace trace{ "::KeyChallengeMessage"};
+		tracer::Trace trace{ "::KeyChallengeMessage" };
 
 		peer::ptr pd = peer_mapper.Get(peer);
 		if (pd->challenge.completed) { return; }
@@ -288,12 +288,14 @@ namespace universelan::server {
 		peer::ptr pd = peer_mapper.Get(peer);
 		LobbyManager::lobby_t lobby{ nullptr };
 
-		if (pd->lobby == nullptr) {
-			lobby = lobby_manager.CreateLobby(pd->id, data->type, data->max_members, data->joinable, data->topology_type);
-			pd->lobby = lobby;
-		}
+		lobby = lobby_manager.CreateLobby(pd->id, data->type, data->max_members, data->joinable, data->topology_type);
 
-		connection.Send(peer, CreateLobbyResponseMessage{ data->request_id, lobby });
+		if (pd->AddLobby(lobby)) {
+			connection.Send(peer, CreateLobbyResponseMessage{ data->request_id, lobby });
+		}
+		else {
+			connection.Send(peer, CreateLobbyResponseMessage{ data->request_id, nullptr });
+		}
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestLobbyListMessage>& data) {
@@ -314,12 +316,13 @@ namespace universelan::server {
 
 		peer::ptr pd = peer_mapper.Get(peer);
 
-		if (pd->lobby) {
-			// already in a lobby
-			data->result = LOBBY_ENTER_RESULT_ERROR;
-			connection.Send(peer, data);
-			return;
-		}
+		// !Apparently it's OK to be in multiple lobbies
+		//if (pd->lobby) {
+		//	// already in a lobby
+		//	data->result = LOBBY_ENTER_RESULT_ERROR;
+		//	connection.Send(peer, data);
+		//	return;
+		//}
 
 		auto lobby = lobby_manager.GetLobby(data->lobby_id);
 		if (!lobby) {
@@ -340,7 +343,12 @@ namespace universelan::server {
 			return;
 		}
 
-		pd->lobby = lobby;
+		if (!pd->AddLobby(lobby)) {
+			data->result = LOBBY_ENTER_RESULT_ERROR;
+			connection.Send(peer, data);
+			return;
+		}
+
 		data->result = LOBBY_ENTER_RESULT_SUCCESS;
 		connection.Send(peer, data);
 
@@ -350,9 +358,9 @@ namespace universelan::server {
 		auto members = lobby->GetMembers();
 		for (auto& member : members) {
 			//if (member != pd->id) {
-				auto member_peer = peer_mapper.Get(member);
+			auto member_peer = peer_mapper.Get(member);
 
-				connection.Send(member_peer->peer, enter_notification);
+			connection.Send(member_peer->peer, enter_notification);
 			//}
 		}
 	}
@@ -368,7 +376,7 @@ namespace universelan::server {
 		data->reason = ILobbyLeftListener::LOBBY_LEAVE_REASON_USER_LEFT;
 #endif
 
-		HandleMemberLobbyLeave(peer, false);
+		HandleMemberLobbyLeave(peer, data->lobby_id, false);
 
 		connection.Send(peer, data);
 	}
@@ -401,7 +409,7 @@ namespace universelan::server {
 		peer::ptr pd = peer_mapper.Get(peer);
 
 		auto lobby = lobby_manager.GetLobby(data->lobby_id);
-		if (!lobby) {
+		if (!lobby || !lobby->IsMember(pd->id)) {
 			return;
 		}
 
@@ -409,7 +417,7 @@ namespace universelan::server {
 		data->message.message_id = lobby->SendMsg(data->message.sender, data->message.data);
 
 		if (data->message.message_id != 0) {
-			auto members = pd->lobby->GetMembers();
+			auto members = lobby->GetMembers();
 			for (auto& member : members) {
 				auto member_peer = peer_mapper.Get(member);
 				if (member_peer) {
@@ -450,7 +458,7 @@ namespace universelan::server {
 		connection.Send(peer, data);
 
 		SetLobbyDataMessage notification{ 0, data->lobby_id, data->key, data->value };
-		auto members = pd->lobby->GetMembers();
+		auto members = lobby->GetMembers();
 		for (auto& member : members) {
 			auto member_peer = peer_mapper.Get(member);
 			if (member_peer && (member_peer->peer != peer)) {
@@ -459,8 +467,8 @@ namespace universelan::server {
 		}
 	}
 
-	template<typename T, typename U> bool BoilerplateHandleLobbyDataUpdate(peer::Mapper& peer_mapper, GalaxyNetworkServer& connection, ENetPeer* peer, const T& data, const U& notification, std::function<bool(peer::ptr pd)> func) {
-		tracer::Trace trace { nullptr, __FUNCTION__ };
+	template<typename T, typename U> bool BoilerplateHandleLobbyDataUpdate(peer::Mapper& peer_mapper, LobbyManager& lobby_manager, GalaxyNetworkServer& connection, ENetPeer* peer, const T& data, const U& notification, std::function<bool(peer::ptr pd, LobbyManager::lobby_t& lobby)> func) {
+		tracer::Trace trace{ nullptr, __FUNCTION__ };
 
 		peer::ptr pd = peer_mapper.Get(peer);
 
@@ -469,15 +477,14 @@ namespace universelan::server {
 #endif
 
 		data->success = false;
+		auto lobby = lobby_manager.GetLobby(data->lobby_id);
 
-		if ((!pd->lobby) ||
-			(pd->lobby->GetID() != data->lobby_id) ||
-			(pd->lobby->GetOwner() != pd->id)) {
+		if (!lobby || !lobby->IsMember(pd->id) || (lobby->GetOwner() != pd->id)) {
 			connection.Send(peer, data);
 			return false;
 		}
 
-		if (!func(pd)) {
+		if (!func(pd, lobby)) {
 			connection.Send(peer, data);
 			return false;
 		}
@@ -485,7 +492,7 @@ namespace universelan::server {
 		data->success = true;
 		connection.Send(peer, data);
 
-		auto members = pd->lobby->GetMembers();
+		auto members = lobby->GetMembers();
 		for (auto& member : members) {
 			auto member_peer = peer_mapper.Get(member);
 			if (member_peer && (member_peer->peer != peer)) {
@@ -503,8 +510,8 @@ namespace universelan::server {
 
 		SetLobbyJoinableMessage notification{ 0, data->lobby_id, data->joinable };
 
-		BoilerplateHandleLobbyDataUpdate(peer_mapper, connection, peer, data, notification, [&](peer::ptr pd) -> bool {
-			pd->lobby->SetJoinable(data->joinable);
+		BoilerplateHandleLobbyDataUpdate(peer_mapper, lobby_manager, connection, peer, data, notification, [&](peer::ptr pd, LobbyManager::lobby_t& lobby) -> bool {
+			lobby->SetJoinable(data->joinable);
 			return true;
 			});
 	}
@@ -515,8 +522,8 @@ namespace universelan::server {
 		REQUIRES_AUTHENTICATION(peer);
 
 		SetLobbyMaxMembersMessage notification{ 0, data->lobby_id, data->max_members };
-		BoilerplateHandleLobbyDataUpdate(peer_mapper, connection, peer, data, notification, [&](peer::ptr pd) -> bool {
-			pd->lobby->SetMaxMembers(data->max_members);
+		BoilerplateHandleLobbyDataUpdate(peer_mapper, lobby_manager, connection, peer, data, notification, [&](peer::ptr pd, LobbyManager::lobby_t& lobby) -> bool {
+			lobby->SetMaxMembers(data->max_members);
 			return true;
 			});
 	}
@@ -527,8 +534,8 @@ namespace universelan::server {
 		REQUIRES_AUTHENTICATION(peer);
 
 		SetLobbyTypeMessage notification{ 0, data->lobby_id, data->type };
-		BoilerplateHandleLobbyDataUpdate(peer_mapper, connection, peer, data, notification, [&](peer::ptr pd) -> bool {
-			pd->lobby->SetType(data->type);
+		BoilerplateHandleLobbyDataUpdate(peer_mapper, lobby_manager, connection, peer, data, notification, [&](peer::ptr pd, LobbyManager::lobby_t& lobby) -> bool {
+			lobby->SetType(data->type);
 			return true;
 			});
 	}
@@ -537,6 +544,7 @@ namespace universelan::server {
 		tracer::Trace trace{ "::SetLobbyMemberDataMessage" };
 
 		REQUIRES_AUTHENTICATION(peer);
+
 		peer::ptr pd = peer_mapper.Get(peer);
 
 		auto lobby = lobby_manager.GetLobby(data->lobby_id);
@@ -564,7 +572,7 @@ namespace universelan::server {
 		connection.Send(peer, data);
 
 		SetLobbyMemberDataMessage notification{ 0, data->lobby_id, data->member_id, data->key, data->value };
-		auto members = pd->lobby->GetMembers();
+		auto members = lobby->GetMembers();
 		for (auto& member : members) {
 			auto member_peer = peer_mapper.Get(member);
 			if (member_peer && (member_peer->peer != peer)) {
@@ -573,17 +581,17 @@ namespace universelan::server {
 		}
 	}
 
-	bool Server::HandleMemberLobbyLeave(ENetPeer* peer, bool disconnected) {
-		tracer::Trace trace { nullptr, __FUNCTION__ };
+	bool Server::HandleMemberLobbyLeave(ENetPeer* peer, const GalaxyID& lobby_id, bool disconnected) {
+		tracer::Trace trace{ nullptr, __FUNCTION__ };
 
 		peer::ptr pd = peer_mapper.Get(peer);
 
-		LobbyManager::lobby_t lobby{ pd->lobby };
+		auto lobby = pd->GetLobby(lobby_id);
 		if (!lobby) {
 			return false;
 		}
 
-		pd->lobby = nullptr;
+		pd->RemoveLobby(lobby_id);
 		lobby->RemoveMember(pd->id);
 
 		if (lobby->GetMemberCount() == 0) {
@@ -622,7 +630,7 @@ namespace universelan::server {
 				connection.Send(member_peer->peer, leave_notification);
 			}
 			else if (close) {
-				member_peer->lobby = nullptr;
+				member_peer->RemoveLobby(lobby);
 				connection.Send(member_peer->peer, leave_notification);
 				connection.Send(member_peer->peer, close_message);
 			}
@@ -630,6 +638,21 @@ namespace universelan::server {
 
 		if (close) {
 			lobby_manager.RemoveLobby(lobby->GetID());
+		}
+
+		return true;
+	}
+
+	bool Server::HandleMemberAllLobbiesLeave(ENetPeer* peer, bool disconnected) {
+		tracer::Trace trace{ nullptr, __FUNCTION__ };
+
+		peer::ptr pd = peer_mapper.Get(peer);
+
+		bool left_some = false;
+		while (pd->lobbies.size()) {
+			if (HandleMemberLobbyLeave(peer, pd->lobbies.begin()->first, disconnected)) {
+				left_some = true;
+			}
 		}
 
 		return true;
@@ -670,7 +693,7 @@ namespace universelan::server {
 	}
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
 	bool Server::HandleMemberChatLeave(ENetPeer* peer) {
-		tracer::Trace trace{ "1"};
+		tracer::Trace trace{ "1" };
 
 		peer::ptr pd = peer_mapper.Get(peer);
 
@@ -688,7 +711,7 @@ namespace universelan::server {
 	}
 
 	bool Server::HandleMemberChatLeave(ENetPeer* peer, galaxy::api::ChatRoomID chat_room_id) {
-		tracer::Trace trace{ "2"};
+		tracer::Trace trace{ "2" };
 
 		peer::ptr pd = peer_mapper.Get(peer);
 

@@ -55,7 +55,7 @@ namespace universelan::server::peer {
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
 		chat_rooms{},
 #endif
-		lobby{nullptr}
+		lobbies{}
 	{
 		assert(peer != nullptr);
 		assert(peer->data == nullptr);
@@ -85,5 +85,41 @@ namespace universelan::server::peer {
 		mapper->Get(peer)->id = id;
 
 		return true;
+	}
+
+	LobbyManager::lobby_t Data::GetLobby(const galaxy::api::GalaxyID& lobby_id) const {
+		auto it = lobbies.find(lobby_id);
+		if (it == lobbies.end()) {
+			return nullptr;
+		}
+
+		return it->second;
+	}
+
+	bool Data::AddLobby(const LobbyManager::lobby_t& lobby) {
+		if (lobby == nullptr) {
+			return false;
+		}
+
+		auto it = lobbies.find(lobby->GetID());
+		if (it != lobbies.end()) {
+			return false;
+		}
+
+		lobbies.emplace(lobby->GetID(), lobby);
+
+		return true;
+	}
+
+	bool Data::RemoveLobby(const galaxy::api::GalaxyID& lobby_id) {
+		return lobbies.erase(lobby_id) > 0;
+	}
+
+	bool Data::RemoveLobby(const LobbyManager::lobby_t& lobby) {
+		if (lobby == nullptr) {
+			return false;
+		}
+
+		return RemoveLobby(lobby->GetID());
 	}
 }

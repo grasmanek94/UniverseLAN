@@ -20,7 +20,7 @@ namespace universelan::client {
 		get_lobby_data_requests{},
 #endif
 		mtx{}, lobby_list{}, lobby_list_filters{ {}, 250, true },
-		lobby_list_filtered{}, joined_lobby{}, lobby_list_filtered_requests{}
+		lobby_list_filtered{}, joined_lobbies{}, lobby_list_filtered_requests{}
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
 	}
@@ -72,14 +72,14 @@ namespace universelan::client {
 			{
 				lock_t lock{ mtx };
 				lobby_list.emplace(data->lobby->GetID(), data->lobby);
-				joined_lobby = data->lobby;
+				joined_lobbies.emplace(data->lobby->GetID(), data->lobby);
 			}
 
-			listeners->NotifyAll(lobbyCreatedListener, &ILobbyCreatedListener::OnLobbyCreated, joined_lobby->GetID(), LobbyCreateResult::LOBBY_CREATE_RESULT_SUCCESS);
-			listeners->NotifyAll(lobbyEnteredListener, &ILobbyEnteredListener::OnLobbyEntered, joined_lobby->GetID(), LobbyEnterResult::LOBBY_ENTER_RESULT_SUCCESS);
+			listeners->NotifyAll(lobbyCreatedListener, &ILobbyCreatedListener::OnLobbyCreated, data->lobby->GetID(), LobbyCreateResult::LOBBY_CREATE_RESULT_SUCCESS);
+			listeners->NotifyAll(lobbyEnteredListener, &ILobbyEnteredListener::OnLobbyEntered, data->lobby->GetID(), LobbyEnterResult::LOBBY_ENTER_RESULT_SUCCESS);
 
 			// TODO: Real Galaxy doesn't do this, maybe remove?
-			//listeners->NotifyAll(&ILobbyMemberStateListener::OnLobbyMemberStateChanged, joined_lobby->GetID(), intf->user->GetGalaxyID(), LobbyMemberStateChange::LOBBY_MEMBER_STATE_CHANGED_ENTERED);
+			//listeners->NotifyAll(&ILobbyMemberStateListener::OnLobbyMemberStateChanged, data->lobby->GetID(), intf->user->GetGalaxyID(), LobbyMemberStateChange::LOBBY_MEMBER_STATE_CHANGED_ENTERED);
 		}
 		else {
 			listeners->NotifyAll(lobbyCreatedListener, &ILobbyCreatedListener::OnLobbyCreated, GalaxyID(0), LobbyCreateResult::LOBBY_CREATE_RESULT_ERROR);
@@ -342,13 +342,14 @@ namespace universelan::client {
 			// Aragami2 fix?
 			//assert(lobby_entry != lobby_list.end());
 			if (lobby_entry == lobby_list.end()) {
-				tracer::Trace trace{ "LOBBY_NOT_FOUND_CREATED_DEFAULT_ENTRY" };
-				lobby_list.emplace(data->lobby_id, std::make_shared<Lobby>());
+				trace.write_all("LOBBY_NOT_FOUND_CREATED_DEFAULT_ENTRY");
+
+				lobby_list.emplace(data->lobby_id, std::make_shared<Lobby>(data->lobby_id));
 				lobby_entry = lobby_list.find(data->lobby_id);
 			}
 
-			joined_lobby = lobby_entry->second;
-			joined_lobby->AddMember(intf->config->GetApiGalaxyID());
+			joined_lobbies.emplace(lobby_entry->first, lobby_entry->second);
+			lobby_entry->second->AddMember(intf->config->GetApiGalaxyID());
 		}
 
 		listeners->NotifyAll(listener, &ILobbyEnteredListener::OnLobbyEntered, data->lobby_id, data->result);
@@ -378,10 +379,14 @@ namespace universelan::client {
 
 		{
 			lock_t lock{ mtx };
-			if (joined_lobby != nullptr) {
-				joined_lobby->RemoveMember(intf->config->GetApiGalaxyID());
+			auto joined_lobby_it = joined_lobbies.find(data->lobby_id);
+			if (joined_lobby_it != joined_lobbies.end()) {
+				auto joined_lobby = joined_lobby_it->second;
+				if (joined_lobby != nullptr) {
+					joined_lobby->RemoveMember(intf->config->GetApiGalaxyID());
+				}
+				joined_lobbies.erase(data->lobby_id);
 			}
-			joined_lobby = nullptr;
 		}
 
 		listeners->NotifyAll(
@@ -939,7 +944,8 @@ namespace universelan::client {
 
 		lock_t lock{ mtx };
 
-		if (!joined_lobby) {
+		auto joined_lobby_ptr = joined_lobbies.find(lobbyID);
+		if (joined_lobby_ptr == joined_lobbies.end()) {
 			return false;
 		}
 
