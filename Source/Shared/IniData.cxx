@@ -269,6 +269,7 @@ namespace universelan {
 	{
 		// Config
 		{
+			std::string debug_root_temp_path = GetPath("Temp");
 			std::cout << "Opening Client config located at " << std::filesystem::current_path() / GetPath(ConfigFile) << std::endl;
 
 			MachineInfo machine_info;
@@ -306,7 +307,7 @@ namespace universelan {
 				break;
 
 			case const_hash("@DebugID"):
-				GalaxyIDOffset = machine_info.GetDebugID();
+				GalaxyIDOffset = machine_info.GetDebugID(debug_root_temp_path);
 				break;
 
 			default:
@@ -376,7 +377,7 @@ namespace universelan {
 					break;
 
 				case const_hash("@DebugID"):
-					CustomPersonaName = std::to_string(machine_info.GetDebugID()) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
+					CustomPersonaName = std::to_string(machine_info.GetDebugID(debug_root_temp_path)) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
 					break;
 
 				default:

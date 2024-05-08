@@ -5,19 +5,16 @@
 #include <winsock2.h>
 #include <iphlpapi.h>
 #else
+#include <fcntl.h>
 #include <unistd.h>
 #endif
 
 #include <cstdint>
+#include <filesystem>
 #include <iomanip>
 #include <mutex>
 #include <sstream>
 #include <string>
-
-#include <boost/interprocess/allocators/allocator.hpp>
-#include <boost/interprocess/containers/vector.hpp>
-#include <boost/interprocess/managed_shared_memory.hpp>
-#include <boost/interprocess/sync/interprocess_mutex.hpp>
 
 namespace universelan {
 
@@ -180,74 +177,64 @@ namespace universelan {
 		return nAddressCount;
 	}
 
-	static int IsPidRunning(DWORD pid)
-	{
-		HANDLE hProcess;
-		DWORD exitCode;
-
-		//Special case for PID 0 System Idle Process
-		if (pid == 0) {
-			return 1;
-		}
-
-		//skip testing bogus PIDs
-		if (pid < 0) {
-			return 0;
-		}
-
-		hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, false, pid);
-		if (NULL == hProcess) {
-			//invalid parameter means PID isn't in the system
-			if (GetLastError() == ERROR_INVALID_PARAMETER) {
-				return 0;
-			}
-
-			//some other error with OpenProcess
-			return -1;
-		}
-
-		if (GetExitCodeProcess(hProcess, &exitCode)) {
-			CloseHandle(hProcess);
-			return (exitCode == STILL_ACTIVE);
-		}
-
-		//error in GetExitCodeProcess()
-		CloseHandle(hProcess);
-		return -1;
-	}
 #else
-	static int IsPidRunning(int pid) {
-		return (getpgid(pid) >= 0);
+	bool lock_file(const std::string& filename) {
+		int fd = open(filename.c_str(), O_RDWR | O_CREAT, 0666);  // Open or create the file
+		if (fd == -1) {
+			return false;  // Failed to open the file
+		}
+
+		struct flock lock;
+		lock.l_type = F_WRLCK;  // Write lock
+		lock.l_whence = SEEK_SET;  // Lock the whole file
+		lock.l_start = 0;
+		lock.l_len = 0;
+
+		// Try to lock the file (F_SETLK for non-blocking operation)
+		if (fcntl(fd, F_SETLK, &lock) == -1) {
+			close(fd);
+			return false;
+		}
+
+		// File successfully locked
+		return true;
 	}
 #endif
 
-	namespace bip = boost::interprocess;
-	using Seg = bip::managed_shared_memory;
-	template <typename T> using Alloc = bip::allocator<T, Seg::segment_manager>;
-	template <typename T> using Vec = bip::vector<T, Alloc<T>>;
+	namespace {
+		const std::string debug_temp_filename = ".universelanclientapimultiprocessdebugcounter.";
+		const int max_debug_id = 16;
+		int my_debug_id = -1;
+		std::mutex debug_id_mtx;
+	}
 
-	int MachineInfo::GetDebugID() {
-		const static auto   id_ = ".universelanclientapimultiprocessdebugcounter";
-		const static auto   max_entries_ = 16;
-		static bip::managed_shared_memory sm(bip::open_or_create, id_, 0x1000);
+	int MachineInfo::GetDebugID(std::string root_temp_path) {
+		std::scoped_lock<std::mutex> id_lock{ debug_id_mtx };
 
-		static Vec<int>& processes = *sm.find_or_construct<Vec<int>>("universelanprocesses-data")(max_entries_, 0, sm.get_segment_manager());
-		static boost::interprocess::interprocess_mutex* mutex = sm.find_or_construct<boost::interprocess::interprocess_mutex>("universelanprocesses-mutex")();
+		if (my_debug_id != -1) {
+			return my_debug_id;
+		}
 
-		boost::interprocess::scoped_lock< boost::interprocess::interprocess_mutex> lock(*mutex);
+		std::filesystem::path root{ root_temp_path };
+		std::error_code ec;
 
-		for (int i = 0; i < max_entries_; ++i) {
-			if (processes[i] == boost::interprocess::ipcdetail::get_current_process_id()) {
-				return i;
+		std::filesystem::create_directories(root, ec);
+
+		for (int id = 0; id < max_debug_id; ++id) {
+			std::filesystem::path p = root / (debug_temp_filename + std::to_string(id));
+
+#ifdef _WIN32
+			bool lock_success = (CreateFile(p.string().c_str(), GENERIC_READ, 0, NULL, OPEN_ALWAYS, 0, NULL) != INVALID_HANDLE_VALUE);
+#else
+			bool lock_success = lock_file(p.string());
+#endif
+
+			if (lock_success) {
+				my_debug_id = id;
+				return id;
 			}
 		}
 
-		for (int i = 0; i < max_entries_; ++i) {
-			if (processes[i] == 0 || !IsPidRunning(processes[i])) {
-				processes[i] = boost::interprocess::ipcdetail::get_current_process_id();
-				return i;
-			}
-		}
 		return -1;
 	}
 }

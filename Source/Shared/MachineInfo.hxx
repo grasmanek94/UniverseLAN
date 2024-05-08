@@ -18,6 +18,6 @@ namespace universelan {
 		std::string GetLocalUserName();
 		std::size_t GetProcessID();
 		std::vector<std::string> GetLocalMACs();
-		int GetDebugID();
+		int GetDebugID(std::string root_temp_path);
 	};
 }
