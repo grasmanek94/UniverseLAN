@@ -111,10 +111,9 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Shadow Warrior 2                      | :white_check_mark:(2)     | 1.95.0                        | Tested with build 338 | 
 | Hammerwatch                           | :white_check_mark:(2)     | 1.139.2                       | Tested with build 360 |
 | Driftland - The Magic Revival         | :construction:            | 1.133.6                       | Both games crash when joining |
-| Serious Sams Bogus Detour             | :construction:            | 1.100.2                       | Stuck on "Creating lobby..." or "Joining lobby..." <br> Can get into lobby since build 243 but host crashes on start |
+| Serious Sams Bogus Detour             | :construction:            | 1.100.2                       | Can join lobby since build 360 and start game, but both players stuck on black "Loading..." screen |
 | Niffelheim                            | :construction:            | 1.139.2                       | Stuck at "Loading..." (save transfer?) | 
-| Homeworld: Deserts of Kharak          | :construction:            | 1.101                         | Tested with 1.100.2. Can't create a lobby somehow. | 
-| No Man's Sky                          | :construction:            | 1.148.3                       | Doesn't work yet, no 'friends' or hosts show up. | 
+| Homeworld: Deserts of Kharak          | :construction:            | 1.101                         | Tested with 1.100.2. After build 362 lobbies can now be created, but connecting doesn't work. | 
 | Alien vs Predator 2000                | :question:                |                               | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176? |
 | Rage of Mages II: Necromancer         | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
 | Neverwinter Nights 2 Complete         | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
@@ -126,6 +125,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Ticket to Ride                        | :left_right_arrow:        | 1.139.2                       | Tried it with the wrapper and works, but need to create a free Wonder account | 
 | Aragami 2                             | :left_right_arrow:        | 1.148.3                       | Probably does not use GOG Galaxy for networking (doesn't work for private lobbies).<br> Can play on public lobbies without GOG Galaxy or with this patch AFAIK. |
 | DUSK (DuskWorld)                      | :left_right_arrow:        | 1.133.6                       | Uses steam (works without Steam Client) api for free online play, doesn't use GOG Galaxy. |
+| No Man's Sky                          | :x:                       | 1.148.3                       | Uses GOG Galaxy only to get an encrypted auth ticket, which authenticates the GOG user into a third party online multiplayer. | 
 | Speed Brawl                           | :x:                       | 1.144.1                       | Does not use Galaxy for multiplayer (EOS? Steam? Custom RakNet MP?) | 
 | Mount & Blade II - Bannerlord         | :x:                       | 1.144.1                       | Uses Epic Online Services, not Galaxy
 | Absolver                              | :x:                       | 1.104.2                       | EAC is preventing usage of UniverseLAN, without EAC multiplayer is disabled | 
