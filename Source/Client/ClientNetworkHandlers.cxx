@@ -137,9 +137,15 @@ namespace universelan::client {
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<P2PNetworkPacketMessage>& data) {
 		// This is too high frequency in my opinion to trace
-
 		interfaces->networking->AddPacket(data);
 	}
+
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<P2PServerNetworkPacketMessage>& data) {
+		// This is too high frequency in my opinion to trace
+		interfaces->server_networking->AddPacket(data);
+	}
+#endif
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<FileShareResponseMessage>& data) {
 		tracer::Trace trace{ "::FileShareResponseMessage", tracer::Trace::NETCLIENT };

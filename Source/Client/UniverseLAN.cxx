@@ -44,7 +44,9 @@ namespace universelan::client {
 #endif
 		matchmaking = std::make_unique<MatchmakingImpl>(this);
 		networking = std::make_unique<NetworkingImpl>(this);
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
 		server_networking = std::make_unique<NetworkingImpl>(this);
+#endif
 		stats = std::make_unique<StatsImpl>(this);
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS
 		utils = std::make_unique<UtilsImpl>(this);

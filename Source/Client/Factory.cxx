@@ -122,6 +122,7 @@ namespace galaxy::api {
 		return GalaxyFactory::GetInstance()->GetNetworking();
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
 	/**
 	 * Calls IGalaxy::GetServerNetworking() on the singleton instance of IGalaxy.
 	 *
@@ -134,6 +135,7 @@ namespace galaxy::api {
 
 		return GalaxyFactory::GetInstance()->GetServerNetworking();
 	}
+#endif
 
 	/**
 	 * Calls IGalaxy::GetStats() on the singleton instance of IGalaxy.

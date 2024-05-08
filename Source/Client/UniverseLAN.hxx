@@ -59,7 +59,9 @@ namespace universelan::client {
 
 		std::unique_ptr<MatchmakingImpl>		matchmaking = nullptr;
 		std::unique_ptr<NetworkingImpl>			networking = nullptr;
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
 		std::unique_ptr<NetworkingImpl>			server_networking = nullptr;
+#endif
 		std::unique_ptr<StatsImpl>				stats = nullptr;
 
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS

@@ -97,9 +97,11 @@ namespace universelan::client {
 		return intf_inst.networking.get();
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
 	INetworking* ServerNetworking() {
 		return intf_inst.server_networking.get();
 	}
+#endif
 
 	IStats* Stats() {
 		return intf_inst.stats.get();

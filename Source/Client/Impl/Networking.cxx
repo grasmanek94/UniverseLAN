@@ -8,12 +8,12 @@ namespace universelan::client {
 		intf{ intf }, listeners{ intf->notification.get() },
 		buffer{}
 	{
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::INETWORKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::INETWORKING };
 	}
 
 	NetworkingImpl::~NetworkingImpl()
 	{
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::INETWORKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::INETWORKING };
 	}
 
 	bool NetworkingImpl::SendP2PPacket(GalaxyID galaxyID, const void* data, uint32_t dataSize, P2PSendType sendType, uint8_t channel) {
@@ -41,17 +41,17 @@ namespace universelan::client {
 	}
 
 	bool NetworkingImpl::GetP2PPacket(void* dest, uint32_t destSize, uint32_t* outMsgSize, GalaxyID& outGalaxyID, uint8_t channel, bool pop) {
-		channels_array::value_type& channel_var = buffer[channel];
+		auto channel_var = &buffer[channel];
 		packet_t packet{ nullptr };
 		{
-			lock_t lock{ channel_var.mtx };
-			if (channel_var.packets.empty()) {
+			lock_t lock{ channel_var->mtx };
+			if (channel_var->packets.empty()) {
 				return false;
 			}
 
-			packet = channel_var.packets.front();
+			packet = channel_var->packets.front();
 			if (pop) {
-				channel_var.packets.pop();
+				channel_var->packets.pop();
 			}
 		}
 
@@ -73,22 +73,22 @@ namespace universelan::client {
 	}
 
 	bool NetworkingImpl::IsP2PPacketAvailable(uint32_t* outMsgSize, uint8_t channel) {
-		channels_array::value_type& channel_var = buffer[channel];
+		auto channel_var = &buffer[channel];
 
-		lock_t lock{ channel_var.mtx };
-		if(channel_var.packets.empty()) {
+		lock_t lock{ channel_var->mtx };
+		if (channel_var->packets.empty()) {
 			return false;
-		} 
+		}
 
-		*outMsgSize = (int32_t)channel_var.packets.front()->data.size();
+		*outMsgSize = (int32_t)channel_var->packets.front()->data.size();
 		return true;
 	}
 
 	void NetworkingImpl::PopP2PPacket(uint8_t channel) {
-		channels_array::value_type& channel_var = buffer[channel];
+		auto channel_var = &buffer[channel];
 
-		lock_t lock{ channel_var.mtx };
-		channel_var.packets.pop();
+		lock_t lock{ channel_var->mtx };
+		channel_var->packets.pop();
 	}
 
 	int NetworkingImpl::GetPingWith(GalaxyID galaxyID) {
@@ -97,7 +97,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_NAT_FUNCTIONALITY
 	void NetworkingImpl::RequestNatTypeDetection() {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::INETWORKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::INETWORKING };
 
 		listeners->NotifyAll(
 			&INatTypeDetectionListener::OnNatTypeDetectionSuccess,
@@ -105,7 +105,7 @@ namespace universelan::client {
 	}
 
 	NatType NetworkingImpl::GetNatType() {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::INETWORKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::INETWORKING };
 
 		return NAT_TYPE_NONE;
 	}
@@ -113,27 +113,25 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_CONNECTION_TYPE
 	ConnectionType NetworkingImpl::GetConnectionType(GalaxyID userID) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::INETWORKING };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::INETWORKING };
 
 		return CONNECTION_TYPE_DIRECT;
 	}
 #endif
 
-	void NetworkingImpl::AddPacket(const NetworkingImpl::packet_t& packet) {
+	void NetworkingImpl::AddPacket(const packet_t& packet) {
 		if (!packet) {
 			return;
 		}
 
 		// locked operation
 		{
-			channels_array::value_type& channel_var = buffer[packet->channel];
+			auto channel_var = &buffer[packet->channel];
 
-			lock_t lock{ channel_var.mtx };
-			channel_var.packets.push(packet);
+			lock_t lock{ channel_var->mtx };
+			channel_var->packets.push(packet);
 		}
 
-		if (listeners->NotifyAllNow(&INetworkingListener::OnP2PPacketAvailable, (uint32_t)packet->data.size(), packet->channel)) {
-			PopP2PPacket(packet->channel);
-		}
+		listeners->NotifyAllNow(&INetworkingListener::OnP2PPacketAvailable, (uint32_t)packet->data.size(), packet->channel);
 	}
 }

@@ -16,6 +16,7 @@ namespace universelan::server {
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<LobbyMemberStateChangeMessage>& data) { tracer::Trace trace{ "::LobbyMemberStateChangeMessage" }; REQUIRES_AUTHENTICATION(peer); }
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<LobbyOwnerChangeMessage>& data) { tracer::Trace trace{ "::LobbyOwnerChangeMessage" }; REQUIRES_AUTHENTICATION(peer); }
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<OnlineStatusChangeMessage>& data) { tracer::Trace trace{ "::OnlineStatusChangeMessage" }; REQUIRES_AUTHENTICATION(peer); }
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<P2PServerNetworkPacketMessage>& data) { REQUIRES_AUTHENTICATION(peer); }
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data)
 	{
@@ -231,20 +232,37 @@ namespace universelan::server {
 		peer::ptr pd = peer_mapper.Get(peer);
 		peer::ptr target_pd{ nullptr };
 
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
+		bool send_server_message = false;
+#endif
+
 		if (galaxy::api::GetIDType(data->id) == galaxy::api::IDType::ID_TYPE_LOBBY) {
 			auto lobby = lobby_manager.GetLobby(data->id);
 			if (lobby) {
 				target_pd = peer_mapper.Get(lobby->GetOwner());
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
+				send_server_message = true;
+#endif
 			}
 		}
 		else {
 			target_pd = peer_mapper.Get(data->id);
 		}
 
-		if (target_pd) {
-			data->id = pd->id;
-			connection.Send(target_pd->peer, *data);
+		if (!target_pd) {
+			return;
 		}
+
+		data->id = pd->id;
+
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
+		if (send_server_message) {
+			connection.Send(target_pd->peer, P2PServerNetworkPacketMessage{ *data });
+			return;		
+		}
+#endif
+
+		connection.Send(target_pd->peer, *data);
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<FileShareMessage>& data) {

@@ -36,6 +36,8 @@ namespace universelan::client {
 	class NetworkingImpl : public INetworking
 	{
 	public:
+
+
 		using mutex_t = std::recursive_mutex;
 		using lock_t = std::scoped_lock<mutex_t>;
 		using packet_t = std::shared_ptr<const P2PNetworkPacketMessage>;
@@ -56,9 +58,7 @@ namespace universelan::client {
 		ListenerRegistrarImpl* listeners;
 
 		channels_array buffer;
-
 	public:
-
 		NetworkingImpl(InterfaceInstances* intf);
 		virtual ~NetworkingImpl();
 

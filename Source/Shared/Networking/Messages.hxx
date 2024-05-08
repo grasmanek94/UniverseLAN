@@ -17,6 +17,7 @@
 #include "Messages/LobbyOwnerChangeMessage.hxx"
 #include "Messages/OnlineStatusChangeMessage.hxx"
 #include "Messages/P2PNetworkPacketMessage.hxx"
+#include "Messages/P2PServerNetworkPacketMessage.hxx"
 #include "Messages/RequestChatRoomMessagesMessage.hxx"
 #include "Messages/RequestChatRoomWithUserMessage.hxx"
 #include "Messages/RequestLobbyDataMessage.hxx"
@@ -57,6 +58,7 @@ namespace universelan {
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(LobbyMemberStateChangeMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(LobbyOwnerChangeMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(OnlineStatusChangeMessage); \
+	SHARED_NETWORK_IMPLEMENT_CASE_FOR(P2PServerNetworkPacketMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(P2PNetworkPacketMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(RequestLobbyDataMessage); \
 	SHARED_NETWORK_IMPLEMENT_CASE_FOR(RequestLobbyListMessage); \

@@ -61,8 +61,11 @@ namespace universelan::client {
 
 	INetworking* UniverseGameServer::GameServerNetworking() {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL_GAMESERVERAPI };
-
+#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
+		return gameserver_intf_inst.server_networking.get();
+#else
 		return gameserver_intf_inst.networking.get();
+#endif
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS
