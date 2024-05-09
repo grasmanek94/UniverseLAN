@@ -111,7 +111,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Shadow Warrior 2                      | :white_check_mark:(2)     | 1.95.0                        | Tested with build 338 | 
 | Hammerwatch                           | :white_check_mark:(2)     | 1.139.2                       | Tested with build 360 |
 | Warhammer: Chaosbane                  | :white_check_mark:(2)     | 1.139.2                       | Tested with build 389 | 
-| Driftland - The Magic Revival         | :construction:            | 1.133.6                       | Both games crash when joining |
+| Driftland - The Magic Revival         | :construction:            | 1.133.6                       | Can create a lobby, doesn't crash now, but the joining player returns to main menu after trying to join |
 | Serious Sams Bogus Detour             | :construction:            | 1.100.2                       | Can join lobby since build 360 and start game, but both players stuck on black "Loading..." screen |
 | Niffelheim                            | :construction:            | 1.139.2                       | Stuck at "Loading..." (save transfer?) | 
 | Homeworld: Deserts of Kharak          | :construction:            | 1.101                         | Tested with 1.100.2. After build 362 lobbies can now be created, but connecting doesn't work. | 
@@ -128,6 +128,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Ticket to Ride                        | :left_right_arrow:        | 1.139.2                       | Tried it with the wrapper and works, but need to create a free Wonder account | 
 | Aragami 2                             | :left_right_arrow:        | 1.148.3                       | Probably does not use GOG Galaxy for networking (doesn't work for private lobbies).<br> Can play on public lobbies without GOG Galaxy or with this patch AFAIK. |
 | DUSK (DuskWorld)                      | :left_right_arrow:        | 1.133.6                       | Uses steam (works without Steam Client) api for free online play, doesn't use GOG Galaxy. |
+| Fade to Silence                       | :x:                       | 1.114.9                       | Probably only uses steam for multiplayer, or some other service. | 
 | No Man's Sky                          | :x:                       | 1.148.3                       | Uses GOG Galaxy only to get an encrypted auth ticket, which authenticates the GOG user into a third party online multiplayer. | 
 | Speed Brawl                           | :x:                       | 1.144.1                       | Does not use Galaxy for multiplayer (EOS? Steam? Custom RakNet MP?) | 
 | Mount & Blade II - Bannerlord         | :x:                       | 1.144.1                       | Uses Epic Online Services, not Galaxy
