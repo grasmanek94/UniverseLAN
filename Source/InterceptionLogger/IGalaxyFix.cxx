@@ -283,6 +283,7 @@ namespace galaxy::api
 		static IGalaxy* GALAXY_CALLTYPE CreateInstance();
 
 		GalaxyFactory& operator=(GalaxyFactory const& other);
+		GalaxyFactory& operator=(GalaxyFactory && other);
 	private:
 
 		static IGalaxy* instance; ///< The instance of IGalaxy.
@@ -290,6 +291,14 @@ namespace galaxy::api
 	};
 
 	GalaxyFactory& GalaxyFactory::operator=(GalaxyFactory const& other) {
+		throw std::runtime_error("Uh oh GalaxyFactory assignment not implemented/untested");
+		this->instance = other.instance;
+		this->errorManager = other.errorManager;
+
+		return (GalaxyFactory&)*this;
+	}
+
+	GalaxyFactory& GalaxyFactory::operator=(GalaxyFactory && other) {
 		throw std::runtime_error("Uh oh GalaxyFactory assignment not implemented/untested");
 		this->instance = other.instance;
 		this->errorManager = other.errorManager;
