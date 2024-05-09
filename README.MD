@@ -111,6 +111,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Shadow Warrior 2                      | :white_check_mark:(2)     | 1.95.0                        | Tested with build 338 | 
 | Hammerwatch                           | :white_check_mark:(2)     | 1.139.2                       | Tested with build 360 |
 | Warhammer: Chaosbane                  | :white_check_mark:(2)     | 1.139.2                       | Tested with build 389 | 
+| Battlestar Galactica Deadlock         | :construction:            | 1.114.9                       | Can host lobby, join, start loading but stuck in loading screen at ~95% | 
 | Driftland - The Magic Revival         | :construction:            | 1.133.6                       | Can create a lobby, doesn't crash now, but the joining player returns to main menu after trying to join |
 | Serious Sams Bogus Detour             | :construction:            | 1.100.2                       | Can join lobby since build 360 and start game, but both players stuck on black "Loading..." screen |
 | Niffelheim                            | :construction:            | 1.139.2                       | Stuck at "Loading..." (save transfer?) | 
@@ -128,6 +129,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Ticket to Ride                        | :left_right_arrow:        | 1.139.2                       | Tried it with the wrapper and works, but need to create a free Wonder account | 
 | Aragami 2                             | :left_right_arrow:        | 1.148.3                       | Probably does not use GOG Galaxy for networking (doesn't work for private lobbies).<br> Can play on public lobbies without GOG Galaxy or with this patch AFAIK. |
 | DUSK (DuskWorld)                      | :left_right_arrow:        | 1.133.6                       | Uses steam (works without Steam Client) api for free online play, doesn't use GOG Galaxy. |
+| Battlefleet Gothic Armada             | :x:                       | 1.139.2                       | Doesn't seem to use Galaxy for multiplayer. | 
 | 8-bit Armies                          | :x:                       | 1.95.0                        | Uses encrypted auth ticket to authenticate to an external multiplayer service, probably Steam. | 
 | 8-bit Hordes                          | :x:                       | 1.95.0                        | Uses encrypted auth ticket to authenticate to an external multiplayer service, probably Steam. | 
 | Fade to Silence                       | :x:                       | 1.114.9                       | Probably only uses steam for multiplayer, or some other service. | 
