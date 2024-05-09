@@ -128,6 +128,8 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Ticket to Ride                        | :left_right_arrow:        | 1.139.2                       | Tried it with the wrapper and works, but need to create a free Wonder account | 
 | Aragami 2                             | :left_right_arrow:        | 1.148.3                       | Probably does not use GOG Galaxy for networking (doesn't work for private lobbies).<br> Can play on public lobbies without GOG Galaxy or with this patch AFAIK. |
 | DUSK (DuskWorld)                      | :left_right_arrow:        | 1.133.6                       | Uses steam (works without Steam Client) api for free online play, doesn't use GOG Galaxy. |
+| 8-bit Armies                          | :x:                       | 1.95.0                        | Uses encrypted auth ticket to authenticate to an external multiplayer service, probably Steam. | 
+| 8-bit Hordes                          | :x:                       | 1.95.0                        | Uses encrypted auth ticket to authenticate to an external multiplayer service, probably Steam. | 
 | Fade to Silence                       | :x:                       | 1.114.9                       | Probably only uses steam for multiplayer, or some other service. | 
 | No Man's Sky                          | :x:                       | 1.148.3                       | Uses GOG Galaxy only to get an encrypted auth ticket, which authenticates the GOG user into a third party online multiplayer. | 
 | Speed Brawl                           | :x:                       | 1.144.1                       | Does not use Galaxy for multiplayer (EOS? Steam? Custom RakNet MP?) | 
