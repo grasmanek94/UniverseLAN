@@ -11,22 +11,34 @@
 #include <IListenerRegistrar.h>
 #include <IUser.h>
 
-#if GALAXY_BUILD_FEATURE_USER_SIGNIN_CROSSPLATFORM
-
+#if GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINCREDENTIALS
 #define USER_SIGN_IN_CREDENTIALS SignInCredentials
-#define USER_SIGN_IN_STEAM SignInSteam
-#define USER_SIGN_IN_GALAXY SignInGalaxy
-#define USER_SIGN_IN_PS4 SignInPS4
-#define USER_SIGN_IN_SERVER_KEY SignInServerKey
-
 #else
-
 #define USER_SIGN_IN_CREDENTIALS SignIn
-#define USER_SIGN_IN_STEAM SignIn
-#define USER_SIGN_IN_GALAXY SignIn
-#define USER_SIGN_IN_PS4 SignIn
-#define USER_SIGN_IN_SERVER_KEY SignIn
+#endif
 
+#if GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINSTEAM
+#define USER_SIGN_IN_STEAM SignInSteam
+#else
+#define USER_SIGN_IN_STEAM SignIn
+#endif
+
+#if GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINGALAXY
+#define USER_SIGN_IN_GALAXY SignInGalaxy
+#else
+#define USER_SIGN_IN_GALAXY SignIn
+#endif
+
+#if GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINPS4
+#define USER_SIGN_IN_PS4 SignInPS4
+#else
+#define USER_SIGN_IN_PS4 SignIn
+#endif
+
+#if GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINSERVERKEY
+#define USER_SIGN_IN_SERVER_KEY SignInServerKey
+#else
+#define USER_SIGN_IN_SERVER_KEY SignIn
 #endif
 
 namespace universelan::client {
@@ -195,8 +207,7 @@ namespace universelan::client {
 		) override;
 #endif
 
-#if GALAXY_BUILD_FEATURE_USER_SIGNIN_CROSSPLATFORM
-
+#if GALAXY_BUILD_FEATURE_HAS_SIGNINTOKEN
 		/**
 		 * Authenticates the Galaxy Peer with refresh token.
 		 *
@@ -214,6 +225,7 @@ namespace universelan::client {
 		 */
 
 		virtual void SignInToken(const char* refreshToken, IAuthListener* const listener = NULL) override;
+#endif
 
 #if GALAXY_BUILD_FEATURE_IUSER_SIGNINLAUNCHER
 		/**
@@ -249,6 +261,7 @@ namespace universelan::client {
 		virtual void SignInEpic(const char* epicAccessToken, const char* epicUsername, IAuthListener* const listener = NULL) override;
 #endif
 
+
 #if GALAXY_BUILD_FEATURE_IUSER_UWP_TO_XBOX_RENAME
 		/**
 		 * Authenticates the Galaxy Peer based on XBOX GDK credentials.
@@ -263,7 +276,8 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void SignInXbox(uint64_t xboxID, IAuthListener* const listener = NULL) override;
-#else
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_SIGNINUWP
 		/**
 		 * Authenticates the Galaxy Peer based on Windows Store authentication
 		 * in Universal Windows Platform application.
@@ -279,6 +293,7 @@ namespace universelan::client {
 		virtual void SignInUWP(IAuthListener* const listener = NULL) override;
 #endif
 
+#if GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINPS4
 		/**
 		 * Authenticates the Galaxy Peer based on PS4 credentials.
 		 *
@@ -291,8 +306,11 @@ namespace universelan::client {
 		 * @param [in] ps4ClientID The PlayStation 4 client ID.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void SignInPS4(const char* ps4ClientID, IAuthListener* const listener = NULL) override;
 
+		virtual void USER_SIGN_IN_PS4(const char* ps4ClientID, IAuthListener* const listener = NULL) override;
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_SIGNINXB1
 		/**
 		 * Authenticates the Galaxy Peer based on XBOX ONE credentials.
 		 *
@@ -305,7 +323,9 @@ namespace universelan::client {
 		 * @param [in] xboxOneUserID The XBOX ONE user ID.
 		 * @param [in] listener The listener for specific operation.
 		 */
+
 		virtual void SignInXB1(const char* xboxOneUserID, IAuthListener* const listener = NULL) override;
+#endif
 
 #if GALAXY_BUILD_FEATURE_IUSER_SIGNINXBLIVE
 		/**
@@ -340,8 +360,7 @@ namespace universelan::client {
 		virtual void SignInAnonymousTelemetry(IAuthListener* const listener = NULL) override;
 #endif
 
-#else
-
+#if GALAXY_BUILD_FEATURE_HAS_SIGNIN_CLASSIC_XBOX
 		/**
 		* Initializes the Galaxy Peer based on XBOX ONE credentials.
 		*
@@ -359,6 +378,7 @@ namespace universelan::client {
 			, IAuthListener* listener = NULL
 #endif
 		);
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_SIGNIN_PS4
 		/**
@@ -382,7 +402,6 @@ namespace universelan::client {
 #endif
 		) override;
 
-#endif
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_SIGNOUT
@@ -643,5 +662,4 @@ namespace universelan::client {
 
 	/** @} */
 }
-
 #endif

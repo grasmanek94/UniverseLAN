@@ -155,7 +155,7 @@ namespace universelan::client {
 	}
 #endif
 
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_GOGSERVICECONNECTIONSTATELISTENER
 	GogServicesConnectionState UtilsImpl::GetGogServicesConnectionState() {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 

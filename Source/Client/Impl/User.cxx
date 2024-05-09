@@ -135,12 +135,13 @@ namespace universelan::client {
 	}
 #endif
 
-#if GALAXY_BUILD_FEATURE_USER_SIGNIN_CROSSPLATFORM
+#if GALAXY_BUILD_FEATURE_HAS_SIGNINTOKEN
 	void UserImpl::SignInToken(const char* refreshToken, IAuthListener* const listener) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		SignIn(listener);
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_IUSER_SIGNINLAUNCHER
 	void UserImpl::SignInLauncher(IAuthListener* const listener) {
@@ -165,7 +166,9 @@ namespace universelan::client {
 
 		SignIn(listener);
 	}
-#else
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_SIGNINUWP
 	void UserImpl::SignInUWP(IAuthListener* const listener) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
@@ -173,7 +176,8 @@ namespace universelan::client {
 	}
 #endif
 
-	void UserImpl::SignInPS4(const char* ps4ClientID, IAuthListener* const listener) {
+#if GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINPS4
+	void UserImpl::USER_SIGN_IN_PS4(const char* ps4ClientID, IAuthListener* const listener) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		if (ps4ClientID != nullptr) {
@@ -181,6 +185,9 @@ namespace universelan::client {
 		}
 	}
 
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_SIGNINXB1
 	void UserImpl::SignInXB1(const char* xboxOneUserID, IAuthListener* const listener) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
@@ -188,6 +195,7 @@ namespace universelan::client {
 			SignIn(listener);
 		}
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_IUSER_SIGNINXBLIVE
 	void UserImpl::SignInXBLive(const char* token, const char* signature, const char* marketplaceID, const char* locale, IAuthListener* const listener) {
@@ -207,8 +215,7 @@ namespace universelan::client {
 	}
 #endif
 
-#else
-
+#if GALAXY_BUILD_FEATURE_HAS_SIGNIN_CLASSIC_XBOX
 	void UserImpl::SignIn(uint32_t xboxOneUserID
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 		, IAuthListener* const listener
@@ -218,6 +225,7 @@ namespace universelan::client {
 
 		SignIn(GET_LISTENER(listener));
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_SIGNIN_PS4
 	void UserImpl::SignIn(const char* ps4ClientID, const char* ps4TitleID, const char* ps4TitleSecret, uint32_t ps4TitleSecretLength
@@ -231,7 +239,6 @@ namespace universelan::client {
 			SignIn(GET_LISTENER(listener));
 		}
 	}
-#endif
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_SIGNOUT

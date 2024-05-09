@@ -415,8 +415,10 @@ namespace universelan::server {
 
 		peer::ptr pd = peer_mapper.Get(peer);
 
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LEAVE_REASON
 		data->reason = ILobbyLeftListener::LOBBY_LEAVE_REASON_USER_LEFT;
+#else
+		data->reason = false;
 #endif
 
 		HandleMemberLobbyLeave(peer, data->lobby_id, false);
@@ -649,8 +651,10 @@ namespace universelan::server {
 
 		LobbyMemberStateChangeMessage leave_notification{ lobby->GetID(), pd->id, (disconnected ? LOBBY_MEMBER_STATE_CHANGED_DISCONNECTED : LOBBY_MEMBER_STATE_CHANGED_LEFT) };
 		LeaveLobbyMessage close_message{ 0, lobby->GetID()
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LEAVE_REASON
 			, ILobbyLeftListener::LOBBY_LEAVE_REASON_LOBBY_CLOSED
+#else
+			, false
 #endif
 		};
 

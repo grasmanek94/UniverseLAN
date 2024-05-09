@@ -156,7 +156,7 @@ namespace universelan::client {
 		 *
 		 * @return Current GOG services connection state.
 		 */
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_GOGSERVICECONNECTIONSTATELISTENER
 		virtual GogServicesConnectionState GetGogServicesConnectionState() override;
 #endif
 	};

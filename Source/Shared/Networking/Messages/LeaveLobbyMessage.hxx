@@ -13,8 +13,10 @@ namespace universelan {
 	public:
 		uint64_t request_id = 0;
 		galaxy::api::GalaxyID lobby_id = 0;
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LEAVE_REASON
 		galaxy::api::ILobbyLeftListener::LobbyLeaveReason reason = galaxy::api::ILobbyLeftListener::LOBBY_LEAVE_REASON_UNDEFINED;
+#else
+		bool reason; // ioFailure
 #endif
 
 		template<class Archive>
@@ -22,9 +24,7 @@ namespace universelan {
 		{
 			ar(request_id
 				, lobby_id
-#if (GALAXY_VERSION) > 11240
 				, reason
-#endif
 			);
 		}
 
@@ -38,13 +38,21 @@ namespace universelan {
 			, lobby_id{ lobby_id }
 		{}
 
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LEAVE_REASON
 		LeaveLobbyMessage(uint64_t request_id
 			, galaxy::api::GalaxyID lobby_id
 			, galaxy::api::ILobbyLeftListener::LobbyLeaveReason reason
 		)	: request_id{ request_id }
 			, lobby_id{ lobby_id }
 			, reason{ reason } 
+		{}
+#else
+		LeaveLobbyMessage(uint64_t request_id
+			, galaxy::api::GalaxyID lobby_id
+			, bool ioFailure
+		) : request_id{ request_id }
+			, lobby_id{ lobby_id }
+			, reason{ ioFailure }
 		{}
 #endif
 	};

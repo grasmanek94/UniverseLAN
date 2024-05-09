@@ -67,7 +67,7 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUTILS };
 	}
 #endif
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_GOGSERVICECONNECTIONSTATELISTENER
 	GogServicesConnectionState UtilsImpl::GetGogServicesConnectionState() {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUTILS };
 
@@ -79,7 +79,7 @@ namespace universelan::client {
 
 	void UtilsImpl::ConnectionStateChangeReceived(bool connected) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUTILS };
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_GOGSERVICECONNECTIONSTATELISTENER
 		listeners->NotifyAll(&IGogServicesConnectionStateListener::OnConnectionStateChange,
 			(connected ?
 				GOG_SERVICES_CONNECTION_STATE_CONNECTED :

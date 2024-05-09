@@ -61,7 +61,7 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
 
   afvd(HAS_IUSERTIMEPLAYEDRETRIEVELISTENER		1.76.0					)
   
-  afvd(HAS_SIGNIN_PS4							1.77.0					)
+  afvd(HAS_SIGNIN_PS4							1.77.0		1.132.1		)
 
   afvd(HAS_PERSONASTATE_ENUM					1.78.0					)
   afvd(HAS_LOBBYTOPOLOGYTYPE_ENUM				1.78.0					)
@@ -71,6 +71,7 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
   afvd(HAS_IOTHERSESSIONSTARTLISTENER			1.82.0 					)
   afvd(HAS_REQUESTLOBBYLIST_ARGS_ALLOWFULL		1.82.0 					)
   afvd(HAS_INITOPTIONS_GALAXYPEERPATH      		1.82.0 		1.120.0 	)
+  afvd(HAS_SIGNIN_CLASSIC_XBOX					1.82.0		1.132.1		)
 
   afvd(HAS_ISTORAGE 							1.88.0 					)
   afvd(HAS_GETCURRENTGAMELANGUAGE				1.88.0 					)
@@ -150,7 +151,8 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
   afvd(SIGNIN_RENAMED_TO_SIGNINXB1	    		1.133.0					)
   afvd(SIGNIN_RENAMED_TO_SIGNINSERVERKEY		1.133.0					)
   afvd(HAS_SIGNINTOKEN							1.133.0					)
-  afvd(HAS_SIGNINUWP							1.133.0					)
+  afvd(HAS_SIGNINUWP							1.133.0		1.148.4		)
+  afvd(HAS_SIGNINXB1							1.133.0					)
 
   afvd(HAS_SIGNOUT								1.133.1					)
 
