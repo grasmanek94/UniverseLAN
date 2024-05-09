@@ -189,6 +189,7 @@ namespace galaxy::api {
 		return GalaxyFactory::GetInstance()->GetStorage();
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
 	/**
 	* Calls IGalaxy::GetCustomNetworking() on the singleton instance of IGalaxy.
 	*
@@ -201,6 +202,7 @@ namespace galaxy::api {
 
 		return GalaxyFactory::GetInstance()->GetCustomNetworking();
 	}
+#endif
 
 	/**
 	 * Calls IGalaxy::GetListenerRegistrar() on the singleton instance of IGalaxy.

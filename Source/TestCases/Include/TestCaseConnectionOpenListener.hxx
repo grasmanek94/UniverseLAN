@@ -2,6 +2,7 @@
 
 #include "TestCaseClientDetails.hxx"
 
+#if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
 class ConnectionOpenListenerImplGlobal : public galaxy::api::GlobalConnectionOpenListener
 {
 public:
@@ -105,3 +106,4 @@ public:
 		}
 	}
 };
+#endif

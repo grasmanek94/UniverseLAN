@@ -29,10 +29,11 @@ int main()
 	ChatRoomMessagesRetrieveListenerImplGlobal chatroommessagesretrievelistener{};
 	ChatRoomWithUserRetrieveListenerImplGlobal chatroomwithuserretrievelistener{};
 #endif
-
+#if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
 	ConnectionCloseListenerImplGlobal connectioncloselistener{};
 	ConnectionDataListenerImplGlobal connectiondatalistener{};
 	ConnectionOpenListenerImplGlobal connectionopenlistener{};
+#endif
 	EncryptedAppTicketListenerImplGlobal encryptedappticketlistener{};
 	FileShareListenerImplGlobal filesharelistener{};
 
