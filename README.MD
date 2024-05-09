@@ -105,6 +105,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Guns, Gore & Cannoli 2                | :white_check_mark:(3)     | 1.124.0                       | |
 | Tropico 6                             | :white_check_mark:(2)     | 1.139.2                       | Also other games are displayed? Game has custom networking?<br> Build 161 worked, build 243 seems to be broken (can't join lobby) <br> Update: The person testing UniverseLAN used an invalid configuration (same generated Galaxy ID numbers), after fixing this configuration issue in Config.ini the person reported the game seems to work on build 243. | 
 | MetalSlug3                            | :white_check_mark:(2)     | 1.100.2                       | Works since build 243 |
+| MetalSlugX                            | :white_check_mark:(2)     | 1.100.2                       | Works, tested on build 389 |
 | Serious Sam 4                         | :white_check_mark:(2)     | 1.144.1                       | Works since build 256 | 
 | Tooth and Tail                        | :white_check_mark:(2)     | 1.122.1                       | Works with 1.124.0, tested with build 256 | 
 | Door Kickers - Action Squad           | :white_check_mark:(2)     | 1.133.6                       | Tested with build 287 |
@@ -129,6 +130,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Ticket to Ride                        | :left_right_arrow:        | 1.139.2                       | Tried it with the wrapper and works, but need to create a free Wonder account | 
 | Aragami 2                             | :left_right_arrow:        | 1.148.3                       | Probably does not use GOG Galaxy for networking (doesn't work for private lobbies).<br> Can play on public lobbies without GOG Galaxy or with this patch AFAIK. |
 | DUSK (DuskWorld)                      | :left_right_arrow:        | 1.133.6                       | Uses steam (works without Steam Client) api for free online play, doesn't use GOG Galaxy. |
+| Blood Bowl 2 Legendary Editition      | :left_right_arrow:        |                               | Uses custom free multiplayer, need to create a free online in-game account on their servers. |
 | Battlefleet Gothic Armada             | :x:                       | 1.139.2                       | Doesn't seem to use Galaxy for multiplayer. | 
 | 8-bit Armies                          | :x:                       | 1.95.0                        | Uses encrypted auth ticket to authenticate to an external multiplayer service, probably Steam. | 
 | 8-bit Hordes                          | :x:                       | 1.95.0                        | Uses encrypted auth ticket to authenticate to an external multiplayer service, probably Steam. | 
