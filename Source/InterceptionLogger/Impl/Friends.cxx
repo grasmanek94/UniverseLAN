@@ -31,15 +31,14 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 		listeners.AddListener<UserInformationRetrieveListener>();
 #endif
-#if GALAXY_BUILD_FEATURE_HAS_ISENTFRIENDINVITATIONLISTRETRIEVELISTENER
-		listeners.AddListener<FriendInvitationListRetrieveListener>();
-#endif
 #if GALAXY_BUILD_FEATURE_HAS_FRIENDADDLISTENER
 		listeners.AddListener<FriendAddListener>();
 #endif
 #if GALAXY_BUILD_FEATURE_NEW_FRIEND_FEATURES_104_3
 		listeners.AddListener<FriendInvitationSendListener>();
+#if GALAXY_BUILD_FEATURE_HAS_ISENTFRIENDINVITATIONLISTRETRIEVELISTENER
 		listeners.AddListener<SentFriendInvitationListRetrieveListener>();
+#endif
 		listeners.AddListener<FriendInvitationListener>();
 		listeners.AddListener<FriendInvitationRespondToListener>();
 		listeners.AddListener<FriendDeleteListener>();

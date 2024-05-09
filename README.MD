@@ -113,6 +113,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Hammerwatch                               | :white_check_mark:(2)     | 1.139.2                       | Tested with build 360 |
 | Warhammer: Chaosbane                      | :white_check_mark:(2)     | 1.139.2                       | Tested with build 389 | 
 | Mutant Football League - Dynasty Edition  | :white_check_mark:(2)     | 1.130.0                       | Tested with build 395 |
+| Oriental Empires                          | :white_check_mark:(2)     | 1.113.3                       | Tested with build 397 |
 | Battlestar Galactica Deadlock             | :construction:            | 1.114.9                       | Can host lobby, join, start loading but stuck in loading screen at ~95% | 
 | Driftland - The Magic Revival             | :construction:            | 1.133.6                       | Can create a lobby, doesn't crash now, but the joining player returns to main menu after trying to join |
 | Serious Sams Bogus Detour                 | :construction:            | 1.100.2                       | Can join lobby since build 360 and start game, but both players stuck on black "Loading..." screen |
