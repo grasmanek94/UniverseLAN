@@ -92,6 +92,21 @@ namespace universelan::client {
 		return result;
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_GETFILEHASHBYINDEX
+	const char* CloudStorageImpl::GetFileHashByIndex(uint32_t index) const
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		auto result = intf()->GetFileHashByIndex(index);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+		}
+
+		return result;
+	}
+#endif
+
 	void CloudStorageImpl::GetFile(const char* container, const char* name, void* userParam, WriteFunc writeFunc, ICloudStorageGetFileListener* listener) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 

@@ -92,6 +92,18 @@ namespace universelan::client {
 		 */
 		virtual uint32_t GetFileTimestampByIndex(uint32_t index) const override;
 
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_GETFILEHASHBYINDEX
+		/**
+		 * Function used to get a file hash from the retrieved list of files stored in cloud storage.
+		 *
+		 * Call for this function is allowed inside ICloudStorageGetFileListListener::OnGetFileListSuccess() only.
+		 *
+		 * @param [in] index Index of the file on the list.
+		 * @return Hash of the file (as hexadecimal string).
+		 */
+		virtual const char* GetFileHashByIndex(uint32_t index) const override;
+#endif
+
 		/**
 		 * Download a file from cloud storage
 		 *

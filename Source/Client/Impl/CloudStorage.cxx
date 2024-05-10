@@ -80,6 +80,13 @@ namespace universelan::client {
 #endif
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_GETFILEHASHBYINDEX
+	const char* CloudStorageImpl::GetFileHashByIndex(uint32_t index) const
+	{
+		return "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	}
+#endif
+
 	void CloudStorageImpl::GetFile(const char* container, const char* name, void* userParam, WriteFunc writeFunc, ICloudStorageGetFileListener* listener) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
