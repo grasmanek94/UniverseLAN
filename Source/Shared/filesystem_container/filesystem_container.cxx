@@ -406,7 +406,7 @@ namespace filesystem_container {
 		return fs_entry_index[index];
 	}
 
-	std::vector<fs_entry_ptr> filesystem_container::get_file_list() const
+	fs_filelist_contrainer_t filesystem_container::get_file_list() const
 	{
 		lock_t lock{ mtx_fs_entry_index };
 		return fs_entry_index;

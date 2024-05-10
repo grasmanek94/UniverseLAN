@@ -23,10 +23,10 @@ namespace universelan::client {
 		intf{ intf },
 		notifications{ notifications },
 		listeners{ notifications } {
-		listeners.AddListener<ChatRoomWithUserRetrieveListener>();
-		listeners.AddListener<ChatRoomMessageSendListener>();
-		listeners.AddListener<ChatRoomMessagesListener>();
-		listeners.AddListener<ChatRoomMessagesRetrieveListener>();
+		listeners.AddListener<CloudStorageGetFileListListener>();
+		listeners.AddListener<CloudStorageGetFileListener>();
+		listeners.AddListener<CloudStoragePutFileListener>();
+		listeners.AddListener<CloudStorageDeleteFileListener>();
 	}
 
 	CloudStorageImpl::~CloudStorageImpl() {
@@ -113,7 +113,7 @@ namespace universelan::client {
 			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
 			trace.write_all(std::format("buffer: {}", buffer));
-			trace.write_all(std::format("bufferLength: {}", (void*)bufferLength));
+			trace.write_all(std::format("bufferLength: {}", bufferLength));
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
@@ -200,7 +200,11 @@ namespace universelan::client {
 			}
 		}
 
-		intf()->PutFile(container, name, userParam, readFunc, rewindFunc, listener, metadataKeys, metadataValues, timeStamp);
+		intf()->PutFile(container, name, userParam, readFunc, rewindFunc, listener, metadataKeys, metadataValues
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
+			, timeStamp
+#endif
+		);
 	}
 
 	void CloudStorageImpl::PutFile(
@@ -237,7 +241,11 @@ namespace universelan::client {
 			}
 		}
 
-		intf()->PutFile(container, name, buffer, bufferLength, listener, metadataKeys, metadataValues, timeStamp);
+		intf()->PutFile(container, name, buffer, bufferLength, listener, metadataKeys, metadataValues
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
+			, timeStamp
+#endif
+		);
 	}
 
 	void CloudStorageImpl::PutFile(

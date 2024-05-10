@@ -17,7 +17,7 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
 		file_upload_requests{}, file_download_requests{},
 #endif
-		sfu(intf->config->GetGameDataPath())
+		sfu(intf->sfu.get())
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 	}
@@ -36,7 +36,7 @@ namespace universelan::client {
 	void StorageImpl::FileWrite(const char* fileName, const void* data, uint32_t dataSize) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 
-		if (!sfu.Write(sfu.storage, fileName, (const char*)data, dataSize)) {
+		if (!sfu->Write(sfu->storage, fileName, (const char*)data, dataSize)) {
 			std::cerr << __FUNCTION__ << " fail: " << fileName << "\n";
 		}
 	}
@@ -44,13 +44,13 @@ namespace universelan::client {
 	uint32_t StorageImpl::FileRead(const char* fileName, void* data, uint32_t dataSize) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 
-		return sfu.Read(sfu.storage, fileName, (char*)data, dataSize);
+		return sfu->Read(sfu->storage, fileName, (char*)data, dataSize);
 	}
 
 	void StorageImpl::FileDelete(const char* fileName) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 
-		if (!sfu.Remove(sfu.storage, fileName)) {
+		if (!sfu->Remove(sfu->storage, fileName)) {
 			std::cerr << __FUNCTION__ << " fail: " << fileName << "\n";
 		}
 	}
@@ -58,25 +58,25 @@ namespace universelan::client {
 	bool StorageImpl::FileExists(const char* fileName) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 
-		return sfu.Exists(sfu.storage, fileName);
+		return sfu->Exists(sfu->storage, fileName);
 	}
 
 	uint32_t StorageImpl::GetFileSize(const char* fileName) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 
-		return sfu.GetSize(sfu.storage, fileName);
+		return sfu->GetSize(sfu->storage, fileName);
 	}
 
 	uint32_t StorageImpl::GetFileTimestamp(const char* fileName) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 
-		return sfu.GetTimestamp(sfu.storage, fileName);
+		return sfu->GetTimestamp(sfu->storage, fileName);
 	}
 
 	uint32_t StorageImpl::GetFileCount() {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 
-		return sfu.GetFileCount(sfu.storage);
+		return sfu->GetFileCount(sfu->storage);
 	}
 
 	const char* StorageImpl::GetFileNameByIndex(uint32_t index) {
@@ -90,7 +90,7 @@ namespace universelan::client {
 	void StorageImpl::GetFileNameCopyByIndex(uint32_t index, char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 
-		std::string path = sfu.GetFileNameByIndex(sfu.storage, index).string();
+		std::string path = sfu->GetFileNameByIndex(sfu->storage, index).string();
 		universelan::util::safe_copy_str_n(path, buffer, bufferLength);
 	}
 
@@ -117,7 +117,7 @@ namespace universelan::client {
 
 		std::string str_file_name{ fileName };
 
-		if (!sfu.Exists(sfu.storage, str_file_name.c_str())) {
+		if (!sfu->Exists(sfu->storage, str_file_name.c_str())) {
 			std::cerr << __FUNCTION__ << " fail: " << fileName << "\n";
 
 			listeners->NotifyAll(
@@ -135,7 +135,7 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
 			file_upload_requests.emplace(request_id, listener);
 #endif
-			intf->client->GetConnection().SendAsync(FileShareMessage{ request_id, str_file_name, sfu.Read(sfu.storage, str_file_name.c_str()) });
+			intf->client->GetConnection().SendAsync(FileShareMessage{ request_id, str_file_name, sfu->Read(sfu->storage, str_file_name.c_str()) });
 			}).detach(); // due to this detach
 	}
 
@@ -175,14 +175,14 @@ namespace universelan::client {
 	void StorageImpl::GetSharedFileNameCopy(SharedFileID sharedFileID, char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 
-		std::string name = sfu.GetSharedFileName(sfu.shared, sharedFileID).string();
+		std::string name = sfu->GetSharedFileName(sfu->shared, sharedFileID).string();
 		universelan::util::safe_copy_str_n(name, buffer, bufferLength);
 	}
 
 	uint32_t StorageImpl::GetSharedFileSize(SharedFileID sharedFileID) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 
-		return sfu.GetSize(sfu.shared, sharedFileID);
+		return sfu->GetSize(sfu->shared, sharedFileID);
 	}
 
 	GalaxyID StorageImpl::GetSharedFileOwner(SharedFileID sharedFileID) {
@@ -194,25 +194,25 @@ namespace universelan::client {
 	uint32_t StorageImpl::SharedFileRead(SharedFileID sharedFileID, void* data, uint32_t dataSize, uint32_t offset) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 
-		return sfu.Read(sfu.shared, sharedFileID, (char*)data, dataSize, offset);
+		return sfu->Read(sfu->shared, sharedFileID, (char*)data, dataSize, offset);
 	}
 
 	void StorageImpl::SharedFileClose(SharedFileID sharedFileID) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 
-		sfu.Remove(sfu.shared, sharedFileID);
+		sfu->Remove(sfu->shared, sharedFileID);
 	}
 
 	uint32_t StorageImpl::GetDownloadedSharedFileCount() {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 
-		return sfu.GetFileCount(sfu.shared);
+		return sfu->GetFileCount(sfu->shared);
 	}
 
 	SharedFileID StorageImpl::GetDownloadedSharedFileByIndex(uint32_t index) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 
-		return sfu.GetSharedIDByIndex(sfu.shared, index);
+		return sfu->GetSharedIDByIndex(sfu->shared, index);
 	}
 
 	void StorageImpl::FileDownloaded(const std::shared_ptr<FileRequestMessage>& data) {
@@ -227,7 +227,7 @@ namespace universelan::client {
 #endif
 
 		if (data->data.size() > 0) {
-			auto entry = sfu.shared->create_shared(data->filename, data->id);
+			auto entry = sfu->shared->create_shared(data->filename, data->id);
 			if (entry && entry->write(data->data)) {
 				listeners->NotifyAll(
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
@@ -257,7 +257,7 @@ namespace universelan::client {
 #endif
 
 		if (data->id != 0) {
-			if (!sfu.CopyFromLocalToShared(data->filename.c_str(), data->id)) {
+			if (!sfu->CopyFromLocalToShared(data->filename.c_str(), data->id)) {
 				std::cerr << "FileUploaded::CopyFromLocalToShared failed\n";
 			}
 

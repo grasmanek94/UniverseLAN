@@ -25,4 +25,6 @@ namespace filesystem_container {
 
 	std::vector<std::filesystem::path> recurse_list_files(const std::filesystem::path& search_root_path);
 	std::vector<std::filesystem::path> list_files(const std::filesystem::path& search_root_path);
+
+	uint64_t file_time_now_since_epoch();
 }

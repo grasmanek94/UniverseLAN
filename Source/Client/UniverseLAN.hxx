@@ -8,6 +8,7 @@
 #include "Impl/InitOptionsModern.hxx"
 
 #include <IniData.hxx>
+#include <SharedFileUtils.hxx>
 
 #include <memory>
 
@@ -47,6 +48,7 @@ namespace universelan::client {
 
 	// interface instances;
 	struct InterfaceInstances {
+		std::unique_ptr<SharedFileUtils>		sfu = nullptr;
 		std::unique_ptr<ClientIniData>			config = nullptr;
 		std::unique_ptr<InitOptionsModern>		init_options = nullptr;
 		std::unique_ptr<Client>					client = nullptr;

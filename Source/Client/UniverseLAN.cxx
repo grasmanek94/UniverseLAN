@@ -3,6 +3,7 @@
 #include "Client.hxx"
 
 #include <IniData.hxx>
+#include <SharedFileUtils.hxx>
 #include <Tracer.hxx>
 
 #include <filesystem>
@@ -18,6 +19,10 @@ namespace universelan::client {
 			config = std::make_unique<ClientIniData>();
 		}
 
+		if (sfu == nullptr) {
+			sfu = std::make_unique<SharedFileUtils>(config->GetGameDataPath());
+		}
+
 		tracer::Trace::InitTracing(
 			(fs::path(config->GetGameDataPath()) / "Tracing").string().c_str(),
 			config->IsUnhandledExceptionLoggingEnabled(),
@@ -31,7 +36,7 @@ namespace universelan::client {
 		tracer::Trace::SetTracingEnabled(true);
 
 		tracer::Trace trace { nullptr, __FUNCTION__ };
-
+		
 		delay_runner = std::make_unique<DelayRunner>(); // No 'this' on purpose
 
 		init_options = std::make_unique<InitOptionsModern>(initOptions);
@@ -81,6 +86,10 @@ namespace universelan::client {
 	void InterfaceInstances::reset() {
 		if (config == nullptr) {
 			config = std::make_unique<ClientIniData>();
+		}
+
+		if (sfu == nullptr) {
+			sfu = std::make_unique<SharedFileUtils>(config->GetGameDataPath());
 		}
 
 		tracer::Trace::InitTracing(

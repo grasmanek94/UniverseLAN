@@ -17,6 +17,90 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::ICLOUDSTORAGE;
 	}
 
+	void CloudStorageGetFileListListener::OnGetFileListSuccess(uint32_t fileCount, uint32_t quota, uint32_t quotaUsed)
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("fileCount: {}", fileCount));
+			trace.write_all(std::format("quota: {}", quota));
+			trace.write_all(std::format("quotaUsed: {}", quotaUsed));
+		}
+	}
+
+	void CloudStorageGetFileListListener::OnGetFileListFailure(FailureReason failureReason)
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+		}
+	}
+
+	void CloudStorageGetFileListener::OnGetFileSuccess(const char* container, const char* name, uint32_t fileSize, uint32_t metadataCount)
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("fileSize: {}", fileSize));
+			trace.write_all(std::format("metadataCount: {}", metadataCount));
+		}
+	}
+
+	void CloudStorageGetFileListener::OnGetFileFailure(const char* container, const char* name, FailureReason failureReason)
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+		}
+	}
+
+	void CloudStoragePutFileListener::OnPutFileSuccess(const char* container, const char* name)
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+		}
+	}
+
+	void CloudStoragePutFileListener::OnPutFileFailure(const char* container, const char* name, FailureReason failureReason)
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+		}
+	}
+
+	void CloudStorageDeleteFileListener::OnDeleteFileSuccess(const char* container, const char* name)
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+		}
+	}
+
+	void CloudStorageDeleteFileListener::OnDeleteFileFailure(const char* container, const char* name, FailureReason failureReason)
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+		}
+	}
 }
 
 #endif

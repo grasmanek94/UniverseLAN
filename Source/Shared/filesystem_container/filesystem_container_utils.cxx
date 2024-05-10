@@ -1,6 +1,7 @@
 #include "filesystem_container_utils.hxx"
 
 #include <array>
+#include <chrono>
 #include <filesystem>
 #include <stdexcept>
 #include <sstream>
@@ -60,6 +61,15 @@ namespace filesystem_container {
 			}
 			return file_list;
 		}
+	}
+
+	uint64_t file_time_now_since_epoch() {
+		static_assert(
+			std::is_integral<std::chrono::system_clock::rep>::value,
+			"Representation of ticks isn't an integral value."
+			);
+		auto now = std::chrono::system_clock::now().time_since_epoch();
+		return std::chrono::duration_cast<std::chrono::seconds>(now).count();
 	}
 
 	bool inside_basepath(

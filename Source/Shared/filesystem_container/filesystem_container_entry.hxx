@@ -64,15 +64,21 @@ namespace filesystem_container {
 		// "Cloud" functions
 		uint64_t get_timestamp_metadata() const;
 		void set_timestamp_metadata(int64_t timestamp);
+		void touch_timestamp_metadata();
 
 		void set_metadata(const std::string& key, const std::string& value);
 		std::string get_metadata(const std::string& key, const std::string& default_value = "") const;
 		std::vector<std::string> get_metadata_keys() const;
 		std::vector<std::string> get_metadata_values() const;
 		file_entry_metadata_container_t get_metadata() const;
+		file_entry_metadata_vector_t get_metadata_vector() const;
+
+		size_t get_metadata_count() const;
 
 		bool save_metadata();
 
 		void create_empty_file_if_not_exist();
+
+		static uint64_t get_timestamp_now();
 	};
 }

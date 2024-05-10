@@ -41,7 +41,8 @@ namespace universelan::client {
 		ListenersRequestHelper<ISharedFileDownloadListener*> file_download_requests;
 #endif
 
-		SharedFileUtils sfu;
+		SharedFileUtils* sfu;
+
 	public:
 		StorageImpl(InterfaceInstances* intf);
 		virtual ~StorageImpl();

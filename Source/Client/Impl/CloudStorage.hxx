@@ -12,13 +12,13 @@
 //#include <Networking/Messages/FileRequestMessage.hxx>
 //#include <Networking/Messages/FileShareMessage.hxx>
 //#include <Networking/Messages/FileShareResponseMessage.hxx>
+#include <filesystem_container/filesystem_container.hxx>
 #include <SharedFileUtils.hxx>
 
 #include <ICloudStorage.h>
 #include <GalaxyID.h>
 #include <IListenerRegistrar.h>
 
-#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -40,9 +40,12 @@ namespace universelan::client {
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
 
-		SharedFileUtils sfu;
-		std::filesystem::path last_container;
-		std::vector<std::filesystem::path> container_file_list;
+		SharedFileUtils* sfu;
+		std::string last_container;
+		filesystem_container::fs_container_ptr last_subcontainer_ref;
+
+		filesystem_container::fs_filelist_contrainer_t container_file_list;
+		filesystem_container::file_entry_metadata_vector_t last_metadata_request;
 
 	public:
 		CloudStorageImpl(InterfaceInstances* intf);

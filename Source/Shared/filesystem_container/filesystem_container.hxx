@@ -12,6 +12,7 @@
 
 namespace filesystem_container {
 	using fs_container_ptr = std::shared_ptr<filesystem_container>;
+	using fs_filelist_contrainer_t = std::vector<fs_entry_ptr>;
 
 	class filesystem_container {
 	public:
@@ -84,7 +85,7 @@ namespace filesystem_container {
 		uint64_t get_shared_id_by_index(size_t index) const;
 		std::filesystem::path get_file_name_by_index(size_t index) const;
 		fs_entry_ptr get_file_by_index(size_t index) const;
-		std::vector<fs_entry_ptr> get_file_list() const;
+		fs_filelist_contrainer_t get_file_list() const;
 
 		std::filesystem::path get_basepath() const;
 

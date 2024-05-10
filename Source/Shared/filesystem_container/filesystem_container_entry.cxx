@@ -168,6 +168,11 @@ namespace filesystem_container {
 		metadata.set_timestamp(timestamp);
 	}
 
+	void filesystem_entry::touch_timestamp_metadata()
+	{
+		metadata.touch_timestamp();
+	}
+
 	uint64_t filesystem_entry::get_share_id() const
 	{
 		return metadata.share_id;
@@ -283,6 +288,16 @@ namespace filesystem_container {
 		return metadata.user_metadata.get_all();
 	}
 
+	file_entry_metadata_vector_t filesystem_entry::get_metadata_vector() const
+	{
+		return metadata.user_metadata.get_vector();
+	}
+
+	size_t filesystem_entry::get_metadata_count() const
+	{
+		return metadata.user_metadata.size();
+	}
+
 	bool filesystem_entry::save_metadata()
 	{
 		std::error_code ec;
@@ -316,5 +331,10 @@ namespace filesystem_container {
 		std::filesystem::create_directories(std::filesystem::path(abs_file_path).remove_filename(), ec);
 
 		std::fstream data_stream{ abs_file_path, file_write_mode };
+	}
+
+	uint64_t filesystem_entry::get_timestamp_now()
+	{
+		return 0;
 	}
 }

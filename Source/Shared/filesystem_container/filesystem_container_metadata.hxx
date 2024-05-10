@@ -12,6 +12,7 @@
 
 namespace filesystem_container {
 	using file_entry_metadata_container_t = std::map<std::string, std::string>;
+	using file_entry_metadata_vector_t = std::vector<std::pair<std::string, std::string>>;
 
 	class file_entry_metadata_container {
 	public:
@@ -52,13 +53,13 @@ namespace filesystem_container {
 		std::vector<std::string> get_keys() const;
 		std::vector<std::string> get_values() const;
 		file_entry_metadata_container_t get_all() const;
+		file_entry_metadata_vector_t get_vector() const;
 
 		void clear();
 		bool empty() const;
+		size_t size() const;
 
 		file_entry_metadata_container& operator=(const file_entry_metadata_container& other);
-
-
 	};
 
 	struct file_entry_metadata {

@@ -100,6 +100,13 @@ namespace galaxy::api {
 	}
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE
+	GALAXY_DLL_EXPORT ICloudStorage* GALAXY_CALLTYPE CloudStorage(void)
+	{
+		return universelan::client::CloudStorage();
+	}
+#endif
+
 	GALAXY_DLL_EXPORT IUser* GALAXY_CALLTYPE User(void)
 	{
 		return universelan::client::User();

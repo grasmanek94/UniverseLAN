@@ -1,4 +1,5 @@
 #include "filesystem_container_metadata.hxx"
+#include "filesystem_container_utils.hxx"
 
 #include <chrono>
 #include <cstdint>
@@ -8,15 +9,6 @@
 namespace filesystem_container {
 	namespace {
 		const std::string timestamp_key = "timestamp";
-
-		std::chrono::system_clock::rep time_since_epoch() {
-			static_assert(
-				std::is_integral<std::chrono::system_clock::rep>::value,
-				"Representation of ticks isn't an integral value."
-				);
-			auto now = std::chrono::system_clock::now().time_since_epoch();
-			return std::chrono::duration_cast<std::chrono::seconds>(now).count();
-		}
 	}
 
 	file_entry_metadata_container::file_entry_metadata_container() :
@@ -79,8 +71,20 @@ namespace filesystem_container {
 	file_entry_metadata_container_t file_entry_metadata_container::get_all() const
 	{
 		lock_t lock{ mtx };
-
 		return data;
+	}
+
+	file_entry_metadata_vector_t file_entry_metadata_container::get_vector() const
+	{
+		lock_t lock{ mtx };
+
+		file_entry_metadata_vector_t v{};
+		v.reserve(data.size());
+		for (auto& k : data) {
+			v.push_back(k);
+		}
+
+		return v;
 	}
 
 	void file_entry_metadata_container::clear()
@@ -93,6 +97,12 @@ namespace filesystem_container {
 	{
 		lock_t lock{ mtx };
 		return data.empty();
+	}
+
+	size_t file_entry_metadata_container::size() const
+	{
+		lock_t lock{ mtx };
+		return data.size();
 	}
 
 	file_entry_metadata_container& file_entry_metadata_container::operator=(const file_entry_metadata_container& other)
@@ -144,6 +154,6 @@ namespace filesystem_container {
 	}
 
 	void file_entry_metadata::touch_timestamp() {
-		set_timestamp(time_since_epoch());
+		set_timestamp(file_time_now_since_epoch());
 	}
 }
