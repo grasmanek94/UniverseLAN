@@ -178,10 +178,10 @@ namespace filesystem_container {
 		metadata.share_id = share_id;
 	}
 
-	uint64_t filesystem_entry::get_size() const
+	size_t filesystem_entry::get_size() const
 	{
 		try {
-			return std::filesystem::file_size(abs_file_path);
+			return (size_t)std::filesystem::file_size(abs_file_path);
 		}
 		catch (std::exception) {
 			return 0;
@@ -234,7 +234,7 @@ namespace filesystem_container {
 
 		data_stream.seekg(offset);
 		data_stream.read(data, data_length);
-		return data_stream.gcount();
+		return (size_t)data_stream.gcount();
 	}
 
 	bool filesystem_entry::write(const char* data, size_t data_length)
