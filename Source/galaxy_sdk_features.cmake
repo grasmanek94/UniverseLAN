@@ -204,7 +204,7 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
 
   afvd(HAS_ICLOUDSTORAGE_SAVEGAME				1.148.14				)
 
-  afvd(HAS_ICLOUDSTORAGE_PUTDELETE_HASH			1.148.15				) # this version should be binary compatible up to and including 1.149.0, and also 1.150.0!
+  afvd(HAS_ICLOUDSTORAGE_HASHING				1.148.15				) # this version should be binary compatible up to and including 1.149.0, and also 1.150.0!
 
   afvd(HAS_INITOPTIONS_GAMESERVICEPLATFORM		1.149.1		1.149.16	)
 

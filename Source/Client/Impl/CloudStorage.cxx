@@ -4,6 +4,7 @@
 
 #include "UniverseLAN.hxx"
 
+#include <ConstHash.hxx>
 #include <filesystem_container/filesystem_container_utils.hxx>
 #include <SafeStringCopy.hxx>
 
@@ -16,6 +17,8 @@ namespace universelan::client {
 	namespace {
 		std::string SaveGameTypeKey = "SavegameType";
 		std::string SaveGameUniqueIDKey = "SavegameUniqueID";
+		std::string HashKey = "HASH";
+		std::string DEFAULT_HASH = "DEADB00B1E5DEADB00B1E5DEADB00B1E";
 	}
 
 	std::string CloudStorageImpl::GenerateUniqueSavegameID()
@@ -100,7 +103,19 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_GETFILEHASHBYINDEX
 	const char* CloudStorageImpl::GetFileHashByIndex(uint32_t index) const
 	{
-		return "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+		if (index >= container_file_list.size()) {
+			return "";
+		}
+
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
+		static thread_local std::string var;
+
+		var = container_file_list[index]->get_metadata(HashKey, DEFAULT_HASH);
+
+		return var.c_str();
+#else
+		return DEFAULT_HASH.c_str();
+#endif	
 	}
 #endif
 
@@ -305,6 +320,9 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
 		, uint32_t timeStamp
 #endif
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
+		, const char* hash
+#endif	
 	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
@@ -339,6 +357,11 @@ namespace universelan::client {
 		static const int buffer_size = 2048;
 		static thread_local char buffer[buffer_size];
 		int read_size = 0;
+
+		if (rewindFunc) {
+			rewindFunc(userParam, ReadPhase::CHECKSUM_CALCULATING);
+			rewindFunc(userParam, ReadPhase::UPLOADING);
+		}
 
 		do {
 			read_size = readFunc(userParam, buffer, (int)buffer_size);
@@ -381,13 +404,19 @@ namespace universelan::client {
 		file_entry->set_metadata(SaveGameUniqueIDKey, GenerateUniqueSavegameID());
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
+		if (hash) {
+			file_entry->set_metadata(HashKey, hash);
+		}
+#endif	
+
 		// TODO: maybe check exit value?
 		file_entry->save_metadata();
 
 		listeners->NotifyAll(
 			listener,
 			&ICloudStoragePutFileListener::OnPutFileSuccess, container, name);
-		}
+	}
 
 	void CloudStorageImpl::PutFile(
 		const char* container,
@@ -405,6 +434,9 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
 		, uint32_t timeStamp
 #endif
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
+		, const char* hash
+#endif	
 	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
@@ -460,17 +492,27 @@ namespace universelan::client {
 		file_entry->set_metadata(SaveGameUniqueIDKey, GenerateUniqueSavegameID());
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
+		if (hash) {
+			file_entry->set_metadata(HashKey, hash);
+		}
+#endif
+
 		// TODO: maybe check exit value?
 		file_entry->save_metadata();
 
 		listeners->NotifyAll(
 			listener,
 			&ICloudStoragePutFileListener::OnPutFileSuccess, container, name);
-		}
+	}
 
 #pragma push_macro("DeleteFile")
 #undef DeleteFile
-	void CloudStorageImpl::DeleteFile(const char* container, const char* name, ICloudStorageDeleteFileListener* listener)
+	void CloudStorageImpl::DeleteFile(const char* container, const char* name, ICloudStorageDeleteFileListener* listener
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
+		, const char* expectedHash
+#endif	
+	)
 #pragma pop_macro ("DeleteFile")
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
@@ -515,6 +557,54 @@ namespace universelan::client {
 		unique_savegame_id_progress = true;
 	}
 #endif
+
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
+
+	void CloudStorageImpl::CalculateHash(void* userParam, ReadFunc readFunc, RewindFunc rewindFunc, char* hashBuffer, uint32_t hashBufferSize) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+
+		if (!hashBuffer || !readFunc || hashBufferSize < MIN_HASH_BUFFER_SIZE) {
+			return;
+		}
+
+		static const int buffer_size = 2048;
+		static thread_local char buffer[buffer_size];
+		int read_size = 0;
+
+		if (rewindFunc) {
+			rewindFunc(userParam, ReadPhase::CHECKSUM_CALCULATING);
+		}
+
+		auto start_hash = const_hash64_data_loop(nullptr, 0);
+
+		do {
+			read_size = readFunc(userParam, buffer, (int)buffer_size);
+			if (read_size > 0) {
+				start_hash = const_hash64_data_loop(buffer, buffer_size, start_hash);
+			}
+		} while (read_size > 0);
+
+		if (read_size < 0) {
+			return;
+		}
+
+		auto hash = std::to_string(start_hash);
+
+		universelan::util::safe_copy_str_n(hash, hashBuffer, hashBufferSize);
 	}
+
+	void CloudStorageImpl::CalculateHash(const void* buffer, uint32_t bufferLength, char* hashBuffer, uint32_t hashBufferSize) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+
+		if (!buffer || !hashBuffer || hashBufferSize < MIN_HASH_BUFFER_SIZE) {
+			return;
+		}
+
+		auto hash = std::to_string(const_hash64_data_loop((const char*)buffer, bufferLength));
+
+		universelan::util::safe_copy_str_n(hash, hashBuffer, hashBufferSize);
+	}
+#endif
+}
 
 #endif

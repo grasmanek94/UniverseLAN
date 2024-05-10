@@ -283,7 +283,11 @@ namespace universelan::client {
 		// Windows.h woes..
 #pragma push_macro("DeleteFile")
 #undef DeleteFile
-		virtual void DeleteFile(const char* container, const char* name, ICloudStorageDeleteFileListener* listener) override;
+		virtual void DeleteFile(const char* container, const char* name, ICloudStorageDeleteFileListener* listener
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
+			, const char* expectedHash = NULL
+#endif	
+		) override;
 #pragma pop_macro ("DeleteFile")
 
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
@@ -316,6 +320,9 @@ namespace universelan::client {
 			ICloudStoragePutFileListener* listener,
 			SavegameType savegameType = SAVEGAME_TYPE_UNDEFINED,
 			uint32_t timeStamp = 0
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
+			, const char* hash = NULL
+#endif
 		) override;
 
 		/**
@@ -345,6 +352,9 @@ namespace universelan::client {
 			ICloudStoragePutFileListener* listener,
 			SavegameType savegameType = SAVEGAME_TYPE_UNDEFINED,
 			uint32_t timeStamp = 0
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
+			, const char* hash = NULL
+#endif
 		) override;
 
 		/**
@@ -361,6 +371,54 @@ namespace universelan::client {
 		 */
 		virtual void CloseSavegame() override;
 #endif
+
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
+		/**
+		 * Calculate hash for the specified object.
+		 *
+		 * This call is synchronous and may be time consuming.
+		 *
+		 * This version of the CalculateHash method uses (userParam, readFunc) parameters
+		 * as an abstraction of a data source for the uploaded data. readFunc will be
+		 * called with userParam passed to the method along with the buffer for the data to be read.
+		 * rewindFunc will be called on start reading data phase and should set the read pointer at
+		 * the begining of the data stream.
+		 *
+		 * @param [in] userParam The parameter passed to readFunc on every call.
+		 * @param [in] readFunc The function called to obtain data chunks for upload.
+		 * @param [in] hashBuffer The buffer for calculated hash. Should be at least MIN_HASH_BUFFER_SIZE long.
+		 * @param [in, out] hashBufferSize The size of buffer for calculated hash.
+		 * @param [in] rewindFunc The function called to rewind read pointer to the begining of the data stream.
+		 */
+		virtual void CalculateHash(
+			void* userParam,
+			ReadFunc readFunc,
+			RewindFunc rewindFunc,
+			char* hashBuffer,
+			uint32_t hashBufferSize
+		) override;
+
+		/**
+		 * Calculate hash for the specified object.
+		 *
+		 * This call is synchronous and may be time consuming.
+		 *
+		 * This version of the CalculateHash method uploads the data pointed by the buffer parameter,
+		 * where bufferLength indicates the file length.
+		 *
+		 * @param [in] buffer The buffer for the data to be read.
+		 * @param [in] size The size of the buffer for the data.
+		 * @param [in, out] hashBuffer The buffer for the calculated hash. Should be at least MIN_HASH_BUFFER_SIZE long.
+		 * @param [in] hashBufferSize The size of the buffer for the calculated hash.
+		 */
+		virtual void CalculateHash(
+			const void* buffer,
+			uint32_t bufferLength,
+			char* hashBuffer,
+			uint32_t hashBufferSize
+		) override;
+#endif
+
 	};
 
 	/** @} */

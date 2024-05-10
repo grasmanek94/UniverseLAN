@@ -292,7 +292,11 @@ namespace universelan::client {
 
 #pragma push_macro("DeleteFile")
 #undef DeleteFile
-	void CloudStorageImpl::DeleteFile(const char* container, const char* name, ICloudStorageDeleteFileListener* listener)
+	void CloudStorageImpl::DeleteFile(const char* container, const char* name, ICloudStorageDeleteFileListener* listener
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
+		, const char* expectedHash
+#endif	
+	)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
@@ -300,6 +304,9 @@ namespace universelan::client {
 			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
 			trace.write_all(std::format("listener: {}", (void*)listener));
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
+			trace.write_all(std::format("expectedHash: {}", util::safe_fix_null_char_ptr_annotate_ret(expectedHash)));
+#endif	
 		}
 
 		intf()->DeleteFile(container, name, listener);
@@ -307,7 +314,11 @@ namespace universelan::client {
 #pragma pop_macro ("DeleteFile")
 
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
-	void CloudStorageImpl::PutFile(const char* container, const char* name, void* userParam, ReadFunc readFunc, RewindFunc rewindFunc, ICloudStoragePutFileListener* listener, SavegameType savegameType, uint32_t timeStamp)
+	void CloudStorageImpl::PutFile(const char* container, const char* name, void* userParam, ReadFunc readFunc, RewindFunc rewindFunc, ICloudStoragePutFileListener* listener, SavegameType savegameType, uint32_t timeStamp
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
+		, const char* hash
+#endif	
+	)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
@@ -320,12 +331,23 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 			trace.write_all(std::format("savegameType: {}", magic_enum::enum_name(savegameType)));
 			trace.write_all(std::format("timeStamp: {}", timeStamp));
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
+			trace.write_all(std::format("hash: {}", util::safe_fix_null_char_ptr_annotate_ret(hash)));
+#endif	
 		}
 
-		intf()->PutFile(container, name, userParam, readFunc, rewindFunc, listener, savegameType, timeStamp);
+		intf()->PutFile(container, name, userParam, readFunc, rewindFunc, listener, savegameType, timeStamp
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
+			, hash
+#endif			
+		);
 	}
 
-	void CloudStorageImpl::PutFile(const char* container, const char* name, const void* buffer, uint32_t bufferLength, ICloudStoragePutFileListener* listener, SavegameType savegameType, uint32_t timeStamp)
+	void CloudStorageImpl::PutFile(const char* container, const char* name, const void* buffer, uint32_t bufferLength, ICloudStoragePutFileListener* listener, SavegameType savegameType, uint32_t timeStamp
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
+		, const char* hash
+#endif	
+	)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
@@ -337,9 +359,16 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 			trace.write_all(std::format("savegameType: {}", magic_enum::enum_name(savegameType)));
 			trace.write_all(std::format("timeStamp: {}", timeStamp));
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
+			trace.write_all(std::format("hash: {}", util::safe_fix_null_char_ptr_annotate_ret(hash)));
+#endif	
 		}
 
-		intf()->PutFile(container, name, buffer, bufferLength, listener, savegameType, timeStamp);
+		intf()->PutFile(container, name, buffer, bufferLength, listener, savegameType, timeStamp
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
+			, hash
+#endif	
+		);
 	}
 
 	void CloudStorageImpl::OpenSavegame()
@@ -354,6 +383,43 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		intf()->CloseSavegame();
+	}
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
+	void CloudStorageImpl::CalculateHash(void* userParam, ReadFunc readFunc, RewindFunc rewindFunc, char* hashBuffer, uint32_t hashBufferSize) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("userParam: {}", userParam));
+			trace.write_all(std::format("readFunc: {}", (void*)readFunc));
+			trace.write_all(std::format("rewindFunc: {}", (void*)rewindFunc));
+			trace.write_all(std::format("hashBuffer: {}", (void*)hashBuffer));
+			trace.write_all(std::format("hashBufferSize: {}", hashBufferSize));
+		}
+
+		intf()->CalculateHash(userParam, readFunc, rewindFunc, hashBuffer, hashBufferSize);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("hashBuffer: {}", util::safe_fix_null_char_ptr_annotate(hashBuffer, hashBufferSize)));
+		}
+	}
+
+	void CloudStorageImpl::CalculateHash(const void* buffer, uint32_t bufferLength, char* hashBuffer, uint32_t hashBufferSize) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("buffer: {}", (void*)buffer));
+			trace.write_all(std::format("bufferLength: {}", bufferLength));
+			trace.write_all(std::format("hashBuffer: {}", (void*)hashBuffer));
+			trace.write_all(std::format("hashBufferSize: {}", hashBufferSize));
+		}
+
+		intf()->CalculateHash(buffer, bufferLength, hashBuffer, hashBufferSize);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("hashBuffer: {}", util::safe_fix_null_char_ptr_annotate(hashBuffer, hashBufferSize)));
+		}
 	}
 #endif
 }
