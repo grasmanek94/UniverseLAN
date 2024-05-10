@@ -209,8 +209,10 @@ namespace universelan::client {
 			const char* const* metadataValues,
 			uint32_t timeStamp
 		)
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_METADATAIDX_FUNCS
 			override
+#endif
 #endif
 			;
 
@@ -260,8 +262,10 @@ namespace universelan::client {
 			const char* const* metadataValues,
 			uint32_t timeStamp
 		)
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_METADATAIDX_FUNCS
 			override
+#endif
 #endif
 			;
 #endif
