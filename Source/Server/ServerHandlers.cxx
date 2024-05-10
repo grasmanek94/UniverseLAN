@@ -290,13 +290,15 @@ namespace universelan::server {
 		REQUIRES_AUTHENTICATION(peer);
 
 		FileShareResponseMessage fsrm{ data->request_id, ++shared_file_counter, data->filename };
-		sfu.OpenShared(shared_file_counter_file, std::ios::trunc) << fsrm.id;
-		if (!sfu.InitSharedFileStorage(fsrm.filename, fsrm.id)) {
-			std::cerr << "FileShareMessage::InitSharedFileStorage FAIL\n";
-		}
+		auto var = sfu.Open(sfu.shared, shared_file_counter_file.c_str(), std::ios::out | std::ios::trunc);
+		var << shared_file_counter;
 
-		if (!sfu.WriteShared(fsrm.filename, data->data.data(), data->data.size())) {
-			std::cerr << "FileShareMessage::WriteShared FAIL\n";
+		auto entry = sfu.shared->create_shared(fsrm.filename, fsrm.id);
+		if (!entry) {
+			std::cerr << "FileShareMessage::create_shared FAIL\n";
+		}
+		else if(!entry->write(data->data)){
+			std::cerr << "FileShareMessage::write FAIL\n";
 		}
 
 		connection.Send(peer, fsrm);
@@ -307,17 +309,26 @@ namespace universelan::server {
 
 		REQUIRES_AUTHENTICATION(peer);
 
+		bool read = false;
 		if (data->id != 0) {
-			data->data = sfu.ReadShared(data->id);
-			data->filename = sfu.GetSharedFileName(data->id).string();
+			auto entry = sfu.shared->get(data->id);
+			if (entry) {
+				data->data = entry->read();
+				data->filename = entry->get_path().string();
+				read = true;
+			}
 		}
-		else if (data->filename.size() != 0) {
-			data->data = sfu.ReadShared(data->filename);
-			data->id = sfu.GetSharedFileID(data->filename);
+		if (!read && data->filename.size() != 0) {
+			auto entry = sfu.shared->get(data->filename);
+			if (entry) {
+				data->data = entry->read();
+				data->filename = entry->get_path().string();
+				read = true;
+			}
 		}
 
-		if (data->data.size() == 0) {
-			std::cerr << "FileShareMessage::ReadShared FAIL\n";
+		if (!read) {
+			std::cerr << "FileShareMessage::Read FAIL\n";
 		}
 
 		connection.Send(peer, data);

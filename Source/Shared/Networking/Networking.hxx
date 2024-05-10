@@ -25,43 +25,46 @@ namespace universelan {
 
 			//Handle packet
 			ENetPacket* packet = event.packet;
-			if (packet->dataLength >= sizeof(uint64_t))
+			if (packet->dataLength < sizeof(uint64_t))
 			{
-				uint64_t unique_class_id = (*reinterpret_cast<uint64_t*>(packet->data));
+				return false;
+			}
 
-				if (unique_class_id == T::UniqueClassId()) {
+			uint64_t unique_class_id = (*reinterpret_cast<uint64_t*>(packet->data));
 
-					std::shared_ptr<T> var(std::make_shared<T>());
+			if (unique_class_id != T::UniqueClassId()) {
+				return false;
+			}
 
-					if (packet->dataLength > sizeof(uint64_t))
-					{
-						bool errorOccured = false;
+			std::shared_ptr<T> var(std::make_shared<T>());
 
-						std::stringstream stream(std::ios::in | std::ios::out | std::ios::binary);
+			if (packet->dataLength > sizeof(uint64_t))
+			{
+				bool errorOccured = false;
 
-						stream.write(reinterpret_cast<char*>(packet->data + sizeof(uint64_t)), packet->dataLength - sizeof(uint64_t));
+				std::stringstream stream(std::ios::in | std::ios::out | std::ios::binary);
 
-						try
-						{
-							cereal::BinaryInputArchive iarchive(stream);
-							iarchive(*var);
+				stream.write(reinterpret_cast<char*>(packet->data + sizeof(uint64_t)), packet->dataLength - sizeof(uint64_t));
 
-						}
-						catch (const std::exception&)
-						{
-							errorOccured = true;
-						}
+				try
+				{
+					cereal::BinaryInputArchive iarchive(stream);
+					iarchive(*var);
 
-						if (!errorOccured) {
-							Handle(event.peer, var);
-							return true;
-						}
-					}
-					else {
-						Handle(event.peer, var);
-						return true;
-					}
 				}
+				catch (const std::exception&)
+				{
+					errorOccured = true;
+				}
+
+				if (!errorOccured) {
+					Handle(event.peer, var);
+					return true;
+				}
+			}
+			else {
+				Handle(event.peer, var);
+				return true;
 			}
 
 			return false;

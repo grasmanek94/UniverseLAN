@@ -56,7 +56,7 @@ namespace universelan::client {
 	{
 	public:
 	
-#if GALAXY_BUILD_FEATURE_HAS_SIGNIN_PS4
+#if GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINSTEAM
 		using SignInDataPtr_T = void;
 #else
 		using SignInDataPtr_T = char;
@@ -156,7 +156,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void USER_SIGN_IN_GALAXY(
-#if GALAXY_BUILD_FEATURE_HAS_SIGNIN_PS4
+#if GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINGALAXY
 			bool requireOnline = false
 #endif
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS

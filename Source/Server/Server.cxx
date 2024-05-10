@@ -90,9 +90,10 @@ namespace universelan::server {
 
 		random.seed(authentication_key ^ milliseconds_since_epoch);
 
-		if (sfu.ExistsShared(shared_file_counter_file)) {
+		if (sfu.Exists(sfu.shared, shared_file_counter_file.c_str())) {
 			std::string counter_txt{};
-			sfu.OpenShared(shared_file_counter_file, std::ios::in) >> counter_txt;
+			auto var = sfu.Open(sfu.shared, shared_file_counter_file.c_str(), std::ios::in);
+			var >> counter_txt;
 			shared_file_counter = std::stoul(counter_txt);
 		}
 
