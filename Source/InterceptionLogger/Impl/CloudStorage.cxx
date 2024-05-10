@@ -147,6 +147,7 @@ namespace universelan::client {
 		intf()->GetFileMetadata(container, name, listener);
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_METADATAIDX_FUNCS
 	const char* CloudStorageImpl::GetFileMetadataKeyByIndex(uint32_t index) const {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
@@ -287,6 +288,7 @@ namespace universelan::client {
 	) {
 		PutFile(container, name, buffer, bufferLength, listener, metadataKeys, metadataValues, 0);
 	}
+#endif
 
 #pragma push_macro("DeleteFile")
 #undef DeleteFile
@@ -303,6 +305,57 @@ namespace universelan::client {
 		intf()->DeleteFile(container, name, listener);
 	}
 #pragma pop_macro ("DeleteFile")
+
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
+	void CloudStorageImpl::PutFile(const char* container, const char* name, void* userParam, ReadFunc readFunc, RewindFunc rewindFunc, ICloudStoragePutFileListener* listener, SavegameType savegameType, uint32_t timeStamp)
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("userParam: {}", userParam));
+			trace.write_all(std::format("readFunc: {}", (void*)readFunc));
+			trace.write_all(std::format("rewindFunc: {}", (void*)rewindFunc));
+			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all(std::format("savegameType: {}", magic_enum::enum_name(savegameType)));
+			trace.write_all(std::format("timeStamp: {}", timeStamp));
+		}
+
+		intf()->PutFile(container, name, userParam, readFunc, rewindFunc, listener, savegameType, timeStamp);
+	}
+
+	void CloudStorageImpl::PutFile(const char* container, const char* name, const void* buffer, uint32_t bufferLength, ICloudStoragePutFileListener* listener, SavegameType savegameType, uint32_t timeStamp)
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("buffer: {}", buffer));
+			trace.write_all(std::format("bufferLength: {}", bufferLength));
+			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all(std::format("savegameType: {}", magic_enum::enum_name(savegameType)));
+			trace.write_all(std::format("timeStamp: {}", timeStamp));
+		}
+
+		intf()->PutFile(container, name, buffer, bufferLength, listener, savegameType, timeStamp);
+	}
+
+	void CloudStorageImpl::OpenSavegame()
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		intf()->OpenSavegame();
+	}
+
+	void CloudStorageImpl::CloseSavegame()
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		intf()->CloseSavegame();
+	}
+#endif
 }
 
 #endif

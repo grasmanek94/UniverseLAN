@@ -60,6 +60,20 @@ namespace universelan::client {
 		}
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
+	void CloudStorageGetFileListener::OnGetFileSuccess(const char* container, const char* name, uint32_t fileSize, SavegameType savegameType, const char* savegameID) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("fileSize: {}", fileSize));
+			trace.write_all(std::format("savegameType: {}", magic_enum::enum_name(savegameType)));
+			trace.write_all(std::format("savegameID: {}", util::safe_fix_null_char_ptr_annotate_ret(savegameID)));
+		}
+	}
+#endif
+
 	void CloudStoragePutFileListener::OnPutFileSuccess(const char* container, const char* name)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };

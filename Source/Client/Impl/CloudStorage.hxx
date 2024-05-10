@@ -47,6 +47,11 @@ namespace universelan::client {
 		filesystem_container::fs_filelist_contrainer_t container_file_list;
 		filesystem_container::file_entry_metadata_vector_t last_metadata_request;
 
+		bool unique_savegame_id_progress;
+		uint64_t unique_savegame_id_counter;
+
+		std::string GenerateUniqueSavegameID();
+
 	public:
 		CloudStorageImpl(InterfaceInstances* intf);
 		virtual ~CloudStorageImpl();
@@ -153,7 +158,8 @@ namespace universelan::client {
 		 */
 		virtual void GetFileMetadata(const char* container, const char* name, ICloudStorageGetFileListener* listener) override;
 
-		/**
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_METADATAIDX_FUNCS
+		/**#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_METADATAIDX_FUNCS
 		 * Function used to get metadata key of retrieved file.
 		 *
 		 * Call for this function is allowed inside ICloudStorageGetFileListListener::OnGetFileSuccess() only.
@@ -172,6 +178,7 @@ namespace universelan::client {
 		 * @return Metadata value.
 		 */
 		virtual const char* GetFileMetadataValueByIndex(uint32_t index) const override;
+#endif
 
 		/**
 		 * Upload a file to the cloud storage
@@ -196,20 +203,6 @@ namespace universelan::client {
 		 * @param [in] metadataKeys The array of tags names, ends with NULL.
 		 * @param [in] metadataValues The array of tags values, ends with NULL. The size is equal to metadataKeys' size.
 		 */
-		virtual void PutFile(
-			const char* container,
-			const char* name,
-			void* userParam,
-			ReadFunc readFunc,
-			RewindFunc rewindFunc,
-			ICloudStoragePutFileListener* listener,
-			const char* const* metadataKeys = NULL,
-			const char* const* metadataValues = NULL
-		)
-#if !GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
-			override
-#endif
-			;
 
 		virtual void PutFile(
 			const char* container,
@@ -217,15 +210,18 @@ namespace universelan::client {
 			void* userParam,
 			ReadFunc readFunc,
 			RewindFunc rewindFunc,
-			ICloudStoragePutFileListener* listener,
-			const char* const* metadataKeys,
-			const char* const* metadataValues,
-			uint32_t timeStamp
-		)
-#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
-			override
+			ICloudStoragePutFileListener* listener
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_METADATAIDX_FUNCS
+			, const char* const* metadataKeys
+			, const char* const* metadataValues
 #endif
-			;
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
+			, SavegameType savegameType = SAVEGAME_TYPE_UNDEFINED
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
+			, uint32_t timeStamp = 0
+#endif
+		) override;
 
 		/**
 		 * Upload a file to the cloud storage
@@ -254,30 +250,18 @@ namespace universelan::client {
 			const char* name,
 			const void* buffer,
 			uint32_t bufferLength,
-			ICloudStoragePutFileListener* listener,
-			const char* const* metadataKeys = NULL,
-			const char* const* metadataValues = NULL
-		)
-#if !GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
-			override
+			ICloudStoragePutFileListener* listener
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_METADATAIDX_FUNCS
+			, const char* const* metadataKeys
+			, const char* const* metadataValues
 #endif
-			;
-
-		virtual void PutFile(
-			const char* container,
-			const char* name,
-			const void* buffer,
-			uint32_t bufferLength,
-			ICloudStoragePutFileListener* listener,
-			const char* const* metadataKeys,
-			const char* const* metadataValues,
-			uint32_t timeStamp
-		)
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
+			, SavegameType savegameType = SAVEGAME_TYPE_UNDEFINED
+#endif
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
-			override
+			, uint32_t timeStamp = 0
 #endif
-			;
-
+		) override;
 		/**
 		 * Delete a file from cloud storage
 		 *
@@ -293,6 +277,23 @@ namespace universelan::client {
 #undef DeleteFile
 		virtual void DeleteFile(const char* container, const char* name, ICloudStorageDeleteFileListener* listener) override;
 #pragma pop_macro ("DeleteFile")
+
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
+		/**
+		 * Starts new savegame
+		 *
+		 * After this call all subsequently stored files will have the same unique savegame ID.
+		 */
+		virtual void OpenSavegame() override;
+
+		/**
+		 * Closes savegame
+		 *
+		 * After this call all subsequently stored files will have a different unique savegame ID.
+		 */
+		virtual void CloseSavegame() override;
+#endif
+
 	};
 
 	/** @} */

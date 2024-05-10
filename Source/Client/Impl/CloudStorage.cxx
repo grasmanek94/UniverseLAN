@@ -4,6 +4,7 @@
 
 #include "UniverseLAN.hxx"
 
+#include <filesystem_container/filesystem_container_utils.hxx>
 #include <SafeStringCopy.hxx>
 
 #include <string>
@@ -12,11 +13,27 @@
 namespace universelan::client {
 	using namespace galaxy::api;
 
+	namespace {
+		std::string SaveGameTypeKey = "SavegameType";
+		std::string SaveGameUniqueIDKey = "SavegameUniqueID";
+	}
+
+	std::string CloudStorageImpl::GenerateUniqueSavegameID()
+	{
+		if (unique_savegame_id_progress) {
+			return std::to_string(unique_savegame_id_counter++);
+		}
+
+		return std::to_string(unique_savegame_id_counter);
+	}
+
 	CloudStorageImpl::CloudStorageImpl(InterfaceInstances* intf) :
 		intf{ intf }, listeners{ intf->notification.get() },
 		sfu{ intf->sfu.get() }, last_container{ "" },
-		last_subcontainer_ref{ nullptr }, container_file_list {},
-		last_metadata_request{}
+		last_subcontainer_ref{ nullptr }, container_file_list{},
+		last_metadata_request{},
+		unique_savegame_id_progress{ true },
+		unique_savegame_id_counter{ filesystem_container::file_time_now_since_epoch() }
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 	}
@@ -25,7 +42,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 	}
 
-	void CloudStorageImpl::GetFileList(const char* container, ICloudStorageGetFileListListener* listener) {		
+	void CloudStorageImpl::GetFileList(const char* container, ICloudStorageGetFileListListener* listener) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
 		last_container = util::safe_fix_null_char_ptr_ret(container);
@@ -131,10 +148,22 @@ namespace universelan::client {
 
 			last_metadata_request = file_entry->get_metadata_vector();
 
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
+			SavegameType savegame_type = (SavegameType)std::stol(file_entry->get_metadata(SaveGameTypeKey));
+			std::string unique_savegame_id = file_entry->get_metadata(SaveGameUniqueIDKey);
+#endif
+
 			this->listeners->NotifyAllNow(
 				listener,
-				&ICloudStorageGetFileListener::OnGetFileSuccess, container_str.c_str(), file_name.c_str(), (uint32_t)data.size(), (uint32_t)last_metadata_request.size());
-		});
+				&ICloudStorageGetFileListener::OnGetFileSuccess, container_str.c_str(), file_name.c_str(), (uint32_t)data.size()
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
+				, savegame_type
+				, unique_savegame_id.c_str()
+#else
+				, (uint32_t)last_metadata_request.size()
+#endif
+			);
+			});
 	}
 
 	void CloudStorageImpl::GetFile(const char* container, const char* name, void* buffer, uint32_t bufferLength, ICloudStorageGetFileListener* listener) {
@@ -179,9 +208,21 @@ namespace universelan::client {
 
 		last_metadata_request = file_entry->get_metadata_vector();
 
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
+		SavegameType savegame_type = (SavegameType)std::stol(file_entry->get_metadata(SaveGameTypeKey));
+		std::string unique_savegame_id = file_entry->get_metadata(SaveGameUniqueIDKey);
+#endif
+
 		listeners->NotifyAll(
 			listener,
-			&ICloudStorageGetFileListener::OnGetFileSuccess, container, name, (uint32_t)written, (uint32_t)last_metadata_request.size());
+			&ICloudStorageGetFileListener::OnGetFileSuccess, container, name, (uint32_t)written
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
+			, savegame_type
+			, unique_savegame_id.c_str()
+#else
+			, (uint32_t)last_metadata_request.size()
+#endif
+		);
 	}
 
 	void CloudStorageImpl::GetFileMetadata(const char* container, const char* name, ICloudStorageGetFileListener* listener) {
@@ -208,11 +249,24 @@ namespace universelan::client {
 
 		last_metadata_request = file_entry->get_metadata_vector();
 
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
+		SavegameType savegame_type = (SavegameType)std::stol(file_entry->get_metadata(SaveGameTypeKey));
+		std::string unique_savegame_id = file_entry->get_metadata(SaveGameUniqueIDKey);
+#endif
+
 		listeners->NotifyAll(
 			listener,
-			&ICloudStorageGetFileListener::OnGetFileSuccess, container, name, (uint32_t)file_entry->get_size(), (uint32_t)last_metadata_request.size());
+			&ICloudStorageGetFileListener::OnGetFileSuccess, container, name, (uint32_t)file_entry->get_size()
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
+			, savegame_type
+			, unique_savegame_id.c_str()
+#else
+			, (uint32_t)last_metadata_request.size()
+#endif
+		);
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_METADATAIDX_FUNCS
 	const char* CloudStorageImpl::GetFileMetadataKeyByIndex(uint32_t index) const {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
@@ -232,6 +286,7 @@ namespace universelan::client {
 
 		return last_metadata_request[index].second.c_str();
 	}
+#endif
 
 	void CloudStorageImpl::PutFile(
 		const char* container,
@@ -239,10 +294,17 @@ namespace universelan::client {
 		void* userParam,
 		ReadFunc readFunc,
 		RewindFunc rewindFunc,
-		ICloudStoragePutFileListener* listener,
-		const char* const* metadataKeys,
-		const char* const* metadataValues,
-		uint32_t timeStamp
+		ICloudStoragePutFileListener* listener
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_METADATAIDX_FUNCS
+		, const char* const* metadataKeys
+		, const char* const* metadataValues
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
+		, SavegameType savegameType
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
+		, uint32_t timeStamp
+#endif
 	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
@@ -274,7 +336,7 @@ namespace universelan::client {
 			return;
 		}
 
-		static const int buffer_size = 1024;
+		static const int buffer_size = 2048;
 		static thread_local char buffer[buffer_size];
 		int read_size = 0;
 
@@ -283,7 +345,7 @@ namespace universelan::client {
 			if (read_size > 0) {
 				file_stream.write(buffer, std::min(buffer_size, read_size));
 			}
-		} while(read_size > 0);
+		} while (read_size > 0);
 
 		if (read_size < 0) {
 			listeners->NotifyAll(
@@ -293,6 +355,7 @@ namespace universelan::client {
 			return;
 		}
 
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_METADATAIDX_FUNCS
 		if (metadataKeys != nullptr && metadataValues != nullptr) {
 			int index = 0;
 			while (metadataKeys[index] && metadataValues[index]) {
@@ -300,10 +363,23 @@ namespace universelan::client {
 				++index;
 			}
 		}
+#endif
 
-		if (timeStamp == 0) {
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
+		if (timeStamp != 0) {
+			file_entry->set_timestamp_metadata(timeStamp);
+
+		}
+		else
+#endif
+		{
 			file_entry->touch_timestamp_metadata();
 		}
+
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
+		file_entry->set_metadata(SaveGameTypeKey, std::to_string((uint32_t)savegameType));
+		file_entry->set_metadata(SaveGameUniqueIDKey, GenerateUniqueSavegameID());
+#endif
 
 		// TODO: maybe check exit value?
 		file_entry->save_metadata();
@@ -311,17 +387,24 @@ namespace universelan::client {
 		listeners->NotifyAll(
 			listener,
 			&ICloudStoragePutFileListener::OnPutFileSuccess, container, name);
-	}
+		}
 
 	void CloudStorageImpl::PutFile(
 		const char* container,
 		const char* name,
 		const void* buffer,
 		uint32_t bufferLength,
-		ICloudStoragePutFileListener* listener,
-		const char* const* metadataKeys,
-		const char* const* metadataValues,
-		uint32_t timeStamp
+		ICloudStoragePutFileListener* listener
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_METADATAIDX_FUNCS
+		, const char* const* metadataKeys
+		, const char* const* metadataValues
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
+		, SavegameType savegameType
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
+		, uint32_t timeStamp
+#endif
 	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
@@ -351,17 +434,31 @@ namespace universelan::client {
 			return;
 		}
 
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_METADATAIDX_FUNCS
 		if (metadataKeys != nullptr && metadataValues != nullptr) {
 			int index = 0;
 			while (metadataKeys[index] && metadataValues[index]) {
 				file_entry->set_metadata(util::safe_fix_null_char_ptr_ret(metadataKeys[index]), util::safe_fix_null_char_ptr_ret(metadataValues[index]));
 				++index;
-			}		
+			}
 		}
+#endif
 
-		if (timeStamp == 0) {
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
+		if (timeStamp != 0) {
+			file_entry->set_timestamp_metadata(timeStamp);
+
+		}
+		else
+#endif
+		{
 			file_entry->touch_timestamp_metadata();
 		}
+
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
+		file_entry->set_metadata(SaveGameTypeKey, std::to_string((uint32_t)savegameType));
+		file_entry->set_metadata(SaveGameUniqueIDKey, GenerateUniqueSavegameID());
+#endif
 
 		// TODO: maybe check exit value?
 		file_entry->save_metadata();
@@ -369,36 +466,7 @@ namespace universelan::client {
 		listeners->NotifyAll(
 			listener,
 			&ICloudStoragePutFileListener::OnPutFileSuccess, container, name);
-	}
-
-	void CloudStorageImpl::PutFile(
-		const char* container,
-		const char* name,
-		void* userParam,
-		ReadFunc readFunc,
-		RewindFunc rewindFunc,
-		ICloudStoragePutFileListener* listener,
-		const char* const* metadataKeys,
-		const char* const* metadataValues
-	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
-
-		PutFile(container, name, userParam, readFunc, rewindFunc, listener, metadataKeys, metadataValues, 0);
-	}
-
-	void CloudStorageImpl::PutFile(
-		const char* container,
-		const char* name,
-		const void* buffer,
-		uint32_t bufferLength,
-		ICloudStoragePutFileListener* listener,
-		const char* const* metadataKeys,
-		const char* const* metadataValues
-	) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
-
-		PutFile(container, name, buffer, bufferLength, listener, metadataKeys, metadataValues, 0);
-	}
+		}
 
 #pragma push_macro("DeleteFile")
 #undef DeleteFile
@@ -430,6 +498,23 @@ namespace universelan::client {
 			listener,
 			&ICloudStorageDeleteFileListener::OnDeleteFileSuccess, container, name);
 	}
-}
+
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
+	void CloudStorageImpl::OpenSavegame()
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+
+		unique_savegame_id_progress = false;
+
+	}
+
+	void CloudStorageImpl::CloseSavegame()
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+
+		unique_savegame_id_progress = true;
+	}
+#endif
+	}
 
 #endif

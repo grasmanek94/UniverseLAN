@@ -139,6 +139,7 @@ namespace universelan::client {
 		 */
 		virtual void GetFileMetadata(const char* container, const char* name, ICloudStorageGetFileListener* listener) override;
 
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_METADATAIDX_FUNCS
 		/**
 		 * Function used to get metadata key of retrieved file.
 		 *
@@ -208,7 +209,7 @@ namespace universelan::client {
 			const char* const* metadataValues,
 			uint32_t timeStamp
 		)
-#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_METADATAIDX_FUNCS
 			override
 #endif
 			;
@@ -259,10 +260,11 @@ namespace universelan::client {
 			const char* const* metadataValues,
 			uint32_t timeStamp
 		)
-#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_METADATAIDX_FUNCS
 			override
 #endif
 			;
+#endif
 
 		/**
 		 * Delete a file from cloud storage
@@ -279,6 +281,82 @@ namespace universelan::client {
 #undef DeleteFile
 		virtual void DeleteFile(const char* container, const char* name, ICloudStorageDeleteFileListener* listener) override;
 #pragma pop_macro ("DeleteFile")
+
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
+		/**
+		 * Upload a file to the cloud storage
+		 *
+		 * This call is asynchronous. Responses come to the ICloudStoragePutFileListener.
+		 *
+		 * This version of the PutFile method uses (userParam, readFunc) parameters
+		 * as an abstraction of a data source for the uploaded data. readFunc will be
+		 * called with userParam passed to the method along with the buffer for the data to be read.
+		 * rewindFunc will be called on start reading data phase and should set the read pointer at
+		 * the begining of the data stream.
+		 *
+		 * @param [in] container The name of the containter.
+		 * @param [in] name The name of the file in cloud storage.
+		 * @param [in] userParam The parameter passed to readFunc on every call.
+		 * @param [in] readFunc The function called to obtain data chunks for upload.
+		 * @param [in] rewindFunc The function called to rewind read pointer to the begining of the data stream.
+		 * @param [in] listener The listener for the specific operation.
+		 * @param [in] savegameType The type of the savegame.
+		 * @param [in] timeStamp The timestamp of the uploaded object. Current time will be set by default.
+		 */
+		virtual void PutFile(
+			const char* container,
+			const char* name,
+			void* userParam,
+			ReadFunc readFunc,
+			RewindFunc rewindFunc,
+			ICloudStoragePutFileListener* listener,
+			SavegameType savegameType = SAVEGAME_TYPE_UNDEFINED,
+			uint32_t timeStamp = 0
+		) override;
+
+		/**
+		 * Upload a file to the cloud storage
+		 *
+		 * This call is asynchronous. Responses come to the ICloudStoragePutFileListener.
+		 *
+		 * This version of the PutFile method uploads the data pointed by the buffer parameter,
+		 * where bufferLength indicates the file length.
+		 *
+		 * Caller is responsible for setting up a lifetime for the buffer: it should be accessible until
+		 * the operation is finished (any of the listener methods is called).
+		 *
+		 * @param [in] container The name of the containter.
+		 * @param [in] name The name of the file in cloud storage.
+		 * @param [out] data The buffer for the data to be read.
+		 * @param [in] size The size of the buffer for the data.
+		 * @param [in] listener The listener for the specific operation.
+		 * @param [in] savegameType The type of the savegame.
+		 * @param [in] timeStamp The timestamp of the uploaded object. Current time will be set by default.
+		 */
+		virtual void PutFile(
+			const char* container,
+			const char* name,
+			const void* buffer,
+			uint32_t bufferLength,
+			ICloudStoragePutFileListener* listener,
+			SavegameType savegameType = SAVEGAME_TYPE_UNDEFINED,
+			uint32_t timeStamp = 0
+		) override;
+
+		/**
+		 * Starts new savegame
+		 *
+		 * After this call all subsequently stored files will have the same unique savegame ID.
+		 */
+		virtual void OpenSavegame() override;
+
+		/**
+		 * Closes savegame
+		 *
+		 * After this call all subsequently stored files will have a different unique savegame ID.
+		 */
+		virtual void CloseSavegame() override;
+#endif
 	};
 
 	/** @} */

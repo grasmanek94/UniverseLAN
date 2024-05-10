@@ -19,6 +19,10 @@ namespace universelan::client {
 	public:
 		virtual void OnGetFileSuccess(const char* container, const char* name, uint32_t fileSize, uint32_t metadataCount);
 		virtual void OnGetFileFailure(const char* container, const char* name, FailureReason failureReason);
+
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
+		virtual void OnGetFileSuccess(const char* container, const char* name, uint32_t fileSize, SavegameType savegameType, const char* savegameID);
+#endif
 	};
 
 	class CloudStoragePutFileListener : public ICloudStoragePutFileListener

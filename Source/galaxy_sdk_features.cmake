@@ -195,6 +195,7 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
   afvd(IUSER_UWP_TO_XBOX_RENAME					1.148.5					)
 
   afvd(HAS_ICLOUDSTORAGE						1.148.6					)
+  afvd(HAS_ICLOUDSTORAGE_METADATAIDX_FUNCS		1.148.6		1.148.12	)
 
   afvd(HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP		1.148.7					)
   afvd(HAS_IUSER_REFRESHTOKEN					1.148.7					)
