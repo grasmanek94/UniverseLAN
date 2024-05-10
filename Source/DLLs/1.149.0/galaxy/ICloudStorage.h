@@ -23,9 +23,12 @@ namespace galaxy
 		enum SavegameType
 		{
 			SAVEGAME_TYPE_UNDEFINED, ///< Not defined savegame type.
-			SAVEGAME_TYPE_AUTO, ///< Auto savegame.
+			SAVEGAME_TYPE_AUTO, ///< Auto savegame, triggered automatically over time.
 			SAVEGAME_TYPE_QUICK, ///< Quick savegame.
-			SAVEGAME_TYPE_MANUAL ///< Manual savegame.
+			SAVEGAME_TYPE_MANUAL, ///< Manual savegame.
+			SAVEGAME_TYPE_POINT_OF_NO_RETURN, ///< Savegame at the point of no return.
+			SAVEGAME_TYPE_ENDGAME_SAVE, ///< Savegame at the end of the game.
+			SAVEGAME_TYPE_CHECKPOINT ///< Savegame at a certain in-game event, e.g. quest completion.
 		};
 
 		/**
@@ -147,7 +150,8 @@ namespace galaxy
 				FAILURE_REASON_ABORTED, ///< Request aborted.
 				FAILURE_REASON_CONNECTION_FAILURE, ///< Unable to communicate with backend services.
 				FAILURE_REASON_READ_FUNC_ERROR, ///< Function readFunc passed to ICloudStorage::PutFile() returned an error.
-				FAILURE_REASON_QUOTA_EXCEEDED ///< Unable to upload the file because there is no free space on cloud storage.
+				FAILURE_REASON_QUOTA_EXCEEDED, ///< Unable to upload the file because there is no free space on cloud storage.
+				FAILURE_REASON_USER_ID_SAMPLED_OUT ///< The user ID for cloud storage is sampled out.
 			};
 
 			/**

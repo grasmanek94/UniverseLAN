@@ -482,6 +482,21 @@ namespace universelan::client {
 	}
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IUSER_REFRESHTOKEN
+	void UserImpl::GetRefreshTokenCopy(char* buffer, uint32_t bufferLength) {
+
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
+
+		universelan::util::safe_copy_str_n(SOME_TOKEN_STRING, buffer, bufferLength);
+	}
+
+	const char* UserImpl::GetRefreshToken(){
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
+
+		return SOME_TOKEN_STRING.c_str();
+	}
+#endif
+
 	void UserImpl::OnlineUserStateChange(const std::shared_ptr<OnlineStatusChangeMessage>& data) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 

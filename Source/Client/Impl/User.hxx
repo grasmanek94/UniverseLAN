@@ -655,6 +655,41 @@ namespace universelan::client {
 		 */
 		virtual void GetAccessTokenCopy(char* buffer, uint32_t bufferLength) override;
 
+#if GALAXY_BUILD_FEATURE_HAS_IUSER_REFRESHTOKEN
+		/**
+		 * Returns the refresh token for the current session.
+		 *
+		 * @remark This call is not thread-safe as opposed to GetRefreshTokenCopy().
+		 *
+		 * @remark Calling this function is allowed when the session has been signed in
+		 * with IUser::SignInToken() only.
+		 *
+		 * The refresh token that is used for the current session might be
+		 * updated in the background automatically, together with the access token,
+		 * without any request for that. Each time the access or refresh token
+		 * is updated, a notification comes to the IAccessTokenListener.
+		 *
+		 * @return The refresh token.
+		 */
+		virtual const char* GetRefreshToken() override;
+
+		/**
+		 * Copies the refresh token for the current session.
+		 *
+		 * @remark Calling this function is allowed when the session has been signed in
+		 * with IUser::SignInToken() only.
+		 *
+		 * The refresh token that is used for the current session might be
+		 * updated in the background automatically, together with access token,
+		 * without any request for that. Each time the access or refresh token
+		 * is updated, a notification comes to the IAccessTokenListener.
+		 *
+		 * @param [in, out] buffer The output buffer.
+		 * @param [in] bufferLength The size of the output buffer.
+		 */
+		virtual void GetRefreshTokenCopy(char* buffer, uint32_t bufferLength) override;
+#endif
+
 		/**
 		 * Reports current access token as no longer working.
 		 *

@@ -699,4 +699,33 @@ namespace universelan::client {
 	}
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IUSER_REFRESHTOKEN
+	void UserImpl::GetRefreshTokenCopy(char* buffer, uint32_t bufferLength) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("buffer: {}", (void*)buffer));
+			trace.write_all(std::format("bufferLength: {}", bufferLength));
+		}
+
+		intf()->GetRefreshTokenCopy(buffer, bufferLength);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
+		}
+	}
+
+	const char* UserImpl::GetRefreshToken() {
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		auto result = intf()->GetRefreshToken();
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+		}
+
+		return result;
+	}
+#endif
+
 }
