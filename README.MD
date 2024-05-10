@@ -135,6 +135,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | DUSK (DuskWorld)                          | :left_right_arrow:        | 1.133.6                       | Uses steam (works without Steam Client) api for free online play, doesn't use GOG Galaxy. |
 | Blood Bowl 2 Legendary Editition          | :left_right_arrow:        |                               | Uses custom free multiplayer, need to create a free online in-game account on their servers. |
 | Battlefleet Gothic Armada                 | :x:                       | 1.139.2                       | Doesn't seem to use Galaxy for multiplayer. | 
+| Jagged Alliance 3                         | :x:                       | 1.150.0                       | Doesn't seem to use Galaxy for multiplayer. (Steam? With EncryptedAppTicket) | 
 | 8-bit Armies                              | :x:                       | 1.95.0                        | Uses encrypted auth ticket to authenticate to an external multiplayer service, probably Steam. | 
 | 8-bit Hordes                              | :x:                       | 1.95.0                        | Uses encrypted auth ticket to authenticate to an external multiplayer service, probably Steam. | 
 | Fade to Silence                           | :x:                       | 1.114.9                       | Probably only uses steam for multiplayer, or some other service. | 
