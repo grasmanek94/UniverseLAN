@@ -126,7 +126,7 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
-		auto result = intf()->SendTelemetryEvent(eventType, listener);
+		auto result = intf()->SendTelemetryEvent(eventType, TelemetryEventSendListener::encapsulate(listener));
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
@@ -144,7 +144,7 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
-		auto result = intf()->SendAnonymousTelemetryEvent(eventType, listener);
+		auto result = intf()->SendAnonymousTelemetryEvent(eventType, TelemetryEventSendListener::encapsulate(listener));
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));

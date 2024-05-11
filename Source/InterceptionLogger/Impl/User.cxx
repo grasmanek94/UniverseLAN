@@ -90,7 +90,7 @@ namespace universelan::client {
 
 		intf()->USER_SIGN_IN_STEAM(steamAppTicket, steamAppTicketSize, personaName
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-			, listener
+			, AuthListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -113,7 +113,7 @@ namespace universelan::client {
 
 		intf()->USER_SIGN_IN_CREDENTIALS(login, password
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-			, listener
+			, AuthListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -142,7 +142,7 @@ namespace universelan::client {
 				config->GetOverrideSignInId().c_str(),
 				config->GetOverrideSignInPassword().c_str()
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-				, listener
+				, AuthListener::encapsulate(listener)
 #endif
 			);
 		}
@@ -152,7 +152,7 @@ namespace universelan::client {
 				requireOnline
 #endif
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-				, listener
+				, AuthListener::encapsulate(listener)
 #endif	
 			);
 		}
@@ -174,7 +174,7 @@ namespace universelan::client {
 		}
 		intf()->USER_SIGN_IN_SERVER_KEY(serverKey
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-			, listener
+			, AuthListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -195,7 +195,7 @@ namespace universelan::client {
 		}
 		intf()->SignInAnonymous(
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-			listener
+			AuthListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -207,14 +207,10 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("refreshToken: {}", util::safe_fix_null_char_ptr_annotate_ret(refreshToken)));
-#if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 			trace.write_all(std::format("listener: {}", (void*)listener));
-#endif
 		}
 		intf()->SignInToken(refreshToken
-#if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-			, listener
-#endif	
+			, AuthListener::encapsulate(listener)
 		);
 	}
 #endif
@@ -230,7 +226,7 @@ namespace universelan::client {
 		}
 		intf()->SignInLauncher(
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-			listener
+			AuthListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -249,7 +245,7 @@ namespace universelan::client {
 		}
 		intf()->SignInEpic(epicAccessToken, epicUsername
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-			, listener
+			, AuthListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -267,7 +263,7 @@ namespace universelan::client {
 		}
 		intf()->SignInXbox(xboxID
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-			, listener
+			, AuthListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -277,7 +273,11 @@ namespace universelan::client {
 	void UserImpl::SignInUWP(IAuthListener* const listener) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
-		intf()->SignInUWP(listener);
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("listener: {}", (void*)listener));
+		}
+
+		intf()->SignInUWP(AuthListener::encapsulate(listener));
 	}
 #endif
 
@@ -290,7 +290,7 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
-		intf()->USER_SIGN_IN_PS4(ps4ClientID, listener);
+		intf()->USER_SIGN_IN_PS4(ps4ClientID, AuthListener::encapsulate(listener));
 	}
 #endif
 
@@ -303,7 +303,7 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
-		intf()->SignInXB1(xboxOneUserID, listener);
+		intf()->SignInXB1(xboxOneUserID, AuthListener::encapsulate(listener));
 	}
 #endif
 
@@ -319,7 +319,7 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
-		intf()->SignInXBLive(token, signature, marketplaceID, locale, listener);
+		intf()->SignInXBLive(token, signature, marketplaceID, locale, AuthListener::encapsulate(listener));
 	}
 #endif
 
@@ -331,7 +331,7 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
-		intf()->SignInAnonymousTelemetry(listener);
+		intf()->SignInAnonymousTelemetry(AuthListener::encapsulate(listener));
 	}
 #endif
 
@@ -351,7 +351,7 @@ namespace universelan::client {
 		}
 		intf()->SignIn(xboxOneUserID
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-			, listener
+			, AuthListener::encapsulate(listener)
 #endif
 		);
 	}
@@ -377,7 +377,7 @@ namespace universelan::client {
 		}
 		intf()->SignIn(ps4ClientID, ps4TitleID, ps4TitleSecret, ps4TitleSecretLength
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-			, listener
+			, AuthListener::encapsulate(listener)
 #endif
 		);
 	}
@@ -415,7 +415,7 @@ namespace universelan::client {
 			userID
 #endif
 #if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
-			, listener
+			, SpecificUserDataListener::encapsulate(listener)
 #endif
 		);
 	}
@@ -501,7 +501,7 @@ namespace universelan::client {
 
 		intf()->SetUserData(key, value
 #if GALAXY_BUILD_FEATURE_HAS_SETUSERDATA_ISPECIFICLISTENER
-			, listener
+			, SpecificUserDataListener::encapsulate(listener)
 #endif
 		);
 	}
@@ -581,7 +581,7 @@ namespace universelan::client {
 
 		intf()->DeleteUserData(key
 #if GALAXY_BUILD_FEATURE_HAS_SETUSERDATA_ISPECIFICLISTENER
-			, listener
+			, SpecificUserDataListener::encapsulate(listener)
 #endif
 		);
 	}
@@ -616,7 +616,7 @@ namespace universelan::client {
 
 		intf()->RequestEncryptedAppTicket(data, dataSize
 #if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
-			, listener
+			, EncryptedAppTicketListener::encapsulate(listener)
 #endif
 		);
 	}

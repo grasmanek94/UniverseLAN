@@ -55,7 +55,7 @@ namespace universelan::client {
 
 		intf()->RequestUserStatsAndAchievements(userID
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			, listener
+			, UserStatsAndAchievementsRetrieveListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -178,7 +178,11 @@ namespace universelan::client {
 
 		}
 
-		intf()->StoreStatsAndAchievements();
+		intf()->StoreStatsAndAchievements(
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
+			StatsAndAchievementsStoreListener::encapsulate(listener)
+#endif	
+		);
 	}
 
 	void StatsImpl::ResetStatsAndAchievements(
@@ -197,7 +201,7 @@ namespace universelan::client {
 
 		intf()->ResetStatsAndAchievements(
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			listener
+			StatsAndAchievementsStoreListener::encapsulate(listener)
 #endif
 		);
 	}
@@ -320,7 +324,7 @@ namespace universelan::client {
 
 		intf()->RequestLeaderboards(
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			listener
+			LeaderboardsRetrieveListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -412,7 +416,7 @@ namespace universelan::client {
 
 		intf()->RequestLeaderboardEntriesGlobal(name, rangeStart, rangeEnd
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			, listener
+			, LeaderboardEntriesRetrieveListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -440,7 +444,7 @@ namespace universelan::client {
 
 		intf()->RequestLeaderboardEntriesAroundUser(name, countBefore, countAfter, userID
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			, listener
+			, LeaderboardEntriesRetrieveListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -471,7 +475,7 @@ namespace universelan::client {
 
 		intf()->RequestLeaderboardEntriesForUsers(name, userArray, userArraySize
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			, listener
+			, LeaderboardEntriesRetrieveListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -513,7 +517,7 @@ namespace universelan::client {
 
 		intf()->SetLeaderboardScore(name, score, forceUpdate
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			, listener
+			, LeaderboardScoreUpdateListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -570,7 +574,7 @@ namespace universelan::client {
 
 		intf()->SetLeaderboardScoreWithDetails(name, score, details, detailsSize, forceUpdate
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			, listener
+			, LeaderboardScoreUpdateListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -609,7 +613,7 @@ namespace universelan::client {
 
 		intf()->FindLeaderboard(name
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			, listener
+			, LeaderboardRetrieveListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -637,7 +641,7 @@ namespace universelan::client {
 
 		intf()->FindOrCreateLeaderboard(name, displayName, sortMethod, displayType
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			, listener
+			, LeaderboardRetrieveListener::encapsulate(listener)
 #endif	
 		);
 
@@ -665,7 +669,7 @@ namespace universelan::client {
 
 		intf()->RequestUserTimePlayed(userID
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			, listener
+			, UserTimePlayedRetrieveListener::encapsulate(listener)
 #endif	
 		);
 	}

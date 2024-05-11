@@ -48,7 +48,7 @@ namespace universelan::client {
 
 		intf()->OpenConnection(connectionString
 #if GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS
-			, listener
+			, ConnectionOpenListener::encapsulate(listener)
 #endif
 		);
 	}
@@ -69,7 +69,7 @@ namespace universelan::client {
 
 		intf()->CloseConnection(connectionID
 #if GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS
-			, listener
+			, ConnectionCloseListener::encapsulate(listener)
 #endif
 		);
 	}

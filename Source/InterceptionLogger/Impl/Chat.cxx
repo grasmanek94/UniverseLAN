@@ -51,7 +51,7 @@ namespace universelan::client {
 
 		intf()->RequestChatRoomWithUser(userID
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS
-			, listener
+			, ChatRoomWithUserRetrieveListener::encapsulate(listener)
 #endif
 			);
 	}
@@ -75,7 +75,7 @@ namespace universelan::client {
 
 		intf()->RequestChatRoomMessages(chatRoomID, limit, referenceMessageID
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS
-			, listener
+			, ChatRoomMessagesRetrieveListener::encapsulate(listener)
 #endif
 		);
 	}
@@ -98,7 +98,7 @@ namespace universelan::client {
 
 		auto result = intf()->SendChatRoomMessage(chatRoomID, msg
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS
-			, listener
+			, ChatRoomMessageSendListener::encapsulate(listener)
 #endif
 		);
 

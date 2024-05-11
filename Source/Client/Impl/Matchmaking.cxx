@@ -75,14 +75,15 @@ namespace universelan::client {
 				joined_lobbies.emplace(data->lobby->GetID(), data->lobby);
 			}
 
-			listeners->NotifyAll(lobbyCreatedListener, &ILobbyCreatedListener::OnLobbyCreated, data->lobby->GetID(), LobbyCreateResult::LOBBY_CREATE_RESULT_SUCCESS);
-			listeners->NotifyAll(lobbyEnteredListener, &ILobbyEnteredListener::OnLobbyEntered, data->lobby->GetID(), LobbyEnterResult::LOBBY_ENTER_RESULT_SUCCESS);
+			// Double check if no adverse effects after changing to NotifyNow
+			listeners->NotifyAllNow(lobbyCreatedListener, &ILobbyCreatedListener::OnLobbyCreated, data->lobby->GetID(), LobbyCreateResult::LOBBY_CREATE_RESULT_SUCCESS);
+			listeners->NotifyAllNow(lobbyEnteredListener, &ILobbyEnteredListener::OnLobbyEntered, data->lobby->GetID(), LobbyEnterResult::LOBBY_ENTER_RESULT_SUCCESS);
 
 			// TODO: Real Galaxy doesn't do this, maybe remove?
 			//listeners->NotifyAll(&ILobbyMemberStateListener::OnLobbyMemberStateChanged, data->lobby->GetID(), intf->user->GetGalaxyID(), LobbyMemberStateChange::LOBBY_MEMBER_STATE_CHANGED_ENTERED);
 		}
 		else {
-			listeners->NotifyAll(lobbyCreatedListener, &ILobbyCreatedListener::OnLobbyCreated, GalaxyID(0), LobbyCreateResult::LOBBY_CREATE_RESULT_ERROR);
+			listeners->NotifyAllNow(lobbyCreatedListener, &ILobbyCreatedListener::OnLobbyCreated, GalaxyID(0), LobbyCreateResult::LOBBY_CREATE_RESULT_ERROR);
 			// listeners->NotifyAll(lobbyEnteredListener, &ILobbyEnteredListener::OnLobbyEntered, GalaxyID(0), LobbyEnterResult::LOBBY_ENTER_RESULT_LOBBY_DOES_NOT_EXIST);
 		}
 	}

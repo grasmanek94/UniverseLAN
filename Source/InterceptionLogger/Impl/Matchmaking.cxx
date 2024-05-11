@@ -75,8 +75,8 @@ namespace universelan::client {
 			, lobbyTopologyType
 #endif	
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			, lobbyCreatedListener
-			, lobbyEnteredListener
+			, LobbyCreatedListener::encapsulate(lobbyCreatedListener)
+			, LobbyEnteredListener::encapsulate(lobbyEnteredListener)
 #endif
 		);
 	}
@@ -105,7 +105,7 @@ namespace universelan::client {
 			allowFullLobbies
 #endif
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			, listener
+			, LobbyListListener::encapsulate(listener)
 #endif
 		);
 	}
@@ -189,7 +189,7 @@ namespace universelan::client {
 
 		intf()->JoinLobby(lobbyID
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			, listener
+			, LobbyEnteredListener::encapsulate(listener)
 #endif
 		);
 	}
@@ -210,7 +210,7 @@ namespace universelan::client {
 
 		intf()->LeaveLobby(lobbyID
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			, listener
+			, LobbyLeftListener::encapsulate(listener)
 #endif
 		);
 	}
@@ -237,7 +237,7 @@ namespace universelan::client {
 #endif
 			intf()->SetMaxNumLobbyMembers(lobbyID, maxNumLobbyMembers
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-				, listener
+				, LobbyDataUpdateListener::encapsulate(listener)
 #endif
 			);
 
@@ -322,7 +322,7 @@ namespace universelan::client {
 #endif
 			intf()->SetLobbyType(lobbyID, lobbyType
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-				, listener
+				, LobbyDataUpdateListener::encapsulate(listener)
 #endif
 			);
 
@@ -375,7 +375,7 @@ namespace universelan::client {
 #endif
 			intf()->SetLobbyJoinable(lobbyID, joinable
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-				, listener
+				, LobbyDataUpdateListener::encapsulate(listener)
 #endif
 			);
 
@@ -427,7 +427,7 @@ namespace universelan::client {
 #endif
 			intf()->RequestLobbyData(lobbyID
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-				, listener
+				, LobbyDataRetrieveListener::encapsulate(listener)
 #endif
 			);
 
@@ -498,7 +498,7 @@ namespace universelan::client {
 #endif
 			intf()->SetLobbyData(lobbyID, key, value
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-				, listener
+				, LobbyDataUpdateListener::encapsulate(listener)
 #endif
 			);
 
@@ -572,7 +572,7 @@ namespace universelan::client {
 #endif
 			intf()->DeleteLobbyData(lobbyID, key
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-				, listener
+				, LobbyDataUpdateListener::encapsulate(listener)
 #endif
 			);
 
@@ -641,7 +641,7 @@ namespace universelan::client {
 
 		intf()->SetLobbyMemberData(lobbyID, key, value
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			, listener
+			, LobbyMemberDataUpdateListener::encapsulate(listener)
 #endif
 		);
 	}
@@ -704,7 +704,7 @@ namespace universelan::client {
 
 			intf()->DeleteLobbyMemberData(lobbyID, key
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-				, listener
+				, LobbyMemberDataUpdateListener::encapsulate(listener)
 #endif
 			);
 	}

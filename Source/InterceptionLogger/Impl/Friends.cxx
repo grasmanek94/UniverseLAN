@@ -114,7 +114,7 @@ namespace universelan::client {
 			, avatarCriteria
 #endif
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			, listener
+			, UserInformationRetrieveListener::encapsulate(listener)
 #endif
 		);
 	}
@@ -334,7 +334,7 @@ namespace universelan::client {
 
 		intf()->RequestFriendList(
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listener
+			FriendListListener::encapsulate(listener)
 #endif
 		);
 	}
@@ -403,7 +403,7 @@ namespace universelan::client {
 
 		intf()->SendFriendInvitation(userID
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			, listener
+			, FriendInvitationSendListener::encapsulate(listener)
 #endif
 		);
 	}
@@ -423,7 +423,7 @@ namespace universelan::client {
 
 		intf()->RequestFriendInvitationList(
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listener
+			FriendInvitationListRetrieveListener::encapsulate(listener)
 #endif
 		);
 	}
@@ -444,7 +444,7 @@ namespace universelan::client {
 
 		intf()->RequestSentFriendInvitationList(
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listener
+			SentFriendInvitationListRetrieveListener::encapsulate(listener)
 #endif
 		);
 	}
@@ -494,7 +494,7 @@ namespace universelan::client {
 
 		intf()->RespondToFriendInvitation(userID, accept
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			, listener
+			, FriendInvitationRespondToListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -515,7 +515,7 @@ namespace universelan::client {
 
 		intf()->DeleteFriend(userID
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			, listener
+			, FriendDeleteListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -539,7 +539,7 @@ namespace universelan::client {
 
 		intf()->SetRichPresence(key, value
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			, listener
+			, RichPresenceChangeListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -560,7 +560,7 @@ namespace universelan::client {
 
 		intf()->DeleteRichPresence(key
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			, listener
+			, RichPresenceChangeListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -580,7 +580,7 @@ namespace universelan::client {
 
 		intf()->ClearRichPresence(
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listener
+			RichPresenceChangeListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -602,7 +602,7 @@ namespace universelan::client {
 
 		intf()->RequestRichPresence(userID
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			, listener
+			, RichPresenceRetrieveListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -753,7 +753,7 @@ namespace universelan::client {
 
 		intf()->SendInvitation(userID, connectionString
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			, listener
+			, SendInvitationListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -776,7 +776,7 @@ namespace universelan::client {
 
 		intf()->FindUser(userSpecifier
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			, listener
+			, UserFindListener::encapsulate(listener)
 #endif	
 		);
 	}

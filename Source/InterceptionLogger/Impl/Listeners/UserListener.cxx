@@ -1,4 +1,5 @@
 #include "UserListener.hxx"
+#include "ProxifySingleShotListener.hxx"
 
 #include <GalaxyID.hxx>
 #include <Tracer.hxx>
@@ -27,6 +28,8 @@ namespace universelan::client {
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
 		}
+
+		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnAuthFailure(failureReason));
 	}
 
 	void AuthListener::OnAuthLost()
@@ -38,6 +41,8 @@ namespace universelan::client {
 	void OtherSessionStartListener::OnOtherSessionStarted()
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnOtherSessionStarted());
 	}
 #endif
 
@@ -48,6 +53,8 @@ namespace universelan::client {
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("operationalState: {}", operationalState));
 		}
+
+		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnOperationalStateChanged(operationalState));
 	}
 
 	void UserDataListener::OnUserDataUpdated()
@@ -63,12 +70,16 @@ namespace universelan::client {
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
 		}
+
+		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnSpecificUserDataUpdated(userID));
 	}
 #endif
 
 	void EncryptedAppTicketListener::OnEncryptedAppTicketRetrieveSuccess()
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnEncryptedAppTicketRetrieveSuccess());
 	}
 
 	void EncryptedAppTicketListener::OnEncryptedAppTicketRetrieveFailure(FailureReason failureReason)
@@ -78,12 +89,16 @@ namespace universelan::client {
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
 		}
+
+		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnEncryptedAppTicketRetrieveFailure(failureReason));
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_IACCESSTOKENLISTENER
 	void AccessTokenListener::OnAccessTokenChanged()
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnAccessTokenChanged());
 	}
 #endif
 }

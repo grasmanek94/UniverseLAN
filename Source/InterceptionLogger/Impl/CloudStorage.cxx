@@ -41,7 +41,7 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
-		intf()->GetFileList(container, listener);
+		intf()->GetFileList(container, CloudStorageGetFileListListener::encapsulate(listener));
 	}
 
 	const char* CloudStorageImpl::GetFileNameByIndex(uint32_t index) const {
@@ -118,7 +118,7 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
-		intf()->GetFile(container, name, userParam, writeFunc, listener);
+		intf()->GetFile(container, name, userParam, writeFunc, CloudStorageGetFileListener::encapsulate(listener));
 	}
 
 	void CloudStorageImpl::GetFile(const char* container, const char* name, void* buffer, uint32_t bufferLength, ICloudStorageGetFileListener* listener) {
@@ -132,7 +132,7 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
-		intf()->GetFile(container, name, buffer, bufferLength, listener);
+		intf()->GetFile(container, name, buffer, bufferLength, CloudStorageGetFileListener::encapsulate(listener));
 	}
 
 	void CloudStorageImpl::GetFileMetadata(const char* container, const char* name, ICloudStorageGetFileListener* listener) {
@@ -144,7 +144,7 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
-		intf()->GetFileMetadata(container, name, listener);
+		intf()->GetFileMetadata(container, name, CloudStorageGetFileListener::encapsulate(listener));
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_METADATAIDX_FUNCS
@@ -216,7 +216,7 @@ namespace universelan::client {
 			}
 		}
 
-		intf()->PutFile(container, name, userParam, readFunc, rewindFunc, listener, metadataKeys, metadataValues
+		intf()->PutFile(container, name, userParam, readFunc, rewindFunc, CloudStoragePutFileListener::encapsulate(listener), metadataKeys, metadataValues
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
 			, timeStamp
 #endif
@@ -257,7 +257,7 @@ namespace universelan::client {
 			}
 		}
 
-		intf()->PutFile(container, name, buffer, bufferLength, listener, metadataKeys, metadataValues
+		intf()->PutFile(container, name, buffer, bufferLength, CloudStoragePutFileListener::encapsulate(listener), metadataKeys, metadataValues
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_PUTFILE_TIMESTAMP
 			, timeStamp
 #endif
@@ -309,7 +309,7 @@ namespace universelan::client {
 #endif	
 		}
 
-		intf()->DeleteFile(container, name, listener);
+		intf()->DeleteFile(container, name, CloudStorageDeleteFileListener::encapsulate(listener));
 	}
 #pragma pop_macro ("DeleteFile")
 
@@ -336,7 +336,7 @@ namespace universelan::client {
 #endif	
 		}
 
-		intf()->PutFile(container, name, userParam, readFunc, rewindFunc, listener, savegameType, timeStamp
+		intf()->PutFile(container, name, userParam, readFunc, rewindFunc, CloudStoragePutFileListener::encapsulate(listener), savegameType, timeStamp
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
 			, hash
 #endif			
@@ -364,7 +364,7 @@ namespace universelan::client {
 #endif	
 		}
 
-		intf()->PutFile(container, name, buffer, bufferLength, listener, savegameType, timeStamp
+		intf()->PutFile(container, name, buffer, bufferLength, CloudStoragePutFileListener::encapsulate(listener), savegameType, timeStamp
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
 			, hash
 #endif	

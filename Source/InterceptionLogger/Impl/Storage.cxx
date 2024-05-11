@@ -187,7 +187,7 @@ namespace universelan::client {
 
 		intf()->FileShare(fileName
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
-			, listener
+			, FileShareListener::encapsulate(listener)
 #endif	
 		);
 	}
@@ -208,7 +208,7 @@ namespace universelan::client {
 
 		intf()->DownloadSharedFile(sharedFileID
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
-			, listener
+			, SharedFileDownloadListener::encapsulate(listener)
 #endif	
 		);
 	}

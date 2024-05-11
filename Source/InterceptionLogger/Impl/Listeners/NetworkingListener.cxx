@@ -1,4 +1,5 @@
 #include "NetworkingListener.hxx"
+#include "ProxifySingleShotListener.hxx"
 
 #include <GalaxyID.hxx>
 #include <Tracer.hxx>
@@ -33,11 +34,15 @@ namespace universelan::client {
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("natType: {}", magic_enum::enum_name(natType)));
 		}
+
+		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnNatTypeDetectionSuccess(natType));
 	}
 
 	void NatTypeDetectionListener::OnNatTypeDetectionFailure()
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnNatTypeDetectionFailure());
 	}
 #endif
 }

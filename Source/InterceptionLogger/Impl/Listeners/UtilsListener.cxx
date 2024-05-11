@@ -1,6 +1,7 @@
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS
 
 #include "UtilsListener.hxx"
+#include "ProxifySingleShotListener.hxx"
 
 #include <GalaxyID.hxx>
 #include <Tracer.hxx>
@@ -25,6 +26,8 @@ namespace universelan::client {
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("overlayVisible: {}", overlayVisible));
 		}
+
+		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnOverlayVisibilityChanged(overlayVisible));
 	}
 
 	void OverlayInitializationStateChangeListener::OnOverlayStateChanged(OverlayState overlayState)
@@ -34,6 +37,8 @@ namespace universelan::client {
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("overlayState: {}", magic_enum::enum_name(overlayState)));
 		}
+
+		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnOverlayStateChanged(overlayState));
 	}
 #endif
 
@@ -46,6 +51,8 @@ namespace universelan::client {
 			trace.write_all(std::format("typeLength: {}", typeLength));
 			trace.write_all(std::format("contentSize: {}", contentSize));
 		}
+
+		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnNotificationReceived(notificationID, typeLength, contentSize));
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_GOGSERVICECONNECTIONSTATELISTENER
@@ -56,6 +63,8 @@ namespace universelan::client {
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("connectionState: {}", magic_enum::enum_name(connectionState)));
 		}
+
+		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnConnectionStateChange(connectionState));
 	}
 #endif
 }
