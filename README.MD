@@ -80,7 +80,9 @@ Debug (tracing) files can be found in `<Configuration Files Directory>/tracing/<
 - Requires GCC 13 or newer.  
 - Requires libtbb to be present (libtbb:i386 on 64-bit systems when compiling for x86)  
    
-   
+## Space
+Please keep in mind that if *all* projects (tests, debug+release, interceptor, client, server, etc.) are built, around 50GiB of free space is required.
+
 # Help! My game and or GOG Galaxy version my game uses is not supported?
 Please [create an issue](https://github.com/grasmanek94/UniverseLAN/issues/new) with the name of the game, game version, and if known the GOG Galaxy SDK version or `Galaxy.dll` / `Galaxy64.dll` sha2 or md5 hash.  
 For games I don't own I need other people to test UniverseLAN development builds.  
