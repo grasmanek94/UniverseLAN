@@ -144,6 +144,7 @@ namespace universelan::client {
 				&IChatRoomMessagesListener::OnChatRoomMessagesReceived,
 				data->id, (uint32_t)data->messages.size(), longest_message);
 
+			// TODO: a throw can make this code unreachable, FIXME
 			incomming_messages_buffer = nullptr;
 		}
 		else {
