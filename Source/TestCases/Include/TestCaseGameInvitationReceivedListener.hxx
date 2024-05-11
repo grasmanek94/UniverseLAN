@@ -2,6 +2,7 @@
 
 #include "TestCaseClientDetails.hxx"
 
+#if GALAXY_BUILD_FEATURE_HAS_IGAMEINVITATIONRECEIVEDLISTENER
 class GameInvitationReceivedListenerImplGlobal : public galaxy::api::GlobalGameInvitationReceivedListener
 {
 public:
@@ -69,5 +70,5 @@ public:
 			on_game_invitation_received(userID, connectionString);
 		}
 	}
-
 };
+#endif

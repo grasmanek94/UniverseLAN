@@ -23,11 +23,17 @@ namespace universelan::client {
 		listeners{ notifications } {
 		listeners.AddListener<PersonaDataChangedListener>();
 		listeners.AddListener<GameJoinRequestedListener>();
+#if GALAXY_BUILD_FEATURE_HAS_IGAMEINVITATIONRECEIVEDLISTENER
 		listeners.AddListener<GameInvitationReceivedListener>();
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_ISENTFRIENDINVITATIONLISTRETRIEVELISTENER
 		listeners.AddListener<SendInvitationListener>();
+#endif
 		listeners.AddListener<FriendListListener>();
 		listeners.AddListener<RichPresenceChangeListener>();
+#if GALAXY_BUILD_FEATURE_ADDED_RICH_PRESENCE_LISTENERS
 		listeners.AddListener<RichPresenceListener>();
+#endif
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 		listeners.AddListener<UserInformationRetrieveListener>();
 #endif

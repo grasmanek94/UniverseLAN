@@ -125,6 +125,7 @@ namespace universelan::client {
 		}
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ILEADERBOARDRETRIEVELISTENER
 	void LeaderboardRetrieveListener::OnLeaderboardRetrieveSuccess(const char* name)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -143,7 +144,9 @@ namespace universelan::client {
 			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
 		}
 	}
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IUSERTIMEPLAYEDRETRIEVELISTENER
 	void UserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveSuccess(GalaxyID userID)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -162,4 +165,5 @@ namespace universelan::client {
 			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
 		}
 	}
+#endif
 }

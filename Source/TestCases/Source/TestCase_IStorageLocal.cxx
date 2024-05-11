@@ -1,3 +1,6 @@
+#if !GALAXY_BUILD_FEATURE_HAS_ISTORAGE
+int main() { return 0; }
+#else
 #include <TestCaseClientDetails.hxx>
 
 #include <unordered_map>
@@ -412,3 +415,4 @@ int main()
 
 	return 0;
 }
+#endif

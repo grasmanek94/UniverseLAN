@@ -338,13 +338,17 @@ static void InitializeGalaxy()
 	g_authListener = new GalaxyAuthListener;
 
 	try {
-		galaxy::api::InitOptions options(galaxy::api::CLIENT_ID.data(), galaxy::api::CLIENT_SECRET.data());
 
 #if GALAXY_BUILD_FEATURE_HAS_IGALAXY
 		galaxy_api = galaxy::api::GalaxyFactory::CreateInstance();
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
+		galaxy::api::InitOptions options(galaxy::api::CLIENT_ID.data(), galaxy::api::CLIENT_SECRET.data());
 		GET_GALAXY_API_AS_IS(Init(options));
+#else
+		GET_GALAXY_API_AS_IS(Init(galaxy::api::CLIENT_ID.data(), galaxy::api::CLIENT_SECRET.data()));
+#endif
 
 		auto credentials = USER_CREDENTIALS[GALAXY_LOGIN_ID];
 

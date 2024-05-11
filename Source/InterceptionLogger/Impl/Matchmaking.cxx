@@ -26,7 +26,9 @@ namespace universelan::client {
 		listeners.AddListener<LobbyEnteredListener>();
 		listeners.AddListener<LobbyLeftListener>();
 		listeners.AddListener<LobbyDataListener>();
+#if GALAXY_BUILD_FEATURE_HAS_ILOBBYDATARETRIEVELISTENER
 		listeners.AddListener<LobbyDataRetrieveListener>();
+#endif
 		listeners.AddListener<LobbyMemberStateListener>();
 		listeners.AddListener<LobbyOwnerChangeListener>();
 		listeners.AddListener<LobbyMessageListener>();

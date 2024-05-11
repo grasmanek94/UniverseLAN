@@ -126,6 +126,7 @@ namespace universelan::client {
 	}
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_ILOBBYDATARETRIEVELISTENER
 	void LobbyDataRetrieveListener::OnLobbyDataRetrieveSuccess(const GalaxyID& lobbyID)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -144,6 +145,7 @@ namespace universelan::client {
 			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
 		}
 	}
+#endif
 
 	void LobbyMemberStateListener::OnLobbyMemberStateChanged(const GalaxyID& lobbyID, const GalaxyID& memberID, LobbyMemberStateChange memberStateChange)
 	{

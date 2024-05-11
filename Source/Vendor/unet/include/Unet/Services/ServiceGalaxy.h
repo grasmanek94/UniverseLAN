@@ -18,7 +18,10 @@ namespace Unet
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		, public galaxy::api::ILobbyListListener, public galaxy::api::ILobbyDataRetrieveListener
 #else
-		, public galaxy::api::GlobalLobbyListListener, public galaxy::api::GlobalLobbyDataRetrieveListener
+		, public galaxy::api::GlobalLobbyListListener
+#if GALAXY_BUILD_FEATURE_HAS_ILOBBYDATARETRIEVELISTENER
+		, public galaxy::api::GlobalLobbyDataRetrieveListener
+#endif
 #endif
 	{
 	private:
@@ -34,16 +37,20 @@ namespace Unet
 #endif
 		) override;
 		void LobbyDataUpdated();
+#if GALAXY_BUILD_FEATURE_HAS_ILOBBYDATARETRIEVELISTENER
 		virtual void OnLobbyDataRetrieveSuccess(const galaxy::api::GalaxyID& lobbyID) override;
 		virtual void OnLobbyDataRetrieveFailure(const galaxy::api::GalaxyID& lobbyID, FailureReason failureReason) override;
+#endif
 	};
 
 	class ServiceGalaxy : public Service,
 		galaxy::api::ILobbyCreatedListener,
 		galaxy::api::ILobbyEnteredListener,
 		galaxy::api::ILobbyLeftListener,
-		galaxy::api::ILobbyMemberStateListener,
-		galaxy::api::ILobbyDataRetrieveListener
+		galaxy::api::ILobbyMemberStateListener
+#if GALAXY_BUILD_FEATURE_HAS_ILOBBYDATARETRIEVELISTENER
+		,galaxy::api::ILobbyDataRetrieveListener
+#endif
 	{
 	private:
 		LobbyListListener m_lobbyListListener;
@@ -108,7 +115,10 @@ namespace Unet
 		) override;
 
 		virtual void OnLobbyMemberStateChanged(const galaxy::api::GalaxyID& lobbyID, const galaxy::api::GalaxyID& memberID, galaxy::api::LobbyMemberStateChange memberStateChange) override;
+
+#if GALAXY_BUILD_FEATURE_HAS_ILOBBYDATARETRIEVELISTENER
 		virtual void OnLobbyDataRetrieveSuccess(const galaxy::api::GalaxyID& lobbyID) override;
 		virtual void OnLobbyDataRetrieveFailure(const galaxy::api::GalaxyID& lobbyID, FailureReason failureReason) override;
+#endif
 	};
 }

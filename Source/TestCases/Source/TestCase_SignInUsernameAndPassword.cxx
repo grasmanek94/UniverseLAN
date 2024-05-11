@@ -1,5 +1,19 @@
 #include <TestCaseClientDetails.hxx>
 
+#if GALAXY_BUILD_FEATURE_HAS_IGALAXY
+#define GET_GALAXY_API(what) galaxy_api->Get ## what
+#define GET_GALAXY_API_AS_IS(what) galaxy_api->what
+
+galaxy::api::IGalaxy* galaxy_api = nullptr;
+#else
+#define GET_GALAXY_API(what) galaxy::api::what
+#define GET_GALAXY_API_AS_IS(what) galaxy::api::what
+#endif
+
+#if !GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINCREDENTIALS
+#define SignInCredentials SignIn
+#endif
+
 int main()
 {
 	tracer::Trace::InitTracing(".", false, true, false, 0, true);
@@ -7,19 +21,31 @@ int main()
 
 	tracer::Trace trace{ "", __FUNCTION__ };
 
+#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
 	galaxy::api::InitOptions options(galaxy::api::CLIENT_ID.data(), galaxy::api::CLIENT_SECRET.data());
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_IGALAXY
-	galaxy::api::IGalaxy* galaxy_api = galaxy::api::GalaxyFactory::CreateInstance();
-
-	galaxy_api->Init(options);
-#else
-	galaxy::api::Init(options);
+	galaxy_api = galaxy::api::GalaxyFactory::CreateInstance();
 #endif
+
+	try {
+#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
+		GET_GALAXY_API_AS_IS(Init(options));
+#else
+		GET_GALAXY_API_AS_IS(Init(galaxy::api::CLIENT_ID.data(), galaxy::api::CLIENT_SECRET.data()));
+#endif
+}
+	catch (const IError& err) {
+		std::cerr << err.GetMsg() << std::endl;
+	}
 
 	trace.write_all("galaxy::api::Init performed");
 
+#if GALAXY_BUILD_FEATURE_HAS_IACCESSTOKENLISTENER
 	AccessTokenListenerImplGlobal accesstokenlistener{};
+#endif
+
 	AchievementChangeListenerImplGlobal achievementchangelistener{};
 	AuthListenerImplGlobal authlistener{};
 
@@ -35,7 +61,10 @@ int main()
 	ConnectionOpenListenerImplGlobal connectionopenlistener{};
 #endif
 	EncryptedAppTicketListenerImplGlobal encryptedappticketlistener{};
+
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 	FileShareListenerImplGlobal filesharelistener{};
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_FRIENDADDLISTENER
 	FriendAddListenerImplGlobal friendaddlistener{};
@@ -50,7 +79,9 @@ int main()
 #endif
 
 	FriendListListenerImplGlobal friendlistlistener{};
+#if GALAXY_BUILD_FEATURE_HAS_IGAMEINVITATIONRECEIVEDLISTENER
 	GameInvitationReceivedListenerImplGlobal gameinvitationreceivedlistener{};
+#endif
 #if GALAXY_BUILD_FEATURE_HAS_GAMEJOINREQUESTEDLISTENER
 	GameJoinRequestedListenerImplGlobal gamejoinrequestedlistener{};
 #endif
@@ -60,12 +91,16 @@ int main()
 #endif
 
 	LeaderboardEntriesRetrieveListenerImplGlobal leaderboardentriesretrievelistener{};
+#if GALAXY_BUILD_FEATURE_HAS_ILEADERBOARDRETRIEVELISTENER
 	LeaderboardRetrieveListenerImplGlobal leaderboardretrievelistener{};
+#endif
 	LeaderboardScoreUpdateListenerImplGlobal leaderboardscoreupdatelistener{};
 	LeaderboardsRetrieveListenerImplGlobal leaderboardsretrievelistener{};
 	LobbyCreatedListenerImplGlobal lobbycreatedlistener{};
 	LobbyDataListenerImplGlobal lobbydatalistener{};
-	LobbyDataRetrieveListenerImplGlobal lobbydataretrievelistener{};
+#if GALAXY_BUILD_FEATURE_HAS_ILOBBYDATARETRIEVELISTENER
+	LobbyDataRetrieveListenerImplGlobal lobbydataretrievelistener{ };
+#endif
 	LobbyEnteredListenerImplGlobal lobbyenteredlistener{};
 	LobbyLeftListenerImplGlobal lobbyleftlistener{};
 	LobbyListListenerImplGlobal lobbylistlistener{};
@@ -78,9 +113,14 @@ int main()
 #endif
 
 	NetworkingListenerImplGlobal networkinglistener{};
+#if GALAXY_BUILD_FEATURE_HAS_INOTIFICATIONLISTENER
 	NotificationListenerImplGlobal notificationlistener{};
+#endif
 	OperationalStateChangeListenerImplGlobal operationalstatechangelistener{};
+
+#if GALAXY_BUILD_FEATURE_HAS_IOTHERSESSIONSTARTLISTENER
 	OtherSessionStartListenerImplGlobal othersessionstartlistener{};
+#endif
 
 #if GALAXY_BUILD_FEATURE_OVERLAYSTATE_ENUM
 	OverlayInitializationStateChangeListenerImplGlobal overlayinitializationstatechangelistener{};
@@ -106,8 +146,12 @@ int main()
 	SentFriendInvitationListRetrieveListenerImplGlobal sentfriendinvitationlistretrievelistener{};
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 	SharedFileDownloadListenerImplGlobal sharedfiledownloadlistener{};
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
 	SpecificUserDataListenerImplGlobal specificuserdatalistener{};
+#endif
 	StatsAndAchievementsStoreListenerImplGlobal statsandachievementsstorelistener{};
 
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY

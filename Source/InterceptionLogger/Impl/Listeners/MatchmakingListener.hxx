@@ -55,12 +55,14 @@ namespace universelan::client {
 	};
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_ILOBBYDATARETRIEVELISTENER
 	class LobbyDataRetrieveListener : public ILobbyDataRetrieveListener
 	{
 	public:
 		virtual void OnLobbyDataRetrieveSuccess(const GalaxyID& lobbyID);
 		virtual void OnLobbyDataRetrieveFailure(const GalaxyID& lobbyID, FailureReason failureReason);
 	};
+#endif
 
 	class LobbyMemberStateListener : public ILobbyMemberStateListener
 	{

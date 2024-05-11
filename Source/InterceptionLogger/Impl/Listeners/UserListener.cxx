@@ -34,10 +34,12 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_IOTHERSESSIONSTARTLISTENER
 	void OtherSessionStartListener::OnOtherSessionStarted()
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 	}
+#endif
 
 	void OperationalStateChangeListener::OnOperationalStateChanged(uint32_t operationalState)
 	{
@@ -53,6 +55,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
 	void SpecificUserDataListener::OnSpecificUserDataUpdated(GalaxyID userID)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -61,6 +64,7 @@ namespace universelan::client {
 			trace.write_all(std::format("userID: {}", userID));
 		}
 	}
+#endif
 
 	void EncryptedAppTicketListener::OnEncryptedAppTicketRetrieveSuccess()
 	{
@@ -76,8 +80,10 @@ namespace universelan::client {
 		}
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_IACCESSTOKENLISTENER
 	void AccessTokenListener::OnAccessTokenChanged()
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 	}
+#endif
 }

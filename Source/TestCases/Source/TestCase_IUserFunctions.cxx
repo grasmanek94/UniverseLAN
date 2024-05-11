@@ -1,3 +1,7 @@
+#if !GALAXY_BUILD_FEATURE_IUSER_GET_DATA_ACCESSTOKEN_COPY
+int main() { return 0; }
+#else
+
 #include <TestCaseClientDetails.hxx>
 
 #if GALAXY_BUILD_FEATURE_HAS_IGALAXY
@@ -273,3 +277,4 @@ int main()
 
 	return 0;
 }
+#endif

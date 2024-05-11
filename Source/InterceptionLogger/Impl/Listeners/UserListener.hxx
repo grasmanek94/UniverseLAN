@@ -13,11 +13,13 @@ namespace universelan::client {
 		virtual void OnAuthLost();
 	};
 
+#if GALAXY_BUILD_FEATURE_HAS_IOTHERSESSIONSTARTLISTENER
 	class OtherSessionStartListener : public IOtherSessionStartListener
 	{
 	public:
 		virtual void OnOtherSessionStarted();
 	};
+#endif
 
 	class OperationalStateChangeListener : public IOperationalStateChangeListener
 	{
@@ -31,11 +33,13 @@ namespace universelan::client {
 		virtual void OnUserDataUpdated();
 	};
 
+#if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
 	class SpecificUserDataListener : public ISpecificUserDataListener
 	{
 	public:
 		virtual void OnSpecificUserDataUpdated(GalaxyID userID);
 	};
+#endif
 
 	class EncryptedAppTicketListener : public IEncryptedAppTicketListener
 	{
@@ -44,9 +48,11 @@ namespace universelan::client {
 		virtual void OnEncryptedAppTicketRetrieveFailure(FailureReason failureReason);
 	};
 
+#if GALAXY_BUILD_FEATURE_HAS_IACCESSTOKENLISTENER
 	class AccessTokenListener : public IAccessTokenListener
 	{
 	public:
 		virtual void OnAccessTokenChanged();
 	};
+#endif
 }

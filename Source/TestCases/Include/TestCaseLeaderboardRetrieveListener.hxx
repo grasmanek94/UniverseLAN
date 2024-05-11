@@ -2,6 +2,7 @@
 
 #include "TestCaseClientDetails.hxx"
 
+#if GALAXY_BUILD_FEATURE_HAS_ILEADERBOARDRETRIEVELISTENER
 class LeaderboardRetrieveListenerImplGlobal : public galaxy::api::GlobalLeaderboardRetrieveListener
 {
 public:
@@ -105,3 +106,4 @@ public:
 		}
 	}
 };
+#endif

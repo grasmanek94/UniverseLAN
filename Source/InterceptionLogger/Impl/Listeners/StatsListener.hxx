@@ -47,17 +47,21 @@ namespace universelan::client {
 		virtual void OnLeaderboardScoreUpdateFailure(const char* name, int32_t score, FailureReason failureReason);
 	};
 
+#if GALAXY_BUILD_FEATURE_HAS_ILEADERBOARDRETRIEVELISTENER
 	class LeaderboardRetrieveListener : public ILeaderboardRetrieveListener
 	{
 	public:
 		virtual void OnLeaderboardRetrieveSuccess(const char* name);
 		virtual void OnLeaderboardRetrieveFailure(const char* name, FailureReason failureReason);
 	};
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IUSERTIMEPLAYEDRETRIEVELISTENER
 	class UserTimePlayedRetrieveListener : public IUserTimePlayedRetrieveListener
 	{
 	public:
 		virtual void OnUserTimePlayedRetrieveSuccess(GalaxyID userID);
 		virtual void OnUserTimePlayedRetrieveFailure(GalaxyID userID, FailureReason failureReason);
 	};
+#endif
 }

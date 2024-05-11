@@ -69,6 +69,7 @@ void Unet::LobbyListListener::LobbyDataUpdated()
 	}
 }
 
+#if GALAXY_BUILD_FEATURE_HAS_ILOBBYDATARETRIEVELISTENER
 void Unet::LobbyListListener::OnLobbyDataRetrieveSuccess(const galaxy::api::GalaxyID& lobbyID)
 {
 	auto it = std::find(m_listDataFetch.begin(), m_listDataFetch.end(), lobbyID);
@@ -102,6 +103,7 @@ void Unet::LobbyListListener::OnLobbyDataRetrieveFailure(const galaxy::api::Gala
 
 	LobbyDataUpdated();
 }
+#endif
 
 Unet::ServiceGalaxy::ServiceGalaxy(Internal::Context* ctx, int numChannels) :
 	Service(ctx, numChannels),
@@ -163,13 +165,18 @@ void Unet::ServiceGalaxy::CreateLobby(LobbyPrivacy privacy, int maxPlayers)
 	galaxy::api::LobbyType type = galaxy::api::LOBBY_TYPE_PUBLIC;
 	switch (privacy) {
 	case LobbyPrivacy::Public: type = galaxy::api::LOBBY_TYPE_PUBLIC; break;
+#if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
 	case LobbyPrivacy::Private: type = galaxy::api::LOBBY_TYPE_PRIVATE; break;
+#endif
 	}
 
 	m_requestLobbyCreated = m_ctx->m_callbackCreateLobby.AddServiceRequest(this);
 
 	try {
-		GET_GALAXY_API(Matchmaking())->CreateLobby(type, maxPlayers, true, galaxy::api::LOBBY_TOPOLOGY_TYPE_FCM
+		GET_GALAXY_API(Matchmaking())->CreateLobby(type, maxPlayers
+#if GALAXY_BUILD_FEATURE_HAS_LOBBYTOPOLOGYTYPE_ENUM
+			, true, galaxy::api::LOBBY_TOPOLOGY_TYPE_FCM
+#endif
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, this
 #endif
@@ -186,27 +193,33 @@ void Unet::ServiceGalaxy::SetLobbyPrivacy(const ServiceID& lobbyId, LobbyPrivacy
 	galaxy::api::LobbyType type = galaxy::api::LOBBY_TYPE_PUBLIC;
 	switch (privacy) {
 	case LobbyPrivacy::Public: type = galaxy::api::LOBBY_TYPE_PUBLIC; break;
+#if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
 	case LobbyPrivacy::Private: type = galaxy::api::LOBBY_TYPE_PRIVATE; break;
+#endif
 	}
 
 	assert(lobbyId.Service == ServiceType::Galaxy);
+#if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
 	try {
 		GET_GALAXY_API(Matchmaking())->SetLobbyType(lobbyId.ID, type);
 	}
 	catch (const galaxy::api::IError& error) {
 		m_ctx->GetCallbacks()->OnLogDebug(strPrintF("[Galaxy] Failed to set lobby privacy: %s", error.GetMsg()));
 	}
+#endif
 }
 
 void Unet::ServiceGalaxy::SetLobbyJoinable(const ServiceID& lobbyId, bool joinable)
 {
 	assert(lobbyId.Service == ServiceType::Galaxy);
+#if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
 	try {
 		GET_GALAXY_API(Matchmaking())->SetLobbyJoinable(lobbyId.ID, joinable);
 	}
 	catch (const galaxy::api::IError& error) {
 		m_ctx->GetCallbacks()->OnLogDebug(strPrintF("[Galaxy] Failed to make lobby joinable: %s", error.GetMsg()));
 	}
+#endif
 }
 
 void Unet::ServiceGalaxy::GetLobbyList()
@@ -214,7 +227,10 @@ void Unet::ServiceGalaxy::GetLobbyList()
 	m_requestLobbyList = m_ctx->m_callbackLobbyList.AddServiceRequest(this);
 
 	try {
-		GET_GALAXY_API(Matchmaking())->RequestLobbyList(false
+		GET_GALAXY_API(Matchmaking())->RequestLobbyList(
+#if GALAXY_BUILD_FEATURE_HAS_REQUESTLOBBYLIST_ARGS_ALLOWFULL
+			false
+#endif
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			, & m_lobbyListListener
 #endif
@@ -302,8 +318,9 @@ int Unet::ServiceGalaxy::GetLobbyPlayerCount(const ServiceID& lobbyId)
 void Unet::ServiceGalaxy::SetLobbyMaxPlayers(const ServiceID& lobbyId, int amount)
 {
 	assert(lobbyId.Service == ServiceType::Galaxy);
-
+#if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
 	GET_GALAXY_API(Matchmaking())->SetMaxNumLobbyMembers(lobbyId.ID, amount);
+#endif
 }
 
 int Unet::ServiceGalaxy::GetLobbyMaxPlayers(const ServiceID& lobbyId)
@@ -511,6 +528,7 @@ void Unet::ServiceGalaxy::OnLobbyMemberStateChanged(const galaxy::api::GalaxyID&
 	}
 }
 
+#if GALAXY_BUILD_FEATURE_HAS_ILOBBYDATARETRIEVELISTENER
 void Unet::ServiceGalaxy::OnLobbyDataRetrieveSuccess(const galaxy::api::GalaxyID& lobbyID)
 {
 	auto it = std::find(m_dataFetch.begin(), m_dataFetch.end(), lobbyID);
@@ -553,3 +571,4 @@ void Unet::ServiceGalaxy::OnLobbyDataRetrieveFailure(const galaxy::api::GalaxyID
 	res.Code = Result::Error;
 	m_ctx->GetCallbacks()->OnLobbyInfoFetched(res);
 }
+#endif

@@ -187,6 +187,7 @@ namespace universelan::client {
 		}
 	}
 
+#if GALAXY_BUILD_FEATURE_ADDED_RICH_PRESENCE_LISTENERS
 	void RichPresenceListener::OnRichPresenceUpdated(GalaxyID userID)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -195,6 +196,7 @@ namespace universelan::client {
 			trace.write_all(std::format("userID: {}", userID));
 		}
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 	void RichPresenceRetrieveListener::OnRichPresenceRetrieveSuccess(GalaxyID userID)
@@ -227,6 +229,7 @@ namespace universelan::client {
 		}
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_IGAMEINVITATIONRECEIVEDLISTENER
 	void GameInvitationReceivedListener::OnGameInvitationReceived(GalaxyID userID, const char* connectionString)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -236,7 +239,9 @@ namespace universelan::client {
 			trace.write_all(std::format("connectionString: {}", util::safe_fix_null_char_ptr_annotate_ret(connectionString)));
 		}
 	}
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_ISENDINVITATIONLISTENER
 	void SendInvitationListener::OnInvitationSendSuccess(GalaxyID userID, const char* connectionString)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -257,6 +262,7 @@ namespace universelan::client {
 			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
 		}
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_FIND_USER
 	void UserFindListener::OnUserFindSuccess(const char* userSpecifier, GalaxyID userID)

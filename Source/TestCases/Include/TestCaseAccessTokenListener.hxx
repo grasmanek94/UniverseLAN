@@ -2,6 +2,7 @@
 
 #include "TestCaseClientDetails.hxx"
 
+#if GALAXY_BUILD_FEATURE_HAS_IACCESSTOKENLISTENER
 class AccessTokenListenerImplGlobal : public galaxy::api::GlobalAccessTokenListener
 {
 public:
@@ -57,6 +58,7 @@ public:
 		}
 	}
 };
+#endif
 
 #if GALAXY_BUILD_FEATURE_GAME_SERVER_API
 

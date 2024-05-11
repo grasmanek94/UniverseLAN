@@ -2,6 +2,7 @@
 
 #include "TestCaseClientDetails.hxx"
 
+#if GALAXY_BUILD_FEATURE_HAS_ILOBBYDATARETRIEVELISTENER
 class LobbyDataRetrieveListenerImplGlobal : public galaxy::api::GlobalLobbyDataRetrieveListener
 {
 public:
@@ -105,6 +106,7 @@ public:
 		}
 	}
 };
+#endif
 
 #if GALAXY_BUILD_FEATURE_GAME_SERVER_API
 

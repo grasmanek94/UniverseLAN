@@ -30,12 +30,18 @@ namespace universelan::client {
 		listeners{ notifications },
 		config{ config } {
 		listeners.AddListener<AuthListener>();
+#if GALAXY_BUILD_FEATURE_HAS_IOTHERSESSIONSTARTLISTENER
 		listeners.AddListener<OtherSessionStartListener>();
+#endif
 		listeners.AddListener<OperationalStateChangeListener>();
 		listeners.AddListener<UserDataListener>();
+#if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
 		listeners.AddListener<SpecificUserDataListener>();
+#endif
 		listeners.AddListener<EncryptedAppTicketListener>();
+#if GALAXY_BUILD_FEATURE_HAS_IACCESSTOKENLISTENER
 		listeners.AddListener<AccessTokenListener>();
+#endif
 	}
 
 	UserImpl::~UserImpl() {
@@ -123,7 +129,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+#if GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINSTEAM
 			trace.write_all(std::format("requireOnline: {}", requireOnline));
+#endif
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 			trace.write_all(std::format("listener: {}", (void*)listener));
 #endif

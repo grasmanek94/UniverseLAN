@@ -88,6 +88,54 @@ namespace galaxy::api {
 namespace tracer = universelan::tracer;
 
 namespace galaxy::api {
+#if !GALAXY_BUILD_FEATURE_HAS_LOBBYTOPOLOGYTYPE_ENUM
+	enum LobbyTopologyType
+	{
+		DEPRECATED_LOBBY_TOPOLOGY_TYPE_FCM_HOST_MIGRATION = 0, ///< All users are connected with each other. Disconnection of lobby owner results in choosing a new one. Deprecated: use LOBBY_TOPOLOGY_TYPE_FCM_OWNERSHIP_TRANSITION instead.
+		LOBBY_TOPOLOGY_TYPE_FCM = 1, ///< All users are connected with each other. Disconnection of lobby owner results in closing the lobby.
+		LOBBY_TOPOLOGY_TYPE_STAR = 2, ///< All users are connected with lobby owner. Disconnection of lobby owner results in closing the lobby.
+		LOBBY_TOPOLOGY_TYPE_CONNECTIONLESS = 3, ///< All users are connected only with server. Disconnection of lobby owner results in choosing a new one.
+		LOBBY_TOPOLOGY_TYPE_FCM_OWNERSHIP_TRANSITION = 4 ///< All users are connected with each other. Disconnection of lobby owner results in choosing a new one.
+};
+#endif
+
+#if !GALAXY_BUILD_FEATURE_HAS_ISTORAGE
+	using SharedFileID = uint64_t;
+#endif
+
+
+#if !GALAXY_BUILD_FEATURE_HAS_ILOBBYDATARETRIEVELISTENER
+	namespace ILobbyDataRetrieveListener {
+		enum FailureReason
+		{
+			FAILURE_REASON_UNDEFINED, ///< Unspecified error.
+			FAILURE_REASON_LOBBY_DOES_NOT_EXIST, ///< Specified lobby does not exist.
+		};
+	}
+#endif
+
+#if !GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LIST_RESULT
+	enum LobbyListResult
+	{
+		LOBBY_LIST_RESULT_SUCCESS,
+		LOBBY_LIST_RESULT_ERROR,
+		LOBBY_LIST_RESULT_CONNECTION_FAILURE
+	};
+#endif
+
+#if !GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LEAVE_REASON
+	enum LobbyLeaveReason
+	{
+		LOBBY_LEAVE_REASON_UNDEFINED,
+		LOBBY_LEAVE_REASON_USER_LEFT,
+		LOBBY_LEAVE_REASON_LOBBY_CLOSED,
+		LOBBY_LEAVE_REASON_CONNECTION_LOST
+	};
+#endif
+
+}
+
+namespace galaxy::api {
 
 #if GALAXY_BUILD_FEATURE_GALAXYID_HAS_IDTYPE
 	using IDType = GalaxyID::IDType;
@@ -130,13 +178,18 @@ namespace galaxy::api {
 		assert(static_cast<IDType>(value >> 56) == IDType::ID_TYPE_UNASSIGNED);
 		return GalaxyID(static_cast<uint64_t>(type) << 56 | value);
 	}
+
+	inline uint64_t GetRealID(const GalaxyID& id)
+	{
+		return id.ToUint64() & 0xffffffffffffffULL;
+	}
 }
 
 template <>
 struct std::formatter<galaxy::api::GalaxyID> : std::formatter<std::string> {
 	auto format(galaxy::api::GalaxyID p, format_context& ctx) const {
 		return formatter<string>::format(
-			std::format("{}({})", p.GetRealID(), magic_enum::enum_name(galaxy::api::GetIDType(p))), ctx);
+			std::format("{}({})", GetRealID(p), magic_enum::enum_name(galaxy::api::GetIDType(p))), ctx);
 	}
 };
 

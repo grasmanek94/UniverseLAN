@@ -135,7 +135,11 @@ namespace universelan::client {
 
 		real_init = [&](InitOptionsImpl const& initOptions) -> void {
 			try {
+#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
 				real_igalaxy_instance->Init(initOptions);
+#else
+				real_igalaxy_instance->Init(initOptions.clientID, initOptions.clientSecret);
+#endif
 			}
 			catch (const IError& error) {
 				std::cerr << "Error: " << error.GetMsg() << std::endl;

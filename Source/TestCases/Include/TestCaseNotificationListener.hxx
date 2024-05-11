@@ -2,6 +2,7 @@
 
 #include "TestCaseClientDetails.hxx"
 
+#if GALAXY_BUILD_FEATURE_HAS_INOTIFICATIONLISTENER
 class NotificationListenerImplGlobal : public galaxy::api::GlobalNotificationListener
 {
 public:
@@ -69,3 +70,4 @@ public:
 		}
 	}
 };
+#endif

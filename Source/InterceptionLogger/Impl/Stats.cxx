@@ -27,8 +27,12 @@ namespace universelan::client {
 		listeners.AddListener<LeaderboardsRetrieveListener>();
 		listeners.AddListener<LeaderboardEntriesRetrieveListener>();
 		listeners.AddListener<LeaderboardScoreUpdateListener>();
+#if GALAXY_BUILD_FEATURE_HAS_ILEADERBOARDRETRIEVELISTENER
 		listeners.AddListener<LeaderboardRetrieveListener>();
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_IUSERTIMEPLAYEDRETRIEVELISTENER
 		listeners.AddListener<UserTimePlayedRetrieveListener>();
+#endif
 	}
 
 	StatsImpl::~StatsImpl() {

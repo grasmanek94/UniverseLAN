@@ -25,29 +25,35 @@ namespace universelan::client {
 		virtual void OnRichPresenceChangeFailure(FailureReason failureReason);
 	};
 
+#if GALAXY_BUILD_FEATURE_ADDED_RICH_PRESENCE_LISTENERS
 	class RichPresenceListener : public IRichPresenceListener
 	{
 	public:
 		virtual void OnRichPresenceUpdated(GalaxyID userID);
 	};
+#endif
 
 	class GameJoinRequestedListener : public IGameJoinRequestedListener
 	{
 		virtual void OnGameJoinRequested(GalaxyID userID, const char* connectionString);
 	};
 
+#if GALAXY_BUILD_FEATURE_HAS_IGAMEINVITATIONRECEIVEDLISTENER
 	class GameInvitationReceivedListener : public IGameInvitationReceivedListener
 	{
 	public:
 		virtual void OnGameInvitationReceived(GalaxyID userID, const char* connectionString);
 	};
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_ISENDINVITATIONLISTENER
 	class SendInvitationListener : public ISendInvitationListener
 	{
 	public:
 		virtual void OnInvitationSendSuccess(GalaxyID userID, const char* connectionString);
 		virtual void OnInvitationSendFailure(GalaxyID userID, const char* connectionString, FailureReason failureReason);
 	};
+#endif
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 	class UserInformationRetrieveListener : public IUserInformationRetrieveListener
