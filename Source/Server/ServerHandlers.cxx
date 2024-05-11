@@ -219,7 +219,11 @@ namespace universelan::server {
 				oldest_message = chat_room->GetMessages().back()->GetID();
 			}
 
-			auto message = chat_room->AddMessage(pd->id, CHAT_MESSAGE_TYPE_CHAT_MESSAGE, data->message->GetContents());
+			auto message = chat_room->AddMessage(pd->id,
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT_MESSAGETYPE
+				data->message->GetType(),
+#endif
+				data->message->GetContents());
 
 			connection.Send(peer, SendToChatRoomMessage{ data->request_id, data->id, nullptr });
 

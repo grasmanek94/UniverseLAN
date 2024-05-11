@@ -40,7 +40,11 @@ namespace universelan {
 		const messages_t& GetMessages() const;
 		messages_t GetMessages(galaxy::api::ChatMessageID exclusive_from) const;
 		const message_t& GetMessageByIndex(uint32_t index) const;
-		message_t AddMessage(galaxy::api::GalaxyID sender, galaxy::api::ChatMessageType type, const std::string& contents);
+		message_t AddMessage(galaxy::api::GalaxyID sender,
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT_MESSAGETYPE
+			galaxy::api::ChatMessageType type,
+#endif
+			const std::string& contents);
 		message_t AddMessage(const ChatMessage& message);
 		uint32_t GetMessageCount() const;
 		uint32_t GetLongestMessage() const;

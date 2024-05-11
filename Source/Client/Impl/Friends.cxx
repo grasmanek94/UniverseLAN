@@ -295,7 +295,13 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			listener,
 #endif
-			& IFriendInvitationRespondToListener::OnFriendInvitationRespondToFailure, userID, IFriendInvitationRespondToListener::FAILURE_REASON_USER_ALREADY_FRIEND);
+			& IFriendInvitationRespondToListener::OnFriendInvitationRespondToFailure, userID,
+#if GALAXY_BUILD_FEATURE_HAS_IFRIEND_INVITEEXTRAFAILREASONS
+			IFriendInvitationRespondToListener::FAILURE_REASON_USER_ALREADY_FRIEND
+#else
+			IFriendInvitationRespondToListener::FAILURE_REASON_FRIEND_INVITATION_DOES_NOT_EXIST
+#endif
+		);
 	}
 
 	void FriendsImpl::DeleteFriend(GalaxyID userID

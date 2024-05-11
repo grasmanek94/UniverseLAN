@@ -15,7 +15,9 @@ namespace universelan::client {
 		: intf{ intf }, listeners{ intf->notification.get() },
 		chatroom_manager{}, incomming_messages_buffer{ nullptr },
 		request_chat_room_with_user_requests{},
+#if GALAXY_BUILD_FEATURE_HAS_ICHATROOMMESSAGERETRIEVELISTENER
 		request_chat_room_messages_requests{},
+#endif
 		send_to_chat_room_requests{},
 		mtx{} {}
 
@@ -79,6 +81,7 @@ namespace universelan::client {
 		}
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ICHATROOMMESSAGERETRIEVELISTENER
 	void ChatImpl::RequestChatRoomMessages(ChatRoomID chatRoomID, uint32_t limit, ChatMessageID referenceMessageID
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS
 		, IChatRoomMessagesRetrieveListener* const listener
@@ -102,11 +105,14 @@ namespace universelan::client {
 
 		intf->client->GetConnection().SendAsync(RequestChatRoomMessagesMessage{ request_id, chatRoomID, referenceMessageID });
 	}
+#endif
 
 	void ChatImpl::RequestChatRoomMessagesProcessed(const std::shared_ptr<RequestChatRoomMessagesMessage>& data) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICHAT };
 
+#if GALAXY_BUILD_FEATURE_HAS_ICHATROOMMESSAGERETRIEVELISTENER
 		IChatRoomMessagesRetrieveListener* listener = request_chat_room_messages_requests.pop(data->request_id);
+#endif
 
 		lock_t lock{ mtx };
 		auto chat_room = chatroom_manager.GetChatRoom(data->id);
@@ -128,9 +134,11 @@ namespace universelan::client {
 
 			incomming_messages_buffer = &data->messages;
 
+#if GALAXY_BUILD_FEATURE_HAS_ICHATROOMMESSAGERETRIEVELISTENER
 			listeners->NotifyAll(listener,
 				&IChatRoomMessagesRetrieveListener::OnChatRoomMessagesRetrieveSuccess,
 				data->id, (uint32_t)data->messages.size(), longest_message);
+#endif
 
 			listeners->NotifyAll(
 				&IChatRoomMessagesListener::OnChatRoomMessagesReceived,
@@ -145,10 +153,11 @@ namespace universelan::client {
 					data->id, data->oldest_message
 				));
 			}
-
+#if GALAXY_BUILD_FEATURE_HAS_ICHATROOMMESSAGERETRIEVELISTENER
 			listeners->NotifyAll(listener,
 				&IChatRoomMessagesRetrieveListener::OnChatRoomMessagesRetrieveFailure,
 				data->id, IChatRoomMessagesRetrieveListener::FAILURE_REASON_UNDEFINED);
+#endif
 		}
 	}
 
@@ -169,7 +178,11 @@ namespace universelan::client {
 
 		uint64_t request_id = MessageUniqueID::get();
 
-		SendToChatRoomMessage message{ request_id, chatRoomID, std::make_shared<ChatMessage>(CHAT_MESSAGE_TYPE_CHAT_MESSAGE, chatRoomID, intf->config->GetApiGalaxyID(), 0UL, msg) };
+		SendToChatRoomMessage message{ request_id, chatRoomID, std::make_shared<ChatMessage>(
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT_MESSAGETYPE
+			CHAT_MESSAGE_TYPE_CHAT_MESSAGE,
+#endif
+			chatRoomID, intf->config->GetApiGalaxyID(), 0UL, msg) };
 
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS
 		send_to_chat_room_requests.emplace(request_id, listener);
@@ -221,7 +234,15 @@ namespace universelan::client {
 		}
 	}
 
-	uint32_t ChatImpl::GetChatRoomMessageByIndex(uint32_t index, ChatMessageID& messageID, ChatMessageType& messageType, GalaxyID& senderID, uint32_t& sendTime, char* buffer, uint32_t bufferLength) {
+	uint32_t ChatImpl::GetChatRoomMessageByIndex(uint32_t index,
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMID_IN_INDEX
+		ChatRoomID& chatRoomID,
+#endif		
+		ChatMessageID& messageID, 
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT_MESSAGETYPE
+		ChatMessageType& messageType,
+#endif
+		GalaxyID& senderID, uint32_t& sendTime, char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICHAT };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS | tracer::Trace::HIGH_FREQUENCY_CALLS)) {
@@ -234,8 +255,13 @@ namespace universelan::client {
 		}
 
 		const auto& message = incomming_messages_buffer->at(index);
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMID_IN_INDEX
+		chatRoomID = message->GetRoom();
+#endif	
 		messageID = message->GetID();
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT_MESSAGETYPE
 		messageType = message->GetType();
+#endif
 		senderID = message->GetUser();
 		sendTime = message->GetSendTime();
 
@@ -244,7 +270,13 @@ namespace universelan::client {
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES | tracer::Trace::HIGH_FREQUENCY_CALLS)) {
 			trace.write_all(std::format(
 				"messageID: {} messageType: {} senderID: {} sendTime: {} buffer: {}",
-				messageID, magic_enum::enum_name(messageType), senderID, sendTime, contents
+				messageID, 
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT_MESSAGETYPE
+				magic_enum::enum_name(messageType),
+#else 
+				0,
+#endif
+				senderID, sendTime, contents
 			));
 		}
 
@@ -307,6 +339,7 @@ namespace universelan::client {
 		}
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ICHATROOMMESSAGERETRIEVELISTENER
 	uint32_t ChatImpl::GetChatRoomUnreadMessageCount(ChatRoomID chatRoomID) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICHAT };
 
@@ -333,6 +366,7 @@ namespace universelan::client {
 			return 0;
 		}
 	}
+#endif
 
 	void ChatImpl::MarkChatRoomAsRead(ChatRoomID chatRoomID) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICHAT };

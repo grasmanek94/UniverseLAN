@@ -72,10 +72,18 @@ namespace universelan {
 		return members.find(id) != members.end();
 	}
 
-	ChatRoom::message_t ChatRoom::AddMessage(GalaxyID sender, ChatMessageType type, const std::string& contents)
+	ChatRoom::message_t ChatRoom::AddMessage(GalaxyID sender,
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT_MESSAGETYPE
+		ChatMessageType type,
+#endif
+		const std::string& contents)
 	{
 		uint32_t send_time = (uint32_t)(std::chrono::system_clock::now().time_since_epoch() / std::chrono::seconds(1));
-		message_t message = std::make_shared<ChatMessage>(type, id, sender, send_time, contents);
+		message_t message = std::make_shared<ChatMessage>(
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT_MESSAGETYPE
+			type,
+#endif
+			id, sender, send_time, contents);
 
 		if (contents.size() > longest_message) {
 			longest_message = (uint32_t)contents.size();
@@ -129,5 +137,5 @@ namespace universelan {
 	uint32_t ChatRoom::GetUnreadCount() const {
 		return (uint32_t)(messages.size() - read_messages);
 	}
-}
+	}
 #endif

@@ -69,6 +69,7 @@ namespace universelan::client {
 		}
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_ICHATROOMMESSAGERETRIEVELISTENER
 	void ChatRoomMessagesRetrieveListener::OnChatRoomMessagesRetrieveSuccess(ChatRoomID chatRoomID, uint32_t messageCount, uint32_t longestMessageLenght)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -89,5 +90,6 @@ namespace universelan::client {
 			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
 		}
 	}
+#endif
 }
 #endif

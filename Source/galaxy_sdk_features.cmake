@@ -88,8 +88,10 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
 
   afvd(HAS_ICHAT 								1.104.3					)
   afvd(NEW_FRIEND_FEATURES_104_3				1.104.3					)
+  afvd(HAS_ICHAT_ROOMID_IN_INDEX				1.104.3		1.104.4		)
 
   afvd(HAS_FRIENDADDLISTENER					1.104.4					)
+  afvd(HAS_IFRIEND_INVITEEXTRAFAILREASONS		1.104.4					)
 
   afvd(GALAXYID_HAS_IDTYPE 						1.106.0					)
 
@@ -97,6 +99,8 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
   afvd(FIND_USER 								1.109.0					)
   afvd(HAS_ICHATROOMMESSAGERETRIEVELISTENER		1.109.0					)
   afvd(HAS_IUSERFINDLISTENER            		1.109.0					)
+
+  afvd(HAS_ICHAT_MESSAGETYPE            		1.110.0					)
 
   afvd(HAS_NAT_FUNCTIONALITY 					1.113.0					)
   afvd(HAS_USERDATAINFOAVAILABLE 				1.113.2					)

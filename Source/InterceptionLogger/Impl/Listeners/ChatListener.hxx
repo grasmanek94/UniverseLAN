@@ -27,12 +27,14 @@ namespace universelan::client {
 		virtual void OnChatRoomMessagesReceived(ChatRoomID chatRoomID, uint32_t messageCount, uint32_t longestMessageLenght);
 	};
 
+#if GALAXY_BUILD_FEATURE_HAS_ICHATROOMMESSAGERETRIEVELISTENER
 	class ChatRoomMessagesRetrieveListener : public IChatRoomMessagesRetrieveListener
 	{
 	public:
 		virtual void OnChatRoomMessagesRetrieveSuccess(ChatRoomID chatRoomID, uint32_t messageCount, uint32_t longestMessageLenght);
 		virtual void OnChatRoomMessagesRetrieveFailure(ChatRoomID chatRoomID, FailureReason failureReason);
 	};
+#endif
 }
 
 #endif

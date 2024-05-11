@@ -45,7 +45,9 @@ namespace universelan::client {
 		ChatRoom::messages_t* incomming_messages_buffer;
 
 		ListenersRequestHelper<IChatRoomWithUserRetrieveListener*> request_chat_room_with_user_requests;
+#if GALAXY_BUILD_FEATURE_HAS_ICHATROOMMESSAGERETRIEVELISTENER
 		ListenersRequestHelper<IChatRoomMessagesRetrieveListener*> request_chat_room_messages_requests;
+#endif
 		ListenersRequestHelper<IChatRoomMessageSendListener*> send_to_chat_room_requests;
 
 		mutex_t mtx;
@@ -70,6 +72,7 @@ namespace universelan::client {
 #endif
 		) override;
 
+#if GALAXY_BUILD_FEATURE_HAS_ICHATROOMMESSAGERETRIEVELISTENER
 		/**
 		 * Retrieves historical messages in a specified chat room.
 		 *
@@ -90,6 +93,7 @@ namespace universelan::client {
 			, IChatRoomMessagesRetrieveListener* const listener = NULL
 #endif
 		) override;
+#endif
 
 		/**
 		 * Sends a message to a chat room.
@@ -137,7 +141,15 @@ namespace universelan::client {
 		 * @param [in] bufferLength The size of the output buffer.
 		 * @return Actual message size in bytes.
 		 */
-		virtual uint32_t GetChatRoomMessageByIndex(uint32_t index, ChatMessageID& messageID, ChatMessageType& messageType, GalaxyID& senderID, uint32_t& sendTime, char* buffer, uint32_t bufferLength) override;
+		virtual uint32_t GetChatRoomMessageByIndex(uint32_t index, 
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMID_IN_INDEX
+			ChatRoomID& chatRoomID,
+#endif
+			ChatMessageID& messageID, 
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT_MESSAGETYPE
+			ChatMessageType& messageType, 
+#endif
+			GalaxyID& senderID, uint32_t& sendTime, char* buffer, uint32_t bufferLength) override;
 
 		/**
 		 * Returns the number of users in a specified chat room.
@@ -158,6 +170,7 @@ namespace universelan::client {
 		 */
 		virtual GalaxyID GetChatRoomMemberUserIDByIndex(ChatRoomID chatRoomID, uint32_t index) override;
 
+#if GALAXY_BUILD_FEATURE_HAS_ICHATROOMMESSAGERETRIEVELISTENER
 		/**
 		 * Returns the number of unread messages in a specified chat room.
 		 *
@@ -167,6 +180,7 @@ namespace universelan::client {
 		 * @return The number of unread messages in the chat room.
 		 */
 		virtual uint32_t GetChatRoomUnreadMessageCount(ChatRoomID chatRoomID) override;
+#endif
 
 		/**
 		 * Marks a specified chat room as read.
