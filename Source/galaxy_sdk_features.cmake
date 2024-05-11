@@ -62,6 +62,7 @@ function(add_feature_definitions_to_target TARGET MAJOR MINOR PATCH)
   afvd(HAS_IUSERTIMEPLAYEDRETRIEVELISTENER		1.76.0					)
   
   afvd(HAS_SIGNIN_PS4							1.77.0		1.132.1		)
+  afvd(HAS_SIGNIN_REQUIREONLINE					1.77.0					)
 
   afvd(HAS_PERSONASTATE_ENUM					1.78.0					)
   afvd(HAS_LOBBYTOPOLOGYTYPE_ENUM				1.78.0					)

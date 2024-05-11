@@ -71,7 +71,7 @@ namespace universelan::client {
 		using mutex_t = std::recursive_mutex;
 		using lock_t = std::scoped_lock<mutex_t>;
 
-#if GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINSTEAM
+#if GALAXY_BUILD_FEATURE_HAS_SIGNIN_REQUIREONLINE
 		using SignInDataPtr_T = void;
 #else
 		using SignInDataPtr_T = char;
@@ -182,7 +182,7 @@ namespace universelan::client {
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void USER_SIGN_IN_GALAXY(
-#if GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINSTEAM
+#if GALAXY_BUILD_FEATURE_HAS_SIGNIN_REQUIREONLINE
 			bool requireOnline = false
 #endif
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
