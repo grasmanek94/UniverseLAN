@@ -22,7 +22,6 @@ public:
 	}
 
 	static void add(galaxy::api::IGalaxyListener* real, galaxy::api::IGalaxyListener* proxy);
-	static void remove(galaxy::api::IGalaxyListener* real);
 	static galaxy::api::IGalaxyListener* pop(galaxy::api::IGalaxyListener* real);
 };
 
@@ -46,6 +45,6 @@ private: \
 	if (target) { \
 		trace.write_all(std::format("listener: {}", (void*)target)); \
 		target->func; \
-		ProxifySyncHandler::remove(target); \
+		ProxifySyncHandler::pop(target); \
 		delete this; \
 	}

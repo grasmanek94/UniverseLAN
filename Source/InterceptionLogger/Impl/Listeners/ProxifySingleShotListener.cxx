@@ -13,13 +13,6 @@ void ProxifySyncHandler::add(galaxy::api::IGalaxyListener* real, galaxy::api::IG
 	_this->proxify.emplace(real, proxy);
 }
 
-void ProxifySyncHandler::remove(galaxy::api::IGalaxyListener* real) {
-	ProxifySyncHandler* _this = ProxifySyncHandler::get();
-
-	lock_t lock{ _this->mtx_proxify };
-	_this->proxify.erase(real);
-}
-
 galaxy::api::IGalaxyListener* ProxifySyncHandler::pop(galaxy::api::IGalaxyListener* real) {
 	ProxifySyncHandler* _this = ProxifySyncHandler::get();
 
@@ -28,6 +21,7 @@ galaxy::api::IGalaxyListener* ProxifySyncHandler::pop(galaxy::api::IGalaxyListen
 	if (it == _this->proxify.end()) {
 		return nullptr;
 	}
+
 	galaxy::api::IGalaxyListener* ret = it->second;
 	_this->proxify.erase(it);
 
