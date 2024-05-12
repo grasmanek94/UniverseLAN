@@ -59,8 +59,12 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
-		lock_t lock{ listeners[listenerType].mtx };
-		listeners[listenerType].set.erase(listener);
+		{
+			lock_t lock{ listeners[listenerType].mtx };
+			listeners[listenerType].set.erase(listener);
+		}
+
+		request_helpers[listenerType].unregister(listener);
 	}
 
 	bool ListenerRegistrarImpl::ExecuteForListenerType(ListenerType listenerType, std::function<void(const std::set<IGalaxyListener*>& listeners)> code)

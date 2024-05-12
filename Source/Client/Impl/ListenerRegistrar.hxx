@@ -19,10 +19,12 @@
 #include <IListenerRegistrar.h>
 #include <GalaxyApi.h>
 
+#include <any>
 #include <array>
 #include <concepts>
 #include <format>
 #include <functional>
+#include <memory>
 #include <mutex>
 #include <optional>
 #include <set>
@@ -46,10 +48,13 @@ namespace universelan::client {
 	 */
 	class ListenerRegistrarImpl : public IListenerRegistrar
 	{
-	private:
+	public:
 		using mutex_t = std::recursive_mutex;
 		using lock_t = std::scoped_lock<mutex_t>;
 		using listener_set = std::set<IGalaxyListener*>;
+		using request_helper_entry_t = std::pair<IGalaxyListener*, std::any>;
+		using request_helper_map_t = std::unordered_map<uint64_t, request_helper_entry_t>;
+		using unregister_helper_map_t = std::unordered_map<IGalaxyListener*, uint64_t>;
 
 		struct data {
 
@@ -60,9 +65,83 @@ namespace universelan::client {
 			{}
 		};
 
+		struct InternalRequestHelper {
+			mutex_t mtx;
+			request_helper_map_t requests;
+			unregister_helper_map_t listeners;
+
+			inline InternalRequestHelper() : mtx{}, requests{}, listeners{} {}
+
+			inline void run_locked(std::function<void()> func) {
+				lock_t lock{ mtx };
+				func();
+			}
+
+			template <typename U=void>
+			bool emplace(uint64_t request_id, IGalaxyListener* listener, std::shared_ptr<U> extra = nullptr) {
+				lock_t lock{ mtx };
+				if (!requests.emplace(request_id, request_helper_entry_t{ listener, std::any(extra) }).second) {
+					return false;
+				}
+
+				listeners.emplace(listener, request_id);
+				return true;
+			}
+
+			template <typename T>
+			bool pop(uint64_t request_id, T*& listener) {
+				lock_t lock{ mtx };
+				auto it = requests.find(request_id);
+				if (it == requests.end()) {
+					listener = nullptr;
+					return false;
+				}
+
+				listener = (T*)it->second.first;
+
+				listeners.erase(it->second.first);
+				requests.erase(it);
+
+				return true;
+			}
+
+			template <typename T, typename U>
+			bool pop(uint64_t request_id, T*& listener, std::shared_ptr<U>& extra) {
+				lock_t lock{ mtx };
+				auto it = requests.find(request_id);
+				if (it == requests.end()) {
+					listener = nullptr;
+					return false;
+				}
+
+				listener = (T*)it->second.first;
+				extra = std::any_cast<std::shared_ptr<U>>(it->second.second);
+
+				listeners.erase(it->second.first);
+				requests.erase(it);
+
+				return true;
+			}
+
+			inline bool unregister(IGalaxyListener* listener) {
+				lock_t lock{ mtx };
+				auto it = listeners.find(listener);
+				if (it == listeners.end()) {
+					return false;
+				}
+
+				requests.erase(it->second);
+				listeners.erase(it);
+
+				return true;
+			}
+		};
+
+	private:
 		InterfaceInstances* intf;
 		DelayRunner* delay_runner;
 		std::array<data, LISTENER_TYPE_END> listeners;
+		std::array<InternalRequestHelper, LISTENER_TYPE_END> request_helpers;
 
 	public:
 
@@ -240,6 +319,39 @@ namespace universelan::client {
 			delay_runner->Add(std::bind_front([this](auto&&... args) {
 				this->NotifyAllNowSpecificOnly(std::forward<decltype(args)>(args)...);
 				}, notification_param_extend_life<decltype(Arguments)>(std::move(Arguments))...));
+		}
+
+		template <typename T, typename U=void>
+		bool AddRequestListener(uint64_t request_id, T* listener, std::shared_ptr<U> extra = nullptr) {
+			if (listener == nullptr) {
+				return false;
+			}
+
+			auto listener_type_id = (ListenerType)T::GetListenerType();
+
+			return request_helpers[listener_type_id].emplace(request_id, listener, extra);
+		}
+
+		template <typename T>
+		bool PopRequestListener(uint64_t request_id, T*& listener) {
+			if (listener == nullptr) {
+				return false;
+			}
+
+			auto listener_type_id = (ListenerType)T::GetListenerType();
+
+			return request_helpers[listener_type_id].pop(request_id, listener);
+		}
+
+		template <typename T, typename U>
+		bool PopRequestListener(uint64_t request_id, T*& listener, std::shared_ptr<U>& extra) {
+			if (listener == nullptr) {
+				return false;
+			}
+
+			auto listener_type_id = (ListenerType)T::GetListenerType();
+
+			return request_helpers[listener_type_id].pop(request_id, listener, extra);
 		}
 	};
 
