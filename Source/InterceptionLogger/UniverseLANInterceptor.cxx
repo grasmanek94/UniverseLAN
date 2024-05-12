@@ -14,6 +14,9 @@
 #include <filesystem>
 #include <memory>
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 /*
   x86 Factory:
 
@@ -142,6 +145,9 @@ namespace universelan::client {
 #endif
 			}
 			catch (const IError& error) {
+#ifdef _WIN32
+				MessageBoxA(NULL, error.GetMsg(), error.GetName(), 0);
+#endif
 				std::cerr << "Error: " << error.GetMsg() << std::endl;
 			}
 		};
