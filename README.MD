@@ -119,7 +119,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | River City Ransom - Underground           | :white_check_mark:(2)     | 1.104.2                       | Tested with build 399 |
 | Warhammer 40K - Dakka Squadron Flyboyz Ed.| :white_check_mark:(2)     | 1.144.1                       | Tested with build 421 |
 | Star Wars Battlefront II (Classic, 2005)  | :white_check_mark:(2)/:construction: | 1.112.2            | There are no lobbies visible on the internet tab, but using UniverseLAN does unlock the LAN tab option when you don't have internet access. |
-| Battlestar Galactica Deadlock             | :construction:            | 1.114.9                       | Can host lobby, join, start loading but stuck in loading screen at ~95% | 
+| Battlestar Galactica Deadlock             | :white_check_mark:(2)     | 1.114.9                       | Tested with build 423 | 
 | Driftland - The Magic Revival             | :construction:            | 1.133.6                       | Can create a lobby, doesn't crash now, but the joining player returns to main menu after trying to join |
 | Serious Sams Bogus Detour                 | :construction:            | 1.100.2                       | Can join lobby since build 360 and start game, but both players stuck on black "Loading..." screen |
 | Niffelheim                                | :construction:            | 1.139.2                       | Stuck at "Loading..." (save transfer?) | 
