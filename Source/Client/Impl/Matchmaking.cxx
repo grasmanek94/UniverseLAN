@@ -424,10 +424,8 @@ namespace universelan::client {
 	void MatchmakingImpl::SetLobbyMaxMembersProcessed(const std::shared_ptr<SetLobbyMaxMembersMessage>& data) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
 
-		uint64_t request_id = MessageUniqueID::get();
-
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-		auto listener = set_max_lobby_members_requests.pop(request_id);
+		auto listener = set_max_lobby_members_requests.pop(data->request_id);
 #endif
 
 		if (data->success) {
@@ -516,10 +514,8 @@ namespace universelan::client {
 	void MatchmakingImpl::SetLobbyTypeProcessed(const std::shared_ptr<SetLobbyTypeMessage>& data) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
 
-		uint64_t request_id = MessageUniqueID::get();
-
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-		auto listener = set_lobby_type_requests.pop(request_id);
+		auto listener = set_lobby_type_requests.pop(data->request_id);
 #endif
 
 		if (data->success) {
@@ -582,10 +578,8 @@ namespace universelan::client {
 	void MatchmakingImpl::SetLobbyJoinableProcessed(const std::shared_ptr<SetLobbyJoinableMessage>& data) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
 
-		uint64_t request_id = MessageUniqueID::get();
-
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-		auto listener = set_lobby_joinable_requests.pop(request_id);
+		auto listener = set_lobby_joinable_requests.pop(data->request_id);
 #endif
 
 		if (data->success) {
