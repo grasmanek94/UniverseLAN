@@ -51,6 +51,7 @@ namespace universelan::client {
 		auto ptr = ProxifySyncHandler::pop(listener);
 		if (ptr) {
 			intf()->Unregister(listenerType, ptr);
+			delete ptr;
 		}
 
 		intf()->Unregister(listenerType, listener);
