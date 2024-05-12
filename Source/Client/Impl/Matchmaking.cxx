@@ -1029,5 +1029,4 @@ namespace universelan::client {
 
 		listeners->NotifyAll(&ILobbyOwnerChangeListener::OnLobbyOwnerChanged, data->lobby_id, data->member_id);
 	}
-
 }
