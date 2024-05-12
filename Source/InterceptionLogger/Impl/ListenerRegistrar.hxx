@@ -8,6 +8,9 @@
 
 #include <stdint.h>
 
+#include <mutex>
+#include <unordered_map>
+
 namespace universelan::client {
 	using namespace galaxy::api;
 

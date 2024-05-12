@@ -1,4 +1,30 @@
 #pragma once
+#include <IListenerRegistrar.h>
+
+#include <mutex>
+#include <unordered_map>
+
+class ProxifySyncHandler {
+public:
+	using mutex_t = std::recursive_mutex;
+	using lock_t = std::scoped_lock<mutex_t>;
+
+private:
+	mutex_t mtx_proxify;
+	std::unordered_map<galaxy::api::IGalaxyListener*, galaxy::api::IGalaxyListener*> proxify;
+
+	ProxifySyncHandler();
+
+public:
+	static ProxifySyncHandler* get() {
+		static ProxifySyncHandler instance;
+		return &instance;
+	}
+
+	static void add(galaxy::api::IGalaxyListener* real, galaxy::api::IGalaxyListener* proxy);
+	static void remove(galaxy::api::IGalaxyListener* real);
+	static galaxy::api::IGalaxyListener* pop(galaxy::api::IGalaxyListener* real);
+};
 
 #define IMPLEMENT_PROXY_ENCAPSULATE_FUNC_FOR(class_type, listener_type) \
 public: \
@@ -10,6 +36,7 @@ public: \
 		} \
 		class_type* proxy = new class_type(); \
 		proxy->target = listener; \
+		ProxifySyncHandler::add(proxy->target, proxy); \
 		return proxy; \
 	} \
 private: \
@@ -19,5 +46,6 @@ private: \
 	if (target) { \
 		trace.write_all(std::format("listener: {}", (void*)target)); \
 		target->func; \
+		ProxifySyncHandler::remove(target); \
 		delete this; \
 	}

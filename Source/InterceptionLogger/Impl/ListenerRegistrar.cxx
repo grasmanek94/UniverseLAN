@@ -4,9 +4,12 @@
 #include <Tracer.hxx>
 #include <SafeStringCopy.hxx>
 
+#include "Listeners/ProxifySingleShotListener.hxx"
+
 #include <magic_enum/magic_enum.hpp>
 
 #include <format>
+#include <mutex>
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -43,6 +46,11 @@ namespace universelan::client {
 			trace.write_all(std::format("listenerType: {}", listenerType));
 #endif
 			trace.write_all(std::format("listener: {}", (void*)listener));
+		}
+
+		auto ptr = ProxifySyncHandler::pop(listener);
+		if (ptr) {
+			intf()->Unregister(listenerType, ptr);
 		}
 
 		intf()->Unregister(listenerType, listener);
