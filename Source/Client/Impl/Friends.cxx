@@ -153,6 +153,10 @@ namespace universelan::client {
 	PersonaState FriendsImpl::GetFriendPersonaState(GalaxyID userID) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
+		if (userID == intf->user->GetGalaxyID()) {
+			return GetPersonaState();
+		}
+
 		lock_t lock(mtx_online_friends);
 		return (online_friends.find(userID) != online_friends.end()) ?
 			PERSONA_STATE_ONLINE :
