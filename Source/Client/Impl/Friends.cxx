@@ -11,13 +11,7 @@ namespace universelan::client {
 	using namespace galaxy::api;
 	FriendsImpl::FriendsImpl(InterfaceInstances* intf) :
 		intf{ intf }, listeners{ intf->notification.get() },
-#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-		user_information_requests{},
-		retrieve_rich_presence_requests{},
-#endif
-		rich_presence_change_requests{},
-		avatar_criteria{ 0 },
-		online_friends{}
+		avatar_criteria{ 0 }, online_friends{}
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 	}
@@ -63,7 +57,7 @@ namespace universelan::client {
 			uint64_t request_id = MessageUniqueID::get();
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			user_information_requests.emplace(request_id, listener);
+			listeners->AddRequestListener(request_id, listener);
 #endif
 
 			intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ RequestSpecificUserDataMessage::RequestTypeFriends, request_id, userID });
@@ -75,7 +69,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-		IUserInformationRetrieveListener* listener = user_information_requests.pop(data->request_id);
+		IUserInformationRetrieveListener* listener = nullptr;
+		listeners->PopRequestListener(data->request_id, listener);
 #endif
 
 		if (data->found) {
@@ -339,7 +334,7 @@ namespace universelan::client {
 		uint64_t request_id = MessageUniqueID::get();
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-		rich_presence_change_requests.emplace(request_id, listener);
+		listeners->AddRequestListener(request_id, listener);
 #endif
 
 		intf->client->GetConnection().SendAsync(RichPresenceChangeMessage{ request_id, 0, RichPresenceChangeMessage::ACTION_SET, key, value });
@@ -359,7 +354,7 @@ namespace universelan::client {
 		uint64_t request_id = MessageUniqueID::get();
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-		rich_presence_change_requests.emplace(request_id, listener);
+		listeners->AddRequestListener(request_id, listener);
 #endif
 
 		intf->client->GetConnection().SendAsync(RichPresenceChangeMessage{ request_id, 0, RichPresenceChangeMessage::ACTION_DELETE, key });
@@ -377,7 +372,7 @@ namespace universelan::client {
 		uint64_t request_id = MessageUniqueID::get();
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-		rich_presence_change_requests.emplace(request_id, listener);
+		listeners->AddRequestListener(request_id, listener);
 #endif
 
 		intf->client->GetConnection().SendAsync(RichPresenceChangeMessage{ request_id, 0, RichPresenceChangeMessage::ACTION_CLEAR });
@@ -387,7 +382,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
 		if (intf->config->IsSelfUserID(data->id)) {
-			IRichPresenceChangeListener* listener = rich_presence_change_requests.pop(data->request_id);
+			IRichPresenceChangeListener* listener = nullptr;
+			listeners->PopRequestListener(data->request_id, listener);
 
 			if (data->success) {
 				listeners->NotifyAll(listener, &IRichPresenceChangeListener::OnRichPresenceChangeSuccess);
@@ -440,7 +436,7 @@ namespace universelan::client {
 		else {
 			uint64_t request_id = MessageUniqueID::get();
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			retrieve_rich_presence_requests.emplace(request_id, listener);
+			listeners->AddRequestListener(request_id, listener);
 #endif
 
 			intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ RequestSpecificUserDataMessage::RequestTypeRichPresence, request_id, userID });
@@ -502,7 +498,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-		IRichPresenceRetrieveListener* listener = retrieve_rich_presence_requests.pop(data->request_id);
+		IRichPresenceRetrieveListener* listener = nullptr;
+		listeners->PopRequestListener(data->request_id, listener);
 #endif
 
 		if (data->found) {

@@ -40,12 +40,6 @@ namespace universelan::client {
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
 
-		ListenersRequestHelper<IUserStatsAndAchievementsRetrieveListener*> specific_user_stats_and_achievements_requests;
-
-#if GALAXY_BUILD_FEATURE_HAS_IUSERTIMEPLAYEDRETRIEVELISTENER
-		ListenersRequestHelper<IUserTimePlayedRetrieveListener*> specific_user_time_played_requests;
-#endif
-
 	public:
 		StatsImpl(InterfaceInstances* intf);
 		virtual ~StatsImpl();

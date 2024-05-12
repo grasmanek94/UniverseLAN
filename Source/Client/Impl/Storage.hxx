@@ -36,11 +36,6 @@ namespace universelan::client {
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
 
-#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
-		ListenersRequestHelper<IFileShareListener*> file_upload_requests;
-		ListenersRequestHelper<ISharedFileDownloadListener*> file_download_requests;
-#endif
-
 		SharedFileUtils* sfu;
 
 	public:

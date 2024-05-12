@@ -14,9 +14,6 @@ namespace universelan::client {
 
 	StorageImpl::StorageImpl(InterfaceInstances* intf) :
 		intf{ intf }, listeners{ intf->notification.get() },
-#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
-		file_upload_requests{}, file_download_requests{},
-#endif
 		sfu(intf->sfu.get())
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
@@ -133,7 +130,7 @@ namespace universelan::client {
 			uint64_t request_id = MessageUniqueID::get();
 
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
-			file_upload_requests.emplace(request_id, listener);
+			listeners->AddRequestListener(request_id, listener);
 #endif
 			intf->client->GetConnection().SendAsync(FileShareMessage{ request_id, str_file_name, sfu->Read(sfu->storage, str_file_name.c_str()) });
 			}).detach(); // due to this detach
@@ -158,7 +155,7 @@ namespace universelan::client {
 		uint64_t request_id = MessageUniqueID::get();
 
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
-		file_download_requests.emplace(request_id, listener);
+		listeners->AddRequestListener(request_id, listener);
 #endif
 
 		intf->client->GetConnection().SendAsync(FileRequestMessage{ request_id, sharedFileID });
@@ -223,7 +220,8 @@ namespace universelan::client {
 		}
 
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
-		ISharedFileDownloadListener* listener = file_download_requests.pop(data->request_id);
+		ISharedFileDownloadListener* listener = nullptr;
+		listeners->PopRequestListener(data->request_id, listener);
 #endif
 
 		if (data->data.size() > 0) {
@@ -253,7 +251,8 @@ namespace universelan::client {
 		}
 
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
-		IFileShareListener* listener = file_upload_requests.pop(data->request_id);
+		IFileShareListener* listener = nullptr;
+		listeners->PopRequestListener(data->request_id, listener);
 #endif
 
 		if (data->id != 0) {

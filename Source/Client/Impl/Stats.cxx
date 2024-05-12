@@ -7,11 +7,7 @@
 namespace universelan::client {
 	using namespace galaxy::api;
 	StatsImpl::StatsImpl(InterfaceInstances* intf) :
-		intf{ intf }, listeners{ intf->notification.get() },
-		specific_user_stats_and_achievements_requests{}
-#if GALAXY_BUILD_FEATURE_HAS_IUSERTIMEPLAYEDRETRIEVELISTENER
-		,specific_user_time_played_requests{}
-#endif
+		intf{ intf }, listeners{ intf->notification.get() }
 	{
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 	}
@@ -39,7 +35,7 @@ namespace universelan::client {
 			uint64_t request_id = MessageUniqueID::get();
 
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			specific_user_stats_and_achievements_requests.emplace(request_id, listener);
+			listeners->AddRequestListener(request_id, listener);
 #endif
 
 			intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ RequestSpecificUserDataMessage::RequestTypeAchievementsAndStats, request_id, userID });
@@ -49,7 +45,8 @@ namespace universelan::client {
 	void StatsImpl::SpecificUserStatsAndAchievementsRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
-		IUserStatsAndAchievementsRetrieveListener* listener = specific_user_stats_and_achievements_requests.pop(data->request_id);
+		IUserStatsAndAchievementsRetrieveListener* listener = nullptr;
+		listeners->PopRequestListener(data->request_id, listener);
 
 		if (data->found) {
 			auto entry = intf->user->GetGalaxyUserData(data->id);
@@ -431,7 +428,7 @@ namespace universelan::client {
 			uint64_t request_id = MessageUniqueID::get();
 
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			specific_user_time_played_requests.emplace(request_id, listener);
+			listeners->AddRequestListener(request_id, listener);
 #endif
 
 			intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ RequestSpecificUserDataMessage::RequestTypePlayTime, request_id, userID });
@@ -449,7 +446,8 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 #if GALAXY_BUILD_FEATURE_HAS_IUSERTIMEPLAYEDRETRIEVELISTENER
-		IUserTimePlayedRetrieveListener* listener = specific_user_time_played_requests.pop(data->request_id);
+		IUserTimePlayedRetrieveListener* listener = nullptr;
+		listeners->PopRequestListener(data->request_id, listener);
 #endif
 
 		if (data->found) {
@@ -462,9 +460,6 @@ namespace universelan::client {
 		else {
 			listeners->NotifyAll(listener, &IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveFailure, data->id, IUserTimePlayedRetrieveListener::FAILURE_REASON_UNDEFINED);
 #endif
-
 		}
 	}
-
-
 }

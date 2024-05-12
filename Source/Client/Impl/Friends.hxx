@@ -62,13 +62,6 @@ namespace universelan::client {
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
 
-#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-		ListenersRequestHelper<IUserInformationRetrieveListener*> user_information_requests;
-		ListenersRequestHelper<IRichPresenceRetrieveListener*> retrieve_rich_presence_requests;
-#endif
-
-		ListenersRequestHelper<IRichPresenceChangeListener*> rich_presence_change_requests;
-
 		AvatarCriteriaImpl avatar_criteria;
 
 		mutable mutex_t mtx_online_friends;

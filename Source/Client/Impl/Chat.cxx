@@ -14,11 +14,6 @@ namespace universelan::client {
 	ChatImpl::ChatImpl(InterfaceInstances* intf)
 		: intf{ intf }, listeners{ intf->notification.get() },
 		chatroom_manager{}, incomming_messages_buffer{ nullptr },
-		request_chat_room_with_user_requests{},
-#if GALAXY_BUILD_FEATURE_HAS_ICHATROOMMESSAGERETRIEVELISTENER
-		request_chat_room_messages_requests{},
-#endif
-		send_to_chat_room_requests{},
 		mtx{} {}
 
 	ChatImpl::~ChatImpl() {}
@@ -41,7 +36,7 @@ namespace universelan::client {
 		}
 
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS
-		request_chat_room_with_user_requests.emplace(request_id, listener);
+		listeners->AddRequestListener(request_id, listener);
 #endif
 
 		intf->client->GetConnection().SendAsync(RequestChatRoomWithUserMessage{ request_id, userID });
@@ -50,7 +45,8 @@ namespace universelan::client {
 	void ChatImpl::RequestChatRoomWithUserProcessed(const std::shared_ptr<RequestChatRoomWithUserMessage>& data) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICHAT };
 
-		IChatRoomWithUserRetrieveListener* listener = request_chat_room_with_user_requests.pop(data->request_id);
+		IChatRoomWithUserRetrieveListener* listener = nullptr;
+		listeners->PopRequestListener(data->request_id, listener);
 
 		bool success{ false };
 		{
@@ -100,7 +96,7 @@ namespace universelan::client {
 		uint64_t request_id = MessageUniqueID::get();
 
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS
-		request_chat_room_messages_requests.emplace(request_id, listener);
+		listeners->AddRequestListener(request_id, listener);
 #endif
 
 		intf->client->GetConnection().SendAsync(RequestChatRoomMessagesMessage{ request_id, chatRoomID, referenceMessageID });
@@ -111,7 +107,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICHAT };
 
 #if GALAXY_BUILD_FEATURE_HAS_ICHATROOMMESSAGERETRIEVELISTENER
-		IChatRoomMessagesRetrieveListener* listener = request_chat_room_messages_requests.pop(data->request_id);
+		IChatRoomMessagesRetrieveListener* listener = nullptr;
+		listeners->PopRequestListener(data->request_id, listener);
 #endif
 
 		lock_t lock{ mtx };
@@ -186,7 +183,7 @@ namespace universelan::client {
 			chatRoomID, intf->config->GetApiGalaxyID(), 0UL, msg) };
 
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS
-		send_to_chat_room_requests.emplace(request_id, listener);
+		listeners->AddRequestListener(request_id, listener);
 #endif
 
 		intf->client->GetConnection().SendAsync(message);
@@ -198,7 +195,8 @@ namespace universelan::client {
 	void ChatImpl::SendChatRoomMessageProcessed(const std::shared_ptr<SendToChatRoomMessage>& data) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICHAT };
 
-		IChatRoomMessageSendListener* listener = send_to_chat_room_requests.pop(data->request_id);
+		IChatRoomMessageSendListener* listener = nullptr;
+		listeners->PopRequestListener(data->request_id, listener);
 
 		if (data->message) {
 			{

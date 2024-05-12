@@ -90,10 +90,6 @@ namespace universelan::client {
 
 		void RunForAllWaitingAuthListeners(std::function<void(IGalaxyListener*)> function);
 
-#if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
-		ListenersRequestHelper<ISpecificUserDataListener*> specific_user_data_requests;
-#endif
-
 	public:
 
 		UserImpl(InterfaceInstances* intf);

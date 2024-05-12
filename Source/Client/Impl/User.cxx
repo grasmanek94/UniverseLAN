@@ -24,9 +24,6 @@ namespace universelan::client {
 		mtx_user_data{}, intf{ intf },
 		listeners{ intf->notification.get() },
 		user_data{}, logged_on{ false }, connected{ false },
-#if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
-		specific_user_data_requests{},
-#endif
 		waiting_auth_listeners{}
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
@@ -278,7 +275,7 @@ namespace universelan::client {
 			uint64_t request_id = MessageUniqueID::get();
 
 #if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
-			specific_user_data_requests.emplace(request_id, listener);
+			listeners->AddRequestListener(request_id, listener);
 #endif
 
 			intf->client->GetConnection().SendAsync(RequestSpecificUserDataMessage{ RequestSpecificUserDataMessage::RequestTypeUserData, request_id, userID });
@@ -289,7 +286,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 #if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
-		ISpecificUserDataListener* listener = specific_user_data_requests.pop(data->request_id);
+		ISpecificUserDataListener* listener = nullptr;
+		listeners->PopRequestListener(data->request_id, listener);
 #endif
 
 		if (data->found) {

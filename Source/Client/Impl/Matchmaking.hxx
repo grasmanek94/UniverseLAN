@@ -79,25 +79,6 @@ namespace universelan::client {
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
 
-		ListenersRequestHelper<ILobbyCreatedListener*> create_lobby_requests;
-		ListenersRequestHelper<ILobbyEnteredListener*> create_lobby_entered_requests;
-		ListenersRequestHelper<ILobbyListListener*> list_lobbies_requests;
-		ListenersRequestHelper<ILobbyEnteredListener*> join_lobby_requests;
-		ListenersRequestHelper<ILobbyLeftListener*> leave_lobby_requests;
-
-#if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-		ListenersRequestHelper<ILobbyDataUpdateListener*> set_max_lobby_members_requests;
-		ListenersRequestHelper<ILobbyDataUpdateListener*> set_lobby_type_requests;
-		ListenersRequestHelper<ILobbyDataUpdateListener*> set_lobby_joinable_requests;
-		ListenersRequestHelper<ILobbyDataUpdateListener*> set_lobby_data_requests;
-		ListenersRequestHelper<ILobbyMemberDataUpdateListener*> set_lobby_member_data_requests;
-#endif
-
-#if GALAXY_BUILD_FEATURE_HAS_ILOBBYDATARETRIEVELISTENER
-		ListenersRequestHelper<ILobbyDataRetrieveListener*> get_lobby_data_requests;
-#endif
-
-
 		mutex_t mtx;
 		LobbyManager::lobbies_t lobby_list;
 		LobbyFilters lobby_list_filters;
