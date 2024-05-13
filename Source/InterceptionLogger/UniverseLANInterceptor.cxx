@@ -165,10 +165,10 @@ namespace universelan::client {
 		user = std::make_unique<UserImpl>(std::bind(&IGalaxy::GetUser, real_igalaxy_instance), real_notification, config.get());
 		friends = std::make_unique<FriendsImpl>(std::bind(&IGalaxy::GetFriends, real_igalaxy_instance), real_notification);
 		matchmaking = std::make_unique<MatchmakingImpl>(std::bind(&IGalaxy::GetMatchmaking, real_igalaxy_instance), real_notification);
-		networking = std::make_unique<NetworkingImpl>(std::bind(&IGalaxy::GetNetworking, real_igalaxy_instance), real_notification);
+		networking = std::make_unique<NetworkingImpl>(std::bind(&IGalaxy::GetNetworking, real_igalaxy_instance), real_notification, gameserver ? 'G' : 'C');
 
 #if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
-		server_networking = std::make_unique<NetworkingImpl>(std::bind(&IGalaxy::GetServerNetworking, real_igalaxy_instance), real_notification);
+		server_networking = std::make_unique<NetworkingImpl>(std::bind(&IGalaxy::GetServerNetworking, real_igalaxy_instance), real_notification, gameserver ? 'G' : 'S');
 #endif
 
 		stats = std::make_unique<StatsImpl>(std::bind(&IGalaxy::GetStats, real_igalaxy_instance), real_notification);
@@ -217,10 +217,10 @@ namespace universelan::client {
 		interceptor_make_unique(user, (gameserver ? "?GameServerUser@api@galaxy@" : "?User@api@galaxy@"), real_notification, config.get());
 		interceptor_make_unique(friends, "?Friends@api@galaxy@", real_notification);
 		interceptor_make_unique(matchmaking, (gameserver ? "?GameServerMatchmaking@api@galaxy@" : "?Matchmaking@api@galaxy@"), real_notification);
-		interceptor_make_unique(networking, (gameserver ? "?GameServerNetworking@api@galaxy@" : "?Networking@api@galaxy@"), real_notification);
+		interceptor_make_unique(networking, (gameserver ? "?GameServerNetworking@api@galaxy@" : "?Networking@api@galaxy@"), real_notification, gameserver ? 'G' : 'C');
 
 #if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
-		interceptor_make_unique(server_networking, "?ServerNetworking@api@galaxy@", real_notification);
+		interceptor_make_unique(server_networking, "?ServerNetworking@api@galaxy@", real_notification, gameserver ? 'G' : 'S');
 #endif
 
 		interceptor_make_unique(stats, "?Stats@api@galaxy@", real_notification);

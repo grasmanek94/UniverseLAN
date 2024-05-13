@@ -58,8 +58,9 @@ namespace universelan::client {
 		ListenerRegistrarImpl* listeners;
 
 		channels_array buffer;
+		char networking_type[4] ; // [S] [C] [G]
 	public:
-		NetworkingImpl(InterfaceInstances* intf);
+		NetworkingImpl(InterfaceInstances* intf, char networking_type_letter);
 		virtual ~NetworkingImpl();
 
 		/**

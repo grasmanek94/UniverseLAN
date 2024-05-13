@@ -4,16 +4,16 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	NetworkingImpl::NetworkingImpl(InterfaceInstances* intf) :
+	NetworkingImpl::NetworkingImpl(InterfaceInstances* intf, char networking_type_letter) :
 		intf{ intf }, listeners{ intf->notification.get() },
-		buffer{}
+		buffer{}, networking_type{'[', networking_type_letter, ']', 0}
 	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::INETWORKING };
+		tracer::Trace trace{ networking_type, __FUNCTION__, tracer::Trace::INETWORKING };
 	}
 
 	NetworkingImpl::~NetworkingImpl()
 	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::INETWORKING };
+		tracer::Trace trace{ networking_type, __FUNCTION__, tracer::Trace::INETWORKING };
 	}
 
 	bool NetworkingImpl::SendP2PPacket(GalaxyID galaxyID, const void* data, uint32_t dataSize, P2PSendType sendType, uint8_t channel) {

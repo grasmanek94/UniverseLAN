@@ -14,7 +14,7 @@ namespace universelan::client {
 	namespace fs = std::filesystem;
 	InterfaceInstances intf_inst;
 
-	void InterfaceInstances::init(const InitOptionsModern& initOptions) {
+	void InterfaceInstances::init(const InitOptionsModern& initOptions, bool is_gameserver) {
 		if (config == nullptr) {
 			config = std::make_unique<ClientIniData>();
 		}
@@ -48,9 +48,9 @@ namespace universelan::client {
 		chat = std::make_unique<ChatImpl>(this);
 #endif
 		matchmaking = std::make_unique<MatchmakingImpl>(this);
-		networking = std::make_unique<NetworkingImpl>(this);
+		networking = std::make_unique<NetworkingImpl>(this, is_gameserver ? 'G' : 'C');
 #if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
-		server_networking = std::make_unique<NetworkingImpl>(this);
+		server_networking = std::make_unique<NetworkingImpl>(this, is_gameserver ? 'G' : 'S');
 #endif
 		stats = std::make_unique<StatsImpl>(this);
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS

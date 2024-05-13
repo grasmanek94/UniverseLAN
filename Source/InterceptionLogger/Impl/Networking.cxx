@@ -26,10 +26,11 @@ namespace universelan::client {
 		}
 	}
 
-	NetworkingImpl::NetworkingImpl(FuncT::F intf, IListenerRegistrar* notifications) : 
+	NetworkingImpl::NetworkingImpl(FuncT::F intf, IListenerRegistrar* notifications, char networking_type_letter) :
 		intf{ intf },
 		notifications{ notifications },
-		listeners{ notifications } {
+		listeners{ notifications },
+		networking_type{ '[', networking_type_letter, ']', 0 } {
 		tracer::Trace trace{ "::WARNING: NetworkingListener disabled due to introducing bugs with PeekPacket", __FUNCTION__, TraceContext };
 
 		//listeners.AddListener<NetworkingListener>();
@@ -43,7 +44,7 @@ namespace universelan::client {
 	}
 
 	bool NetworkingImpl::SendP2PPacket(GalaxyID galaxyID, const void* data, uint32_t dataSize, P2PSendType sendType, uint8_t channel) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ networking_type, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("galaxyID: {}", galaxyID));
@@ -68,7 +69,7 @@ namespace universelan::client {
 	}
 
 	bool NetworkingImpl::PeekP2PPacket(void* dest, uint32_t destSize, uint32_t* outMsgSize, GalaxyID& outGalaxyID, uint8_t channel) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ networking_type, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("dest: {}", dest));
@@ -99,7 +100,7 @@ namespace universelan::client {
 	}
 	
 	bool NetworkingImpl::ReadP2PPacket(void* dest, uint32_t destSize, uint32_t* outMsgSize, GalaxyID& outGalaxyID, uint8_t channel) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ networking_type, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("dest: {}", dest));
@@ -129,7 +130,7 @@ namespace universelan::client {
 	}
 
 	bool NetworkingImpl::IsP2PPacketAvailable(uint32_t* outMsgSize, uint8_t channel) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ networking_type, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::DETAILED };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("outMsgSize(addr): {}", (void*)outMsgSize));
@@ -149,7 +150,7 @@ namespace universelan::client {
 	}
 
 	void NetworkingImpl::PopP2PPacket(uint8_t channel) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ networking_type, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("channel: {}", channel));
@@ -159,7 +160,7 @@ namespace universelan::client {
 	}
 
 	int NetworkingImpl::GetPingWith(GalaxyID galaxyID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ networking_type, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("galaxyID: {}", galaxyID));
@@ -176,13 +177,13 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_NAT_FUNCTIONALITY
 	void NetworkingImpl::RequestNatTypeDetection() {
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ networking_type, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		intf()->RequestNatTypeDetection();
 	}
 
 	NatType NetworkingImpl::GetNatType() {
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ networking_type, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		auto result = intf()->GetNatType();
 
@@ -196,7 +197,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_CONNECTION_TYPE
 	ConnectionType NetworkingImpl::GetConnectionType(GalaxyID userID) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
+		tracer::Trace trace{ networking_type, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));

@@ -95,7 +95,7 @@ namespace universelan::client {
 		std::unique_ptr<ListenerRegistrarImpl>	notification = nullptr;
 		std::unique_ptr<DelayRunner>			delay_runner = nullptr;
 
-		void init(const InitOptionsModern& initOptions);
+		void init(const InitOptionsModern& initOptions, bool is_gameserver = false);
 		void reset();
 
 		~InterfaceInstances();

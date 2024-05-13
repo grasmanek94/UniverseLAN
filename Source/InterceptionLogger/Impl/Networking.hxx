@@ -36,10 +36,11 @@ namespace universelan::client {
 		FuncT::F intf;
 		IListenerRegistrar* notifications;
 		ListenersContainer listeners;
+		char networking_type[4]; // [S] [C] [G]
 
 	public:
 
-		NetworkingImpl(FuncT::F intf, IListenerRegistrar* notifications);
+		NetworkingImpl(FuncT::F intf, IListenerRegistrar* notifications, char networking_type_letter);
 		virtual ~NetworkingImpl();
 
 		/**
