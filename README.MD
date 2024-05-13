@@ -120,7 +120,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Warhammer 40K - Dakka Squadron Flyboyz Ed.| :white_check_mark:(2)     | 1.144.1                       | Tested with build 421 |
 | Star Wars Battlefront II (Classic, 2005)  | :white_check_mark:(2)/:construction: | 1.112.2            | There are no lobbies visible on the internet tab, but using UniverseLAN does unlock the LAN tab option when you don't have internet access. |
 | Battlestar Galactica Deadlock             | :white_check_mark:(2)     | 1.114.9                       | Tested with build 423 | 
-| Driftland - The Magic Revival             | :construction:            | 1.133.6                       | Can create a lobby, doesn't crash now, but the joining player returns to main menu after trying to join |
+| Driftland - The Magic Revival             | :white_check_mark:(2)     | 1.133.6                       | Works since build 436, apparently UniverseLAN had a bug where the server was sending the packet "as user" and not "as lobby" (when the user is the lobby owner) |
 | Serious Sams Bogus Detour                 | :construction:            | 1.100.2                       | Can join lobby since build 360 and start game, but both players stuck on black "Loading..." screen |
 | Niffelheim                                | :construction:            | 1.139.2                       | Stuck at "Loading..." (save transfer?) | 
 | Homeworld: Deserts of Kharak              | :construction:            | 1.101                         | Tested with 1.100.2. After build 362 lobbies can now be created, but connecting doesn't work. | 
