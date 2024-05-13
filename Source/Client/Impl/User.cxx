@@ -297,10 +297,10 @@ namespace universelan::client {
 		}
 
 #if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
-		listeners->NotifyAll(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, data->id);
+		listeners->NotifyAllNow(listener, &ISpecificUserDataListener::OnSpecificUserDataUpdated, data->id);
 #endif
 		if (intf->config->IsSelfUserID(data->id)) {
-			listeners->NotifyAll(&IUserDataListener::OnUserDataUpdated);
+			listeners->NotifyAllNow(&IUserDataListener::OnUserDataUpdated);
 		}
 	}
 
@@ -561,36 +561,35 @@ namespace universelan::client {
 
 		if (!SignedIn()) {
 			RunForAllWaitingAuthListeners([&](IGalaxyListener* listener) {
-				listeners->NotifyAllSpecificOnly(listener, &IAuthListener::OnAuthFailure, IAuthListener::FAILURE_REASON_GALAXY_SERVICE_NOT_AVAILABLE);
+				listeners->NotifyAllNowSpecificOnly(listener, &IAuthListener::OnAuthFailure, IAuthListener::FAILURE_REASON_GALAXY_SERVICE_NOT_AVAILABLE);
 			});
 
-			listeners->NotifyAll(&IAuthListener::OnAuthFailure, IAuthListener::FAILURE_REASON_GALAXY_SERVICE_NOT_AVAILABLE);
-			listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN);
+			listeners->NotifyAllNow(&IAuthListener::OnAuthFailure, IAuthListener::FAILURE_REASON_GALAXY_SERVICE_NOT_AVAILABLE);
+			listeners->NotifyAllNow(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN);
 			return;
 		}
 
 		if (key_challenge_accepted) {
 			// Connected & Can exchange messages
 #if GALAXY_BUILD_FEATURE_HAS_IACCESSTOKENLISTENER
-			listeners->NotifyAll(&IAccessTokenListener::OnAccessTokenChanged);
+			listeners->NotifyAllNow(&IAccessTokenListener::OnAccessTokenChanged);
 #endif
 			RunForAllWaitingAuthListeners([&](IGalaxyListener* listener) {
-				listeners->NotifyAllSpecificOnly(listener, &IAuthListener::OnAuthSuccess);
+				listeners->NotifyAllNowSpecificOnly(listener, &IAuthListener::OnAuthSuccess);
 				});
 
-			listeners->NotifyAll(&IAuthListener::OnAuthSuccess);
-			listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, (IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN | IOperationalStateChangeListener::OPERATIONAL_STATE_LOGGED_ON));
-			listeners->NotifyAll(&IPersonaDataChangedListener::OnPersonaDataChanged, intf->user->GetGalaxyID(), IPersonaDataChangedListener::PERSONA_CHANGE_NONE);
-			listeners->NotifyAll(&IFriendListListener::OnFriendListRetrieveSuccess);
+			listeners->NotifyAllNow(&IAuthListener::OnAuthSuccess);
+			listeners->NotifyAllNow(&IOperationalStateChangeListener::OnOperationalStateChanged, (IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN | IOperationalStateChangeListener::OPERATIONAL_STATE_LOGGED_ON));
+			listeners->NotifyAllNow(&IPersonaDataChangedListener::OnPersonaDataChanged, intf->user->GetGalaxyID(), IPersonaDataChangedListener::PERSONA_CHANGE_NONE);
+			listeners->NotifyAllNow(&IFriendListListener::OnFriendListRetrieveSuccess);
 		}
 		else if (connection_state) {
 			// Connected
-			//listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, (IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN));
+			//listeners->NotifyAllNow(&IOperationalStateChangeListener::OnOperationalStateChanged, (IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN));
 		}
 		else {
 			// Disconnected
-			listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, (IOperationalStateChangeListener::OperationalState::OPERATIONAL_STATE_SIGNED_IN));
+			listeners->NotifyAllNow(&IOperationalStateChangeListener::OnOperationalStateChanged, (IOperationalStateChangeListener::OperationalState::OPERATIONAL_STATE_SIGNED_IN));
 		}
-
 	}
 }

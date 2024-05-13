@@ -227,7 +227,7 @@ namespace universelan::client {
 		if (data->data.size() > 0) {
 			auto entry = sfu->shared->create_shared(data->filename, data->id);
 			if (entry && entry->write(data->data)) {
-				listeners->NotifyAll(
+				listeners->NotifyAllNow(
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
 					listener,
 #endif
@@ -236,7 +236,7 @@ namespace universelan::client {
 			}
 		}
 
-		listeners->NotifyAll(
+		listeners->NotifyAllNow(
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
 			listener,
 #endif
@@ -260,14 +260,14 @@ namespace universelan::client {
 				std::cerr << "FileUploaded::CopyFromLocalToShared failed\n";
 			}
 
-			listeners->NotifyAll(
+			listeners->NotifyAllNow(
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
 				listener,
 #endif
 				& IFileShareListener::OnFileShareSuccess, data->filename.c_str(), data->id);
 		}
 		else {
-			listeners->NotifyAll(
+			listeners->NotifyAllNow(
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
 				listener,
 #endif

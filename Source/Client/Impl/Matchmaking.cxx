@@ -215,7 +215,7 @@ namespace universelan::client {
 		auto filter = lobby_list_filtered_requests.pop(data->request_id);
 
 		if (data->error) {
-			listeners->NotifyAll(
+			listeners->NotifyAllNow(
 				listener
 				, &ILobbyListListener::OnLobbyList
 				, (uint32_t)0
@@ -245,7 +245,7 @@ namespace universelan::client {
 		lock_t lock{ mtx };
 		lobby_list = data->lobby_list;
 		lobby_list_filtered = filtered_list_of_lobbies;
-		listeners->NotifyAll(
+		listeners->NotifyAllNow(
 			listener
 			, &ILobbyListListener::OnLobbyList
 			, (uint32_t)lobby_list_filtered.size()
@@ -351,8 +351,8 @@ namespace universelan::client {
 			lobby_entry->second->AddMember(intf->config->GetApiGalaxyID());
 		}
 
-		listeners->NotifyAll(listener, &ILobbyEnteredListener::OnLobbyEntered, data->lobby_id, data->result);
-		//listeners->NotifyAll(&ILobbyMemberStateListener::OnLobbyMemberStateChanged, data->lobby_id, intf->user->GetGalaxyID(), LobbyMemberStateChange::LOBBY_MEMBER_STATE_CHANGED_ENTERED); // TODO: this is probably superfluous (or at least on some version)
+		listeners->NotifyAllNow(listener, &ILobbyEnteredListener::OnLobbyEntered, data->lobby_id, data->result);
+		//listeners->NotifyAllNow(&ILobbyMemberStateListener::OnLobbyMemberStateChanged, data->lobby_id, intf->user->GetGalaxyID(), LobbyMemberStateChange::LOBBY_MEMBER_STATE_CHANGED_ENTERED); // TODO: this is probably superfluous (or at least on some version)
 	}
 
 	void MatchmakingImpl::LeaveLobby(GalaxyID lobbyID
@@ -389,7 +389,7 @@ namespace universelan::client {
 			}
 		}
 
-		listeners->NotifyAll(
+		listeners->NotifyAllNow(
 			listener
 			, &ILobbyLeftListener::OnLobbyLeft
 			, data->lobby_id
@@ -439,14 +439,14 @@ namespace universelan::client {
 			}
 
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
+			listeners->NotifyAllNow(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
 #endif
 
-			listeners->NotifyAll(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
+			listeners->NotifyAllNow(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
 		}
 		else {
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateFailure, data->lobby_id, data->fail_reason);
+			listeners->NotifyAllNow(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateFailure, data->lobby_id, data->fail_reason);
 #endif
 		}
 	}
@@ -530,14 +530,14 @@ namespace universelan::client {
 			}
 
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
+			listeners->NotifyAllNow(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
 #endif
 
-			listeners->NotifyAll(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
+			listeners->NotifyAllNow(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
 		}
 		else {
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateFailure, data->lobby_id, data->fail_reason);
+			listeners->NotifyAllNow(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateFailure, data->lobby_id, data->fail_reason);
 #endif
 		}
 	}
@@ -595,13 +595,13 @@ namespace universelan::client {
 			}
 
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
+			listeners->NotifyAllNow(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
 #endif
-			listeners->NotifyAll(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
+			listeners->NotifyAllNow(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
 		}
 		else {
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateFailure, data->lobby_id, data->fail_reason);
+			listeners->NotifyAllNow(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateFailure, data->lobby_id, data->fail_reason);
 #endif
 		}
 	}
@@ -660,13 +660,13 @@ namespace universelan::client {
 			}
 
 #if GALAXY_BUILD_FEATURE_HAS_ILOBBYDATARETRIEVELISTENER
-			listeners->NotifyAll(listener, &ILobbyDataRetrieveListener::OnLobbyDataRetrieveSuccess, data->lobby_id);
+			listeners->NotifyAllNow(listener, &ILobbyDataRetrieveListener::OnLobbyDataRetrieveSuccess, data->lobby_id);
 #endif
-			listeners->NotifyAll(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
+			listeners->NotifyAllNow(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
 		}
 		else {
 #if GALAXY_BUILD_FEATURE_HAS_ILOBBYDATARETRIEVELISTENER
-			listeners->NotifyAll(listener, &ILobbyDataRetrieveListener::OnLobbyDataRetrieveFailure, data->lobby_id, data->fail_reason);
+			listeners->NotifyAllNow(listener, &ILobbyDataRetrieveListener::OnLobbyDataRetrieveFailure, data->lobby_id, data->fail_reason);
 #endif
 		}
 	}
@@ -738,13 +738,13 @@ namespace universelan::client {
 			}
 
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
+			listeners->NotifyAllNow(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
 #endif
-			listeners->NotifyAll(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
+			listeners->NotifyAllNow(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, 0);
 		}
 		else {
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			listeners->NotifyAll(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateFailure, data->lobby_id, data->fail_reason);
+			listeners->NotifyAllNow(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateFailure, data->lobby_id, data->fail_reason);
 #endif
 		}
 	}
@@ -866,14 +866,14 @@ namespace universelan::client {
 			}
 
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			listeners->NotifyAll(listener, &ILobbyMemberDataUpdateListener::OnLobbyMemberDataUpdateSuccess, data->lobby_id, data->member_id);
+			listeners->NotifyAllNow(listener, &ILobbyMemberDataUpdateListener::OnLobbyMemberDataUpdateSuccess, data->lobby_id, data->member_id);
 #endif
 
-			listeners->NotifyAll(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, data->member_id);
+			listeners->NotifyAllNow(&ILobbyDataListener::OnLobbyDataUpdated, data->lobby_id, data->member_id);
 		}
 		else {
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			listeners->NotifyAll(listener, &ILobbyMemberDataUpdateListener::OnLobbyMemberDataUpdateFailure, data->lobby_id, data->member_id, data->fail_reason);
+			listeners->NotifyAllNow(listener, &ILobbyMemberDataUpdateListener::OnLobbyMemberDataUpdateFailure, data->lobby_id, data->member_id, data->fail_reason);
 #endif
 		}
 	}
@@ -970,7 +970,7 @@ namespace universelan::client {
 			}
 		}
 
-		listeners->NotifyAll(&ILobbyMessageListener::OnLobbyMessageReceived, data->lobby_id, data->message.sender, data->message.message_id, (uint32_t)data->message.data.size());
+		listeners->NotifyAllNow(&ILobbyMessageListener::OnLobbyMessageReceived, data->lobby_id, data->message.sender, data->message.message_id, (uint32_t)data->message.data.size());
 	}
 
 	uint32_t MatchmakingImpl::GetLobbyMessage(GalaxyID lobbyID, uint32_t messageID, GalaxyID& senderID, char* msg, uint32_t msgLength) {

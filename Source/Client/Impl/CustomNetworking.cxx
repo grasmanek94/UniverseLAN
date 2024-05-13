@@ -179,7 +179,7 @@ namespace universelan::client {
 		lock_t lock(mtx);
 		auto entry = channels.find(connectionID);
 		if (entry == channels.end()) {
-			return std::shared_ptr<CustomNetworkingImpl::Channel>{nullptr};
+			return nullptr;
 		}
 
 		return entry->second;

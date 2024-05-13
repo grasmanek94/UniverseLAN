@@ -62,7 +62,7 @@ namespace universelan::client {
 				));
 			}
 
-			listeners->NotifyAll(listener,
+			listeners->NotifyAllNow(listener,
 				&IChatRoomWithUserRetrieveListener::OnChatRoomWithUserRetrieveSuccess,
 				data->id, data->chat_room->GetID());
 		}
@@ -71,7 +71,7 @@ namespace universelan::client {
 				trace.write_all(std::format("OnChatRoomWithUserRetrieveFailure userID: {}", data->id));
 			}
 
-			listeners->NotifyAll(listener,
+			listeners->NotifyAllNow(listener,
 				&IChatRoomWithUserRetrieveListener::OnChatRoomWithUserRetrieveFailure,
 				data->id, IChatRoomWithUserRetrieveListener::FAILURE_REASON_UNDEFINED);
 		}
@@ -132,12 +132,12 @@ namespace universelan::client {
 			incomming_messages_buffer = &data->messages;
 
 #if GALAXY_BUILD_FEATURE_HAS_ICHATROOMMESSAGERETRIEVELISTENER
-			listeners->NotifyAll(listener,
+			listeners->NotifyAllNow(listener,
 				&IChatRoomMessagesRetrieveListener::OnChatRoomMessagesRetrieveSuccess,
 				data->id, (uint32_t)data->messages.size(), longest_message);
 #endif
 
-			listeners->NotifyAll(
+			listeners->NotifyAllNow(
 				&IChatRoomMessagesListener::OnChatRoomMessagesReceived,
 				data->id, (uint32_t)data->messages.size(), longest_message);
 
@@ -152,7 +152,7 @@ namespace universelan::client {
 				));
 			}
 #if GALAXY_BUILD_FEATURE_HAS_ICHATROOMMESSAGERETRIEVELISTENER
-			listeners->NotifyAll(listener,
+			listeners->NotifyAllNow(listener,
 				&IChatRoomMessagesRetrieveListener::OnChatRoomMessagesRetrieveFailure,
 				data->id, IChatRoomMessagesRetrieveListener::FAILURE_REASON_UNDEFINED);
 #endif
@@ -214,7 +214,7 @@ namespace universelan::client {
 				));
 			}
 
-			listeners->NotifyAll(listener,
+			listeners->NotifyAllNow(listener,
 				&IChatRoomMessageSendListener::OnChatRoomMessageSendSuccess,
 				data->id, (uint32_t)data->request_id, data->message->GetID(), data->message->GetSendTime());
 		}
@@ -227,7 +227,7 @@ namespace universelan::client {
 				));
 			}
 
-			listeners->NotifyAll(listener,
+			listeners->NotifyAllNow(listener,
 				&IChatRoomMessageSendListener::OnChatRoomMessageSendFailure,
 				data->id, (uint32_t)data->request_id, IChatRoomMessageSendListener::FAILURE_REASON_UNDEFINED);
 		}

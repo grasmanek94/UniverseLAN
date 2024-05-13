@@ -78,16 +78,16 @@ namespace universelan::client {
 			entry->stats = data->asuc;
 			entry->nickname = data->nickname;
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listeners->NotifyAll(listener, &IUserInformationRetrieveListener::OnUserInformationRetrieveSuccess, data->id);
+			listeners->NotifyAllNow(listener, &IUserInformationRetrieveListener::OnUserInformationRetrieveSuccess, data->id);
 #endif
 		}
 		else {
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listeners->NotifyAll(listener, &IUserInformationRetrieveListener::OnUserInformationRetrieveFailure, data->id, IUserInformationRetrieveListener::FAILURE_REASON_UNDEFINED);
+			listeners->NotifyAllNow(listener, &IUserInformationRetrieveListener::OnUserInformationRetrieveFailure, data->id, IUserInformationRetrieveListener::FAILURE_REASON_UNDEFINED);
 #endif
 		}
 #if GALAXY_BUILD_FEATURE_IFRIENDS_ONPERSONADATACHANGED
-		listeners->NotifyAll(&IPersonaDataChangedListener::OnPersonaDataChanged, data->id, IPersonaDataChangedListener::PERSONA_CHANGE_NONE);
+		listeners->NotifyAllNow(&IPersonaDataChangedListener::OnPersonaDataChanged, data->id, IPersonaDataChangedListener::PERSONA_CHANGE_NONE);
 #endif
 	}
 
@@ -386,13 +386,13 @@ namespace universelan::client {
 			listeners->PopRequestListener(data->request_id, listener);
 
 			if (data->success) {
-				listeners->NotifyAll(listener, &IRichPresenceChangeListener::OnRichPresenceChangeSuccess);
+				listeners->NotifyAllNow(listener, &IRichPresenceChangeListener::OnRichPresenceChangeSuccess);
 #if GALAXY_BUILD_FEATURE_ADDED_RICH_PRESENCE_LISTENERS
-				listeners->NotifyAll(&IRichPresenceListener::OnRichPresenceUpdated, intf->config->GetApiGalaxyID());
+				listeners->NotifyAllNow(&IRichPresenceListener::OnRichPresenceUpdated, intf->config->GetApiGalaxyID());
 #endif
 			}
 			else {
-				listeners->NotifyAll(listener, &IRichPresenceChangeListener::OnRichPresenceChangeFailure, IRichPresenceChangeListener::FAILURE_REASON_UNDEFINED);
+				listeners->NotifyAllNow(listener, &IRichPresenceChangeListener::OnRichPresenceChangeFailure, IRichPresenceChangeListener::FAILURE_REASON_UNDEFINED);
 			}
 			return;
 		}
@@ -508,16 +508,16 @@ namespace universelan::client {
 			entry->nickname = data->nickname;
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listeners->NotifyAll(listener, &IRichPresenceRetrieveListener::OnRichPresenceRetrieveSuccess, data->id);
+			listeners->NotifyAllNow(listener, &IRichPresenceRetrieveListener::OnRichPresenceRetrieveSuccess, data->id);
 #endif
 #if GALAXY_BUILD_FEATURE_ADDED_RICH_PRESENCE_LISTENERS
-			listeners->NotifyAll(&IRichPresenceListener::OnRichPresenceUpdated, data->id);
+			listeners->NotifyAllNow(&IRichPresenceListener::OnRichPresenceUpdated, data->id);
 #endif
 
 		}
 		else {
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-			listeners->NotifyAll(listener, &IRichPresenceRetrieveListener::OnRichPresenceRetrieveFailure, data->id, IRichPresenceRetrieveListener::FAILURE_REASON_UNDEFINED);
+			listeners->NotifyAllNow(listener, &IRichPresenceRetrieveListener::OnRichPresenceRetrieveFailure, data->id, IRichPresenceRetrieveListener::FAILURE_REASON_UNDEFINED);
 #endif
 		}
 	}
@@ -649,7 +649,7 @@ namespace universelan::client {
 				online_friends.insert(userID);
 			}
 #if GALAXY_BUILD_FEATURE_HAS_FRIENDADDLISTENER
-			listeners->NotifyAll(&IFriendAddListener::OnFriendAdded, userID, IFriendAddListener::INVITATION_DIRECTION_INCOMING);
+			listeners->NotifyAllNow(&IFriendAddListener::OnFriendAdded, userID, IFriendAddListener::INVITATION_DIRECTION_INCOMING);
 #endif
 		}
 		else {
@@ -658,7 +658,7 @@ namespace universelan::client {
 				online_friends.erase(userID);
 			}
 #if GALAXY_BUILD_FEATURE_HAS_FRIENDADDLISTENER
-			listeners->NotifyAll(&IFriendDeleteListener::OnFriendDeleteSuccess, userID);
+			listeners->NotifyAllNow(&IFriendDeleteListener::OnFriendDeleteSuccess, userID);
 #endif
 		}
 	}
@@ -666,10 +666,10 @@ namespace universelan::client {
 	void FriendsImpl::InvitationReceived(const std::shared_ptr<InvitationMessage>& data)
 	{
 #if GALAXY_BUILD_FEATURE_HAS_ISENDINVITATIONLISTENER
-		listeners->NotifyAll(&IGameInvitationReceivedListener::OnGameInvitationReceived, data->user_id, data->connection_string.c_str());
+		listeners->NotifyAllNow(&IGameInvitationReceivedListener::OnGameInvitationReceived, data->user_id, data->connection_string.c_str());
 
 		if (intf->config->AutoAcceptGameInvitationsEnabled()) {
-			listeners->NotifyAll(&IGameJoinRequestedListener::OnGameJoinRequested, data->user_id, data->connection_string.c_str());
+			listeners->NotifyAllNow(&IGameJoinRequestedListener::OnGameJoinRequested, data->user_id, data->connection_string.c_str());
 		}
 #endif
 	}
