@@ -50,7 +50,7 @@ namespace galaxy::api {
 
 	inline GalaxyID FromRealID(IDType type, uint64_t value)
 	{
-		return GalaxyID(static_cast<uint64_t>(type) << 56 | (value & 0xffffffffffffffULL));
+		return GalaxyID(static_cast<uint64_t>(type) << 56 | (value & 0x00ffffffffffffffULL));
 	}
 
 	inline uint64_t GetRealID(const GalaxyID& id)

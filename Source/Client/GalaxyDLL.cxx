@@ -57,9 +57,7 @@ namespace universelan::client {
 		std::cout << "Build: " << Version_Number << std::endl;
 		std::cout << "Using username: " << intf_inst.config->GetCustomPersonaName() << std::endl;
 		std::cout << "Using key: " << const_hash64(intf_inst.config->GetAuthenticationKey()) << std::endl;
-
-		auto real_galaxy_id = galaxy::api::FromRealID(galaxy::api::IDType::ID_TYPE_USER, intf_inst.config->GetCustomGalaxyID());
-		std::cout << "Using GalaxyID: " << intf_inst.config->GetCustomGalaxyID() << " (" << real_galaxy_id.ToUint64() << ")" << std::endl;
+		std::cout << "Using GalaxyID: " << intf_inst.config->GetCustomGalaxyID() << " (" << intf_inst.config->GetApiGalaxyID().ToUint64() << ")" << std::endl;
 
 		intf_inst.client->Start();
 	}

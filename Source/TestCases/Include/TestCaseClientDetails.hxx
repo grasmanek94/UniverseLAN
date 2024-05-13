@@ -181,7 +181,7 @@ namespace galaxy::api {
 
 	inline uint64_t GetRealID(const GalaxyID& id)
 	{
-		return id.ToUint64() & 0xffffffffffffffULL;
+		return id.ToUint64() & 0x00ffffffffffffffULL;
 	}
 }
 

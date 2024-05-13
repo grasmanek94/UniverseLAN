@@ -18,11 +18,11 @@ namespace universelan {
 	using galaxy::api::LobbyTopologyType;
 
 	Lobby::Lobby() :
-		id{ GlobalUniqueID::get() }, owner_id{}, max_members{}, joinable{}, topology_type{}, type{},
+		id{ galaxy::api::FromRealID(galaxy::api::IDType::ID_TYPE_LOBBY, GlobalUniqueID::get()) }, owner_id{}, max_members{}, joinable{}, topology_type{}, type{},
 		current_message_id{ 1 }, data{}, user_data{}, messages{} {}
 
 	Lobby::Lobby(GalaxyID lobby_id) :
-		id{ lobby_id }, owner_id{}, max_members{}, joinable{}, topology_type{}, type{},
+		id{ galaxy::api::FromRealID(galaxy::api::IDType::ID_TYPE_LOBBY, lobby_id.ToUint64()) }, owner_id{}, max_members{}, joinable{}, topology_type{}, type{},
 		current_message_id{ 1 }, data{}, user_data{}, messages{} {}
 
 	Lobby::Lobby(GalaxyID owner_id, LobbyType type, uint32_t max_members, bool joinable,
