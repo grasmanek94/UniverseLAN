@@ -259,6 +259,7 @@ namespace universelan::server {
 		bool send_server_message = false;
 #endif
 
+		// Send message TO lobby
 		if (galaxy::api::GetIDType(data->id) == galaxy::api::IDType::ID_TYPE_LOBBY) {
 			auto lobby = lobby_manager.GetLobby(data->id);
 			if (lobby) {
@@ -278,6 +279,15 @@ namespace universelan::server {
 
 		data->id = pd->id;
 
+		// Send message AS lobby
+		for (auto& lobby_iter : pd->lobbies) {
+			auto& lobby = lobby_iter.second;
+			if (lobby ->GetType() == LOBBY_TOPOLOGY_TYPE_STAR && lobby->GetOwner() == pd->id) {
+				data->id = lobby->GetID();
+				break;
+			}
+		}
+
 #if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
 		if (send_server_message) {
 			connection.Send(target_pd->peer, P2PServerNetworkPacketMessage{ *data });
@@ -286,7 +296,7 @@ namespace universelan::server {
 #endif
 
 		connection.Send(target_pd->peer, *data);
-		}
+	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<FileShareMessage>& data) {
 		tracer::Trace trace{ "::FileShareMessage" };
@@ -301,7 +311,7 @@ namespace universelan::server {
 		if (!entry) {
 			std::cerr << "FileShareMessage::create_shared FAIL\n";
 		}
-		else if(!entry->write(data->data)){
+		else if (!entry->write(data->data)) {
 			std::cerr << "FileShareMessage::write FAIL\n";
 		}
 
@@ -415,11 +425,11 @@ namespace universelan::server {
 		// hmm should we include the user itself?
 		auto members = lobby->GetMembers();
 		for (auto& member : members) {
-			//if (member != pd->id) {
-			auto member_peer = peer_mapper.Get(member);
+			if (member != pd->id) {
+				auto member_peer = peer_mapper.Get(member);
 
-			connection.Send(member_peer->peer, enter_notification);
-			//}
+				connection.Send(member_peer->peer, enter_notification);
+			}
 		}
 	}
 
@@ -686,7 +696,6 @@ namespace universelan::server {
 		auto members = lobby->GetMembers();
 		for (auto& member : members) {
 			auto member_peer = peer_mapper.Get(member);
-
 			if (!close && new_owner) {
 				connection.Send(member_peer->peer, owner_change_message);
 				connection.Send(member_peer->peer, leave_notification);
@@ -831,4 +840,4 @@ namespace universelan::server {
 		data->user_id = pd->id;
 		connection.Send(target->peer, data);
 	}
-	}
+}
