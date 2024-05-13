@@ -19,6 +19,8 @@
 #include <IListenerRegistrar.h>
 #include <GalaxyApi.h>
 
+#include <magic_enum/magic_enum.hpp>
+
 #include <any>
 #include <array>
 #include <concepts>
@@ -323,35 +325,52 @@ namespace universelan::client {
 
 		template <typename T, typename U=void>
 		bool AddRequestListener(uint64_t request_id, T* listener, std::shared_ptr<U> extra = nullptr) {
+			tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::LISTENERREGISTRAR | tracer::Trace::HIGH_FREQUENCY_CALLS };
+
+			if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+				trace.write_all(std::format("request_id: {}", request_id));
+				trace.write_all(std::format("listener: {}", (void*)listener));
+			}
+
 			if (listener == nullptr) {
 				return false;
 			}
 
-			auto listener_type_id = (ListenerType)T::GetListenerType();
+			auto listener_type_id = T::GetListenerType();
 
-			return request_helpers[listener_type_id].emplace(request_id, listener, extra);
+			if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+				trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listener_type_id)));
+			}
+
+			return request_helpers[(size_t)listener_type_id].emplace(request_id, (IGalaxyListener*)listener, extra);
 		}
 
 		template <typename T>
 		bool PopRequestListener(uint64_t request_id, T*& listener) {
-			if (listener == nullptr) {
-				return false;
+			tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::LISTENERREGISTRAR | tracer::Trace::HIGH_FREQUENCY_CALLS };
+
+			auto listener_type_id = T::GetListenerType();
+
+			if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+				trace.write_all(std::format("request_id: {}", request_id));
+				trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listener_type_id)));
 			}
 
-			auto listener_type_id = (ListenerType)T::GetListenerType();
-
-			return request_helpers[listener_type_id].pop(request_id, listener);
+			return request_helpers[(size_t)listener_type_id].pop(request_id, listener);
 		}
 
 		template <typename T, typename U>
 		bool PopRequestListener(uint64_t request_id, T*& listener, std::shared_ptr<U>& extra) {
-			if (listener == nullptr) {
-				return false;
+			tracer::Trace trace{ "::extra", __FUNCTION__, tracer::Trace::LISTENERREGISTRAR | tracer::Trace::HIGH_FREQUENCY_CALLS};
+
+			auto listener_type_id = T::GetListenerType();
+
+			if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+				trace.write_all(std::format("request_id: {}", request_id));
+				trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listener_type_id)));
 			}
 
-			auto listener_type_id = (ListenerType)T::GetListenerType();
-
-			return request_helpers[listener_type_id].pop(request_id, listener, extra);
+			return request_helpers[(size_t)listener_type_id].pop(request_id, listener, extra);
 		}
 	};
 

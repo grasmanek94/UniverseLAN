@@ -34,7 +34,7 @@ namespace universelan::client {
 	void ListenerRegistrarImpl::Register(ListenerTypeImpl listenerType, IGalaxyListener* listener) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
 
-		if (listener == nullptr || listenerType <= LISTENER_TYPE_BEGIN || listenerType >= LISTENER_TYPE_END) {
+		if (listener == nullptr || listenerType < LISTENER_TYPE_BEGIN || listenerType >= LISTENER_TYPE_END) {
 			return;
 		}
 
@@ -50,7 +50,7 @@ namespace universelan::client {
 	void ListenerRegistrarImpl::Unregister(ListenerTypeImpl listenerType, IGalaxyListener* listener) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
 
-		if (listener == nullptr || listenerType <= LISTENER_TYPE_BEGIN || listenerType >= LISTENER_TYPE_END) {
+		if (listener == nullptr || listenerType < LISTENER_TYPE_BEGIN || listenerType >= LISTENER_TYPE_END) {
 			return;
 		}
 
