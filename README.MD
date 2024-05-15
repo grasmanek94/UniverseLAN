@@ -100,14 +100,13 @@ Another option would be to gift the game to people working on UniverseLAN projec
 
 | Game                                      | Status                    | Tested GOG Galaxy SDK Version | Notes |
 | :---------                                | :-------:                 | :---------:                   | :---------: |
+| Vikings - Wolves of Midgard               | :white_check_mark:(2)     | 1.100.2                       | Must apply `set OPENSSL_ia32cap=:~0x20000000` on newer CPU's for this game to start without crashing.<br> This issue is not caused by UniverseLAN or GOG, but OpenSSL / Unity/Unreal.<br> Tested with build 440 |
 | Phantom Doctrine                          | :white_check_mark:(2)     | 1.124.0                       | Must apply `set OPENSSL_ia32cap=:~0x20000000` on newer CPU's for this game to start without crashing.<br> This issue is not caused by UniverseLAN or GOG, but OpenSSL / Unity.<br> Tested with build 301 |
 | SYNTHETIK: Legion Rising                  | :white_check_mark:(2)     | 1.113.3                       | Works since build 301 |
 | Aragami 1                                 | :white_check_mark:(2)     | 1.121.2                       | |
 | Forsaken Remastered                       | :white_check_mark:(3)     | 1.124.0                       | |
 | Guns, Gore & Cannoli 2                    | :white_check_mark:(3)     | 1.124.0                       | |
 | Tropico 6                                 | :white_check_mark:(2)     | 1.139.2                       | Also other games are displayed? Game has custom networking?<br> Build 161 worked, build 243 seems to be broken (can't join lobby) <br> Update: The person testing UniverseLAN used an invalid configuration (same generated Galaxy ID numbers), after fixing this configuration issue in Config.ini the person reported the game seems to work on build 243. | 
-| MetalSlug3                                | :white_check_mark:(2)     | 1.100.2                       | Works since build 243 |
-| MetalSlugX                                | :white_check_mark:(2)     | 1.100.2                       | Works, tested on build 389 |
 | Serious Sam 4                             | :white_check_mark:(2)     | 1.144.1                       | Works since build 256 | 
 | Tooth and Tail                            | :white_check_mark:(2)     | 1.122.1                       | Works with 1.124.0, tested with build 256 | 
 | Door Kickers - Action Squad               | :white_check_mark:(2)     | 1.133.6                       | Tested with build 287 |
@@ -121,11 +120,30 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Star Wars Battlefront II (Classic, 2005)  | :white_check_mark:(2)/:construction: | 1.112.2            | There are no lobbies visible on the internet tab, but using UniverseLAN does unlock the LAN tab option when you don't have internet access. |
 | Battlestar Galactica Deadlock             | :white_check_mark:(2)     | 1.114.9                       | Tested with build 423 | 
 | Driftland - The Magic Revival             | :white_check_mark:(2)     | 1.133.6                       | Works since build 436, apparently UniverseLAN had a bug where the server was sending the packet "as user" and not "as lobby" (when the user is the lobby owner) |
+| Knights and Bikes                         | :white_check_mark:(2)     | 1.133.6                       | Tested with build 440, other player needs to join via commandline with --JoinLobby <id>, id will be displayed in the console of the host after clicking invite friend. |
+| Metal Slug                                | :white_check_mark:(2)     | 1.100.2                       | Tested with build 440 (not perfect because it's showing "waiting for player...", but works) |
+| Metal Slug 3                              | :white_check_mark:(2)     | 1.100.2                       | Works since build 243 (not perfect because it's showing "waiting for player...", but works) |
+| Metal Slug X                              | :white_check_mark:(2)     | 1.100.2                       | Works, tested on build 389 (not perfect because it's showing "waiting for player...", but works) |
+| Shock Troopers             | :white_check_mark:(2)/:construction:     | 1.100.2                       | Tested with build 440, sometimes disconnect error though?  (not perfect because it's showing "waiting for player...", but works) |
+| The Last Blade                            | :white_check_mark:(2)     | 1.100.2                       | Tested with build 440 (not perfect because it's showing "waiting for player...", but works) |
+| Shock Troopers - 2nd Squad                | :white_check_mark:(2)     | 1.100.2                       | Tested with build 440 (not perfect because it's showing "waiting for player...", but works) |
+| Twinkle Star Sprites                      | :white_check_mark:(2)     | 1.100.2                       | Tested with build 440 (not perfect because it's showing "waiting for player...", but works) |
+| Streets of Rage 4                         | :white_check_mark:(2)     | 1.144.1                       | Tested with build 440 |
+| Talisman Digital Edition                  | :white_check_mark:(2)     | 1.139.2                       | Tested with build 440 |
+| The Witcher Adventure Game                | :white_check_mark:(2)     | 1.69                          | Tested with build 440 - 1.68 |
+| The King of Fighters XIII                 | :construction:            | 1.114.9                       | Can't find lobbies |
+| The King of Fighters 98UM                 | :construction:            | 1.114.9                       | Stuck at "starting game..." |
+| Stronghold Warlords                       | :construction:            | 1.144.1                       | Stuck in loading screen waiting for client/joined player. Joined player doesn't start loading |
+| Stronghold Crusader 2                     | :construction:            | 1.68                          | Stuck in loading screen waiting for client/joined player. Joined player doesn't start loading |
 | Serious Sams Bogus Detour                 | :construction:            | 1.100.2                       | Can join lobby since build 360 and start game, but both players stuck on black "Loading..." screen |
+| Dying Light                               | :construction:            | 1.148.3                       | Doesn't seem to work for now and crashes when EncryptedAppTicket is not disabled. I think LAN may be internet-bound unfortunately. |
 | Niffelheim                                | :construction:            | 1.139.2                       | Stuck at "Loading..." (save transfer?) | 
 | Homeworld: Deserts of Kharak              | :construction:            | 1.101                         | Tested with 1.100.2. After build 362 lobbies can now be created, but connecting doesn't work. Seems like host game is stuck in SetLobbyJoinable loop? | 
 | Ancestors Legacy                          | :construction:            | 1.133.6                       | Requires Leaderboards features to be implemented | 
+| Craft The World                           | :construction:            | 1.100.2                       | Stuck at loading screen when hosting/joining. | 
+| Offworld Trading Company                  | :construction:            | 1.94                          | Tested with 1.95 build 440, stuck on game load in a GetUserData loop |
 | Alien vs Predator 2000                    | :question:                |                               | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176? |
+| Rise of the Triad (2013)                  | :left_right_arrow:        |                               | Native LAN available | 
 | Rage of Mages II: Necromancer             | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
 | Neverwinter Nights 2 Complete             | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
 | Baldur's Gate 3                           | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
@@ -137,6 +155,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Aragami 2                                 | :left_right_arrow:        | 1.148.3                       | Probably does not use GOG Galaxy for networking (doesn't work for private lobbies).<br> Can play on public lobbies without GOG Galaxy or with this patch AFAIK. |
 | DUSK (DuskWorld)                          | :left_right_arrow:        | 1.133.6                       | Uses steam (works without Steam Client) api for free online play, doesn't use GOG Galaxy. |
 | Blood Bowl 2 Legendary Editition          | :left_right_arrow:        |                               | Uses custom free multiplayer, need to create a free online in-game account on their servers. |
+| Bound By Blades                           | :left_right_arrow:        | 1.150.0                       | UniverseLAN can't make this game LAN-able, this game uses custom/free multiplayer (Photon Engine) that does not use Steam or Galaxy, but online multiplayer is DRM Free. Would need to develop a custom Photon Engine API. When dev stops paying for Photon CCU's the game multiplayer will stop working. A project for another time maybe. |
 | Ashes of the Singularity - Escalation     | :x:                       | 1.100.2                       | Requires .exe patches to patch out modification checks so that entering lobby is possible, unfortunately both players are seen as 'Host' and other side doesn't 'see' clicking 'ready'. UniverseLAN needs to support .exe patching, and the both players being 'host' needs to be analyzed and fixed. Afters analysis it seems that for the "real" networking the game uses Epic Online Services. No dice here. |
 | Battlefleet Gothic Armada                 | :x:                       | 1.139.2                       | Doesn't seem to use Galaxy for multiplayer. | 
 | Jagged Alliance 3                         | :x:                       | 1.150.0                       | Doesn't seem to use Galaxy for multiplayer. (Steam? With EncryptedAppTicket) | 
@@ -152,6 +171,9 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Northgard                                 | :x:                       | 1.139.2                       | Still thinks the game is offline, custom multiplayer? | 
 | Tropico 5                                 | :x:                       | 1.68.0                        | Game uses an external service for multiplayer? | 
 | Saints Row IV - Re-Elected                | :x:                       | 1.148.3                       | Uses Epic Online Services for multiplayer probably (stuck after "do you want to sign in?") | 
+| ArcRunner                                 | :x:                       | 1.150.0                       | Uses Epic Online Services for multiplayer |
+| Battlezone 98 Redux                       | :x:                       | 1.100.2                       | Uses Steam for multiplayer |
+| Homeseek                                  | :x:                       | -                             | Uses Epic Online Services for multiplayer |
 
 # Notice
 I'm not affiliated in any way with GOG or CD Projekt RED.  
