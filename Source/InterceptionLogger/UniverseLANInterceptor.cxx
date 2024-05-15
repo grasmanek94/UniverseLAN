@@ -136,12 +136,15 @@ namespace universelan::client {
 		real_igalaxy_instance = real_factory_create_instance();
 		real_ierror_manager = real_factory_get_error_manager();
 
-		real_init = [&](InitOptionsImpl const& initOptions) -> void {
+		real_init = [this](InitOptionsImpl initOptions) -> void {
 			try {
+				if (initOptions.galaxyPeerPath == nullptr || *initOptions.galaxyPeerPath == '\0') {
+					initOptions.galaxyPeerPath = ".";
+				}
 #if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
 				real_igalaxy_instance->Init(initOptions);
 #else
-				real_igalaxy_instance->Init(initOptions.clientID, initOptions.clientSecret);
+				real_igalaxy_instance->Init(initOptions.clientID, initOptions.clientSecret, initOptions.galaxyPeerPath);
 #endif
 			}
 			catch (const IError& error) {
