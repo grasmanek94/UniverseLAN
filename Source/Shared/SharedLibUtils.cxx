@@ -7,8 +7,11 @@
 #include <dlfcn.h>
 #endif
 
-#include <stdexcept>
+#include <stdlib.h>
+
 #include <functional>
+#include <memory>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -64,12 +67,23 @@ namespace universelan
 		SharedLibUtils* instance = nullptr;
 		std::string dll_name = "";
 		std::vector<std::string> dll_functions;
+		const char UNIVERSELAN_INTERCEPTOR_REALDLL_PREFIX[] = "UNIVERSELAN_INTERCEPTOR_REALDLL_PREFIX";
 	}
 
 	SharedLibUtils::SharedLibUtils() {
 		dll_functions.clear();
 
 		dll_name = "";
+
+		size_t required = 0;
+		getenv_s(&required, NULL, 0, UNIVERSELAN_INTERCEPTOR_REALDLL_PREFIX);
+
+		if (required != 0) {
+			std::shared_ptr<char[]> dll_prefix(new char[required]);
+			if (getenv_s(&required, dll_prefix.get(), required, UNIVERSELAN_INTERCEPTOR_REALDLL_PREFIX) == 0) {
+				dll_name = std::string(dll_prefix.get(), required);
+			}
+		}	
 
 #ifndef _WIN32
 		dll_name += "lib";
