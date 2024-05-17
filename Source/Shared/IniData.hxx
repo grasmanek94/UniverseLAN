@@ -39,7 +39,7 @@ namespace universelan {
 		IniData();
 		virtual ~IniData();
 
-		const std::string& GetGameDataPath() const;
+		std::string GetGameDataPath() const;
 		const std::string& GetServerDataPath() const;
 		const std::string& GetAuthenticationKey() const;
 

@@ -2,6 +2,7 @@
 
 #include "Client.hxx"
 
+#include <EnvUtils.hxx>
 #include <IniData.hxx>
 #include <SharedFileUtils.hxx>
 #include <Tracer.hxx>
@@ -20,7 +21,7 @@ namespace universelan::client {
 		}
 
 		if (sfu == nullptr) {
-			sfu = std::make_unique<SharedFileUtils>(config->GetGameDataPath());
+			sfu = std::make_unique<SharedFileUtils>(env_utils::get_gamedata_path_prefix() + config->GetGameDataPath());
 		}
 
 		tracer::Trace::InitTracing(
@@ -89,7 +90,7 @@ namespace universelan::client {
 		}
 
 		if (sfu == nullptr) {
-			sfu = std::make_unique<SharedFileUtils>(config->GetGameDataPath());
+			sfu = std::make_unique<SharedFileUtils>(env_utils::get_gamedata_path_prefix() + config->GetGameDataPath());
 		}
 
 		tracer::Trace::InitTracing(

@@ -1,4 +1,5 @@
 #include "SharedLibUtils.hxx"
+#include "EnvUtils.hxx"
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -73,21 +74,7 @@ namespace universelan
 	SharedLibUtils::SharedLibUtils() {
 		dll_functions.clear();
 
-		dll_name = "";
-
-		size_t required = 0;
-		getenv_s(&required, NULL, 0, UNIVERSELAN_INTERCEPTOR_REALDLL_PREFIX);
-
-		if (required != 0) {
-			std::shared_ptr<char[]> dll_prefix(new char[required]);
-			if (getenv_s(&required, dll_prefix.get(), required, UNIVERSELAN_INTERCEPTOR_REALDLL_PREFIX) == 0) {
-				if (required > 0) {
-					dll_name = std::string(dll_prefix.get(), required - 1);
-				}
-			}
-		}
-
-		dll_name +=
+		dll_name += env_utils::get_env(UNIVERSELAN_INTERCEPTOR_REALDLL_PREFIX) +
 #ifndef _WIN32
 		"lib"
 #endif

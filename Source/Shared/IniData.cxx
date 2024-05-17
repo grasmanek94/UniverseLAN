@@ -1,8 +1,9 @@
 #include "IniData.hxx"
 
-#include "ConstHash.hxx"
-#include "MachineInfo.hxx"
 #include "ConsoleCoutRedirector.hxx"
+#include "ConstHash.hxx"
+#include "EnvUtils.hxx"
+#include "MachineInfo.hxx"
 
 #include <magic_enum/magic_enum.hpp>
 #include <Tracer.hxx>
@@ -191,9 +192,9 @@ namespace universelan {
 		return TraceToConsole;
 	}
 
-	const std::string& IniData::GetGameDataPath() const
+	std::string IniData::GetGameDataPath() const
 	{
-		return GameDataPath;
+		return env_utils::get_gamedata_path_prefix() + GameDataPath;
 	}
 
 	const std::string& IniData::GetServerDataPath() const
@@ -302,7 +303,7 @@ namespace universelan {
 
 			auto GalaxyIDOffsetString = ini.GetValue(UserSection.c_str(), "GalaxyIDOffset", "");
 			switch (const_hash(GalaxyIDOffsetString)) {
-			case const_hash("@ProcessID"): 
+			case const_hash("@ProcessID"):
 				GalaxyIDOffset = machine_info.GetProcessID();
 				break;
 
@@ -313,7 +314,7 @@ namespace universelan {
 			default:
 				GalaxyIDOffset = ini.GetLongLongValue(UserSection.c_str(), "GalaxyIDOffset", 0);
 				break;
-			
+
 			}
 
 			Avatar = ini.GetValue(UserSection.c_str(), "Avatar", "me.png");
