@@ -81,26 +81,30 @@ namespace universelan
 		if (required != 0) {
 			std::shared_ptr<char[]> dll_prefix(new char[required]);
 			if (getenv_s(&required, dll_prefix.get(), required, UNIVERSELAN_INTERCEPTOR_REALDLL_PREFIX) == 0) {
-				dll_name = std::string(dll_prefix.get(), required);
+				if (required > 0) {
+					dll_name = std::string(dll_prefix.get(), required - 1);
+				}
 			}
-		}	
+		}
 
+		dll_name +=
 #ifndef _WIN32
-		dll_name += "lib";
+		"lib"
 #endif
-		dll_name += "Real";
+		"Real"
 #if GALAXY_BUILD_FEATURE_HAS_RED_PREFIX
-		dll_name += "RED";
+		"RED"
 #endif
-		dll_name += "Galaxy";
+		"Galaxy"
 #if defined(_WIN64) || (defined(_LP64) && _LP64 == 1)
-		dll_name += "64";
+		"64"
 #endif
 #ifdef _WIN32
-		dll_name += ".dll";
+		".dll"
 #else
-		dll_name += ".so";
+		".so"
 #endif
+			;
 
 		ListDLLFunctions(dll_name, dll_functions);
 
