@@ -29,7 +29,6 @@ namespace universelan::server {
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<LobbyMemberStateChangeMessage>& data) { tracer::Trace trace{ "::LobbyMemberStateChangeMessage" }; REQUIRES_AUTHENTICATION(peer); }
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<LobbyOwnerChangeMessage>& data) { tracer::Trace trace{ "::LobbyOwnerChangeMessage" }; REQUIRES_AUTHENTICATION(peer); }
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<OnlineStatusChangeMessage>& data) { tracer::Trace trace{ "::OnlineStatusChangeMessage" }; REQUIRES_AUTHENTICATION(peer); }
-	void Server::Handle(ENetPeer* peer, const std::shared_ptr<P2PServerNetworkPacketMessage>& data) { REQUIRES_AUTHENTICATION(peer); }
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data)
 	{
@@ -243,6 +242,66 @@ namespace universelan::server {
 	}
 #endif
 
+	// Message *from* a *server host*
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<P2PServerNetworkPacketMessage>& data) {
+		REQUIRES_AUTHENTICATION(peer);
+
+		tracer::Trace trace{ "::P2PServerNetworkPacketMessage", __FUNCTION__, tracer::Trace::INETWORKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
+
+		if (trace.has_flags(tracer::Trace::NETWORK_P2P_CONTENTS)) {
+			trace.write_all(std::format("data_contents: {}", bytes_to_hex(data->data.data(), (uint32_t)data->data.size())));
+		}
+
+		ENetPacketFlag flag{};
+
+		switch (data->send_type) {
+		case P2P_SEND_RELIABLE:
+#if GALAXY_BUILD_FEATURE_HAS_P2P_SEND_IMMEDIATE
+		case P2P_SEND_RELIABLE_IMMEDIATE:
+#endif
+			flag = ENET_PACKET_FLAG_RELIABLE;
+			break;
+
+		case P2P_SEND_UNRELIABLE:
+#if GALAXY_BUILD_FEATURE_HAS_P2P_SEND_IMMEDIATE
+		case P2P_SEND_UNRELIABLE_IMMEDIATE:
+#endif
+			// no unreliable flag?
+			break;
+		}
+
+		peer::ptr pd = peer_mapper.Get(peer);
+		P2PNetworkPacketMessage data_to_send{ *data };
+
+		for (auto& lobby_iter : pd->lobbies) {
+			auto& lobby = lobby_iter.second;
+			if (lobby && lobby->GetOwner() == pd->id && lobby->GetMemberCount() >= 2) {
+				if (galaxy::api::GetIDType(data->id) == galaxy::api::IDType::ID_TYPE_LOBBY) {
+					if (data->id == lobby->GetID()) {
+						// send to all lobby members "as lobby" (id is already lobby so just send as-is)
+						for (const auto& member : lobby->GetMembers()) {
+							peer::ptr target_pd = peer_mapper.Get(member);
+							if (target_pd) {
+								connection.Send(target_pd->peer, data_to_send, flag);
+							}
+						}
+					}
+				}
+				else if (lobby->IsMember(data->id)) {
+					peer::ptr target_pd = peer_mapper.Get(data->id);
+					if (target_pd != nullptr) {
+						// send "as lobby" (modify id to lobby)
+						data_to_send.id = lobby->GetID();
+						connection.Send(target_pd->peer, data_to_send, flag);
+					}
+					else if (trace.has_flags(tracer::Trace::DETAILED)) {
+						trace.write_all("target_pd is nullptr?!");
+					}
+				}
+			}
+		}
+	}
+
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<P2PNetworkPacketMessage>& data) {
 		REQUIRES_AUTHENTICATION(peer);
 
@@ -252,50 +311,68 @@ namespace universelan::server {
 			trace.write_all(std::format("data_contents: {}", bytes_to_hex(data->data.data(), (uint32_t)data->data.size())));
 		}
 
+		ENetPacketFlag flag{};
+
+		switch (data->send_type) {
+		case P2P_SEND_RELIABLE:
+#if GALAXY_BUILD_FEATURE_HAS_P2P_SEND_IMMEDIATE
+		case P2P_SEND_RELIABLE_IMMEDIATE:
+#endif
+			flag = ENET_PACKET_FLAG_RELIABLE;
+			break;
+
+		case P2P_SEND_UNRELIABLE:
+#if GALAXY_BUILD_FEATURE_HAS_P2P_SEND_IMMEDIATE
+		case P2P_SEND_UNRELIABLE_IMMEDIATE:
+#endif
+			// no unreliable flag?
+			break;
+		}
+
 		peer::ptr pd = peer_mapper.Get(peer);
 		peer::ptr target_pd{ nullptr };
-
-#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
-		bool send_server_message = false;
-#endif
 
 		// Send message TO lobby
 		if (galaxy::api::GetIDType(data->id) == galaxy::api::IDType::ID_TYPE_LOBBY) {
 			auto lobby = lobby_manager.GetLobby(data->id);
 			if (lobby) {
 				target_pd = peer_mapper.Get(lobby->GetOwner());
+
+				if (target_pd) {
+					if (target_pd->id == pd->id) {
+						// broadcast to all members, lobby owner sent to own lobby
+						// now question, should we use the lobby id or the member id?
+						// Uncomment for host member id instead of lobby id:
+						// data->id = pd->id;
+
+						for (const auto& member : lobby->GetMembers()) {
+							peer::ptr target_pd = peer_mapper.Get(member);
+							if (target_pd) {
+								connection.Send(target_pd->peer, *data, flag);
+							}
+						}
+					}
+					else {
 #if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
-				send_server_message = true;
+						// some member sent a message to the lobby host
+						data->id = pd->id;
+						connection.Send(target_pd->peer, P2PServerNetworkPacketMessage{ *data }, flag);
 #endif
+					}
+				}
 			}
+			return;
 		}
-		else {
-			target_pd = peer_mapper.Get(data->id);
-		}
+
+		target_pd = peer_mapper.Get(data->id);
 
 		if (!target_pd) {
 			return;
 		}
 
+		// send normal packet from peer to peer
 		data->id = pd->id;
-
-		// Send message AS lobby
-		for (auto& lobby_iter : pd->lobbies) {
-			auto& lobby = lobby_iter.second;
-			if (lobby ->GetType() == LOBBY_TOPOLOGY_TYPE_STAR && lobby->GetOwner() == pd->id) {
-				data->id = lobby->GetID();
-				break;
-			}
-		}
-
-#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
-		if (send_server_message) {
-			connection.Send(target_pd->peer, P2PServerNetworkPacketMessage{ *data });
-			return;
-		}
-#endif
-
-		connection.Send(target_pd->peer, *data);
+		connection.Send(target_pd->peer, *data, flag);
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<FileShareMessage>& data) {
@@ -568,7 +645,7 @@ namespace universelan::server {
 			if (member_peer && (member_peer->peer != peer)) {
 				connection.Send(member_peer->peer, notification);
 			}
-		}
+}
 
 		return true;
 	}
@@ -699,7 +776,7 @@ namespace universelan::server {
 			if (!close && new_owner) {
 				connection.Send(member_peer->peer, owner_change_message);
 				connection.Send(member_peer->peer, leave_notification);
-			}
+		}
 			else if (close) {
 				member_peer->RemoveLobby(lobby);
 				connection.Send(member_peer->peer, leave_notification);
@@ -712,7 +789,7 @@ namespace universelan::server {
 		}
 
 		return true;
-	}
+		}
 
 	bool Server::HandleMemberAllLobbiesLeave(ENetPeer* peer, bool disconnected) {
 		tracer::Trace trace{ nullptr, __FUNCTION__ };

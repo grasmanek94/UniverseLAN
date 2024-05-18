@@ -29,6 +29,11 @@ namespace universelan::client {
 	 * @addtogroup api
 	 * @{
 	 */
+	enum class NetworkingImplType {
+		Client,
+		Server,
+		GameServer
+	};
 
 	 /**
 	  * The interface for communicating with other Galaxy Peers.
@@ -58,9 +63,11 @@ namespace universelan::client {
 		ListenerRegistrarImpl* listeners;
 
 		channels_array buffer;
+		NetworkingImplType net_packet_type;
 		char networking_type[4] ; // [S] [C] [G]
+
 	public:
-		NetworkingImpl(InterfaceInstances* intf, char networking_type_letter);
+		NetworkingImpl(InterfaceInstances* intf, NetworkingImplType net_packet_type);
 		virtual ~NetworkingImpl();
 
 		/**

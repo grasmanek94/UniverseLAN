@@ -4,11 +4,26 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
-	NetworkingImpl::NetworkingImpl(InterfaceInstances* intf, char networking_type_letter) :
+	NetworkingImpl::NetworkingImpl(InterfaceInstances* intf, NetworkingImplType net_packet_type) :
 		intf{ intf }, listeners{ intf->notification.get() },
-		buffer{}, networking_type{'[', networking_type_letter, ']', 0}
+		buffer{}, net_packet_type{ net_packet_type }, networking_type{ '[', 'U', ']', 0 }
 	{
 		tracer::Trace trace{ networking_type, __FUNCTION__, tracer::Trace::INETWORKING };
+
+		switch (net_packet_type)
+		{
+		case NetworkingImplType::Client:
+			networking_type[1] = 'C';
+			break;
+
+		case NetworkingImplType::Server:
+			networking_type[1] = 'S';
+			break;
+
+		case NetworkingImplType::GameServer:
+			networking_type[1] = 'G';
+			break;
+		}
 	}
 
 	NetworkingImpl::~NetworkingImpl()
@@ -35,9 +50,14 @@ namespace universelan::client {
 			break;
 		}
 
-		intf->client->GetConnection().SendAsync(P2PNetworkPacketMessage{ galaxyID, channel, sendType, (const char*)data, dataSize }, flag);
+		switch (net_packet_type)
+		{
+		case NetworkingImplType::Server:
+		case NetworkingImplType::GameServer:
+			return intf->client->GetConnection().SendAsync(P2PServerNetworkPacketMessage{ galaxyID, channel, sendType, (const char*)data, dataSize }, flag);
+		}
 
-		return true;
+		return intf->client->GetConnection().SendAsync(P2PNetworkPacketMessage{ galaxyID, channel, sendType, (const char*)data, dataSize }, flag);
 	}
 
 	bool NetworkingImpl::GetP2PPacket(void* dest, uint32_t destSize, uint32_t* outMsgSize, GalaxyID& outGalaxyID, uint8_t channel, bool pop) {

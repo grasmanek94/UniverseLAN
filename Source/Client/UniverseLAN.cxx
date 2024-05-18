@@ -49,9 +49,9 @@ namespace universelan::client {
 		chat = std::make_unique<ChatImpl>(this);
 #endif
 		matchmaking = std::make_unique<MatchmakingImpl>(this);
-		networking = std::make_unique<NetworkingImpl>(this, is_gameserver ? 'G' : 'C');
+		networking = std::make_unique<NetworkingImpl>(this, is_gameserver ? NetworkingImplType::GameServer : NetworkingImplType::Client);
 #if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
-		server_networking = std::make_unique<NetworkingImpl>(this, is_gameserver ? 'G' : 'S');
+		server_networking = std::make_unique<NetworkingImpl>(this, is_gameserver ? NetworkingImplType::GameServer : NetworkingImplType::Server);
 #endif
 		stats = std::make_unique<StatsImpl>(this);
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS
