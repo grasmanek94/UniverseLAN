@@ -2,6 +2,7 @@
 
 #include "Listeners/UserListener.hxx"
 
+#include <EnvUtils.hxx>
 #include <GalaxyID.hxx>
 #include <Tracer.hxx>
 #include <SafeStringCopy.hxx>
@@ -16,6 +17,9 @@ namespace universelan::client {
 
 	namespace {
 		const auto TraceContext = tracer::Trace::IUSER;
+
+		const char UNIVERSELAN_OVERRIDE_USERNAME[] = "UNIVERSELAN_OVERRIDE_USERNAME";
+		const char UNIVERSELAN_OVERRIDE_PASSWORD[] = "UNIVERSELAN_OVERRIDE_PASSWORD";
 	}
 
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
@@ -138,9 +142,20 @@ namespace universelan::client {
 		}
 
 		if (config->OverrideSignInEnabled()) {
+			std::string id = env_utils::get_env(UNIVERSELAN_OVERRIDE_USERNAME);
+			std::string password = env_utils::get_env(UNIVERSELAN_OVERRIDE_PASSWORD);
+
+			if (id.length() < 1) {
+				id = config->GetOverrideSignInId();
+			}
+
+			if (password.length() < 1) {
+				password = config->GetOverrideSignInPassword();
+			}
+
 			intf()->USER_SIGN_IN_CREDENTIALS(
-				config->GetOverrideSignInId().c_str(),
-				config->GetOverrideSignInPassword().c_str()
+				id.c_str(),
+				password.c_str()
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 				, AuthListener::encapsulate(listener)
 #endif

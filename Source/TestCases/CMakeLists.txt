@@ -43,6 +43,7 @@ function(add_simple_test_case GALAXY_VERSION_NUMBER TEST_CASE_NAME PREFIX)
     set(MAYBE_RED_GALAXY_PREFIX "")
   endif()
 
+  
   target_link_libraries(${CURRENT_TEST_TARGET} PUBLIC 
     universelan-magic_enum
     universelan-galaxy-${GALAXY_VERSION} 
@@ -50,7 +51,7 @@ function(add_simple_test_case GALAXY_VERSION_NUMBER TEST_CASE_NAME PREFIX)
     universelan-common-version
     "${CURRENT_TEST_REFERENCE_DIR}/${MAYBE_RED_GALAXY_PREFIX}Galaxy${ARCH_ADDITION}.lib"
   )
-
+ 
   set_target_properties(${CURRENT_TEST_TARGET} PROPERTIES 
     OUTPUT_NAME "TestCase${ARCH_ADDITION}_${TEST_CASE_NAME}"
     RUNTIME_OUTPUT_DIRECTORY "${CURRENT_TEST_OUTPUT}"
@@ -62,17 +63,46 @@ function(add_simple_test_case GALAXY_VERSION_NUMBER TEST_CASE_NAME PREFIX)
   if(NOT MSVC)
 
     target_link_options(${CURRENT_TEST_TARGET} PRIVATE -static-libgcc -static-libstdc++)
-    file(COPY "${CMAKE_SOURCE_DIR}/Config/" DESTINATION "${CURRENT_TEST_OUTPUT}")
+    file(COPY "${CMAKE_SOURCE_DIR}/ConfigDebug/" DESTINATION "${CURRENT_TEST_OUTPUT}")
     file(COPY "${CURRENT_TEST_REFERENCE_DIR}/lib${MAYBE_RED_GALAXY_PREFIX}Galaxy${ARCH_ADDITION}.so" DESTINATION "${CURRENT_TEST_OUTPUT}/Debug/")
 
   else()
 
-    file(COPY "${CURRENT_TEST_REFERENCE_DIR}/${MAYBE_RED_GALAXY_PREFIX}Galaxy${ARCH_ADDITION}.dll" DESTINATION "${CURRENT_TEST_OUTPUT}/Debug/")
-    file(COPY "${CURRENT_TEST_REFERENCE_DIR}/${MAYBE_RED_GALAXY_PREFIX}Galaxy${ARCH_ADDITION}.dll" DESTINATION "${CURRENT_TEST_OUTPUT}/Release/")
+    set(DLL_FILENAME "${MAYBE_RED_GALAXY_PREFIX}Galaxy${ARCH_ADDITION}.dll")
+    if(EXISTS   "${CURRENT_TEST_REFERENCE_DIR}/${DLL_FILENAME}")    
+ 
+      if(BUILD_INTERCEPTOR)
+        set(DLL_OUT_DIR "gog/")
+      else()
+        set(DLL_OUT_DIR "")
+      endif()
 
-    file(COPY "${CMAKE_SOURCE_DIR}/Config/" DESTINATION "${CURRENT_TEST_OUTPUT}/Debug/")
+      file(COPY "${CURRENT_TEST_REFERENCE_DIR}/${DLL_FILENAME}" DESTINATION "${CURRENT_TEST_OUTPUT}/Debug/${DLL_OUT_DIR}")
+      file(COPY "${CURRENT_TEST_REFERENCE_DIR}/${DLL_FILENAME}" DESTINATION "${CURRENT_TEST_OUTPUT}/Release/${DLL_OUT_DIR}")
+
+      if(BUILD_INTERCEPTOR)
+        file(RENAME "${CURRENT_TEST_OUTPUT}/Debug/${DLL_OUT_DIR}${DLL_FILENAME}" "${CURRENT_TEST_OUTPUT}/Debug/${DLL_OUT_DIR}Real${DLL_FILENAME}")
+        file(RENAME "${CURRENT_TEST_OUTPUT}/Release/${DLL_OUT_DIR}${DLL_FILENAME}" "${CURRENT_TEST_OUTPUT}/Release/${DLL_OUT_DIR}Real${DLL_FILENAME}")
+      endif()
+    endif()
+
+    set(PEER_FILENAME "GalaxyPeer${ARCH_ADDITION}.dll")
+    if(EXISTS   "${CURRENT_TEST_REFERENCE_DIR}/${PEER_FILENAME}")
+      file(COPY "${CURRENT_TEST_REFERENCE_DIR}/${PEER_FILENAME}" DESTINATION "${CURRENT_TEST_OUTPUT}/Debug/")
+      file(COPY "${CURRENT_TEST_REFERENCE_DIR}/${PEER_FILENAME}" DESTINATION "${CURRENT_TEST_OUTPUT}/Release/")
+    endif()
+
+    file(COPY "${CMAKE_SOURCE_DIR}/ConfigDebug/" DESTINATION "${CURRENT_TEST_OUTPUT}/Debug/")
     file(COPY "${CMAKE_SOURCE_DIR}/Config/" DESTINATION "${CURRENT_TEST_OUTPUT}/Release/")
 
+    if(BUILD_INTERCEPTOR)
+      configure_file("${CMAKE_CURRENT_SOURCE_DIR}/batch/test_gog_user1.bat.in" "${CURRENT_TEST_OUTPUT}/Debug/test_gog_user1.bat" @ONLY)
+      configure_file("${CMAKE_CURRENT_SOURCE_DIR}/batch/test_gog_user1.bat.in" "${CURRENT_TEST_OUTPUT}/Release/test_gog_user1.bat" @ONLY)
+      configure_file("${CMAKE_CURRENT_SOURCE_DIR}/batch/test_gog_user2.bat.in" "${CURRENT_TEST_OUTPUT}/Debug/test_gog_user2.bat" @ONLY)
+      configure_file("${CMAKE_CURRENT_SOURCE_DIR}/batch/test_gog_user2.bat.in" "${CURRENT_TEST_OUTPUT}/Release/test_gog_user2.bat" @ONLY)
+      configure_file("${CMAKE_CURRENT_SOURCE_DIR}/batch/test_ulan.bat.in" "${CURRENT_TEST_OUTPUT}/Debug/test_ulan.bat" @ONLY)
+      configure_file("${CMAKE_CURRENT_SOURCE_DIR}/batch/test_ulan.bat.in" "${CURRENT_TEST_OUTPUT}/Release/test_ulan.bat" @ONLY)
+    endif()
   endif()
 
   set(CURRENT_TEST_TARGET ${CURRENT_TEST_TARGET} PARENT_SCOPE)

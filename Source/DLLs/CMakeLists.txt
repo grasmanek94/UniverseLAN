@@ -150,6 +150,18 @@ function(add_universelan_executables GALAXY_VERSION_NUMBER)
     if(NOT MSVC)
       target_link_options(universelan-interceptor-${GALAXY_VERSION} PRIVATE -static-libgcc -static-libstdc++)
     endif()
+
+    if(BUILD_TEST_CASES)
+      # Copy the UniverseLAN.dll to the test dir prefixed with "ulan-"
+      add_custom_command(TARGET universelan-client-${GALAXY_VERSION} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:universelan-client-${GALAXY_VERSION}> "${CMAKE_SOURCE_DIR}/bin/tests/${GALAXY_VERSION_NUMBER}/$<CONFIG>/ulan-Real$<TARGET_FILE_NAME:universelan-client-${GALAXY_VERSION}>"
+      )
+
+      # Copy the Interceptor.dll to the test dir names as "Galaxy<arch>.dll"
+      add_custom_command(TARGET universelan-interceptor-${GALAXY_VERSION} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:universelan-interceptor-${GALAXY_VERSION}> "${CMAKE_SOURCE_DIR}/bin/tests/${GALAXY_VERSION_NUMBER}/$<CONFIG>/$<TARGET_FILE_NAME:universelan-client-${GALAXY_VERSION}>"
+      )
+    endif()
   endif()
 
   if(NOT MSVC)
