@@ -152,9 +152,14 @@ function(add_universelan_executables GALAXY_VERSION_NUMBER)
     endif()
 
     if(BUILD_TEST_CASES)
-      # Copy the UniverseLAN.dll to the test dir prefixed with "ulan-"
+      # Copy the UniverseLAN.dll to the test dir prefixed with "Real"
       add_custom_command(TARGET universelan-client-${GALAXY_VERSION} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:universelan-client-${GALAXY_VERSION}> "${CMAKE_SOURCE_DIR}/bin/tests/${GALAXY_VERSION_NUMBER}/$<CONFIG>/ulan-Real$<TARGET_FILE_NAME:universelan-client-${GALAXY_VERSION}>"
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:universelan-client-${GALAXY_VERSION}> "${CMAKE_SOURCE_DIR}/bin/tests/${GALAXY_VERSION_NUMBER}/$<CONFIG>/Real$<TARGET_FILE_NAME:universelan-client-${GALAXY_VERSION}>"
+      )
+
+      # Copy the server.exe to the test dir
+      add_custom_command(TARGET universelan-server-${GALAXY_VERSION} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:universelan-server-${GALAXY_VERSION}> "${CMAKE_SOURCE_DIR}/bin/tests/${GALAXY_VERSION_NUMBER}/$<CONFIG>/$<TARGET_FILE_NAME:universelan-server-${GALAXY_VERSION}>"
       )
 
       # Copy the Interceptor.dll to the test dir names as "Galaxy<arch>.dll"

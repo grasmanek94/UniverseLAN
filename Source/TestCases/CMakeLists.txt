@@ -100,8 +100,6 @@ function(add_simple_test_case GALAXY_VERSION_NUMBER TEST_CASE_NAME PREFIX)
       configure_file("${CMAKE_CURRENT_SOURCE_DIR}/batch/test_gog_user1.bat.in" "${CURRENT_TEST_OUTPUT}/Release/test_gog_user1.bat" @ONLY)
       configure_file("${CMAKE_CURRENT_SOURCE_DIR}/batch/test_gog_user2.bat.in" "${CURRENT_TEST_OUTPUT}/Debug/test_gog_user2.bat" @ONLY)
       configure_file("${CMAKE_CURRENT_SOURCE_DIR}/batch/test_gog_user2.bat.in" "${CURRENT_TEST_OUTPUT}/Release/test_gog_user2.bat" @ONLY)
-      configure_file("${CMAKE_CURRENT_SOURCE_DIR}/batch/test_ulan.bat.in" "${CURRENT_TEST_OUTPUT}/Debug/test_ulan.bat" @ONLY)
-      configure_file("${CMAKE_CURRENT_SOURCE_DIR}/batch/test_ulan.bat.in" "${CURRENT_TEST_OUTPUT}/Release/test_ulan.bat" @ONLY)
     endif()
   endif()
 

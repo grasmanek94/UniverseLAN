@@ -1,4 +1,0 @@
-setlocal
-set UNIVERSELAN_INTERCEPTOR_REALDLL_PREFIX=ulan-
-%*
-endlocal
