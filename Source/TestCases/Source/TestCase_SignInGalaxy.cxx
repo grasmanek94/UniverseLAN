@@ -50,7 +50,7 @@ int main()
 
 	GET_GALAXY_API(User())->SignInGalaxy();
 
-	while (!signed_in || (end_time < std::chrono::steady_clock::now()))
+	while (!signed_in || (std::chrono::steady_clock::now() < end_time))
 	{
 		GET_GALAXY_API_AS_IS(ProcessData());
 
