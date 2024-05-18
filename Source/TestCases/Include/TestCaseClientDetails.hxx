@@ -343,3 +343,4 @@ catch (const IError& err) { \
 #include "TestCaseUserInformationRetrieveListener.hxx"
 #include "TestCaseUserStatsAndAchievementsRetrieveListener.hxx"
 #include "TestCaseUserTimePlayedRetrieveListener.hxx"
+#include "TestCaseInitListener.hxx"
