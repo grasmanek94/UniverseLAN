@@ -1,19 +1,8 @@
 #include <TestCaseClientDetails.hxx>
 
-#if GALAXY_BUILD_FEATURE_HAS_IGALAXY
-#define GET_GALAXY_API(what) galaxy_api->Get ## what
-#define GET_GALAXY_API_AS_IS(what) galaxy_api->what
-
-galaxy::api::IGalaxy* galaxy_api = nullptr;
-#else
-#define GET_GALAXY_API(what) galaxy::api::what
-#define GET_GALAXY_API_AS_IS(what) galaxy::api::what
-#endif
-
 #if !GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINCREDENTIALS
 #define SignInCredentials SignIn
 #endif
-
 
 #if GALAXY_BUILD_FEATURE_HAS_IACCESSTOKENLISTENER
 bool has_access_token_refreshed = true;
@@ -31,7 +20,7 @@ GalaxyID my_lobby_id = 0;
 void perform_test() {
 
 	auto matchmaking_ptr = GET_GALAXY_API(Matchmaking());
-	
+
 	matchmaking_ptr->CreateLobby(LobbyType::LOBBY_TYPE_PUBLIC, 4
 #if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
 		, true, LobbyTopologyType::LOBBY_TOPOLOGY_TYPE_FCM_OWNERSHIP_TRANSITION
@@ -62,24 +51,7 @@ int main()
 	tracer::Trace::SetLogToCout(true);
 	tracer::Trace::SetTracingEnabled(false);
 
-#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
-	galaxy::api::InitOptions options(galaxy::api::CLIENT_ID.data(), galaxy::api::CLIENT_SECRET.data());
-#endif
-
-#if GALAXY_BUILD_FEATURE_HAS_IGALAXY
-	galaxy_api = galaxy::api::GalaxyFactory::CreateInstance();
-#endif
-
-	try {
-#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
-		GET_GALAXY_API_AS_IS(Init(options));
-#else
-		GET_GALAXY_API_AS_IS(Init(galaxy::api::CLIENT_ID.data(), galaxy::api::CLIENT_SECRET.data()));
-#endif
-	}
-	catch (const IError& err) {
-		std::cerr << err.GetMsg() << std::endl;
-	}
+	GALAXY_INIT();
 
 	trace = std::make_unique<tracer::Trace>("", "main");
 
@@ -279,6 +251,8 @@ int main()
 		delay_runner.Run();
 		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
+
+	GALAXY_DEINIT();
 
 	return 0;
 }

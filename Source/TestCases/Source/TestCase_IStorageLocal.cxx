@@ -7,16 +7,6 @@ int main() { return 0; }
 #include <string>
 #include <vector>
 
-#if GALAXY_BUILD_FEATURE_HAS_IGALAXY
-#define GET_GALAXY_API(what) galaxy_api->Get ## what
-#define GET_GALAXY_API_AS_IS(what) galaxy_api->what
-
-galaxy::api::IGalaxy* galaxy_api = nullptr;
-#else
-#define GET_GALAXY_API(what) galaxy::api::what
-#define GET_GALAXY_API_AS_IS(what) galaxy::api::what
-#endif
-
 #if !GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINCREDENTIALS
 #define SignInCredentials SignIn
 #endif
@@ -228,13 +218,7 @@ int main()
 	tracer::Trace::SetLogToCout(true);
 	tracer::Trace::SetTracingEnabled(false);
 
-	galaxy::api::InitOptions options(galaxy::api::CLIENT_ID.data(), galaxy::api::CLIENT_SECRET.data());
-
-#if GALAXY_BUILD_FEATURE_HAS_IGALAXY
-	galaxy_api = galaxy::api::GalaxyFactory::CreateInstance();
-#endif
-
-	GET_GALAXY_API_AS_IS(Init(options));
+	GALAXY_INIT();
 
 	trace = std::make_unique<tracer::Trace>("", "main");
 
@@ -412,6 +396,8 @@ int main()
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
+
+	GALAXY_DEINIT();
 
 	return 0;
 }

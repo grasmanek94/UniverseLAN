@@ -227,6 +227,62 @@ bool compare_equal(const char* const data, const std::string& str) {
 	return true;
 }
 
+#if GALAXY_BUILD_FEATURE_HAS_IGALAXY
+#define GET_GALAXY_API(what) galaxy_api->Get ## what
+#define GET_GALAXY_API_AS_IS(what) galaxy_api->what
+
+galaxy::api::IGalaxy* galaxy_api = nullptr;
+#else
+#define GET_GALAXY_API(what) galaxy::api::what
+#define GET_GALAXY_API_AS_IS(what) galaxy::api::what
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_IGALAXY && GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
+#define GALAXY_INIT() \
+try { \
+	galaxy_api = galaxy::api::GalaxyFactory::CreateInstance(); \
+	galaxy::api::InitOptions options(galaxy::api::CLIENT_ID.data(), galaxy::api::CLIENT_SECRET.data()); \
+	GET_GALAXY_API_AS_IS(Init(options)); \
+} \
+catch (const IError& err) { \
+	std::cerr << err.GetMsg() << std::endl; \
+}
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_IGALAXY && !GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
+#define GALAXY_INIT() \
+try { \
+	galaxy_api = galaxy::api::GalaxyFactory::CreateInstance(); \
+	GET_GALAXY_API_AS_IS(Init(galaxy::api::CLIENT_ID.data(), galaxy::api::CLIENT_SECRET.data())); \
+} \
+catch (const IError& err) { \
+	std::cerr << err.GetMsg() << std::endl; \
+}
+#endif
+
+#if !GALAXY_BUILD_FEATURE_HAS_IGALAXY && GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
+#define GALAXY_INIT() \
+try { \
+	galaxy::api::InitOptions options(galaxy::api::CLIENT_ID.data(), galaxy::api::CLIENT_SECRET.data()); \
+	GET_GALAXY_API_AS_IS(Init(options)); \
+} \
+catch (const IError& err) { \
+	std::cerr << err.GetMsg() << std::endl; \
+}
+#endif
+
+#if !GALAXY_BUILD_FEATURE_HAS_IGALAXY && !GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
+#define GALAXY_INIT() \
+try { \
+	GET_GALAXY_API_AS_IS(Init(galaxy::api::CLIENT_ID.data(), galaxy::api::CLIENT_SECRET.data())); \
+} \
+catch (const IError& err) { \
+	std::cerr << err.GetMsg() << std::endl; \
+}
+#endif
+
+#define GALAXY_DEINIT() GET_GALAXY_API_AS_IS(Shutdown())
+
 #include "TestCaseDelayRunner.hxx"
 #include "TestCaseAuthListener.hxx"
 #include "TestCaseAccessTokenListener.hxx"
