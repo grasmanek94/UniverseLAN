@@ -283,6 +283,14 @@ catch (const IError& err) { \
 
 #define GALAXY_DEINIT() GET_GALAXY_API_AS_IS(Shutdown())
 
+#if !GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINGALAXY
+#define SignInGalaxy SignIn
+#endif
+
+#if !GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINCREDENTIALS
+#define SignInCredentials SignIn
+#endif
+
 #include "TestCaseDelayRunner.hxx"
 #include "TestCaseAuthListener.hxx"
 #include "TestCaseAccessTokenListener.hxx"

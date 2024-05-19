@@ -1,24 +1,14 @@
 #if !GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 int main() { return 0; }
 #else
+
+#define USE_TESTING_MAIN
+
 #include <TestCaseClientDetails.hxx>
 
 #include <unordered_map>
 #include <string>
 #include <vector>
-
-#if !GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINCREDENTIALS
-#define SignInCredentials SignIn
-#endif
-
-bool has_access_token_refreshed = true;
-bool has_signed_in = false;
-bool has_connected = false;
-bool has_operational_state_change = false;
-bool has_person_data_unchanged = false;
-bool performed_init = false;
-bool user_data_received = true;
-std::unique_ptr<tracer::Trace> trace{ nullptr };
 
 using file_data_t = std::vector<unsigned char>;
 using file_map_t = std::unordered_map<std::string, file_data_t>;
@@ -39,27 +29,27 @@ And maybe add some UTF-8 encoded characters here: łakomo
 żyć też się tutaj da.
 		)STR");
 
-	files["test2.bin"] = { 
+	files["test2.bin"] = {
 		0x9B,0x3E,0x34,0x87,
 		0xFD,0x24,0xB4,0x64,
 		0xBA,0x80,0x04,0xFD,
 		0xDF,0x23,0x41,0xEE,
 		0x00,0x00,0x00,0x00,
-		0xAC,0xF9,0x8F,0x00 
+		0xAC,0xF9,0x8F,0x00
 	};
 
 
 	auto storage_ptr = GET_GALAXY_API(Storage());
-	
+
 	for (auto& file : files) {
 		storage_ptr->FileDelete(file.first.c_str());
 	}
 
 	for (auto& file : files) {
-		bool status = 
+		bool status =
 			(storage_ptr->FileExists(file.first.c_str()) == false) &&
 			(storage_ptr->GetFileSize(file.first.c_str()) == 0)
-		;
+			;
 
 		tracer::Trace::write_all(
 			std::format(
@@ -105,7 +95,7 @@ And maybe add some UTF-8 encoded characters here: łakomo
 	}
 
 	for (auto& file : files) {
-		bool status = 
+		bool status =
 			(storage_ptr->FileExists(file.first.c_str()) == true) &&
 			(storage_ptr->GetFileSize(file.first.c_str()) == 21)
 			;
@@ -163,7 +153,7 @@ And maybe add some UTF-8 encoded characters here: łakomo
 			(storage_ptr->FileExists(file.first.c_str()) == true) &&
 			(storage_ptr->GetFileSize(file.first.c_str()) == file.second.size()) &&
 			(storage_ptr->GetFileCount() > 1)
-		;
+			;
 
 		tracer::Trace::write_all(
 			std::format(
@@ -197,208 +187,7 @@ And maybe add some UTF-8 encoded characters here: łakomo
 	}
 }
 
-void try_init() {
-	if (!has_signed_in ||
-		!has_connected ||
-		!has_operational_state_change ||
-		!has_person_data_unchanged ||
-		!has_access_token_refreshed ||
-		!user_data_received ||
-		performed_init)
-	{
-		return;
-	}
+void register_listeners() {}
+bool should_keep_running() { return true; }
 
-	performed_init = true;
-}
-
-int main()
-{
-	tracer::Trace::InitTracing(".", false, true, false, 0, true);
-	tracer::Trace::SetLogToCout(true);
-	tracer::Trace::SetTracingEnabled(false);
-
-	GALAXY_INIT();
-
-	trace = std::make_unique<tracer::Trace>("", "main");
-
-	AccessTokenListenerImplGlobal accesstokenlistener{ [&]() {
-		has_access_token_refreshed = true;
-		try_init();
-		} };
-
-	AchievementChangeListenerImplGlobal achievementchangelistener{};
-	AuthListenerImplGlobal authlistener{ [&]() {
-		has_signed_in = true;
-		try_init();
-		} };
-
-#if GALAXY_BUILD_FEATURE_HAS_ICHAT 
-	ChatRoomMessageSendListenerImplGlobal chatroommessagesendlistener{};
-	ChatRoomMessagesListenerImplGlobal chatroommessageslistener{};
-	ChatRoomMessagesRetrieveListenerImplGlobal chatroommessagesretrievelistener{};
-	ChatRoomWithUserRetrieveListenerImplGlobal chatroomwithuserretrievelistener{};
-#endif
-#if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING
-	ConnectionCloseListenerImplGlobal connectioncloselistener{};
-	ConnectionDataListenerImplGlobal connectiondatalistener{};
-	ConnectionOpenListenerImplGlobal connectionopenlistener{};
-#endif
-	EncryptedAppTicketListenerImplGlobal encryptedappticketlistener{};
-	FileShareListenerImplGlobal filesharelistener{};
-
-#if GALAXY_BUILD_FEATURE_HAS_FRIENDADDLISTENER
-	FriendAddListenerImplGlobal friendaddlistener{};
-#endif
-
-#if GALAXY_BUILD_FEATURE_NEW_FRIEND_FEATURES_104_3
-	FriendDeleteListenerImplGlobal frienddeletelistener{};
-	FriendInvitationListRetrieveListenerImplGlobal friendinvitationlistretrievelistener{};
-	FriendInvitationListenerImplGlobal friendinvitationlistener{};
-	FriendInvitationRespondToListenerImplGlobal friendinvitationrespondtolistener{};
-	FriendInvitationSendListenerImplGlobal friendinvitationsendlistener{};
-#endif
-
-	FriendListListenerImplGlobal friendlistlistener{};
-	GameInvitationReceivedListenerImplGlobal gameinvitationreceivedlistener{};
-#if GALAXY_BUILD_FEATURE_HAS_GAMEJOINREQUESTEDLISTENER
-	GameJoinRequestedListenerImplGlobal gamejoinrequestedlistener{};
-#endif
-
-#if GALAXY_BUILD_FEATURE_HAS_GOGSERVICECONNECTIONSTATELISTENER
-	GogServicesConnectionStateListenerImplGlobal gogservicesconnectionstatelistener{ [&](GogServicesConnectionState state) {
-		if (state != GOG_SERVICES_CONNECTION_STATE_CONNECTED) {
-			return;
-		}
-		has_connected = true;
-		try_init();
-		} };
-#endif
-
-	LeaderboardEntriesRetrieveListenerImplGlobal leaderboardentriesretrievelistener{};
-	LeaderboardRetrieveListenerImplGlobal leaderboardretrievelistener{};
-	LeaderboardScoreUpdateListenerImplGlobal leaderboardscoreupdatelistener{};
-	LeaderboardsRetrieveListenerImplGlobal leaderboardsretrievelistener{};
-	LobbyCreatedListenerImplGlobal lobbycreatedlistener{};
-	LobbyDataListenerImplGlobal lobbydatalistener{};
-	LobbyDataRetrieveListenerImplGlobal lobbydataretrievelistener{};
-	LobbyEnteredListenerImplGlobal lobbyenteredlistener{};
-	LobbyLeftListenerImplGlobal lobbyleftlistener{};
-	LobbyListListenerImplGlobal lobbylistlistener{};
-	LobbyMemberStateListenerImplGlobal lobbymemberstatelistener{};
-	LobbyMessageListenerImplGlobal lobbymessagelistener{};
-	LobbyOwnerChangeListenerImplGlobal lobbyownerchangelistener{};
-
-#if GALAXY_BUILD_FEATURE_HAS_NAT_FUNCTIONALITY
-	NatTypeDetectionListenerImplGlobal nattypedetectionlistener{};
-#endif
-
-	NetworkingListenerImplGlobal networkinglistener{};
-	NotificationListenerImplGlobal notificationlistener{};
-	OperationalStateChangeListenerImplGlobal operationalstatechangelistener{ [&](uint32_t operationalState) {
-		if (!(operationalState & IOperationalStateChangeListener::OperationalState::OPERATIONAL_STATE_SIGNED_IN &&
-			operationalState & IOperationalStateChangeListener::OperationalState::OPERATIONAL_STATE_LOGGED_ON)) {
-			return;
-		}
-		has_operational_state_change = true;
-		try_init();
-		} };
-
-	OtherSessionStartListenerImplGlobal othersessionstartlistener{};
-
-#if GALAXY_BUILD_FEATURE_OVERLAYSTATE_ENUM
-	OverlayInitializationStateChangeListenerImplGlobal overlayinitializationstatechangelistener{};
-	OverlayVisibilityChangeListenerImplGlobal overlayvisibilitychangelistener{};
-#endif
-
-	PersonaDataChangedListenerImplGlobal personadatachangedlistener{ [&](GalaxyID userID, uint32_t personaStateChange) {
-		if (personaStateChange != 0 || userID != GET_GALAXY_API(User())->GetGalaxyID()) {
-			return;
-		}
-		has_person_data_unchanged = true;
-		try_init();
-		}
-	};
-	//RichPresenceChangeListenerImplGlobal richpresencechangelistener{};
-
-#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-	//RichPresenceListenerImplGlobal richpresencelistener{};
-#endif
-
-#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-	//RichPresenceRetrieveListenerImplGlobal richpresenceretrievelistener{};
-#endif
-
-#if GALAXY_BUILD_FEATURE_HAS_ISENTFRIENDINVITATIONLISTRETRIEVELISTENER
-	SendInvitationListenerImplGlobal sendinvitationlistener{};
-#endif
-
-#if GALAXY_BUILD_FEATURE_HAS_ISENTFRIENDINVITATIONLISTRETRIEVELISTENER
-	SentFriendInvitationListRetrieveListenerImplGlobal sentfriendinvitationlistretrievelistener{};
-#endif
-
-	SharedFileDownloadListenerImplGlobal sharedfiledownloadlistener{};
-	SpecificUserDataListenerImplGlobal specificuserdatalistener{
-		[&](GalaxyID userID) {
-		user_data_received = true;
-		try_init();
-		}
-	};
-	StatsAndAchievementsStoreListenerImplGlobal statsandachievementsstorelistener{};
-
-#if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
-	TelemetryEventSendListenerImplGlobal telemetryeventsendlistener{};
-#endif
-
-	UserDataListenerImplGlobal userdatalistener{ [&]() {
-		user_data_received = true;
-		try_init();
-		}
-	};
-
-#if GALAXY_BUILD_FEATURE_HAS_IUSERFINDLISTENER
-	UserFindListenerImplGlobal userfindlistener{};
-#endif
-
-#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-	UserInformationRetrieveListenerImplGlobal userinformationretrievelistener{};
-	UserStatsAndAchievementsRetrieveListenerImplGlobal userstatsandachievementsretrievelistener{};
-#endif
-
-#if GALAXY_BUILD_FEATURE_HAS_IUSERTIMEPLAYEDRETRIEVELISTENER
-	UserTimePlayedRetrieveListenerImplGlobal usertimeplayedretrievelistener{};
-#endif
-
-#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
-	ServerNetworkingListenerImplGlobal servernetworkinglistener{};
-#endif
-
-#if GALAXY_BUILD_FEATURE_HAS_IOVERLAYSTATECHANGELISTENER
-	OverlayStateChangeListenerImplGlobal overlaystatechangelistener{};
-#endif
-
-	auto credentials = USER_CREDENTIALS[0];
-
-	GET_GALAXY_API(User())->SignInCredentials(credentials[0].data(), credentials[1].data());
-	bool sub_init_done = false;
-
-	while (true)
-	{
-		GET_GALAXY_API_AS_IS(ProcessData());
-		if (performed_init && !sub_init_done) {
-			sub_init_done = true;
-
-			tracer::Trace::SetTracingEnabled(true);
-			trace = std::make_unique<tracer::Trace>("::INIT", "main");
-
-			perform_test();
-		}
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(5));
-	}
-
-	GALAXY_DEINIT();
-
-	return 0;
-}
 #endif

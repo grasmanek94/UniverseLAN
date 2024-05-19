@@ -1,9 +1,5 @@
 #include <TestCaseClientDetails.hxx>
 
-#if !GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINGALAXY
-#define SignInGalaxy SignIn
-#endif
-
 int main()
 {
 	tracer::Trace::InitTracing("TestLog", false, true, false, 0, true);

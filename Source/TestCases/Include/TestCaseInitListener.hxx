@@ -160,3 +160,47 @@ public:
 		TryInit();
 	}
 };
+
+#ifdef USE_TESTING_MAIN
+std::unique_ptr<tracer::Trace> trace{ nullptr };
+DelayRunner delay_runner{};
+
+void perform_test();
+void register_listeners();
+bool should_keep_running();
+
+int main()
+{
+	tracer::Trace::InitTracing("TestLog", false, true, false, 0, true);
+	tracer::Trace::SetLogToCout(false);
+	tracer::Trace::SetTracingEnabled(false);
+
+	GALAXY_INIT();
+
+	register_listeners();
+
+	trace = std::make_unique<tracer::Trace>("", "main");
+
+	GET_GALAXY_API(User())->SignInGalaxy();
+
+	TestInitListenerGlobal test_start_listener{ [&](void) -> void {
+		tracer::Trace::SetTracingEnabled(true);
+		trace = std::make_unique<tracer::Trace>("::INIT", "main");
+
+		perform_test();
+	} };
+
+	while (should_keep_running())
+	{
+		GET_GALAXY_API_AS_IS(ProcessData());
+
+		delay_runner.Run();
+		std::this_thread::sleep_for(std::chrono::milliseconds(5));
+	}
+
+	GALAXY_DEINIT();
+
+	return 0;
+}
+
+#endif
