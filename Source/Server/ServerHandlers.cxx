@@ -132,9 +132,10 @@ namespace universelan::server {
 		pd->hello_performed = true;
 
 		// When coming online, share all user data with other users
-		auto this_player_data = std::make_shared<RequestSpecificUserDataMessage>(RequestSpecificUserDataMessage::RequestTypeUserData, 0, pd->id);
-		auto member_data = std::make_shared<RequestSpecificUserDataMessage>(RequestSpecificUserDataMessage::RequestTypeUserData, 0, 0);
+		auto this_player_data = std::make_shared<RequestSpecificUserDataMessage>();
+		auto member_data = std::make_shared<RequestSpecificUserDataMessage>();
 
+		this_player_data->id = pd->id;
 		this_player_data->found = true;
 		this_player_data->asuc = pd->user_data->stats;
 		this_player_data->nickname = pd->user_data->nickname;
@@ -143,7 +144,7 @@ namespace universelan::server {
 			if (peer != online_peer) {
 				peer::ptr online_member = peer_mapper.Get(online_peer);
 				if (online_member->id.IsValid() && online_member->hello_performed) {
-					connection.Send(peer, this_player_data);
+					connection.Send(online_peer, this_player_data);
 
 					// also share other users data with newly connected user
 					member_data->id = online_member->id;
@@ -151,7 +152,7 @@ namespace universelan::server {
 					member_data->asuc = online_member->user_data->stats;
 					member_data->nickname = online_member->user_data->nickname;
 
-					connection.Send(online_peer, member_data);
+					connection.Send(peer, member_data);
 				}
 			}
 		}
