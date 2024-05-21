@@ -195,6 +195,7 @@ int main()
 		GET_GALAXY_API_AS_IS(ProcessData());
 
 		delay_runner.Run();
+
 		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
 

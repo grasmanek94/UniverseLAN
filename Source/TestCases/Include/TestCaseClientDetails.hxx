@@ -75,6 +75,7 @@ namespace galaxy::api {
 #endif
 
 	constexpr std::array LOBBY_TEST_DATA = {
+		std::array{"lobby_identifier"sv,"uvlan-test"sv},
 		std::array{"string_test"sv,"abbcccddddz--xyz"sv},
 		std::array{"string_test2"sv,"0123456789"sv},
 		std::array{"reverse"sv,"9876543210"sv},
