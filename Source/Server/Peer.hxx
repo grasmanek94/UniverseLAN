@@ -54,6 +54,8 @@ namespace universelan::server::peer {
 		Challenge challenge;
 		std::chrono::system_clock::time_point connected_time;
 		GalaxyUserData::ptr_t user_data;
+		bool hello_performed;
+
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
 		ChatRoomManager::chatrooms_t chat_rooms;
 #endif

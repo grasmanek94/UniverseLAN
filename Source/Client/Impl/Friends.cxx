@@ -76,7 +76,9 @@ namespace universelan::client {
 		if (data->found) {
 			auto entry = intf->user->GetGalaxyUserData(data->id);
 			entry->stats = data->asuc;
-			entry->nickname = data->nickname;
+			if (entry->nickname != data->nickname) {
+				entry->nickname = data->nickname;
+			}
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			listeners->NotifyAllNow(listener, &IUserInformationRetrieveListener::OnUserInformationRetrieveSuccess, data->id);
 #endif
@@ -505,7 +507,9 @@ namespace universelan::client {
 		if (data->found) {
 			auto entry = intf->user->GetGalaxyUserData(data->id);
 			entry->stats = data->asuc;
-			entry->nickname = data->nickname;
+			if (entry->nickname != data->nickname) {
+				entry->nickname = data->nickname;
+			}
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			listeners->NotifyAllNow(listener, &IRichPresenceRetrieveListener::OnRichPresenceRetrieveSuccess, data->id);

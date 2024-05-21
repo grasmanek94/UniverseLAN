@@ -423,6 +423,7 @@ namespace universelan {
 		}
 
 		local_user_data = std::make_shared<GalaxyUserData>(GetApiGalaxyID());
+		local_user_data->nickname = CustomPersonaName;
 
 		// Achievements
 		{

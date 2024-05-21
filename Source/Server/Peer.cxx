@@ -51,7 +51,7 @@ namespace universelan::server::peer {
 	Data::Data(ENetPeer* peer, Mapper* mapper) :
 		mapper{ mapper}, peer{ peer }, id{ 0ULL }, challenge{},
 		connected_time{ std::chrono::system_clock::now() },
-		user_data{ nullptr }, 
+		user_data{ nullptr }, hello_performed{false},
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
 		chat_rooms{},
 #endif

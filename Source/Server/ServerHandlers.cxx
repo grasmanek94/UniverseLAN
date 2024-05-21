@@ -90,8 +90,16 @@ namespace universelan::server {
 
 				unauthenticated_peers.erase(peer);
 				connection.Send(peer, ConnectionAcceptedMessage{});
+
+				// Broadcast that this user is online
 				connection.Broadcast(OnlineStatusChangeMessage{ pd->id, true }, peer);
 
+#ifndef NDEBUG
+				// Allow some slack for breakpoints
+				enet_peer_timeout(peer, 100 * ENET_PEER_TIMEOUT_LIMIT, 100 * ENET_PEER_TIMEOUT_MINIMUM, 100 * ENET_PEER_TIMEOUT_MAXIMUM);
+#endif
+
+				// Tell this user which other users are online
 				for (auto& online_peer : peer_mapper.connected_peers) {
 					if (peer != online_peer) {
 						peer::ptr online_member = peer_mapper.Get(online_peer);
@@ -119,6 +127,33 @@ namespace universelan::server {
 		pd->user_data->stats = data->asuc;
 		if (!data->nickname.empty() && pd->user_data->nickname.empty()) {
 			pd->user_data->nickname = data->nickname;
+		}
+
+		pd->hello_performed = true;
+
+		// When coming online, share all user data with other users
+		auto this_player_data = std::make_shared<RequestSpecificUserDataMessage>(RequestSpecificUserDataMessage::RequestTypeUserData, 0, pd->id);
+		auto member_data = std::make_shared<RequestSpecificUserDataMessage>(RequestSpecificUserDataMessage::RequestTypeUserData, 0, 0);
+
+		this_player_data->found = true;
+		this_player_data->asuc = pd->user_data->stats;
+		this_player_data->nickname = pd->user_data->nickname;
+
+		for (auto& online_peer : peer_mapper.connected_peers) {
+			if (peer != online_peer) {
+				peer::ptr online_member = peer_mapper.Get(online_peer);
+				if (online_member->id.IsValid() && online_member->hello_performed) {
+					connection.Send(peer, this_player_data);
+
+					// also share other users data with newly connected user
+					member_data->id = online_member->id;
+					member_data->found = true;
+					member_data->asuc = online_member->user_data->stats;
+					member_data->nickname = online_member->user_data->nickname;
+
+					connection.Send(online_peer, member_data);
+				}
+			}
 		}
 	}
 
@@ -753,8 +788,8 @@ namespace universelan::server {
 		}
 
 		bool close{
-			(lobby->GetTopology() == LOBBY_TOPOLOGY_TYPE_FCM) ||
-			(lobby->GetTopology() == LOBBY_TOPOLOGY_TYPE_STAR)
+			(lobby->GetOwner() == pd->id) &&
+			((lobby->GetTopology() == LOBBY_TOPOLOGY_TYPE_FCM) || (lobby->GetTopology() == LOBBY_TOPOLOGY_TYPE_STAR))
 		};
 
 		LobbyMemberStateChangeMessage leave_notification{ lobby->GetID(), pd->id, (disconnected ? LOBBY_MEMBER_STATE_CHANGED_DISCONNECTED : LOBBY_MEMBER_STATE_CHANGED_LEFT) };
@@ -772,6 +807,7 @@ namespace universelan::server {
 		if (lobby->GetOwner() == pd->id) {
 			new_owner = true;
 			new_owner_id = lobby->ChooseNewOwner();
+			lobby->SetOwner(new_owner_id);
 		}
 
 		LobbyOwnerChangeMessage owner_change_message{ lobby->GetID(), new_owner_id };

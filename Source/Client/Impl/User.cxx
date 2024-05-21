@@ -293,7 +293,9 @@ namespace universelan::client {
 		if (data->found) {
 			auto entry = GetGalaxyUserData(data->id);
 			entry->stats = data->asuc;
-			entry->nickname = data->nickname;
+			if (entry->nickname != data->nickname) {
+				entry->nickname = data->nickname;
+			}
 		}
 
 #if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
