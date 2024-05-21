@@ -3,6 +3,7 @@
 #include "Listeners/NetworkingListener.hxx"
 
 #include <ConstHash.hxx>
+#include <filesystem_container/filesystem_container_utils.hxx>
 #include <GalaxyID.hxx>
 #include <Tracer.hxx>
 #include <SafeStringCopy.hxx>
@@ -55,7 +56,8 @@ namespace universelan::client {
 			trace.write_all(std::format("data_hash: {:x}", const_hash64_data_loop((const char*)data, dataSize)));
 
 			if (trace.has_flags(tracer::Trace::NETWORK_P2P_CONTENTS)) {
-				trace.write_all(std::format("data_contents: {}", bytes_to_hex(data, dataSize)));
+				trace.write_all(std::format("data_contents_hex: {}", bytes_to_hex(data, dataSize)));
+				trace.write_all(std::format("data_contents_enc: {}", filesystem_container::filename_encode(std::string((char*)data, (size_t)dataSize))));
 			}
 		}
 
@@ -82,16 +84,19 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
-			if (outMsgSize) {
-				trace.write_all(std::format("outMsgSize: {}", *outMsgSize));
-			}
+			if (result) {
+				if (outMsgSize) {
+					trace.write_all(std::format("outMsgSize: {}", *outMsgSize));
+				}
 
-			trace.write_all(std::format("outGalaxyID: {}", outGalaxyID));
-			if (outMsgSize) {
-				trace.write_all(std::format("data_hash: {:x}", const_hash64_data_loop((const char*)dest, *outMsgSize)));
+				trace.write_all(std::format("outGalaxyID: {}", outGalaxyID));
+				if (outMsgSize) {
+					trace.write_all(std::format("data_hash: {:x}", const_hash64_data_loop((const char*)dest, *outMsgSize)));
 
-				if (trace.has_flags(tracer::Trace::NETWORK_P2P_CONTENTS)) {
-					trace.write_all(std::format("data_contents: {}", bytes_to_hex(dest, *outMsgSize)));
+					if (trace.has_flags(tracer::Trace::NETWORK_P2P_CONTENTS)) {
+						trace.write_all(std::format("data_contents_hex: {}", bytes_to_hex(dest, *outMsgSize)));
+						trace.write_all(std::format("data_contents_enc: {}", filesystem_container::filename_encode(std::string((char*)dest, (size_t)*outMsgSize))));
+					}
 				}
 			}
 		}
@@ -113,15 +118,18 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
-			if (outMsgSize) {
-				trace.write_all(std::format("outMsgSize: {}", *outMsgSize));
-			}
+			if (result) {
+				if (outMsgSize) {
+					trace.write_all(std::format("outMsgSize: {}", *outMsgSize));
+				}
 
-			trace.write_all(std::format("outGalaxyID: {}", outGalaxyID));
-			if (outMsgSize) {
-				trace.write_all(std::format("data_hash: {:x}", const_hash64_data_loop((const char*)dest, *outMsgSize)));
-				if (trace.has_flags(tracer::Trace::NETWORK_P2P_CONTENTS)) {
-					trace.write_all(std::format("data_contents: {}", bytes_to_hex(dest, *outMsgSize)));
+				trace.write_all(std::format("outGalaxyID: {}", outGalaxyID));
+				if (outMsgSize) {
+					trace.write_all(std::format("data_hash: {:x}", const_hash64_data_loop((const char*)dest, *outMsgSize)));
+					if (trace.has_flags(tracer::Trace::NETWORK_P2P_CONTENTS)) {
+						trace.write_all(std::format("data_contents_hex: {}", bytes_to_hex(dest, *outMsgSize)));
+						trace.write_all(std::format("data_contents_enc: {}", filesystem_container::filename_encode(std::string((char*)dest, (size_t)*outMsgSize))));
+					}
 				}
 			}
 		}

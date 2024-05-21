@@ -234,6 +234,7 @@ namespace universelan::client {
 		 */
 		virtual ConnectionType GetConnectionType(GalaxyID userID) override;
 #endif
+
 		virtual void AddPacket(const packet_t& packet);
 		virtual bool GetP2PPacket(void* dest, uint32_t destSize, uint32_t* outMsgSize, GalaxyID& outGalaxyID, uint8_t channel, bool pop);
 	};
