@@ -143,7 +143,9 @@ namespace universelan::client {
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<P2PServerNetworkPacketMessage>& data) {
 #if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
 		// This is too high frequency in my opinion to trace
-		interfaces->server_networking->AddPacket(data);
+		if (data) {
+			interfaces->server_networking->AddPacket(data->packet);
+		}
 #endif
 	}
 

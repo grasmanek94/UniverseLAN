@@ -2,27 +2,32 @@
 
 #include "P2PNetworkPacketMessage.hxx"
 
+#include <memory>
+
 namespace universelan {
-	class P2PServerNetworkPacketMessage : public P2PNetworkPacketMessage
+	class P2PServerNetworkPacketMessage
 	{
 	public:
+		std::shared_ptr<P2PNetworkPacketMessage> packet;
+
 		template<class Archive>
 		void serialize(Archive& ar)
 		{
-			P2PNetworkPacketMessage::serialize<Archive>(ar);
+			ar(packet);
 		}
 
-		UniqueClassId_Declare(P2PServerPNetworkPacketMessage);
+		UniqueClassId_Declare(P2PServerNetworkPacketMessage);
 
 		P2PServerNetworkPacketMessage()
-			: P2PNetworkPacketMessage{} {}
+			: packet{ nullptr } {}
 
 		P2PServerNetworkPacketMessage(galaxy::api::GalaxyID id, uint8_t channel, galaxy::api::P2PSendType send_type, const char* data, uint32_t data_length)
-			: P2PNetworkPacketMessage{ id, channel, send_type, data, data_length } {}
+			: packet{ std::make_shared<P2PNetworkPacketMessage>(id, channel, send_type, data, data_length) } {}
 
 		P2PServerNetworkPacketMessage(const P2PNetworkPacketMessage& packet)
-			: P2PNetworkPacketMessage{ packet } {}
+			: packet{ std::make_shared<P2PNetworkPacketMessage>(packet) } {}
 
-		virtual ~P2PServerNetworkPacketMessage() {}
+		P2PServerNetworkPacketMessage(const std::shared_ptr<P2PNetworkPacketMessage>& packet)
+			: packet{ packet } {}
 	};
 }

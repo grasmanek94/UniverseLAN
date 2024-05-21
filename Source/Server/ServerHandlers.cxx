@@ -243,10 +243,16 @@ namespace universelan::server {
 #endif
 
 	// Message *from* a *server host*
-	void Server::Handle(ENetPeer* peer, const std::shared_ptr<P2PServerNetworkPacketMessage>& data) {
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<P2PServerNetworkPacketMessage>& server_data) {
 		REQUIRES_AUTHENTICATION(peer);
 
 		tracer::Trace trace{ "::P2PServerNetworkPacketMessage", __FUNCTION__, tracer::Trace::INETWORKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
+
+		auto& data = server_data->packet;
+
+		if (!data) {
+			return;
+		}
 
 		if (trace.has_flags(tracer::Trace::NETWORK_P2P_CONTENTS)) {
 			trace.write_all(std::format("data_contents: {}", bytes_to_hex(data->data.data(), (uint32_t)data->data.size())));
@@ -645,7 +651,7 @@ namespace universelan::server {
 			if (member_peer && (member_peer->peer != peer)) {
 				connection.Send(member_peer->peer, notification);
 			}
-}
+		}
 
 		return true;
 	}
@@ -776,7 +782,7 @@ namespace universelan::server {
 			if (!close && new_owner) {
 				connection.Send(member_peer->peer, owner_change_message);
 				connection.Send(member_peer->peer, leave_notification);
-		}
+			}
 			else if (close) {
 				member_peer->RemoveLobby(lobby);
 				connection.Send(member_peer->peer, leave_notification);
@@ -789,7 +795,7 @@ namespace universelan::server {
 		}
 
 		return true;
-		}
+	}
 
 	bool Server::HandleMemberAllLobbiesLeave(ENetPeer* peer, bool disconnected) {
 		tracer::Trace trace{ nullptr, __FUNCTION__ };
