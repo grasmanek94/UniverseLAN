@@ -29,6 +29,8 @@ namespace universelan {
 			: request_id{ request_id }, lobby_id{ lobby_id }, data{}, fail_reason{ galaxy::api::ILobbyDataRetrieveListener::FAILURE_REASON_UNDEFINED } {}
 		RequestLobbyDataMessage(uint64_t request_id, galaxy::api::GalaxyID lobby_id, LobbyManager::lobby_t& data)
 			: request_id{ request_id }, lobby_id{ lobby_id }, data{ data }, fail_reason{ galaxy::api::ILobbyDataRetrieveListener::FAILURE_REASON_UNDEFINED } {}
+		RequestLobbyDataMessage(uint64_t request_id, galaxy::api::GalaxyID lobby_id, const LobbyManager::lobby_t& data)
+			: request_id{ request_id }, lobby_id{ lobby_id }, data{ data }, fail_reason{ galaxy::api::ILobbyDataRetrieveListener::FAILURE_REASON_UNDEFINED } {}
 		RequestLobbyDataMessage(uint64_t request_id, galaxy::api::GalaxyID lobby_id, galaxy::api::ILobbyDataRetrieveListener::FailureReason fail_reason)
 			: request_id{ request_id }, lobby_id{ lobby_id }, data{ }, fail_reason{ fail_reason } {}
 	};

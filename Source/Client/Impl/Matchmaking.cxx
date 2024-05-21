@@ -432,7 +432,9 @@ namespace universelan::client {
 			{
 				lock_t lock{ mtx };
 				auto lobby_entry = lobby_list.find(data->lobby_id);
-				assert(lobby_entry != lobby_list.end());
+				if (lobby_entry == lobby_list.end()) {
+					lobby_entry = lobby_list.emplace(data->lobby_id, std::make_shared<Lobby>(data->lobby_id)).first;
+				}
 
 				auto lobby = lobby_entry->second;
 				lobby->SetMaxMembers(data->max_members);
@@ -523,7 +525,9 @@ namespace universelan::client {
 			{
 				lock_t lock{ mtx };
 				auto lobby_entry = lobby_list.find(data->lobby_id);
-				assert(lobby_entry != lobby_list.end());
+				if (lobby_entry == lobby_list.end()) {
+					lobby_entry = lobby_list.emplace(data->lobby_id, std::make_shared<Lobby>(data->lobby_id)).first;
+				}
 
 				auto lobby = lobby_entry->second;
 				lobby->SetType(data->type);
@@ -588,7 +592,9 @@ namespace universelan::client {
 			{
 				lock_t lock{ mtx };
 				auto lobby_entry = lobby_list.find(data->lobby_id);
-				assert(lobby_entry != lobby_list.end());
+				if (lobby_entry == lobby_list.end()) {
+					lobby_entry = lobby_list.emplace(data->lobby_id, std::make_shared<Lobby>(data->lobby_id)).first;
+				}
 
 				auto lobby = lobby_entry->second;
 				lobby->SetJoinable(data->joinable);
@@ -652,7 +658,9 @@ namespace universelan::client {
 			{
 				lock_t lock{ mtx };
 				auto lobby_entry = lobby_list.find(data->lobby_id);
-				assert(lobby_entry != lobby_list.end());
+				if (lobby_entry == lobby_list.end()) {
+					lobby_entry = lobby_list.emplace(data->lobby_id, data->data).first;
+				}
 
 				auto lobby = lobby_entry->second;
 				lobby->SetAllData(data->data->GetAllData());
@@ -731,7 +739,9 @@ namespace universelan::client {
 			{
 				lock_t lock{ mtx };
 				auto lobby_entry = lobby_list.find(data->lobby_id);
-				assert(lobby_entry != lobby_list.end());
+				if (lobby_entry == lobby_list.end()) {
+					lobby_entry = lobby_list.emplace(data->lobby_id, std::make_shared<Lobby>(data->lobby_id)).first;
+				}
 
 				auto lobby = lobby_entry->second;
 				lobby->SetData(data->key.c_str(), data->value.c_str());
@@ -859,7 +869,9 @@ namespace universelan::client {
 			{
 				lock_t lock{ mtx };
 				auto lobby_entry = lobby_list.find(data->lobby_id);
-				assert(lobby_entry != lobby_list.end());
+				if (lobby_entry == lobby_list.end()) {
+					lobby_entry = lobby_list.emplace(data->lobby_id, std::make_shared<Lobby>(data->lobby_id)).first;
+				}
 
 				auto lobby = lobby_entry->second;
 				lobby->SetMemberData(data->member_id, data->key.c_str(), data->value.c_str());

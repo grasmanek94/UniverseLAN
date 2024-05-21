@@ -156,6 +156,10 @@ namespace universelan::server {
 				}
 			}
 		}
+
+		for (auto& lobby : lobby_manager.GetLobbies()) {
+			connection.Send(peer, RequestLobbyDataMessage{ 0ULL, lobby.second->GetID(), lobby.second });
+		}
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
@@ -681,13 +685,15 @@ namespace universelan::server {
 		data->success = true;
 		connection.Send(peer, data);
 
-		auto members = lobby->GetMembers();
+		connection.Broadcast(notification);
+
+		/*auto members = lobby->GetMembers();
 		for (auto& member : members) {
 			auto member_peer = peer_mapper.Get(member);
 			if (member_peer && (member_peer->peer != peer)) {
 				connection.Send(member_peer->peer, notification);
 			}
-		}
+		}*/
 
 		return true;
 	}
@@ -882,6 +888,7 @@ namespace universelan::server {
 
 		connection.Broadcast(data);
 	}
+
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
 	bool Server::HandleMemberChatLeave(ENetPeer* peer) {
 		tracer::Trace trace{ "1" };
