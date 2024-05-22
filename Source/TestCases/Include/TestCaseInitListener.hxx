@@ -126,7 +126,7 @@ public:
 	virtual void OnConnectionStateChange(GogServicesConnectionState connectionState) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		if (state != GOG_SERVICES_CONNECTION_STATE_CONNECTED) {
+		if (connectionState != GOG_SERVICES_CONNECTION_STATE_CONNECTED) {
 			has_connected = false;
 			return;
 		}

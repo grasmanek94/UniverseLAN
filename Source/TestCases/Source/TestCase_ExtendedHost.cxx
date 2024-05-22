@@ -27,7 +27,7 @@ void UpdateTimer() {
 	auto matchmaking_ptr = GET_GALAXY_API(Matchmaking());
 	matchmaking_ptr->SetLobbyData(my_lobby_id, "timer", std::to_string(GetTimeNow()).c_str());
 	matchmaking_ptr->SetLobbyMemberData(my_lobby_id, "my_runtime", std::to_string(GetRunTime()).c_str());
-	matchmaking_ptr->SendLobbyMessage(my_lobby_id, message.c_str(), message.size());
+	matchmaking_ptr->SendLobbyMessage(my_lobby_id, message.c_str(), (uint32_t)message.size());
 
 	auto networking_ptr = GET_GALAXY_API(Networking());
 	uint32_t member_count = matchmaking_ptr->GetNumLobbyMembers(my_lobby_id);
@@ -36,7 +36,7 @@ void UpdateTimer() {
 		if (member != my_galaxy_id) {
 			for (uint8_t channel = 0; channel < 9; channel += 3) {
 				std::string p2p_packet{ std::format("This is P2P packet nr {} from host {} in {} destined to {} @ channel {}", counter, my_galaxy_id, my_lobby_id, member, (int)channel) };
-				networking_ptr->SendP2PPacket(member, p2p_packet.c_str(), p2p_packet.size(), P2P_SEND_UNRELIABLE, channel);
+				networking_ptr->SendP2PPacket(member, p2p_packet.c_str(), (uint32_t)p2p_packet.size(), P2P_SEND_UNRELIABLE, channel);
 			}
 		}
 	}

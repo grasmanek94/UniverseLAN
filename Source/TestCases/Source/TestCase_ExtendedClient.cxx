@@ -26,7 +26,7 @@ void UpdateTimer() {
 	auto matchmaking_ptr = GET_GALAXY_API(Matchmaking());
 	matchmaking_ptr->SetLobbyData(my_lobby_id, "timer_client", std::to_string(GetTimeNow()).c_str());
 	matchmaking_ptr->SetLobbyMemberData(my_lobby_id, "my_runtime", std::to_string(GetRunTime()).c_str());
-	matchmaking_ptr->SendLobbyMessage(my_lobby_id, message.c_str(), message.size());
+	matchmaking_ptr->SendLobbyMessage(my_lobby_id, message.c_str(), (uint32_t)message.size());
 
 	auto networking_ptr = GET_GALAXY_API(Networking());
 	for (uint8_t channel = 0; channel < 9; channel += 3) {
@@ -41,7 +41,7 @@ void UpdateTimer() {
 					));
 				std::string response = "CLIENT ACK: " + std::string(buffer, out_msg_size);
 
-				networking_ptr->SendP2PPacket(sender, response.c_str(), response.size(), P2P_SEND_UNRELIABLE, channel);
+				networking_ptr->SendP2PPacket(sender, response.c_str(), (uint32_t)response.size(), P2P_SEND_UNRELIABLE, channel);
 			}
 		}
 	}
