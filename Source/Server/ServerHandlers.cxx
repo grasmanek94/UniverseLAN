@@ -376,41 +376,37 @@ namespace universelan::server {
 		}
 
 		peer::ptr pd = peer_mapper.Get(peer);
-		peer::ptr target_pd{ nullptr };
 
 		// Send message TO lobby
 		if (galaxy::api::GetIDType(data->id) == galaxy::api::IDType::ID_TYPE_LOBBY) {
 			auto lobby = lobby_manager.GetLobby(data->id);
 			if (lobby) {
-				target_pd = peer_mapper.Get(lobby->GetOwner());
+				peer::ptr lobby_owner_pd = peer_mapper.Get(lobby->GetOwner());
 
-				if (target_pd) {
-					if (target_pd->id == pd->id) {
+				if (lobby_owner_pd) {
+					if (lobby_owner_pd->id == pd->id) {
 						// broadcast to all members, lobby owner sent to own lobby
 						// now question, should we use the lobby id or the member id?
 						// Uncomment for host member id instead of lobby id:
 						// data->id = pd->id;
-
 						for (const auto& member : lobby->GetMembers()) {
-							peer::ptr target_pd = peer_mapper.Get(member);
-							if (target_pd) {
-								connection.Send(target_pd->peer, *data, flag);
+							peer::ptr lobby_member_pd = peer_mapper.Get(member);
+							if (lobby_member_pd) {
+								connection.Send(lobby_member_pd->peer, *data, flag);
 							}
 						}
 					}
 					else {
-#if GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
 						// some member sent a message to the lobby host
 						data->id = pd->id;
-						connection.Send(target_pd->peer, P2PServerNetworkPacketMessage{ *data }, flag);
-#endif
+						connection.Send(lobby_owner_pd->peer, P2PServerNetworkPacketMessage{ *data }, flag);
 					}
 				}
 			}
 			return;
 		}
 
-		target_pd = peer_mapper.Get(data->id);
+		peer::ptr target_pd = peer_mapper.Get(data->id);
 
 		if (!target_pd) {
 			return;
