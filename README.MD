@@ -121,20 +121,23 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Battlestar Galactica Deadlock             | :white_check_mark:(2)     | 1.114.9                       | Tested with build 423 | 
 | Driftland - The Magic Revival             | :white_check_mark:(2)     | 1.133.6                       | Works since build 436, apparently UniverseLAN had a bug where the server was sending the packet "as user" and not "as lobby" (when the user is the lobby owner) |
 | Knights and Bikes                         | :white_check_mark:(2)     | 1.133.6                       | Tested with build 440, other player needs to join via commandline with --JoinLobby <id>, id will be displayed in the console of the host after clicking invite friend. |
-| Metal Slug                                | :white_check_mark:(2)     | 1.100.2                       | Tested with build 440 (not perfect because it's showing "waiting for player...", but works) |
-| Metal Slug 3                              | :white_check_mark:(2)     | 1.100.2                       | Works since build 243 (not perfect because it's showing "waiting for player...", but works) |
-| Metal Slug X                              | :white_check_mark:(2)     | 1.100.2                       | Works, tested on build 389 (not perfect because it's showing "waiting for player...", but works) |
-| Shock Troopers             | :white_check_mark:(2)/:construction:     | 1.100.2                       | Tested with build 440, sometimes disconnect error though?  (not perfect because it's showing "waiting for player...", but works) |
-| The Last Blade                            | :white_check_mark:(2)     | 1.100.2                       | Tested with build 440 (not perfect because it's showing "waiting for player...", but works) |
-| Shock Troopers - 2nd Squad                | :white_check_mark:(2)     | 1.100.2                       | Tested with build 440 (not perfect because it's showing "waiting for player...", but works) |
-| Twinkle Star Sprites                      | :white_check_mark:(2)     | 1.100.2                       | Tested with build 440 (not perfect because it's showing "waiting for player...", but works) |
+| Metal Slug                                | :white_check_mark:(2)     | 1.100.2                       | Works fine since build 464 |
+| Metal Slug 3                              | :white_check_mark:(2)     | 1.100.2                       | Works fine since build 464 |
+| Metal Slug X                              | :white_check_mark:(2)     | 1.100.2                       | Works fine since build 464 |
+| Shock Troopers                            | :white_check_mark:(2)     | 1.100.2                       | Works fine since build 464 |
+| The Last Blade                            | :white_check_mark:(2)     | 1.100.2                       | Works fine since build 464 |
+| Shock Troopers - 2nd Squad                | :white_check_mark:(2)     | 1.100.2                       | Works fine since build 464 |
+| Twinkle Star Sprites                      | :white_check_mark:(2)     | 1.100.2                       | Works fine since build 464 |
 | Streets of Rage 4                         | :white_check_mark:(2)     | 1.144.1                       | Tested with build 440 |
 | Talisman Digital Edition                  | :white_check_mark:(2)     | 1.139.2                       | Tested with build 440 |
 | The Witcher Adventure Game                | :white_check_mark:(2)     | 1.69                          | Tested with build 440 - 1.68 |
-| The King of Fighters XIII                 | :construction:            | 1.114.9                       | Can't find lobbies |
-| The King of Fighters 98UM                 | :construction:            | 1.114.9                       | Stuck at "starting game..." |
-| Stronghold Warlords                       | :construction:            | 1.144.1                       | Stuck in loading screen waiting for client/joined player. Joined player doesn't start loading |
-| Stronghold Crusader 2                     | :construction:            | 1.68                          | Stuck in loading screen waiting for client/joined player. Joined player doesn't start loading |
+| Blood - Fresh Supply                      | :white_check_mark:(2)     | 1.133.6                       | Tested with build 464 |
+| Stronghold Warlords                       | :white_check_mark:(2)     | 1.144.1                       | Works since build 464 |
+| Stronghold Crusader 2                     | :white_check_mark:(2)     | 1.68                          | Works since build 464 |
+| Gauntlet                                  | :white_check_mark:(2)     | 1.104.2                       | Works since build 464 |
+| GAROU MARK OF THE WOLVES                  | :white_check_mark:(2)     | 1.114.9                       | Works since build 464 |
+| The King of Fighters XIII                 | :white_check_mark:(2)     | 1.114.9                       | Works since build 464 |
+| The King of Fighters 98UM                 | :white_check_mark:(2)     | 1.114.9                       | Works since build 464 |
 | Serious Sams Bogus Detour                 | :construction:            | 1.100.2                       | Can join lobby since build 360 and start game, but both players stuck on black "Loading..." screen |
 | Dying Light                               | :construction:            | 1.148.3                       | Doesn't seem to work for now and crashes when EncryptedAppTicket is not disabled. I think LAN may be internet-bound unfortunately. |
 | Niffelheim                                | :construction:            | 1.139.2                       | Stuck at "Loading..." (save transfer?) | 
@@ -143,6 +146,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Craft The World                           | :construction:            | 1.100.2                       | Stuck at loading screen when hosting/joining. | 
 | Offworld Trading Company                  | :construction:            | 1.94                          | Tested with 1.95 build 440, stuck on game load in a GetUserData loop |
 | Alien vs Predator 2000                    | :question:                |                               | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176? |
+| Double Dragon Trilogy                     | :question:                |                               | Unknown version, Galaxy.dll SHA1: `789f3b02ced8dbac2e5f8c2c98448569f70960cc` |
 | Rise of the Triad (2013)                  | :left_right_arrow:        |                               | Native LAN available | 
 | Rage of Mages II: Necromancer             | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
 | Neverwinter Nights 2 Complete             | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 

@@ -136,7 +136,9 @@ void OnLobbyCreated(const GalaxyID& lobbyID, LobbyCreateResult result)
 		matchmaking_ptr->SetLobbyData(my_lobby_id, data_entry[0].data(), data_entry[1].data());
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
 	matchmaking_ptr->SetLobbyJoinable(my_lobby_id, true);
+#endif
 }
 
 void perform_test() {

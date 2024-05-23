@@ -1,6 +1,6 @@
 #pragma once
 
-#if !HAS_INITOPTIONS
+#if !GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
 #include <stdint.h>
 #include <cstddef>
 
@@ -34,6 +34,7 @@ namespace galaxy
 				, clientSecret(_clientSecret)
 				, configFilePath(_configFilePath)
 				, storagePath(_storagePath)
+				, galaxyPeerPath("")
 			{
 			}
 
@@ -41,6 +42,7 @@ namespace galaxy
 			const char* clientSecret; ///< The secret of the client.
 			const char* configFilePath; ///< The path to folder which contains configuration files.
 			const char* storagePath; ///< The path to folder for storing internal SDK data. Used only on Android devices.
+			const char* galaxyPeerPath; ///< The path to folder for storing internal SDK data. Used only on Android devices.
 		};
 
 		/** @} */

@@ -736,7 +736,7 @@ namespace universelan {
 	bool ClientIniData::IsSelfUserID(galaxy::api::GalaxyID userID) const
 	{
 		return
-			// TODO: Check if 0 is also in real GOG Galaxy SDK for self-user reference
+			(userID.ToUint64() == 0) ||
 			(userID == galaxy::api::FromRealID(galaxy::api::IDType::ID_TYPE_USER, 0ULL)) ||
 			(userID == GetApiGalaxyID());
 	}
