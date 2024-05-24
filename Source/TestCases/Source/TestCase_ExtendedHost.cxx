@@ -148,7 +148,7 @@ void perform_test() {
 	my_galaxy_id = user_ptr->GetGalaxyID();
 
 	matchmaking_ptr->CreateLobby(LobbyType::LOBBY_TYPE_PUBLIC, 4
-#if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
+#if GALAXY_BUILD_FEATURE_HAS_LOBBYTOPOLOGYTYPE_ENUM
 		, true, LobbyTopologyType::LOBBY_TOPOLOGY_TYPE_STAR
 #endif
 	);

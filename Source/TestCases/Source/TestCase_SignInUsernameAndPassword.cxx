@@ -29,15 +29,6 @@ int main()
 
 	UserDataListenerImplGlobal userdatalistener{};
 
-#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
-	UserInformationRetrieveListenerImplGlobal userinformationretrievelistener{};
-	UserStatsAndAchievementsRetrieveListenerImplGlobal userstatsandachievementsretrievelistener{};
-#endif
-
-#if GALAXY_BUILD_FEATURE_HAS_IUSERTIMEPLAYEDRETRIEVELISTENER
-	UserTimePlayedRetrieveListenerImplGlobal usertimeplayedretrievelistener{};
-#endif
-
 	trace.write_all("Listeners registered");
 
 	auto credentials = USER_CREDENTIALS[0];

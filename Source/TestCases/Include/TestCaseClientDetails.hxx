@@ -134,10 +134,6 @@ namespace galaxy::api {
 	};
 #endif
 
-}
-
-namespace galaxy::api {
-
 #if GALAXY_BUILD_FEATURE_GALAXYID_HAS_IDTYPE
 	using IDType = GalaxyID::IDType;
 #else
@@ -185,6 +181,10 @@ namespace galaxy::api {
 		return id.ToUint64() & 0x00ffffffffffffffULL;
 	}
 }
+
+#if !GALAXY_BUILD_FEATURE_IUTILS_NOTIFICATION_ID_TYPEDEF
+using NotificationID = uint32_t;
+#endif
 
 template <>
 struct std::formatter<galaxy::api::GalaxyID> : std::formatter<std::string> {

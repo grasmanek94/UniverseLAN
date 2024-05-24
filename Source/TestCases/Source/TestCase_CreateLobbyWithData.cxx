@@ -50,7 +50,7 @@ void perform_test() {
 	auto matchmaking_ptr = GET_GALAXY_API(Matchmaking());
 
 	matchmaking_ptr->CreateLobby(LobbyType::LOBBY_TYPE_PUBLIC, 4
-#if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
+#if GALAXY_BUILD_FEATURE_HAS_LOBBYTOPOLOGYTYPE_ENUM
 		, true, LobbyTopologyType::LOBBY_TOPOLOGY_TYPE_FCM_OWNERSHIP_TRANSITION
 #endif
 	);
