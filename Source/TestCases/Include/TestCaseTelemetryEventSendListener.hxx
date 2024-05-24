@@ -109,7 +109,7 @@ public:
 };
 
 #if GALAXY_BUILD_FEATURE_GAME_SERVER_API
-
+#if GALAXY_BUILD_FEATURE_HAS_GAMESERVERTELEMETRY
 class GameServerTelemetryEventSendListenerImplGlobal : public galaxy::api::GameServerGlobalTelemetryEventSendListener
 {
 public:
@@ -161,6 +161,7 @@ public:
 		}
 	}
 };
-
 #endif
+#endif
+
 #endif

@@ -32,7 +32,7 @@ namespace universelan::client {
 	}
 
 	uint32_t UtilsImpl::GetNotification(NotificationID notificationID
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_IUTILS_GETNOTIFICATION_1_129_CHANGE
 		, bool& consumable
 #endif
 		, char* type, uint32_t typeLength, void* content, uint32_t contentSize) {

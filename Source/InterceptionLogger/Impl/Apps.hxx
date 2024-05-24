@@ -33,9 +33,10 @@ namespace universelan::client {
 	private:
 		FuncT::F intf;
 		IListenerRegistrar* notifications;
+		bool force_dlc_check;
 
 	public:
-		AppsImpl(FuncT::F intf, IListenerRegistrar* notifications);
+		AppsImpl(FuncT::F intf, IListenerRegistrar* notifications, bool force_dlc_check);
 
 		virtual ~AppsImpl() override;
 

@@ -321,7 +321,7 @@ namespace universelan::server {
 
 		for (auto& lobby_iter : pd->lobbies) {
 			auto& lobby = lobby_iter.second;
-			if (lobby && lobby->GetOwner() == pd->id && lobby->GetMemberCount() >= 2) {
+			if (lobby && lobby->GetOwner() == pd->id && lobby->GetMemberCount() > 0) {
 				if (galaxy::api::GetIDType(data->id) == galaxy::api::IDType::ID_TYPE_LOBBY) {
 					if (data->id == lobby->GetID()) {
 						// send to all lobby members "as lobby" (id is already lobby so just send as-is)
@@ -384,6 +384,7 @@ namespace universelan::server {
 				peer::ptr lobby_owner_pd = peer_mapper.Get(lobby->GetOwner());
 
 				if (lobby_owner_pd) {
+#if !GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING
 					if (lobby_owner_pd->id == pd->id) {
 						// broadcast to all members, lobby owner sent to own lobby
 						// now question, should we use the lobby id or the member id?
@@ -396,7 +397,9 @@ namespace universelan::server {
 							}
 						}
 					}
-					else {
+					else
+#endif
+					{
 						// some member sent a message to the lobby host
 						data->id = pd->id;
 						connection.Send(lobby_owner_pd->peer, P2PServerNetworkPacketMessage{ *data }, flag);

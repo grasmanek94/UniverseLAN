@@ -73,7 +73,7 @@ public:
 };
 
 #if GALAXY_BUILD_FEATURE_GAME_SERVER_API
-
+#if GALAXY_BUILD_FEATURE_HAS_GAMESERVERGLOBALGOGSERVICESCONNECTIONSTATELISTENER
 class GameServerGogServicesConnectionStateListenerImplGlobal : public galaxy::api::GameServerGlobalGogServicesConnectionStateListener
 {
 public:
@@ -107,6 +107,7 @@ public:
 		}
 	}
 };
-
 #endif
+#endif
+
 #endif

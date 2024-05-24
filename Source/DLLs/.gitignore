@@ -5,11 +5,17 @@ server_versioninfo.rc
 interceptor_versioninfo.rc
 Galaxy.dll
 Galaxy.lib
+Galaxy.pdb
 REDGalaxy.dll
 REDGalaxy.lib
+REDGalaxy.pdb
 Galaxy64.dll
 Galaxy64.lib
+Galaxy64.pdb
 GalaxyPeer.dll
+GalaxyPeer.pdb
 GalaxyPeer64.dll
+GalaxyPeer64.pdb
 REDGalaxy64.dll
 REDGalaxy64.lib
+REDGalaxy64.pdb

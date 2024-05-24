@@ -59,7 +59,7 @@ void UpdateTimer() {
 						sender, (int)channel, std::string(buffer, out_msg_size)
 					));
 				std::string response = "SHOULDN'T HAPPEN CLIENT ACK: " + std::string(buffer, out_msg_size);
-				networking_ptr->SendP2PPacket(sender, response.c_str(), response.size(), P2P_SEND_UNRELIABLE, channel);
+				networking_ptr->SendP2PPacket(sender, response.c_str(), (uint32_t)response.size(), P2P_SEND_UNRELIABLE, channel);
 			}
 		}
 	}

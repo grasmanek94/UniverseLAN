@@ -138,12 +138,13 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | GAROU MARK OF THE WOLVES                  | :white_check_mark:(2)     | 1.114.9                       | Works since build 464 |
 | The King of Fighters XIII                 | :white_check_mark:(2)     | 1.114.9                       | Works since build 464 |
 | The King of Fighters 98UM                 | :white_check_mark:(2)     | 1.114.9                       | Works since build 464 |
+| Craft The World                           | :white_check_mark:(2)     | 1.100.2                       | Works since build 466 |
+| Worms W.M.D                               | :white_check_mark:(2)     | 1.128.3                       | Works since build 466 |
 | Serious Sams Bogus Detour                 | :construction:            | 1.100.2                       | Can join lobby since build 360 and start game, but both players stuck on black "Loading..." screen |
 | Dying Light                               | :construction:            | 1.148.3                       | Doesn't seem to work for now and crashes when EncryptedAppTicket is not disabled. I think LAN may be internet-bound unfortunately. |
 | Niffelheim                                | :construction:            | 1.139.2                       | Stuck at "Loading..." (save transfer?) | 
 | Homeworld: Deserts of Kharak              | :construction:            | 1.101                         | Tested with 1.100.2. After build 362 lobbies can now be created, but connecting doesn't work. Seems like host game is stuck in SetLobbyJoinable loop? | 
 | Ancestors Legacy                          | :construction:            | 1.133.6                       | Requires Leaderboards features to be implemented | 
-| Craft The World                           | :construction:            | 1.100.2                       | Stuck at loading screen when hosting/joining. | 
 | Offworld Trading Company                  | :construction:            | 1.94                          | Tested with 1.95 build 440, stuck on game load in a GetUserData loop |
 | Alien vs Predator 2000                    | :question:                |                               | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176? |
 | Double Dragon Trilogy                     | :question:                |                               | Unknown version, Galaxy.dll SHA1: `789f3b02ced8dbac2e5f8c2c98448569f70960cc` |
@@ -178,6 +179,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | ArcRunner                                 | :x:                       | 1.150.0                       | Uses Epic Online Services for multiplayer |
 | Battlezone 98 Redux                       | :x:                       | 1.100.2                       | Uses Steam for multiplayer |
 | Homeseek                                  | :x:                       | -                             | Uses Epic Online Services for multiplayer |
+| The Escapists 2                           | :x:                       | 1.132.1                       | Uses Photon networking for online multiplayer, UniverseLAN will not be able to make multiplayer work without internet. |
 
 # Notice
 I'm not affiliated in any way with GOG or CD Projekt RED.  

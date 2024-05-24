@@ -52,7 +52,7 @@ namespace universelan::client {
 			}
 
 			custom_network->listeners->NotifyAll(listener, &IConnectionOpenListener::OnConnectionOpenFailure, connectionString
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_CONNECTION_FAILURE_REASON
 				, IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE
 #else
 				, IConnectionOpenListener::FAILURE_REASON_UNDEFINED
@@ -162,7 +162,7 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ICUSTOMNETWORKING };
 
 		listeners->NotifyAll(channel->listener_open, &IConnectionOpenListener::OnConnectionOpenFailure, channel->connection_string.c_str()
-#if (GALAXY_VERSION) > 11240
+#if GALAXY_BUILD_FEATURE_HAS_CONNECTION_FAILURE_REASON
 			, IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE
 #else
 			, IConnectionOpenListener::FAILURE_REASON_UNDEFINED

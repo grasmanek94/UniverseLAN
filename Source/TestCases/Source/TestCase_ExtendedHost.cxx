@@ -59,7 +59,7 @@ void UpdateTimer() {
 	auto server_networking_ptr = GET_GALAXY_API(ServerNetworking());
 	for (uint8_t channel = 0; channel < 9; channel += 3) {
 		std::string p2p_packet{ std::format("This is a lobby packet nr {} from host {} in {} @ channel {}", counter, my_galaxy_id, my_lobby_id, (int)channel) };
-		server_networking_ptr->SendP2PPacket(my_lobby_id, p2p_packet.c_str(), p2p_packet.size(), P2P_SEND_UNRELIABLE, channel);
+		server_networking_ptr->SendP2PPacket(my_lobby_id, p2p_packet.c_str(), (uint32_t)p2p_packet.size(), P2P_SEND_UNRELIABLE, channel);
 	}
 
 	for (uint8_t channel = 0; channel < 9; channel += 3) {

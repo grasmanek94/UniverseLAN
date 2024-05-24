@@ -186,7 +186,7 @@ namespace universelan::client {
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_IAPPS
-		apps = std::make_unique<AppsImpl>(std::bind(&IGalaxy::GetApps, real_igalaxy_instance), real_notification);
+		apps = std::make_unique<AppsImpl>(std::bind(&IGalaxy::GetApps, real_igalaxy_instance), real_notification, config->GetEnableAllDLC());
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
@@ -238,7 +238,7 @@ namespace universelan::client {
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_IAPPS
-		interceptor_make_unique(apps, "?Apps@api@galaxy@", real_notification);
+		interceptor_make_unique(apps, "?Apps@api@galaxy@", real_notification, config->GetEnableAllDLC());
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
