@@ -26,3 +26,4 @@ cmake-linux-x64/
 release-packages/
 cmake-x*custom*.bat
 ConfigInterceptor*/
+CMakeSettings.json
