@@ -46,6 +46,7 @@ namespace universelan::client {
 	}
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_OPERATIONALSTATECHANGELISTENER
 	void OperationalStateChangeListener::OnOperationalStateChanged(uint32_t operationalState)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -56,6 +57,7 @@ namespace universelan::client {
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnOperationalStateChanged(operationalState));
 	}
+#endif
 
 	void UserDataListener::OnUserDataUpdated()
 	{
@@ -75,6 +77,7 @@ namespace universelan::client {
 	}
 #endif
 
+#if GALAXY_BUILD_FEATURE_ENCRYPTED_APP_TICKET
 	void EncryptedAppTicketListener::OnEncryptedAppTicketRetrieveSuccess()
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -92,6 +95,7 @@ namespace universelan::client {
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnEncryptedAppTicketRetrieveFailure(failureReason));
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_IACCESSTOKENLISTENER
 	void AccessTokenListener::OnAccessTokenChanged()

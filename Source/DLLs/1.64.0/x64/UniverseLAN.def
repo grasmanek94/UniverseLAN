@@ -1,0 +1,14 @@
+LIBRARY
+EXPORTS
+  ??0IGalaxy@api@galaxy@@QEAA@AEBV012@@Z @1
+  ??0IGalaxy@api@galaxy@@QEAA@XZ @2
+  ??1IGalaxy@api@galaxy@@UEAA@XZ @3
+  ??4GalaxyFactory@api@galaxy@@QEAAAEAV012@AEBV012@@Z @4
+  ??4IGalaxy@api@galaxy@@QEAAAEAV012@AEBV012@@Z @5
+  ??_7IGalaxy@api@galaxy@@6B@ @6
+  ?CreateInstance@GalaxyFactory@api@galaxy@@SAPEAVIGalaxy@23@XZ @7
+  ?GetErrorManager@GalaxyFactory@api@galaxy@@SAPEAVIErrorManager@23@XZ @8
+  ?GetInstance@GalaxyFactory@api@galaxy@@SAPEAVIGalaxy@23@XZ @9
+  ?ResetInstance@GalaxyFactory@api@galaxy@@SAXXZ @10
+  ?errorManager@GalaxyFactory@api@galaxy@@0PEAVIErrorManager@23@EA @11
+  ?instance@GalaxyFactory@api@galaxy@@0PEAVIGalaxy@23@EA @12

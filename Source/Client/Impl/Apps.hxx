@@ -40,6 +40,7 @@ namespace universelan::client {
 		 */
 		virtual bool IsDlcInstalled(ProductID productID) override;
 
+#if GALAXY_BUILD_FEATURE_HAS_GETCURRENTGAMELANGUAGE
 		/**
 		 * Returns current game language for given product ID.
 		 *
@@ -57,6 +58,7 @@ namespace universelan::client {
 		 * @return current game language for given product ID.
 		 */
 		virtual void GetCurrentGameLanguageCopy(char* buffer, uint32_t bufferLength, ProductID productID = 0) override;
+#endif
 	};
 
 	/** @} */

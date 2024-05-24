@@ -16,6 +16,7 @@ namespace universelan::client {
 		const auto TraceContext = tracer::Trace::IFRIENDS;
 	}
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_ONPERSONADATACHANGED
 	void PersonaDataChangedListener::OnPersonaDataChanged(GalaxyID userID, uint32_t personaStateChange)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -27,6 +28,7 @@ namespace universelan::client {
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnPersonaDataChanged(userID, personaStateChange));
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 	void UserInformationRetrieveListener::OnUserInformationRetrieveSuccess(GalaxyID userID)
@@ -53,6 +55,7 @@ namespace universelan::client {
 	}
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IFRIENDLISTLISTENER
 	void FriendListListener::OnFriendListRetrieveSuccess()
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -70,6 +73,7 @@ namespace universelan::client {
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnFriendListRetrieveFailure(failureReason));
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_NEW_FRIEND_FEATURES_104_3
 	void FriendInvitationSendListener::OnFriendInvitationSendSuccess(GalaxyID userID)
@@ -208,6 +212,7 @@ namespace universelan::client {
 	}
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IRICHPRECENSECHANGELISTENER
 	void RichPresenceChangeListener::OnRichPresenceChangeSuccess()
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -225,6 +230,7 @@ namespace universelan::client {
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnRichPresenceChangeFailure(failureReason));
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_ADDED_RICH_PRESENCE_LISTENERS
 	void RichPresenceListener::OnRichPresenceUpdated(GalaxyID userID)
@@ -264,6 +270,7 @@ namespace universelan::client {
 	}
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_GAMEJOINREQUESTEDLISTENER
 	void GameJoinRequestedListener::OnGameJoinRequested(GalaxyID userID, const char* connectionString)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -275,6 +282,7 @@ namespace universelan::client {
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnGameJoinRequested(userID, connectionString));
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_IGAMEINVITATIONRECEIVEDLISTENER
 	void GameInvitationReceivedListener::OnGameInvitationReceived(GalaxyID userID, const char* connectionString)

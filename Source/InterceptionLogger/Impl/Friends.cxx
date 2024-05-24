@@ -21,16 +21,24 @@ namespace universelan::client {
 		intf{ intf },
 		notifications{ notifications },
 		listeners{ notifications } {
+#if GALAXY_BUILD_FEATURE_IFRIENDS_ONPERSONADATACHANGED
 		listeners.AddListener<PersonaDataChangedListener>();
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_GAMEJOINREQUESTEDLISTENER
 		listeners.AddListener<GameJoinRequestedListener>();
+#endif
 #if GALAXY_BUILD_FEATURE_HAS_IGAMEINVITATIONRECEIVEDLISTENER
 		listeners.AddListener<GameInvitationReceivedListener>();
 #endif
 #if GALAXY_BUILD_FEATURE_HAS_ISENTFRIENDINVITATIONLISTRETRIEVELISTENER
 		listeners.AddListener<SendInvitationListener>();
 #endif
+#if GALAXY_BUILD_FEATURE_HAS_IFRIENDLISTLISTENER
 		listeners.AddListener<FriendListListener>();
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_IRICHPRECENSECHANGELISTENER
 		listeners.AddListener<RichPresenceChangeListener>();
+#endif
 #if GALAXY_BUILD_FEATURE_ADDED_RICH_PRESENCE_LISTENERS
 		listeners.AddListener<RichPresenceListener>();
 #endif
@@ -182,6 +190,7 @@ namespace universelan::client {
 	}
 #endif
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_HAS_PERSONANAME_AND_AVATARURL
 	const char* FriendsImpl::GetFriendPersonaName(GalaxyID userID) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
@@ -197,6 +206,7 @@ namespace universelan::client {
 
 		return result;
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_GET_FRIEND_PERSONA_AVATAR_COPY
 	void FriendsImpl::GetFriendPersonaNameCopy(GalaxyID userID, char* buffer, uint32_t bufferLength) {
@@ -234,6 +244,7 @@ namespace universelan::client {
 	}
 #endif
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_HAS_PERSONANAME_AND_AVATARURL
 	const char* FriendsImpl::GetFriendAvatarUrl(GalaxyID userID, AvatarType avatarType) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
@@ -250,6 +261,7 @@ namespace universelan::client {
 
 		return result;
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_GET_FRIEND_PERSONA_AVATAR_COPY
 	void FriendsImpl::GetFriendAvatarUrlCopy(GalaxyID userID, AvatarType avatarType, char* buffer, uint32_t bufferLength) {
@@ -301,6 +313,7 @@ namespace universelan::client {
 		intf()->GetFriendAvatarImageRGBA(userID, avatarType, buffer, bufferLength);
 	}
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_HAS_ISAVATARRGBAIMAGEAVAILABLE
 	bool FriendsImpl::IsFriendAvatarImageRGBAAvailable(GalaxyID userID, AvatarType avatarType) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
@@ -318,7 +331,9 @@ namespace universelan::client {
 		return result;
 	}
 #endif
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IFRIENDLISTLISTENER
 	void FriendsImpl::RequestFriendList(
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 		IFriendListListener* const listener
@@ -338,6 +353,7 @@ namespace universelan::client {
 #endif
 		);
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_ADDED_RICH_PRESENCE_LISTENERS
 	bool FriendsImpl::IsFriend(GalaxyID userID) {
@@ -357,6 +373,7 @@ namespace universelan::client {
 	}
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IFRIENDLISTLISTENER
 	uint32_t FriendsImpl::GetFriendCount() {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
@@ -384,6 +401,7 @@ namespace universelan::client {
 
 		return result;
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_NEW_FRIEND_FEATURES_104_3
 
@@ -522,6 +540,7 @@ namespace universelan::client {
 
 #endif
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_SET_DEL_CLR_RICHPRESENCE
 	void FriendsImpl::SetRichPresence(const char* key, const char* value
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 		, IRichPresenceChangeListener* const listener
@@ -584,6 +603,7 @@ namespace universelan::client {
 #endif	
 		);
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_ADDED_RICH_PRESENCE_LISTENERS
 	void FriendsImpl::RequestRichPresence(GalaxyID userID
@@ -725,6 +745,7 @@ namespace universelan::client {
 
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_GAMEJOINREQUESTEDLISTENER
 	void FriendsImpl::ShowOverlayInviteDialog(const char* connectionString) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
@@ -734,6 +755,7 @@ namespace universelan::client {
 
 		intf()->ShowOverlayInviteDialog(connectionString);
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_ISENDINVITATIONLISTENER
 	void FriendsImpl::SendInvitation(GalaxyID userID, const char* connectionString

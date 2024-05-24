@@ -2,6 +2,7 @@
 
 #include "TestCaseClientDetails.hxx"
 
+#if GALAXY_BUILD_FEATURE_ENCRYPTED_APP_TICKET
 class EncryptedAppTicketListenerImplGlobal : public galaxy::api::GlobalEncryptedAppTicketListener
 {
 public:
@@ -145,4 +146,5 @@ public:
 	}
 };
 
+#endif
 #endif

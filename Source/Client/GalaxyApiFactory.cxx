@@ -11,6 +11,12 @@
 
 #include <IGalaxy.h>
 
+#if !GALAXY_BUILD_FEATURE_FACTORY_HAS_CALLTYPE
+#define FACTORY_CALLTYPE 
+#else
+#define FACTORY_CALLTYPE GALAXY_CALLTYPE
+#endif
+
 namespace galaxy::api
 {
 	using namespace universelan::tracer;
@@ -134,6 +140,7 @@ namespace galaxy::api
 		}
 	};
 
+#if GALAXY_BUILD_FEATURE_HAS_IERRORMANAGER
 	class ErrorManager : public IErrorManager {
 	public:
 		virtual ~ErrorManager() override {
@@ -148,11 +155,15 @@ namespace galaxy::api
 			return nullptr;
 		}
 	};
+#endif
 
 	IGalaxy* GalaxyFactory::instance{ nullptr };
-	IErrorManager* GalaxyFactory::errorManager{ nullptr };
 
-	IGalaxy* GALAXY_CALLTYPE GalaxyFactory::GetInstance() {
+#if GALAXY_BUILD_FEATURE_HAS_IERRORMANAGER
+	IErrorManager* GalaxyFactory::errorManager{ nullptr };
+#endif
+
+	IGalaxy* FACTORY_CALLTYPE GalaxyFactory::GetInstance() {
 		if (instance == nullptr) {
 			//Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
@@ -162,7 +173,8 @@ namespace galaxy::api
 		return instance;
 	}
 
-	IErrorManager* GALAXY_CALLTYPE GalaxyFactory::GetErrorManager() {
+#if GALAXY_BUILD_FEATURE_HAS_IERRORMANAGER
+	IErrorManager* FACTORY_CALLTYPE GalaxyFactory::GetErrorManager() {
 		if (errorManager == nullptr) {
 			//Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
@@ -171,15 +183,21 @@ namespace galaxy::api
 
 		return errorManager;
 	}
+#endif
 
-	void GALAXY_CALLTYPE GalaxyFactory::ResetInstance() {
+#if GALAXY_BUILD_FEATURE_FACTORY_RESET_RENAMED_TO_RESETINSTANCE
+	void FACTORY_CALLTYPE GalaxyFactory::ResetInstance()
+#else
+	void FACTORY_CALLTYPE GalaxyFactory::Reset()
+#endif
+	{
 		if (instance != nullptr) {
 			delete instance;
 			instance = nullptr;
 		}
 	}
 
-	IGalaxy* GALAXY_CALLTYPE GalaxyFactory::CreateInstance() {
+	IGalaxy* FACTORY_CALLTYPE GalaxyFactory::CreateInstance() {
 		if (instance == nullptr) {
 			instance = new GalaxyImpl();
 		}

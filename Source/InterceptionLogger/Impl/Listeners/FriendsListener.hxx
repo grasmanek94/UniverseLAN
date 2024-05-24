@@ -7,6 +7,7 @@
 namespace universelan::client {
 	using namespace galaxy::api;
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_ONPERSONADATACHANGED
 	class PersonaDataChangedListener : public IPersonaDataChangedListener
 	{
 		IMPLEMENT_PROXY_ENCAPSULATE_FUNC_FOR(PersonaDataChangedListener, IPersonaDataChangedListener);
@@ -14,7 +15,9 @@ namespace universelan::client {
 	public:
 		virtual void OnPersonaDataChanged(GalaxyID userID, uint32_t personaStateChange);
 	};
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IFRIENDLISTLISTENER
 	class FriendListListener : public IFriendListListener
 	{
 		IMPLEMENT_PROXY_ENCAPSULATE_FUNC_FOR(FriendListListener, IFriendListListener);
@@ -23,7 +26,9 @@ namespace universelan::client {
 		virtual void OnFriendListRetrieveSuccess();
 		virtual void OnFriendListRetrieveFailure(FailureReason failureReason);
 	};
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IRICHPRECENSECHANGELISTENER
 	class RichPresenceChangeListener : public IRichPresenceChangeListener
 	{
 		IMPLEMENT_PROXY_ENCAPSULATE_FUNC_FOR(RichPresenceChangeListener, IRichPresenceChangeListener);
@@ -32,6 +37,7 @@ namespace universelan::client {
 		virtual void OnRichPresenceChangeSuccess();
 		virtual void OnRichPresenceChangeFailure(FailureReason failureReason);
 	};
+#endif
 
 #if GALAXY_BUILD_FEATURE_ADDED_RICH_PRESENCE_LISTENERS
 	class RichPresenceListener : public IRichPresenceListener
@@ -43,6 +49,7 @@ namespace universelan::client {
 	};
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_GAMEJOINREQUESTEDLISTENER
 	class GameJoinRequestedListener : public IGameJoinRequestedListener
 	{
 		IMPLEMENT_PROXY_ENCAPSULATE_FUNC_FOR(GameJoinRequestedListener, IGameJoinRequestedListener);
@@ -50,6 +57,7 @@ namespace universelan::client {
 	public:
 		virtual void OnGameJoinRequested(GalaxyID userID, const char* connectionString);
 	};
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_IGAMEINVITATIONRECEIVEDLISTENER
 	class GameInvitationReceivedListener : public IGameInvitationReceivedListener

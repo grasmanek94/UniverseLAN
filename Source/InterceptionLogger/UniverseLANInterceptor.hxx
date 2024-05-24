@@ -35,12 +35,16 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_IGALAXY
 		std::function<GALAXY_DLL_EXPORT galaxy::api::IGalaxy* GALAXY_CALLTYPE(void)> real_factory_create_instance = nullptr;
+#if GALAXY_BUILD_FEATURE_HAS_IERRORMANAGER
 		std::function<GALAXY_DLL_EXPORT galaxy::api::IErrorManager* GALAXY_CALLTYPE(void)> real_factory_get_error_manager = nullptr;
+#endif	
 		std::function<GALAXY_DLL_EXPORT galaxy::api::IGalaxy* GALAXY_CALLTYPE(void)> real_factory_get_instance = nullptr;
 		std::function<GALAXY_DLL_EXPORT void GALAXY_CALLTYPE(void)> real_factory_reset_instance = nullptr;
 
 		galaxy::api::IGalaxy* real_igalaxy_instance;
+#if GALAXY_BUILD_FEATURE_HAS_IERRORMANAGER
 		galaxy::api::IErrorManager* real_ierror_manager;
+#endif
 #endif
 
 		std::function<GALAXY_DLL_EXPORT void GALAXY_CALLTYPE(InitOptionsImpl const& initOptions)> real_init = nullptr;

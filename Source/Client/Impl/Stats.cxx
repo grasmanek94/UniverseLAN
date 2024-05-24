@@ -368,11 +368,13 @@ namespace universelan::client {
 	}
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_GETLEADERBORDENTRYCOUNT
 	uint32_t StatsImpl::GetLeaderboardEntryCount(const char* name) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		return 0;
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_ILEADERBOARDRETRIEVELISTENER
 	void StatsImpl::FindLeaderboard(const char* name
@@ -392,8 +394,13 @@ namespace universelan::client {
 	void StatsImpl::FindOrCreateLeaderboard(
 		const char* name
 		, const char* displayName
+#if GALAXY_BUILD_FEATURE_ISTATS_LEADERBORDSORTMETHOD_1_71_ARG_CHANGE
+		, LeaderboardSortMethod sortMethod
+		, LeaderboardDisplayType displayType
+#else
 		, const LeaderboardSortMethod& sortMethod
 		, const LeaderboardDisplayType& displayType
+#endif
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 		, ILeaderboardRetrieveListener* const listener
 #endif

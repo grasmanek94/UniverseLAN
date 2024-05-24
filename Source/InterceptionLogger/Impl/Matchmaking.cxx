@@ -45,7 +45,7 @@ namespace universelan::client {
 	void MatchmakingImpl::CreateLobby(
 		LobbyType lobbyType
 		, uint32_t maxMembers
-#if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
+#if GALAXY_BUILD_FEATURE_HAS_LOBBYTOPOLOGYTYPE_ENUM
 		, bool joinable
 		, LobbyTopologyType lobbyTopologyType
 #endif
@@ -59,7 +59,7 @@ namespace universelan::client {
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyType: {}", magic_enum::enum_name(lobbyType)));
 			trace.write_all(std::format("maxMembers: {}", maxMembers));
-#if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
+#if GALAXY_BUILD_FEATURE_HAS_LOBBYTOPOLOGYTYPE_ENUM
 			trace.write_all(std::format("maxMembers: {}", joinable));
 			trace.write_all(std::format("lobbyTopologyType: {}", magic_enum::enum_name(lobbyTopologyType)));
 #endif
@@ -70,7 +70,7 @@ namespace universelan::client {
 		}
 
 		intf()->CreateLobby(lobbyType, maxMembers
-#if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
+#if GALAXY_BUILD_FEATURE_HAS_LOBBYTOPOLOGYTYPE_ENUM
 			, joinable
 			, lobbyTopologyType
 #endif	

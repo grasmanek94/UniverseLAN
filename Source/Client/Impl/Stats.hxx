@@ -517,6 +517,7 @@ namespace universelan::client {
 		) override;
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_GETLEADERBORDENTRYCOUNT
 		/**
 		 * Returns the leaderboard entry count for requested leaderboard.
 		 *
@@ -528,6 +529,7 @@ namespace universelan::client {
 		 * @return The leaderboard entry count.
 		 */
 		virtual uint32_t GetLeaderboardEntryCount(const char* name) override;
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_ILEADERBOARDRETRIEVELISTENER
 		/**
@@ -563,8 +565,13 @@ namespace universelan::client {
 		virtual void FindOrCreateLeaderboard(
 			const char* name
 			, const char* displayName
+#if GALAXY_BUILD_FEATURE_ISTATS_LEADERBORDSORTMETHOD_1_71_ARG_CHANGE
+			, LeaderboardSortMethod sortMethod
+			, LeaderboardDisplayType displayType
+#else
 			, const LeaderboardSortMethod& sortMethod
 			, const LeaderboardDisplayType& displayType
+#endif
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			, ILeaderboardRetrieveListener* const listener = NULL
 #endif

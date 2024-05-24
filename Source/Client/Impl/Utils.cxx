@@ -27,9 +27,11 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUTILS };
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_INOTIFICATIONLISTENER
 	void UtilsImpl::RegisterForNotification(const char* type) {
 		tracer::Trace trace { type, __FUNCTION__ };
 	}
+
 
 	uint32_t UtilsImpl::GetNotification(NotificationID notificationID
 #if GALAXY_BUILD_FEATURE_IUTILS_GETNOTIFICATION_1_129_CHANGE
@@ -40,13 +42,16 @@ namespace universelan::client {
 
 		return 0;
 	}
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IUTILS_SHOWOVERLAYWITHWEBPAGE
 	void UtilsImpl::ShowOverlayWithWebPage(const char* url) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::IUTILS };
 
 		std::cout << "ShowOverlayWithWebPage:\n\t";
 		std::cout << url << std::endl;
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_OVERLAYSTATE_ENUM
 	bool UtilsImpl::IsOverlayVisible() {

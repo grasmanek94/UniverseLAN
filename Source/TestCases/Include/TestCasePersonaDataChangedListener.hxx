@@ -2,6 +2,7 @@
 
 #include "TestCaseClientDetails.hxx"
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_ONPERSONADATACHANGED
 class PersonaDataChangedListenerImplGlobal : public galaxy::api::GlobalPersonaDataChangedListener
 {
 public:
@@ -69,3 +70,4 @@ public:
 		}
 	}
 };
+#endif

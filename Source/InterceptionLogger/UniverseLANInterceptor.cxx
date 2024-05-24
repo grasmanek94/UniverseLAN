@@ -129,12 +129,16 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_IGALAXY
 
 		assign_func(real_factory_create_instance, "?CreateInstance@GalaxyFactory@api@galaxy@");
+#if GALAXY_BUILD_FEATURE_HAS_IERRORMANAGER
 		assign_func(real_factory_get_error_manager, "?GetErrorManager@GalaxyFactory@api@galaxy@");
+#endif
 		assign_func(real_factory_get_instance, "?GetInstance@GalaxyFactory@api@galaxy@");
 		assign_func(real_factory_reset_instance, "?ResetInstance@GalaxyFactory@api@galaxy@");
 
 		real_igalaxy_instance = real_factory_create_instance();
+#if GALAXY_BUILD_FEATURE_HAS_IERRORMANAGER
 		real_ierror_manager = real_factory_get_error_manager();
+#endif
 
 		real_init = [this](InitOptionsImpl initOptions) -> void {
 			try {

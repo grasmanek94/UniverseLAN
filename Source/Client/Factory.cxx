@@ -52,7 +52,11 @@ namespace galaxy::api {
 			return;
 
 		GalaxyFactory::GetInstance()->Shutdown();
+#if GALAXY_BUILD_FEATURE_FACTORY_RESET_RENAMED_TO_RESETINSTANCE
 		GalaxyFactory::ResetInstance();
+#else
+		GalaxyFactory::Reset();
+#endif
 	}
 
 	/**
@@ -238,6 +242,7 @@ namespace galaxy::api {
 		return GalaxyFactory::GetInstance()->GetLogger();
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_IERRORMANAGER
 	/**
 	 * Calls IGalaxy::GetError() on singleton instance of IGalaxy.
 	 *
@@ -245,7 +250,10 @@ namespace galaxy::api {
 	 */
 	GALAXY_DLL_EXPORT const IError* GALAXY_CALLTYPE GetError()
 	{
+
 		return GalaxyFactory::GetErrorManager()->GetLastError();
 	}
+#endif
+
 }
 #endif

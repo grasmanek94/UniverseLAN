@@ -462,7 +462,7 @@ namespace universelan::client {
 #endif
 		) override;
 
-#if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
+#if GALAXY_BUILD_FEATURE_IUSER_GET_DATA_ACCESSTOKEN_COPY
 		/**
 		 * Copies an entry from the data storage of current user.
 		 *
@@ -473,7 +473,11 @@ namespace universelan::client {
 		 * @param [in] bufferLength The size of the output buffer.
 		 * @param [in] userID The ID of the user. It can be omitted when reading own data.
 		 */
-		virtual void GetUserDataCopy(const char* key, char* buffer, uint32_t bufferLength, GalaxyID userID = GalaxyID()) override;
+		virtual void GetUserDataCopy(const char* key, char* buffer, uint32_t bufferLength
+#if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
+			, GalaxyID userID = GalaxyID()
+#endif
+		) override;
 #endif
 
 		/**
@@ -543,6 +547,7 @@ namespace universelan::client {
 #endif
 		) override;
 
+#if GALAXY_BUILD_FEATURE_IUSER_HAS_ISLOGGEDON
 		/**
 		 * Checks if the user is logged on to Galaxy backend services.
 		 *
@@ -556,6 +561,7 @@ namespace universelan::client {
 		 * @return true if the user is logged on to Galaxy backend services, false otherwise.
 		 */
 		virtual bool IsLoggedOn() override;
+#endif
 
 #if GALAXY_BUILD_FEATURE_ENCRYPTED_APP_TICKET
 #if GALAXY_BUILD_FEATURE_ENCRYPTED_APP_TICKET_CONST
@@ -618,6 +624,7 @@ namespace universelan::client {
 		 */
 		virtual const char* GetAccessToken() override;
 
+#if GALAXY_BUILD_FEATURE_IUSER_GET_DATA_ACCESSTOKEN_COPY
 		/**
 		 * Copies the access token for current session.
 		 *
@@ -630,6 +637,7 @@ namespace universelan::client {
 		 * @param [in] bufferLength The size of the output buffer.
 		 */
 		virtual void GetAccessTokenCopy(char* buffer, uint32_t bufferLength) override;
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_IUSER_REFRESHTOKEN
 		/**

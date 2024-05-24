@@ -157,7 +157,9 @@ std::string Unet::ServiceGalaxy::GetUserName()
 
 void Unet::ServiceGalaxy::SetRichPresence(const char* key, const char* value)
 {
+#if GALAXY_BUILD_FEATURE_IFRIENDS_SET_DEL_CLR_RICHPRESENCE
 	GET_GALAXY_API(Friends())->SetRichPresence(key, value);
+#endif
 }
 
 void Unet::ServiceGalaxy::CreateLobby(LobbyPrivacy privacy, int maxPlayers)

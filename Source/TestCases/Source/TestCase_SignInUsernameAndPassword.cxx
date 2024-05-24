@@ -18,20 +18,9 @@ int main()
 	AchievementChangeListenerImplGlobal achievementchangelistener{};
 	AuthListenerImplGlobal authlistener{};
 
-	EncryptedAppTicketListenerImplGlobal encryptedappticketlistener{};
-
-#if GALAXY_BUILD_FEATURE_HAS_GOGSERVICECONNECTIONSTATELISTENER
-	GogServicesConnectionStateListenerImplGlobal gogservicesconnectionstatelistener{};
-#endif
-
-	OperationalStateChangeListenerImplGlobal operationalstatechangelistener{};
-
 #if GALAXY_BUILD_FEATURE_HAS_IOTHERSESSIONSTARTLISTENER
 	OtherSessionStartListenerImplGlobal othersessionstartlistener{};
 #endif
-
-	PersonaDataChangedListenerImplGlobal personadatachangedlistener{};
-	RichPresenceChangeListenerImplGlobal richpresencechangelistener{};
 
 #if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
 	SpecificUserDataListenerImplGlobal specificuserdatalistener{};

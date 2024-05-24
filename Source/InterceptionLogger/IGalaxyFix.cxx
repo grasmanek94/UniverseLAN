@@ -11,6 +11,12 @@
 #include <functional>
 #include <stdexcept>
 
+#if !GALAXY_BUILD_FEATURE_FACTORY_HAS_CALLTYPE
+#define FACTORY_CALLTYPE 
+#else
+#define FACTORY_CALLTYPE GALAXY_CALLTYPE
+#endif
+
 namespace galaxy::api
 {
 	/**
@@ -255,14 +261,16 @@ namespace galaxy::api
 		 *
 		 * @return The instance of IGalaxy or NULL if it has not been created yet.
 		 */
-		static IGalaxy* GALAXY_CALLTYPE GetInstance();
+		static IGalaxy* FACTORY_CALLTYPE GetInstance();
 
+#if GALAXY_BUILD_FEATURE_HAS_IERRORMANAGER
 		/**
 		 * Returns the instance of error manager. Creates it if it does not exists yet.
 		 *
 		 * @return instance of error manager.
 		 */
-		static IErrorManager* GALAXY_CALLTYPE GetErrorManager();
+		static IErrorManager* FACTORY_CALLTYPE GetErrorManager();
+#endif
 
 		/**
 		 * Removes the created instance of IGalaxy.
@@ -270,7 +278,11 @@ namespace galaxy::api
 		 * @remark Instead of using this method directly, you probably should use
 		 * the Shutdown() method defined in GalaxyApi.h.
 		 */
-		static void GALAXY_CALLTYPE ResetInstance();
+#if GALAXY_BUILD_FEATURE_FACTORY_RESET_RENAMED_TO_RESETINSTANCE
+		static void FACTORY_CALLTYPE ResetInstance();
+#else
+		static void FACTORY_CALLTYPE Reset();
+#endif
 
 		/**
 		 * Returns the instance of IGalaxy. Creates it if it does not exist yet.
@@ -280,20 +292,25 @@ namespace galaxy::api
 		 *
 		 * @return The instance of IGalaxy.
 		 */
-		static IGalaxy* GALAXY_CALLTYPE CreateInstance();
+		static IGalaxy* FACTORY_CALLTYPE CreateInstance();
 
 		GalaxyFactory& operator=(GalaxyFactory const& other);
 		GalaxyFactory& operator=(GalaxyFactory && other);
 	private:
 
 		static IGalaxy* instance; ///< The instance of IGalaxy.
+
+#if GALAXY_BUILD_FEATURE_HAS_IERRORMANAGER
 		static IErrorManager* errorManager; ///< The instance of Error Manager.
+#endif
 	};
 
 	GalaxyFactory& GalaxyFactory::operator=(GalaxyFactory const& other) {
 		throw std::runtime_error("Uh oh GalaxyFactory assignment not implemented/untested");
 		this->instance = other.instance;
+#if GALAXY_BUILD_FEATURE_HAS_IERRORMANAGER
 		this->errorManager = other.errorManager;
+#endif
 
 		return (GalaxyFactory&)*this;
 	}
@@ -301,7 +318,9 @@ namespace galaxy::api
 	GalaxyFactory& GalaxyFactory::operator=(GalaxyFactory && other) {
 		throw std::runtime_error("Uh oh GalaxyFactory assignment not implemented/untested");
 		this->instance = other.instance;
+#if GALAXY_BUILD_FEATURE_HAS_IERRORMANAGER
 		this->errorManager = other.errorManager;
+#endif
 
 		return (GalaxyFactory&)*this;
 	}

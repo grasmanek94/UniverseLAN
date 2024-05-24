@@ -37,6 +37,7 @@ namespace universelan::client {
 		return result;
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_GETCURRENTGAMELANGUAGE
 	const char* AppsImpl::GetCurrentGameLanguage(ProductID productID) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
@@ -68,6 +69,7 @@ namespace universelan::client {
 			trace.write_all(std::format("language: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
 		}
 	}
+#endif
 }
 
 #endif

@@ -20,6 +20,10 @@ namespace universelan::client {
 	using GetImageRGBABufferType = unsigned char;
 #endif
 
+#if !GALAXY_BUILD_FEATURE_IUTILS_NOTIFICATION_ID_TYPEDEF
+	using NotificationID = uint32_t;
+#endif
+
 	/**
 	 * @addtogroup api
 	 * @{
@@ -63,6 +67,7 @@ namespace universelan::client {
 		 */
 		virtual void GetImageRGBA(uint32_t imageID, GetImageRGBABufferType* buffer, uint32_t bufferLength) override;
 
+#if GALAXY_BUILD_FEATURE_HAS_INOTIFICATIONLISTENER
 		/**
 		 * Register for notifications of a specified type.
 		 *
@@ -88,7 +93,9 @@ namespace universelan::client {
 			, bool& consumable
 #endif
 			, char* type, uint32_t typeLength, void* content, uint32_t contentSize) override;
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IUTILS_SHOWOVERLAYWITHWEBPAGE
 		/**
 		 * Shows web page in the overlay.
 		 *
@@ -98,6 +105,7 @@ namespace universelan::client {
 		 * @param [in] url The URL address of a specified web page with the limit of 2047 bytes.
 		 */
 		virtual void ShowOverlayWithWebPage(const char* url) override;
+#endif
 
 #if GALAXY_BUILD_FEATURE_OVERLAYSTATE_ENUM
 		/**

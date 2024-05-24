@@ -5,6 +5,7 @@
 #include <ContainerGetByIndex.hxx>
 #include <SafeStringCopy.hxx>
 
+#include <boost/preprocessor/control/if.hpp>
 #include <string>
 
 namespace universelan::client {
@@ -60,9 +61,15 @@ namespace universelan::client {
 				listeners->NotifyAll(&IAccessTokenListener::OnAccessTokenChanged);
 #endif
 				listeners->NotifyAll(listener, &IAuthListener::OnAuthSuccess);
+#if GALAXY_BUILD_FEATURE_HAS_OPERATIONALSTATECHANGELISTENER
 				listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, (IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN | IOperationalStateChangeListener::OPERATIONAL_STATE_LOGGED_ON));
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_IFRIENDS_ONPERSONADATACHANGED
 				listeners->NotifyAll(&IPersonaDataChangedListener::OnPersonaDataChanged, intf->user->GetGalaxyID(), IPersonaDataChangedListener::PERSONA_CHANGE_NONE);
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_IFRIENDLISTLISTENER	
 				listeners->NotifyAll(&IFriendListListener::OnFriendListRetrieveSuccess);
+#endif
 			}
 			else if (listener != nullptr) {
 				lock_t lock{ mtx_waiting_auth_listeners };
@@ -71,7 +78,9 @@ namespace universelan::client {
 		}
 		else {
 			listeners->NotifyAll(listener, &IAuthListener::OnAuthFailure, IAuthListener::FAILURE_REASON_GALAXY_SERVICE_NOT_AVAILABLE);
+#if GALAXY_BUILD_FEATURE_HAS_OPERATIONALSTATECHANGELISTENER
 			listeners->NotifyAll(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN);
+#endif
 		}
 	}
 
@@ -332,11 +341,16 @@ namespace universelan::client {
 		return GetGalaxyUserData(userID)->stats.GetUserData(key).c_str();
 	}
 
+#if GALAXY_BUILD_FEATURE_IUSER_GET_DATA_ACCESSTOKEN_COPY
+	void UserImpl::GetUserDataCopy(const char* key, char* buffer, uint32_t bufferLength
 #if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
-	void UserImpl::GetUserDataCopy(const char* key, char* buffer, uint32_t bufferLength, GalaxyID userID) {
+		, GalaxyID userID
+#endif	
+	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
-		const std::string& str = GetGalaxyUserData(userID)->stats.GetUserData(key);
+		GalaxyID id = BOOST_PP_IF(GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER, userID, 0);
+		const std::string& str = GetGalaxyUserData(id)->stats.GetUserData(key);
 		universelan::util::safe_copy_str_n(str, buffer, bufferLength);
 	}
 #endif
@@ -420,11 +434,13 @@ namespace universelan::client {
 		);
 	}
 
+#if GALAXY_BUILD_FEATURE_IUSER_HAS_ISLOGGEDON
 	bool UserImpl::IsLoggedOn() {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		return logged_on && SignedIn();
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_ENCRYPTED_APP_TICKET
 	void UserImpl::RequestEncryptedAppTicket(RequestEncryptedAppTicketDataT* data, uint32_t dataSize
@@ -463,11 +479,13 @@ namespace universelan::client {
 		return SOME_TOKEN_STRING.c_str();
 	}
 
+#if GALAXY_BUILD_FEATURE_IUSER_GET_DATA_ACCESSTOKEN_COPY
 	void UserImpl::GetAccessTokenCopy(char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		universelan::util::safe_copy_str_n(SOME_TOKEN_STRING, buffer, bufferLength);
 	}
+#endif
 
 	bool UserImpl::ReportInvalidAccessToken(const char* accessToken
 #if GALAXY_BUILD_FEATURE_USER_ACCESS_TOKEN_INFO
@@ -490,7 +508,7 @@ namespace universelan::client {
 		universelan::util::safe_copy_str_n(SOME_TOKEN_STRING, buffer, bufferLength);
 	}
 
-	const char* UserImpl::GetRefreshToken(){
+	const char* UserImpl::GetRefreshToken() {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		return SOME_TOKEN_STRING.c_str();
@@ -564,10 +582,12 @@ namespace universelan::client {
 		if (!SignedIn()) {
 			RunForAllWaitingAuthListeners([&](IGalaxyListener* listener) {
 				listeners->NotifyAllNowSpecificOnly(listener, &IAuthListener::OnAuthFailure, IAuthListener::FAILURE_REASON_GALAXY_SERVICE_NOT_AVAILABLE);
-			});
+				});
 
 			listeners->NotifyAllNow(&IAuthListener::OnAuthFailure, IAuthListener::FAILURE_REASON_GALAXY_SERVICE_NOT_AVAILABLE);
+#if GALAXY_BUILD_FEATURE_HAS_OPERATIONALSTATECHANGELISTENER
 			listeners->NotifyAllNow(&IOperationalStateChangeListener::OnOperationalStateChanged, IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN);
+#endif
 			return;
 		}
 
@@ -581,9 +601,15 @@ namespace universelan::client {
 				});
 
 			listeners->NotifyAllNow(&IAuthListener::OnAuthSuccess);
+#if GALAXY_BUILD_FEATURE_HAS_OPERATIONALSTATECHANGELISTENER
 			listeners->NotifyAllNow(&IOperationalStateChangeListener::OnOperationalStateChanged, (IOperationalStateChangeListener::OPERATIONAL_STATE_SIGNED_IN | IOperationalStateChangeListener::OPERATIONAL_STATE_LOGGED_ON));
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_IFRIENDS_ONPERSONADATACHANGED
 			listeners->NotifyAllNow(&IPersonaDataChangedListener::OnPersonaDataChanged, intf->user->GetGalaxyID(), IPersonaDataChangedListener::PERSONA_CHANGE_NONE);
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_IFRIENDLISTLISTENER	
 			listeners->NotifyAllNow(&IFriendListListener::OnFriendListRetrieveSuccess);
+#endif
 		}
 		else if (connection_state) {
 			// Connected
@@ -591,7 +617,9 @@ namespace universelan::client {
 		}
 		else {
 			// Disconnected
+#if GALAXY_BUILD_FEATURE_HAS_OPERATIONALSTATECHANGELISTENER
 			listeners->NotifyAllNow(&IOperationalStateChangeListener::OnOperationalStateChanged, (IOperationalStateChangeListener::OperationalState::OPERATIONAL_STATE_SIGNED_IN));
+#endif
 		}
 	}
 }

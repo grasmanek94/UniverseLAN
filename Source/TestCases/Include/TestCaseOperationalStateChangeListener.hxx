@@ -2,6 +2,7 @@
 
 #include "TestCaseClientDetails.hxx"
 
+#if GALAXY_BUILD_FEATURE_HAS_OPERATIONALSTATECHANGELISTENER
 class OperationalStateChangeListenerImplGlobal : public galaxy::api::GlobalOperationalStateChangeListener
 {
 public:
@@ -106,4 +107,5 @@ public:
 	}
 };
 
+#endif
 #endif

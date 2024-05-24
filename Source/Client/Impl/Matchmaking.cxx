@@ -23,7 +23,7 @@ namespace universelan::client {
 	void MatchmakingImpl::CreateLobby(
 		LobbyType lobbyType
 		, uint32_t maxMembers
-#if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
+#if GALAXY_BUILD_FEATURE_HAS_LOBBYTOPOLOGYTYPE_ENUM
 		, bool joinable
 		, LobbyTopologyType lobbyTopologyType
 #endif
@@ -44,7 +44,7 @@ namespace universelan::client {
 		listeners->NotifyAll(&INatTypeDetectionListener::OnNatTypeDetectionSuccess, galaxy::api::NatType::NAT_TYPE_PORT_RESTRICTED);
 #endif
 
-#if !GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
+#if !GALAXY_BUILD_FEATURE_HAS_LOBBYTOPOLOGYTYPE_ENUM
 		bool joinable = true;
 		LobbyTopologyType lobbyTopologyType = (LobbyTopologyType)0;
 #endif

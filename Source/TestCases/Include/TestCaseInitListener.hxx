@@ -14,8 +14,12 @@ class TestInitListenerGlobal :
 #if GALAXY_BUILD_FEATURE_HAS_GOGSERVICECONNECTIONSTATELISTENER
 	, public galaxy::api::GlobalGogServicesConnectionStateListener
 #endif
+#if GALAXY_BUILD_FEATURE_HAS_OPERATIONALSTATECHANGELISTENER
 	, public galaxy::api::GlobalOperationalStateChangeListener
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_IFRIENDS_ONPERSONADATACHANGED
 	, public galaxy::api::GlobalPersonaDataChangedListener
+#endif
 {
 public:
 	using on_test_ready_callback = std::function<void(void)>;
@@ -34,8 +38,12 @@ private:
 	void TryInit() {
 		if (!has_signed_in ||
 			!has_connected ||
+#if GALAXY_BUILD_FEATURE_HAS_OPERATIONALSTATECHANGELISTENER
 			!has_operational_state_change ||
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_IFRIENDS_ONPERSONADATACHANGED
 			!has_person_data_changed ||
+#endif
 #if GALAXY_BUILD_FEATURE_HAS_IACCESSTOKENLISTENER
 			!has_access_token_refreshed ||
 #endif
@@ -136,6 +144,7 @@ public:
 }
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_OPERATIONALSTATECHANGELISTENER
 	virtual void OnOperationalStateChanged(uint32_t operationalState) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
@@ -148,7 +157,9 @@ public:
 		has_operational_state_change = true;
 		TryInit();
 	}
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IFRIENDS_ONPERSONADATACHANGED
 	virtual void OnPersonaDataChanged(GalaxyID userID, uint32_t personaStateChange) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
@@ -159,6 +170,7 @@ public:
 		has_person_data_changed = true;
 		TryInit();
 	}
+#endif
 };
 
 #ifdef USE_TESTING_MAIN

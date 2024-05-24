@@ -112,7 +112,7 @@ namespace universelan::client {
 		virtual void CreateLobby(
 			LobbyType lobbyType
 			, uint32_t maxMembers
-#if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
+#if GALAXY_BUILD_FEATURE_HAS_LOBBYTOPOLOGYTYPE_ENUM
 			, bool joinable
 			, LobbyTopologyType lobbyTopologyType
 #endif

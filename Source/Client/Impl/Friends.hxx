@@ -160,6 +160,7 @@ namespace universelan::client {
 		virtual PersonaState GetPersonaState() override;
 #endif
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_HAS_PERSONANAME_AND_AVATARURL
 		/**
 		 * Returns the nickname of a specified user.
 		 *
@@ -171,6 +172,7 @@ namespace universelan::client {
 		 * @return The nickname of the user.
 		 */
 		virtual const char* GetFriendPersonaName(GalaxyID userID) override;
+#endif
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_GET_FRIEND_PERSONA_AVATAR_COPY
 		/**
@@ -197,6 +199,7 @@ namespace universelan::client {
 		virtual PersonaState GetFriendPersonaState(GalaxyID userID)override;
 #endif
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_HAS_PERSONANAME_AND_AVATARURL
 		/**
 		 * Returns the URL of the avatar of a specified user.
 		 *
@@ -209,7 +212,7 @@ namespace universelan::client {
 		 * @return The URL of the avatar.
 		 */
 		virtual const char* GetFriendAvatarUrl(GalaxyID userID, AvatarType avatarType) override;
-
+#endif
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_GET_FRIEND_PERSONA_AVATAR_COPY
 		/**
@@ -253,6 +256,7 @@ namespace universelan::client {
 		 */
 		virtual void GetFriendAvatarImageRGBA(GalaxyID userID, AvatarType avatarType, GetImageRGBABufferType* buffer, uint32_t bufferLength) override;
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_HAS_ISAVATARRGBAIMAGEAVAILABLE
 		/**
 		 * Checks if a specified avatar image is available.
 		 *
@@ -262,7 +266,9 @@ namespace universelan::client {
 		 */
 		virtual bool IsFriendAvatarImageRGBAAvailable(GalaxyID userID, AvatarType avatarType) override;
 #endif
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IFRIENDLISTLISTENER
 		/**
 		 * Performs a request for the user's list of friends.
 		 *
@@ -275,6 +281,7 @@ namespace universelan::client {
 			IFriendListListener* const listener = NULL
 #endif
 		) override;
+#endif
 
 #if GALAXY_BUILD_FEATURE_ADDED_RICH_PRESENCE_LISTENERS
 		/**
@@ -288,6 +295,7 @@ namespace universelan::client {
 		virtual bool IsFriend(GalaxyID userID) override;
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IFRIENDLISTLISTENER
 		/**
 		 * Returns the number of retrieved friends in the user's list of friends.
 		 *
@@ -306,6 +314,7 @@ namespace universelan::client {
 		 * @return The GalaxyID of the friend.
 		 */
 		virtual GalaxyID GetFriendByIndex(uint32_t index) override;
+#endif
 
 #if GALAXY_BUILD_FEATURE_NEW_FRIEND_FEATURES_104_3
 		/**
@@ -399,6 +408,8 @@ namespace universelan::client {
 #endif
 		) override;
 #endif
+
+#if GALAXY_BUILD_FEATURE_IFRIENDS_SET_DEL_CLR_RICHPRESENCE
 		/**
 		 * Sets the variable value under a specified name.
 		 *
@@ -453,6 +464,7 @@ namespace universelan::client {
 			IRichPresenceChangeListener* const listener = NULL
 #endif
 		) override;
+#endif
 
 #if GALAXY_BUILD_FEATURE_ADDED_RICH_PRESENCE_LISTENERS
 		/**
@@ -545,6 +557,7 @@ namespace universelan::client {
 		virtual void GetRichPresenceKeyByIndexCopy(uint32_t index, char* buffer, uint32_t bufferLength, GalaxyID userID = GalaxyID()) override;
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_GAMEJOINREQUESTEDLISTENER
 		/**
 		 * Shows game invitation dialog that allows to invite users to game.
 		 *
@@ -559,6 +572,7 @@ namespace universelan::client {
 		 * @param [in] connectionString The string which contains connection info with the limit of 4095 bytes.
 		 */
 		virtual void ShowOverlayInviteDialog(const char* connectionString) override;
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_ISENDINVITATIONLISTENER
 		/**

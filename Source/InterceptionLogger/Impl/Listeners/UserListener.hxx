@@ -27,6 +27,7 @@ namespace universelan::client {
 	};
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_OPERATIONALSTATECHANGELISTENER
 	class OperationalStateChangeListener : public IOperationalStateChangeListener
 	{
 		IMPLEMENT_PROXY_ENCAPSULATE_FUNC_FOR(OperationalStateChangeListener, IOperationalStateChangeListener);
@@ -34,6 +35,7 @@ namespace universelan::client {
 	public:
 		virtual void OnOperationalStateChanged(uint32_t operationalState);
 	};
+#endif
 
 	class UserDataListener : public IUserDataListener
 	{
@@ -53,6 +55,7 @@ namespace universelan::client {
 	};
 #endif
 
+#if GALAXY_BUILD_FEATURE_ENCRYPTED_APP_TICKET
 	class EncryptedAppTicketListener : public IEncryptedAppTicketListener
 	{
 		IMPLEMENT_PROXY_ENCAPSULATE_FUNC_FOR(EncryptedAppTicketListener, IEncryptedAppTicketListener);
@@ -61,6 +64,7 @@ namespace universelan::client {
 		virtual void OnEncryptedAppTicketRetrieveSuccess();
 		virtual void OnEncryptedAppTicketRetrieveFailure(FailureReason failureReason);
 	};
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_IACCESSTOKENLISTENER
 	class AccessTokenListener : public IAccessTokenListener

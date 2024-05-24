@@ -42,6 +42,7 @@ namespace universelan::client {
 	}
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_INOTIFICATIONLISTENER
 	void NotificationListener::OnNotificationReceived(NotificationID notificationID, uint32_t typeLength, uint32_t contentSize)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
@@ -54,6 +55,7 @@ namespace universelan::client {
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnNotificationReceived(notificationID, typeLength, contentSize));
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_GOGSERVICECONNECTIONSTATELISTENER
 	void GogServicesConnectionStateListener::OnConnectionStateChange(GogServicesConnectionState connectionState)

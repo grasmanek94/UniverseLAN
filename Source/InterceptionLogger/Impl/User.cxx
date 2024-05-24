@@ -37,12 +37,16 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_IOTHERSESSIONSTARTLISTENER
 		listeners.AddListener<OtherSessionStartListener>();
 #endif
+#if GALAXY_BUILD_FEATURE_HAS_OPERATIONALSTATECHANGELISTENER
 		listeners.AddListener<OperationalStateChangeListener>();
+#endif
 		listeners.AddListener<UserDataListener>();
 #if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
 		listeners.AddListener<SpecificUserDataListener>();
 #endif
+#if GALAXY_BUILD_FEATURE_ENCRYPTED_APP_TICKET
 		listeners.AddListener<EncryptedAppTicketListener>();
+#endif
 #if GALAXY_BUILD_FEATURE_HAS_IACCESSTOKENLISTENER
 		listeners.AddListener<AccessTokenListener>();
 #endif
@@ -480,18 +484,28 @@ namespace universelan::client {
 		return result;
 	}
 
+#if GALAXY_BUILD_FEATURE_IUSER_GET_DATA_ACCESSTOKEN_COPY
+	void UserImpl::GetUserDataCopy(const char* key, char* buffer, uint32_t bufferLength
 #if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
-	void UserImpl::GetUserDataCopy(const char* key, char* buffer, uint32_t bufferLength, GalaxyID userID) {
+		, GalaxyID userID
+#endif	
+	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
 			trace.write_all(std::format("buffer: {}", (void*)buffer));
 			trace.write_all(std::format("bufferLength: {}", bufferLength));
+#if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
 			trace.write_all(std::format("userID: {}", userID));
+#endif
 		}
 
-		intf()->GetUserDataCopy(key, buffer, bufferLength, userID);
+		intf()->GetUserDataCopy(key, buffer, bufferLength
+#if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
+			, userID
+#endif
+		);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
@@ -601,6 +615,7 @@ namespace universelan::client {
 		);
 	}
 
+#if GALAXY_BUILD_FEATURE_IUSER_HAS_ISLOGGEDON
 	bool UserImpl::IsLoggedOn() {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
@@ -612,6 +627,7 @@ namespace universelan::client {
 
 		return result;
 	}
+#endif
 
 #if GALAXY_BUILD_FEATURE_ENCRYPTED_APP_TICKET
 	void UserImpl::RequestEncryptedAppTicket(RequestEncryptedAppTicketDataT* data, uint32_t dataSize
@@ -679,6 +695,7 @@ namespace universelan::client {
 		return result;
 	}
 
+#if GALAXY_BUILD_FEATURE_IUSER_GET_DATA_ACCESSTOKEN_COPY
 	void UserImpl::GetAccessTokenCopy(char* buffer, uint32_t bufferLength) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
@@ -693,6 +710,7 @@ namespace universelan::client {
 			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
 		}
 	}
+#endif
 
 	bool UserImpl::ReportInvalidAccessToken(const char* accessToken
 #if GALAXY_BUILD_FEATURE_USER_ACCESS_TOKEN_INFO

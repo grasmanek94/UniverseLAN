@@ -2,6 +2,7 @@
 
 #include "TestCaseClientDetails.hxx"
 
+#if GALAXY_BUILD_FEATURE_HAS_IFRIENDLISTLISTENER
 class FriendListListenerImplGlobal : public galaxy::api::GlobalFriendListListener
 {
 public:
@@ -95,3 +96,4 @@ public:
 		}
 	}
 };
+#endif

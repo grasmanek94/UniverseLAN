@@ -1,0 +1,11 @@
+LIBRARY
+EXPORTS
+  ??0IGalaxy@api@galaxy@@QEAA@AEBV012@@Z @1
+  ??0IGalaxy@api@galaxy@@QEAA@XZ @2
+  ??1IGalaxy@api@galaxy@@UEAA@XZ @3
+  ??4GalaxyFactory@api@galaxy@@QEAAAEAV012@AEBV012@@Z @4
+  ??4IGalaxy@api@galaxy@@QEAAAEAV012@AEBV012@@Z @5
+  ??_7IGalaxy@api@galaxy@@6B@ @6
+  ?GetInstance@GalaxyFactory@api@galaxy@@SAPEAVIGalaxy@23@XZ @7
+  ?Reset@GalaxyFactory@api@galaxy@@SAXXZ @8
+  ?instance@GalaxyFactory@api@galaxy@@0PEAVIGalaxy@23@EA @9
