@@ -160,6 +160,8 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Aragami 2                                 | :left_right_arrow:        | 1.148.3                       | Probably does not use GOG Galaxy for networking (doesn't work for private lobbies).<br> Can play on public lobbies without GOG Galaxy or with this patch AFAIK. |
 | DUSK (DuskWorld)                          | :left_right_arrow:        | 1.133.6                       | Uses steam (works without Steam Client) api for free online play, doesn't use GOG Galaxy. |
 | Blood Bowl 2 Legendary Editition          | :left_right_arrow:        |                               | Uses custom free multiplayer, need to create a free online in-game account on their servers. |
+| Deathtrap                                 | :left_right_arrow:        | 1.75                          | Has Native LAN |
+| Trine 3                                   | :left_right_arrow:        | 1.65                          | Has free online multiplayer, but does not use Galaxy Multiplayer which means that this game is internet-only. UniverseLAN can't make it LAN-able. |
 | Bound By Blades                           | :left_right_arrow:        | 1.150.0                       | UniverseLAN can't make this game LAN-able, this game uses custom/free multiplayer (Photon Engine) that does not use Steam or Galaxy, but online multiplayer is DRM Free. Would need to develop a custom Photon Engine API. When dev stops paying for Photon CCU's the game multiplayer will stop working. A project for another time maybe. |
 | Ashes of the Singularity - Escalation     | :x:                       | 1.100.2                       | Requires .exe patches to patch out modification checks so that entering lobby is possible, unfortunately both players are seen as 'Host' and other side doesn't 'see' clicking 'ready'. UniverseLAN needs to support .exe patching, and the both players being 'host' needs to be analyzed and fixed. Afters analysis it seems that for the "real" networking the game uses Epic Online Services. No dice here. |
 | Battlefleet Gothic Armada                 | :x:                       | 1.139.2                       | Doesn't seem to use Galaxy for multiplayer. | 
@@ -180,6 +182,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Battlezone 98 Redux                       | :x:                       | 1.100.2                       | Uses Steam for multiplayer |
 | Homeseek                                  | :x:                       | -                             | Uses Epic Online Services for multiplayer |
 | The Escapists 2                           | :x:                       | 1.132.1                       | Uses Photon networking for online multiplayer, UniverseLAN will not be able to make multiplayer work without internet. |
+| Descent - Underground                     | :x:                       | 1.88                          | Doesn't seem to load the Galaxy.dll even with `--gog` launch param? |
 
 # Notice
 I'm not affiliated in any way with GOG or CD Projekt RED.  
