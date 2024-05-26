@@ -9,76 +9,923 @@
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
-    <h1 id="why-">Why?</h1>
-    <p>This extends the <a href="https://www.gog.com/en/about_gog">&quot;You buy it, you own it&quot;</a> and  &quot;DRM-Free&quot; GOG philosophy to the multiplayer portion of all games that use GOG Galaxy.</p>
-    <p>Why <em>Universe</em>LAN? Because the Universe is much bigger than the Galaxy!</p>
-    <h1 id="what-is-universelan-">What is <em>UniverseLAN</em>?</h1>
-    <p><a href="https://github.com/grasmanek94/UniverseLAN">UniverseLAN</a> is a GOG Galaxy wrapper which allows LAN / Direct IP connections for games using Galaxy Multiplayer (without using GOG Galaxy client).<br>This is useful in cases where:
-    1) You and other people own a game
-    2) All or some of you don&#39;t have (reliable) internet access
-    3) And as such GOG Galaxy services won&#39;t work
-    4) The game you want to play does not natively support LAN and/or DirectIP connections
-    5) But you all want to play together anyway  </p>
-    <p>UniverseLAN allows you to play locally (e.g. LAN parties) without relying on internet access. UniverseLAN does not care if you are in a hotel room with bad WiFi or visiting a remote place with your friends! You can still enjoy your games, <em>together</em>.   </p>
-    <p><small>I hope this does not need to be said, but:</small>   </p>
-    <ul>
-    <li><strong>UniverseLAN does not bypass or remove any DRM measures.</strong>  </li>
-    <li>UniverseLAN does not condone piracy, does not facilitate piracy, and will not facilitate piracy.  </li>
-    <li>UniverseLAN is not a cheat tool and does not facilitate cheating, and will not facilitate cheating.  </li>
-    <li>Please adhere to <a href="https://support.gog.com/hc/en-us/articles/212184489-Can-I-share-games-with-others-?product=gog">GOG requirements</a>:  <blockquote>
-    <p>Your account and games are for your personal use only. If you want to share them, you can always buy a gift for that person.</p>
-    <p>The DRM-free nature of our service means that we trust you that this will not be abused.</p>
-    </blockquote>
-    </li>
-    <li>The devices that you want to play on together do need to be able to reach each other on a reliable (local) network.</li>
-    </ul>
-    <h1 id="what-is-the-status-of-universelan-">What is the status of <em>UniverseLAN</em>?</h1>
-    <p><a href="https://github.com/grasmanek94/UniverseLAN">UniverseLAN</a> is in development, and in beta.<br>Do expect bugs, possibly lost save files, updates and fixes.  </p>
-    <blockquote>
-    <p>At this moment in time you are expected to build it yourself to get binaries.<br><a href="https://github.com/grasmanek94/UniverseLAN">UniverseLAN</a> requires a C++20 compatible compiler.<br>The internal development name of this project is <code>LanSupportForDRMFreeGames [LSFDRMFG]</code>, you might see references to that in the source.  </p>
-    </blockquote>
-    <h3 id="note">Note</h3>
-    <p><small><em>*</em> Some games do use GOG Galaxy but do not use GOG Galaxy for multiplayer.<br>They can use other services or custom networking implementations.<br>Such games might not be able to be played together using UniverseLAN wrapper.</small></p>
-    <h1 id="how-do-you-get-def-files-">How do you get .def files?</h1>
-    <p>To generate the module definition files, use <a href="https://github.com/mavenlin/wrap_dll">wrap_dll</a>:  </p>
-    <ul>
-    <li><code>python3 wrap_dll.py Galaxy64.dll</code>  </li>
-    </ul>
-    <p>Then remove on each line everything after (and including) <strong><code>=</code> sign</strong> in .def file.
-    Place in <code>Source/DLLs/&lt;version&gt;/UniverseLAN.def</code></p>
-    <h1 id="instructions">Instructions</h1>
-    <ul>
-    <li>Replace target game <code>Galaxy.dll</code>, <code>Galaxy64.dll</code>, <code>REDGalaxy.dll</code> or <code>REDGalaxy64.dll</code> to use UniverseLAN (check the .dll file properties to view the version information, else make an sha1 checksum and look in <a href="https://github.com/grasmanek94/UniverseLAN/blob/master/ZipFileHasher/sha1_hashes.txt">sha1_hashes.txt</a> for the hash to determine the sdk version).</li>
-    <li>Place config files in the working directory of the game</li>
-    <li>Place Server executable where config files are located</li>
-    <li>Adjust config accordingly (e.g. point to a server address that hosts the UniverseLAN Backend)</li>
-    <li>It&#39;s recommended to NOT mix x64 and x86 platforms (e.g. x64 server with x86 game)</li>
-    <li>Do NOT mix different versions due to ABI incompatibility (e.g. 1.148.3.0 client with 1.100.2.0 server or vice versa), GOG does not keep their Galaxy library backwards compatible / upgradeable.</li>
-    <li>Don&#39;t add GOG stdint.h when adding new SDK versions, remove it. If you try it WILL cause errors.</li>
-    <li>It is possible to support Galaxy SDK versions from 1.57 up to the newest ones (1.152.6+).</li>
-    <li>If someone has earlier SDK headers and/or documentation files please share &lt;3</li>
-    </ul>
-    <h1 id="debug-information">Debug Information</h1>
-    <p>Debug (tracing) files can be found in <code>&lt;Configuration Files Directory&gt;/tracing/&lt;date time when application was launched&gt;/</code>.</p>
-    <h1 id="compilation">Compilation</h1>
-    <h2 id="windows">Windows</h2>
-    <ul>
-    <li>Visual Studio 2019 16.10 or newer required  </li>
-    </ul>
-    <h2 id="linux">Linux</h2>
-    <ul>
-    <li>Requires GCC 13 or newer.  </li>
-    <li>Requires libtbb to be present (libtbb:i386 on 64-bit systems when compiling for x86)  </li>
-    </ul>      
-  <h1 id="list-status-of-games"><a href="https://github.com/grasmanek94/UniverseLAN/">List / status of games</a></h1>
-  <a href="https://github.com/grasmanek94/UniverseLAN/">Click here</a>
-  <h1 id="notice">Notice</h1>
-  <p>I&#39;m not affiliated in any way with GOG or CD Projekt RED.<br>All trademarks and copyright are property of their respective owners.<br>Any statements or expressed opinions here are each of their respective own person and do not represent any companies or other entities.<br>GOG SDK documentation and SDK include files are freely available from <a href="https://docs.gog.com/galaxyapi/">https://docs.gog.com/galaxyapi/</a>.<br>No copyright infringement intended.  </p>
-  <h1 id="is-distributing-header-files-against-copyrights-">Is distributing header files against copyrights?</h1>
-  <p>I don&#39;t think so:  </p>
-  <ol>
-  <li><a href="https://en.wikipedia.org/wiki/Google_LLC_v._Oracle_America,_Inc">https://en.wikipedia.org/wiki/Google_LLC_v._Oracle_America,_Inc</a>.</li>
-  <li><a href="https://softwareengineering.stackexchange.com/questions/216471/how-does-copyrights-apply-to-source-code-header-files">https://softwareengineering.stackexchange.com/questions/216471/how-does-copyrights-apply-to-source-code-header-files</a></li>
-  </ol>
+      <p align="center">
+        <img src="https://raw.githubusercontent.com/grasmanek94/UniverseLAN/master/docs/logo-128.png" alt="Logo"/>
+      </p> 
+      <h1 id="why-">Why?</h1>
+      <p>This extends the <a href="https://www.gog.com/en/about_gog">&quot;You buy it, you own it&quot;</a> and  &quot;DRM-Free&quot; GOG philosophy to the multiplayer portion of all games that use GOG Galaxy.</p>
+      <p>Why <em>Universe</em>LAN? Because the Universe is much bigger than the Galaxy!</p>
+      <h1 id="what-is-universelan-">What is <em>UniverseLAN</em>?</h1>
+      <p><a href="https://github.com/grasmanek94/UniverseLAN">UniverseLAN</a> is a GOG Galaxy wrapper which allows LAN / Direct IP connections for games using Galaxy Multiplayer (without using GOG Galaxy client).<br>This is useful in cases where:
+      1) You and other people own a game
+      2) All or some of you don&#39;t have (reliable) internet access
+      3) And as such GOG Galaxy services won&#39;t work
+      4) The game you want to play does not natively support LAN and/or DirectIP connections
+      5) But you all want to play together anyway  </p>
+      <p>UniverseLAN allows you to play locally (e.g. LAN parties) without relying on internet access. UniverseLAN does not care if you are in a hotel room with bad WiFi or visiting a remote place with your friends! You can still enjoy your games, <em>together</em>.   </p>
+      <p><small>I hope this does not need to be said, but:</small>   </p>
+      <ul>
+      <li><strong>UniverseLAN does not bypass or remove any DRM measures.</strong>    </li>
+      <li><strong>UniversLAN does not bypass any cd-key or ownership checks.</strong>  </li>
+      <li><strong>UniverseLAN does not give you free DLC, you still need to buy DLC from GOG and install the DLC before being able to use any DLC.</strong>  </li>
+      <li><strong>UniverseLAN does not and can&#39;t bypass any &quot;always online&quot; requirements.</strong>  </li>
+      <li><strong>UniverseLAN does not condone piracy, does not facilitate piracy, and will not facilitate piracy.</strong>  </li>
+      <li><strong>UniverseLAN is not a cheat tool and does not facilitate cheating, and will not facilitate cheating.</strong>  </li>
+      <li>Please adhere to <a href="https://support.gog.com/hc/en-us/articles/212184489-Can-I-share-games-with-others-?product=gog">GOG requirements</a>:  <blockquote>
+      <p>Your account and games are for your personal use only. If you want to share them, you can always buy a gift for that person.</p>
+      <p>The DRM-free nature of our service means that we trust you that this will not be abused.</p>
+      </blockquote>
+      </li>
+      <li>The devices that you want to play on together do need to be able to reach each other on a reliable (local) network.</li>
+      </ul>
+      <h1 id="what-is-the-status-of-universelan-">What is the status of <em>UniverseLAN</em>?</h1>
+      <p><a href="https://github.com/grasmanek94/UniverseLAN">UniverseLAN</a> is in development, and in beta.<br>Do expect bugs, possibly lost save files, updates and fixes.  </p>
+      <blockquote>
+      <p>At this moment in time you are expected to build it yourself to get up-to-date binaries.<br>Older binaries may be available at the &#39;<a href="https://github.com/grasmanek94/UniverseLAN/releases">Releases</a>&#39; page.<br><a href="https://github.com/grasmanek94/UniverseLAN">UniverseLAN</a> requires a C++20 compatible compiler (VS 2019 16.10+ , GCC 13+).<br>The internal development name of this project is <code>LanSupportForDRMFreeGames [LSFDRMFG]</code>, you might see references to that in the source.  </p>
+      </blockquote>
+      <h3 id="note">Note</h3>
+      <p><small><em>*</em> Some games do use GOG Galaxy but do not use GOG Galaxy for multiplayer.<br>They can use other services or custom networking implementations.<br>Such games might not be able to be played together using UniverseLAN wrapper.</small></p>
+      <h1 id="how-do-you-get-def-files-">How do you get .def files?</h1>
+      <p>Check the <a href="https://github.com/grasmanek94/UniverseLAN/blob/master/Util/README.md"><code>Util README</code></a> folder, or alternatively:</p>
+      <p>To generate the module definition files, use <a href="https://github.com/mavenlin/wrap_dll">wrap_dll</a>:  </p>
+      <ul>
+      <li><code>python3 wrap_dll.py Galaxy64.dll</code>  </li>
+      </ul>
+      <p>Then remove on each line everything after (and including) <strong><code>=</code> sign</strong> in .def file.
+      Place in <code>Source/DLLs/&lt;version&gt;/UniverseLAN.def</code></p>
+      <h1 id="instructions">Instructions</h1>
+      <ul>
+      <li>Replace target game <code>Galaxy.dll</code>, <code>Galaxy64.dll</code>, <code>REDGalaxy.dll</code> or <code>REDGalaxy64.dll</code> to use UniverseLAN (check the .dll file properties to view the version information, else make an sha1 checksum and look in <a href="ZipFileHasher/sha1_hashes.txt">sha1_hashes.txt</a> for the hash to determine the sdk version).</li>
+      <li>Place config files in the working directory* of the game</li>
+      <li>Place Server executable where config files are located.</li>
+      <li>Adjust config accordingly (e.g. point to a server address that hosts the UniverseLAN Backend)</li>
+      <li>It&#39;s recommended to NOT mix x64 and x86 platforms (e.g. x64 server with x86 game)</li>
+      <li>Do NOT mix different versions due to ABI incompatibility (e.g. 1.148.3.0 client with 1.100.2.0 server or vice versa), GOG does not keep their Galaxy library backwards compatible / upgradeable.  </li>
+      <li>One machine must host the server, the other machine must be correctly configured to point to the machine hosting the server.  </li>
+      <li>Make sure the Galaxy ID numbers are different (Config.ini).  </li>
+      </ul>
+      <blockquote>
+      <p><code>*</code> - Usually the working directory is the root directory of the game, or where the .exe file is located. Some games use a proxy launcher .exe in the game root directory like <code>Game_Name\Launcher.exe</code>, which launches and executable from a subfolder like <code>Game_Name\Binaries\Win64\RealGame.exe</code>, this might indicate that config and server files should be placed in <code>Game_Name\Binaries\Win64\</code>.</p>
+      </blockquote>
+      <p>For developers:  </p>
+      <ul>
+      <li>Don&#39;t add GOG stdint.h when adding new SDK versions, remove it. If you try it WILL cause errors.</li>
+      <li>It is possible to support Galaxy SDK versions from 1.57 up to the newest ones (1.152.6+).</li>
+      <li>If someone has earlier SDK headers and/or documentation files please share &lt;3</li>
+      </ul>
+      <h1 id="debug-information">Debug Information</h1>
+      <p>Debug (tracing) files can be found in <code>&lt;Configuration Files Directory&gt;/tracing/&lt;date time when application was launched&gt;/</code>.</p>
+      <h1 id="compilation">Compilation</h1>
+      <h2 id="windows">Windows</h2>
+      <ul>
+      <li>Visual Studio 2019 16.10 or newer required  </li>
+      </ul>
+      <h2 id="linux">Linux</h2>
+      <ul>
+      <li>Requires GCC 13 or newer.  </li>
+      <li>Requires libtbb to be present (libtbb:i386 on 64-bit systems when compiling for x86)  </li>
+      </ul>
+      <h2 id="space">Space</h2>
+      <p>Please keep in mind that if <em>all</em> projects (tests, debug+release, interceptor, client, server, etc.) are built, around 50GiB of free space is required.</p>
+      <h1 id="help-my-game-and-or-gog-galaxy-version-my-game-uses-is-not-supported-">Help! My game and or GOG Galaxy version my game uses is not supported?</h1>
+      <p>Please <a href="https://github.com/grasmanek94/UniverseLAN/issues/new">create an issue</a> with the name of the game, game version, and if known the GOG Galaxy SDK version or <code>Galaxy.dll</code> / <code>Galaxy64.dll</code> sha2 or md5 hash.<br>For games I don&#39;t own I need other people to test UniverseLAN development builds.<br>Another option would be to gift the game to people working on UniverseLAN project.  </p>
+      <h1 id="list-status-of-games">List / status of games</h1>
+      <p>&#9989; (N) - Players can play together, tested with N players [(2) would mean 2 clients].
+        <br>&#128679; - Work in progress.
+        <br>&#9888; - May or may not work, not tested, the future will tell.
+        <br>&#10060; - Tested and does not work.
+        <br>&#10067; - Can&#39;t acquire the correct GOG Galaxy SDK version.
+        <br>&#8596; - Game supports direct connect, LAN or free multiplayer, and as such does not need UniverseLAN.
+        <br>&#128310; - Worked before, some commit has broken this game. To be investigated.  </p>
+      <table>
+      <thead>
+      <tr>
+      <th style="text-align:left">Game</th>
+      <th style="text-align:center">Status</th>
+      <th style="text-align:center">Tested GOG Galaxy SDK Version</th>
+      <th style="text-align:center">Notes</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td style="text-align:left">Vikings - Wolves of Midgard</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.100.2</td>
+      <td style="text-align:center">Must apply <code>set OPENSSL_ia32cap=:~0x20000000</code> on newer CPU&#39;s for this game to start without crashing.<br> This issue is not caused by UniverseLAN or GOG, but OpenSSL / Unity/Unreal.<br> Tested with build 440</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Phantom Doctrine</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.124.0</td>
+      <td style="text-align:center">Must apply <code>set OPENSSL_ia32cap=:~0x20000000</code> on newer CPU&#39;s for this game to start without crashing.<br> This issue is not caused by UniverseLAN or GOG, but OpenSSL / Unity.<br> Tested with build 301</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">SYNTHETIK: Legion Rising</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.113.3</td>
+      <td style="text-align:center">Works since build 301</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Aragami 1</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.121.2</td>
+      <td style="text-align:center"></td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Forsaken Remastered</td>
+      <td style="text-align:center">&#9989;(3)</td>
+      <td style="text-align:center">1.124.0</td>
+      <td style="text-align:center"></td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Guns, Gore &amp; Cannoli 2</td>
+      <td style="text-align:center">&#9989;(3)</td>
+      <td style="text-align:center">1.124.0</td>
+      <td style="text-align:center"></td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Tropico 6</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.139.2</td>
+      <td style="text-align:center">Also other games are displayed? Game has custom networking?<br> Build 161 worked, build 243 seems to be broken (can&#39;t join lobby) <br> Update: The person testing UniverseLAN used an invalid configuration (same generated Galaxy ID numbers), after fixing this configuration issue in Config.ini the person reported the game seems to work on build 243.</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Serious Sam 4</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.144.1</td>
+      <td style="text-align:center">Works since build 256</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Tooth and Tail</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.122.1</td>
+      <td style="text-align:center">Works with 1.124.0, tested with build 256</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Door Kickers - Action Squad</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.133.6</td>
+      <td style="text-align:center">Tested with build 287</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Shadow Warrior 2</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.95.0</td>
+      <td style="text-align:center">Tested with build 338</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Hammerwatch</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.139.2</td>
+      <td style="text-align:center">Tested with build 360</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Warhammer: Chaosbane</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.139.2</td>
+      <td style="text-align:center">Tested with build 389</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Mutant Football League - Dynasty Edition</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.130.0</td>
+      <td style="text-align:center">Tested with build 395</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Oriental Empires</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.113.3</td>
+      <td style="text-align:center">Tested with build 397</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">River City Ransom - Underground</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.104.2</td>
+      <td style="text-align:center">Tested with build 399</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Warhammer 40K - Dakka Squadron Flyboyz Ed.</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.144.1</td>
+      <td style="text-align:center">Tested with build 421</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Star Wars Battlefront II (Classic, 2005)</td>
+      <td style="text-align:center">&#9989;(2)/&#128679;</td>
+      <td style="text-align:center">1.112.2</td>
+      <td style="text-align:center">There are no lobbies visible on the internet tab, but using UniverseLAN does unlock the LAN tab option when you don&#39;t have internet access.</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Battlestar Galactica Deadlock</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.114.9</td>
+      <td style="text-align:center">Tested with build 423</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Driftland - The Magic Revival</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.133.6</td>
+      <td style="text-align:center">Works since build 436, apparently UniverseLAN had a bug where the server was sending the packet &quot;as user&quot; and not &quot;as lobby&quot; (when the user is the lobby owner)</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Knights and Bikes</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.133.6</td>
+      <td style="text-align:center">Tested with build 440, other player needs to join via commandline with --JoinLobby <id>, id will be displayed in the console of the host after clicking invite friend.</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Metal Slug</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.100.2</td>
+      <td style="text-align:center">Works fine since build 464</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Metal Slug 3</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.100.2</td>
+      <td style="text-align:center">Works fine since build 464</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Metal Slug X</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.100.2</td>
+      <td style="text-align:center">Works fine since build 464</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Shock Troopers</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.100.2</td>
+      <td style="text-align:center">Works fine since build 464</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">The Last Blade</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.100.2</td>
+      <td style="text-align:center">Works fine since build 464</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Shock Troopers - 2nd Squad</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.100.2</td>
+      <td style="text-align:center">Works fine since build 464</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Twinkle Star Sprites</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.100.2</td>
+      <td style="text-align:center">Works fine since build 464</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Streets of Rage 4</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.144.1</td>
+      <td style="text-align:center">Tested with build 440</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Talisman Digital Edition</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.139.2</td>
+      <td style="text-align:center">Tested with build 440</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">The Witcher Adventure Game</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.69</td>
+      <td style="text-align:center">Tested with build 440 - 1.68</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Blood - Fresh Supply</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.133.6</td>
+      <td style="text-align:center">Tested with build 464</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Stronghold Warlords</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.144.1</td>
+      <td style="text-align:center">Works since build 464</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Stronghold Crusader 2</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.68</td>
+      <td style="text-align:center">Works since build 464</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Gauntlet</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.104.2</td>
+      <td style="text-align:center">Works since build 464</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">GAROU MARK OF THE WOLVES</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.114.9</td>
+      <td style="text-align:center">Works since build 464</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">The King of Fighters XIII</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.114.9</td>
+      <td style="text-align:center">Works since build 464</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">The King of Fighters 98UM</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.114.9</td>
+      <td style="text-align:center">Works since build 464</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Craft The World</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.100.2</td>
+      <td style="text-align:center">Works since build 466</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Worms W.M.D</td>
+      <td style="text-align:center">&#9989;(2)</td>
+      <td style="text-align:center">1.128.3</td>
+      <td style="text-align:center">Works since build 466</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Serious Sams Bogus Detour</td>
+      <td style="text-align:center">&#128679;</td>
+      <td style="text-align:center">1.100.2</td>
+      <td style="text-align:center">Can join lobby since build 360 and start game, but both players stuck on black &quot;Loading...&quot; screen</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Dying Light</td>
+      <td style="text-align:center">&#128679;</td>
+      <td style="text-align:center">1.148.3</td>
+      <td style="text-align:center">Doesn&#39;t seem to work for now and crashes when EncryptedAppTicket is not disabled. I think LAN may be internet-bound unfortunately.</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Niffelheim</td>
+      <td style="text-align:center">&#128679;</td>
+      <td style="text-align:center">1.139.2</td>
+      <td style="text-align:center">Stuck at &quot;Loading...&quot; (save transfer?)</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Homeworld: Deserts of Kharak</td>
+      <td style="text-align:center">&#128679;</td>
+      <td style="text-align:center">1.101</td>
+      <td style="text-align:center">Tested with 1.100.2. After build 362 lobbies can now be created, but connecting doesn&#39;t work. Seems like host game is stuck in SetLobbyJoinable loop?</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Ancestors Legacy</td>
+      <td style="text-align:center">&#128679;</td>
+      <td style="text-align:center">1.133.6</td>
+      <td style="text-align:center">Requires Leaderboards features to be implemented</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Offworld Trading Company</td>
+      <td style="text-align:center">&#128679;</td>
+      <td style="text-align:center">1.94</td>
+      <td style="text-align:center">Tested with 1.95 build 440, stuck on game load in a GetUserData loop</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Alien vs Predator 2000</td>
+      <td style="text-align:center">&#10067;</td>
+      <td style="text-align:center"></td>
+      <td style="text-align:center">It&#39;s some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176?</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Double Dragon Trilogy</td>
+      <td style="text-align:center">&#10067;</td>
+      <td style="text-align:center"></td>
+      <td style="text-align:center">Unknown version, Galaxy.dll SHA1: <code>789f3b02ced8dbac2e5f8c2c98448569f70960cc</code></td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Rise of the Triad (2013)</td>
+      <td style="text-align:center">&#8596;</td>
+      <td style="text-align:center"></td>
+      <td style="text-align:center">Native LAN available</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Rage of Mages II: Necromancer</td>
+      <td style="text-align:center">&#8596;</td>
+      <td style="text-align:center"></td>
+      <td style="text-align:center">Native LAN or Free Multiplayer available</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Neverwinter Nights 2 Complete</td>
+      <td style="text-align:center">&#8596;</td>
+      <td style="text-align:center"></td>
+      <td style="text-align:center">Native LAN or Free Multiplayer available</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Baldur&#39;s Gate 3</td>
+      <td style="text-align:center">&#8596;</td>
+      <td style="text-align:center"></td>
+      <td style="text-align:center">Native LAN or Free Multiplayer available</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Heroes of Might and Magic 3</td>
+      <td style="text-align:center">&#8596;</td>
+      <td style="text-align:center"></td>
+      <td style="text-align:center">Native LAN or Free Multiplayer available</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Empire Earth 3</td>
+      <td style="text-align:center">&#8596;</td>
+      <td style="text-align:center"></td>
+      <td style="text-align:center">Native LAN or Free Multiplayer available</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Jazz Jackrabbit 2 Collection</td>
+      <td style="text-align:center">&#8596;</td>
+      <td style="text-align:center"></td>
+      <td style="text-align:center">Native LAN or Free Multiplayer available</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Homeworld Remastered Collection</td>
+      <td style="text-align:center">&#8596;</td>
+      <td style="text-align:center">1.77</td>
+      <td style="text-align:center">Has native LAN for all three games when launching HomeworldRM.exe</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Ticket to Ride</td>
+      <td style="text-align:center">&#8596;</td>
+      <td style="text-align:center">1.139.2</td>
+      <td style="text-align:center">Tried it with the wrapper and works, but need to create a free Wonder account</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Aragami 2</td>
+      <td style="text-align:center">&#8596;</td>
+      <td style="text-align:center">1.148.3</td>
+      <td style="text-align:center">Probably does not use GOG Galaxy for networking (doesn&#39;t work for private lobbies).<br> Can play on public lobbies without GOG Galaxy or with this patch AFAIK.</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">DUSK (DuskWorld)</td>
+      <td style="text-align:center">&#8596;</td>
+      <td style="text-align:center">1.133.6</td>
+      <td style="text-align:center">Uses steam (works without Steam Client) api for free online play, doesn&#39;t use GOG Galaxy.</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Blood Bowl 2 Legendary Editition</td>
+      <td style="text-align:center">&#8596;</td>
+      <td style="text-align:center"></td>
+      <td style="text-align:center">Uses custom free multiplayer, need to create a free online in-game account on their servers.</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Deathtrap</td>
+      <td style="text-align:center">&#8596;</td>
+      <td style="text-align:center">1.75</td>
+      <td style="text-align:center">Has Native LAN</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Trine 3</td>
+      <td style="text-align:center">&#8596;</td>
+      <td style="text-align:center">1.65</td>
+      <td style="text-align:center">Has free online multiplayer, but does not use Galaxy Multiplayer which means that this game is internet-only. UniverseLAN can&#39;t make it LAN-able.</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Bound By Blades</td>
+      <td style="text-align:center">&#8596;</td>
+      <td style="text-align:center">1.150.0</td>
+      <td style="text-align:center">UniverseLAN can&#39;t make this game LAN-able, this game uses custom/free multiplayer (Photon Engine) that does not use Steam or Galaxy, but online multiplayer is DRM Free. Would need to develop a custom Photon Engine API. When dev stops paying for Photon CCU&#39;s the game multiplayer will stop working. A project for another time maybe.</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Ashes of the Singularity - Escalation</td>
+      <td style="text-align:center">&#10060;</td>
+      <td style="text-align:center">1.100.2</td>
+      <td style="text-align:center">Requires .exe patches to patch out modification checks so that entering lobby is possible, unfortunately both players are seen as &#39;Host&#39; and other side doesn&#39;t &#39;see&#39; clicking &#39;ready&#39;. UniverseLAN needs to support .exe patching, and the both players being &#39;host&#39; needs to be analyzed and fixed. Afters analysis it seems that for the &quot;real&quot; networking the game uses Epic Online Services. No dice here.</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Battlefleet Gothic Armada</td>
+      <td style="text-align:center">&#10060;</td>
+      <td style="text-align:center">1.139.2</td>
+      <td style="text-align:center">Doesn&#39;t seem to use Galaxy for multiplayer.</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Jagged Alliance 3</td>
+      <td style="text-align:center">&#10060;</td>
+      <td style="text-align:center">1.150.0</td>
+      <td style="text-align:center">Doesn&#39;t seem to use Galaxy for multiplayer. (Steam? With EncryptedAppTicket)</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">8-bit Armies</td>
+      <td style="text-align:center">&#10060;</td>
+      <td style="text-align:center">1.95.0</td>
+      <td style="text-align:center">Uses encrypted auth ticket to authenticate to an external multiplayer service, probably Steam.</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">8-bit Hordes</td>
+      <td style="text-align:center">&#10060;</td>
+      <td style="text-align:center">1.95.0</td>
+      <td style="text-align:center">Uses encrypted auth ticket to authenticate to an external multiplayer service, probably Steam.</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Fade to Silence</td>
+      <td style="text-align:center">&#10060;</td>
+      <td style="text-align:center">1.114.9</td>
+      <td style="text-align:center">Probably only uses steam for multiplayer, or some other service.</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">No Man&#39;s Sky</td>
+      <td style="text-align:center">&#10060;</td>
+      <td style="text-align:center">1.148.3</td>
+      <td style="text-align:center">Uses GOG Galaxy only to get an encrypted auth ticket, which authenticates the GOG user into a third party online multiplayer.</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Speed Brawl</td>
+      <td style="text-align:center">&#10060;</td>
+      <td style="text-align:center">1.144.1</td>
+      <td style="text-align:center">Does not use Galaxy for multiplayer (EOS? Steam? Custom RakNet MP?)</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Mount &amp; Blade II - Bannerlord</td>
+      <td style="text-align:center">&#10060;</td>
+      <td style="text-align:center">1.144.1</td>
+      <td style="text-align:center">Uses Epic Online Services, not Galaxy</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Absolver</td>
+      <td style="text-align:center">&#10060;</td>
+      <td style="text-align:center">1.104.2</td>
+      <td style="text-align:center">EAC is preventing usage of UniverseLAN, without EAC multiplayer is disabled</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">DUSK</td>
+      <td style="text-align:center">&#10060;</td>
+      <td style="text-align:center">1.133.6</td>
+      <td style="text-align:center">No multiplayer --&gt; DuskWorld</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Roboquest</td>
+      <td style="text-align:center">&#10060;</td>
+      <td style="text-align:center">1.148.3</td>
+      <td style="text-align:center">Probably does not use GOG Galaxy for networking.</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Northgard</td>
+      <td style="text-align:center">&#10060;</td>
+      <td style="text-align:center">1.139.2</td>
+      <td style="text-align:center">Still thinks the game is offline, custom multiplayer?</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Tropico 5</td>
+      <td style="text-align:center">&#10060;</td>
+      <td style="text-align:center">1.68.0</td>
+      <td style="text-align:center">Game uses an external service for multiplayer?</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Saints Row IV - Re-Elected</td>
+      <td style="text-align:center">&#10060;</td>
+      <td style="text-align:center">1.148.3</td>
+      <td style="text-align:center">Uses Epic Online Services for multiplayer probably (stuck after &quot;do you want to sign in?&quot;)</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">ArcRunner</td>
+      <td style="text-align:center">&#10060;</td>
+      <td style="text-align:center">1.150.0</td>
+      <td style="text-align:center">Uses Epic Online Services for multiplayer</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Battlezone 98 Redux</td>
+      <td style="text-align:center">&#10060;</td>
+      <td style="text-align:center">1.100.2</td>
+      <td style="text-align:center">Uses Steam for multiplayer</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Homeseek</td>
+      <td style="text-align:center">&#10060;</td>
+      <td style="text-align:center">-</td>
+      <td style="text-align:center">Uses Epic Online Services for multiplayer</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">The Escapists 2</td>
+      <td style="text-align:center">&#10060;</td>
+      <td style="text-align:center">1.132.1</td>
+      <td style="text-align:center">Uses Photon networking for online multiplayer, UniverseLAN will not be able to make multiplayer work without internet.</td>
+      </tr>
+      <tr>
+      <td style="text-align:left">Descent - Underground</td>
+      <td style="text-align:center">&#10060;</td>
+      <td style="text-align:center">1.88</td>
+      <td style="text-align:center">Doesn&#39;t seem to load the Galaxy.dll even with <code>--gog</code> launch param?</td>
+      </tr>
+      </tbody>
+      </table>
+      <h1 id="notice">Notice</h1>
+      <p>I&#39;m not affiliated in any way with GOG or CD Projekt RED.<br>All trademarks and copyright are property of their respective owners.<br>Any statements or expressed opinions here are each of their respective own person and do not represent any companies or other entities.<br>GOG SDK documentation and SDK include files are freely available from <a href="https://docs.gog.com/galaxyapi/">https://docs.gog.com/galaxyapi/</a>.<br>No copyright infringement intended.  </p>
+      <h1 id="is-distributing-header-files-against-copyrights-">Is distributing header files against copyrights?</h1>
+      <p>I don&#39;t think so:  </p>
+      <ol>
+      <li><a href="https://en.wikipedia.org/wiki/Google_LLC_v._Oracle_America,_Inc">https://en.wikipedia.org/wiki/Google_LLC_v._Oracle_America,_Inc</a>.</li>
+      <li><a href="https://softwareengineering.stackexchange.com/questions/216471/how-does-copyrights-apply-to-source-code-header-files">https://softwareengineering.stackexchange.com/questions/216471/how-does-copyrights-apply-to-source-code-header-files</a></li>
+      </ol>
+      <h2 id="-source-dlls-version-gog-is-missing-files-what-do-i-do-"><code>Source/DLLs/&lt;version&gt;/gog/</code> is missing files? What do I do?</h2>
+      <p>The tests require the Galaxy.lib and Galaxy.dll files from GOG.<br>You can get any version matching Galaxy.dll from any game that you own.<br>UniverseLAN does not and will not distribute (RED)Galaxy / (RED)Galaxy64 dll files, because it&#39;s against copyright / GOG ToS.<br>I don&#39;t know if .lib files should be considered API or copyrighted program code, but to play it safe UniverseLAN also does not distribute .lib files.<br>For the time being; if you wish to build the tests, you need to acquire these .lib files from the GOG Galaxy SDK, available in the GOG Galaxy Developer Portal.<br>Building the tests is optional.  </p>
+      <blockquote>
+      <p>Tip: By creating a project with <a href="https://github.com/mavenlin/wrap_dll">wrap_dll</a> and providing a valid <code>(RED)Galaxy(64).dll</code> you can generate a wrapper project, which when compiled, should yield a compatible .lib file that you can use to build the tests.  </p>
+      </blockquote>
+      <h2 id="galaxy-sdk-backwards-compatibility-list">Galaxy SDK Backwards Compatibility List</h2>
+      <p>These GOG Galaxy SDK versions should work interchangeably.  </p>
+      <blockquote>
+      <p>For Developers: This does not neccesseraly represent version compilation compatibility, for example 1.125 and 1.125.1 are not compile-compatible (due to <code>uint32_t</code> to <code>enum</code> type change), but should be binary-compatible.  </p>
+      </blockquote>
+      <table>
+      <thead>
+      <tr>
+      <th style="text-align:center">UniverseLAN Release</th>
+      <th style="text-align:left">Compatible Galaxy SDK Versions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td style="text-align:center">1.57</td>
+      <td style="text-align:left">1.57</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.60</td>
+      <td style="text-align:left">1.59 <br> 1.60</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.61</td>
+      <td style="text-align:left">1.61</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.64</td>
+      <td style="text-align:left">1.62 <br> 1.63 <br> 1.64</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.66</td>
+      <td style="text-align:left">1.65 <br> 1.66</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.67</td>
+      <td style="text-align:left">1.67</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.68</td>
+      <td style="text-align:left">1.68</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.69</td>
+      <td style="text-align:left">1.69</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.70</td>
+      <td style="text-align:left">1.70</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.72</td>
+      <td style="text-align:left">1.71 <br> 1.72</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.73</td>
+      <td style="text-align:left">1.73</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.74</td>
+      <td style="text-align:left">1.74</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.75</td>
+      <td style="text-align:left">1.75</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.76</td>
+      <td style="text-align:left">1.76</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.77</td>
+      <td style="text-align:left">1.77</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.80</td>
+      <td style="text-align:left">1.78 <br> 1.79 <br> 1.80</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.87</td>
+      <td style="text-align:left">1.82 <br> 1.83 <br> 1.84 <br> 1.85 <br> 1.86 <br> 1.87</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.92</td>
+      <td style="text-align:left">1.88 <br> 1.89 <br> 1.90 <br> 1.91 <br> 1.92</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.95</td>
+      <td style="text-align:left">1.92.1 <br> 1.93 <br> 1.94 <br> 1.95 <br> 1.96 <br> 1.97 <br> 1.98</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.99</td>
+      <td style="text-align:left">1.99</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.100.2</td>
+      <td style="text-align:left">1.100 <br> 1.100.2 <br> 1.101 <br> 1.101.2 <br> 1.101.4 <br> 1.102</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.104.2</td>
+      <td style="text-align:left">1.103 <br> 1.103.1 <br> 1.104 <br> 1.104.1 <br> 1.104.2</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.104.3</td>
+      <td style="text-align:left">1.104.3</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.104.4</td>
+      <td style="text-align:left">1.104.4 <br> 1.104.5 <br> 1.104.6 <br> 1.105</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.106</td>
+      <td style="text-align:left">1.106 <br> 1.107 <br> 1.108</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.109</td>
+      <td style="text-align:left">1.109</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.112.2</td>
+      <td style="text-align:left">1.110 <br> 1.110.1 <br> 1.110.2 <br> 1.110.3 <br> 1.110.4 <br> 1.111 <br> 1.111.2 <br> 1.112 <br> 1.112.1 <br> 1.112.2</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">-</td>
+      <td style="text-align:left">1.113 <br> 1.113.1</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.113.3</td>
+      <td style="text-align:left">1.113.2 <br> 1.113.3</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.114.9</td>
+      <td style="text-align:left">1.114 <br> 1.114.1 <br> 1.114.2 <br> 1.114.3 <br> 1.114.4 <br> 1.114.6 <br> 1.114.7 <br> 1.114.8 <br> 1.114.9 <br> 1.114.12</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.121.2</td>
+      <td style="text-align:left">1.120 <br> 1.120.1 <br> 1.121 <br> 1.121.1 <br> 1.121.2</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.124</td>
+      <td style="text-align:left">1.122 <br> 1.122.1 <br> 1.122.3 <br> 1.122.4 <br> 1.123 <br> 1.123.1 <br> 1.124</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.125.2</td>
+      <td style="text-align:left">1.125 <br> 1.125.1 <br> 1.125.2</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.126.1</td>
+      <td style="text-align:left">1.126 <br> 1.126.1</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.127</td>
+      <td style="text-align:left">1.127</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.128.3</td>
+      <td style="text-align:left">1.128 <br> 1.128.1 <br> 1.128.2 <br> 1.128.3</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.130.0</td>
+      <td style="text-align:left">1.129 <br> 1.130 <br> 1.130.1</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.131.3</td>
+      <td style="text-align:left">1.131 <br> 1.131.1 <br> 1.131.2 <br> 1.131.3</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.132.1</td>
+      <td style="text-align:left">1.132 <br> 1.132.1</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.133</td>
+      <td style="text-align:left">1.133</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.133.6</td>
+      <td style="text-align:left">1.133.1 <br> 1.133.3 <br> 1.133.4 <br> 1.133.5 <br> 1.133.6 <br> 1.133.7 <br> 1.133.9</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.134.8</td>
+      <td style="text-align:left">1.134 <br> 1.134.1 <br> 1.134.2 <br> 1.134.3 <br> 1.134.4 <br> 1.134.5 <br> 1.134.6 <br> 1.134.7 <br> 1.134.8</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.134.9</td>
+      <td style="text-align:left">1.134.9</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.134.10</td>
+      <td style="text-align:left">1.134.10</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.135</td>
+      <td style="text-align:left">1.135</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.138</td>
+      <td style="text-align:left">1.136 <br> 1.136.4 <br> 1.137 <br> 1.137.1 <br> 1.137.2 <br> 1.137.3 <br> 1.137.4 <br> 1.137.5 <br> 1.137.6 <br> 1.138</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.139.2</td>
+      <td style="text-align:left">1.138.1 <br> 1.139 <br> 1.139.1 <br> 1.139.2 <br> 1.139.3 <br> 1.139.4</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.139.5</td>
+      <td style="text-align:left">1.139.5</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.139.6</td>
+      <td style="text-align:left">1.139.6</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">-</td>
+      <td style="text-align:left">1.139.7 <br> 1.139.8 <br> 1.139.9</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.140</td>
+      <td style="text-align:left">1.140</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.142</td>
+      <td style="text-align:left">1.141 <br> 1.142</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.144.1</td>
+      <td style="text-align:left">1.143 <br> 1.143.1 <br> 1.143.2 <br> 1.143.3 <br> 1.144 <br> 1.144.1 <br> 1.144.2 <br> 1.145 <br> 1.145.1 <br> 1.145.2 <br> 1.145.3 <br> 1.145.4 <br> 1.145.5</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.148.1</td>
+      <td style="text-align:left">1.146 <br> 1.147 <br> 1.147.1 <br> 1.148 <br> 1.148.1</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.148.2</td>
+      <td style="text-align:left">1.148.2</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.148.3</td>
+      <td style="text-align:left">1.148.3 <br> 1.148.4</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.148.5</td>
+      <td style="text-align:left">1.148.5</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.148.6</td>
+      <td style="text-align:left">1.148.6</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.148.7</td>
+      <td style="text-align:left">1.148.7 <br> 1.148.8 <br> 1.148.9 <br> 1.148.10</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.148.11</td>
+      <td style="text-align:left">1.148.11 <br> 1.148.12</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.148.14</td>
+      <td style="text-align:left">1.148.14</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.149.0</td>
+      <td style="text-align:left">1.148.15 <br> 1.148.16 <br> 1.148.17 <br> 1.148.18 <br> 1.148.19 <br> 1.148.20 <br> 1.148.21 <br> 1.148.22 <br> 1.148.23 <br> 1.148.25 <br> 1.148.26 <br> 1.149.0 <br> 1.150.0?</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">-</td>
+      <td style="text-align:left">1.149.1</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">-</td>
+      <td style="text-align:left">1.149.2 <br> 1.149.3 <br> 1.149.4 <br> 1.149.5 <br> 1.149.6 <br> 1.149.7 <br> 1.149.8</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">-</td>
+      <td style="text-align:left">1.149.9</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">-</td>
+      <td style="text-align:left">1.149.10</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">-</td>
+      <td style="text-align:left">1.149.11</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">-</td>
+      <td style="text-align:left">1.149.12 <br> 1.149.13 <br> 1.149.14 <br> 1.149.15 <br> 1.149.16</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">1.150</td>
+      <td style="text-align:left">1.150</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">-</td>
+      <td style="text-align:left">1.151</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">-</td>
+      <td style="text-align:left">1.152.1</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">-</td>
+      <td style="text-align:left">1.152.2</td>
+      </tr>
+      <tr>
+      <td style="text-align:center">-</td>
+      <td style="text-align:left">1.152.5 <br> 1.152.6</td>
+      </tr>
+      </tbody>
+      </table>
 </body>
 </html>

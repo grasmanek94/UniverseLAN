@@ -1,3 +1,7 @@
+<p align="center">
+ <img src="https://raw.githubusercontent.com/grasmanek94/UniverseLAN/master/docs/logo-128.png" alt="Logo"/>
+</p>
+
 # Why?
 
 This extends the ["You buy it, you own it"](https://www.gog.com/en/about_gog) and  "DRM-Free" GOG philosophy to the multiplayer portion of all games that use GOG Galaxy.
