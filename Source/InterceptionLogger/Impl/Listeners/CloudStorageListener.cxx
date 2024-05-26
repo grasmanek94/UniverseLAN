@@ -39,34 +39,7 @@ namespace universelan::client {
 			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
 		}
 
-		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC();
-	}
-
-	void CloudStorageGetFileListener::OnGetFileSuccess(const char* container, const char* name, uint32_t fileSize, uint32_t metadataCount)
-	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
-
-		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
-			trace.write_all(std::format("fileSize: {}", fileSize));
-			trace.write_all(std::format("metadataCount: {}", metadataCount));
-		}
-
-		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnGetFileSuccess(container, name, fileSize, metadataCount));
-	}
-
-	void CloudStorageGetFileListener::OnGetFileFailure(const char* container, const char* name, FailureReason failureReason)
-	{
-		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
-
-		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
-		}
-
-		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnGetFileFailure(container, name, failureReason));
+		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnGetFileListFailure(failureReason));
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
@@ -83,7 +56,35 @@ namespace universelan::client {
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnGetFileSuccess(container, name, fileSize, savegameType, savegameID));
 	}
+#else
+	void CloudStorageGetFileListener::OnGetFileSuccess(const char* container, const char* name, uint32_t fileSize, uint32_t metadataCount)
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("fileSize: {}", fileSize));
+			trace.write_all(std::format("metadataCount: {}", metadataCount));
+		}
+
+
+		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnGetFileSuccess(container, name, fileSize, metadataCount));
+	}
 #endif
+
+	void CloudStorageGetFileListener::OnGetFileFailure(const char* container, const char* name, FailureReason failureReason)
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
+			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+		}
+
+		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnGetFileFailure(container, name, failureReason));
+	}
 
 	void CloudStoragePutFileListener::OnPutFileSuccess(const char* container, const char* name)
 	{

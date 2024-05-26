@@ -74,6 +74,14 @@ namespace universelan::client {
 		universe_client_api.reset();
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_SHUTDOWNOPTIONS
+	void ShutdownEx(const ShutdownOptions& shutdownOptions) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
+
+		universe_client_api.reset();
+	}
+#endif
+
 	IUser* User() {
 		return universe_client_api.user.get();
 	}

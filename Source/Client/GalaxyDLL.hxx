@@ -8,6 +8,10 @@ namespace universelan::client {
 	void Init(const galaxy::api::InitOptions& initOptions);
 #endif
 	void Shutdown();
+#if GALAXY_BUILD_FEATURE_HAS_SHUTDOWNOPTIONS
+	void ShutdownEx(const ShutdownOptions& shutdownOptions);
+#endif
+
 	IUser* User();
 	IFriends* Friends();
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT

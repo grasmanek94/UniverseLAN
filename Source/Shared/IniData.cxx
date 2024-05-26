@@ -281,6 +281,7 @@ namespace universelan {
 			LoadIni(ini, GetPath(ConfigFile));
 
 			Language = ini.GetValue(SettingsSection.c_str(), "Language", "english");
+			LanguageCode = ini.GetValue(SettingsSection.c_str(), "LanguageCode", "en-US");
 			EnableAllDLC = ini.GetBoolValue(SettingsSection.c_str(), "EnableAllDLC", true);
 			SaveUnknownDLCIDs = ini.GetBoolValue(SettingsSection.c_str(), "SaveUnknownDLCIDs", true);
 			SaveAchievementsAndStats = ini.GetBoolValue(SettingsSection.c_str(), "SaveAchievementsAndStats", true);
@@ -537,6 +538,11 @@ namespace universelan {
 	const std::string& ClientIniData::GetLanguage() const
 	{
 		return Language;
+	}
+
+	const std::string& ClientIniData::GetLanguageCode() const
+	{
+		return LanguageCode;
 	}
 
 	bool ClientIniData::GetEnableAllDLC() const

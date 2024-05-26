@@ -20,6 +20,12 @@ namespace galaxy::api {
 		universelan::client::Shutdown();
 	}
 	
+#if GALAXY_BUILD_FEATURE_HAS_SHUTDOWNOPTIONS
+	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE ShutdownEx(const ShutdownOptions& shutdownOptions) {
+		universelan::client::ShutdownEx(shutdownOptions);
+	}
+#endif
+
 #if GALAXY_BUILD_FEATURE_HAS_IAPPS
 	GALAXY_DLL_EXPORT IApps* GALAXY_CALLTYPE Apps(void)
 	{

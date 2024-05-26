@@ -70,6 +70,44 @@ namespace universelan::client {
 		}
 	}
 #endif
+
+
+#if GALAXY_BUILD_FEATURE_HAS_IAPPS_LANGUAGECODE
+	const char* AppsImpl::GetCurrentGameLanguageCode(ProductID productID)
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("productID: {}", productID));
+		}
+
+		auto lang_code = intf()->GetCurrentGameLanguageCode(productID);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("lang_code: {}", lang_code));
+		}
+
+		return lang_code;
+	}
+
+	void AppsImpl::GetCurrentGameLanguageCodeCopy(char* buffer, uint32_t bufferLength, ProductID productID)
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("buffer: {}", (void*)buffer));
+			trace.write_all(std::format("bufferLength: {}", bufferLength));
+			trace.write_all(std::format("productID: {}", productID));
+		}
+
+		intf()->GetCurrentGameLanguageCodeCopy(buffer, bufferLength, productID);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("lang_code: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
+		}
+	}
+#endif
+
 }
 
 #endif

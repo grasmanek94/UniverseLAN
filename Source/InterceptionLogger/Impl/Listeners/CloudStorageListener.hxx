@@ -23,12 +23,13 @@ namespace universelan::client {
 		IMPLEMENT_PROXY_ENCAPSULATE_FUNC_FOR(CloudStorageGetFileListener, ICloudStorageGetFileListener);
 
 	public:
+#if !GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
 		virtual void OnGetFileSuccess(const char* container, const char* name, uint32_t fileSize, uint32_t metadataCount);
-		virtual void OnGetFileFailure(const char* container, const char* name, FailureReason failureReason);
-
-#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
+#else
 		virtual void OnGetFileSuccess(const char* container, const char* name, uint32_t fileSize, SavegameType savegameType, const char* savegameID);
 #endif
+
+		virtual void OnGetFileFailure(const char* container, const char* name, FailureReason failureReason);
 	};
 
 	class CloudStoragePutFileListener : public ICloudStoragePutFileListener

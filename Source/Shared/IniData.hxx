@@ -91,6 +91,7 @@ namespace universelan {
 
 		const std::string SettingsSection = "Settings";
 		std::string Language;
+		std::string LanguageCode;
 		bool EnableAllDLC;
 		bool SaveUnknownDLCIDs;
 		bool SaveAchievementsAndStats;
@@ -155,6 +156,7 @@ namespace universelan {
 		virtual ~ClientIniData();
 
 		const std::string& GetLanguage() const;
+		const std::string& GetLanguageCode() const;
 		bool GetEnableAllDLC() const;
 		bool GetSaveUnknownDLCIDs() const;
 		bool GetSaveAchievementsAndStats() const;

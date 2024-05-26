@@ -20,6 +20,13 @@ namespace galaxy::api {
 		gameserver.ShutdownGameServer();
 	}
 
+#if GALAXY_BUILD_FEATURE_HAS_SHUTDOWNOPTIONS
+	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE ShutdownGameServerEx(const ShutdownOptions& shutdownOptions) {
+		Trace trace{ nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL_GAMESERVERAPI };
+		gameserver.ShutdownGameServer();
+	}
+#endif
+
 	GALAXY_DLL_EXPORT IUser* GALAXY_CALLTYPE GameServerUser() {
 		return gameserver.GameServerUser();
 	}
