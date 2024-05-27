@@ -134,6 +134,9 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_SIGNIN_REQUIREONLINE
 		bool requireOnline
 #endif
+#if GALAXY_BUILD_FEATURE_HAS_IUSER_SIGNINGALAXY_TIMEOUT
+		, uint32_t timeout
+#endif
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 		, IAuthListener* const listener
 #endif
@@ -143,6 +146,9 @@ namespace universelan::client {
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINSTEAM
 			trace.write_all(std::format("requireOnline: {}", requireOnline));
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_IUSER_SIGNINGALAXY_TIMEOUT
+			trace.write_all(std::format("timeout: {}", timeout));
 #endif
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 			trace.write_all(std::format("listener: {}", (void*)listener));
@@ -173,6 +179,9 @@ namespace universelan::client {
 			intf()->USER_SIGN_IN_GALAXY(
 #if GALAXY_BUILD_FEATURE_HAS_SIGNIN_REQUIREONLINE
 				requireOnline
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_IUSER_SIGNINGALAXY_TIMEOUT
+				, timeout
 #endif
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 				, AuthListener::encapsulate(listener)

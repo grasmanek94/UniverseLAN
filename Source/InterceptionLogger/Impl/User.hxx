@@ -54,7 +54,7 @@ namespace universelan::client {
 	class UserImpl : public IUser
 	{
 	public:
-	
+
 #if GALAXY_BUILD_FEATURE_HAS_SIGNIN_REQUIREONLINE
 		using SignInDataPtr_T = void;
 #else
@@ -151,12 +151,16 @@ namespace universelan::client {
 		 * @remark Information about being signed in or signed out also comes to
 		 * the IOperationalStateChangeListener.
 		 *
-		 * @param [in] requireOnline Indicates if sing in with Galaxy backend is required.
+		 * @param [in] requireOnline Indicates if sign in with Galaxy backend is required.
+		 * @param [in] timeout Time in seconds for AuthListener to trigger timeout
 		 * @param [in] listener The listener for specific operation.
 		 */
 		virtual void USER_SIGN_IN_GALAXY(
 #if GALAXY_BUILD_FEATURE_HAS_SIGNIN_REQUIREONLINE
 			bool requireOnline = false
+#endif
+#if GALAXY_BUILD_FEATURE_HAS_IUSER_SIGNINGALAXY_TIMEOUT
+			, uint32_t timeout = 15
 #endif
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 			, IAuthListener* const listener = NULL

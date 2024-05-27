@@ -180,6 +180,9 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_SIGNIN_REQUIREONLINE
 			bool requireOnline = false
 #endif
+#if GALAXY_BUILD_FEATURE_HAS_IUSER_SIGNINGALAXY_TIMEOUT
+			, uint32_t timeout = 15
+#endif
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
 			, IAuthListener* const listener = NULL
 #endif
