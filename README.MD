@@ -187,6 +187,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Homeseek                                  | :x:                       | -                             | Uses Epic Online Services for multiplayer |
 | The Escapists 2                           | :x:                       | 1.132.1                       | Uses Photon networking for online multiplayer, UniverseLAN will not be able to make multiplayer work without internet. |
 | Descent - Underground                     | :x:                       | 1.88                          | Doesn't seem to load the Galaxy.dll even with `--gog` launch param? |
+| Dark Envoy                                | :x:                       | 1.152.6                       | Uses Photon networking for online multiplayer, UniverseLAN will not be able to make multiplayer work without internet. |
 
 # Notice
 I'm not affiliated in any way with GOG or CD Projekt RED.  
