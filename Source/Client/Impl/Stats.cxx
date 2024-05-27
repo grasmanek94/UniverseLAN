@@ -2,6 +2,7 @@
 
 #include "UniverseLAN.hxx"
 
+#include <ContainerGetByIndex.hxx>
 #include <SafeStringCopy.hxx>
 
 namespace universelan::client {
@@ -9,12 +10,12 @@ namespace universelan::client {
 	StatsImpl::StatsImpl(InterfaceInstances* intf) :
 		intf{ intf }, listeners{ intf->notification.get() }
 	{
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 	}
 
 	StatsImpl::~StatsImpl()
 	{
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 	}
 
 	void StatsImpl::RequestUserStatsAndAchievements(GalaxyID userID
@@ -22,14 +23,14 @@ namespace universelan::client {
 		, IUserStatsAndAchievementsRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		if (intf->config->IsSelfUserID(userID)) {
 			listeners->NotifyAll(
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 				listener,
 #endif
-				&IUserStatsAndAchievementsRetrieveListener::OnUserStatsAndAchievementsRetrieveSuccess, userID);
+				& IUserStatsAndAchievementsRetrieveListener::OnUserStatsAndAchievementsRetrieveSuccess, userID);
 		}
 		else {
 			uint64_t request_id = MessageUniqueID::get();
@@ -43,7 +44,7 @@ namespace universelan::client {
 	}
 
 	void StatsImpl::SpecificUserStatsAndAchievementsRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		IUserStatsAndAchievementsRetrieveListener* listener = nullptr;
 		listeners->PopRequestListener(data->request_id, listener);
@@ -60,37 +61,37 @@ namespace universelan::client {
 	}
 
 	int32_t StatsImpl::GetStatInt(const char* name, GalaxyID userID) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		return intf->user->GetGalaxyUserData(userID)->stats.GetStat(name).i;
 	}
 
 	float StatsImpl::GetStatFloat(const char* name, GalaxyID userID) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		return intf->user->GetGalaxyUserData(userID)->stats.GetStat(name).f;
 	}
 
 	void StatsImpl::SetStatInt(const char* name, int32_t value) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		intf->config->GetLocalUserData()->stats.SetStat(name, value);
 	}
 
 	void StatsImpl::SetStatFloat(const char* name, float value) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		intf->config->GetLocalUserData()->stats.SetStat(name, value);
 	}
 
 	void StatsImpl::UpdateAvgRateStat(const char* name, float countThisSession, double sessionLength) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		intf->config->GetLocalUserData()->stats.SetStat(name, (float)(intf->config->GetLocalUserData()->stats.GetStat(name).f + (countThisSession / sessionLength)));
 	}
 
 	void StatsImpl::GetAchievement(const char* name, bool& unlocked, uint32_t& unlockTime, GalaxyID userID) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		auto* data = intf->user->GetGalaxyUserData(userID)->stats.GetAchievementData(name);
 
@@ -101,7 +102,7 @@ namespace universelan::client {
 	}
 
 	void StatsImpl::SetAchievement(const char* name) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		auto* data = intf->config->GetLocalUserData()->stats.GetAchievementData(name);
 
@@ -114,7 +115,7 @@ namespace universelan::client {
 	}
 
 	void StatsImpl::ClearAchievement(const char* name) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		auto* data = intf->config->GetLocalUserData()->stats.GetAchievementData(name);
 		if (data) {
@@ -128,7 +129,7 @@ namespace universelan::client {
 		IStatsAndAchievementsStoreListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		intf->config->SaveStatsAndAchievements();
 
@@ -138,7 +139,7 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			listener,
 #endif
-			&IStatsAndAchievementsStoreListener::OnUserStatsAndAchievementsStoreSuccess);
+			& IStatsAndAchievementsStoreListener::OnUserStatsAndAchievementsStoreSuccess);
 	}
 
 	void StatsImpl::ResetStatsAndAchievements(
@@ -146,7 +147,7 @@ namespace universelan::client {
 		IStatsAndAchievementsStoreListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		intf->config->ResetStatsAndAchievements();
 
@@ -156,25 +157,25 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			listener,
 #endif
-			&IStatsAndAchievementsStoreListener::OnUserStatsAndAchievementsStoreSuccess);
+			& IStatsAndAchievementsStoreListener::OnUserStatsAndAchievementsStoreSuccess);
 	}
 
 	const char* StatsImpl::GetAchievementDisplayName(const char* name) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		return name;
 	}
 
 #if GALAXY_BUILD_FEATURE_ISTATS_GET_ACHIEVEMENT_LEADERBOARD_COPY
 	void StatsImpl::GetAchievementDisplayNameCopy(const char* name, char* buffer, uint32_t bufferLength) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		universelan::util::safe_copy_str_n(name, buffer, bufferLength);
 	}
 #endif
 
 	const char* StatsImpl::GetAchievementDescription(const char* name) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		auto* data = intf->config->GetLocalUserData()->stats.GetAchievementData(name);
 		if (data) {
@@ -186,7 +187,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_ISTATS_GET_ACHIEVEMENT_LEADERBOARD_COPY
 	void StatsImpl::GetAchievementDescriptionCopy(const char* name, char* buffer, uint32_t bufferLength) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		auto* data = intf->config->GetLocalUserData()->stats.GetAchievementData(name);
 
@@ -198,7 +199,7 @@ namespace universelan::client {
 #endif
 
 	bool StatsImpl::IsAchievementVisible(const char* name) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		auto* data = intf->config->GetLocalUserData()->stats.GetAchievementData(name);
 
@@ -211,7 +212,7 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_IFRIENDS_ISTATS_UPDATE_1_127_0
 	bool StatsImpl::IsAchievementVisibleWhileLocked(const char* name) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		auto* data = intf->config->GetLocalUserData()->stats.GetAchievementData(name);
 
@@ -228,37 +229,37 @@ namespace universelan::client {
 		ILeaderboardsRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		listeners->NotifyAll(
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			listener,
 #endif
-			&ILeaderboardsRetrieveListener::OnLeaderboardsRetrieveFailure, ILeaderboardsRetrieveListener::FAILURE_REASON_UNDEFINED);
+			& ILeaderboardsRetrieveListener::OnLeaderboardsRetrieveFailure, ILeaderboardsRetrieveListener::FAILURE_REASON_UNDEFINED);
 	}
 
 	const char* StatsImpl::GetLeaderboardDisplayName(const char* name) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		return name;
 	}
 
 #if GALAXY_BUILD_FEATURE_ISTATS_GET_ACHIEVEMENT_LEADERBOARD_COPY
 	void StatsImpl::GetLeaderboardDisplayNameCopy(const char* name, char* buffer, uint32_t bufferLength) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		universelan::util::safe_copy_str_n(name, buffer, bufferLength);
 	}
 #endif
 
 	LeaderboardSortMethod StatsImpl::GetLeaderboardSortMethod(const char* name) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		return LEADERBOARD_SORT_METHOD_NONE;
 	}
 
 	LeaderboardDisplayType StatsImpl::GetLeaderboardDisplayType(const char* name) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		return LEADERBOARD_DISPLAY_TYPE_NONE;
 	}
@@ -271,13 +272,13 @@ namespace universelan::client {
 		, ILeaderboardEntriesRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		listeners->NotifyAll(
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			listener,
 #endif
-			&ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
+			& ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
 	}
 
 	void StatsImpl::RequestLeaderboardEntriesAroundUser(
@@ -289,13 +290,13 @@ namespace universelan::client {
 		, ILeaderboardEntriesRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		listeners->NotifyAll(
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			listener,
 #endif
-			&ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
+			& ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
 	}
 
 	void StatsImpl::RequestLeaderboardEntriesForUsers(
@@ -306,17 +307,17 @@ namespace universelan::client {
 		, ILeaderboardEntriesRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		listeners->NotifyAll(
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			listener, 
+			listener,
 #endif
-			&ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
+			& ILeaderboardEntriesRetrieveListener::OnLeaderboardEntriesRetrieveFailure, name, ILeaderboardEntriesRetrieveListener::FAILURE_REASON_UNDEFINED);
 	}
 
 	void StatsImpl::GetRequestedLeaderboardEntry(uint32_t index, uint32_t& rank, int32_t& score, GalaxyID& userID) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 	}
 
 	void StatsImpl::SetLeaderboardScore(
@@ -333,7 +334,7 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			listener,
 #endif
-			&ILeaderboardScoreUpdateListener::OnLeaderboardScoreUpdateFailure, name, score, ILeaderboardScoreUpdateListener::FAILURE_REASON_UNDEFINED);
+			& ILeaderboardScoreUpdateListener::OnLeaderboardScoreUpdateFailure, name, score, ILeaderboardScoreUpdateListener::FAILURE_REASON_UNDEFINED);
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_LEADERBOARD_WITH_DETAILS
@@ -358,19 +359,19 @@ namespace universelan::client {
 		, ILeaderboardScoreUpdateListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		listeners->NotifyAll(
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			listener, 
+			listener,
 #endif
-			&ILeaderboardScoreUpdateListener::OnLeaderboardScoreUpdateFailure, name, score, ILeaderboardScoreUpdateListener::FAILURE_REASON_UNDEFINED);
+			& ILeaderboardScoreUpdateListener::OnLeaderboardScoreUpdateFailure, name, score, ILeaderboardScoreUpdateListener::FAILURE_REASON_UNDEFINED);
 	}
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_GETLEADERBORDENTRYCOUNT
 	uint32_t StatsImpl::GetLeaderboardEntryCount(const char* name) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		return 0;
 	}
@@ -382,13 +383,13 @@ namespace universelan::client {
 		, ILeaderboardRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		listeners->NotifyAll(
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			listener, 
+			listener,
 #endif
-			&ILeaderboardRetrieveListener::OnLeaderboardRetrieveFailure, name, ILeaderboardRetrieveListener::FAILURE_REASON_UNDEFINED);
+			& ILeaderboardRetrieveListener::OnLeaderboardRetrieveFailure, name, ILeaderboardRetrieveListener::FAILURE_REASON_UNDEFINED);
 	}
 
 	void StatsImpl::FindOrCreateLeaderboard(
@@ -405,13 +406,13 @@ namespace universelan::client {
 		, ILeaderboardRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		listeners->NotifyAll(
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-			listener, 
+			listener,
 #endif
-			&ILeaderboardRetrieveListener::OnLeaderboardRetrieveFailure, name, ILeaderboardRetrieveListener::FAILURE_REASON_UNDEFINED);
+			& ILeaderboardRetrieveListener::OnLeaderboardRetrieveFailure, name, ILeaderboardRetrieveListener::FAILURE_REASON_UNDEFINED);
 	}
 #endif
 
@@ -421,15 +422,15 @@ namespace universelan::client {
 		, IUserTimePlayedRetrieveListener* const listener
 #endif
 	) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 		// no need to refresh play time because it's the diff between 'submitted_time_played + (time_now - connect_time)'
 		if (intf->user->IsGalaxyUserDataPresent(userID)) {
 			listeners->NotifyAll(
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
-				listener, 
+				listener,
 #endif
-				&IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveSuccess, userID);
+				& IUserTimePlayedRetrieveListener::OnUserTimePlayedRetrieveSuccess, userID);
 		}
 		else {
 			uint64_t request_id = MessageUniqueID::get();
@@ -450,7 +451,7 @@ namespace universelan::client {
 #endif
 
 	void StatsImpl::RequestUserTimePlayedProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data) {
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ISTATS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTATS };
 
 #if GALAXY_BUILD_FEATURE_HAS_IUSERTIMEPLAYEDRETRIEVELISTENER
 		IUserTimePlayedRetrieveListener* listener = nullptr;
@@ -469,4 +470,35 @@ namespace universelan::client {
 #endif
 		}
 	}
+
+#if GALAXY_BUILD_FEATURE_HAS_ISTATS_ACHIEVEMENTSNUMBER
+	uint32_t StatsImpl::GetAchievementsNumber() {
+		return intf->user->GetGalaxyUserData(0)->stats.run_locked_achievements<uint32_t>([&](auto& Achievements) -> uint32_t {
+			return Achievements.size();
+			});
+	}
+
+	const char* StatsImpl::GetAchievementName(uint32_t index) {
+		return intf->user->GetGalaxyUserData(0)->stats.run_locked_achievements<const char*>([&](auto& Achievements) -> const char* {
+			auto entry = container_get_by_index(Achievements, index);
+			if (!entry) {
+				return "";
+			}
+
+			return entry->first.c_str();
+			});
+	}
+
+	void StatsImpl::GetAchievementNameCopy(uint32_t index, char* buffer, uint32_t bufferLength) {
+		intf->user->GetGalaxyUserData(0)->stats.run_locked_achievements<void>([&](AchievementsAndStatsContainer::achievements_t& Achievements) -> void {
+			auto entry = container_get_by_index(Achievements, index);
+			if (!entry) {
+				universelan::util::safe_copy_str_n("", buffer, bufferLength);
+				return;
+			}
+
+			universelan::util::safe_copy_str_n(entry->first, buffer, bufferLength);
+			});
+	}
+#endif
 }

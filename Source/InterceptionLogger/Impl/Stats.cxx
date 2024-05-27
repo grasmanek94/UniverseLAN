@@ -697,4 +697,50 @@ namespace universelan::client {
 		return result;
 	}
 #endif
+
+#if GALAXY_BUILD_FEATURE_HAS_ISTATS_ACHIEVEMENTSNUMBER
+	uint32_t StatsImpl::GetAchievementsNumber() {
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		auto result = intf()->GetAchievementsNumber();
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+
+		return result;
+	}
+
+	const char* StatsImpl::GetAchievementName(uint32_t index) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("index: {}", index));
+		}
+
+		auto result = intf()->GetAchievementName(index);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+		}
+
+		return result;
+	}
+
+	void StatsImpl::GetAchievementNameCopy(uint32_t index, char* buffer, uint32_t bufferLength) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("index: {}", index));
+			trace.write_all(std::format("buffer: {}", (void*)buffer));
+			trace.write_all(std::format("bufferLength: {}", bufferLength));
+		}
+
+		intf()->GetAchievementNameCopy(index, buffer, bufferLength);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
+		}
+	}
+#endif
 }

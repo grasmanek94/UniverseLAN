@@ -1,5 +1,4 @@
-#ifndef UNIVERSELAN_IMPL_STATS_H
-#define UNIVERSELAN_IMPL_STATS_H
+#pragma once
 
 /**
  * @file
@@ -604,11 +603,38 @@ namespace universelan::client {
 		virtual uint32_t GetUserTimePlayed(GalaxyID userID = GalaxyID()) override;
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_ISTATS_ACHIEVEMENTSNUMBER
+		/**
+		 * Returns a number of achievements.
+		 *
+		 * @pre Retrieve the achievements first by calling RequestUserStatsAndAchievements().
+		 */
+		virtual uint32_t GetAchievementsNumber() override;
+
+		/**
+		 * Returns the 'API KEY' for an achievement index between 0 and GetAchievementsNumber.
+		 *
+		 * @pre Retrieve the achievements first by calling RequestUserStatsAndAchievements().
+		 *
+		 * @param [in] index The index of the achievement.
+		 */
+		virtual const char* GetAchievementName(uint32_t index) override;
+
+		/**
+		 * Copies the 'API KEY' for an achievement index between 0 and GetAchievementsNumber.
+		 *
+		 * @pre Retrieve the achievements first by calling RequestUserStatsAndAchievements().
+		 *
+		 * @param [in] index The index of the achievement.
+		 * @param [in, out] buffer The output buffer.
+		 * @param [in] bufferLength The size of the output buffer.
+		 */
+		virtual void GetAchievementNameCopy(uint32_t index, char* buffer, uint32_t bufferLength) override;
+#endif
+
 		void SpecificUserStatsAndAchievementsRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
 		void RequestUserTimePlayedProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
 	};
 
 	/** @} */
 }
-
-#endif
