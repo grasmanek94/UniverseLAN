@@ -75,4 +75,24 @@ namespace universelan::client {
 		virtual void OnAccessTokenChanged();
 	};
 #endif
+
+#if GALAXY_BUILD_FEATURE_HAS_IUSER_OPENID
+	class PlayFabCreateOpenIDConnectionListener : public IPlayFabCreateOpenIDConnectionListener
+	{
+		IMPLEMENT_PROXY_ENCAPSULATE_FUNC_FOR(PlayFabCreateOpenIDConnectionListener, IPlayFabCreateOpenIDConnectionListener);
+
+	public:
+		virtual void OnPlayFabCreateOpenIDConnectionSuccess(bool connectionAlreadyExists) override;
+		virtual void OnPlayFabCreateOpenIDConnectionFailure(FailureReason failureReason) override;
+	};
+
+	class PlayFabLoginWithOpenIDConnectListener : public IPlayFabLoginWithOpenIDConnectListener
+	{
+		IMPLEMENT_PROXY_ENCAPSULATE_FUNC_FOR(PlayFabLoginWithOpenIDConnectListener, IPlayFabLoginWithOpenIDConnectListener);
+
+	public:
+		virtual void OnPlayFabLoginWithOpenIDConnectSuccess() override;
+		virtual void OnPlayFabLoginWithOpenIDConnectFailure(FailureReason failureReason) override;
+	};
+#endif
 }

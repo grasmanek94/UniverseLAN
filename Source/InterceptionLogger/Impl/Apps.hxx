@@ -7,6 +7,7 @@
  */
 
 #include <GalaxyFunctional.hxx>
+#include <ListenersContainer.hxx>
 
 #include <GalaxyExport.h>
 #include <IApps.h>
@@ -34,6 +35,7 @@ namespace universelan::client {
 		FuncT::F intf;
 		IListenerRegistrar* notifications;
 		bool force_dlc_check;
+		ListenersContainer listeners;
 
 	public:
 		AppsImpl(FuncT::F intf, IListenerRegistrar* notifications, bool force_dlc_check);

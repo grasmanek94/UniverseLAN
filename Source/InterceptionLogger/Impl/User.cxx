@@ -50,6 +50,10 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_IACCESSTOKENLISTENER
 		listeners.AddListener<AccessTokenListener>();
 #endif
+#if GALAXY_BUILD_FEATURE_HAS_IUSER_OPENID
+		listeners.AddListener<PlayFabCreateOpenIDConnectionListener>();
+		listeners.AddListener<PlayFabLoginWithOpenIDConnectListener>();
+#endif
 	}
 
 	UserImpl::~UserImpl() {
@@ -779,7 +783,7 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
-		intf()->SignInAuthorizationCode(authorizationCode, redirectURI, listener);
+		intf()->SignInAuthorizationCode(authorizationCode, redirectURI, AuthListener::encapsulate(listener));
 	}
 
 	const char* UserImpl::GetIDToken() {
@@ -809,4 +813,40 @@ namespace universelan::client {
 		}
 	}
 #endif
+
+#if GALAXY_BUILD_FEATURE_HAS_IUSER_OPENID
+	void UserImpl::CreateOpenIDConnection(const char* secretKey, const char* titleID, const char* connectionID,
+		bool ignoreNonce, IPlayFabCreateOpenIDConnectionListener* const listener) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("secretKey: {}", util::safe_fix_null_char_ptr_annotate_ret(secretKey)));
+			trace.write_all(std::format("titleID: {}", util::safe_fix_null_char_ptr_annotate_ret(titleID)));
+			trace.write_all(std::format("connectionID: {}", util::safe_fix_null_char_ptr_annotate_ret(connectionID)));
+			trace.write_all(std::format("ignoreNonce: {}", ignoreNonce));
+			trace.write_all(std::format("listener: {}", (void*)listener));
+		}
+
+		intf()->CreateOpenIDConnection(secretKey, secretKey, connectionID, ignoreNonce, PlayFabCreateOpenIDConnectionListener::encapsulate(listener));
+	}
+
+	void UserImpl::LoginWithOpenIDConnect(const char* titleID, const char* connectionID, const char* idToken,
+		bool createAccount, const char* encryptedRequest, const char* playerSecret, IPlayFabLoginWithOpenIDConnectListener* const listener) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("titleID: {}", util::safe_fix_null_char_ptr_annotate_ret(titleID)));
+			trace.write_all(std::format("connectionID: {}", util::safe_fix_null_char_ptr_annotate_ret(connectionID)));
+			trace.write_all(std::format("idToken: {}", util::safe_fix_null_char_ptr_annotate_ret(idToken)));
+			trace.write_all(std::format("createAccount: {}", createAccount));
+			trace.write_all(std::format("encryptedRequest: {}", util::safe_fix_null_char_ptr_annotate_ret(encryptedRequest)));
+			trace.write_all(std::format("playerSecret: {}", util::safe_fix_null_char_ptr_annotate_ret(playerSecret)));
+			trace.write_all(std::format("listener: {}", (void*)listener));
+		}
+
+		intf()->LoginWithOpenIDConnect(titleID, connectionID, idToken, createAccount, encryptedRequest,
+			playerSecret, PlayFabLoginWithOpenIDConnectListener::encapsulate(listener));
+	}
+#endif
+
 }

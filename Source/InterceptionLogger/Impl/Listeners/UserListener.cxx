@@ -105,4 +105,46 @@ namespace universelan::client {
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnAccessTokenChanged());
 	}
 #endif
+
+#if GALAXY_BUILD_FEATURE_HAS_IUSER_OPENID
+	void PlayFabCreateOpenIDConnectionListener::OnPlayFabCreateOpenIDConnectionSuccess(bool connectionAlreadyExists) 
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("connectionAlreadyExists: {}", connectionAlreadyExists));
+		}
+
+		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnPlayFabCreateOpenIDConnectionSuccess(connectionAlreadyExists));
+	}
+
+	void PlayFabCreateOpenIDConnectionListener::OnPlayFabCreateOpenIDConnectionFailure(FailureReason failureReason)
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+		}
+
+		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnPlayFabCreateOpenIDConnectionFailure(failureReason));
+	}
+
+	void PlayFabLoginWithOpenIDConnectListener::OnPlayFabLoginWithOpenIDConnectSuccess()
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnPlayFabLoginWithOpenIDConnectSuccess());
+	}
+
+	void PlayFabLoginWithOpenIDConnectListener::OnPlayFabLoginWithOpenIDConnectFailure(FailureReason failureReason) 
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+		}
+
+		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnPlayFabLoginWithOpenIDConnectFailure(failureReason));
+	}
+#endif
 }

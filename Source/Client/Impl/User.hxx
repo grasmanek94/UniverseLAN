@@ -1,5 +1,4 @@
-#ifndef UNIVERSELAN_IMPL_USER_H
-#define UNIVERSELAN_IMPL_USER_H
+#pragma once
 
 /**
  * @file
@@ -771,6 +770,34 @@ namespace universelan::client {
 		virtual void GetIDTokenCopy(char* buffer, uint32_t bufferLength) override;
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IUSER_OPENID
+		/**
+		 * Performs a request for a PlayFab's CreateOpenIdConnection
+		 *
+		 * This call is asynchronous. Responses come to the IPlayFabCreateOpenIDConnectionListener.
+		 *
+		 * @param [in] secretKey This API requires a title secret key, available to title admins, from PlayFab Game Manager.
+		 * @param [in] titleID Unique identifier for the title, found in the Settings > Game Properties section of the PlayFab developer site when a title has been selected.
+		 * @param [in] connectionID A name for the connection that identifies it within the title.
+		 * @param [in] ignoreNounce Ignore 'nonce' claim in identity tokens.
+		*/
+		virtual void CreateOpenIDConnection(const char* secretKey, const char* titleID, const char* connectionID, bool ignoreNonce = true, IPlayFabCreateOpenIDConnectionListener* const listener = NULL) override;
+
+		/**
+		 * Performs a request for a PlayFab's LoginWithOpenIdConnect
+		 *
+		 * This call is asynchronous. Responses come to the IPlayFabLoginWithOpenIDConnectListener.
+		 *
+		 * @param [in] titleID Unique identifier for the title, found in the Settings > Game Properties section of the PlayFab developer site when a title has been selected.
+		 * @param [in] connectionID A name that identifies which configured OpenID Connect provider relationship to use.
+		 * @param [in] idToken The JSON Web token (JWT) returned by the identity provider after login.
+		 * @param [in] createAccount Automatically create a PlayFab account if one is not currently linked to this ID.
+		 * @param [in] encryptedRequest Base64 encoded body that is encrypted with the Title's public RSA key (Enterprise Only).
+		 * @param [in] playerSecret Player secret that is used to verify API request signatures (Enterprise Only).
+		*/
+		virtual void LoginWithOpenIDConnect(const char* titleID, const char* connectionID, const char* idToken, bool createAccount = true, const char* encryptedRequest = NULL, const char* playerSecret = NULL, IPlayFabLoginWithOpenIDConnectListener* const listener = NULL) override;
+#endif
+
 		void SpecificUserDataRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
 		void OnlineUserStateChange(const std::shared_ptr<OnlineStatusChangeMessage>& data);
 		void SetUserDataMessageReceived(const std::shared_ptr<SetUserDataMessage>& data);
@@ -782,4 +809,3 @@ namespace universelan::client {
 
 	/** @} */
 }
-#endif

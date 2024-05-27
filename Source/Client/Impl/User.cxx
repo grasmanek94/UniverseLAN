@@ -536,6 +536,24 @@ namespace universelan::client {
 	}
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IUSER_OPENID
+	void UserImpl::CreateOpenIDConnection(const char* secretKey, const char* titleID, const char* connectionID,
+		bool ignoreNonce, IPlayFabCreateOpenIDConnectionListener* const listener) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
+
+		listeners->NotifyAll(&IPlayFabCreateOpenIDConnectionListener::OnPlayFabCreateOpenIDConnectionFailure, 
+			IPlayFabCreateOpenIDConnectionListener::FAILURE_REASON_CONNECTION_FAILURE);
+	}
+
+	void UserImpl::LoginWithOpenIDConnect(const char* titleID, const char* connectionID, const char* idToken,
+		bool createAccount, const char* encryptedRequest, const char* playerSecret, IPlayFabLoginWithOpenIDConnectListener* const listener) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
+
+		listeners->NotifyAll(&IPlayFabLoginWithOpenIDConnectListener::OnPlayFabLoginWithOpenIDConnectFailure,
+			IPlayFabLoginWithOpenIDConnectListener::FAILURE_REASON_CONNECTION_FAILURE);
+	}
+#endif
+
 	void UserImpl::OnlineUserStateChange(const std::shared_ptr<OnlineStatusChangeMessage>& data) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 

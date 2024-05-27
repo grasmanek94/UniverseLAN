@@ -2,6 +2,8 @@
 
 #include "Apps.hxx"
 
+#include "Listeners/AppsListener.hxx"
+
 #include <Tracer.hxx>
 #include <SafeStringCopy.hxx>
 
@@ -17,7 +19,15 @@ namespace universelan::client {
 	}
 
 	AppsImpl::AppsImpl(FuncT::F intf, IListenerRegistrar* notifications, bool force_dlc_check) :
-		intf{ intf }, notifications{ notifications }, force_dlc_check{ force_dlc_check } {}
+		intf{ intf },
+		notifications{ notifications },
+		force_dlc_check{ force_dlc_check },
+		listeners{ notifications }
+	{
+#if GALAXY_BUILD_FEATURE_HAS_IAPPS_ISDLCOWNED
+		listeners.AddListener<IsDlcOwnedListener>();
+#endif
+	}
 
 	AppsImpl::~AppsImpl() {}
 
@@ -122,7 +132,7 @@ namespace universelan::client {
 			listener->OnDlcCheckSuccess(productID, true);
 		}
 		else {
-			intf()->IsDlcOwned(productID, listener);
+			intf()->IsDlcOwned(productID, IsDlcOwnedListener::encapsulate(listener));
 		}
 	}
 #endif
