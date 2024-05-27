@@ -185,9 +185,9 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | ArcRunner                                 | :x:                       | 1.150.0                       | Uses Epic Online Services for multiplayer |
 | Battlezone 98 Redux                       | :x:                       | 1.100.2                       | Uses Steam for multiplayer |
 | Homeseek                                  | :x:                       | -                             | Uses Epic Online Services for multiplayer |
-| The Escapists 2                           | :x:                       | 1.132.1                       | Uses Photon networking for online multiplayer, UniverseLAN will not be able to make multiplayer work without internet. |
+| The Escapists 2                           | :x:                       | 1.132.1                       | UniverseLAN can't make this game LAN-able, this game uses custom/free multiplayer (Photon Engine) that does not use Steam or Galaxy, but online multiplayer is DRM Free. |
 | Descent - Underground                     | :x:                       | 1.88                          | Doesn't seem to load the Galaxy.dll even with `--gog` launch param? |
-| Dark Envoy                                | :x:                       | 1.152.6                       | Uses Photon networking for online multiplayer, UniverseLAN will not be able to make multiplayer work without internet. |
+| Dark Envoy                                | :x:                       | 1.152.6                       | UniverseLAN can't make this game LAN-able, this game uses custom/free multiplayer (Photon Engine) that does not use Steam or Galaxy, but online multiplayer is DRM Free. |
 
 # Notice
 I'm not affiliated in any way with GOG or CD Projekt RED.  
