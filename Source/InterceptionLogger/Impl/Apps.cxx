@@ -108,6 +108,24 @@ namespace universelan::client {
 	}
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IAPPS_ISDLCOWNED
+	void AppsImpl::IsDlcOwned(ProductID productID, IIsDlcOwnedListener* const listener)
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IAPPS };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("productID: {}", productID));
+			trace.write_all(std::format("listener: {}", (void*)listener));
+		}
+
+		if (force_dlc_check) {
+			listener->OnDlcCheckSuccess(productID, true);
+		}
+		else {
+			intf()->IsDlcOwned(productID, listener);
+		}
+	}
+#endif
 }
 
 #endif

@@ -82,6 +82,10 @@ namespace universelan::client {
 		 */
 		virtual void GetCurrentGameLanguageCodeCopy(char* buffer, uint32_t bufferLength, ProductID productID = 0) override;
 #endif
+
+#if GALAXY_BUILD_FEATURE_HAS_IAPPS_ISDLCOWNED
+		virtual void IsDlcOwned(ProductID productID, IIsDlcOwnedListener* const listener) override;
+#endif
 	};
 
 	/** @} */

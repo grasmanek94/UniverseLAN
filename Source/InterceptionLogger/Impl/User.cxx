@@ -769,4 +769,44 @@ namespace universelan::client {
 	}
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IUSER_AUTHORIZATION_IDTOKEN
+	void UserImpl::SignInAuthorizationCode(const char* authorizationCode, const char* redirectURI, IAuthListener* const listener) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("authorizationCode: {}", util::safe_fix_null_char_ptr_annotate_ret(authorizationCode)));
+			trace.write_all(std::format("redirectURI: {}", util::safe_fix_null_char_ptr_annotate_ret(redirectURI)));
+			trace.write_all(std::format("listener: {}", (void*)listener));
+		}
+
+		intf()->SignInAuthorizationCode(authorizationCode, redirectURI, listener);
+	}
+
+	const char* UserImpl::GetIDToken() {
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		auto result = intf()->GetIDToken();
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+		}
+
+		return result;
+	}
+
+	void UserImpl::GetIDTokenCopy(char* buffer, uint32_t bufferLength) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("buffer: {}", (void*)buffer));
+			trace.write_all(std::format("bufferLength: {}", bufferLength));
+		}
+
+		intf()->GetIDTokenCopy(buffer, bufferLength);
+
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
+		}
+	}
+#endif
 }

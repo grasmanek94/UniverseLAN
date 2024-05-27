@@ -104,6 +104,30 @@ namespace universelan::client {
 	}
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IAPPS_ISDLCOWNED
+	void AppsImpl::IsDlcOwned(ProductID productID, IIsDlcOwnedListener* const listener)
+	{
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IAPPS };
+
+		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
+			trace.write_all(std::format("productID: {}", productID));
+			trace.write_all(std::format("listener: {}", (void*)listener));
+		}
+
+		bool result = intf->config->GetEnableAllDLC() || intf->config->IsDLCInstalled(productID);
+
+		if (intf->user->SignedIn()) {
+			intf->notification->NotifyAll(&IIsDlcOwnedListener::OnDlcCheckSuccess, productID, result);
+		}
+		else {
+			intf->notification->NotifyAll(&IIsDlcOwnedListener::OnDlcCheckFailure, productID, IIsDlcOwnedListener::FAILURE_REASON_GALAXY_SERVICE_NOT_SIGNED_IN);
+		}
+	
+		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
+			trace.write_all(std::format("result: {}", result));
+		}
+	}
+#endif
 }
 
 #endif

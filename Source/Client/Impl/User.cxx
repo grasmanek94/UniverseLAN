@@ -502,7 +502,6 @@ namespace universelan::client {
 
 #if GALAXY_BUILD_FEATURE_HAS_IUSER_REFRESHTOKEN
 	void UserImpl::GetRefreshTokenCopy(char* buffer, uint32_t bufferLength) {
-
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		universelan::util::safe_copy_str_n(SOME_TOKEN_STRING, buffer, bufferLength);
@@ -512,6 +511,28 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		return SOME_TOKEN_STRING.c_str();
+	}
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_IUSER_AUTHORIZATION_IDTOKEN
+	void UserImpl::SignInAuthorizationCode(const char* authorizationCode, const char* redirectURI, IAuthListener* const listener) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
+
+		if (authorizationCode != nullptr && redirectURI != nullptr && listener != nullptr) {
+			SignIn(listener);
+		}
+	}
+
+	const char* UserImpl::GetIDToken() {
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
+
+		return SOME_TOKEN_STRING.c_str();
+	}
+
+	void UserImpl::GetIDTokenCopy(char* buffer, uint32_t bufferLength) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
+
+		universelan::util::safe_copy_str_n(SOME_TOKEN_STRING, buffer, bufferLength);
 	}
 #endif
 
@@ -574,7 +595,7 @@ namespace universelan::client {
 	}
 
 	void UserImpl::ConnectionStateChangeReceived(bool connection_state, bool key_challenge_accepted) {
-		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUTILS };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
 		logged_on = key_challenge_accepted;
 		connected = connection_state;

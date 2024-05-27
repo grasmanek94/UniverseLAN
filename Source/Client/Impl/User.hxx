@@ -722,6 +722,55 @@ namespace universelan::client {
 		) override;
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_IUSER_AUTHORIZATION_IDTOKEN
+		/**
+		 * Authenticates the Galaxy Peer based on OpenID Connect generated authorization code.
+		 *
+		 * This call is asynchronous. Responses come to the IAuthListener
+		 * (for all GlobalAuthListener-derived and optional listener passed as argument).
+		 *
+		 * @remark Information about being signed in or signed out also comes to
+		 * the IOperationalStateChangeListener.
+		 *
+		 * @param [in] requireOnline Indicates if sign in with Galaxy backend is required.
+		 * @param [in] listener The listener for specific operation.
+		 */
+		virtual void SignInAuthorizationCode(const char* authorizationCode, const char* redirectURI, IAuthListener* const listener = NULL) override;
+
+		/**
+		 * Returns the id token for the current session.
+		 *
+		 * @remark This call is not thread-safe as opposed to GetIDTokenCopy().
+		 *
+		 * @remark Calling this function is allowed when the session has been signed in
+		 * with IUser::SignInToken() only.
+		 *
+		 * The id token that is used for the current session might be
+		 * updated in the background automatically, together with the access token,
+		 * without any request for that. Each time the access or id token
+		 * is updated, a notification comes to the IAccessTokenListener.
+		 *
+		 * @return The id token.
+		 */
+		virtual const char* GetIDToken() override;
+
+		/**
+		 * Copies the id token for the current session.
+		 *
+		 * @remark Calling this function is allowed when the session has been signed in
+		 * with IUser::SignInToken() only.
+		 *
+		 * The id token that is used for the current session might be
+		 * updated in the background automatically, together with access token,
+		 * without any request for that. Each time the access or id token
+		 * is updated, a notification comes to the IAccessTokenListener.
+		 *
+		 * @param [in, out] buffer The output buffer.
+		 * @param [in] bufferLength The size of the output buffer.
+		 */
+		virtual void GetIDTokenCopy(char* buffer, uint32_t bufferLength) override;
+#endif
+
 		void SpecificUserDataRequestProcessed(const std::shared_ptr<RequestSpecificUserDataMessage>& data);
 		void OnlineUserStateChange(const std::shared_ptr<OnlineStatusChangeMessage>& data);
 		void SetUserDataMessageReceived(const std::shared_ptr<SetUserDataMessage>& data);
