@@ -144,6 +144,9 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | The King of Fighters 98UM                 | :white_check_mark:(2)     | 1.114.9                       | Works since build 464 |
 | Craft The World                           | :white_check_mark:(2)     | 1.100.2                       | Works since build 466 |
 | Worms W.M.D                               | :white_check_mark:(2)     | 1.128.3                       | Works since build 466 |
+| Gloomhaven                                | :white_check_mark:(2)     | 1.148.3                       | Tested with build 487 |
+| Grand Ages Medieval                       | :white_check_mark:(2)     | 1.68.0                        | Must apply `set OPENSSL_ia32cap=:~0x20000000` on newer CPU's for this game to start without crashing.<br> This issue is not caused by UniverseLAN or GOG, but OpenSSL / Unity/Unreal.<br> Tested with build 487 |
+| The Original Strife - Veteran Edition     | :white_check_mark:(2)     | 1.144.1                       | Tested with build 487 |
 | Serious Sams Bogus Detour                 | :construction:            | 1.100.2                       | Can join lobby since build 360 and start game, but both players stuck on black "Loading..." screen |
 | Dying Light                               | :construction:            | 1.148.3                       | Doesn't seem to work for now and crashes when EncryptedAppTicket is not disabled. I think LAN may be internet-bound unfortunately. |
 | Niffelheim                                | :construction:            | 1.139.2                       | Stuck at "Loading..." (save transfer?) | 
@@ -167,6 +170,8 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Deathtrap                                 | :left_right_arrow:        | 1.75                          | Has Native LAN |
 | Trine 3                                   | :left_right_arrow:        | 1.65                          | Has free online multiplayer, but does not use Galaxy Multiplayer which means that this game is internet-only. UniverseLAN can't make it LAN-able. |
 | Bound By Blades                           | :left_right_arrow:        | 1.150.0                       | UniverseLAN can't make this game LAN-able, this game uses custom/free multiplayer (Photon Engine) that does not use Steam or Galaxy, but online multiplayer is DRM Free. Would need to develop a custom Photon Engine API. When dev stops paying for Photon CCU's the game multiplayer will stop working. A project for another time maybe. |
+| Saints Row - Gat Out of Hell              | :left_right_arrow:        | 1.96                          | Has Native LAN |
+| Turok 2 - Seeds of Evil                   | :left_right_arrow:        | 1.130.0                       | Has Native LAN / DirectIP |
 | Ashes of the Singularity - Escalation     | :x:                       | 1.100.2                       | Requires .exe patches to patch out modification checks so that entering lobby is possible, unfortunately both players are seen as 'Host' and other side doesn't 'see' clicking 'ready'. UniverseLAN needs to support .exe patching, and the both players being 'host' needs to be analyzed and fixed. Afters analysis it seems that for the "real" networking the game uses Epic Online Services. No dice here. |
 | Battlefleet Gothic Armada                 | :x:                       | 1.139.2                       | Doesn't seem to use Galaxy for multiplayer. | 
 | Jagged Alliance 3                         | :x:                       | 1.150.0                       | Doesn't seem to use Galaxy for multiplayer. (Steam? With EncryptedAppTicket) | 
@@ -188,6 +193,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | The Escapists 2                           | :x:                       | 1.132.1                       | UniverseLAN can't make this game LAN-able, this game uses custom/free multiplayer (Photon Engine) that does not use Steam or Galaxy, but online multiplayer is DRM Free. |
 | Descent - Underground                     | :x:                       | 1.88                          | Doesn't seem to load the Galaxy.dll even with `--gog` launch param? |
 | Dark Envoy                                | :x:                       | 1.152.6                       | UniverseLAN can't make this game LAN-able, this game uses custom/free multiplayer (Photon Engine) that does not use Steam or Galaxy, but online multiplayer is DRM Free. |
+| Dungeons 2                                | :x:                       | 1.68                          | UniverseLAN can't make this game LAN-able, this game uses custom/free multiplayer that does not use Steam or Galaxy, but online multiplayer is DRM Free. |
 
 # Notice
 I'm not affiliated in any way with GOG or CD Projekt RED.  
