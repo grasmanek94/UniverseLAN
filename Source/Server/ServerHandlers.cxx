@@ -481,6 +481,7 @@ namespace universelan::server {
 		lobby = lobby_manager.CreateLobby(pd->id, data->type, data->max_members, data->joinable, data->topology_type);
 
 		if (pd->AddLobby(lobby)) {
+			std::cout << std::format("Lobby Created: {} (Raw: {})", lobby->GetID(), lobby->GetID().ToUint64()) << std::endl;
 			connection.Send(peer, CreateLobbyResponseMessage{ data->request_id, lobby });
 		}
 		else {
