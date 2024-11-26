@@ -4,7 +4,7 @@
 
 # Why?
 
-This extends the ["You buy it, you own it"](https://www.gog.com/en/about_gog) and  "DRM-Free" GOG philosophy to the multiplayer portion of all games that use GOG Galaxy.
+This extends the ["You buy it, you own it"](https://www.gog.com/en/about_gog) and "DRM-Free" GOG philosophy to the multiplayer portion of all games that use GOG Galaxy.
 
 Why *Universe*LAN? Because the Universe is much bigger than the Galaxy!
 
@@ -22,7 +22,7 @@ UniverseLAN allows you to play locally (e.g. LAN parties) without relying on int
 
 <small>I hope this does not need to be said, but:</small>   
 - **UniverseLAN does not bypass or remove any DRM measures.**    
-- **UniversLAN does not bypass any cd-key or ownership checks.**  
+- **UniverseLAN does not bypass any cd-key or ownership checks.**  
 - **UniverseLAN does not give you free DLC, you still need to buy DLC from GOG and install the DLC before being able to use any DLC.**  
 - **UniverseLAN does not and can't bypass any "always online" requirements.**  
 - **UniverseLAN does not condone piracy, does not facilitate piracy, and will not facilitate piracy.**  
@@ -58,11 +58,13 @@ Place in `Source/DLLs/<version>/UniverseLAN.def`
 # Instructions
 
 - Replace target game `Galaxy.dll`, `Galaxy64.dll`, `REDGalaxy.dll` or `REDGalaxy64.dll` to use UniverseLAN (check the .dll file properties to view the version information, else make an sha1 checksum and look in [sha1_hashes.txt](ZipFileHasher/sha1_hashes.txt) for the hash to determine the sdk version).
-- Place config files in the working directory* of the game
+- Place [config files](https://github.com/grasmanek94/UniverseLAN/blob/master/Config/) in the working directory* of the game
 - Place Server executable where config files are located.
-- Adjust config accordingly (e.g. point to a server address that hosts the UniverseLAN Backend)
+- Adjust [config](https://github.com/grasmanek94/UniverseLAN/blob/master/Config/UniverseLANData/Config.ini#L25) accordingly (e.g. point to a server address that hosts the UniverseLAN Backend)
 - It's recommended to NOT mix x64 and x86 platforms (e.g. x64 server with x86 game)
 - Do NOT mix different versions due to ABI incompatibility (e.g. 1.148.3.0 client with 1.100.2.0 server or vice versa), GOG does not keep their Galaxy library backwards compatible / upgradeable.  
+- - Please check the right side in [this](#galaxy-sdk-backwards-compatibility-list) table and find the Galaxy version that your game is using, then, on the left side in the [table](#galaxy-sdk-backwards-compatibility-list) the supported UniverseLAN release version is listed. Download that UniverseLAN version from the latest tag (by expanding "Assets") on the [releases page](https://github.com/grasmanek94/UniverseLAN/releases).
+- - If there is no relevant entry in the version compatibility table, then that version is not (yet) supported.
 - One machine must host the server, the other machine must be correctly configured to point to the machine hosting the server.  
 - Make sure the Galaxy ID numbers are different (Config.ini).  
 
