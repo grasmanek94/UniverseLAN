@@ -196,6 +196,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Descent - Underground                     | :x:                       | 1.88                          | Doesn't seem to load the Galaxy.dll even with `--gog` launch param? |
 | Dark Envoy                                | :x:                       | 1.152.6                       | UniverseLAN can't make this game LAN-able, this game uses custom/free multiplayer (Photon Engine) that does not use Steam or Galaxy, but online multiplayer is DRM Free. |
 | Dungeons 2                                | :x:                       | 1.68                          | UniverseLAN can't make this game LAN-able, this game uses custom/free multiplayer that does not use Steam or Galaxy, but online multiplayer is DRM Free. |
+| MechWarrior 5: Mercenaries                | :x:                       | 1.139.2                       | Doesn't seem to use Galaxy for multiplayer. |
 
 # Notice
 I'm not affiliated in any way with GOG or CD Projekt RED.  
