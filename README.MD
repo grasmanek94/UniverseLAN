@@ -137,7 +137,6 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Shock Troopers - 2nd Squad                | :white_check_mark:(2)     | 1.100.2                       | Works fine since build 464 |
 | Twinkle Star Sprites                      | :white_check_mark:(2)     | 1.100.2                       | Works fine since build 464 |
 | Streets of Rage 4                         | :white_check_mark:(2)     | 1.144.1                       | Tested with build 440 |
-| Talisman Digital Edition                  | :white_check_mark:(2)     | 1.139.2                       | Tested with build 440 |
 | The Witcher Adventure Game                | :white_check_mark:(2)     | 1.69                          | Tested with build 440 - 1.68 |
 | Blood - Fresh Supply                      | :white_check_mark:(2)     | 1.133.6                       | Tested with build 464 |
 | Stronghold Warlords                       | :white_check_mark:(2)     | 1.144.1                       | Works since build 464 |
@@ -173,6 +172,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Blood Bowl 2 Legendary Editition          | :left_right_arrow:        |                               | Uses custom free multiplayer, need to create a free online in-game account on their servers. |
 | Deathtrap                                 | :left_right_arrow:        | 1.75                          | Has Native LAN |
 | Trine 3                                   | :left_right_arrow:        | 1.65                          | Has free online multiplayer, but does not use Galaxy Multiplayer which means that this game is internet-only. UniverseLAN can't make it LAN-able. |
+| Talisman Digital Edition                  | :left_right_arrow:        | 1.139.2                       | Has free online multiplayer, but does not use Galaxy Multiplayer which means that this game is internet-only. UniverseLAN can't make it LAN-able. |
 | Bound By Blades                           | :left_right_arrow:        | 1.150.0                       | UniverseLAN can't make this game LAN-able, this game uses custom/free multiplayer (Photon Engine) that does not use Steam or Galaxy, but online multiplayer is DRM Free. Would need to develop a custom Photon Engine API. When dev stops paying for Photon CCU's the game multiplayer will stop working. A project for another time maybe. |
 | Saints Row - Gat Out of Hell              | :left_right_arrow:        | 1.96                          | Has Native LAN |
 | Turok 2 - Seeds of Evil                   | :left_right_arrow:        | 1.130.0                       | Has Native LAN / DirectIP |
