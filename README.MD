@@ -106,6 +106,9 @@ Another option would be to gift the game to people working on UniverseLAN projec
 
 | Game                                      | Status                    | Tested GOG Galaxy SDK Version | Notes |
 | :---------                                | :-------:                 | :---------:                   | :---------: |
+| Ashen                                     | :white_check_mark:(2)     | 1.139.2                       | Tested with build 487 working fine with two players; both players need to enter the same key and leave the rest area |
+| Praetorians - HD Remaster                 | :white_check_mark:(2)     | 1.139.2                       | Tested with build 487 working fine with two players |
+|  Core Keeper                              | :white_check_mark:(2)     | 1.152.11                      | Tested with build 487 working fine with two players |
 | Sniper Elite V2 Remaster                  | :white_check_mark:(2)     | 1.133.6                       | Tested with build 487 |
 | ENDLESS™ Space 2                          | :white_check_mark:(2)     | 1.152.8                       | Tested with build 487 |
 | Vikings - Wolves of Midgard               | :white_check_mark:(2)     | 1.100.2                       | Must apply `set OPENSSL_ia32cap=:~0x20000000` on newer CPU's for this game to start without crashing.<br> This issue is not caused by UniverseLAN or GOG, but OpenSSL / Unity/Unreal.<br> Tested with build 440 |
@@ -150,8 +153,6 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Gloomhaven                                | :white_check_mark:(2)     | 1.148.3                       | Tested with build 487 |
 | Grand Ages Medieval                       | :white_check_mark:(2)     | 1.68.0                        | Must apply `set OPENSSL_ia32cap=:~0x20000000` on newer CPU's for this game to start without crashing.<br> This issue is not caused by UniverseLAN or GOG, but OpenSSL / Unity/Unreal.<br> Tested with build 487 |
 | The Original Strife - Veteran Edition     | :white_check_mark:(2)     | 1.144.1                       | Tested with build 487 |
-| Praetorians - HD Remaster                 | :white_check_mark:(2)     | 1.139.2                       | Tested with build 487 working fine with two players |
-|  Core Keeper                              | :white_check_mark:(2)     | 1.152.11                      | Tested with build 487 working fine with two players |
 | Serious Sams Bogus Detour                 | :construction:            | 1.100.2                       | Can join lobby since build 360 and start game, but both players stuck on black "Loading..." screen |
 | Dying Light                               | :construction:            | 1.148.3                       | Doesn't seem to work for now and crashes when EncryptedAppTicket is not disabled. I think LAN may be internet-bound unfortunately. |
 | Niffelheim                                | :construction:            | 1.139.2                       | Stuck at "Loading..." (save transfer?) | 
