@@ -60,7 +60,7 @@ Place in `Source/DLLs/<version>/UniverseLAN.def`
 - Replace target game `Galaxy.dll`, `Galaxy64.dll`, `REDGalaxy.dll` or `REDGalaxy64.dll` to use UniverseLAN (check the .dll file properties to view the version information, else make an sha1 checksum and look in [sha1_hashes.txt](ZipFileHasher/sha1_hashes.txt) for the hash to determine the sdk version).
 - Place [config files](https://github.com/grasmanek94/UniverseLAN/blob/master/Config/) in the working directory* of the game
 - Place Server executable where config files are located.
-- Adjust [config](https://github.com/grasmanek94/UniverseLAN/blob/master/Config/UniverseLANData/Config.ini#L25) accordingly (e.g. point to a server address that hosts the UniverseLAN Backend)
+- Adjust [config](https://github.com/grasmanek94/UniverseLAN/blob/master/Config/UniverseLANData/Config.ini#L25) accordingly (e.g. point to a server address that hosts the UniverseLAN Backend, or if you just want to connect to the first available server just use `255.255.255.255`)
 - It's recommended to NOT mix x64 and x86 platforms (e.g. x64 server with x86 game)
 - Do NOT mix different versions due to ABI incompatibility (e.g. 1.148.3.0 client with 1.100.2.0 server or vice versa), GOG does not keep their Galaxy library backwards compatible / upgradeable.  
 - - Please check the right side in [this](#galaxy-sdk-backwards-compatibility-list) table and find the Galaxy version that your game is using, then, on the left side in the [table](#galaxy-sdk-backwards-compatibility-list) the supported UniverseLAN release version is listed. Download that UniverseLAN version from the latest tag (by expanding "Assets") on the [releases page](https://github.com/grasmanek94/UniverseLAN/releases).
