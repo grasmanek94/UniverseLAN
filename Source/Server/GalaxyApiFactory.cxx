@@ -25,10 +25,6 @@ namespace galaxy::api
 	};
 #endif
 
-#if GALAXY_BUILD_FEATURE_HAS_IERRORMANAGER
-	IErrorManager* GalaxyFactory::errorManager{ nullptr };
-#endif
-
 	IGalaxy* FACTORY_CALLTYPE GalaxyFactory::GetInstance() {
 		return nullptr;
 	}
