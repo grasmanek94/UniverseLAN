@@ -474,7 +474,7 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_ISTATS_ACHIEVEMENTSNUMBER
 	uint32_t StatsImpl::GetAchievementsNumber() {
 		return intf->user->GetGalaxyUserData(0)->stats.run_locked_achievements<uint32_t>([&](auto& Achievements) -> uint32_t {
-			return Achievements.size();
+			return (uint32_t)Achievements.size();
 			});
 	}
 

@@ -30,7 +30,7 @@ namespace universelan {
 
 	galaxy::api::SharedFileID SharedFileUtils::GetSharedFileID(const fs_container_ptr& container, const char* file_name) const
 	{
-		if (!container || file_name == nullptr || *file_name == NULL) {
+		if (!container || file_name == nullptr || *file_name == '\0') {
 			return 0;
 		}
 
@@ -72,7 +72,7 @@ namespace universelan {
 
 	std::fstream SharedFileUtils::Open(const fs_container_ptr& container, const char* file_name, std::ios::openmode mode) const
 	{
-		if (!container || file_name == nullptr || *file_name == NULL) {
+		if (!container || file_name == nullptr || *file_name == '\0') {
 			return std::fstream{};
 		}
 
@@ -100,7 +100,7 @@ namespace universelan {
 
 	bool SharedFileUtils::Exists(const fs_container_ptr& container, const char* file_name) const
 	{
-		if (!container || file_name == nullptr || *file_name == NULL) {
+		if (!container || file_name == nullptr || *file_name == '\0') {
 			return false;
 		}
 
@@ -128,7 +128,7 @@ namespace universelan {
 
 	bool SharedFileUtils::Remove(const fs_container_ptr& container, const char* file_name) const
 	{
-		if (!container || file_name == nullptr || *file_name == NULL) {
+		if (!container || file_name == nullptr || *file_name == '\0') {
 			return false;
 		}
 
@@ -156,7 +156,7 @@ namespace universelan {
 
 	bool SharedFileUtils::Write(const fs_container_ptr& container, const char* file_name, const char* data, size_t data_length) const
 	{
-		if (!container || file_name == nullptr || *file_name == NULL) {
+		if (!container || file_name == nullptr || *file_name == '\0') {
 			return false;
 		}
 
@@ -184,7 +184,7 @@ namespace universelan {
 
 	std::vector<char> SharedFileUtils::Read(const fs_container_ptr& container, const char* file_name) const
 	{
-		if (!container || file_name == nullptr || *file_name == NULL) {
+		if (!container || file_name == nullptr || *file_name == '\0') {
 			return {};
 		}
 
@@ -198,7 +198,7 @@ namespace universelan {
 
 	uint32_t SharedFileUtils::Read(const fs_container_ptr& container, const char* file_name, char* data, size_t data_length, size_t offset) const
 	{
-		if (!container || file_name == nullptr || *file_name == NULL || !data || data_length == 0) {
+		if (!container || file_name == nullptr || *file_name == '\0' || !data || data_length == 0) {
 			return 0;
 		}
 
@@ -226,7 +226,7 @@ namespace universelan {
 
 	uint32_t SharedFileUtils::GetSize(const fs_container_ptr& container, const char* file_name) const
 	{
-		if (!container || file_name == nullptr || *file_name == NULL) {
+		if (!container || file_name == nullptr || *file_name == '\0') {
 			return 0;
 		}
 
@@ -254,7 +254,7 @@ namespace universelan {
 
 	uint32_t SharedFileUtils::GetTimestamp(const fs_container_ptr& container, const char* file_name) const
 	{
-		if (!container || file_name == nullptr || *file_name == NULL) {
+		if (!container || file_name == nullptr || *file_name == '\0') {
 			return 0;
 		}
 
@@ -310,7 +310,7 @@ namespace universelan {
 
 	bool SharedFileUtils::CopyFromLocalToShared(const char* file_name , galaxy::api::SharedFileID id) const
 	{
-		if (file_name == nullptr || *file_name == NULL || id == 0) {
+		if (file_name == nullptr || *file_name == '\0' || id == 0) {
 			return 0;
 		}
 
@@ -329,7 +329,7 @@ namespace universelan {
 
 	bool SharedFileUtils::CopyFromSharedToLocal(const char* file_name) const
 	{
-		if (file_name == nullptr || *file_name == NULL) {
+		if (file_name == nullptr || *file_name == '\0') {
 			return 0;
 		}
 
