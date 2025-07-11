@@ -326,7 +326,7 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
-		if (name == nullptr || *name == NULL || readFunc == nullptr) {
+		if (name == nullptr || *name == '\0' || readFunc == nullptr) {
 			listeners->NotifyAll(
 				listener,
 				&ICloudStoragePutFileListener::OnPutFileFailure, container, name, ICloudStoragePutFileListener::FAILURE_REASON_UNDEFINED);
@@ -440,7 +440,7 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
-		if (name == nullptr || *name == NULL || buffer == nullptr) {
+		if (name == nullptr || *name == '\0' || buffer == nullptr) {
 			listeners->NotifyAll(
 				listener,
 				&ICloudStoragePutFileListener::OnPutFileFailure, container, name, ICloudStoragePutFileListener::FAILURE_REASON_UNDEFINED);
@@ -517,7 +517,7 @@ namespace universelan::client {
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
-		if (name == nullptr || *name == NULL) {
+		if (name == nullptr || *name == '\0') {
 			listeners->NotifyAll(
 				listener,
 				&ICloudStorageDeleteFileListener::OnDeleteFileFailure, container, name, ICloudStorageDeleteFileListener::FAILURE_REASON_UNDEFINED);
