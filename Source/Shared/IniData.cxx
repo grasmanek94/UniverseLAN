@@ -366,6 +366,22 @@ namespace universelan {
 					CustomPersonaName = std::to_string(const_hash64(machine_info.GetLocalMachineName())) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
 					break;
 
+				case const_hash("@MachineID"):
+					if (machine_info.GetInstallationID().size() < 1) {
+						throw std::runtime_error("@MachineID: No Machine ID found");
+					}
+
+					CustomPersonaName = machine_info.GetInstallationID() + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
+					break;
+
+				case const_hash("@MachineIDHash"):
+					if (machine_info.GetInstallationID().size() < 1) {
+						throw std::runtime_error("@MachineIDHash: No Machine ID found");
+					}
+
+					CustomPersonaName = std::to_string(const_hash64(machine_info.GetInstallationID())) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
+					break;
+
 				case const_hash("@NetworkAdapterMACHash"):
 					if (machine_info.GetLocalMACs().size() < 1) {
 						throw std::runtime_error("@NetworkAdapterMACHash: No MAC adresses found");
@@ -405,6 +421,14 @@ namespace universelan {
 					}
 
 					str = machine_info.GetLocalMachineName();
+					break;
+
+				case const_hash("@MachineIDHash"):
+					if (machine_info.GetLocalMachineName().size() < 1) {
+						throw std::runtime_error("@MachineIDHash: No Machine ID found");
+					}
+
+					str = machine_info.GetInstallationID();
 					break;
 
 				case const_hash("@NetworkAdapterMACHash"):

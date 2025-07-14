@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <string>
@@ -82,6 +83,16 @@ namespace universelan::util {
 		}
 		return value;
 	}
+
+#ifndef _WIN32
+	size_t strnlen_s(const char* str, size_t strsz) {
+		if (str == nullptr) {
+			return 0;
+		}
+		return strnlen(str, strsz);
+	}
+
+#endif
 
 	inline std::string safe_fix_null_char_ptr_annotate(const char* buffer, uint32_t buffer_len) {
 		if (buffer == nullptr) {

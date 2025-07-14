@@ -19,7 +19,7 @@
 namespace universelan {
 
 	MachineInfo::MachineInfo() :
-		machine_name{ "" }, user_name{ "" }, macs{}
+		machine_name{ "" }, user_name{ "" }, machine_id {""}, macs{}
 	{
 	}
 
@@ -37,8 +37,10 @@ namespace universelan {
 			DWORD  bufCharCount = INFO_BUFFER_SIZE;
 
 			// Get the computer name.
-			if (!GetComputerName(infoBuf, &bufCharCount)) {
-				machine_name.assign((const char* const)infoBuf, (const size_t)bufCharCount);
+			if (GetComputerName(infoBuf, &bufCharCount)) {
+				if (bufCharCount > 0) {
+					machine_name.assign((const char* const)infoBuf, (const size_t)(bufCharCount - 1));
+				}
 			}
 		}
 #else
@@ -57,8 +59,10 @@ namespace universelan {
 			DWORD  bufCharCount = INFO_BUFFER_SIZE;
 
 			// Get the user name.
-			if (!GetUserName(infoBuf, &bufCharCount)) {
-				user_name.assign((const char* const)infoBuf, (const size_t)bufCharCount);
+			if (GetUserName(infoBuf, &bufCharCount)) {
+				if (bufCharCount > 0) {
+					user_name.assign((const char* const)infoBuf, (const size_t)(bufCharCount - 1));
+				}
 			}
 		}
 #else
@@ -66,6 +70,32 @@ namespace universelan {
 #endif
 
 		return user_name;
+	}
+
+	std::string MachineInfo::GetInstallationID()
+	{
+#ifdef _WIN32
+		const std::string subkey = "SOFTWARE\\Microsoft\\Cryptography";
+		const std::string valueName = "MachineGuid";
+		HKEY hKey = NULL;
+		char guid[256];
+		DWORD guidSize = sizeof(guid);
+
+		if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, subkey.c_str(), 0, KEY_READ | KEY_WOW64_64KEY, &hKey) == ERROR_SUCCESS) {
+			if (RegQueryValueExA(hKey, valueName.c_str(), nullptr, nullptr, reinterpret_cast<LPBYTE>(guid), &guidSize) == ERROR_SUCCESS) {
+				machine_id.assign((const char* const)guid, (const size_t)(guidSize - 1));
+			}
+			RegCloseKey(hKey);
+		}
+
+#else
+		std::ifstream file("/etc/machine-id");
+		if (file.is_open()) {
+			std::getline(file, machine_id);
+		}
+#endif
+
+		return machine_id;
 	}
 
 	std::vector<std::string> MachineInfo::GetLocalMACs()
