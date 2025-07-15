@@ -106,6 +106,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 
 | Game                                      | Status                    | Tested GOG Galaxy SDK Version | Notes |
 | :---------                                | :-------:                 | :---------:                   | :---------: |
+| Warhammer 40,000: Shootas, Blood & Teef   | :white_check_mark:(2)     | 1.148.3                       | Tested with build 506 |
 | Warhammer 40,000: Rogue Trader            | :white_check_mark:(2)     | 1.150.0                       | Tested with build 487 |
 | Sniper Elite V2 Remaster                  | :white_check_mark:(2)     | 1.133.6                       | Tested with build 487 |
 | ENDLESS™ Space 2                          | :white_check_mark:(2)     | 1.152.8                       | Tested with build 487 |
