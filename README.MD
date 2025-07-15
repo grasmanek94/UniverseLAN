@@ -106,9 +106,10 @@ Another option would be to gift the game to people working on UniverseLAN projec
 
 | Game                                      | Status                    | Tested GOG Galaxy SDK Version | Notes |
 | :---------                                | :-------:                 | :---------:                   | :---------: |
-| Ashen                                     | :white_check_mark:(2)     | 1.139.2                       | Tested with build 487 working fine with two players; both players need to enter the same key and leave the rest area |
-| Praetorians - HD Remaster                 | :white_check_mark:(2)     | 1.139.2                       | Tested with build 487 working fine with two players |
-| Core Keeper                               | :white_check_mark:(2)     | 1.152.11                      | Tested with build 487 working fine with two players |
+| Ashen                                     | :white_check_mark:(2)     | 1.139.2                       | Tested with build 487, both players need to enter the same key and leave the rest area |
+| Praetorians - HD Remaster                 | :white_check_mark:(2)     | 1.139.2                       | Tested with build 487 |
+| Core Keeper                               | :white_check_mark:(2)     | 1.152.11                      | Tested with build 487 |
+| Warhammer 40,000: Shootas, Blood & Teef   | :white_check_mark:(2)     | 1.148.3                       | Tested with build 506 |
 | Warhammer 40,000: Rogue Trader            | :white_check_mark:(2)     | 1.150.0                       | Tested with build 487 |
 | Sniper Elite V2 Remaster                  | :white_check_mark:(2)     | 1.133.6                       | Tested with build 487 |
 | ENDLESS™ Space 2                          | :white_check_mark:(2)     | 1.152.8                       | Tested with build 487 |
