@@ -2,6 +2,6 @@
 {
     public class LoggerStateMachine
     {
-
+        public List<LogEntries.Base> Entries { get; set; } = new();
     }
 }

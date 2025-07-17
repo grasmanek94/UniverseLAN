@@ -9,7 +9,6 @@ namespace UniverseLanLogAnalyzer.Parser
         public string FileName { get; private set; }
         public int NestingLevel { get; private set; }
         public int CurrentLineNumber { get; private set; }
-        public List<LogEntries.Base> Entries { get; private set; }
         private LogEntries.Base? PreviousEntry { get; set; }
         private LoggerStateMachine StateMachine { get; set; }
 
@@ -18,9 +17,10 @@ namespace UniverseLanLogAnalyzer.Parser
             FileName = filename;
             NestingLevel = 0;
             CurrentLineNumber = 0;
-            Entries = new();
             PreviousEntry = null;
             StateMachine = state_machine;
+
+            StateMachine.Entries = new();
         }
 
         public void Parse()
@@ -65,7 +65,7 @@ namespace UniverseLanLogAnalyzer.Parser
 
         private LogEntries.Base? GetLastUpEntry()
         {
-            LogEntries.Base? prev = Entries.Last();
+            LogEntries.Base? prev = StateMachine.Entries.Last();
 
             if (prev == null)
             {
@@ -164,7 +164,7 @@ namespace UniverseLanLogAnalyzer.Parser
                 parent.Child = entry;
             }
 
-            Entries.Add(LogEntries.Reallocator.ReMap(entry));
+            StateMachine.Entries.Add(LogEntries.Reallocator.ReMap(entry));
 
             PreviousEntry = entry;
         }
