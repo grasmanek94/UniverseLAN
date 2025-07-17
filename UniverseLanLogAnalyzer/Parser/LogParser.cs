@@ -1,4 +1,6 @@
 ﻿using System.Globalization;
+using System.Runtime.CompilerServices;
+using UniverseLanLogAnalyzer.Galaxy;
 
 namespace UniverseLanLogAnalyzer.Parser
 {
@@ -9,14 +11,16 @@ namespace UniverseLanLogAnalyzer.Parser
         public int CurrentLineNumber { get; private set; }
         public List<LogEntries.Base> Entries { get; private set; }
         private LogEntries.Base? PreviousEntry { get; set; }
+        private LoggerStateMachine StateMachine { get; set; }
 
-        public LogParser(string filename)
+        public LogParser(string filename, LoggerStateMachine state_machine)
         {
             FileName = filename;
             NestingLevel = 0;
             CurrentLineNumber = 0;
             Entries = new();
             PreviousEntry = null;
+            StateMachine = state_machine;
         }
 
         public void Parse()

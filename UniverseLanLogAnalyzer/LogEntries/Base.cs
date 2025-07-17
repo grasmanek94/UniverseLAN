@@ -1,4 +1,6 @@
-﻿namespace UniverseLanLogAnalyzer.LogEntries
+﻿using UniverseLanLogAnalyzer.Galaxy;
+
+namespace UniverseLanLogAnalyzer.LogEntries
 {
     public class Base
     {
@@ -18,6 +20,8 @@
 
         public List<string> Properties { get; set; } = new List<string>();
 
+        public LoggerStateMachine StateMachine { get; set; }
+
         public Base() {}
 
         public Base(Base original)
@@ -33,6 +37,7 @@
             this.Function = original.Function;
             this.FunctionExtra = original.FunctionExtra;
             this.Properties = new List<string>(original.Properties);
+            this.StateMachine = original.StateMachine;
         }
 
         public override string ToString()

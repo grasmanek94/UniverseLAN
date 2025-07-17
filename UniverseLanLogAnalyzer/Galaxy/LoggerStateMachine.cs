@@ -1,6 +1,6 @@
 ﻿namespace UniverseLanLogAnalyzer.Galaxy
 {
-    public class StateMachine
+    public class LoggerStateMachine
     {
 
     }

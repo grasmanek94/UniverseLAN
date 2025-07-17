@@ -1,3 +1,4 @@
+using UniverseLanLogAnalyzer.Galaxy;
 using UniverseLanLogAnalyzer.Parser;
 
 namespace UniverseLanLogAnalyzer
@@ -8,7 +9,8 @@ namespace UniverseLanLogAnalyzer
         {
             InitializeComponent();
 
-            LogParser parser = new LogParser(@"C:\Users\Rafal\Desktop\SSBD-real-gog-log\Working-A.log");
+            LoggerStateMachine state_machine = new LoggerStateMachine();
+            LogParser parser = new LogParser(@"C:\Users\Rafal\Desktop\SSBD-real-gog-log\Working-A.log", state_machine);
             parser.Parse();
         }
     }

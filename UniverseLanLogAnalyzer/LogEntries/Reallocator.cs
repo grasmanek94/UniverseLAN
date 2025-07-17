@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 
 namespace UniverseLanLogAnalyzer.LogEntries
 {
@@ -26,6 +27,8 @@ namespace UniverseLanLogAnalyzer.LogEntries
             {
                 return (Base)Activator.CreateInstance(type, original)!;
             }
+
+            Debug.WriteLine($"{original.Function} not mapped");
 
             return original;
         }
