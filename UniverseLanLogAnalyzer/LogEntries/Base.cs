@@ -22,7 +22,9 @@ namespace UniverseLanLogAnalyzer.LogEntries
 
         public LoggerStateMachine StateMachine { get; set; }
 
-        public Base() {}
+        public Base(LoggerStateMachine state_machine) {
+            StateMachine = state_machine;
+        }
 
         public Base(Base original)
         {

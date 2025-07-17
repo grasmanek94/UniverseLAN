@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.Runtime.CompilerServices;
 using UniverseLanLogAnalyzer.Galaxy;
 
 namespace UniverseLanLogAnalyzer.Parser
@@ -136,7 +135,7 @@ namespace UniverseLanLogAnalyzer.Parser
                 throw new InterceptorLogParsingException(FileName, CurrentLineNumber, line);
             }
 
-            LogEntries.Base entry = new();
+            LogEntries.Base entry = new(StateMachine);
 
             entry.NestingLevel = NestingLevel;
             entry.Address = address;
