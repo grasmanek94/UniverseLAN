@@ -65,9 +65,9 @@ namespace universelan::tracer {
 		static void SetTracingEnabled(bool enabled);
 		static void SetLogToCout(bool enabled);
 
-		Trace(const char* const extra = nullptr, uint64_t mask = INFORMATIONAL, const char* const func = std::source_location::current().function_name());
-		Trace(uint64_t mask, const char* const extra = nullptr, const char* const func = std::source_location::current().function_name());
-		Trace(const char* const extra, const char* const func, uint64_t mask = INFORMATIONAL);
+		Trace(const char* const extra = nullptr, uint64_t mask = INFORMATIONAL, const char* const func = std::source_location::current().function_name(), void* override_caller_address = nullptr);
+		Trace(uint64_t mask, const char* const extra = nullptr, const char* const func = std::source_location::current().function_name(), void* override_caller_address = nullptr);
+		Trace(const char* const extra, const char* const func, uint64_t mask = INFORMATIONAL, void* override_caller_address = nullptr);
 
 		~Trace();
 

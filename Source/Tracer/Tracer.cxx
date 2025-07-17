@@ -226,22 +226,34 @@ namespace universelan::tracer {
 		return true;
 	}
 
-	Trace::Trace(const char* const extra, uint64_t mask, const char* const func) :
+	Trace::Trace(const char* const extra, uint64_t mask, const char* const func, void* override_caller_address) :
 		enabled{ tracing_enabled && ((enabled_tracing_flags & mask) == mask) },
-		func{ func }, extra{ extra }, return_address{ nullptr } {
+		func{ func }, extra{ extra }, return_address{ override_caller_address } {
 		if (!enabled) {
 			return;
 		}
 
 #ifdef _WIN32
-		return_address = _ReturnAddress();
+		if (return_address == nullptr) {
+			return_address = _ReturnAddress();
+		}
 #endif
 		Tracer::Enter(func, extra, return_address);
 	}
 
 	// delegate constructors
-	Trace::Trace(uint64_t mask, const char* const extra, const char* const func) : Trace{ extra, mask, func } {}
-	Trace::Trace(const char* const extra, const char* const func, uint64_t mask) : Trace{ extra, mask, func } {}
+	Trace::Trace(uint64_t mask, const char* const extra, const char* const func, void* override_caller_address) : Trace{ extra, mask, func,
+		override_caller_address
+#ifdef _WIN32
+		== nullptr ? _ReturnAddress() : override_caller_address
+#endif
+	} {}
+	Trace::Trace(const char* const extra, const char* const func, uint64_t mask, void* override_caller_address) : Trace{ extra, mask, func,
+		override_caller_address
+#ifdef _WIN32
+		== nullptr ? _ReturnAddress() : override_caller_address
+#endif
+	} {}
 
 	Trace::~Trace() {
 		if (!enabled) {
