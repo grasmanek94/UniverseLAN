@@ -4,12 +4,12 @@
     {
         public enum Type
         {
-            Unassigned = 0,
-            Lobby = 1,
-            User = 2
+            ID_TYPE_UNASSIGNED,
+            ID_TYPE_LOBBY,
+            ID_TYPE_USER
         }
 
-        public ulong id;
+        public ulong id; // 0 as an argument to a function means usually SELF (logged in user), otherwise invalid
 
         public GalaxyID(ulong id)
         {
@@ -18,29 +18,27 @@
 
         public GalaxyID(ulong id, Type type)
         {
-            this.id = (id & 0x0FFFFFFFFFFFFFFF) | ((ulong)type << 56);
+            this.id = (id & 0x0FFFFFFFFFFFFFFF) | (((ulong)type << 56) & 0xF000000000000000);
         }
 
         public Type GetIDType()
         {
             return (Type)(id >> 56);
         }
-    }
 
-    public enum LobbyTopologyType
-    {
-        FCM_HOST_MIGRATION = 0,
-        FCM = 1,
-        STAR = 2,
-        CONNECTIONLESS = 3,
-        FCM_OWNERSHIP_TRANSITION = 4
-    }
+        public void SetType(Type type)
+        {
+            this.id = (id & 0x0FFFFFFFFFFFFFFF) | (((ulong)type << 56) & 0xF000000000000000);
+        }
 
-    public enum LobbyType
-    {
-        PRIVATE = 0,
-        FRIENDS_ONLY = 1,
-        PUBLIC = 2,
-        INVISIBLE_TO_FRIENDS = 3 
-    };
+        public void SetID(ulong id)
+        {
+            this.id = (id & 0x0FFFFFFFFFFFFFFF) | (((ulong)GetIDType() << 56) & 0xF000000000000000);
+        }
+
+        public void SetRaw(ulong num)
+        {
+            this.id = num;
+        }
+    }
 }

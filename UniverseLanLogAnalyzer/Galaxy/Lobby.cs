@@ -4,6 +4,23 @@
     using LobbyMessagesType = Dictionary<uint, byte[]>;
     using LobbyUserKVType = Dictionary<User, Dictionary<string, byte[]>>;
 
+    public enum LobbyTopologyType
+    {
+        FCM_HOST_MIGRATION = 0,
+        FCM = 1,
+        STAR = 2,
+        CONNECTIONLESS = 3,
+        FCM_OWNERSHIP_TRANSITION = 4
+    }
+
+    public enum LobbyType
+    {
+        PRIVATE = 0,
+        FRIENDS_ONLY = 1,
+        PUBLIC = 2,
+        INVISIBLE_TO_FRIENDS = 3
+    };
+
     public class Lobby
     {
         public GalaxyID id;
