@@ -58,7 +58,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("operationalState: {}({})", operationalState, magic_enum::enum_flags_name((OperationalState)operationalState)));
+			trace.write_all(std::format("operationalState: {}({})", operationalState,
+				magic_enum::enum_flags_name((OperationalState)operationalState)));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnOperationalStateChanged(operationalState));
@@ -113,7 +114,7 @@ namespace universelan::client {
 #endif
 
 #if GALAXY_BUILD_FEATURE_HAS_IUSER_OPENID
-	void PlayFabCreateOpenIDConnectionListener::OnPlayFabCreateOpenIDConnectionSuccess(bool connectionAlreadyExists) 
+	void PlayFabCreateOpenIDConnectionListener::OnPlayFabCreateOpenIDConnectionSuccess(bool connectionAlreadyExists)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
@@ -142,7 +143,7 @@ namespace universelan::client {
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnPlayFabLoginWithOpenIDConnectSuccess());
 	}
 
-	void PlayFabLoginWithOpenIDConnectListener::OnPlayFabLoginWithOpenIDConnectFailure(FailureReason failureReason) 
+	void PlayFabLoginWithOpenIDConnectListener::OnPlayFabLoginWithOpenIDConnectFailure(FailureReason failureReason)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
