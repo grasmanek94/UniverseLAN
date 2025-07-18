@@ -5,8 +5,9 @@
      * use Enum.TryParse from string */
     public enum ListenerType
     {
-        LISTENER_TYPE_BEGIN, ///< Used for iterating over listener types.
-        LOBBY_LIST = LISTENER_TYPE_BEGIN, ///< Used by ILobbyListListener.
+        /* Swapped due to correct name showing */
+        LOBBY_LIST,  ///< Used by ILobbyListListener.
+        LISTENER_TYPE_BEGIN = LOBBY_LIST, ///< Used for iterating over listener types.
         LOBBY_CREATED, ///< Used by ILobbyCreatedListener.
         LOBBY_ENTERED, ///< Used by ILobbyEnteredListener.
         LOBBY_LEFT, ///< Used by ILobbyLeftListener.

@@ -8,7 +8,7 @@ namespace UniverseLanLogAnalyzer.Tests
         [Fact]
         public void Parse_UserID_And_Type()
         {
-            string[] props = { 
+            List<string> props = new List<string> { 
                 "aaa: bbb(ccc)",
                 "userID: 46781906533578385(ID_TYPE_USER)",
                 "ddd: eee(fff)"
@@ -31,7 +31,7 @@ namespace UniverseLanLogAnalyzer.Tests
         [Fact]
         public void Parse_PersonaStateChange_WithWildcard()
         {
-            string[] props = {
+            List<string> props = new List<string> {
                 "aaa: bbb(ccc)",
                 "userID: 46781906533578385(ID_TYPE_USER)",
                 "personaStateChange: 0(*)",
@@ -55,7 +55,7 @@ namespace UniverseLanLogAnalyzer.Tests
         [Fact]
         public void Parse_EnumFlags_FromString()
         {
-            string[] props = {
+            List<string> props = new List<string> {
                 "aaa: bbb(ccc)",
                 "userID: 46781906533578385(ID_TYPE_USER)",
                 "personaStateChange: 3(PERSONA_CHANGE_NAME|PERSONA_CHANGE_AVATAR)",
@@ -83,7 +83,7 @@ namespace UniverseLanLogAnalyzer.Tests
         [Fact]
         public void Parse_Boolean_And_Enum()
         {
-            string[] props = {
+            List<string> props = new List<string> {
                 "aaa: bbb(ccc)",
                 "lobbyType: LOBBY_TYPE_PUBLIC",
                 "maxMembers: 250",
@@ -114,7 +114,7 @@ namespace UniverseLanLogAnalyzer.Tests
         [Fact]
         public void Parse_Hexadecimal_And_Enum()
         {
-            string[] props = {
+            List<string> props = new List<string> {
                 "aaa: bbb(ccc)",
                 "listenerType: LOBBY_LEFT",
                 "listener: 0xd882870",
@@ -138,7 +138,7 @@ namespace UniverseLanLogAnalyzer.Tests
         [Fact]
         public void Parse_With_Condition_True()
         {
-            string[] props = {
+            List<string> props = new List<string> {
                 "aaa: bbb(ccc)",
                 "lobbyID: 58815465033870437(ID_TYPE_LOBBY)",
                 "data: 0xf5f410",
@@ -177,7 +177,7 @@ namespace UniverseLanLogAnalyzer.Tests
         [Fact]
         public void Parse_With_Condition_False_Should_Skip()
         {
-            string[] props = {
+            List<string> props = new List<string> {
                 "aaa: bbb(ccc)",
                 "lobbyID: 58815465033870437(ID_TYPE_LOBBY)",
                 "data: 0xf5f410",
@@ -214,7 +214,7 @@ namespace UniverseLanLogAnalyzer.Tests
         [Fact]
         public void Parse_AllFieldsPresent_ShouldSucceed()
         {
-            string[] props = {
+            List<string> props = new List<string> {
                 "aaa: bbb(ccc)",
                 "lobbyType: LOBBY_TYPE_PUBLIC",
                 "maxMembers: 255",
@@ -257,7 +257,7 @@ namespace UniverseLanLogAnalyzer.Tests
         [Fact]
         public void Parse_MissingJoinableAndTopology_ShouldSucceed()
         {
-            string[] props = {
+            List<string> props = new List<string> {
                 "aaa: bbb(ccc)",
                 "lobbyType: LOBBY_TYPE_PUBLIC",
                 "maxMembers: 255",
@@ -294,7 +294,7 @@ namespace UniverseLanLogAnalyzer.Tests
         [Fact]
         public void Parse_MissingListeners_ShouldSucceed()
         {
-            string[] props = {
+            List<string> props = new List<string> {
                 "aaa: bbb(ccc)",
                 "lobbyType: LOBBY_TYPE_PUBLIC",
                 "maxMembers: 255",
@@ -333,7 +333,7 @@ namespace UniverseLanLogAnalyzer.Tests
         [Fact]
         public void Parse_OnlyRequiredFields_ShouldSucceed()
         {
-            string[] props = {
+            List<string> props = new List<string> {
                 "aaa: bbb(ccc)",
                 "lobbyType: LOBBY_TYPE_PUBLIC",
                 "maxMembers: 255",

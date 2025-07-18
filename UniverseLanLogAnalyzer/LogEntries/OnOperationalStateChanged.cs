@@ -14,10 +14,7 @@ namespace UniverseLanLogAnalyzer.LogEntries
 
         public override void PostInit()
         {
-            if (!Parser.Arguments.ParseOperationalState(this, out var state))
-            {
-                throw new InterceptorEntryInitException(this, "OperationalState");
-            }
+            Parser.Arguments.ParseOperationalState(this, out var state);
             State = state;
         }
     }

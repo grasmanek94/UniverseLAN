@@ -13,19 +13,19 @@ namespace UniverseLanLogAnalyzer.LogEntries
         public Base? NextAtNestingLevel { get; set; }
         public Base? PrevAtNestingLevel { get; set; }
 
-        public ulong Address { get; set; } = 0;
-        public int NestingLevel { get; set; } = 0;
-        public string Function { get; set; } = String.Empty;
-        public string FunctionExtra { get; set; } = String.Empty;
+        public ulong Address = 0;
+        public int NestingLevel = 0;
+        public string Function = String.Empty;
+        public string FunctionExtra = String.Empty;
 
         /* Entries such as ReadP2PPacket and Send aren't considered 'Key' frames for log comparison.
          * Entries like 'CreateLobby' 'JoinLobby' 'Set*Data' etc should be considered key elements for comparison.
          * */
-        public bool IsKeyFrame { get; set; } = false;
+        public bool IsKeyFrame = false;
 
-        public List<string> Properties { get; set; } = new List<string>();
+        public List<string> Properties = new List<string>();
 
-        public LoggerStateMachine StateMachine { get; set; }
+        public LoggerStateMachine StateMachine;
 
         public Base(LoggerStateMachine state_machine) {
             StateMachine = state_machine;

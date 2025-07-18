@@ -14,7 +14,7 @@ namespace UniverseLanLogAnalyzer.Parser
     {
         private static readonly Regex PlaceholderRegex = new(@"\{(d|x|e|ef|b|s)\}");
 
-        public static bool Parse(ref string[] properties, string template, object[] outputs, Type[] types)
+        public static bool Parse(ref List<string> properties, string template, object[] outputs, Type[] types)
         {
             var lines = template.Split('\n');
             var matchedIndices = new HashSet<int>();
@@ -39,7 +39,7 @@ namespace UniverseLanLogAnalyzer.Parser
 
                 bool matched = false;
 
-                for (int i = 0; i < properties.Length; i++)
+                for (int i = 0; i < properties.Count; i++)
                 {
                     if (matchedIndices.Contains(i))
                     {
@@ -128,7 +128,7 @@ namespace UniverseLanLogAnalyzer.Parser
             }
 
             // Remove matched entries
-            properties = properties.Where((_, i) => !matchedIndices.Contains(i)).ToArray();
+            properties = properties.Where((_, i) => !matchedIndices.Contains(i)).ToList();
             return true;
         }
 
@@ -221,7 +221,7 @@ namespace UniverseLanLogAnalyzer.Parser
             }
         }
 
-        public static bool Parse<T1>(ref string[] properties, string template, out T1 arg1)
+        public static bool Parse<T1>(ref List<string> properties, string template, out T1 arg1)
         {
             Type[] types = new[] { typeof(T1) };
 
@@ -233,7 +233,7 @@ namespace UniverseLanLogAnalyzer.Parser
             return result;
         }
 
-        public static bool Parse<T1, T2>(ref string[] properties, string template, out T1 arg1, out T2 arg2)
+        public static bool Parse<T1, T2>(ref List<string> properties, string template, out T1 arg1, out T2 arg2)
         {
             Type[] types = new[] { typeof(T1), typeof(T2) };
 
@@ -246,7 +246,7 @@ namespace UniverseLanLogAnalyzer.Parser
             return result;
         }
 
-        public static bool Parse<T1, T2, T3>(ref string[] properties, string template, out T1 arg1, out T2 arg2, out T3 arg3)
+        public static bool Parse<T1, T2, T3>(ref List<string> properties, string template, out T1 arg1, out T2 arg2, out T3 arg3)
         {
             Type[] types = new[] { typeof(T1), typeof(T2), typeof(T3) };
 
@@ -260,7 +260,7 @@ namespace UniverseLanLogAnalyzer.Parser
             return result;
         }
 
-        public static bool Parse<T1, T2, T3, T4>(ref string[] properties, string template, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4)
+        public static bool Parse<T1, T2, T3, T4>(ref List<string> properties, string template, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4)
         {
             Type[] types = new[] { typeof(T1), typeof(T2), typeof(T3), typeof(T4) };
 
@@ -275,7 +275,7 @@ namespace UniverseLanLogAnalyzer.Parser
             return result;
         }
 
-        public static bool Parse<T1, T2, T3, T4, T5>(ref string[] properties, string template, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5)
+        public static bool Parse<T1, T2, T3, T4, T5>(ref List<string> properties, string template, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5)
         {
             Type[] types = new[] { typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5) };
 
@@ -291,7 +291,7 @@ namespace UniverseLanLogAnalyzer.Parser
             return result;
         }
 
-        public static bool Parse<T1, T2, T3, T4, T5, T6>(ref string[] properties, string template, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5, out T6 arg6)
+        public static bool Parse<T1, T2, T3, T4, T5, T6>(ref List<string> properties, string template, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5, out T6 arg6)
         {
             Type[] types = new[] { typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6) };
 
@@ -308,7 +308,7 @@ namespace UniverseLanLogAnalyzer.Parser
             return result;
         }
 
-        public static bool Parse<T1, T2, T3, T4, T5, T6, T7>(ref string[] properties, string template, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5, out T6 arg6, out T7 arg7)
+        public static bool Parse<T1, T2, T3, T4, T5, T6, T7>(ref List<string> properties, string template, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5, out T6 arg6, out T7 arg7)
         {
             Type[] types = new[] { typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7) };
 
@@ -326,7 +326,7 @@ namespace UniverseLanLogAnalyzer.Parser
             return result;
         }
 
-        public static bool Parse<T1, T2, T3, T4, T5, T6, T7, T8>(ref string[] properties, string template, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5, out T6 arg6, out T7 arg7, out T8 arg8)
+        public static bool Parse<T1, T2, T3, T4, T5, T6, T7, T8>(ref List<string> properties, string template, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5, out T6 arg6, out T7 arg7, out T8 arg8)
         {
             Type[] types = new[] { typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7), typeof(T8) };
 
@@ -345,7 +345,7 @@ namespace UniverseLanLogAnalyzer.Parser
             return result;
         }
 
-        public static bool Parse<T1, T2, T3, T4, T5, T6, T7, T8, T9>(ref string[] properties, string template, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5, out T6 arg6, out T7 arg7, out T8 arg8, out T9 arg9)
+        public static bool Parse<T1, T2, T3, T4, T5, T6, T7, T8, T9>(ref List<string> properties, string template, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5, out T6 arg6, out T7 arg7, out T8 arg8, out T9 arg9)
         {
             Type[] types = new[] { typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7), typeof(T8), typeof(T9) };
 
@@ -365,7 +365,7 @@ namespace UniverseLanLogAnalyzer.Parser
             return result;
         }
 
-        public static bool Parse<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(ref string[] properties, string template, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5, out T6 arg6, out T7 arg7, out T8 arg8, out T9 arg9, out T10 arg10)
+        public static bool Parse<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(ref List<string> properties, string template, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5, out T6 arg6, out T7 arg7, out T8 arg8, out T9 arg9, out T10 arg10)
         {
             Type[] types = new[] { typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7), typeof(T8), typeof(T9), typeof(T10) };
 

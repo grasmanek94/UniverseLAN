@@ -7,19 +7,17 @@
         public string What { get; private set; }
         public LogEntries.Base Entry { get; private set; }
 
-        public InterceptorArgumentParsingException(LogEntries.Base entry, string what, string property) 
-            : base($"Argument '{what}' parsing error occurred at property '{property}' in object '{entry}'")
+        public InterceptorArgumentParsingException(LogEntries.Base entry, string what) 
+            : base($"Argument '{what}' parsing error occurred in object '{entry}'")
         {
             Entry = entry;
-            Property = property;
             What = what;
         }
 
-        public InterceptorArgumentParsingException(LogEntries.Base entry, string what, string property, Exception? innerException)
-            : base($"Argument '{what}' parsing error occurred at property '{property}' in object '{entry}'", innerException)
+        public InterceptorArgumentParsingException(LogEntries.Base entry, string what, Exception? innerException)
+            : base($"Argument '{what}' parsing error occurred in object '{entry}'", innerException)
         {
             Entry = entry;
-            Property = property;
             What = what;
         }
     }
