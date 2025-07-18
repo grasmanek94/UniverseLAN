@@ -70,47 +70,34 @@ namespace UniverseLanLogAnalyzer.Parser
                             throw new InvalidOperationException("Too few output parameters.");
                         }
 
-                        try
+                        object parsed = type switch
                         {
-                            object parsed = type switch
-                            {
-                                "d" => ParseNumber(types[outputIndex], value),
-                                "x" => ParseHex(types[outputIndex], value),
-                                "b" => ParseBool(value),
-                                "e" => ParseEnum(types[outputIndex], value),
-                                "ef" => ParseEnumFlags(types[outputIndex], value),
-                                "s" => value,
-                                _ => throw new NotSupportedException($"Unsupported placeholder: {type}")
-                            };
+                            "d" => ParseNumber(types[outputIndex], value),
+                            "x" => ParseHex(types[outputIndex], value),
+                            "b" => ParseBool(value),
+                            "e" => ParseEnum(types[outputIndex], value),
+                            "ef" => ParseEnumFlags(types[outputIndex], value),
+                            "s" => value,
+                            _ => throw new NotSupportedException($"Unsupported placeholder: {type}")
+                        };
 
-                            /* Only remove successfully parsed properties */
-                            matchedIndices.Add(i);
+                        /* Only remove successfully parsed properties */
+                        matchedIndices.Add(i);
 
-                            if (IsOptional(types[outputIndex]))
-                            {
-                                var innerType = types[outputIndex].GetGenericArguments()[0];
-                                var optionalInstance = Activator.CreateInstance(types[outputIndex])!;
-                                types[outputIndex].GetProperty("Value")!.SetValue(optionalInstance, Convert.ChangeType(parsed, innerType));
-                                types[outputIndex].GetProperty("Available")!.SetValue(optionalInstance, true);
-                                outputs[outputIndex] = optionalInstance;
-                            }
-                            else
-                            {
-                                outputs[outputIndex] = parsed;
-                            }
-
-                            outputIndex++;
-                        }
-                        catch (Exception e)
+                        if (IsOptional(types[outputIndex]))
                         {
-                            if (e is FormatException && IsOptional(types[outputIndex]))
-                            {
-                                outputIndex++;
-                                continue;
-                            }
-
-                            throw;
+                            var innerType = types[outputIndex].GetGenericArguments()[0];
+                            var optionalInstance = Activator.CreateInstance(types[outputIndex])!;
+                            types[outputIndex].GetProperty("Value")!.SetValue(optionalInstance, Convert.ChangeType(parsed, innerType));
+                            types[outputIndex].GetProperty("Available")!.SetValue(optionalInstance, true);
+                            outputs[outputIndex] = optionalInstance;
                         }
+                        else
+                        {
+                            outputs[outputIndex] = parsed;
+                        }
+
+                        outputIndex++;
                     }
 
                     break;
@@ -123,8 +110,7 @@ namespace UniverseLanLogAnalyzer.Parser
                     foreach (var _ in placeholders)
                     {
                         if (outputIndex >= types.Length) { continue; }
-                        var type = types[outputIndex];
-                        if (!IsOptional(type))
+                        if (!IsOptional(types[outputIndex]))
                         {
                             allOptional = false;
                             break;
