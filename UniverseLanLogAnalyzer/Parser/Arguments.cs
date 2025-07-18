@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Windows.Forms;
 using UniverseLanLogAnalyzer.Galaxy;
 
 namespace UniverseLanLogAnalyzer.Parser
@@ -40,124 +41,154 @@ namespace UniverseLanLogAnalyzer.Parser
             return true;
         }
 
-        public static GalaxyID? ParseGalaxyID(string prefix, LogEntries.Base entry)
+        public static bool TryParseProperty<T>(
+            LogEntries.Base entry,
+            string keyName,
+            Func<string, string?, T> converter,
+            out T result)
         {
             for (int i = 0; i < entry.Properties.Count; i++)
             {
                 string prop = entry.Properties[i];
-                string key = string.Empty;
-                string value = string.Empty;
-                string? type_str = null;
-
-                ulong id = 0;
-                GalaxyID.Type type;
-
-                if (!TryParseKeyValueExtra(prop, out key, out value, out type_str))
-                {
+                if (!TryParseKeyValueExtra(prop, out var key, out var value, out var extra))
                     continue;
-                }
 
-                if (!key.Equals(prefix, StringComparison.Ordinal))
-                {
+                if (!key.Equals(keyName, StringComparison.Ordinal))
                     continue;
-                }
 
-                if (type_str == null)
+                try
+                {
+                    result = converter(value, extra);
+                    entry.Properties.RemoveAt(i);
+                    return true;
+                }
+                catch
                 {
                     throw new InterceptorArgumentParsingException(entry, key, prop);
                 }
-
-                if (!Enum.TryParse(type_str, out type))
-                {
-                    throw new InterceptorArgumentParsingException(entry, key, prop);
-                }
-
-                if (!ulong.TryParse(value, out id))
-                {
-                    throw new InterceptorArgumentParsingException(entry, key, prop);
-                }
-
-                entry.Properties.RemoveAt(i);
-                return new GalaxyID(id, type);
             }
 
-            return null;
+            result = default!;
+            return false;
         }
 
-        public static ListenerTypeInfo? ParseListenerRegister(LogEntries.Base entry)
+        public static bool TryParseGrouped<T>(
+            LogEntries.Base entry,
+            Func<List<(string key, string value, string? extra)>, T?> builder,
+            out T? result)
         {
-            ListenerTypeInfo? listener_info = null;
-            string prefix = "listenerType";
+            var parsed = new List<(string key, string value, string? extra, int index)>();
 
             for (int i = 0; i < entry.Properties.Count; i++)
             {
-                string prop = entry.Properties[i];
-                string key = string.Empty;
-                string value = string.Empty;
-                string? unused = null;
-
-                ulong id = 0;
-                ListenerType type;
-
-                if (!TryParseKeyValueExtra(prop, out key, out value, out unused))
+                if (!TryParseKeyValueExtra(entry.Properties[i], out var key, out var value, out var extra))
                 {
-                    if (listener_info == null)
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        throw new InterceptorArgumentParsingException(entry, key, prop);
-                    }
-                }
-
-                if (!key.Equals(prefix, StringComparison.Ordinal))
-                {
-                    if (listener_info == null)
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        throw new InterceptorArgumentParsingException(entry, key, prop);
-                    }
-                }
-
-                if (listener_info == null)
-                {
-                    if (value == null)
-                    {
-                        throw new InterceptorArgumentParsingException(entry, key, prop);
-                    }
-
-                    if (!Enum.TryParse(value, out type))
-                    {
-                        throw new InterceptorArgumentParsingException(entry, key, prop);
-                    }
-
-                    listener_info = new();
-                    listener_info.Type = type;
-
-                    prefix = "listener";
                     continue;
                 }
-                else
+
+                parsed.Add((key, value, extra, i));
+
+                var simplified = parsed.Select(p => (p.key, p.value, p.extra)).ToList();
+                result = builder(simplified);
+                if (result != null)
                 {
-                    if (!ulong.TryParse(value.Substring(2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out id))
+                    // Remove only the matched entries
+                    foreach (var (_, _, _, index) in parsed)
                     {
-                        throw new InterceptorArgumentParsingException(entry, key, prop);
+                        entry.Properties[index] = null!; // Mark for removal
                     }
 
-                    listener_info.ListenerAddress = id;
-
-                    entry.Properties.RemoveAt(i);
-                    entry.Properties.RemoveAt(i - 1);
-
-                    return listener_info;
+                    entry.Properties.RemoveAll(p => p == null);
+                    return true;
                 }
             }
 
-            return null;
+            result = default;
+            return false;
+        }
+
+        /* Example contents (prefix=userID):
+            userID: 46781906533578385(ID_TYPE_USER)
+        */
+        /* Example contents (prefix=lobbyID):
+            lobbyID: 58815465033870437(ID_TYPE_LOBBY)
+        */
+        public static GalaxyID? ParseGalaxyID(string prefix, LogEntries.Base entry)
+        {
+            return TryParseProperty(entry, prefix, (value, extra) =>
+            {
+                if (extra == null)
+                {
+                    throw new InterceptorArgumentParsingException(entry, prefix, "");
+                }
+
+                if (!ulong.TryParse(value, out var id))
+                {
+                    throw new InterceptorArgumentParsingException(entry, prefix, value);
+                }
+
+                if (!Enum.TryParse(extra, out GalaxyID.Type type))
+                {
+                    throw new InterceptorArgumentParsingException(entry, prefix, extra);
+                }
+
+                return new GalaxyID(id, type);
+            }, out var result) ? result : null;
+        }
+
+        /* Example contents:
+            listenerType: AUTH
+            listener: 0x137e668
+        */
+        public static ListenerTypeInfo? ParseListenerRegister(LogEntries.Base entry)
+        {
+            TryParseGrouped(entry, parsed =>
+            {
+                if (parsed.Count < 2)
+                {
+                    return null;
+                }
+
+                var (key1, value1, _) = parsed[0];
+                var (key2, value2, _) = parsed[1];
+
+                if (key1 != "listenerType" || key2 != "listener")
+                {
+                    return null;
+                }
+
+                if (!Enum.TryParse(value1, out ListenerType type))
+                {
+                    throw new InterceptorArgumentParsingException(entry, key1, value1);
+                }
+
+                if (!ulong.TryParse(value2.Substring(2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var addr))
+                {
+                    throw new InterceptorArgumentParsingException(entry, key2, value2);
+                }
+
+                return new ListenerTypeInfo { Type = type, ListenerAddress = addr };
+            }, out var result);
+
+            return result;
+        }
+
+        /* Example contents:
+            operationalState: 3(OPERATIONAL_STATE_SIGNED_IN|OPERATIONAL_STATE_LOGGED_ON)
+        */
+        /* Example contents:
+            operationalState: 0()
+        */
+        public static bool ParseOperationalState(LogEntries.Base entry, out OperationalState state)
+        {
+            return TryParseProperty(entry, "operationalState", (value, _) =>
+            {
+                if (!ulong.TryParse(value, out var num))
+                {
+                    throw new InterceptorArgumentParsingException(entry, "operationalState", value);
+                }
+                return (OperationalState)num;
+            }, out state);
         }
     }
 }
