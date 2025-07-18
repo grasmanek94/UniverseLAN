@@ -7,8 +7,14 @@
 #include <SafeStringCopy.hxx>
 
 #include <magic_enum/magic_enum.hpp>
+#include <magic_enum/magic_enum_flags.hpp>
 
 #include <format>
+
+template <>
+struct magic_enum::customize::enum_range<galaxy::api::AvatarType> {
+	static constexpr bool is_flags = true;
+};
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -250,7 +256,7 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("avatarType: {}", magic_enum::enum_name(avatarType)));
+			trace.write_all(std::format("avatarType: {}", magic_enum::enum_flags_name(avatarType)));
 		}
 
 		auto result = intf()->GetFriendAvatarUrl(userID, avatarType);
@@ -269,7 +275,7 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("avatarType: {}", magic_enum::enum_name(avatarType)));
+			trace.write_all(std::format("avatarType: {}", magic_enum::enum_flags_name(avatarType)));
 			trace.write_all(std::format("buffer: {}", (void*)buffer));
 			trace.write_all(std::format("bufferLength: {}", bufferLength));
 		}
@@ -288,7 +294,7 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("avatarType: {}", magic_enum::enum_name(avatarType)));
+			trace.write_all(std::format("avatarType: {}", magic_enum::enum_flags_name(avatarType)));
 		}
 
 		auto result = intf()->GetFriendAvatarImageID(userID, avatarType);
@@ -305,7 +311,7 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("avatarType: {}", magic_enum::enum_name(avatarType)));
+			trace.write_all(std::format("avatarType: {}", magic_enum::enum_flags_name(avatarType)));
 			trace.write_all(std::format("buffer: {}", (void*)buffer));
 			trace.write_all(std::format("bufferLength: {}", bufferLength));
 		}
@@ -319,7 +325,7 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("avatarType: {}", magic_enum::enum_name(avatarType)));
+			trace.write_all(std::format("avatarType: {}", magic_enum::enum_flags_name(avatarType)));
 		}
 
 		auto result = intf()->IsFriendAvatarImageRGBAAvailable(userID, avatarType);
