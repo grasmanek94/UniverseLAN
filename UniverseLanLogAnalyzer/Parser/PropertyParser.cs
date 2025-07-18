@@ -115,7 +115,7 @@ namespace UniverseLanLogAnalyzer.Parser
             };
         }
 
-        private static object ParseNumber(Type type, string value)
+        private static object ParseInternalNum(Type type, object value)
         {
             if (type.IsEnum)
             {
@@ -126,18 +126,17 @@ namespace UniverseLanLogAnalyzer.Parser
             return Convert.ChangeType(value, type);
         }
 
+        private static object ParseNumber(Type type, string value)
+        {
+            return ParseInternalNum(type, value);
+        }
+
         private static object ParseHex(Type type, string value)
         {
             string simplified_value = value.StartsWith("0x") ? value[2..] : value;
             ulong num = Convert.ToUInt64(simplified_value, 16);
 
-            if (type.IsEnum)
-            {
-                var underlying = Enum.GetUnderlyingType(type);
-                var numeric = Convert.ChangeType(num, underlying);
-                return Enum.ToObject(type, numeric);
-            }
-            return Convert.ChangeType(num, type);
+            return ParseInternalNum(type, num);
         }
 
         private static object ParseEnum(Type enumType, string value)
