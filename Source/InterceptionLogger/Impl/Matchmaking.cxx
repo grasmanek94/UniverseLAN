@@ -735,13 +735,13 @@ namespace universelan::client {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
 			trace.write_all(std::format("data: {}", (void*)data));
 			trace.write_all(std::format("dataSize: {}", dataSize));
+			trace.write_all(std::format("msg: {}", util::safe_fix_null_char_ptr_annotate((const char*)data, dataSize)));
 		}
 
 		auto result = intf()->SendLobbyMessage(lobbyID, data, dataSize);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
-			trace.write_all(std::format("msg: {}", util::safe_fix_null_char_ptr_annotate((const char*)data, dataSize)));
 		}
 
 		return result;
@@ -761,7 +761,7 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
-			trace.write_all(std::format("msg: {}", util::safe_fix_null_char_ptr_annotate(msg, std::min(result, msgLength))));
+			trace.write_all(std::format("result_msg: {}", util::safe_fix_null_char_ptr_annotate(msg, std::min(result, msgLength))));
 		}
 
 		return result;
