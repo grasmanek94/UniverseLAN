@@ -167,6 +167,10 @@ namespace UniverseLanLogAnalyzer.Parser
             return Enum.ToObject(enumType, result);
         }
 
+        private static void AssignOrDefault<T>(bool success, out T arg, object[] outputs, int index)
+        {
+            arg = success ? (T)outputs[index]! : default!;
+        }
 
         public static bool Parse<T1>(ref string[] properties, string template, out T1 arg1)
         {
@@ -174,7 +178,9 @@ namespace UniverseLanLogAnalyzer.Parser
 
             object[] outputs = new object[1];
             bool result = Parse(ref properties, template, outputs, types);
-            arg1 = (T1)outputs[0]!;
+
+            AssignOrDefault(result, out arg1, outputs, 0);
+
             return result;
         }
 
@@ -184,8 +190,10 @@ namespace UniverseLanLogAnalyzer.Parser
 
             object[] outputs = new object[2];
             bool result = Parse(ref properties, template, outputs, types);
-            arg1 = (T1)outputs[0]!;
-            arg2 = (T2)outputs[1]!;
+
+            AssignOrDefault(result, out arg1, outputs, 0);
+            AssignOrDefault(result, out arg2, outputs, 1);
+
             return result;
         }
 
@@ -195,9 +203,11 @@ namespace UniverseLanLogAnalyzer.Parser
 
             object[] outputs = new object[3];
             bool result = Parse(ref properties, template, outputs, types);
-            arg1 = (T1)outputs[0]!;
-            arg2 = (T2)outputs[1]!;
-            arg3 = (T3)outputs[2]!;
+
+            AssignOrDefault(result, out arg1, outputs, 0);
+            AssignOrDefault(result, out arg2, outputs, 1);
+            AssignOrDefault(result, out arg3, outputs, 2);
+
             return result;
         }
 
@@ -207,10 +217,12 @@ namespace UniverseLanLogAnalyzer.Parser
 
             object[] outputs = new object[4];
             bool result = Parse(ref properties, template, outputs, types);
-            arg1 = (T1)outputs[0]!;
-            arg2 = (T2)outputs[1]!;
-            arg3 = (T3)outputs[2]!;
-            arg4 = (T4)outputs[3]!;
+
+            AssignOrDefault(result, out arg1, outputs, 0);
+            AssignOrDefault(result, out arg2, outputs, 1);
+            AssignOrDefault(result, out arg3, outputs, 2);
+            AssignOrDefault(result, out arg4, outputs, 3);
+
             return result;
         }
 
@@ -220,11 +232,13 @@ namespace UniverseLanLogAnalyzer.Parser
 
             object[] outputs = new object[5];
             bool result = Parse(ref properties, template, outputs, types);
-            arg1 = (T1)outputs[0]!;
-            arg2 = (T2)outputs[1]!;
-            arg3 = (T3)outputs[2]!;
-            arg4 = (T4)outputs[3]!;
-            arg5 = (T5)outputs[4]!;
+
+            AssignOrDefault(result, out arg1, outputs, 0);
+            AssignOrDefault(result, out arg2, outputs, 1);
+            AssignOrDefault(result, out arg3, outputs, 2);
+            AssignOrDefault(result, out arg4, outputs, 3);
+            AssignOrDefault(result, out arg5, outputs, 4);
+
             return result;
         }
 
@@ -234,12 +248,14 @@ namespace UniverseLanLogAnalyzer.Parser
 
             object[] outputs = new object[6];
             bool result = Parse(ref properties, template, outputs, types);
-            arg1 = (T1)outputs[0]!;
-            arg2 = (T2)outputs[1]!;
-            arg3 = (T3)outputs[2]!;
-            arg4 = (T4)outputs[3]!;
-            arg5 = (T5)outputs[4]!;
-            arg6 = (T6)outputs[5]!;
+
+            AssignOrDefault(result, out arg1, outputs, 0);
+            AssignOrDefault(result, out arg2, outputs, 1);
+            AssignOrDefault(result, out arg3, outputs, 2);
+            AssignOrDefault(result, out arg4, outputs, 3);
+            AssignOrDefault(result, out arg5, outputs, 4);
+            AssignOrDefault(result, out arg6, outputs, 5);
+
             return result;
         }
 
@@ -249,13 +265,14 @@ namespace UniverseLanLogAnalyzer.Parser
 
             object[] outputs = new object[7];
             bool result = Parse(ref properties, template, outputs, types);
-            arg1 = (T1)outputs[0]!;
-            arg2 = (T2)outputs[1]!;
-            arg3 = (T3)outputs[2]!;
-            arg4 = (T4)outputs[3]!;
-            arg5 = (T5)outputs[4]!;
-            arg6 = (T6)outputs[5]!;
-            arg7 = (T7)outputs[6]!;
+
+            AssignOrDefault(result, out arg1, outputs, 0);
+            AssignOrDefault(result, out arg2, outputs, 1);
+            AssignOrDefault(result, out arg3, outputs, 2);
+            AssignOrDefault(result, out arg4, outputs, 3);
+            AssignOrDefault(result, out arg5, outputs, 4);
+            AssignOrDefault(result, out arg6, outputs, 5);
+            AssignOrDefault(result, out arg7, outputs, 6);
 
             return result;
         }
@@ -266,14 +283,15 @@ namespace UniverseLanLogAnalyzer.Parser
 
             object[] outputs = new object[8];
             bool result = Parse(ref properties, template, outputs, types);
-            arg1 = (T1)outputs[0]!;
-            arg2 = (T2)outputs[1]!;
-            arg3 = (T3)outputs[2]!;
-            arg4 = (T4)outputs[3]!;
-            arg5 = (T5)outputs[4]!;
-            arg6 = (T6)outputs[5]!;
-            arg7 = (T7)outputs[6]!;
-            arg8 = (T8)outputs[7]!;
+
+            AssignOrDefault(result, out arg1, outputs, 0);
+            AssignOrDefault(result, out arg2, outputs, 1);
+            AssignOrDefault(result, out arg3, outputs, 2);
+            AssignOrDefault(result, out arg4, outputs, 3);
+            AssignOrDefault(result, out arg5, outputs, 4);
+            AssignOrDefault(result, out arg6, outputs, 5);
+            AssignOrDefault(result, out arg7, outputs, 6);
+            AssignOrDefault(result, out arg8, outputs, 7);
 
             return result;
         }
