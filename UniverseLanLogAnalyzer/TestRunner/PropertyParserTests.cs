@@ -34,6 +34,7 @@ namespace UniverseLanLogAnalyzer.Tests
 
             Assert.True(result);
             Assert.Equal(0UL, (ulong)state);
+            Assert.Equal(GalaxyID.Type.ID_TYPE_USER, type);
         }
 
         [Fact]
@@ -55,6 +56,7 @@ namespace UniverseLanLogAnalyzer.Tests
             Assert.Equal(3UL, (ulong)stateNum);
             Assert.True(stateFlags.HasFlag(PersonaStateChange.PERSONA_CHANGE_NAME));
             Assert.True(stateFlags.HasFlag(PersonaStateChange.PERSONA_CHANGE_AVATAR));
+            Assert.Equal(GalaxyID.Type.ID_TYPE_USER, type);
         }
 
         [Fact]
@@ -97,6 +99,7 @@ namespace UniverseLanLogAnalyzer.Tests
 
             Assert.True(result);
             Assert.Equal(0xd882870UL, address);
+            Assert.Equal(ListenerType.LOBBY_LEFT, type);
         }
 
         [Fact]
@@ -107,7 +110,8 @@ namespace UniverseLanLogAnalyzer.Tests
                 "data: 0xf5f410",
                 "dataSize: 5",
                 "result: true",
-                "msg: p1234567890abcdefwoeijd213d12fhgb1239fh9"
+                "msg: p1234567890abcdefwoeijd213d12fhgb1239fh9",
+                "something_else: 1337"
             };
 
             ulong lobbyId;
@@ -115,11 +119,20 @@ namespace UniverseLanLogAnalyzer.Tests
             ulong data;
             int dataSize;
             bool resultFlag;
-            string msg;
-            bool result = PropertyParser.Parse(ref props, "lobbyID: {d}({e})\ndata: {x}\ndataSize: {d}\nresult: {b:result}\nmsg: {s?result==true}", out lobbyId, out lobbyIdType, out data, out dataSize, out resultFlag, out msg);
+            Optional<string> msg;
+            int somethingElse;
+
+            bool result = PropertyParser.Parse(ref props, "lobbyID: {d}({e})\ndata: {x}\ndataSize: {d}\nresult: {b:result}\nmsg: {s?result==true}\nsomething_else: {d}", out lobbyId, out lobbyIdType, out data, out dataSize, out resultFlag, out msg, out somethingElse);
             
             Assert.True(result);
-            Assert.Equal("p1234567890abcdefwoeijd213d12fhgb1239fh9", msg);
+            Assert.Equal(58815465033870437UL, lobbyId);
+            Assert.Equal(GalaxyID.Type.ID_TYPE_LOBBY, lobbyIdType);
+            Assert.Equal(0xf5f410UL, data);
+            Assert.Equal(5, dataSize);
+            Assert.True(resultFlag);
+            Assert.True(msg.Available);
+            Assert.Equal("p1234567890abcdefwoeijd213d12fhgb1239fh9", msg.Value);
+            Assert.Equal(1337, somethingElse);
         }
 
         [Fact]
@@ -129,7 +142,8 @@ namespace UniverseLanLogAnalyzer.Tests
                 "lobbyID: 58815465033870437(ID_TYPE_LOBBY)",
                 "data: 0xf5f410",
                 "dataSize: 5",
-                "result: false"
+                "result: false",
+                "something_else: 1337"
             };
 
             ulong lobbyId;
@@ -137,10 +151,149 @@ namespace UniverseLanLogAnalyzer.Tests
             ulong data;
             int dataSize;
             bool resultFlag;
-            string msg;
+            Optional<string> msg;
+            int somethingElse;
 
-            bool result = PropertyParser.Parse(ref props, "lobbyID: {d}({e})\ndata: {x}\ndataSize: {d}\nresult: {b:result}\nmsg: {s?result==true}", out lobbyId, out lobbyIdType, out data, out dataSize, out resultFlag, out msg);
-            Assert.False(result);
+            bool result = PropertyParser.Parse(ref props, "lobbyID: {d}({e})\ndata: {x}\ndataSize: {d}\nresult: {b}\nmsg: {s}\nsomething_else: {d}", out lobbyId, out lobbyIdType, out data, out dataSize, out resultFlag, out msg, out somethingElse);
+            
+            Assert.True(result);
+            Assert.Equal(58815465033870437UL, lobbyId);
+            Assert.Equal(GalaxyID.Type.ID_TYPE_LOBBY, lobbyIdType);
+            Assert.Equal(0xf5f410UL, data);
+            Assert.Equal(5, dataSize);
+            Assert.False(resultFlag);
+            Assert.False(msg.Available);
+            Assert.Equal(1337, somethingElse);
+        }
+
+        [Fact]
+        public void Parse_AllFieldsPresent_ShouldSucceed()
+        {
+            string[] props = {
+                "lobbyType: LOBBY_TYPE_PUBLIC",
+                "maxMembers: 255",
+                "joinable: true",
+                "lobbyTopologyType: LOBBY_TOPOLOGY_TYPE_FCM",
+                "lobbyCreatedListener: 0xabcdef0099",
+                "lobbyEnteredListener: 0x1234567899",
+                "something_else: 1337"
+            };
+
+            LobbyType lobbyType;
+            int maxMembers;
+            Optional<bool> joinable;
+            Optional<LobbyTopologyType> lobbyTopologyType;
+            Optional<ulong> createdListenerAddress;
+            Optional<ulong> enteredListenerAddress;
+            int somethingElse;
+
+            bool result = PropertyParser.Parse(ref props,
+                "lobbyType: {e}\nmaxMembers: {d}\njoinable: {b}\nlobbyTopologyType: {e}\nlobbyCreatedListener: {x}\nlobbyEnteredListener: {x}\nsomething_else: {d}",
+                out lobbyType, out maxMembers, out joinable, out lobbyTopologyType, out createdListenerAddress, out enteredListenerAddress, out somethingElse);
+
+            Assert.True(result);
+            Assert.True(joinable.Available);
+            Assert.True(joinable.Value);
+            Assert.True(lobbyTopologyType.Available);
+            Assert.Equal(LobbyTopologyType.LOBBY_TOPOLOGY_TYPE_FCM, lobbyTopologyType.Value);
+            Assert.True(createdListenerAddress.Available);
+            Assert.Equal(0xabcdef0099UL, createdListenerAddress.Value);
+            Assert.True(enteredListenerAddress.Available);
+            Assert.Equal(0x1234567899UL, enteredListenerAddress.Value);
+            Assert.Equal(1337, somethingElse);
+        }
+
+        [Fact]
+        public void Parse_MissingJoinableAndTopology_ShouldSucceed()
+        {
+            string[] props = {
+                "lobbyType: LOBBY_TYPE_PUBLIC",
+                "maxMembers: 255",
+                "lobbyCreatedListener: 0xabcdef0099",
+                "lobbyEnteredListener: 0x1234567899",
+                "something_else: 1337"
+            };
+
+            LobbyType lobbyType;
+            int maxMembers;
+            Optional<bool> joinable;
+            Optional<LobbyTopologyType> lobbyTopologyType;
+            Optional<ulong> createdListenerAddress;
+            Optional<ulong> enteredListenerAddress;
+            int somethingElse;
+
+            bool result = PropertyParser.Parse(ref props,
+                "lobbyType: {e}\nmaxMembers: {d}\njoinable: {b}\nlobbyTopologyType: {e}\nlobbyCreatedListener: {x}\nlobbyEnteredListener: {x}\nsomething_else: {d}",
+                out lobbyType, out maxMembers, out joinable, out lobbyTopologyType, out createdListenerAddress, out enteredListenerAddress, out somethingElse);
+
+            Assert.True(result);
+            Assert.False(joinable.Available);
+            Assert.False(lobbyTopologyType.Available);
+            Assert.True(createdListenerAddress.Available);
+            Assert.True(enteredListenerAddress.Available);
+            Assert.Equal(1337, somethingElse);
+        }
+
+        [Fact]
+        public void Parse_MissingListeners_ShouldSucceed()
+        {
+            string[] props = {
+                "lobbyType: LOBBY_TYPE_PUBLIC",
+                "maxMembers: 255",
+                "joinable: true",
+                "lobbyTopologyType: LOBBY_TOPOLOGY_TYPE_FCM",
+                "something_else: 1337"
+            };
+
+            LobbyType lobbyType;
+            int maxMembers;
+            Optional<bool> joinable;
+            Optional<LobbyTopologyType> lobbyTopologyType;
+            Optional<ulong> createdListenerAddress;
+            Optional<ulong> enteredListenerAddress;
+            int somethingElse;
+
+            bool result = PropertyParser.Parse(ref props,
+                "lobbyType: {e}\nmaxMembers: {d}\njoinable: {b}\nlobbyTopologyType: {e}\nlobbyCreatedListener: {x}\nlobbyEnteredListener: {x}\nsomething_else: {d}",
+                out lobbyType, out maxMembers, out joinable, out lobbyTopologyType, out createdListenerAddress, out enteredListenerAddress, out somethingElse);
+
+            Assert.True(result);
+            Assert.True(joinable.Available);
+            Assert.True(joinable.Value);
+            Assert.True(lobbyTopologyType.Available);
+            Assert.Equal(LobbyTopologyType.LOBBY_TOPOLOGY_TYPE_FCM, lobbyTopologyType.Value);
+            Assert.False(createdListenerAddress.Available);
+            Assert.False(enteredListenerAddress.Available);
+            Assert.Equal(1337, somethingElse);
+        }
+
+        [Fact]
+        public void Parse_OnlyRequiredFields_ShouldSucceed()
+        {
+            string[] props = {
+                "lobbyType: LOBBY_TYPE_PUBLIC",
+                "maxMembers: 255",
+                "something_else: 1337"
+            };
+
+            LobbyType lobbyType;
+            int maxMembers;
+            Optional<bool> joinable;
+            Optional<LobbyTopologyType> lobbyTopologyType;
+            Optional<ulong> createdListenerAddress;
+            Optional<ulong> enteredListenerAddress;
+            int somethingElse;
+
+            bool result = PropertyParser.Parse(ref props,
+                "lobbyType: {e}\nmaxMembers: {d}\njoinable: {b}\nlobbyTopologyType: {e}\nlobbyCreatedListener: {x}\nlobbyEnteredListener: {x}\nsomething_else: {d}",
+                out lobbyType, out maxMembers, out joinable, out lobbyTopologyType, out createdListenerAddress, out enteredListenerAddress, out somethingElse);
+
+            Assert.True(result);
+            Assert.False(joinable.Available);
+            Assert.False(lobbyTopologyType.Available);
+            Assert.False(createdListenerAddress.Available);
+            Assert.False(enteredListenerAddress.Available);
+            Assert.Equal(1337, somethingElse);
         }
     }
 

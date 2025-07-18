@@ -2,6 +2,14 @@
 
 namespace UniverseLanLogAnalyzer.Parser
 {
+    public class Optional<T>
+    {
+        public T Value { get; set; } = default!;
+        public bool Available { get; set; } = false;
+
+        public static implicit operator T(Optional<T> opt) => opt.Value;
+    }
+
     public static class PropertyParser
     {
         private static readonly Regex PlaceholderRegex
@@ -38,11 +46,17 @@ namespace UniverseLanLogAnalyzer.Parser
 
                 for (int i = 0; i < properties.Length; i++)
                 {
-                    if (matchedIndices.Contains(i)) continue;
+                    if (matchedIndices.Contains(i))
+                    {
+                        continue;
+                    }
 
                     var prop = properties[i];
                     var match = regex.Match(prop);
-                    if (!match.Success) continue;
+                    if (!match.Success)
+                    {
+                        continue;
+                    }
 
                     // Check condition
                     bool skip = false;
@@ -72,37 +86,98 @@ namespace UniverseLanLogAnalyzer.Parser
                         var (type, name, condVar, _) = placeholders[j];
                         var value = match.Groups[j + 1].Value;
 
-                        if (type == "*") continue;
-                        if (outputIndex >= outputs.Length)
-                            throw new InvalidOperationException("Too few output parameters.");
-
-                        object parsed = type switch
+                        if (type == "*")
                         {
-                            "d" => ParseNumber(types[outputIndex], value),
-                            "x" => ParseHex(types[outputIndex], value),
-                            "b" => ParseBool(value),
-                            "e" => ParseEnum(types[outputIndex], value),
-                            "ef" => ParseEnumFlags(types[outputIndex], value),
-                            "s" => value,
-                            _ => throw new NotSupportedException($"Unsupported placeholder: {type}")
-                        };
+                            continue;
+                        }
 
+                        if (outputIndex >= outputs.Length)
+                        {
+                            throw new InvalidOperationException("Too few output parameters.");
+                        }
 
-                        outputs[outputIndex] = parsed;
-                        context[name ?? $"arg{outputIndex}"] = parsed;
-                        outputIndex++;
+                        try
+                        {
+                            object parsed = type switch
+                            {
+                                "d" => ParseNumber(types[outputIndex], value),
+                                "x" => ParseHex(types[outputIndex], value),
+                                "b" => ParseBool(value),
+                                "e" => ParseEnum(types[outputIndex], value),
+                                "ef" => ParseEnumFlags(types[outputIndex], value),
+                                "s" => value,
+                                _ => throw new NotSupportedException($"Unsupported placeholder: {type}")
+                            };
+
+                            if (IsOptional(types[outputIndex]))
+                            {
+                                var innerType = types[outputIndex].GetGenericArguments()[0];
+                                var optionalInstance = Activator.CreateInstance(types[outputIndex])!;
+                                types[outputIndex].GetProperty("Value")!.SetValue(optionalInstance, Convert.ChangeType(parsed, innerType));
+                                types[outputIndex].GetProperty("Available")!.SetValue(optionalInstance, true);
+                                outputs[outputIndex] = optionalInstance;
+                            }
+                            else
+                            {
+                                outputs[outputIndex] = parsed;
+                            }
+
+                            context[name ?? $"arg{{outputIndex}}"] = parsed;
+                            outputIndex++;
+                        }
+                        catch (Exception e)
+                        {
+                            if (e is NotSupportedException) { throw; }
+                            if (!IsOptional(types[outputIndex])) { throw; }
+
+                            outputIndex++;
+                            continue;
+                        }
                     }
 
                     break;
                 }
 
                 if (!matched)
-                    return false;
+                {
+                    // Check if all placeholders are for Optional<T>
+                    bool allOptional = true;
+                    foreach (var (_, _, _, _) in placeholders)
+                    {
+                        if (outputIndex >= types.Length) { continue; }
+                        var type = types[outputIndex];
+                        if (!(type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Optional<>)))
+                        {
+                            allOptional = false;
+                            break;
+                        }
+                        outputIndex++;
+                    }
+
+                    if (!allOptional)
+                    {
+                        return false;
+                    }
+
+                    continue; // skip optional line
+                }
             }
 
             // Remove matched entries
             properties = properties.Where((_, i) => !matchedIndices.Contains(i)).ToArray();
             return true;
+        }
+
+        private static bool IsOptional(Type type)
+        {
+            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Optional<>);
+        }
+
+        private static Type UnwrapOptional(Type type)
+        {
+            return IsOptional(type)
+                ? type.GetGenericArguments()[0]
+                : type;
         }
 
         private static bool ParseBool(string value)
@@ -117,6 +192,8 @@ namespace UniverseLanLogAnalyzer.Parser
 
         private static object ParseInternalNum(Type type, object value)
         {
+            type = UnwrapOptional(type);
+
             if (type.IsEnum)
             {
                 var underlying = Enum.GetUnderlyingType(type);
@@ -141,6 +218,8 @@ namespace UniverseLanLogAnalyzer.Parser
 
         private static object ParseEnum(Type enumType, string value)
         {
+            enumType = UnwrapOptional(enumType);
+
             if (!enumType.IsEnum)
             {
                 throw new ArgumentException("Target type is not an enum.");
@@ -150,6 +229,8 @@ namespace UniverseLanLogAnalyzer.Parser
 
         private static object ParseEnumFlags(Type enumType, string value)
         {
+            enumType = UnwrapOptional(enumType);
+
             if (!enumType.IsEnum)
             {
                 throw new ArgumentException("Target type is not an enum.");
@@ -170,6 +251,10 @@ namespace UniverseLanLogAnalyzer.Parser
         private static void AssignOrDefault<T>(bool success, out T arg, object[] outputs, int index)
         {
             arg = success ? (T)outputs[index]! : default!;
+            if ((arg == null) && IsOptional(typeof(T)))
+            {
+                arg = (T)Activator.CreateInstance(typeof(T))!;
+            }
         }
 
         public static bool Parse<T1>(ref string[] properties, string template, out T1 arg1)
