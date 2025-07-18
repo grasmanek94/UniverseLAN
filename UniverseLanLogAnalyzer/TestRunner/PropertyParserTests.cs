@@ -8,7 +8,12 @@ namespace UniverseLanLogAnalyzer.Tests
         [Fact]
         public void Parse_UserID_And_Type()
         {
-            string[] props = { "userID: 46781906533578385(ID_TYPE_USER)" };
+            string[] props = { 
+                "aaa: bbb(ccc)",
+                "userID: 46781906533578385(ID_TYPE_USER)",
+                "ddd: eee(fff)"
+            };
+
             ulong id = 0;
             GalaxyID.Type type = 0;
 
@@ -17,14 +22,20 @@ namespace UniverseLanLogAnalyzer.Tests
             Assert.True(result);
             Assert.Equal(46781906533578385UL, id);
             Assert.Equal(GalaxyID.Type.ID_TYPE_USER, type);
+
+            Assert.Equal("aaa: bbb(ccc)", props.First());
+            Assert.Equal("ddd: eee(fff)", props.Last());
+            Assert.Equal(2, props.Count());
         }
 
         [Fact]
         public void Parse_PersonaStateChange_WithWildcard()
         {
             string[] props = {
+                "aaa: bbb(ccc)",
                 "userID: 46781906533578385(ID_TYPE_USER)",
-                "personaStateChange: 0(*)"
+                "personaStateChange: 0(*)",
+                "ddd: eee(fff)"
             };
             ulong id = 0;
             GalaxyID.Type type = 0;
@@ -35,14 +46,20 @@ namespace UniverseLanLogAnalyzer.Tests
             Assert.True(result);
             Assert.Equal(0UL, (ulong)state);
             Assert.Equal(GalaxyID.Type.ID_TYPE_USER, type);
+
+            Assert.Equal("aaa: bbb(ccc)", props.First());
+            Assert.Equal("ddd: eee(fff)", props.Last());
+            Assert.Equal(2, props.Count());
         }
 
         [Fact]
         public void Parse_EnumFlags_FromString()
         {
             string[] props = {
+                "aaa: bbb(ccc)",
                 "userID: 46781906533578385(ID_TYPE_USER)",
-                "personaStateChange: 3(PERSONA_CHANGE_NAME|PERSONA_CHANGE_AVATAR)"
+                "personaStateChange: 3(PERSONA_CHANGE_NAME|PERSONA_CHANGE_AVATAR)",
+                "ddd: eee(fff)"
             };
 
             ulong id = 0;
@@ -57,16 +74,22 @@ namespace UniverseLanLogAnalyzer.Tests
             Assert.True(stateFlags.HasFlag(PersonaStateChange.PERSONA_CHANGE_NAME));
             Assert.True(stateFlags.HasFlag(PersonaStateChange.PERSONA_CHANGE_AVATAR));
             Assert.Equal(GalaxyID.Type.ID_TYPE_USER, type);
+
+            Assert.Equal("aaa: bbb(ccc)", props.First());
+            Assert.Equal("ddd: eee(fff)", props.Last());
+            Assert.Equal(2, props.Count());
         }
 
         [Fact]
         public void Parse_Boolean_And_Enum()
         {
             string[] props = {
+                "aaa: bbb(ccc)",
                 "lobbyType: LOBBY_TYPE_PUBLIC",
                 "maxMembers: 250",
                 "joinable: true",
-                "lobbyTopologyType: LOBBY_TOPOLOGY_TYPE_FCM"
+                "lobbyTopologyType: LOBBY_TOPOLOGY_TYPE_FCM",
+                "ddd: eee(fff)"
             };
 
             LobbyType lobbyType = 0;
@@ -82,14 +105,20 @@ namespace UniverseLanLogAnalyzer.Tests
             Assert.Equal(250, maxMembers);
             Assert.True(joinable);
             Assert.Equal(LobbyTopologyType.LOBBY_TOPOLOGY_TYPE_FCM, topology);
+
+            Assert.Equal("aaa: bbb(ccc)", props.First());
+            Assert.Equal("ddd: eee(fff)", props.Last());
+            Assert.Equal(2, props.Count());
         }
 
         [Fact]
         public void Parse_Hexadecimal_And_Enum()
         {
             string[] props = {
+                "aaa: bbb(ccc)",
                 "listenerType: LOBBY_LEFT",
-                "listener: 0xd882870"
+                "listener: 0xd882870",
+                "ddd: eee(fff)"
             };
 
             ListenerType type = 0;
@@ -100,18 +129,24 @@ namespace UniverseLanLogAnalyzer.Tests
             Assert.True(result);
             Assert.Equal(0xd882870UL, address);
             Assert.Equal(ListenerType.LOBBY_LEFT, type);
+
+            Assert.Equal("aaa: bbb(ccc)", props.First());
+            Assert.Equal("ddd: eee(fff)", props.Last());
+            Assert.Equal(2, props.Count());
         }
 
         [Fact]
         public void Parse_With_Condition_True()
         {
             string[] props = {
+                "aaa: bbb(ccc)",
                 "lobbyID: 58815465033870437(ID_TYPE_LOBBY)",
                 "data: 0xf5f410",
                 "dataSize: 5",
                 "result: true",
                 "msg: p1234567890abcdefwoeijd213d12fhgb1239fh9",
-                "something_else: 1337"
+                "something_else: 1337",
+                "ddd: eee(fff)"
             };
 
             ulong lobbyId;
@@ -133,17 +168,23 @@ namespace UniverseLanLogAnalyzer.Tests
             Assert.True(msg.Available);
             Assert.Equal("p1234567890abcdefwoeijd213d12fhgb1239fh9", msg.Value);
             Assert.Equal(1337, somethingElse);
+
+            Assert.Equal("aaa: bbb(ccc)", props.First());
+            Assert.Equal("ddd: eee(fff)", props.Last());
+            Assert.Equal(2, props.Count());
         }
 
         [Fact]
         public void Parse_With_Condition_False_Should_Skip()
         {
             string[] props = {
+                "aaa: bbb(ccc)",
                 "lobbyID: 58815465033870437(ID_TYPE_LOBBY)",
                 "data: 0xf5f410",
                 "dataSize: 5",
                 "result: false",
-                "something_else: 1337"
+                "something_else: 1337",
+                "ddd: eee(fff)"
             };
 
             ulong lobbyId;
@@ -164,19 +205,25 @@ namespace UniverseLanLogAnalyzer.Tests
             Assert.False(resultFlag);
             Assert.False(msg.Available);
             Assert.Equal(1337, somethingElse);
+
+            Assert.Equal("aaa: bbb(ccc)", props.First());
+            Assert.Equal("ddd: eee(fff)", props.Last());
+            Assert.Equal(2, props.Count());
         }
 
         [Fact]
         public void Parse_AllFieldsPresent_ShouldSucceed()
         {
             string[] props = {
+                "aaa: bbb(ccc)",
                 "lobbyType: LOBBY_TYPE_PUBLIC",
                 "maxMembers: 255",
                 "joinable: true",
                 "lobbyTopologyType: LOBBY_TOPOLOGY_TYPE_FCM",
                 "lobbyCreatedListener: 0xabcdef0099",
                 "lobbyEnteredListener: 0x1234567899",
-                "something_else: 1337"
+                "something_else: 1337",
+                "ddd: eee(fff)"
             };
 
             LobbyType lobbyType;
@@ -201,17 +248,23 @@ namespace UniverseLanLogAnalyzer.Tests
             Assert.True(enteredListenerAddress.Available);
             Assert.Equal(0x1234567899UL, enteredListenerAddress.Value);
             Assert.Equal(1337, somethingElse);
+
+            Assert.Equal("aaa: bbb(ccc)", props.First());
+            Assert.Equal("ddd: eee(fff)", props.Last());
+            Assert.Equal(2, props.Count());
         }
 
         [Fact]
         public void Parse_MissingJoinableAndTopology_ShouldSucceed()
         {
             string[] props = {
+                "aaa: bbb(ccc)",
                 "lobbyType: LOBBY_TYPE_PUBLIC",
                 "maxMembers: 255",
                 "lobbyCreatedListener: 0xabcdef0099",
                 "lobbyEnteredListener: 0x1234567899",
-                "something_else: 1337"
+                "something_else: 1337",
+                "ddd: eee(fff)"
             };
 
             LobbyType lobbyType;
@@ -232,17 +285,23 @@ namespace UniverseLanLogAnalyzer.Tests
             Assert.True(createdListenerAddress.Available);
             Assert.True(enteredListenerAddress.Available);
             Assert.Equal(1337, somethingElse);
+
+            Assert.Equal("aaa: bbb(ccc)", props.First());
+            Assert.Equal("ddd: eee(fff)", props.Last());
+            Assert.Equal(2, props.Count());
         }
 
         [Fact]
         public void Parse_MissingListeners_ShouldSucceed()
         {
             string[] props = {
+                "aaa: bbb(ccc)",
                 "lobbyType: LOBBY_TYPE_PUBLIC",
                 "maxMembers: 255",
                 "joinable: true",
                 "lobbyTopologyType: LOBBY_TOPOLOGY_TYPE_FCM",
-                "something_else: 1337"
+                "something_else: 1337",
+                "ddd: eee(fff)"
             };
 
             LobbyType lobbyType;
@@ -265,15 +324,21 @@ namespace UniverseLanLogAnalyzer.Tests
             Assert.False(createdListenerAddress.Available);
             Assert.False(enteredListenerAddress.Available);
             Assert.Equal(1337, somethingElse);
+
+            Assert.Equal("aaa: bbb(ccc)", props.First());
+            Assert.Equal("ddd: eee(fff)", props.Last());
+            Assert.Equal(2, props.Count());
         }
 
         [Fact]
         public void Parse_OnlyRequiredFields_ShouldSucceed()
         {
             string[] props = {
+                "aaa: bbb(ccc)",
                 "lobbyType: LOBBY_TYPE_PUBLIC",
                 "maxMembers: 255",
-                "something_else: 1337"
+                "something_else: 1337",
+                "ddd: eee(fff)"
             };
 
             LobbyType lobbyType;
@@ -294,6 +359,10 @@ namespace UniverseLanLogAnalyzer.Tests
             Assert.False(createdListenerAddress.Available);
             Assert.False(enteredListenerAddress.Available);
             Assert.Equal(1337, somethingElse);
+
+            Assert.Equal("aaa: bbb(ccc)", props.First());
+            Assert.Equal("ddd: eee(fff)", props.Last());
+            Assert.Equal(2, props.Count());
         }
     }
 
