@@ -34,14 +34,14 @@ namespace UniverseLanLogAnalyzer.Tests
             List<string> props = new List<string> {
                 "aaa: bbb(ccc)",
                 "userID: 46781906533578385(ID_TYPE_USER)",
-                "personaStateChange: 0(*)",
+                "personaStateChange: 0()",
                 "ddd: eee(fff)"
             };
             ulong id = 0;
             GalaxyID.Type type = 0;
             PersonaStateChange state = 0;
 
-            bool result = PropertyParser.Parse(ref props, "userID: {d}({e})\npersonaStateChange: {d}(*)", out id, out type, out state);
+            bool result = PropertyParser.Parse(ref props, "userID: {d}({e})\npersonaStateChange: {d}({*})", out id, out type, out state);
 
             Assert.True(result);
             Assert.Equal(0UL, (ulong)state);
@@ -364,6 +364,91 @@ namespace UniverseLanLogAnalyzer.Tests
             Assert.Equal("ddd: eee(fff)", props.Last());
             Assert.Equal(2, props.Count());
         }
-    }
 
+        [Fact]
+        public void Parse_EnumFlags_FromString_WithIgnore1()
+        {
+            List<string> props = new List<string> {
+                "aaa: bbb(ccc)",
+                "personaStateChange: 3(PERSONA_CHANGE_NAME|PERSONA_CHANGE_AVATAR)",
+                "ddd: eee(fff)"
+            };
+
+            PersonaStateChange stateFlags = 0;
+
+            bool result = PropertyParser.Parse(ref props, "personaStateChange: {*}({ef})", out stateFlags);
+
+            Assert.True(result);
+            Assert.True(stateFlags.HasFlag(PersonaStateChange.PERSONA_CHANGE_NAME));
+            Assert.True(stateFlags.HasFlag(PersonaStateChange.PERSONA_CHANGE_AVATAR));
+         
+            Assert.Equal("aaa: bbb(ccc)", props.First());
+            Assert.Equal("ddd: eee(fff)", props.Last());
+            Assert.Equal(2, props.Count());
+        }
+
+        [Fact]
+        public void Parse_EnumFlags_FromString_WithIgnore2()
+        {
+            List<string> props = new List<string> {
+                "aaa: bbb(ccc)",
+                "personaStateChange: 3(PERSONA_CHANGE_NAME|PERSONA_CHANGE_AVATAR)",
+                "ddd: eee(fff)"
+            };
+
+            PersonaStateChange stateFlags = 0;
+
+            bool result = PropertyParser.Parse(ref props, "personaStateChange: {d}({*})", out stateFlags);
+
+            Assert.True(result);
+            Assert.True(stateFlags.HasFlag(PersonaStateChange.PERSONA_CHANGE_NAME));
+            Assert.True(stateFlags.HasFlag(PersonaStateChange.PERSONA_CHANGE_AVATAR));
+
+            Assert.Equal("aaa: bbb(ccc)", props.First());
+            Assert.Equal("ddd: eee(fff)", props.Last());
+            Assert.Equal(2, props.Count());
+        }
+
+        [Fact]
+        public void Parse_EnumFlags_FromString_WithIgnore3()
+        {
+            List<string> props = new List<string> {
+                "aaa: bbb(ccc)",
+                "personaStateChange: 0()",
+                "ddd: eee(fff)"
+            };
+
+            PersonaStateChange stateFlags = PersonaStateChange.PERSONA_CHANGE_NAME;
+
+            bool result = PropertyParser.Parse(ref props, "personaStateChange: {d}({*})", out stateFlags);
+
+            Assert.True(result);
+            Assert.Equal(PersonaStateChange.PERSONA_CHANGE_NONE, stateFlags);
+
+            Assert.Equal("aaa: bbb(ccc)", props.First());
+            Assert.Equal("ddd: eee(fff)", props.Last());
+            Assert.Equal(2, props.Count());
+        }
+
+        [Fact]
+        public void Parse_EnumFlags_FromString_WithIgnore4()
+        {
+            List<string> props = new List<string> {
+                "aaa: bbb(ccc)",
+                "personaStateChange: 0()",
+                "ddd: eee(fff)"
+            };
+
+            PersonaStateChange stateFlags = PersonaStateChange.PERSONA_CHANGE_NAME;
+
+            bool result = PropertyParser.Parse(ref props, "personaStateChange: {*}({ef})", out stateFlags);
+
+            Assert.True(result);
+            Assert.Equal(PersonaStateChange.PERSONA_CHANGE_NONE, stateFlags);
+
+            Assert.Equal("aaa: bbb(ccc)", props.First());
+            Assert.Equal("ddd: eee(fff)", props.Last());
+            Assert.Equal(2, props.Count());
+        }
+    }
 }

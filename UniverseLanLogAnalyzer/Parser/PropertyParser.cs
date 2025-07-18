@@ -12,7 +12,7 @@ namespace UniverseLanLogAnalyzer.Parser
 
     public static class PropertyParser
     {
-        private static readonly Regex PlaceholderRegex = new(@"\{(d|x|e|ef|b|s)\}");
+        private static readonly Regex PlaceholderRegex = new(@"\{(d|x|e|ef|b|s|\*)\}");
 
         public static bool Parse(ref List<string> properties, string template, object[] outputs, Type[] types)
         {
@@ -30,10 +30,10 @@ namespace UniverseLanLogAnalyzer.Parser
                     placeholders.Add((
                         match.Groups[1].Value
                     ));
-                    return "(.+?)";
+                    return "(.*?)";
                 });
                 pattern = Regex.Escape(pattern);
-                pattern = pattern.Replace(Regex.Escape("(.+?)"), "(.+?)");
+                pattern = pattern.Replace(Regex.Escape("(.*?)"), "(.*?)");
 
                 var regex = new Regex("^" + pattern + "$");
 
@@ -81,9 +81,6 @@ namespace UniverseLanLogAnalyzer.Parser
                             _ => throw new NotSupportedException($"Unsupported placeholder: {type}")
                         };
 
-                        /* Only remove successfully parsed properties */
-                        matchedIndices.Add(i);
-
                         if (IsOptional(types[outputIndex]))
                         {
                             var innerType = types[outputIndex].GetGenericArguments()[0];
@@ -99,6 +96,9 @@ namespace UniverseLanLogAnalyzer.Parser
 
                         outputIndex++;
                     }
+
+                    /* Only remove successfully parsed properties */
+                    matchedIndices.Add(i);
 
                     break;
                 }
