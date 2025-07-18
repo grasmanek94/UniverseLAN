@@ -63,7 +63,7 @@ namespace universelan::client {
 			trace.write_all(std::format("lobbyType: {}", magic_enum::enum_name(lobbyType)));
 			trace.write_all(std::format("maxMembers: {}", maxMembers));
 #if GALAXY_BUILD_FEATURE_HAS_LOBBYTOPOLOGYTYPE_ENUM
-			trace.write_all(std::format("maxMembers: {}", joinable));
+			trace.write_all(std::format("joinable: {}", joinable));
 			trace.write_all(std::format("lobbyTopologyType: {}", magic_enum::enum_name(lobbyTopologyType)));
 #endif
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
