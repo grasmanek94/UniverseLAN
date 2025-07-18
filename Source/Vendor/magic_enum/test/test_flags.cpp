@@ -1,6 +1,6 @@
 // Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2019 - 2023 Daniil Goncharov <neargye@gmail.com>.
+// Copyright (c) 2019 - 2024 Daniil Goncharov <neargye@gmail.com>.
 //
 // Permission is hereby  granted, free of charge, to any  person obtaining a copy
 // of this software and associated  documentation files (the "Software"), to deal
@@ -32,11 +32,11 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
-#include <magic_enum.hpp>
-#include <magic_enum_flags.hpp>
-#include <magic_enum_fuse.hpp>
-#include <magic_enum_iostream.hpp>
-#include <magic_enum_utility.hpp>
+#include <magic_enum/magic_enum.hpp>
+#include <magic_enum/magic_enum_flags.hpp>
+#include <magic_enum/magic_enum_fuse.hpp>
+#include <magic_enum/magic_enum_iostream.hpp>
+#include <magic_enum/magic_enum_utility.hpp>
 
 #include <array>
 #include <cctype>
@@ -91,8 +91,8 @@ struct magic_enum::customize::enum_range<number> {
   static constexpr bool is_flags = true;
 };
 
-#include <magic_enum.hpp>
-#include <magic_enum_fuse.hpp>
+#include <magic_enum/magic_enum.hpp>
+#include <magic_enum/magic_enum_fuse.hpp>
 
 using namespace magic_enum;
 using namespace magic_enum::bitwise_operators;
@@ -720,7 +720,7 @@ TEST_CASE("constexpr_for") {
 
 #if defined(__cpp_lib_format)
 
-#include <magic_enum_format.hpp>
+#include <magic_enum/magic_enum_format.hpp>
 
 TEST_CASE("format-base") {
   REQUIRE(std::format("Test-{:~^11}.", Color::RED | Color::GREEN) == "Test-~RED|GREEN~.");

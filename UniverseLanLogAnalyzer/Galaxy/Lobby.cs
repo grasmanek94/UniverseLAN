@@ -48,7 +48,7 @@
             this.max_members = 0;
             this.joinable = true;
             this.owner_id = new GalaxyID(0);
-            this.id = new GalaxyID(id, GalaxyID.Type.Lobby);
+            this.id = new GalaxyID(id, GalaxyID.Type.ID_TYPE_LOBBY);
             this.topology_type = topology_type;
             this.type = type;
         }

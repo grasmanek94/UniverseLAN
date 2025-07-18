@@ -16,7 +16,7 @@ jobs:
 
     name: "${{ matrix.config.vs }}"
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Build Win32
       shell: bash
@@ -43,6 +43,5 @@ jobs:
         ctest --output-on-failure -C Debug
 
     - name: Bazel Test
-      continue-on-error: true
       working-directory: test
       run: bazelisk test //... --config=ci

@@ -1,6 +1,6 @@
 // Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2019 - 2023 Daniil Goncharov <neargye@gmail.com>.
+// Copyright (c) 2019 - 2024 Daniil Goncharov <neargye@gmail.com>.
 //
 // Permission is hereby  granted, free of charge, to any  person obtaining a copy
 // of this software and associated  documentation files (the "Software"), to deal
@@ -23,14 +23,13 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
-#undef  MAGIC_ENUM_RANGE_MIN
+#define MAGIC_ENUM_NO_CHECK_REFLECTED_ENUM
 #define MAGIC_ENUM_RANGE_MIN -120
-#undef  MAGIC_ENUM_RANGE_MAX
 #define MAGIC_ENUM_RANGE_MAX 120
-#include <magic_enum.hpp>
-#include <magic_enum_fuse.hpp>
-#include <magic_enum_iostream.hpp>
-#include <magic_enum_utility.hpp>
+#include <magic_enum/magic_enum.hpp>
+#include <magic_enum/magic_enum_fuse.hpp>
+#include <magic_enum/magic_enum_iostream.hpp>
+#include <magic_enum/magic_enum_utility.hpp>
 
 #include <array>
 #include <cctype>
@@ -510,6 +509,11 @@ class a_foo2 {
 };
 } // namespace
 
+enum class LargeNumbers {
+    First = -1024,
+    Second = 1024
+};
+
 TEST_CASE("enum_name") {
   SECTION("automatic storage") {
     constexpr Color cr = Color::RED;
@@ -645,6 +649,13 @@ TEST_CASE("enum_name") {
 
     REQUIRE(enum_name<Binary::ONE>() == "ONE");
     REQUIRE(enum_name<MaxUsedAsInvalid::ONE>() == "ONE");
+  }
+
+  SECTION("empty if the value is out of range") {
+    const auto ln_value = GENERATE(LargeNumbers::First, LargeNumbers::Second);
+    const auto ln_name = enum_name(ln_value);
+
+    REQUIRE(ln_name.empty());
   }
 }
 
@@ -1165,7 +1176,7 @@ TEST_CASE("multdimensional-switch-case") {
 
 #if defined(__cpp_lib_format)
 
-#include <magic_enum_format.hpp>
+#include <magic_enum/magic_enum_format.hpp>
 
 TEST_CASE("format-base") {
   REQUIRE(std::format("{}", Color::RED) == "red");
@@ -1234,4 +1245,44 @@ TEST_CASE("enum_prev_value_circular") {
   REQUIRE(enum_prev_value_circular(Color::RED, -2) == Color::BLUE);
   REQUIRE(enum_prev_value_circular(Color::RED, -3) == Color::RED);
   REQUIRE(enum_prev_value_circular(Color::RED, -4) == Color::GREEN);
+}
+
+TEST_CASE("valid_enum") {
+  //enum Forward1;
+  enum Forward2 : uint32_t;
+  enum class Forward3;
+  enum class Forward4 : uint32_t;
+  enum Empty1 {};
+  enum Empty2 : uint32_t {};
+  enum class Empty3 {};
+  enum class Empty4 : uint32_t {};
+
+  //REQUIRE(magic_enum::detail::is_reflected_v<Forward1, as_flags<true>>);
+  //REQUIRE(magic_enum::detail::is_reflected_v<Forward1, as_flags<false>>);
+  REQUIRE(magic_enum::detail::is_reflected_v<Forward2, as_flags<true>>);
+  REQUIRE(magic_enum::detail::is_reflected_v<Forward2, as_flags<false>>);
+  REQUIRE(magic_enum::detail::is_reflected_v<Forward3, as_flags<true>>);
+  REQUIRE(magic_enum::detail::is_reflected_v<Forward3, as_flags<false>>);
+  REQUIRE(magic_enum::detail::is_reflected_v<Forward4, as_flags<true>>);
+  REQUIRE(magic_enum::detail::is_reflected_v<Forward4, as_flags<false>>);
+  REQUIRE(magic_enum::detail::is_reflected_v<Empty1, as_flags<true>>);
+  REQUIRE(magic_enum::detail::is_reflected_v<Empty1, as_flags<false>>);
+  REQUIRE(magic_enum::detail::is_reflected_v<Empty2, as_flags<true>>);
+  REQUIRE(magic_enum::detail::is_reflected_v<Empty2, as_flags<false>>);
+  REQUIRE(magic_enum::detail::is_reflected_v<Empty3, as_flags<true>>);
+  REQUIRE(magic_enum::detail::is_reflected_v<Empty3, as_flags<false>>);
+  REQUIRE(magic_enum::detail::is_reflected_v<Empty4, as_flags<true>>);
+  REQUIRE(magic_enum::detail::is_reflected_v<Empty4, as_flags<false>>);
+}
+
+TEST_CASE("enum_reflected") {
+  REQUIRE(enum_reflected<number>(number::one));
+  REQUIRE(enum_reflected<number>(number::three));
+  REQUIRE_FALSE(enum_reflected<number>(number::four));
+  REQUIRE(enum_reflected<number>(100));
+  REQUIRE(enum_reflected<number>(101));
+  REQUIRE(enum_reflected<number>(234));
+  REQUIRE(enum_reflected<number>(300));
+  REQUIRE_FALSE(enum_reflected<number>(400));
+  REQUIRE_FALSE(enum_reflected<number>(500));
 }

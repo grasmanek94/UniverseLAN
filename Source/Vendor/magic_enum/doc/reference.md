@@ -10,6 +10,7 @@
 * [`enum_entries` obtains pair (value enum, string enum name) sequence.](#enum_entries)
 * [`enum_index` obtains index in enum value sequence from enum value.](#enum_index)
 * [`enum_contains` checks whether enum contains enumerator with such value.](#enum_contains)
+* [`enum_reflected` returns true if the enum value is in the range of values that can be reflected..](#enum_reflected)
 * [`enum_type_name` returns type name of enum.](#enum_type_name)
 * [`enum_fuse` returns a bijective mix of enum values.](#enum_fuse)
 * [`enum_switch` allows runtime enum value transformation to constexpr context.](#enum_switch)
@@ -316,6 +317,18 @@ constexpr bool enum_contains(string_view value, BinaryPredicate p) noexcept(is_n
   magic_enum::enum_contains<Color>("fda"); // -> false
   ```
 
+## `enum_reflected`
+
+```cpp
+template <typename E>
+constexpr bool enum_reflected(E value) noexcept;
+
+template <typename E>
+constexpr bool enum_reflected(underlying_type_t<E> value) noexcept;
+```
+
+* Returns true if the enum value is in the range of values that can be reflected.
+
 ## `enum_type_name`
 
 ```cpp
@@ -431,6 +444,19 @@ constexpr bool enum_flags_contains(string_view value, BinaryPredicate p) noexcep
 
 * You should add the required file `<magic_enum_flags.hpp>`.
 
+* For enum-flags add `is_flags` to specialization `enum_range` for necessary enum type. Specialization of `enum_range` must be injected in `namespace magic_enum::customize`.
+  ```cpp
+  enum class Directions { Up = 1 << 1, Down = 1 << 2, Right = 1 << 3, Left = 1 << 4 };
+  template <>
+  struct magic_enum::customize::enum_range<Directions> {
+    static constexpr bool is_flags = true;
+  };
+  ```
+
+  * `MAGIC_ENUM_RANGE_MAX/MAGIC_ENUM_RANGE_MIN` does not affect the maximum amount of flags.
+
+  * If enum is declared as flags, then it will not reflect the value of zero and is logically AND.
+
 * Examples
 
   ```cpp
@@ -439,15 +465,18 @@ constexpr bool enum_flags_contains(string_view value, BinaryPredicate p) noexcep
     Down = 2,
     Up = 4,
     Right = 8,
+    LeftAndDown = 3
   };
   template <>
   struct magic_enum::customize::enum_range<Directions> {
     static constexpr bool is_flags = true;
   };
 
-  magic_enum::enum_flags_name(Directions::Up | Directions::Right); // directions_name -> "Directions::Up|Directions::Right"
+  magic_enum::enum_flags_name(Directions::Up | Directions::Right); // -> "Directions::Up|Directions::Right"
+  magic_enum::enum_flags_name(Directions::LeftAndDown); // -> "Directions::Left|Directions::Down"
 
   magic_enum::enum_flags_contains(Directions::Up | Directions::Right); // -> true
+  magic_enum::enum_flags_contains(Directions::LeftAndDown); // -> false
 
   magic_enum::enum_flags_cast(3); // -> "Directions::Left|Directions::Down"
 
@@ -549,7 +578,7 @@ basic_ostream<Char, Traits>& operator<<(basic_ostream<Char, Traits>& os, optiona
 * Examples
 
   ```cpp
-  using namespace magic_enum::ostream_operators; // out-of-the-box ostream operators for enums.
+  using magic_enum::iostream_operators::operator<<; // out-of-the-box ostream operators for enums.
   Color color = Color::BLUE;
   std::cout << color << std::endl; // "BLUE"
   ```
@@ -568,7 +597,7 @@ basic_istream<Char, Traits>& operator>>(basic_istream<Char, Traits>& is, E& valu
 * Examples
 
   ```cpp
-  using namespace magic_enum::istream_operators; // out-of-the-box istream operators for enums.
+  using magic_enum::iostream_operators::operator>>; // out-of-the-box istream operators for enums.
   Color color;
   std::cin >> color;
   ```
@@ -696,7 +725,7 @@ struct array {
   color_rgb_array[Color::RED] = {255, 0, 0};
   color_rgb_array[Color::GREEN] = {0, 255, 0};
   color_rgb_array[Color::BLUE] = {0, 0, 255};
-  std::get<Color::BLUE>(color_rgb_array) // -> RGB{0, 0, 255}
+  magic_enum::containers::get<Color::BLUE>(color_rgb_array) // -> RGB{0, 0, 255}
   ```
 
 ## `containers::bitset`

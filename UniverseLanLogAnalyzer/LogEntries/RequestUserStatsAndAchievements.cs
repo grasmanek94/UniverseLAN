@@ -10,13 +10,12 @@ namespace UniverseLanLogAnalyzer.LogEntries
 
         public RequestUserStatsAndAchievements(Base original) : base(original)
         {
-
-            foreach (var entry in Properties)
+            var temp = Parser.Arguments.ParseGalaxyID("userID", this);
+            if (temp == null)
             {
-                string trimmed = entry.Trim();
-
+                throw new InterceptorEntryInitException(this, "userID");
             }
-
+            UserID = temp;
         }
     }
 }

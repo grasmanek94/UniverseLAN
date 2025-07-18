@@ -1,6 +1,6 @@
 // Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2019 - 2023 Daniil Goncharov <neargye@gmail.com>.
+// Copyright (c) 2019 - 2024 Daniil Goncharov <neargye@gmail.com>.
 //
 // Permission is hereby  granted, free of charge, to any  person obtaining a copy
 // of this software and associated  documentation files (the "Software"), to deal
@@ -96,8 +96,8 @@ constexpr bool operator==(MyStringView lhs, MyStringView rhs) {
 #define MAGIC_ENUM_USING_ALIAS_STRING using string = MyString;
 #define MAGIC_ENUM_USING_ALIAS_STRING_VIEW using string_view = MyStringView;
 
-#include <magic_enum.hpp>
-#include <magic_enum_flags.hpp>
+#include <magic_enum/magic_enum.hpp>
+#include <magic_enum/magic_enum_flags.hpp>
 using namespace magic_enum;
 using namespace magic_enum::bitwise_operators;
 

@@ -1,6 +1,6 @@
 // Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2019 - 2023 Daniil Goncharov <neargye@gmail.com>.
+// Copyright (c) 2019 - 2024 Daniil Goncharov <neargye@gmail.com>.
 // Copyright (c) 2022 - 2023 Bela Schaum <schaumb@gmail.com>.
 //
 // Permission is hereby  granted, free of charge, to any  person obtaining a copy
@@ -33,8 +33,8 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
-#include <magic_enum_containers.hpp>
-#include <magic_enum_iostream.hpp>
+#include <magic_enum/magic_enum_containers.hpp>
+#include <magic_enum/magic_enum_iostream.hpp>
 
 #include <functional>
 
@@ -88,13 +88,13 @@ TEST_CASE("containers_array") {
 
   constexpr auto colors = magic_enum::enum_values<Color>();
 
-  std::ignore = std::get<0>(compare_before);
-  std::ignore = std::get<1>(compare_before);
-  std::ignore = std::get<2>(compare_before);
+  std::ignore = magic_enum::containers::get<0>(compare_before);
+  std::ignore = magic_enum::containers::get<1>(compare_before);
+  std::ignore = magic_enum::containers::get<2>(compare_before);
 
-  std::ignore = std::get<Color::RED>(compare_before);
-  std::ignore = std::get<Color::GREEN>(compare_before);
-  std::ignore = std::get<Color::BLUE>(compare_before);
+  std::ignore = magic_enum::containers::get<Color::RED>(compare_before);
+  std::ignore = magic_enum::containers::get<Color::GREEN>(compare_before);
+  std::ignore = magic_enum::containers::get<Color::BLUE>(compare_before);
 
   REQUIRE(std::make_pair(colors[0], color_rgb_container_int[colors[0]]) == std::make_pair<Color, std::uint8_t>(Color::RED, 1U));
   REQUIRE(std::make_pair(colors[1], color_rgb_container_int[colors[1]]) == std::make_pair<Color, std::uint8_t>(Color::GREEN, 4U));
@@ -107,22 +107,17 @@ TEST_CASE("containers_array") {
   constexpr magic_enum::containers::array<Color, std::uint8_t> compare_after{{1U, 2U, 4U}};
   REQUIRE(color_rgb_container_int == compare_after);
 
-  std::ignore = std::get<0>(compare_after);
-  std::ignore = std::get<1>(compare_after);
-  std::ignore = std::get<2>(compare_after);
+  std::ignore = magic_enum::containers::get<0>(compare_after);
+  std::ignore = magic_enum::containers::get<1>(compare_after);
+  std::ignore = magic_enum::containers::get<2>(compare_after);
 
-  std::ignore = std::get<Color::RED>(compare_after);
-  std::ignore = std::get<Color::GREEN>(compare_after);
-  std::ignore = std::get<Color::BLUE>(compare_after);
+  std::ignore = magic_enum::containers::get<Color::RED>(compare_after);
+  std::ignore = magic_enum::containers::get<Color::GREEN>(compare_after);
+  std::ignore = magic_enum::containers::get<Color::BLUE>(compare_after);
 
   REQUIRE(std::make_pair(colors[0], color_rgb_container_int[colors[0]]) == std::make_pair<Color, std::uint8_t>(Color::RED, 1U));
   REQUIRE(std::make_pair(colors[1], color_rgb_container_int[colors[1]]) == std::make_pair<Color, std::uint8_t>(Color::GREEN, 2U));
   REQUIRE(std::make_pair(colors[2], color_rgb_container_int[colors[2]]) == std::make_pair<Color, std::uint8_t>(Color::BLUE, 4U));
-
-  auto empty = magic_enum::containers::array<Empty, std::nullptr_t>();
-  REQUIRE(empty.empty());
-  REQUIRE(empty.size() == 0);
-  REQUIRE(magic_enum::enum_count<Empty>() == empty.size());
 
   auto color_rgb_container = magic_enum::containers::array<Color, RGB>();
   REQUIRE_FALSE(color_rgb_container.empty());
@@ -145,9 +140,9 @@ TEST_CASE("containers_array") {
   REQUIRE(color_rgb_container.front() == RGB{color_max, 0, 0});
   REQUIRE(color_rgb_container.back() == RGB{0, 0, color_max});
 
-  REQUIRE(std::get<Color::RED>(color_rgb_container) == RGB{color_max, 0, 0});
-  REQUIRE(std::get<Color::GREEN>(color_rgb_container) == RGB{0, color_max, 0});
-  REQUIRE(std::get<Color::BLUE>(color_rgb_container) == RGB{0, 0, color_max});
+  REQUIRE(magic_enum::containers::get<Color::RED>(color_rgb_container) == RGB{color_max, 0, 0});
+  REQUIRE(magic_enum::containers::get<Color::GREEN>(color_rgb_container) == RGB{0, color_max, 0});
+  REQUIRE(magic_enum::containers::get<Color::BLUE>(color_rgb_container) == RGB{0, 0, color_max});
 
   auto iterator = color_rgb_container.begin();
   REQUIRE_FALSE(check_const(iterator));
@@ -270,6 +265,12 @@ TEST_CASE("containers_set") {
   REQUIRE_FALSE(color_set.empty());
   REQUIRE(color_set.size() == 3);
   REQUIRE(magic_enum::enum_count<Color>() == color_set.size());
+  color_set.erase(Color::RED);
+  color_set.erase(Color::GREEN);
+  REQUIRE(magic_enum::enum_count<Color>() - 2 == color_set.size());
+  REQUIRE(color_set.count(Color::RED) == 0);
+  REQUIRE_FALSE(color_set.contains(Color::GREEN));
+  REQUIRE(color_set.contains(Color::BLUE));
 
   auto color_set_compare = magic_enum::containers::set<Color>();
   color_set_compare.insert(Color::BLUE);
@@ -281,7 +282,7 @@ TEST_CASE("containers_set") {
   REQUIRE(color_set_filled.size() == 3);
   REQUIRE(magic_enum::enum_count<Color>() == color_set_filled.size());
 
-  magic_enum::containers::set color_set_not_const {Color::RED, Color::GREEN, Color::BLUE};
+  magic_enum::containers::set color_set_not_const = {Color::RED, Color::GREEN, Color::BLUE};
   REQUIRE_FALSE(color_set_not_const.empty());
   REQUIRE(color_set_not_const.size() == 3);
   REQUIRE(magic_enum::enum_count<Color>() == color_set_not_const.size());

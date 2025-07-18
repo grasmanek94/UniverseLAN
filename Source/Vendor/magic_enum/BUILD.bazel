@@ -1,6 +1,3 @@
-load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//bazel:copts.bzl", "COPTS")
-
 licenses(["notice"])
 
 exports_files(["LICENSE"])
@@ -9,7 +6,6 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "magic_enum",
-    hdrs = glob(["include/*.hpp"]),
-    copts = COPTS,
+    hdrs = glob(["include/magic_enum/*.hpp"]),
     includes = ["include"],
 )

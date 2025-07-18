@@ -55,30 +55,102 @@ namespace UniverseLanLogAnalyzer.Parser
                     continue;
                 }
 
-                if(!key.Equals(prefix, StringComparison.Ordinal))
+                if (!key.Equals(prefix, StringComparison.Ordinal))
                 {
                     continue;
                 }
 
                 if (type_str == null)
                 {
-                    throw new InterceptorArgumentParsingException(key, prop);
+                    throw new InterceptorArgumentParsingException(entry, key, prop);
                 }
 
                 if (!Enum.TryParse(type_str, out type))
                 {
-                    throw new InterceptorArgumentParsingException(key, prop);
+                    throw new InterceptorArgumentParsingException(entry, key, prop);
                 }
 
-                if(!ulong.TryParse(value, out id))
+                if (!ulong.TryParse(value, out id))
                 {
-                    throw new InterceptorArgumentParsingException(key, prop);
+                    throw new InterceptorArgumentParsingException(entry, key, prop);
                 }
 
                 return new GalaxyID(id, type);
             }
 
             return null;
+        }
+
+        public static ListenerTypeInfo? ParseListenerRegister(LogEntries.Base entry)
+        {
+            ListenerTypeInfo? listener_info = null;
+            string prefix = "listenerType";
+
+            foreach (var prop in entry.Properties)
+            {
+                string key = string.Empty;
+                string value = string.Empty;
+                string? type_str = null;
+
+                ulong id = 0;
+                ListenerType type;
+
+                if (!TryParseKeyValueExtra(prop, out key, out value, out type_str))
+                {
+                    if (listener_info == null)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        throw new InterceptorArgumentParsingException(entry, key, prop);
+                    }
+                }
+
+                if (!key.Equals(prefix, StringComparison.Ordinal))
+                {
+                    if (listener_info == null)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        throw new InterceptorArgumentParsingException(entry, key, prop);
+                    }
+                }
+
+                if (!ulong.TryParse(value, out id))
+                {
+                    throw new InterceptorArgumentParsingException(entry, key, prop);
+                }
+
+                if (listener_info == null)
+                {
+                    if (type_str == null)
+                    {
+                        throw new InterceptorArgumentParsingException(entry, key, prop);
+                    }
+
+                    if (!Enum.TryParse(type_str, out type))
+                    {
+                        throw new InterceptorArgumentParsingException(entry, key, prop);
+                    }
+
+                    listener_info = new();
+                    listener_info.Type = type;
+                    listener_info.RawTypeId = id;
+
+                    prefix = "listener";
+                    continue;
+                }
+                else
+                {
+                    listener_info.ListenerAddress = id;
+                    return listener_info;
+                }
+            }
+
+            return listener_info;
         }
     }
 }

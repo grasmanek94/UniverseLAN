@@ -6,8 +6,14 @@
 #include <SafeStringCopy.hxx>
 
 #include <magic_enum/magic_enum.hpp>
+#include <magic_enum/magic_enum_flags.hpp>
 
 #include <format>
+
+template <>
+struct magic_enum::customize::enum_range<galaxy::api::IOperationalStateChangeListener::OperationalState> {
+	static constexpr bool is_flags = true;
+};
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -52,7 +58,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("operationalState: {}", operationalState));
+			trace.write_all(std::format("operationalState: {}({})", operationalState, magic_enum::enum_flags_name((OperationalState)operationalState)));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnOperationalStateChanged(operationalState));
