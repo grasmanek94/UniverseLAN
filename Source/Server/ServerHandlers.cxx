@@ -3,6 +3,7 @@
 #include "Peer.hxx"
 
 #include <Networking/Networking.hxx>
+#include <SafeStringCopy.hxx>
 #include <Tracer.hxx>
 
 #include <format>
@@ -12,16 +13,7 @@
 
 namespace universelan::server {
 	using namespace galaxy::api;
-
-	namespace {
-		std::string bytes_to_hex(const void* data, uint32_t dataSize) {
-			std::string hex;
-			for (uint32_t i = 0; i < dataSize; ++i) {
-				hex += std::format("{:02x}", ((const unsigned char*)data)[i]);
-			}
-			return hex;
-		}
-	}
+	using namespace universelan::util;
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAcceptedMessage>& data) { tracer::Trace trace{ "::ConnectionAcceptedMessage" }; REQUIRES_AUTHENTICATION(peer); /* Not handled in server */ }
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<FileShareResponseMessage>& data) { tracer::Trace trace{ "::FileShareResponseMessage" }; REQUIRES_AUTHENTICATION(peer); }

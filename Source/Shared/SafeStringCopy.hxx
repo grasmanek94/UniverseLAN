@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <format>
 #include <string>
 
 namespace universelan::util {
@@ -99,5 +100,13 @@ namespace universelan::util {
 			return "!!(nullptr)";
 		}
 		return std::string(buffer, std::min((size_t)buffer_len, strnlen_s(buffer, buffer_len)));
+	}
+
+	inline std::string bytes_to_hex(const void* data, uint32_t dataSize) {
+		std::string hex;
+		for (uint32_t i = 0; i < dataSize; ++i) {
+			hex += std::format("{:02x}", ((const unsigned char*)data)[i]);
+		}
+		return hex;
 	}
 }

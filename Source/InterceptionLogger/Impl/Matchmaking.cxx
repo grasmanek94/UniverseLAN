@@ -2,6 +2,8 @@
 
 #include "Listeners/MatchmakingListener.hxx"
 
+#include <ConstHash.hxx>
+#include <filesystem_container/filesystem_container_utils.hxx>
 #include <GalaxyID.hxx>
 #include <Tracer.hxx>
 #include <SafeStringCopy.hxx>
@@ -12,6 +14,7 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
+	using namespace universelan::util;
 
 	namespace {
 		const auto TraceContext = tracer::Trace::IMATCHMAKING;
@@ -738,6 +741,7 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all(std::format("result: {}", result));
+			trace.write_all(std::format("msg: {}", util::safe_fix_null_char_ptr_annotate((const char*)data, dataSize)));
 		}
 
 		return result;

@@ -14,17 +14,10 @@
 
 namespace universelan::client {
 	using namespace galaxy::api;
+	using namespace universelan::util;
 
 	namespace {
 		const auto TraceContext = tracer::Trace::INETWORKING;
-
-		std::string bytes_to_hex(const void* data, uint32_t dataSize) {
-			std::string hex;
-			for (uint32_t i = 0; i < dataSize; ++i) {
-				hex += std::format("{:02x}", ((const unsigned char*)data)[i]);
-			}
-			return hex;
-		}
 	}
 
 	NetworkingImpl::NetworkingImpl(FuncT::F intf, IListenerRegistrar* notifications, char networking_type_letter) :
