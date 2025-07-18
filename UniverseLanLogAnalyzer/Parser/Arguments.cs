@@ -51,7 +51,7 @@ namespace UniverseLanLogAnalyzer.Parser
         */
         public static void ParseOperationalState(LogEntries.Base entry, out OperationalState state)
         {
-            if (!PropertyParser.Parse(ref entry.Properties, "operationalState: {d}({ef})", out long num, out state))
+            if (!PropertyParser.Parse(ref entry.Properties, "operationalState: {*}({ef})", out state))
             {
                 throw new InterceptorArgumentParsingException(entry, "operationalState");
             }
