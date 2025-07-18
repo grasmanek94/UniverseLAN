@@ -12,28 +12,23 @@ namespace UniverseLanLogAnalyzer.Parser
 
     public static class PropertyParser
     {
-        private static readonly Regex PlaceholderRegex
-            = new(@"\{(d|x|e|ef|b|s)(:([a-zA-Z_][a-zA-Z0-9_]*))?(\?([a-zA-Z_][a-zA-Z0-9_]*)==(.+?))?\}");
+        private static readonly Regex PlaceholderRegex = new(@"\{(d|x|e|ef|b|s)\}");
 
         public static bool Parse(ref string[] properties, string template, object[] outputs, Type[] types)
         {
             var lines = template.Split('\n');
             var matchedIndices = new HashSet<int>();
             var outputIndex = 0;
-            var context = new Dictionary<string, object>();
 
             foreach (var line in lines)
             {
-                var placeholders = new List<(string type, string? name, string? condVar, string? condVal)>();
+                var placeholders = new List<string>();
 
                 string pattern = line;
                 pattern = PlaceholderRegex.Replace(pattern, match =>
                 {
                     placeholders.Add((
-                        match.Groups[1].Value,
-                        match.Groups[3].Success ? match.Groups[3].Value : null,
-                        match.Groups[5].Success ? match.Groups[5].Value : null,
-                        match.Groups[6].Success ? match.Groups[6].Value : null
+                        match.Groups[1].Value
                     ));
                     return "(.+?)";
                 });
@@ -58,32 +53,11 @@ namespace UniverseLanLogAnalyzer.Parser
                         continue;
                     }
 
-                    // Check condition
-                    bool skip = false;
-                    foreach (var (_, _, condVar, condVal) in placeholders)
-                    {
-                        if (condVar != null)
-                        {
-                            if (!context.TryGetValue(condVar, out var actualVal) ||
-                                !actualVal.ToString().Equals(condVal, StringComparison.OrdinalIgnoreCase))
-                            {
-                                skip = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (skip)
-                    {
-                        continue;
-                    }
-
                     matched = true;
-                    matchedIndices.Add(i);
 
                     for (int j = 0; j < placeholders.Count; j++)
                     {
-                        var (type, name, condVar, _) = placeholders[j];
+                        var type = placeholders[j];
                         var value = match.Groups[j + 1].Value;
 
                         if (type == "*")
@@ -109,6 +83,9 @@ namespace UniverseLanLogAnalyzer.Parser
                                 _ => throw new NotSupportedException($"Unsupported placeholder: {type}")
                             };
 
+                            /* Only remove successfully parsed properties */
+                            matchedIndices.Add(i);
+
                             if (IsOptional(types[outputIndex]))
                             {
                                 var innerType = types[outputIndex].GetGenericArguments()[0];
@@ -122,16 +99,17 @@ namespace UniverseLanLogAnalyzer.Parser
                                 outputs[outputIndex] = parsed;
                             }
 
-                            context[name ?? $"arg{{outputIndex}}"] = parsed;
                             outputIndex++;
                         }
                         catch (Exception e)
                         {
-                            if (e is NotSupportedException) { throw; }
-                            if (!IsOptional(types[outputIndex])) { throw; }
+                            if (e is FormatException && IsOptional(types[outputIndex]))
+                            {
+                                outputIndex++;
+                                continue;
+                            }
 
-                            outputIndex++;
-                            continue;
+                            throw;
                         }
                     }
 
@@ -142,11 +120,11 @@ namespace UniverseLanLogAnalyzer.Parser
                 {
                     // Check if all placeholders are for Optional<T>
                     bool allOptional = true;
-                    foreach (var (_, _, _, _) in placeholders)
+                    foreach (var _ in placeholders)
                     {
                         if (outputIndex >= types.Length) { continue; }
                         var type = types[outputIndex];
-                        if (!(type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Optional<>)))
+                        if (!IsOptional(type))
                         {
                             allOptional = false;
                             break;

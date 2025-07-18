@@ -122,7 +122,7 @@ namespace UniverseLanLogAnalyzer.Tests
             Optional<string> msg;
             int somethingElse;
 
-            bool result = PropertyParser.Parse(ref props, "lobbyID: {d}({e})\ndata: {x}\ndataSize: {d}\nresult: {b:result}\nmsg: {s?result==true}\nsomething_else: {d}", out lobbyId, out lobbyIdType, out data, out dataSize, out resultFlag, out msg, out somethingElse);
+            bool result = PropertyParser.Parse(ref props, "lobbyID: {d}({e})\ndata: {x}\ndataSize: {d}\nresult: {b}\nmsg: {s}\nsomething_else: {d}", out lobbyId, out lobbyIdType, out data, out dataSize, out resultFlag, out msg, out somethingElse);
             
             Assert.True(result);
             Assert.Equal(58815465033870437UL, lobbyId);
