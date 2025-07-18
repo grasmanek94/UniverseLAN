@@ -37,6 +37,11 @@ namespace UniverseLanLogAnalyzer.Parser
                     line = reader.ReadLine();
                 }
             }
+
+            foreach (var entry in StateMachine.Entries)
+            {
+                entry.PostInit();
+            }
         }
 
         private LogEntries.Base? GetLastRelativeEntryAtNestingLevel(LogEntries.Base current)

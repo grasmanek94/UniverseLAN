@@ -6,16 +6,20 @@ namespace UniverseLanLogAnalyzer.LogEntries
     {
         public static readonly string MATCH = "universelan::client::StatsImpl::RequestUserStatsAndAchievements";
 
-        public GalaxyID UserID { get; set; }
+        public GalaxyID? UserID { get; set; }
 
         public RequestUserStatsAndAchievements(Base original) : base(original)
         {
-            var temp = Parser.Arguments.ParseGalaxyID("userID", this);
-            if (temp == null)
+
+        }
+
+        public override void PostInit()
+        {
+            UserID = Parser.Arguments.ParseGalaxyID("userID", this);
+            if (UserID == null)
             {
                 throw new InterceptorEntryInitException(this, "userID");
             }
-            UserID = temp;
         }
     }
 }

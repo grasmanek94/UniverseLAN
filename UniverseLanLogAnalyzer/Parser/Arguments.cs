@@ -1,4 +1,5 @@
-﻿using UniverseLanLogAnalyzer.Galaxy;
+﻿using System.Globalization;
+using UniverseLanLogAnalyzer.Galaxy;
 
 namespace UniverseLanLogAnalyzer.Parser
 {
@@ -139,7 +140,7 @@ namespace UniverseLanLogAnalyzer.Parser
                 }
                 else
                 {
-                    if (!ulong.TryParse(value, out id))
+                    if (!ulong.TryParse(value.Substring(2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out id))
                     {
                         throw new InterceptorArgumentParsingException(entry, key, prop);
                     }

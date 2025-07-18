@@ -4,16 +4,19 @@
     {
         public static readonly string MATCH = "universelan::client::ListenerRegistrarImpl::Register";
 
-        public Galaxy.ListenerTypeInfo Info { get; set; }
+        public Galaxy.ListenerTypeInfo? Info { get; set; }
 
         public ListenerRegistrarRegister(Base original) : base(original)
         {
-            var temp = Parser.Arguments.ParseListenerRegister(this);
-            if (temp == null)
+        }
+
+        public override void PostInit()
+        {
+            Info = Parser.Arguments.ParseListenerRegister(this);
+            if (Info == null)
             {
                 throw new InterceptorEntryInitException(this, "ListenerTypeInfo");
             }
-            Info = temp;
         }
     }
 }

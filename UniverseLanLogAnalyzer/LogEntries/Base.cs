@@ -42,6 +42,8 @@ namespace UniverseLanLogAnalyzer.LogEntries
             this.StateMachine = original.StateMachine;
         }
 
+        public virtual void PostInit() { }
+
         public override string ToString()
         {
             return $"{Function}@{Address:X}[{NestingLevel}]";
