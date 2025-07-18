@@ -6,8 +6,14 @@
 #include <SafeStringCopy.hxx>
 
 #include <magic_enum/magic_enum.hpp>
+#include <magic_enum/magic_enum_flags.hpp>
 
 #include <format>
+
+template <>
+struct magic_enum::customize::enum_range<galaxy::api::IPersonaDataChangedListener::PersonaStateChange> {
+	static constexpr bool is_flags = true;
+};
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -23,7 +29,8 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("personaStateChange: {}", personaStateChange));
+			trace.write_all(std::format("personaStateChange: {}({})", personaStateChange,
+				magic_enum::enum_flags_name((PersonaStateChange)personaStateChange)));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnPersonaDataChanged(userID, personaStateChange));
