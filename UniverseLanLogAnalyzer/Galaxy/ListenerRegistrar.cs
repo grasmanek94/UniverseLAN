@@ -78,7 +78,6 @@
     public class ListenerTypeInfo
     {
         public ListenerType Type { get; set; }
-        public ulong RawTypeId { get; set; }
         public ulong ListenerAddress { get; set; }
     }
 }

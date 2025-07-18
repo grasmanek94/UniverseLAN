@@ -90,12 +90,12 @@ namespace UniverseLanLogAnalyzer.Parser
             {
                 string key = string.Empty;
                 string value = string.Empty;
-                string? type_str = null;
+                string? unused = null;
 
                 ulong id = 0;
                 ListenerType type;
 
-                if (!TryParseKeyValueExtra(prop, out key, out value, out type_str))
+                if (!TryParseKeyValueExtra(prop, out key, out value, out unused))
                 {
                     if (listener_info == null)
                     {
@@ -119,38 +119,37 @@ namespace UniverseLanLogAnalyzer.Parser
                     }
                 }
 
-                if (!ulong.TryParse(value, out id))
-                {
-                    throw new InterceptorArgumentParsingException(entry, key, prop);
-                }
-
                 if (listener_info == null)
                 {
-                    if (type_str == null)
+                    if (value == null)
                     {
                         throw new InterceptorArgumentParsingException(entry, key, prop);
                     }
 
-                    if (!Enum.TryParse(type_str, out type))
+                    if (!Enum.TryParse(value, out type))
                     {
                         throw new InterceptorArgumentParsingException(entry, key, prop);
                     }
 
                     listener_info = new();
                     listener_info.Type = type;
-                    listener_info.RawTypeId = id;
 
                     prefix = "listener";
                     continue;
                 }
                 else
                 {
+                    if (!ulong.TryParse(value, out id))
+                    {
+                        throw new InterceptorArgumentParsingException(entry, key, prop);
+                    }
+
                     listener_info.ListenerAddress = id;
                     return listener_info;
                 }
             }
 
-            return listener_info;
+            return null;
         }
     }
 }
