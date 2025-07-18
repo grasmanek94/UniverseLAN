@@ -344,5 +344,46 @@ namespace UniverseLanLogAnalyzer.Parser
 
             return result;
         }
+
+        public static bool Parse<T1, T2, T3, T4, T5, T6, T7, T8, T9>(ref string[] properties, string template, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5, out T6 arg6, out T7 arg7, out T8 arg8, out T9 arg9)
+        {
+            Type[] types = new[] { typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7), typeof(T8), typeof(T9) };
+
+            object[] outputs = new object[9];
+            bool result = Parse(ref properties, template, outputs, types);
+
+            AssignOrDefault(result, out arg1, outputs, 0);
+            AssignOrDefault(result, out arg2, outputs, 1);
+            AssignOrDefault(result, out arg3, outputs, 2);
+            AssignOrDefault(result, out arg4, outputs, 3);
+            AssignOrDefault(result, out arg5, outputs, 4);
+            AssignOrDefault(result, out arg6, outputs, 5);
+            AssignOrDefault(result, out arg7, outputs, 6);
+            AssignOrDefault(result, out arg8, outputs, 7);
+            AssignOrDefault(result, out arg9, outputs, 8);
+
+            return result;
+        }
+
+        public static bool Parse<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(ref string[] properties, string template, out T1 arg1, out T2 arg2, out T3 arg3, out T4 arg4, out T5 arg5, out T6 arg6, out T7 arg7, out T8 arg8, out T9 arg9, out T10 arg10)
+        {
+            Type[] types = new[] { typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7), typeof(T8), typeof(T9), typeof(T10) };
+
+            object[] outputs = new object[10];
+            bool result = Parse(ref properties, template, outputs, types);
+
+            AssignOrDefault(result, out arg1, outputs, 0);
+            AssignOrDefault(result, out arg2, outputs, 1);
+            AssignOrDefault(result, out arg3, outputs, 2);
+            AssignOrDefault(result, out arg4, outputs, 3);
+            AssignOrDefault(result, out arg5, outputs, 4);
+            AssignOrDefault(result, out arg6, outputs, 5);
+            AssignOrDefault(result, out arg7, outputs, 6);
+            AssignOrDefault(result, out arg8, outputs, 7);
+            AssignOrDefault(result, out arg9, outputs, 8);
+            AssignOrDefault(result, out arg10, outputs, 9);
+
+            return result;
+        }
     }
 }
