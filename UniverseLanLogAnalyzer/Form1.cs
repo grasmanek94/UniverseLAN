@@ -29,7 +29,6 @@ namespace UniverseLanLogAnalyzer
                 LogParser parser = new LogParser(@"C:\Users\Rafal\Desktop\SSBD-real-gog-log\NotWorking-D.log", state_machine);
                 parser.Parse();
             }
-
         }
     }
 }
