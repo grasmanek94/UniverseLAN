@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using UniverseLanLogAnalyzer.Galaxy;
 
 namespace UniverseLanLogAnalyzer.Parser
@@ -41,6 +42,15 @@ namespace UniverseLanLogAnalyzer.Parser
             foreach (var entry in StateMachine.Entries)
             {
                 entry.PostInit();
+
+                if (entry.Properties.Count > 0)
+                {
+                    Debug.WriteLine($"Entry '{entry.Function}' has unprocessed properties:");
+                    foreach (var prop in entry.Properties)
+                    {
+                        Debug.WriteLine($" {prop}");
+                    }
+                }
             }
         }
 

@@ -42,8 +42,9 @@ namespace UniverseLanLogAnalyzer.Parser
 
         public static GalaxyID? ParseGalaxyID(string prefix, LogEntries.Base entry)
         {
-            foreach (var prop in entry.Properties)
+            for (int i = 0; i < entry.Properties.Count; i++)
             {
+                string prop = entry.Properties[i];
                 string key = string.Empty;
                 string value = string.Empty;
                 string? type_str = null;
@@ -76,6 +77,7 @@ namespace UniverseLanLogAnalyzer.Parser
                     throw new InterceptorArgumentParsingException(entry, key, prop);
                 }
 
+                entry.Properties.RemoveAt(i);
                 return new GalaxyID(id, type);
             }
 
@@ -87,8 +89,9 @@ namespace UniverseLanLogAnalyzer.Parser
             ListenerTypeInfo? listener_info = null;
             string prefix = "listenerType";
 
-            foreach (var prop in entry.Properties)
+            for (int i = 0; i < entry.Properties.Count; i++)
             {
+                string prop = entry.Properties[i];
                 string key = string.Empty;
                 string value = string.Empty;
                 string? unused = null;
@@ -146,6 +149,10 @@ namespace UniverseLanLogAnalyzer.Parser
                     }
 
                     listener_info.ListenerAddress = id;
+
+                    entry.Properties.RemoveAt(i);
+                    entry.Properties.RemoveAt(i - 1);
+
                     return listener_info;
                 }
             }

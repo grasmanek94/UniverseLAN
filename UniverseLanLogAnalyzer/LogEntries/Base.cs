@@ -18,6 +18,11 @@ namespace UniverseLanLogAnalyzer.LogEntries
         public string Function { get; set; } = String.Empty;
         public string FunctionExtra { get; set; } = String.Empty;
 
+        /* Entries such as ReadP2PPacket and Send aren't considered 'Key' frames for log comparison.
+         * Entries like 'CreateLobby' 'JoinLobby' 'Set*Data' etc should be considered key elements for comparison.
+         * */
+        public bool IsKeyFrame { get; set; } = false;
+
         public List<string> Properties { get; set; } = new List<string>();
 
         public LoggerStateMachine StateMachine { get; set; }
@@ -40,6 +45,7 @@ namespace UniverseLanLogAnalyzer.LogEntries
             this.FunctionExtra = original.FunctionExtra;
             this.Properties = new List<string>(original.Properties);
             this.StateMachine = original.StateMachine;
+            this.IsKeyFrame = original.IsKeyFrame;
         }
 
         public virtual void PostInit() { }
