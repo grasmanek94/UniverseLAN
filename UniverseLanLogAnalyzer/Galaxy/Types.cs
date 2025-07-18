@@ -51,7 +51,7 @@
     };
 
     [Flags]
-    enum PersonaStateChange
+    public enum PersonaStateChange
     {
         PERSONA_CHANGE_NONE = 0x0000, ///< No information has changed.
         PERSONA_CHANGE_NAME = 0x0001, ///< Persona name has changed.
@@ -63,7 +63,7 @@
     };
 
     [Flags]
-    enum AvatarType
+    public enum AvatarType
     {
         AVATAR_TYPE_NONE = 0x0000, ///< No avatar type specified.
         AVATAR_TYPE_SMALL = 0x0001, ///< Avatar resolution size: 32x32.
@@ -71,7 +71,7 @@
         AVATAR_TYPE_LARGE = 0x0004 ///< Avatar resolution size: 184x184.
     };
 
-    enum PersonaState
+    public enum PersonaState
     {
         PERSONA_STATE_OFFLINE, ///< User is not currently logged on.
         PERSONA_STATE_ONLINE ///< User is logged on.
