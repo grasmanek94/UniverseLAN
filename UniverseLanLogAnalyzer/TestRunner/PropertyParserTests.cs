@@ -41,8 +41,9 @@ namespace UniverseLanLogAnalyzer.Tests
         {
             string[] props = {
                 "userID: 46781906533578385(ID_TYPE_USER)",
-                "personaStateChange: 3(PERSONA_CHANGE_NAME\nPERSONA_CHANGE_AVATAR)"
+                "personaStateChange: 3(PERSONA_CHANGE_NAME|PERSONA_CHANGE_AVATAR)"
             };
+
             ulong id = 0;
             GalaxyID.Type type = 0;
             PersonaStateChange stateNum = 0;
@@ -65,6 +66,7 @@ namespace UniverseLanLogAnalyzer.Tests
                 "joinable: true",
                 "lobbyTopologyType: LOBBY_TOPOLOGY_TYPE_FCM"
             };
+
             LobbyType lobbyType = 0;
             int maxMembers = 0;
             bool joinable = false;
@@ -87,6 +89,7 @@ namespace UniverseLanLogAnalyzer.Tests
                 "listenerType: LOBBY_LEFT",
                 "listener: 0xd882870"
             };
+
             ListenerType type = 0;
             ulong address = 0;
 
@@ -106,13 +109,14 @@ namespace UniverseLanLogAnalyzer.Tests
                 "result: true",
                 "msg: p1234567890abcdefwoeijd213d12fhgb1239fh9"
             };
-     
-            GalaxyID.Type lobbyId;
+
+            ulong lobbyId;
+            GalaxyID.Type lobbyIdType;
             ulong data;
             int dataSize;
             bool resultFlag;
             string msg;
-            bool result = PropertyParser.Parse(ref props, "lobbyID: {e}\ndata: {x}\ndataSize: {d}\nresult: {b}\nmsg: {s?result==true}", out lobbyId, out data, out dataSize, out resultFlag, out msg);
+            bool result = PropertyParser.Parse(ref props, "lobbyID: {d}({e})\ndata: {x}\ndataSize: {d}\nresult: {b}\nmsg: {s?result==true}", out lobbyId, out lobbyIdType, out data, out dataSize, out resultFlag, out msg);
             
             Assert.True(result);
             Assert.Equal("p1234567890abcdefwoeijd213d12fhgb1239fh9", msg);
@@ -128,13 +132,14 @@ namespace UniverseLanLogAnalyzer.Tests
                 "result: false"
             };
 
-            GalaxyID.Type lobbyId;
+            ulong lobbyId;
+            GalaxyID.Type lobbyIdType;
             ulong data;
             int dataSize;
             bool resultFlag;
             string msg;
 
-            bool result = PropertyParser.Parse(ref props, "lobbyID: {e}\ndata: {x}\ndataSize: {d}\nresult: {b}\nmsg: {s?result==true}", out lobbyId, out data, out dataSize, out resultFlag, out msg);
+            bool result = PropertyParser.Parse(ref props, "lobbyID: {d}({e})\ndata: {x}\ndataSize: {d}\nresult: {b}\nmsg: {s?result==true}", out lobbyId, out lobbyIdType, out data, out dataSize, out resultFlag, out msg);
             Assert.False(result);
         }
     }

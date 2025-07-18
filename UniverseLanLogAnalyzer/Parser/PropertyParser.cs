@@ -72,14 +72,15 @@ namespace UniverseLanLogAnalyzer.Parser
 
                         object parsed = type switch
                         {
-                            "d" => ulong.Parse(value),
-                            "x" => Convert.ToUInt64(value.StartsWith("0x") ? value[2..] : value, 16),
+                            "d" => ParseNumber(types[outputIndex], value),
+                            "x" => ParseHex(types[outputIndex], value),
                             "b" => ParseBool(value),
                             "e" => ParseEnum(types[outputIndex], value),
                             "ef" => ParseEnumFlags(types[outputIndex], value),
                             "s" => value,
                             _ => throw new NotSupportedException($"Unsupported placeholder: {type}")
                         };
+
 
                         outputs[outputIndex] = parsed;
                         context[$"arg{outputIndex}"] = parsed;
@@ -108,17 +109,46 @@ namespace UniverseLanLogAnalyzer.Parser
             };
         }
 
+        private static object ParseNumber(Type type, string value)
+        {
+            if (type.IsEnum)
+            {
+                var underlying = Enum.GetUnderlyingType(type);
+                var numeric = Convert.ChangeType(value, underlying);
+                return Enum.ToObject(type, numeric);
+            }
+            return Convert.ChangeType(value, type);
+        }
+
+        private static object ParseHex(Type type, string value)
+        {
+            string simplified_value = value.StartsWith("0x") ? value[2..] : value;
+            ulong num = Convert.ToUInt64(simplified_value, 16);
+
+            if (type.IsEnum)
+            {
+                var underlying = Enum.GetUnderlyingType(type);
+                var numeric = Convert.ChangeType(num, underlying);
+                return Enum.ToObject(type, numeric);
+            }
+            return Convert.ChangeType(num, type);
+        }
+
         private static object ParseEnum(Type enumType, string value)
         {
             if (!enumType.IsEnum)
+            {
                 throw new ArgumentException("Target type is not an enum.");
+            }
             return Enum.Parse(enumType, value, ignoreCase: true);
         }
 
         private static object ParseEnumFlags(Type enumType, string value)
         {
             if (!enumType.IsEnum)
+            {
                 throw new ArgumentException("Target type is not an enum.");
+            }
 
             var parts = value.Split(new[] { '|', ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
             ulong result = 0;
