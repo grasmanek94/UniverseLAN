@@ -4,7 +4,8 @@ namespace UniverseLanLogAnalyzer.Parser
 {
     public static class PropertyParser
     {
-        private static readonly Regex PlaceholderRegex = new(@"\{(d|x|e|ef|b|s)(\?([a-zA-Z_][a-zA-Z0-9_]*)==(.+?))?\}");
+        private static readonly Regex PlaceholderRegex
+            = new(@"\{(d|x|e|ef|b|s)(:([a-zA-Z_][a-zA-Z0-9_]*))?(\?([a-zA-Z_][a-zA-Z0-9_]*)==(.+?))?\}");
 
         public static bool Parse(ref string[] properties, string template, object[] outputs, Type[] types)
         {
@@ -15,14 +16,16 @@ namespace UniverseLanLogAnalyzer.Parser
 
             foreach (var line in lines)
             {
-                var placeholders = new List<(string type, string? condVar, string? condVal)>();
+                var placeholders = new List<(string type, string? name, string? condVar, string? condVal)>();
+
                 string pattern = line;
                 pattern = PlaceholderRegex.Replace(pattern, match =>
                 {
                     placeholders.Add((
                         match.Groups[1].Value,
                         match.Groups[3].Success ? match.Groups[3].Value : null,
-                        match.Groups[4].Success ? match.Groups[4].Value : null
+                        match.Groups[5].Success ? match.Groups[5].Value : null,
+                        match.Groups[6].Success ? match.Groups[6].Value : null
                     ));
                     return "(.+?)";
                 });
@@ -43,7 +46,7 @@ namespace UniverseLanLogAnalyzer.Parser
 
                     // Check condition
                     bool skip = false;
-                    foreach (var (_, condVar, condVal) in placeholders)
+                    foreach (var (_, _, condVar, condVal) in placeholders)
                     {
                         if (condVar != null)
                         {
@@ -56,14 +59,17 @@ namespace UniverseLanLogAnalyzer.Parser
                         }
                     }
 
-                    if (skip) continue;
+                    if (skip)
+                    {
+                        continue;
+                    }
 
                     matched = true;
                     matchedIndices.Add(i);
 
                     for (int j = 0; j < placeholders.Count; j++)
                     {
-                        var (type, condVar, _) = placeholders[j];
+                        var (type, name, condVar, _) = placeholders[j];
                         var value = match.Groups[j + 1].Value;
 
                         if (type == "*") continue;
@@ -83,7 +89,7 @@ namespace UniverseLanLogAnalyzer.Parser
 
 
                         outputs[outputIndex] = parsed;
-                        context[$"arg{outputIndex}"] = parsed;
+                        context[name ?? $"arg{outputIndex}"] = parsed;
                         outputIndex++;
                     }
 
