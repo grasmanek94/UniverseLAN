@@ -25,11 +25,7 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-#if GALAXY_BUILD_FEATURE_HAS_LISTENERTYPE
-			trace.write_all(std::format("listenerType: {}", magic_enum::enum_name(listenerType)));
-#else
-			trace.write_all(std::format("listenerType: {}", listenerType));
-#endif
+			trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType)));
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
@@ -40,11 +36,7 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-#if GALAXY_BUILD_FEATURE_HAS_LISTENERTYPE
-			trace.write_all(std::format("listenerType: {}", magic_enum::enum_name(listenerType)));
-#else
-			trace.write_all(std::format("listenerType: {}", listenerType));
-#endif
+			trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType)));
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 

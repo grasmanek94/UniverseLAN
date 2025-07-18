@@ -1,7 +1,4 @@
-﻿
-using System.Windows.Forms;
-
-namespace UniverseLanLogAnalyzer.Parser
+﻿namespace UniverseLanLogAnalyzer.Parser
 {
     [Serializable]
     internal class InterceptorLogParsingException : Exception
