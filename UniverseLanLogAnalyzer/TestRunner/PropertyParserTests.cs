@@ -116,7 +116,7 @@ namespace UniverseLanLogAnalyzer.Tests
             int dataSize;
             bool resultFlag;
             string msg;
-            bool result = PropertyParser.Parse(ref props, "lobbyID: {d}({e})\ndata: {x}\ndataSize: {d}\nresult: {b}\nmsg: {s?result==true}", out lobbyId, out lobbyIdType, out data, out dataSize, out resultFlag, out msg);
+            bool result = PropertyParser.Parse(ref props, "lobbyID: {d}({e})\ndata: {x}\ndataSize: {d}\nresult: {b:result}\nmsg: {s?result==true}", out lobbyId, out lobbyIdType, out data, out dataSize, out resultFlag, out msg);
             
             Assert.True(result);
             Assert.Equal("p1234567890abcdefwoeijd213d12fhgb1239fh9", msg);
@@ -139,7 +139,7 @@ namespace UniverseLanLogAnalyzer.Tests
             bool resultFlag;
             string msg;
 
-            bool result = PropertyParser.Parse(ref props, "lobbyID: {d}({e})\ndata: {x}\ndataSize: {d}\nresult: {b}\nmsg: {s?result==true}", out lobbyId, out lobbyIdType, out data, out dataSize, out resultFlag, out msg);
+            bool result = PropertyParser.Parse(ref props, "lobbyID: {d}({e})\ndata: {x}\ndataSize: {d}\nresult: {b:result}\nmsg: {s?result==true}", out lobbyId, out lobbyIdType, out data, out dataSize, out resultFlag, out msg);
             Assert.False(result);
         }
     }
