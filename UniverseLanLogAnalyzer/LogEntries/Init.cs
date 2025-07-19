@@ -4,8 +4,6 @@
     {
         public static readonly string MATCH = "universelan::client::Init";
 
-        public Init(Base original) : base(original)
-        {
-        }
+        public Init(Base original) : base(original) { }
     }
 }
