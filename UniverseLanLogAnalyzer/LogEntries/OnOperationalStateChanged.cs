@@ -1,4 +1,5 @@
 ﻿using UniverseLanLogAnalyzer.Galaxy;
+using UniverseLanLogAnalyzer.Parser;
 
 namespace UniverseLanLogAnalyzer.LogEntries
 {
@@ -12,9 +13,19 @@ namespace UniverseLanLogAnalyzer.LogEntries
         {
         }
 
+        /* Example contents:
+            operationalState: 3(OPERATIONAL_STATE_SIGNED_IN|OPERATIONAL_STATE_LOGGED_ON)
+        */
+        /* Example contents:
+            operationalState: 0()
+        */
         public override void PostInit()
         {
-            Parser.Arguments.ParseOperationalState(this, out var state);
+            if (!PropertyParser.Parse(ref Properties, "operationalState: {*}({ef})", out OperationalState state))
+            {
+                throw new InterceptorArgumentParsingException(this, "operationalState");
+            }
+
             State = state;
         }
     }

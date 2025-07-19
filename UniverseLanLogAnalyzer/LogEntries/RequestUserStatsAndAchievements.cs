@@ -1,4 +1,5 @@
 ﻿using UniverseLanLogAnalyzer.Galaxy;
+using UniverseLanLogAnalyzer.Parser;
 
 namespace UniverseLanLogAnalyzer.LogEntries
 {
@@ -13,13 +14,19 @@ namespace UniverseLanLogAnalyzer.LogEntries
 
         }
 
+        /* Example contents (prefix=userID):
+            userID: 46781906533578385(ID_TYPE_USER)
+        */
         public override void PostInit()
         {
-            UserID = Parser.Arguments.ParseGalaxyID("userID", this);
-            if (UserID == null)
+            GalaxyID id;
+
+            if (!PropertyParser.Parse(ref Properties, "userID: {gid}", out id))
             {
-                throw new InterceptorEntryInitException(this, "userID");
+                throw new InterceptorArgumentParsingException(this, "userID");
             }
+
+            UserID = id;
         }
     }
 }

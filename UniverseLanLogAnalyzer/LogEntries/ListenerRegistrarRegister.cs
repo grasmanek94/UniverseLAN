@@ -1,4 +1,7 @@
-﻿namespace UniverseLanLogAnalyzer.LogEntries
+﻿using UniverseLanLogAnalyzer.Galaxy;
+using UniverseLanLogAnalyzer.Parser;
+
+namespace UniverseLanLogAnalyzer.LogEntries
 {
     public class ListenerRegistrarRegister : Base
     {
@@ -10,13 +13,21 @@
         {
         }
 
+        /* Example contents:
+            listenerType: AUTH
+            listener: 0x137e668
+        */
         public override void PostInit()
         {
-            Info = Parser.Arguments.ParseListenerRegister(this);
-            if (Info == null)
+            ListenerType type;
+            ulong listener_address;
+
+            if (!PropertyParser.Parse(ref Properties, "listenerType: {e}\nlistener: {x}", out type, out listener_address))
             {
-                throw new InterceptorEntryInitException(this, "ListenerTypeInfo");
+                throw new InterceptorArgumentParsingException(this, "listener");
             }
+
+            Info = new ListenerTypeInfo { Type = type, ListenerAddress = listener_address };
         }
     }
 }
