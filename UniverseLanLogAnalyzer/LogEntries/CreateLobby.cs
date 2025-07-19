@@ -30,7 +30,7 @@ namespace UniverseLanLogAnalyzer.LogEntries
                 "lobbyType: {e}\nmaxMembers: {d}\njoinable: {b}\nlobbyTopologyType: {e}\nlobbyCreatedListener: {x}\nlobbyEnteredListener: {x}", 
                 out LobbyType, out LobbyMaxMembers, out LobbyJoinable, out LobbyTopology, out LobbyCreatedListener, out LobbyEnteredListener))
             {
-                throw new InterceptorArgumentParsingException(this, "Lobby");
+                throw new InterceptorPropertyParsingException(this);
             }
         }
     }

@@ -4,8 +4,6 @@
     {
         public static readonly string MATCH = "universelan::client::MatchmakingImpl::SendLobbyMessage";
 
-        public SendLobbyMessage(Base original) : base(original)
-        {
-        }
+        public SendLobbyMessage(Base original) : base(original) { }
     }
 }

@@ -84,4 +84,26 @@
         PERSONA_STATE_OFFLINE, ///< User is not currently logged on.
         PERSONA_STATE_ONLINE ///< User is logged on.
     };
+
+    public enum LobbyCreateResult
+    {
+        LOBBY_CREATE_RESULT_SUCCESS, ///< Lobby was created.
+        LOBBY_CREATE_RESULT_ERROR ///< Unexpected error.
+    };
+
+    public enum LobbyEnterResult
+    {
+        LOBBY_ENTER_RESULT_SUCCESS, ///< The user has entered the lobby.
+        LOBBY_ENTER_RESULT_LOBBY_DOES_NOT_EXIST, ///< Specified lobby does not exist.
+        LOBBY_ENTER_RESULT_LOBBY_IS_FULL, ///< Specified lobby is full.
+        LOBBY_ENTER_RESULT_ERROR ///< Unexpected error.
+    };
+
+    public enum P2PSendType
+    {
+        P2P_SEND_UNRELIABLE = 0, ///< UDP-like packet transfer. The packet will be sent during the next call to ProcessData().
+        P2P_SEND_RELIABLE = 1, ///< TCP-like packet transfer. The packet will be sent during the next call to ProcessData().
+        P2P_SEND_UNRELIABLE_IMMEDIATE = 2, ///< UDP-like packet transfer. The packet will be sent instantly.
+        P2P_SEND_RELIABLE_IMMEDIATE = 3 ///< TCP-like packet transfer. The packet will be sent instantly.
+    };
 }

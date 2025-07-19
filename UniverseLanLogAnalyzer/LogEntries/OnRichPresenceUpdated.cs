@@ -16,9 +16,11 @@ namespace UniverseLanLogAnalyzer.LogEntries
         */
         public override void PostInit()
         {
-            if (!PropertyParser.Parse(ref Properties, "userID: {gid}", out UserID))
+            if (!PropertyParser.Parse(ref Properties,
+                "userID: {gid}",
+                out UserID))
             {
-                throw new InterceptorArgumentParsingException(this, "userID");
+                throw new InterceptorPropertyParsingException(this);
             }
         }
     }

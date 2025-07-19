@@ -18,9 +18,11 @@ namespace UniverseLanLogAnalyzer.LogEntries
         */
         public override void PostInit()
         {
-            if (!PropertyParser.Parse(ref Properties, "listenerType: {e}\nlistener: {x}", out ListenerType, out ListenerAddress))
+            if (!PropertyParser.Parse(ref Properties, 
+                "listenerType: {e}\nlistener: {x}", 
+                out ListenerType, out ListenerAddress))
             {
-                throw new InterceptorArgumentParsingException(this, "listener");
+                throw new InterceptorPropertyParsingException(this);
             }
         }
     }

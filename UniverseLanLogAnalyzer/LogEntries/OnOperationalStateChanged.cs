@@ -21,9 +21,11 @@ namespace UniverseLanLogAnalyzer.LogEntries
         */
         public override void PostInit()
         {
-            if (!PropertyParser.Parse(ref Properties, "operationalState: {*}({ef})", out OperationalState state))
+            if (!PropertyParser.Parse(ref Properties,
+                "operationalState: {*}({ef})",
+                out OperationalState state))
             {
-                throw new InterceptorArgumentParsingException(this, "operationalState");
+                throw new InterceptorPropertyParsingException(this);
             }
 
             State = state;
