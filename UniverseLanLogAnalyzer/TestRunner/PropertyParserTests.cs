@@ -29,6 +29,28 @@ namespace UniverseLanLogAnalyzer.Tests
         }
 
         [Fact]
+        public void Parse_UserID_And_Type_GID()
+        {
+            List<string> props = new List<string> {
+                "aaa: bbb(ccc)",
+                "userID: 46781906533578385(ID_TYPE_USER)",
+                "ddd: eee(fff)"
+            };
+
+            GalaxyID galaxy_id;
+
+            bool result = PropertyParser.Parse(ref props, "userID: {gid}", out galaxy_id);
+
+            Assert.True(result);
+            Assert.Equal(46781906533578385UL, galaxy_id.GetID());
+            Assert.Equal(GalaxyID.Type.ID_TYPE_USER, galaxy_id.GetIDType());
+
+            Assert.Equal("aaa: bbb(ccc)", props.First());
+            Assert.Equal("ddd: eee(fff)", props.Last());
+            Assert.Equal(2, props.Count());
+        }
+
+        [Fact]
         public void Parse_PersonaStateChange_WithWildcard()
         {
             List<string> props = new List<string> {

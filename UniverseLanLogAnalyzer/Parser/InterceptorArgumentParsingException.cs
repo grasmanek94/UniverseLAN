@@ -3,7 +3,6 @@
     [Serializable]
     internal class InterceptorArgumentParsingException : Exception
     {
-        public string Property { get; private set; }
         public string What { get; private set; }
         public LogEntries.Base Entry { get; private set; }
 

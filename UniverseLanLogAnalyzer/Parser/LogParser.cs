@@ -11,6 +11,7 @@ namespace UniverseLanLogAnalyzer.Parser
         public int CurrentLineNumber { get; private set; }
         private LogEntries.Base? PreviousEntry { get; set; }
         private LoggerStateMachine StateMachine { get; set; }
+        private Dictionary<string, HashSet<string>> PropertyChecks { get; set; }
 
         public LogParser(string filename, LoggerStateMachine state_machine)
         {
@@ -19,8 +20,10 @@ namespace UniverseLanLogAnalyzer.Parser
             CurrentLineNumber = 0;
             PreviousEntry = null;
             StateMachine = state_machine;
+            PropertyChecks = new();
 
             StateMachine.Entries = new();
+
         }
 
         public void Parse()
@@ -45,10 +48,22 @@ namespace UniverseLanLogAnalyzer.Parser
 
                 if (entry.Properties.Count > 0)
                 {
-                    Debug.WriteLine($"Entry '{entry.Function}' has unprocessed properties:");
+                    string propsline = "";
                     foreach (var prop in entry.Properties)
                     {
-                        Debug.WriteLine($" {prop}");
+                        propsline += $" {prop}\n";
+                    }
+
+                    if(!PropertyChecks.ContainsKey(entry.Function))
+                    {
+                        PropertyChecks.Add(entry.Function, new HashSet<string>());
+                    }
+
+                    if (!PropertyChecks[entry.Function].Contains(propsline))
+                    {
+                        PropertyChecks[entry.Function].Add(propsline);
+                        Debug.WriteLine($"Entry '{entry.Function}' has unprocessed properties:");
+                        Debug.Write(propsline);
                     }
                 }
             }

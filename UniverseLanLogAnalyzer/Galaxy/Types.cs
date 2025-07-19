@@ -9,36 +9,44 @@
             ID_TYPE_USER
         }
 
-        public ulong id; // 0 as an argument to a function means usually SELF (logged in user), otherwise invalid
+        public ulong raw; // 0 as an argument to a function means usually SELF (logged in user), otherwise invalid
+        public static readonly ulong mask_id = 0x00FFFFFFFFFFFFFFUL;
+        public static readonly ulong mask_type = ~mask_id;
+        public static readonly int shift_type = 56;
 
         public GalaxyID(ulong id)
         {
-            this.id = id;
+            this.raw = id;
         }
 
         public GalaxyID(ulong id, Type type)
         {
-            this.id = (id & 0x0FFFFFFFFFFFFFFF) | (((ulong)type << 56) & 0xF000000000000000);
+            this.raw = (((ulong)type << shift_type) & mask_type) | (id & mask_id);
         }
 
         public Type GetIDType()
         {
-            return (Type)(id >> 56);
+            return (Type)(raw >> 56);
+        }
+
+        public ulong GetID()
+        {
+            return (raw & mask_id);
         }
 
         public void SetType(Type type)
         {
-            this.id = (id & 0x0FFFFFFFFFFFFFFF) | (((ulong)type << 56) & 0xF000000000000000);
+            this.raw = (raw & mask_id) | (((ulong)type << shift_type) & mask_type);
         }
 
         public void SetID(ulong id)
         {
-            this.id = (id & 0x0FFFFFFFFFFFFFFF) | (((ulong)GetIDType() << 56) & 0xF000000000000000);
+            this.raw = (raw & mask_id) | (((ulong)GetIDType() << shift_type) & mask_type);
         }
 
         public void SetRaw(ulong num)
         {
-            this.id = num;
+            this.raw = num;
         }
     }
 

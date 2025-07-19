@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using UniverseLanLogAnalyzer.Galaxy;
 
 namespace UniverseLanLogAnalyzer.Parser
 {
@@ -12,7 +13,7 @@ namespace UniverseLanLogAnalyzer.Parser
 
     public static class PropertyParser
     {
-        private static readonly Regex PlaceholderRegex = new(@"\{(d|x|e|ef|b|s|\*)\}");
+        private static readonly Regex PlaceholderRegex = new(@"\{(d|x|e|ef|b|s|gid|\*)\}");
 
         public static bool Parse(ref List<string> properties, string template, object[] outputs, Type[] types)
         {
@@ -78,6 +79,7 @@ namespace UniverseLanLogAnalyzer.Parser
                             "e" => ParseEnum(types[outputIndex], value),
                             "ef" => ParseEnumFlags(types[outputIndex], value),
                             "s" => value,
+                            "gid" => ParseGalaxyID(types[outputIndex], value),
                             _ => throw new NotSupportedException($"Unsupported placeholder: {type}")
                         };
 
@@ -130,6 +132,27 @@ namespace UniverseLanLogAnalyzer.Parser
             // Remove matched entries
             properties = properties.Where((_, i) => !matchedIndices.Contains(i)).ToList();
             return true;
+        }
+
+        private static GalaxyID ParseGalaxyID(Type type, string value)
+        {
+            type = UnwrapOptional(type);
+            if(type != typeof(GalaxyID))
+            {
+                throw new ArgumentException("Target type is not GalaxyID.");
+            }
+
+            var split = value.Trim().Split("(");
+            if((split.Length != 2) || (split[0].Length < 1) || (split[1].Length < 2) || (split[1].Last() != ')'))
+            {
+                throw new FormatException($"Invalid GalaxyID: {value}");
+            }
+            string id_type_str = split[1].Substring(0, split[1].Length - 1);
+
+            ulong id = (ulong)ParseNumber(typeof(ulong), split[0]);
+            GalaxyID.Type id_type = (GalaxyID.Type)ParseEnum(typeof(GalaxyID.Type), id_type_str);
+
+            return new GalaxyID(id, id_type);
         }
 
         private static bool IsOptional(Type type)
