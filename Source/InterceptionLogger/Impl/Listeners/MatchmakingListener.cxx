@@ -6,8 +6,14 @@
 #include <SafeStringCopy.hxx>
 
 #include <magic_enum/magic_enum.hpp>
+#include <magic_enum/magic_enum_flags.hpp>
 
 #include <format>
+
+template <>
+struct magic_enum::customize::enum_range<galaxy::api::LobbyMemberStateChange> {
+	static constexpr bool is_flags = true;
+};
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -185,7 +191,7 @@ namespace universelan::client {
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("lobbyID: {}", lobbyID));
 			trace.write_all(std::format("memberID: {}", memberID));
-			trace.write_all(std::format("memberStateChange: {}", magic_enum::enum_name(memberStateChange)));
+			trace.write_all(std::format("memberStateChange: {}", magic_enum::enum_flags_name(memberStateChange)));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnLobbyMemberStateChanged(lobbyID, memberID, memberStateChange));
