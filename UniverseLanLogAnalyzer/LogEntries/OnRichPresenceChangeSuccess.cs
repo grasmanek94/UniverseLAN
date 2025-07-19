@@ -4,8 +4,6 @@
     {
         public static readonly string MATCH = "universelan::client::RichPresenceChangeListener::OnRichPresenceChangeSuccess";
 
-        public OnRichPresenceChangeSuccess(Base original) : base(original)
-        {
-        }
+        public OnRichPresenceChangeSuccess(Base original) : base(original) { }
     }
 }

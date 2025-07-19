@@ -7,11 +7,9 @@ namespace UniverseLanLogAnalyzer.LogEntries
     {
         public static readonly string MATCH = "universelan::client::OperationalStateChangeListener::OnOperationalStateChanged";
 
-        public OperationalState State { get; set; }
+        public OperationalState State;
 
-        public OnOperationalStateChanged(Base original) : base(original)
-        {
-        }
+        public OnOperationalStateChanged(Base original) : base(original) { }
 
         /* Example contents:
             operationalState: 3(OPERATIONAL_STATE_SIGNED_IN|OPERATIONAL_STATE_LOGGED_ON)
@@ -23,12 +21,10 @@ namespace UniverseLanLogAnalyzer.LogEntries
         {
             if (!PropertyParser.Parse(ref Properties,
                 "operationalState: {*}({ef})",
-                out OperationalState state))
+                out State))
             {
                 throw new InterceptorPropertyParsingException(this);
             }
-
-            State = state;
         }
     }
 }

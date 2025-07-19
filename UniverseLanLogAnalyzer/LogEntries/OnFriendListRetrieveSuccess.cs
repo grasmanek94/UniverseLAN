@@ -4,8 +4,6 @@
     {
         public static readonly string MATCH = "universelan::client::FriendListListener::OnFriendListRetrieveSuccess";
 
-        public OnFriendListRetrieveSuccess(Base original) : base(original)
-        {
-        }
+        public OnFriendListRetrieveSuccess(Base original) : base(original) { }
     }
 }

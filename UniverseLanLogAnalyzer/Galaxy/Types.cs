@@ -119,6 +119,13 @@
         LOBBY_COMPARISON_TYPE_LOWER_OR_EQUAL = 5 ///< The lobby should have a property of a value that is lower than or equal to the one specified.
     };
 
+    public enum LobbyListResult
+    {
+        LOBBY_LIST_RESULT_SUCCESS,
+        LOBBY_LIST_RESULT_ERROR,
+        LOBBY_LIST_RESULT_CONNECTION_FAILURE
+    };
+
     public enum P2PSendType
     {
         P2P_SEND_UNRELIABLE = 0, ///< UDP-like packet transfer. The packet will be sent during the next call to ProcessData().

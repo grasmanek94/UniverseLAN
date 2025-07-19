@@ -4,8 +4,8 @@
     {
         public static readonly string MATCH = "universelan::client::UserImpl::SignIn";
 
-        public SignIn(Base original) : base(original)
-        {
-        }
+        public SignIn(Base original) : base(original) { }
+
+        /* Not implemented for now */
     }
 }
