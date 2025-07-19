@@ -7,26 +7,21 @@ namespace UniverseLanLogAnalyzer.LogEntries
     {
         public static readonly string MATCH = "universelan::client::StatsImpl::RequestUserStatsAndAchievements";
 
-        public GalaxyID? UserID { get; set; }
+        public GalaxyID? UserID;
+        public Optional<long> ListenerAddress = new();
 
-        public RequestUserStatsAndAchievements(Base original) : base(original)
-        {
-
-        }
+        public RequestUserStatsAndAchievements(Base original) : base(original) {}
 
         /* Example contents (prefix=userID):
             userID: 46781906533578385(ID_TYPE_USER)
+            listener: 0x1234567890
         */
         public override void PostInit()
         {
-            GalaxyID id;
-
-            if (!PropertyParser.Parse(ref Properties, "userID: {gid}", out id))
+            if (!PropertyParser.Parse(ref Properties, "userID: {gid}\nlistener: {x}", out UserID, out ListenerAddress))
             {
                 throw new InterceptorArgumentParsingException(this, "userID");
             }
-
-            UserID = id;
         }
     }
 }

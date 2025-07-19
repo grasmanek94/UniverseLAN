@@ -7,11 +7,10 @@ namespace UniverseLanLogAnalyzer.LogEntries
     {
         public static readonly string MATCH = "universelan::client::ListenerRegistrarImpl::Register";
 
-        public Galaxy.ListenerTypeInfo? Info { get; set; }
+        public ListenerType ListenerType;
+        public ulong ListenerAddress;
 
-        public ListenerRegistrarRegister(Base original) : base(original)
-        {
-        }
+        public ListenerRegistrarRegister(Base original) : base(original) {}
 
         /* Example contents:
             listenerType: AUTH
@@ -19,15 +18,10 @@ namespace UniverseLanLogAnalyzer.LogEntries
         */
         public override void PostInit()
         {
-            ListenerType type;
-            ulong listener_address;
-
-            if (!PropertyParser.Parse(ref Properties, "listenerType: {e}\nlistener: {x}", out type, out listener_address))
+            if (!PropertyParser.Parse(ref Properties, "listenerType: {e}\nlistener: {x}", out ListenerType, out ListenerAddress))
             {
                 throw new InterceptorArgumentParsingException(this, "listener");
             }
-
-            Info = new ListenerTypeInfo { Type = type, ListenerAddress = listener_address };
         }
     }
 }

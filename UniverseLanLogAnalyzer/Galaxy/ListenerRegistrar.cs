@@ -75,10 +75,4 @@
         PLAYFAB_LOGIN_WITH_OPENID_CONNECT, ///< Used by IPlayFabLoginWithOpenIDConnectListener.
         LISTENER_TYPE_END ///< Used for iterating over listener types.
     };
-
-    public class ListenerTypeInfo
-    {
-        public ListenerType Type { get; set; }
-        public ulong ListenerAddress { get; set; }
-    }
 }
