@@ -116,7 +116,8 @@ namespace universelan::client {
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("userID: {}", userID));
 #if GALAXY_BUILD_FEATURE_HAS_1_73_AVATARTYPE_CRITERIA
-			trace.write_all(std::format("avatarCriteria: {}", avatarCriteria));
+			trace.write_all(std::format("avatarCriteria: {}({})", avatarCriteria, 
+				magic_enum::enum_flags_name((AvatarType)avatarCriteria)));
 #endif
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			trace.write_all(std::format("listener: {}", (void*)listener));
@@ -169,7 +170,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("buffer: {}", (void*)buffer));
+			trace.write_all(std::format("buffer(addr): {}", (void*)buffer));
 			trace.write_all(std::format("bufferLength: {}", bufferLength));
 		}
 
