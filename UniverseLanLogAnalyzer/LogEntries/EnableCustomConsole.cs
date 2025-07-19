@@ -4,8 +4,6 @@
     {
         public static readonly string MATCH = "universelan::client::EnableCustomConsole";
 
-        public EnableCustomConsole(Base original) : base(original)
-        {
-        }
+        public EnableCustomConsole(Base original) : base(original) { }
     }
 }

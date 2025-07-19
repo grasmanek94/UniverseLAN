@@ -4,8 +4,6 @@
     {
         public static readonly string MATCH = "universelan::client::BindStdHandlesToConsole";
 
-        public BindStdHandlesToConsole(Base original) : base(original)
-        {
-        }
+        public BindStdHandlesToConsole(Base original) : base(original) { }
     }
 }

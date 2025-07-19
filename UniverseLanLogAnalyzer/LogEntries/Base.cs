@@ -23,6 +23,10 @@ namespace UniverseLanLogAnalyzer.LogEntries
          * */
         public bool IsKeyFrame = false;
 
+        /* Entries which can be squashed into a single entry like IsP2PPacketAvailable or GetGalaxyID loops, etc..
+         * */
+        public bool CollapseRepeat = false;
+
         public List<string> Properties = new List<string>();
 
         public LoggerStateMachine StateMachine;
@@ -46,6 +50,7 @@ namespace UniverseLanLogAnalyzer.LogEntries
             this.Properties = new List<string>(original.Properties);
             this.StateMachine = original.StateMachine;
             this.IsKeyFrame = original.IsKeyFrame;
+            this.CollapseRepeat = original.CollapseRepeat;
         }
 
         public virtual void PostInit() { }
