@@ -6,6 +6,70 @@ namespace UniverseLanLogAnalyzer.Tests
     public class PropertyParserTests
     {
         [Fact]
+        public void Parse_Empty_String_Without_Opt()
+        {
+            List<string> props = new List<string> {
+                "aaa: bbb(ccc)",
+                "lobbyID: 58815465033870437(ID_TYPE_LOBBY)",
+                "key: skin",
+                "value:",
+                "ddd: eee(fff)"
+            };
+
+            GalaxyID LobbyID;
+            string Key = "";
+            string Value = "";
+            Optional<long> ListenerAddress = new();
+
+            bool result = PropertyParser.Parse(ref props, "lobbyID: {gid}\nkey: {s}\nvalue: {s}\nlistener: {x}", out LobbyID, out Key, out Value, out ListenerAddress);
+
+            Assert.True(result);
+
+            Assert.Equal(58815465033870437UL, LobbyID.GetID());
+            Assert.Equal(GalaxyID.Type.ID_TYPE_LOBBY, LobbyID.GetIDType());
+            Assert.Equal("skin", Key);
+            Assert.Equal("", Value);
+            Assert.False(ListenerAddress.Available);
+
+            Assert.Equal("aaa: bbb(ccc)", props.First());
+            Assert.Equal("ddd: eee(fff)", props.Last());
+            Assert.Equal(2, props.Count());
+        }
+
+        [Fact]
+        public void Parse_Empty_String_With_Opt()
+        {
+            List<string> props = new List<string> {
+                "aaa: bbb(ccc)",
+                "lobbyID: 58815465033870437(ID_TYPE_LOBBY)",
+                "key: skin",
+                "value:",
+                "listener: 0x3333333333",
+                "ddd: eee(fff)"
+            };
+
+            GalaxyID LobbyID;
+            string Key = "";
+            string Value = "";
+            Optional<long> ListenerAddress = new();
+
+            bool result = PropertyParser.Parse(ref props, "lobbyID: {gid}\nkey: {s}\nvalue: {s}\nlistener: {x}", out LobbyID, out Key, out Value, out ListenerAddress);
+
+            Assert.True(result);
+
+            Assert.Equal(58815465033870437UL, LobbyID.GetID());
+            Assert.Equal(GalaxyID.Type.ID_TYPE_LOBBY, LobbyID.GetIDType());
+            Assert.Equal("skin", Key);
+            Assert.Equal("", Value);
+            Assert.True(ListenerAddress.Available);
+            Assert.Equal(0x3333333333L, ListenerAddress.Value);
+
+            Assert.Equal("aaa: bbb(ccc)", props.First());
+            Assert.Equal("ddd: eee(fff)", props.Last());
+            Assert.Equal(2, props.Count());
+        }
+
+        [Fact]
         public void Parse_UserID_And_Type()
         {
             List<string> props = new List<string> { 

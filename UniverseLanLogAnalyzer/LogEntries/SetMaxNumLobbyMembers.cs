@@ -17,8 +17,8 @@ namespace UniverseLanLogAnalyzer.LogEntries
         /* Example contents:
             lobbyID: 58815465033870437(ID_TYPE_LOBBY)
             maxNumLobbyMembers: 4
-            result: true
             listener: 0x1234567890
+            result: true
         */
         public override void PostInit()
         {

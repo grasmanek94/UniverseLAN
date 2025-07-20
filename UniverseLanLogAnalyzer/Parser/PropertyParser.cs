@@ -20,6 +20,11 @@ namespace UniverseLanLogAnalyzer.Parser
             var lines = template.Split('\n');
             var matchedIndices = new HashSet<int>();
             var outputIndex = 0;
+            string protector = "\0";
+            string find_str_unprotected = @"\s*(.*?)";
+            string find_other_unprotected = "(.*?)";
+            string find_str = protector + find_str_unprotected + protector;
+            string find_other = protector + find_other_unprotected + protector;
 
             foreach (var line in lines)
             {
@@ -28,13 +33,26 @@ namespace UniverseLanLogAnalyzer.Parser
                 string pattern = line;
                 pattern = PlaceholderRegex.Replace(pattern, match =>
                 {
-                    placeholders.Add((
-                        match.Groups[1].Value
-                    ));
-                    return "(.*?)";
+                    var type = match.Groups[1].Value;
+                    placeholders.Add(type);
+
+                    // If the placeholder is {s}, allow optional whitespace after colon
+                    if (type == "s")
+                    {
+                        return find_str; 
+                    }
+
+                    return find_other;
                 });
+
                 pattern = Regex.Escape(pattern);
-                pattern = pattern.Replace(Regex.Escape("(.*?)"), "(.*?)");
+
+                string escaped_a = Regex.Escape(": " + find_str);
+                string escaped_b = Regex.Escape(find_other);
+
+                // allows matching both "value:" and "value: something"
+                pattern = pattern.Replace(escaped_a, @":" + find_str_unprotected);
+                pattern = pattern.Replace(escaped_b, find_other_unprotected);
 
                 var regex = new Regex("^" + pattern + "$");
 
@@ -59,6 +77,7 @@ namespace UniverseLanLogAnalyzer.Parser
                     for (int j = 0; j < placeholders.Count; j++)
                     {
                         var type = placeholders[j];
+
                         var value = match.Groups[j + 1].Value;
 
                         if (type == "*")

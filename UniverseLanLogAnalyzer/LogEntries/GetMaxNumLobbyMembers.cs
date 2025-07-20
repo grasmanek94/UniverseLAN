@@ -19,7 +19,7 @@ namespace UniverseLanLogAnalyzer.LogEntries
         public override void PostInit()
         {
             if (!PropertyParser.Parse(ref Properties,
-                "lobbyID: {gid}\nresult {d}",
+                "lobbyID: {gid}\nresult: {d}",
                 out LobbyID, out MaxNumLobbyMembers))
             {
                 throw new InterceptorPropertyParsingException(this);
