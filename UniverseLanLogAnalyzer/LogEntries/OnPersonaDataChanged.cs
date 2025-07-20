@@ -22,8 +22,8 @@ namespace UniverseLanLogAnalyzer.LogEntries
         */
         public override void PostInit()
         {
-            if (!PropertyParser.Parse(ref Properties, 
-                "userID: {gid}\noperationalState: {*}({ef})", 
+            if (!PropertyParser.Parse(ref Properties,
+                "userID: {gid}\npersonaStateChange: {*}({ef})", 
                 out UserID, out StateChange))
             {
                 throw new InterceptorPropertyParsingException(this);
