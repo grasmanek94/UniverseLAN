@@ -32,7 +32,7 @@ namespace UniverseLanLogAnalyzer.LogEntries
         public override void PostInit()
         {
             if (!PropertyParser.Parse(ref Properties,
-                "galaxyID: {gid}\ndata: {*}\ndataSize: {d}\nsendType: {e}\nchannel: {d}\ndata_hash: {x}\ndata_contents_hex: {s}\ndata_contents_enc: {s}",
+                "galaxyID: {gid}\ndata: {*}\ndataSize: {d}\nsendType: {e}\nchannel: {d}\ndata_hash: {x}\ndata_contents_hex: {s}\ndata_contents_enc: {s}\nresult: {b}",
                 out Target, out DataSize, out P2PSendType, out Channel, out DataHash, out DataHex, out DataEnc, out Result))
             {
                 throw new InterceptorPropertyParsingException(this);

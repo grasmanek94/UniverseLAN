@@ -9,8 +9,8 @@ namespace UniverseLanLogAnalyzer.LogEntries
 
         public GalaxyID? LobbyID;
         public int MaxNumLobbyMembers;
-        public bool Result;
         public Optional<long> ListenerAddress = new();
+        public bool Result;
 
         public SetMaxNumLobbyMembers(Base original) : base(original) { }
 
@@ -24,7 +24,7 @@ namespace UniverseLanLogAnalyzer.LogEntries
         {
             if (!PropertyParser.Parse(ref Properties,
                 "lobbyID: {gid}\nmaxNumLobbyMembers: {d}\nlistener: {x}\nresult: {b}",
-                out LobbyID, out MaxNumLobbyMembers, out Result, out ListenerAddress))
+                out LobbyID, out MaxNumLobbyMembers, out ListenerAddress, out Result))
             {
                 throw new InterceptorPropertyParsingException(this);
             }

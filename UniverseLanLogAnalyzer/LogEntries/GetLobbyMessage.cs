@@ -8,12 +8,14 @@ namespace UniverseLanLogAnalyzer.LogEntries
         public static readonly string MATCH = "universelan::client::MatchmakingImpl::GetLobbyMessage";
 
         public GalaxyID? LobbyID;
-        public ulong DataSize;
-        public string Message = "";
+        public int MessageID;
+        public ulong BufferAddress;
+        public ulong BufferSize;
+        public ulong DataSizeResult;
+        public Optional<string> Message = new();
         public Optional<ulong> MessageHash = new();
         public Optional<string> MessageHex = new();
         public Optional<string> MessageEnc = new();
-        public bool Result = false;
 
         public GetLobbyMessage(Base original) : base(original) { }
 
@@ -31,8 +33,8 @@ namespace UniverseLanLogAnalyzer.LogEntries
         public override void PostInit()
         {
             if (!PropertyParser.Parse(ref Properties,
-                "lobbyID: {gid}\nmessageID: {d}\nmsg: {*}\nmsgLength: {d}\nresult: {d}\nresult_msg: {s}\nresult_msg_hash: {x}\nresult_msg_hex: {s}\nresult_msg_enc: {s}",
-                out LobbyID, out DataSize, out Message, out MessageHash, out MessageHex, out MessageEnc, out Result))
+                "lobbyID: {gid}\nmessageID: {d}\nmsg: {x}\nmsgLength: {d}\nresult: {d}\nresult_msg: {s}\nresult_msg_hash: {x}\nresult_msg_hex: {s}\nresult_msg_enc: {s}",
+                out LobbyID, out MessageID, out BufferAddress, out BufferSize, out DataSizeResult, out Message, out MessageHash, out MessageHex, out MessageEnc))
             {
                 throw new InterceptorPropertyParsingException(this);
             }
