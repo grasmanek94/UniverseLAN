@@ -60,5 +60,38 @@ namespace UniverseLanLogAnalyzer.LogEntries
         {
             return $"{Function}@{Address:X}[{NestingLevel}]";
         }
+
+        public virtual bool IsRepeatEntry(Base? other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            bool check =
+                (Address == other.Address) &&
+                (NestingLevel == other.NestingLevel) &&
+                Function.Equals(other.Function) &&
+                FunctionExtra.Equals(other.FunctionExtra) &&
+                (IsKeyFrame == other.IsKeyFrame) &&
+                (CollapseRepeat == other.CollapseRepeat) &&
+                (Properties.Count == other.Properties.Count) &&
+                (other.Child == null); /* No support for repeat Child entries, only simple entries for now */
+
+            if(!check) 
+            { 
+                return false; 
+            }
+
+            for(int i = 0; i < Properties.Count; ++i)
+            {
+                if (!Properties[i].Equals(other.Properties[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }

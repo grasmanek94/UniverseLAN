@@ -13,6 +13,8 @@ namespace UniverseLanLogAnalyzer
                 LoggerStateMachine state_machine = new LoggerStateMachine();
                 LogParser parser = new LogParser(@"C:\Users\Rafal\Desktop\SSBD-real-gog-log\Working-A.log", state_machine);
                 parser.Parse();
+                LoggerStateMachineCleanup cleanup = new LoggerStateMachineCleanup(state_machine);
+                cleanup.FoldRecurring();
             }
             {
                 LoggerStateMachine state_machine = new LoggerStateMachine();
