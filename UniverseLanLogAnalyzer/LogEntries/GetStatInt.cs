@@ -11,7 +11,10 @@ namespace UniverseLanLogAnalyzer.LogEntries
         public GalaxyID? UserID;
         public int Result;
 
-        public GetStatInt(Base original) : base(original) { }
+        public GetStatInt(Base original) : base(original)
+        {
+            CollapseRepeat = true;
+        }
 
         /* Example contents:
             name: found_weapons

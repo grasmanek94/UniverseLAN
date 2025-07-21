@@ -10,7 +10,10 @@ namespace UniverseLanLogAnalyzer.LogEntries
         public GalaxyID? LobbyID;
         public LobbyEnterResult LobbyEnterResult;
 
-        public OnLobbyEntered(Base original) : base(original) {}
+        public OnLobbyEntered(Base original) : base(original)
+        {
+            IsKeyFrame = true;
+        }
 
         /* Example contents:
             lobbyID: 58815465033870437(ID_TYPE_LOBBY)

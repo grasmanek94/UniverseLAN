@@ -1,5 +1,4 @@
-﻿using System.Windows.Forms;
-using UniverseLanLogAnalyzer.Galaxy;
+﻿using UniverseLanLogAnalyzer.Galaxy;
 using UniverseLanLogAnalyzer.Parser;
 
 namespace UniverseLanLogAnalyzer.LogEntries

@@ -9,7 +9,10 @@ namespace UniverseLanLogAnalyzer.LogEntries
 
         public GalaxyID? Result;
 
-        public GetGalaxyID(Base original) : base(original) { }
+        public GetGalaxyID(Base original) : base(original)
+        {
+            CollapseRepeat = true;
+        }
 
         /* Example contents:
             result: 46781906533578385(ID_TYPE_USER)

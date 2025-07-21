@@ -14,7 +14,10 @@ namespace UniverseLanLogAnalyzer.LogEntries
         public Optional<ulong> LobbyCreatedListener = new();
         public Optional<ulong> LobbyEnteredListener = new();
 
-        public CreateLobby(Base original) : base(original) {}
+        public CreateLobby(Base original) : base(original)
+        {
+            IsKeyFrame = true;
+        }
 
         /* Example contents:
             lobbyType: LOBBY_TYPE_PUBLIC
@@ -27,7 +30,7 @@ namespace UniverseLanLogAnalyzer.LogEntries
         public override void PostInit()
         {
             if (!PropertyParser.Parse(ref Properties,
-                "lobbyType: {e}\nmaxMembers: {d}\njoinable: {b}\nlobbyTopologyType: {e}\nlobbyCreatedListener: {x}\nlobbyEnteredListener: {x}", 
+                "lobbyType: {e}\nmaxMembers: {d}\njoinable: {b}\nlobbyTopologyType: {e}\nlobbyCreatedListener: {x}\nlobbyEnteredListener: {x}",
                 out LobbyType, out LobbyMaxMembers, out LobbyJoinable, out LobbyTopology, out LobbyCreatedListener, out LobbyEnteredListener))
             {
                 throw new InterceptorPropertyParsingException(this);

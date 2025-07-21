@@ -4,6 +4,9 @@
     {
         public static readonly string MATCH = "universelan::client::AuthListener::OnAuthSuccess";
 
-        public OnAuthSuccess(Base original) : base(original) { }
+        public OnAuthSuccess(Base original) : base(original)
+        {
+            IsKeyFrame = true;
+        }
     }
 }

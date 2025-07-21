@@ -10,7 +10,10 @@ namespace UniverseLanLogAnalyzer.LogEntries
         public GalaxyID? LobbyID;
         public GalaxyID? OwnerID;
 
-        public GetLobbyOwner(Base original) : base(original) { }
+        public GetLobbyOwner(Base original) : base(original)
+        {
+            CollapseRepeat = true;
+        }
 
         /* Example contents:
             lobbyID: 58815465033870437(ID_TYPE_LOBBY)

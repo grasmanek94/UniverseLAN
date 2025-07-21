@@ -4,6 +4,9 @@
     {
         public static readonly string MATCH = "universelan::client::NetworkingImpl::NetworkingImpl::WARNING:";
 
-        public NetworkingImplWarning(Base original) : base(original) { }
+        public NetworkingImplWarning(Base original) : base(original)
+        {
+            CollapseRepeat = true;
+        }
     }
 }

@@ -11,7 +11,10 @@ namespace UniverseLanLogAnalyzer.LogEntries
         public int Channel;
         public bool Result = false;
 
-        public IsP2PPacketAvailable_C(Base original) : base(original) { }
+        public IsP2PPacketAvailable_C(Base original) : base(original)
+        {
+            CollapseRepeat = true;
+        }
 
         /* Example contents:
             outMsgSize(addr): 0xf5f90c

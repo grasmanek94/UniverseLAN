@@ -8,7 +8,10 @@ namespace UniverseLanLogAnalyzer.LogEntries
 
         public string Name = "";
 
-        public GetPersonaName(Base original) : base(original) {}
+        public GetPersonaName(Base original) : base(original)
+        {
+            CollapseRepeat = true;
+        }
 
         /* Example contents:
              result: TestGalaxyUserA

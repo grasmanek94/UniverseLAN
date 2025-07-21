@@ -26,6 +26,7 @@ namespace UniverseLanLogAnalyzer.LogEntries
         /* Entries which can be squashed into a single entry like IsP2PPacketAvailable or GetGalaxyID loops, etc..
          * */
         public bool CollapseRepeat = false;
+        public uint RepeatCount = 1;
 
         public List<string> Properties = new List<string>();
 
