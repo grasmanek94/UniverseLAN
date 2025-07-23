@@ -165,12 +165,8 @@ namespace UniverseLanLogAnalyzer.Parser
                 throw new InterceptorLogParsingException(FileName, CurrentLineNumber, line);
             }
 
-            LogEntries.Base entry = new(StateMachine);
+            LogEntries.Base entry = LogEntries.Reallocator.ReMap(new(StateMachine, NestingLevel, address, function_str, function_str_extra));
 
-            entry.NestingLevel = NestingLevel;
-            entry.Address = address;
-            entry.Function = function_str;
-            entry.FunctionExtra = function_str_extra;
             entry.Previous = PreviousEntry;
 
             if (PreviousEntry != null)
@@ -193,7 +189,7 @@ namespace UniverseLanLogAnalyzer.Parser
                 parent.Child = entry;
             }
 
-            StateMachine.Entries.Add(LogEntries.Reallocator.ReMap(entry));
+            StateMachine.Entries.Add(entry);
 
             PreviousEntry = entry;
         }

@@ -35,6 +35,14 @@ namespace UniverseLanLogAnalyzer.LogEntries
         public Base(LoggerStateMachine state_machine) {
             StateMachine = state_machine;
         }
+        public Base(LoggerStateMachine state_machine, int nesting_level, ulong address, string function, string function_extra)
+        {
+            StateMachine = state_machine;
+            NestingLevel = nesting_level;
+            Address = address;
+            Function = function;
+            FunctionExtra = function_extra;
+        }
 
         public Base(Base original)
         {

@@ -20,9 +20,16 @@
 
             /* Basically removes the entry from in between two entries from the linked list */
             entry.Next = next.Next;
+            entry.NextAtNestingLevel = next.NextAtNestingLevel;
+
             if (entry.Next != null)
             {
-                entry.Next.Previous = entry;
+                entry.Next.Previous = entry;          
+            }
+
+            if(entry.NextAtNestingLevel != null)
+            {
+                entry.NextAtNestingLevel.PrevAtNestingLevel = entry;
             }
         }
 
@@ -40,6 +47,8 @@
                     Fold(entry);
                 }
             }
+
+            StateMachine.Entries = CleanedUpEntries;
         }
     }
 }
