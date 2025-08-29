@@ -1,4 +1,4 @@
-﻿using UniverseLanLogAnalyzer.Galaxy;
+﻿using UniverseLanLogAnalyzer.Galaxy.Types;
 using UniverseLanLogAnalyzer.Parser;
 
 namespace UniverseLanLogAnalyzer.LogEntries
@@ -30,7 +30,7 @@ namespace UniverseLanLogAnalyzer.LogEntries
         public override void PostInit()
         {
             if (!PropertyParser.Parse(ref Properties,
-                "lobbyID: {gid}\ndata: {*}\ndataSize: {d}\nmsg: {s}\ncmsg_hash: {x}\nmsg_hex: {s}\nmsg_enc: {s}\nresult: {b}",
+                "lobbyID: {gid}\ndata: {*}\ndataSize: {d}\nmsg: {s}\nmsg_hash: {x}\nmsg_hex: {s}\nmsg_enc: {s}\nresult: {b}",
                 out LobbyID, out DataSize, out Message, out MessageHash, out MessageHex, out MessageEnc, out Result))
             {
                 throw new InterceptorPropertyParsingException(this);

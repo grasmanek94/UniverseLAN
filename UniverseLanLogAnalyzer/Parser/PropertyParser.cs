@@ -1,16 +1,8 @@
 ﻿using System.Text.RegularExpressions;
-using UniverseLanLogAnalyzer.Galaxy;
+using UniverseLanLogAnalyzer.Galaxy.Types;
 
 namespace UniverseLanLogAnalyzer.Parser
 {
-    public class Optional<T>
-    {
-        public T Value { get; set; } = default!;
-        public bool Available { get; set; } = false;
-
-        public static implicit operator T(Optional<T> opt) => opt.Value;
-    }
-
     public static class PropertyParser
     {
         private static readonly Regex PlaceholderRegex = new(@"\{(d|x|e|ef|b|s|gid|\*)\}");

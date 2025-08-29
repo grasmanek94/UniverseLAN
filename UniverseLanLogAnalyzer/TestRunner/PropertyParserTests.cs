@@ -1,4 +1,4 @@
-﻿using UniverseLanLogAnalyzer.Galaxy;
+﻿using UniverseLanLogAnalyzer.Galaxy.Types;
 using UniverseLanLogAnalyzer.Parser;
 
 namespace UniverseLanLogAnalyzer.Tests
