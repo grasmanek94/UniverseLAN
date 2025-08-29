@@ -2,7 +2,7 @@
 {
     using LobbyKVType = Dictionary<string, byte[]>;
     using LobbyMessagesType = Dictionary<uint, byte[]>;
-    using LobbyUserKVType = Dictionary<User, Dictionary<string, byte[]>>;
+    using LobbyUserKVType = Dictionary<GalaxyID, Dictionary<string, byte[]>>;
 
     public enum LobbyTopologyType
     {
