@@ -20,10 +20,14 @@ namespace UniverseLanLogAnalyzer
             foreach(var file in test_files)
             {
                 LoggerStateMachine state_machine = new LoggerStateMachine();
+
                 LogParser parser = new LogParser(file, state_machine);
                 parser.Parse();
+
                 LoggerStateMachineCleanup cleanup = new LoggerStateMachineCleanup(state_machine);
                 cleanup.FoldRecurring();
+
+                state_machine.PopulateStateMachine();
             }
         }
     }

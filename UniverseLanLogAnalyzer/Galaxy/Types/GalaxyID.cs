@@ -1,5 +1,9 @@
-﻿namespace UniverseLanLogAnalyzer.Galaxy.Types
+﻿using MessagePack;
+using UniverseLanLogAnalyzer.Util;
+
+namespace UniverseLanLogAnalyzer.Galaxy.Types
 {
+    [MessagePackObject]
     public class GalaxyID
     {
         public enum Type
@@ -9,11 +13,14 @@
             ID_TYPE_USER
         }
 
+        [Key(0)]
         public ulong raw; // 0 as an argument to a function means usually SELF (logged in user), otherwise invalid
+
         public static readonly ulong mask_id = 0x00FFFFFFFFFFFFFFUL;
         public static readonly ulong mask_type = ~mask_id;
         public static readonly int shift_type = 56;
 
+        [SerializationConstructor]
         public GalaxyID(ulong id)
         {
             raw = id;
@@ -47,6 +54,11 @@
         public void SetRaw(ulong num)
         {
             raw = num;
+        }
+
+        public GalaxyID DeepClone()
+        {
+            return CloneUtils.DeepClone(this);
         }
     }
 }

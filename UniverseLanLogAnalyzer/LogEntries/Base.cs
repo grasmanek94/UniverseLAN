@@ -101,5 +101,10 @@ namespace UniverseLanLogAnalyzer.LogEntries
 
             return true;
         }
+
+        public virtual void ProcessState(State state)
+        {
+            /* empty on purpose */
+        }
     }
 }

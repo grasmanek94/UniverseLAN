@@ -1,5 +1,8 @@
 ﻿namespace UniverseLanLogAnalyzer.Galaxy.Types
 {
+    using MessagePack;
+    using UniverseLanLogAnalyzer.Util;
+
     using LobbyKVType = Dictionary<string, byte[]>;
     using LobbyMessagesType = Dictionary<uint, byte[]>;
     using LobbyUserKVType = Dictionary<GalaxyID, Dictionary<string, byte[]>>;
@@ -21,16 +24,26 @@
         LOBBY_TYPE_INVISIBLE_TO_FRIENDS = 3
     };
 
+    [MessagePackObject]
     public class Lobby
     {
+        [Key(0)]
         public GalaxyID id;
+        [Key(1)]
         public GalaxyID owner_id;
+        [Key(2)]
         public bool joinable;
+        [Key(3)]
         public uint max_members;
+        [Key(4)]
         public LobbyKVType kv_store = new();
+        [Key(5)]
         public LobbyUserKVType user_kv_store = new();
+        [Key(6)]
         public LobbyMessagesType messages = new();
+        [Key(7)]
         public LobbyTopologyType topology_type;
+        [Key(8)]
         public LobbyType type;
 
         public Lobby(GalaxyID id, LobbyTopologyType topology_type, LobbyType type)
@@ -51,6 +64,14 @@
             this.id = new GalaxyID(id, GalaxyID.Type.ID_TYPE_LOBBY);
             this.topology_type = topology_type;
             this.type = type;
+        }
+
+        /* Don't use, only for serialization */
+        public Lobby() : this(0, LobbyTopologyType.LOBBY_TOPOLOGY_TYPE_FCM_HOST_MIGRATION, LobbyType.LOBBY_TYPE_PRIVATE) {}
+
+        public Lobby DeepClone()
+        {      
+            return CloneUtils.DeepClone(this);
         }
     }
 }
