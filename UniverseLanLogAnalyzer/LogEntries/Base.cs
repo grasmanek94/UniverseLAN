@@ -81,7 +81,7 @@ namespace UniverseLanLogAnalyzer.LogEntries
                 (NestingLevel == other.NestingLevel) &&
                 Function.Equals(other.Function) &&
                 FunctionExtra.Equals(other.FunctionExtra) &&
-                (IsKeyFrame == other.IsKeyFrame) &&
+                (IsKeyFrame == other.IsKeyFrame) && /* TODO: Might want to not squash key frames though? */
                 (CollapseRepeat == other.CollapseRepeat) &&
                 (Properties.Count == other.Properties.Count) &&
                 (other.Child == null); /* No support for repeat Child entries, only simple entries for now */
