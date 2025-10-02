@@ -33,6 +33,15 @@ namespace UniverseLanLogAnalyzer.LogEntries
         public override void ProcessState(State state)
         {
             base.ProcessState(state);
+
+            if(Result == LobbyCreateResult.LOBBY_CREATE_RESULT_SUCCESS)
+            {
+                Lobby lobby = state.UnassignedLobbies.ElementAt(0);
+                lobby.id = LobbyID;
+                state.Lobbies.Add(LobbyID, lobby);
+            }
+
+            state.UnassignedLobbies.RemoveAt(0);
         }
     }
 }
