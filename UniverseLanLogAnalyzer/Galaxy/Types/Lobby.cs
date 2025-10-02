@@ -45,6 +45,10 @@
         public LobbyTopologyType topology_type;
         [Key(8)]
         public LobbyType type;
+        [Key(9)]
+        public ulong created_listener;
+        [Key(10)]
+        public ulong entered_listener;
 
         public Lobby(GalaxyID id, LobbyTopologyType topology_type, LobbyType type)
         {
@@ -54,6 +58,8 @@
             this.id = id;
             this.topology_type = topology_type;
             this.type = type;
+            created_listener = 0;
+            entered_listener = 0;
         }
 
         public Lobby(ulong id, LobbyTopologyType topology_type, LobbyType type)
@@ -64,6 +70,8 @@
             this.id = new GalaxyID(id, GalaxyID.Type.ID_TYPE_LOBBY);
             this.topology_type = topology_type;
             this.type = type;
+            created_listener = 0;
+            entered_listener = 0;
         }
 
         /* Don't use, only for serialization */

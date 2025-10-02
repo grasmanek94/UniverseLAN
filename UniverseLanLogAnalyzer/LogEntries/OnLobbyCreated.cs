@@ -1,4 +1,5 @@
-﻿using UniverseLanLogAnalyzer.Galaxy.Types;
+﻿using UniverseLanLogAnalyzer.Galaxy;
+using UniverseLanLogAnalyzer.Galaxy.Types;
 using UniverseLanLogAnalyzer.Parser;
 
 namespace UniverseLanLogAnalyzer.LogEntries
@@ -27,6 +28,11 @@ namespace UniverseLanLogAnalyzer.LogEntries
             {
                 throw new InterceptorPropertyParsingException(this);
             }
+        }
+
+        public override void ProcessState(State state)
+        {
+            base.ProcessState(state);
         }
     }
 }

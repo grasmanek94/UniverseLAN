@@ -1,4 +1,5 @@
-﻿using UniverseLanLogAnalyzer.Galaxy.Types;
+﻿using UniverseLanLogAnalyzer.Galaxy;
+using UniverseLanLogAnalyzer.Galaxy.Types;
 using UniverseLanLogAnalyzer.Parser;
 
 namespace UniverseLanLogAnalyzer.LogEntries
@@ -8,7 +9,7 @@ namespace UniverseLanLogAnalyzer.LogEntries
         public static readonly string MATCH = "universelan::client::MatchmakingImpl::CreateLobby";
 
         public LobbyType LobbyType;
-        public int LobbyMaxMembers = 0;
+        public uint LobbyMaxMembers = 0;
         public Optional<bool> LobbyJoinable = new();
         public Optional<LobbyTopologyType> LobbyTopology = new();
         public Optional<ulong> LobbyCreatedListener = new();
@@ -35,6 +36,19 @@ namespace UniverseLanLogAnalyzer.LogEntries
             {
                 throw new InterceptorPropertyParsingException(this);
             }
+        }
+
+        public override void ProcessState(State state)
+        {
+            base.ProcessState(state);
+            Lobby lobby = new Lobby();
+            lobby.max_members = LobbyMaxMembers;
+            lobby.joinable = LobbyJoinable;
+            lobby.topology_type = LobbyTopology;
+            lobby.entered_listener = LobbyEnteredListener;
+            lobby.created_listener = LobbyCreatedListener;
+
+            state.UnassignedLobbies.Add(lobby);
         }
     }
 }

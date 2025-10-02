@@ -7,6 +7,9 @@ namespace UniverseLanLogAnalyzer.Galaxy
     [MessagePackObject]
     public class State
     {
+        [Key(3)]
+        public List<Lobby> UnassignedLobbies = new();
+
         [Key(0)]
         public Dictionary<GalaxyID, Lobby> Lobbies = new();
         [Key(1)]
