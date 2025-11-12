@@ -1,4 +1,10 @@
-if(git status --porcelain |Where {$_ -match '^\?\?'}){
+if ((Get-Command "7z.exe" -ErrorAction SilentlyContinue) -eq $null) 
+{ 
+    echo "7z.exe not found!"
+    pause
+    exit
+}
+elseif(git status --porcelain |Where {$_ -match '^\?\?'}){
     echo "Untracked files detected!"
     pause
     exit
@@ -49,7 +55,13 @@ foreach ($version in $subdirs)
             }
 
             echo "Archiving '$version_release_dir\' into '.\$output_folder\$resulting_filename'"
-            Compress-Archive -Path "$version_release_dir\*" -DestinationPath ".\$output_folder\$resulting_filename"
+            #Compress-Archive -Path "$version_release_dir\*" -DestinationPath ".\$output_folder\$resulting_filename"
+
+            $sourcePath = "$version_release_dir\*"
+            $destinationPath = ".\$output_folder\$resulting_filename"
+
+            & "7z.exe" a -tzip "$destinationPath" "$sourcePath" -mx=9 -y
+
             echo "Done"
         }
     }
