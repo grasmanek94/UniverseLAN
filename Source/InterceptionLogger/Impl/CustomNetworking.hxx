@@ -31,7 +31,7 @@ namespace universelan::client {
 	class CustomNetworkingImpl : public ICustomNetworking
 	{
 	public:
-		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT ICustomNetworking* GALAXY_CALLTYPE(void)>>;
+		using FuncT = functional::xt<std::function<ICustomNetworking* GALAXY_CALLTYPE(void)>>;
 		using FuncPtr = typename FuncT::PTR;
 
 	private:

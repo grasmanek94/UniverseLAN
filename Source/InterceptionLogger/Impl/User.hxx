@@ -61,7 +61,7 @@ namespace universelan::client {
 		using SignInDataPtr_T = char;
 #endif
 
-		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT IUser* GALAXY_CALLTYPE(void)>>;
+		using FuncT = functional::xt<std::function<IUser* GALAXY_CALLTYPE(void)>>;
 		using FuncPtr = typename FuncT::PTR;
 
 	private:

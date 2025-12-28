@@ -47,11 +47,11 @@ namespace universelan::client {
 #endif
 #endif
 
-		std::function<GALAXY_DLL_EXPORT void GALAXY_CALLTYPE(InitOptionsImpl const& initOptions)> real_init = nullptr;
+		std::function<void GALAXY_CALLTYPE(InitOptionsImpl const& initOptions)> real_init = nullptr;
 
-		std::function<GALAXY_DLL_EXPORT void GALAXY_CALLTYPE(void)> real_process_data = nullptr;
-		std::function<GALAXY_DLL_EXPORT void GALAXY_CALLTYPE(void)> real_shutdown = nullptr;
-		std::function<GALAXY_DLL_EXPORT uint32_t (void)> real_load = nullptr;
+		std::function<void GALAXY_CALLTYPE(void)> real_process_data = nullptr;
+		std::function<void GALAXY_CALLTYPE(void)> real_shutdown = nullptr;
+		std::function<uint32_t (void)> real_load = nullptr;
 
 		std::unique_ptr<ClientIniData>			config = nullptr;
 		std::unique_ptr<InitOptionsModern>		init_options = nullptr;

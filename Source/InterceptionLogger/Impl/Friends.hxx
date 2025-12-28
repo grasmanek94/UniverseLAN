@@ -43,7 +43,7 @@ namespace universelan::client {
 	class FriendsImpl : public IFriends
 	{
 	public:
-		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT IFriends* GALAXY_CALLTYPE(void)>>;
+		using FuncT = functional::xt<std::function<IFriends* GALAXY_CALLTYPE(void)>>;
 		using FuncPtr = typename FuncT::PTR;
 
 	private:

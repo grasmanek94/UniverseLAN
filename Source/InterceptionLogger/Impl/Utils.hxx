@@ -35,7 +35,7 @@ namespace universelan::client {
 	class UtilsImpl : public IUtils
 	{
 	public:
-		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT IUtils* GALAXY_CALLTYPE(void)>>;
+		using FuncT = functional::xt<std::function<IUtils* GALAXY_CALLTYPE(void)>>;
 		using FuncPtr = typename FuncT::PTR;
 
 	private:

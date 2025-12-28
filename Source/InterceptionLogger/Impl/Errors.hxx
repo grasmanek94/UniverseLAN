@@ -20,7 +20,7 @@ namespace universelan::client {
 	class Error : public IError
 	{
 	public:
-		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT const IError* GALAXY_CALLTYPE(void)>>;
+		using FuncT = functional::xt<std::function<const IError* GALAXY_CALLTYPE(void)>>;
 		using FuncPtr = typename FuncT::PTR;
 
 	private:

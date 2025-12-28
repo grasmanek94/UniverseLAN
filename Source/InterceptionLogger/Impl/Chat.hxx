@@ -30,7 +30,7 @@ namespace universelan::client {
 	class ChatImpl : public IChat
 	{
 	public:
-		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT IChat* GALAXY_CALLTYPE(void)>>;
+		using FuncT = functional::xt<std::function<IChat* GALAXY_CALLTYPE(void)>>;
 		using FuncPtr = typename FuncT::PTR;
 
 	private:

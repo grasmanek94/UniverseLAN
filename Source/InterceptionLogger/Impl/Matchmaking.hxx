@@ -29,7 +29,7 @@ namespace universelan::client {
 	class MatchmakingImpl : public IMatchmaking
 	{
 	public:
-		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT IMatchmaking* GALAXY_CALLTYPE(void)>>;
+		using FuncT = functional::xt<std::function<IMatchmaking* GALAXY_CALLTYPE(void)>>;
 		using FuncPtr = typename FuncT::PTR;
 
 	private:

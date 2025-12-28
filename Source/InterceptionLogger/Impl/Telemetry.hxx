@@ -24,7 +24,7 @@ namespace universelan::client {
 	class TelemetryImpl : public ITelemetry
 	{
 	public:
-		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT ITelemetry* GALAXY_CALLTYPE(void)>>;
+		using FuncT = functional::xt<std::function<ITelemetry* GALAXY_CALLTYPE(void)>>;
 		using FuncPtr = typename FuncT::PTR;
 
 	private:

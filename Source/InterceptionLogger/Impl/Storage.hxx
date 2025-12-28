@@ -17,7 +17,7 @@ namespace universelan::client {
 	class StorageImpl : public IStorage
 	{
 	public:
-		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT IStorage* GALAXY_CALLTYPE(void)>>;
+		using FuncT = functional::xt<std::function<IStorage* GALAXY_CALLTYPE(void)>>;
 		using FuncPtr = typename FuncT::PTR;
 
 	private:

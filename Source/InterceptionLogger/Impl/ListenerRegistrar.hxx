@@ -28,7 +28,7 @@ namespace universelan::client {
 	class ListenerRegistrarImpl : public IListenerRegistrar
 	{
 	public:
-		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT IListenerRegistrar* GALAXY_CALLTYPE(void)>>;
+		using FuncT = functional::xt<std::function<IListenerRegistrar* GALAXY_CALLTYPE(void)>>;
 		using FuncPtr = typename FuncT::PTR;
 
 	private:
