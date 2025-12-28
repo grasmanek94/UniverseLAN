@@ -14,7 +14,8 @@ namespace universelan::client {
 	ChatImpl::ChatImpl(InterfaceInstances* intf)
 		: intf{ intf }, listeners{ intf->notification.get() },
 		chatroom_manager{}, incomming_messages_buffer{ nullptr },
-		mtx{} {}
+		mtx{} {
+	}
 
 	ChatImpl::~ChatImpl() {}
 
@@ -131,18 +132,21 @@ namespace universelan::client {
 
 			incomming_messages_buffer = &data->messages;
 
+			try {
 #if GALAXY_BUILD_FEATURE_HAS_ICHATROOMMESSAGERETRIEVELISTENER
-			listeners->NotifyAllNow(listener,
-				&IChatRoomMessagesRetrieveListener::OnChatRoomMessagesRetrieveSuccess,
-				data->id, (uint32_t)data->messages.size(), longest_message);
+				listeners->NotifyAllNow(listener,
+					&IChatRoomMessagesRetrieveListener::OnChatRoomMessagesRetrieveSuccess,
+					data->id, (uint32_t)data->messages.size(), longest_message);
 #endif
 
-			listeners->NotifyAllNow(
-				&IChatRoomMessagesListener::OnChatRoomMessagesReceived,
-				data->id, (uint32_t)data->messages.size(), longest_message);
-
-			// TODO: a throw can make this code unreachable, FIXME
-			incomming_messages_buffer = nullptr;
+				listeners->NotifyAllNow(
+					&IChatRoomMessagesListener::OnChatRoomMessagesReceived,
+					data->id, (uint32_t)data->messages.size(), longest_message);
+			}
+			catch (...) {
+				incomming_messages_buffer = nullptr;
+				throw;
+			}
 		}
 		else {
 			if (trace.has_flags(tracer::Trace::DETAILED)) {
@@ -237,7 +241,7 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMID_IN_INDEX
 		ChatRoomID& chatRoomID,
 #endif		
-		ChatMessageID& messageID, 
+		ChatMessageID& messageID,
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT_MESSAGETYPE
 		ChatMessageType& messageType,
 #endif
@@ -269,7 +273,7 @@ namespace universelan::client {
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES | tracer::Trace::HIGH_FREQUENCY_CALLS)) {
 			trace.write_all(std::format(
 				"messageID: {} messageType: {} senderID: {} sendTime: {} buffer: {}",
-				messageID, 
+				messageID,
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT_MESSAGETYPE
 				magic_enum::enum_name(messageType),
 #else 
