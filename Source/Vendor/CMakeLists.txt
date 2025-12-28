@@ -17,3 +17,4 @@ include(websocketpp.cmake)
 
 include(galaxy.cmake)
 include(unet.cmake)
+include(json.cmake)
