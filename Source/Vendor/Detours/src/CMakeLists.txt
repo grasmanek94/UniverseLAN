@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 
 if (MSVC)
   if("${MSVC_C_ARCHITECTURE_ID}" STREQUAL "x64")
@@ -44,7 +44,7 @@ if (MSVC)
   else()
     # no
   endif()
-elseif()
+else()
   # no
 endif()
 

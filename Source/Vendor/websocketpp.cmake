@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 
 set(websocketpp_DIR ${CMAKE_CURRENT_SOURCE_DIR}/websocketpp-0.8.2/cmake/ )
 
