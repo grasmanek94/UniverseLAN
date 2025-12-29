@@ -35,6 +35,30 @@ namespace universelan::env_utils
 		return "";
 	}
 
+	std::wstring get_env(const std::wstring& var)
+	{
+#ifdef _WIN32
+		size_t required = 0;
+		_wgetenv_s(&required, NULL, 0, var.c_str());
+
+		if (required != 0) {
+			std::unique_ptr<wchar_t[]> env_data(new wchar_t[required]);
+			if (_wgetenv_s(&required, env_data.get(), required, var.c_str()) == 0) {
+				if (required > 0) {
+					return std::wstring(env_data.get(), required - 1);
+				}
+			}
+		}
+
+#else
+		const char* env_data = std::getenv(var.c_str());
+		if (env_data != nullptr) {
+			return std::string(env_data);
+		}
+#endif
+
+		return L"";
+	}
 	std::string get_gamedata_path_prefix()
 	{
 		return get_env(UNIVERSELAN_GAMEDATA_PREFIX);

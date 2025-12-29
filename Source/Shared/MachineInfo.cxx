@@ -1,22 +1,31 @@
 #include "MachineInfo.hxx"
 
+#include <EnvUtils.hxx>
+
 #include <nlohmann/json.hpp>
 
 #ifdef _WIN32
+
 #include <Windows.h>
 #include <winsock2.h>
 #include <iphlpapi.h>
 #include <shlobj.h>
+
 #else
-#include <fcntl.h>
-#include <unistd.h>
+
 #include <dlfcn.h>
+#include <fcntl.h>
+#include <pwd.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #endif
 
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
+#include <memory>
 #include <mutex>
 #include <sstream>
 #include <string>
@@ -221,29 +230,6 @@ namespace universelan {
 		}
 		return nAddressCount;
 	}
-
-#else
-	bool lock_file(const std::string& filename) {
-		int fd = open(filename.c_str(), O_RDWR | O_CREAT, 0666);  // Open or create the file
-		if (fd == -1) {
-			return false;  // Failed to open the file
-		}
-
-		struct flock lock;
-		lock.l_type = F_WRLCK;  // Write lock
-		lock.l_whence = SEEK_SET;  // Lock the whole file
-		lock.l_start = 0;
-		lock.l_len = 0;
-
-		// Try to lock the file (F_SETLK for non-blocking operation)
-		if (fcntl(fd, F_SETLK, &lock) == -1) {
-			close(fd);
-			return false;
-		}
-
-		// File successfully locked
-		return true;
-	}
 #endif
 
 	namespace {
@@ -286,23 +272,71 @@ namespace universelan {
 		void GetLocalAppDataDirectory(MachineInfo::KnownPath& known_path) {
 			known_path.available = false;
 
+#ifdef _WIN32
 			PWSTR local_appdata_path = nullptr;
 			const HRESULT hr = SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &local_appdata_path);
 			if (SUCCEEDED(hr) && local_appdata_path) {
 
 				known_path.available = true;
-				known_path.path = std::filesystem::path(local_appdata_path);
+				known_path.path = std::filesystem::path(local_appdata_path) / universelan_directory;
 
 				CoTaskMemFree(local_appdata_path);
 			}
 			else {
-				// TODO: _wdupenv_s
-				const wchar_t* const local_appdata_path_env = _wgetenv(L"LOCALAPPDATA");
-				if (local_appdata_path_env != nullptr) {
+				std::filesystem::path local_appdata_path_env{ env_utils::get_env(L"LOCALAPPDATA") };
+				if (std::filesystem::exists(local_appdata_path_env) && std::filesystem::is_directory(local_appdata_path_env)) {
 					known_path.available = true;
-					known_path.path = std::filesystem::path(local_appdata_path_env);
+					known_path.path = std::filesystem::path(local_appdata_path_env) / universelan_directory;
 				}
 			}
+#else
+			const std::string home_directory = env_utils::get_env("HOME");
+			if (home_directory.length() > 0) {
+				std::filesystem::path home_directory_path{ home_directory };
+				if (std::filesystem::exists(home_directory_path) && std::filesystem::is_directory(home_directory_path)) {
+					known_path.available = true;
+					known_path.path = std::filesystem::path(home_directory) / (L"." + universelan_directory);
+				}
+			}
+
+			if (!known_path.available) {
+				size_t bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
+				if (bufsize == -1) {
+					bufsize = 0x4000;
+				}
+
+				std::unique_ptr<char[]> buf(new char[bufsize]);
+				passwd pwd{};
+				passwd* result = nullptr;
+				int s = getpwuid_r(getuid(), &pwd, buf.get(), bufsize, &result);
+				if (result != NULL) {
+					known_path.available = true;
+					known_path.path = std::filesystem::path(result->pw_dir) / (L"." + universelan_directory);
+				}
+			}
+#endif
+		}
+#else
+		bool lock_file(const std::string& filename) {
+			int fd = open(filename.c_str(), O_RDWR | O_CREAT, 0666);  // Open or create the file
+			if (fd == -1) {
+				return false;  // Failed to open the file
+			}
+
+			struct flock lock;
+			lock.l_type = F_WRLCK;  // Write lock
+			lock.l_whence = SEEK_SET;  // Lock the whole file
+			lock.l_start = 0;
+			lock.l_len = 0;
+
+			// Try to lock the file (F_SETLK for non-blocking operation)
+			if (fcntl(fd, F_SETLK, &lock) == -1) {
+				close(fd);
+				return false;
+			}
+
+			// File successfully locked
+			return true;
 		}
 #endif
 		std::optional<uint64_t> TryGetJsonGameID(const nlohmann::json& json, const std::string& entry) {
@@ -362,10 +396,10 @@ namespace universelan {
 			return std::nullopt;
 		}
 
-		bool TryGetCurrentGameRootID(bool& has_found_any_info_files, uint64_t& root_game_id, const std::filesystem::path& start_dir) {
+		bool TryGetCurrentRootGameID(bool& has_found_any_info_files, uint64_t& out_root_game_id, const std::filesystem::path& dir) {
 
 			has_found_any_info_files = false;
-			for (auto& p : std::filesystem::directory_iterator(start_dir))
+			for (auto& p : std::filesystem::directory_iterator(dir))
 			{
 				if (p.path().extension() == gog_info_extension &&
 					p.path().filename().wstring().starts_with(gog_info_prefix)) {
@@ -374,6 +408,7 @@ namespace universelan {
 
 					auto root_game_id = TryGetRootGameID(p.path());
 					if (root_game_id) {
+						out_root_game_id = root_game_id.value();
 						return true;
 					}
 				}
@@ -396,10 +431,11 @@ namespace universelan {
 			std::filesystem::path start_dir =
 				known_paths.library_directory.available ? known_paths.library_directory.path : known_paths.executable_directory.path;
 
-			uint64_t game_root_id = 0;
+			constexpr uint64_t invalid_game_id = std::numeric_limits<uint64_t>::max();
+			uint64_t game_id = invalid_game_id;
 			bool has_found_any_info_files = false;
 
-			while (!has_found_any_info_files && !TryGetCurrentGameRootID(has_found_any_info_files, game_root_id, start_dir)) {
+			while (!has_found_any_info_files && !TryGetCurrentRootGameID(has_found_any_info_files, game_id, start_dir)) {
 				std::filesystem::path parent = start_dir.parent_path();
 
 				if (parent.empty() || parent == start_dir || start_dir == start_dir.root_path()) {
@@ -408,12 +444,12 @@ namespace universelan {
 				start_dir = parent;
 			}
 
-			if (game_root_id == 0) {
+			if (game_id == invalid_game_id) {
 				return;
 			}
 
 			known_paths.local_appdata_game_directory.available = true;
-			known_paths.local_appdata_game_directory.path = known_paths.local_appdata_directory.path / universelan_directory / std::to_wstring(game_root_id);
+			known_paths.local_appdata_game_directory.path = known_paths.local_appdata_directory.path / std::to_wstring(game_id);
 		}
 
 		void GetCurrentLibraryPaths(MachineInfo::KnownPaths& known_paths) {
@@ -443,28 +479,29 @@ namespace universelan {
 
 			GetModuleFileNameSafe(nullptr, known_paths.executable_directory);
 
-			GetLocalAppDataDirectory(known_paths.local_appdata_directory);
-
 #else
-			// POSIX (Linux/macOS): dladdr gives us the shared object file containing the given symbol
 			Dl_info info{};
-			if (dladdr(reinterpret_cast<const void*>(&GetCurrentLibraryPath), &info) == 0 ||
-				info.dli_fname == nullptr) {
-				// Fallback: try /proc/self/exe (Linux) or return empty on macOS if not available
-#ifdef __linux__
-				std::filesystem::path exePath = "/proc/self/exe";
-				std::error_code ec;
-				auto resolved = std::filesystem::read_symlink(exePath, ec);
-				if (ec) return {};
-				return resolved.parent_path();
-#else
-				return {};
-#endif
+			if (dladdr(reinterpret_cast<const void*>(&GetCurrentLibraryPaths), &info) != 0 &&
+				info.dli_fname != nullptr) {
+				known_paths.library_directory.available = true;
+				known_paths.library_directory.path = std::filesystem::path(info.dli_fname).parent_path();
 			}
 
-			std::filesystem::path soPath(info.dli_fname);
-			return soPath.parent_path();
+			std::filesystem::path executable_path = "/proc/self/exe";
+			std::error_code ec;
+			auto resolved = std::filesystem::read_symlink(executable_path, ec);
+			if (!ec) {
+				known_paths.executable_directory.available = true;
+				known_paths.executable_directory.path = resolved.parent_path();
+			}
+
+
+
 #endif
+
+			GetLocalAppDataDirectory(known_paths.local_appdata_directory);
+
+			GetCurrentGameLocalAppDataDirectory(known_paths);
 		}
 	}
 
