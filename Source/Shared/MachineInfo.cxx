@@ -459,9 +459,21 @@ namespace universelan {
 				known_paths.chosen_operating_directory.available = true;
 				known_paths.chosen_operating_directory.path = known_paths.local_appdata_game_directory.path;
 
+			} else if (!known_paths.chosen_operating_directory.available &&
+				known_paths.local_appdata_directory.available) {
+
+				/* Server most likely */
+				auto universelan_file_global = known_paths.local_appdata_directory.path / boot_file;
+
+				known_paths.boot_file_path.available = true;
+				known_paths.boot_file_path.path = universelan_file_global;
+
+				known_paths.chosen_operating_directory.available = true;
+				known_paths.chosen_operating_directory.path = known_paths.local_appdata_directory.path;
+
 			}
 			else if (!known_paths.chosen_operating_directory.available) {
-				/* else select temp dir */
+				/* else select temp dir as last resort */
 				auto universelan_file = known_paths.temporary_directory.path / boot_file;
 
 				known_paths.boot_file_path.available = true;

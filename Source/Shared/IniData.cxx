@@ -213,7 +213,7 @@ namespace universelan {
 
 		void CheckDefaultServerConfig(const MachineInfo& machine_info, const std::filesystem::path& config_file, bool show_info = false) {
 			/* Local App Data dir has been chosen -- no other UniverseLAN.ini files found */
-			if (machine_info.GetOperatingPath().path == machine_info.GetKnownPaths().local_appdata_game_directory.path) {
+			if (machine_info.GetOperatingPath().path == machine_info.GetKnownPaths().local_appdata_directory.path) {
 				std::error_code ec;
 				if (!std::filesystem::exists(config_file)) {
 					/* Create a default UniverseLAN.ini file */
