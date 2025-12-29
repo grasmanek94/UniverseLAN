@@ -13,6 +13,6 @@ function(define_client GALAXY_VERSION)
 
   target_link_libraries(
     universelan-lib-${GALAXY_VERSION}
-    PUBLIC universelan-common-shared-${GALAXY_VERSION} websocketpp boost json
+    PUBLIC universelan-common-shared-${GALAXY_VERSION} websocketpp boost
   )
 endfunction()

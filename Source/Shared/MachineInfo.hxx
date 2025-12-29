@@ -2,10 +2,26 @@
 
 #include <string>
 #include <vector>
+#include <filesystem>
 
 namespace universelan {
 	class MachineInfo
 	{
+	public:
+
+		struct KnownPath {
+			bool available = false;
+			std::filesystem::path path{};
+		};
+
+		struct KnownPaths {
+			KnownPath library_directory;
+			KnownPath executable_directory;
+			KnownPath working_directory;
+			KnownPath local_appdata_directory;
+			KnownPath local_appdata_game_directory;
+		};
+
 	private:
 		std::string machine_name;
 		std::string user_name;
@@ -13,7 +29,9 @@ namespace universelan {
 
 		std::vector<std::string> macs;
 
+		KnownPaths known_paths;
 	public:
+
 		MachineInfo();
 
 		std::string GetLocalMachineName();
@@ -22,5 +40,8 @@ namespace universelan {
 		std::size_t GetProcessID();
 		std::vector<std::string> GetLocalMACs();
 		int GetDebugID(std::string root_temp_path);
+
+		std::filesystem::path GetCurrentLibraryPath();
+		std::filesystem::path GetSettingsStoragePath();
 	};
 }
