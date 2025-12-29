@@ -20,6 +20,7 @@ namespace universelan {
 			KnownPath working_directory;
 			KnownPath local_appdata_directory;
 			KnownPath local_appdata_game_directory;
+			KnownPath temporary_directory;
 		};
 
 	private:
