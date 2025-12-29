@@ -2,9 +2,11 @@
 
 #include "ConsoleCoutRedirector.hxx"
 #include "ConstHash.hxx"
+#include "DefaultConfigFiles.hxx"
 #include "EnvUtils.hxx"
 #include "MachineInfo.hxx"
 
+#include <boost/algorithm/string/join.hpp>
 #include <magic_enum/magic_enum.hpp>
 #include <Tracer.hxx>
 
@@ -12,6 +14,7 @@
 #include <chrono>
 #include <exception>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -121,43 +124,152 @@ namespace universelan {
 			return flags;
 		}
 
-		void LoadIni(CSimpleIniA& ini, const std::string& filename)
+		void LoadIni(CSimpleIniA& ini, const std::filesystem::path& filename, bool show_error, const std::vector<std::wstring>& search_locations)
 		{
 			SI_Error rc = ini.LoadFile(filename.c_str());
 			if (rc < 0) {
-				std::string problem = "Cannot load or parse " + filename + ", error (Return Code / errno): " + std::to_string(rc) + " / " + std::to_string(errno) + "\nWill try to use sane defaults.";
-				//	throw std::runtime_error(problem);
+				std::wstring problem = L"Cannot load or parse '" + filename.wstring() + L"', error (Return Code / errno): " + std::to_wstring(rc) +
+					L" / " + std::to_wstring(errno) + L"\nWill try to use sane defaults.\nPlease check if the file exists, is readable and accessible.\nTried searching in:\n" +
+					boost::algorithm::join(search_locations, L"\n");
+
 #ifdef _WIN32
-				MessageBox(NULL, problem.c_str(), "UniverseLAN - Error", 0);
+				if (show_error) {
+					MessageBoxW(NULL, problem.c_str(), L"UniverseLAN - Error", MB_ICONWARNING);
+				}
+				else {
+					std::wcout << "Exception occurred during init: " << problem << std::endl;
+				}
 #else
-				std::cout << "Exception occurred during init: " << problem << std::endl;
+				std::wcout << "Exception occurred during init: " << problem << std::endl;
 #endif
+			}
+		}
+
+		void LoadIni(CSimpleIniA& ini, const std::filesystem::path& filename, bool show_error)
+		{
+			SI_Error rc = ini.LoadFile(filename.c_str());
+			if (rc < 0) {
+				std::wstring problem = L"Cannot load or parse '" + filename.wstring() + L"', error (Return Code / errno): " + std::to_wstring(rc) +
+					L" / " + std::to_wstring(errno) + L"\nWill try to use sane defaults.\nPlease check if the file exists, is readable and accessible.";
+
+#ifdef _WIN32
+				if (show_error) {
+					MessageBoxW(NULL, problem.c_str(), L"UniverseLAN - Error", MB_ICONWARNING);
+				}
+				else {
+					std::wcout << "Exception occurred during init: " << problem << std::endl;
+				}			
+#else
+				std::wcout << "Exception occurred during init: " << problem << std::endl;
+#endif
+			}
+		}
+
+		void CheckDefaultConfig(const MachineInfo& machine_info, bool show_info = false) {
+			/* Local App Data dir has been chosen -- no other UniverseLAN.ini files found */
+			if (machine_info.GetOperatingPath().path == machine_info.GetKnownPaths().local_appdata_game_directory.path) {
+				std::error_code ec;
+				if (!std::filesystem::exists(machine_info.GetBootFile().path)) {
+					/* Create a default UniverseLAN.ini file */
+					universelan::defaults::create_boot_file(machine_info.GetBootFile().path);
+
+					std::wstring info = L"A new config file has been created: '" + machine_info.GetBootFile().path.wstring() + L"'.\nUniverseLAN will save data there for all games.";
+#ifdef _WIN32
+					if (show_info) {
+						MessageBoxW(NULL, info.c_str(), L"UniverseLAN - Info", MB_ICONINFORMATION);
+					}
+					else {
+						std::wcout << "INFO: " << info << std::endl;
+					}
+#else
+					std::wcout << "INFO: " << info << std::endl;
+#endif
+				}
+			}
+		}
+
+		void CheckDefaultClientConfig(const MachineInfo& machine_info, const std::filesystem::path& config_file, bool show_info = false) {
+			/* Local App Data dir has been chosen -- no other UniverseLAN.ini files found */
+			if (machine_info.GetOperatingPath().path == machine_info.GetKnownPaths().local_appdata_game_directory.path) {
+				std::error_code ec;
+				if (!std::filesystem::exists(config_file)) {
+					/* Create a default UniverseLAN.ini file */
+					universelan::defaults::create_client_config_file(config_file);
+
+					std::wstring info = L"A new client config file has been created: '" + config_file.wstring() + L"'.\nUniverseLAN will save data there for this game.";
+#ifdef _WIN32
+					if (show_info) {
+						MessageBoxW(NULL, info.c_str(), L"UniverseLAN - Info", MB_ICONINFORMATION);
+					}
+					else {
+						std::wcout << "INFO: " << info << std::endl;
+					}
+#else
+					std::wcout << "INFO: " << info << std::endl;
+#endif
+				}
+			}
+		}
+
+		void CheckDefaultServerConfig(const MachineInfo& machine_info, const std::filesystem::path& config_file, bool show_info = false) {
+			/* Local App Data dir has been chosen -- no other UniverseLAN.ini files found */
+			if (machine_info.GetOperatingPath().path == machine_info.GetKnownPaths().local_appdata_game_directory.path) {
+				std::error_code ec;
+				if (!std::filesystem::exists(config_file)) {
+					/* Create a default UniverseLAN.ini file */
+					universelan::defaults::create_server_config_file(config_file);
+
+					std::wstring info = L"A new server config file has been created: '" + config_file.wstring() + L"'.\nUniverseLAN will save data there for this game server.";
+#ifdef _WIN32
+					if (show_info) {
+						MessageBoxW(NULL, info.c_str(), L"UniverseLAN - Info", MB_ICONINFORMATION);
+					}
+					else {
+						std::wcout << "INFO: " << info << std::endl;
+					}
+#else
+					std::wcout << "INFO: " << info << std::endl;
+#endif
+				}
 			}
 		}
 	}
 
-	std::string IniData::GetPath(std::string base, const std::string& filename)
+	std::filesystem::path IniData::GetPath(const std::filesystem::path& base, const std::filesystem::path& filename) const
 	{
-		return (std::filesystem::path(base) / filename).string();
+		return MachineInformation.GetOperatingPath().path / base / filename;
 	}
 
 	IniData::IniData() :
+		GameDataPath{ "UniverseLANData" },
+		ServerDataPath{ "UniverseLANServerData" },
+		CallTracing{ false },
+		UnhandledExceptionLogging{ false },
+		MiniDumpOnUnhandledException{ false },
+		MiniDumpVerbosityLevel{ 0 },
+		TracingAlwaysFlush{ false },
+		CallTracingFlags{ 0 },
+		TraceToConsole{ false },
+		AuthenticationKey{ "" },
+		MachineInformation{},
 		BootTime{ std::chrono::system_clock::now() }
 	{
 		CSimpleIniA ini;
 		ini.SetUnicode();
 
-		std::cout << "Opening Global config located at " << std::filesystem::current_path() / BootFile << std::endl;
+		std::wcout << L"Opening Global config located at " << MachineInformation.GetBootFile().path << std::endl;
 
-		LoadIni(ini, BootFile);
+		CheckDefaultConfig(MachineInformation, true);
+
+		LoadIni(ini, MachineInformation.GetBootFile().path, true, MachineInformation.GetBootFileSearchLocations());
 
 		GameDataPath = ini.GetValue(StoragePathSection.c_str(), "GameDataPath", "UniverseLANData");
 		ServerDataPath = ini.GetValue(StoragePathSection.c_str(), "ServerDataPath", "UniverseLANServerData");
-		CallTracing = ini.GetBoolValue(TracingSection.c_str(), "CallTracing", true);
-		UnhandledExceptionLogging = ini.GetBoolValue(TracingSection.c_str(), "UnhandledExceptionLogging", true);
-		MiniDumpOnUnhandledException = ini.GetBoolValue(TracingSection.c_str(), "MiniDumpOnUnhandledException", true);
-		MiniDumpVerbosityLevel = ini.GetLongValue(TracingSection.c_str(), "MiniDumpVerbosityLevel", 2);
-		TracingAlwaysFlush = ini.GetBoolValue(TracingSection.c_str(), "AlwaysFlush", true);
+		CallTracing = ini.GetBoolValue(TracingSection.c_str(), "CallTracing", false);
+		UnhandledExceptionLogging = ini.GetBoolValue(TracingSection.c_str(), "UnhandledExceptionLogging", false);
+		MiniDumpOnUnhandledException = ini.GetBoolValue(TracingSection.c_str(), "MiniDumpOnUnhandledException", false);
+		MiniDumpVerbosityLevel = ini.GetLongValue(TracingSection.c_str(), "MiniDumpVerbosityLevel", 0);
+		TracingAlwaysFlush = ini.GetBoolValue(TracingSection.c_str(), "AlwaysFlush", false);
 		CallTracingFlags = parse_flags(ini.GetValue(TracingSection.c_str(), "CallTracingFlags", "INFORMATIONAL"));
 		TraceToConsole = ini.GetBoolValue(TracingSection.c_str(), "TraceToConsole", false);
 
@@ -211,7 +323,7 @@ namespace universelan {
 	{
 	}
 
-	std::string ServerIniData::GetPath(const std::string& filename) const {
+	std::filesystem::path ServerIniData::GetPath(const std::filesystem::path& filename) const {
 		return IniData::GetPath(GetServerDataPath(), filename);
 	}
 
@@ -220,9 +332,10 @@ namespace universelan {
 		CSimpleIniA ini;
 		ini.SetUnicode();
 
-		std::cout << "Opening Server config located at " << std::filesystem::current_path() / GetPath(ConfigFile) << std::endl;
+		std::wcout << L"Opening Server config located at " << GetPath(ConfigFile) << std::endl;
 
-		LoadIni(ini, GetPath(ConfigFile));
+		CheckDefaultServerConfig(MachineInformation, GetPath(ConfigFile), false);
+		LoadIni(ini, GetPath(ConfigFile), true);
 
 		AllowFileSharingDownload = ini.GetBoolValue(StoragePathSection.c_str(), "AllowFileSharingDownload", true);
 		AllowFileSharingUpload = ini.GetBoolValue(StoragePathSection.c_str(), "AllowFileSharingUpload", true);
@@ -261,7 +374,7 @@ namespace universelan {
 		return MaxTickRate;
 	}
 
-	std::string ClientIniData::GetPath(const std::string& filename) const {
+	std::filesystem::path ClientIniData::GetPath(const std::filesystem::path& filename) const {
 		return IniData::GetPath(GetGameDataPath(), filename);
 	}
 
@@ -270,15 +383,14 @@ namespace universelan {
 	{
 		// Config
 		{
-			std::string debug_root_temp_path = GetPath("Temp");
+			auto debug_root_temp_path = GetPath("Temp");
 			std::cout << "Opening Client config located at " << std::filesystem::current_path() / GetPath(ConfigFile) << std::endl;
-
-			MachineInfo machine_info;
 
 			CSimpleIniA ini;
 			ini.SetUnicode();
 
-			LoadIni(ini, GetPath(ConfigFile));
+			CheckDefaultClientConfig(MachineInformation, GetPath(ConfigFile), false);
+			LoadIni(ini, GetPath(ConfigFile), true);
 
 			Language = ini.GetValue(SettingsSection.c_str(), "Language", "english");
 			LanguageCode = ini.GetValue(SettingsSection.c_str(), "LanguageCode", "en-US");
@@ -305,11 +417,11 @@ namespace universelan {
 			auto GalaxyIDOffsetString = ini.GetValue(UserSection.c_str(), "GalaxyIDOffset", "");
 			switch (const_hash(GalaxyIDOffsetString)) {
 			case const_hash("@ProcessID"):
-				GalaxyIDOffset = machine_info.GetProcessID();
+				GalaxyIDOffset = MachineInformation.GetProcessID();
 				break;
 
 			case const_hash("@DebugID"):
-				GalaxyIDOffset = machine_info.GetDebugID(debug_root_temp_path);
+				GalaxyIDOffset = MachineInformation.GetDebugID(debug_root_temp_path);
 				break;
 
 			default:
@@ -335,67 +447,67 @@ namespace universelan {
 
 				switch (const_hash(PersonaNameType)) {
 				case const_hash("@WindowsAccountName"):
-					if (machine_info.GetLocalMachineName().size() < 1) {
+					if (MachineInformation.GetLocalMachineName().size() < 1) {
 						throw std::runtime_error("@WindowsAccountName: No username found");
 					}
 
-					CustomPersonaName = machine_info.GetLocalUserName() + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
+					CustomPersonaName = MachineInformation.GetLocalUserName() + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
 					break;
 
 				case const_hash("@WindowsAccountNameHash"):
-					if (machine_info.GetLocalMachineName().size() < 1) {
+					if (MachineInformation.GetLocalMachineName().size() < 1) {
 						throw std::runtime_error("@WindowsAccountNameHash: No username found");
 					}
 
-					CustomPersonaName = std::to_string(const_hash64(machine_info.GetLocalUserName())) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
+					CustomPersonaName = std::to_string(const_hash64(MachineInformation.GetLocalUserName())) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
 					break;
 
 				case const_hash("@ComputerName"):
-					if (machine_info.GetLocalMachineName().size() < 1) {
+					if (MachineInformation.GetLocalMachineName().size() < 1) {
 						throw std::runtime_error("@ComputerName: No machine name found");
 					}
 
-					CustomPersonaName = machine_info.GetLocalMachineName() + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
+					CustomPersonaName = MachineInformation.GetLocalMachineName() + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
 					break;
 
 				case const_hash("@ComputerNameHash"):
-					if (machine_info.GetLocalMachineName().size() < 1) {
+					if (MachineInformation.GetLocalMachineName().size() < 1) {
 						throw std::runtime_error("@ComputerNameHash: No machine name found");
 					}
 
-					CustomPersonaName = std::to_string(const_hash64(machine_info.GetLocalMachineName())) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
+					CustomPersonaName = std::to_string(const_hash64(MachineInformation.GetLocalMachineName())) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
 					break;
 
 				case const_hash("@MachineID"):
-					if (machine_info.GetInstallationID().size() < 1) {
+					if (MachineInformation.GetInstallationID().size() < 1) {
 						throw std::runtime_error("@MachineID: No Machine ID found");
 					}
 
-					CustomPersonaName = machine_info.GetInstallationID() + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
+					CustomPersonaName = MachineInformation.GetInstallationID() + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
 					break;
 
 				case const_hash("@MachineIDHash"):
-					if (machine_info.GetInstallationID().size() < 1) {
+					if (MachineInformation.GetInstallationID().size() < 1) {
 						throw std::runtime_error("@MachineIDHash: No Machine ID found");
 					}
 
-					CustomPersonaName = std::to_string(const_hash64(machine_info.GetInstallationID())) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
+					CustomPersonaName = std::to_string(const_hash64(MachineInformation.GetInstallationID())) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
 					break;
 
 				case const_hash("@NetworkAdapterMACHash"):
-					if (machine_info.GetLocalMACs().size() < 1) {
+					if (MachineInformation.GetLocalMACs().size() < 1) {
 						throw std::runtime_error("@NetworkAdapterMACHash: No MAC adresses found");
 					}
 
-					CustomPersonaName = std::to_string(const_hash64(machine_info.GetLocalMACs().front())) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
+					CustomPersonaName = std::to_string(const_hash64(MachineInformation.GetLocalMACs().front())) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
 					break;
 
 				case const_hash("@ProcessID"):
-					CustomPersonaName = std::to_string(machine_info.GetProcessID()) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
+					CustomPersonaName = std::to_string(MachineInformation.GetProcessID()) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
 					break;
 
 				case const_hash("@DebugID"):
-					CustomPersonaName = std::to_string(machine_info.GetDebugID(debug_root_temp_path)) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
+					CustomPersonaName = std::to_string(MachineInformation.GetDebugID(debug_root_temp_path)) + (SuffixPersonaNameTypeResultWithCustomPersonaName ? CustomPersonaName : "");
 					break;
 
 				default:
@@ -408,35 +520,35 @@ namespace universelan {
 
 				switch (const_hash(GalaxyIDType)) {
 				case const_hash("@WindowsAccountNameHash"):
-					if (machine_info.GetLocalMachineName().size() < 1) {
+					if (MachineInformation.GetLocalMachineName().size() < 1) {
 						throw std::runtime_error("@WindowsAccountNameHash: No username found");
 					}
 
-					str = machine_info.GetLocalUserName();
+					str = MachineInformation.GetLocalUserName();
 					break;
 
 				case const_hash("@ComputerNameHash"):
-					if (machine_info.GetLocalMachineName().size() < 1) {
+					if (MachineInformation.GetLocalMachineName().size() < 1) {
 						throw std::runtime_error("@ComputerNameHash: No machine name found");
 					}
 
-					str = machine_info.GetLocalMachineName();
+					str = MachineInformation.GetLocalMachineName();
 					break;
 
 				case const_hash("@MachineIDHash"):
-					if (machine_info.GetLocalMachineName().size() < 1) {
+					if (MachineInformation.GetLocalMachineName().size() < 1) {
 						throw std::runtime_error("@MachineIDHash: No Machine ID found");
 					}
 
-					str = machine_info.GetInstallationID();
+					str = MachineInformation.GetInstallationID();
 					break;
 
 				case const_hash("@NetworkAdapterMACHash"):
-					if (machine_info.GetLocalMACs().size() < 1) {
+					if (MachineInformation.GetLocalMACs().size() < 1) {
 						throw std::runtime_error("@NetworkAdapterMACHash: No MAC adresses found");
 					}
 
-					str = machine_info.GetLocalMACs().front();
+					str = MachineInformation.GetLocalMACs().front();
 					break;
 
 				default:
@@ -455,7 +567,7 @@ namespace universelan {
 			CSimpleIniA ini;
 			ini.SetUnicode();
 
-			LoadIni(ini, GetPath(AchievementsFile));
+			LoadIni(ini, GetPath(AchievementsFile), false);
 
 			CSimpleIniA::TNamesDepend sections;
 			ini.GetAllSections(sections);
@@ -485,7 +597,7 @@ namespace universelan {
 			CSimpleIniA ini;
 			ini.SetUnicode();
 
-			LoadIni(ini, GetPath(DLCFile));
+			LoadIni(ini, GetPath(DLCFile), false);
 
 			// get all keys in a section
 			CSimpleIniA::TNamesDepend keys;
@@ -516,7 +628,7 @@ namespace universelan {
 			CSimpleIniA ini;
 			ini.SetUnicode();
 
-			LoadIni(ini, GetPath(StatsFile));
+			LoadIni(ini, GetPath(StatsFile), false);
 
 			local_user_data->stats.SetPlayTime(ini.GetLongValue(MetadataSection.c_str(), "PlayTime", 0));
 
@@ -539,7 +651,7 @@ namespace universelan {
 			CSimpleIniA ini;
 			ini.SetUnicode();
 
-			LoadIni(ini, GetPath(UserDataFile));
+			LoadIni(ini, GetPath(UserDataFile), false);
 
 			// get all keys in a section
 			CSimpleIniA::TNamesDepend keys;
@@ -685,7 +797,7 @@ namespace universelan {
 			CSimpleIniA ini;
 			ini.SetUnicode();
 
-			LoadIni(ini, GetPath(AchievementsFile));
+			LoadIni(ini, GetPath(AchievementsFile), false);
 
 			local_user_data->stats.run_locked_achievements<void>([&](auto& Achievements) {
 				for (auto& achievement : Achievements) {
@@ -711,7 +823,7 @@ namespace universelan {
 			CSimpleIniA ini;
 			ini.SetUnicode();
 
-			LoadIni(ini, GetPath(DLCFile));
+			LoadIni(ini, GetPath(DLCFile), false);
 
 			for (const auto& dlc : DLCs) {
 				std::string name = std::to_string(dlc.first);
@@ -727,7 +839,7 @@ namespace universelan {
 			CSimpleIniA ini;
 			ini.SetUnicode();
 
-			LoadIni(ini, GetPath(StatsFile));
+			LoadIni(ini, GetPath(StatsFile), false);
 
 			ini.SetLongValue(MetadataSection.c_str(), "PlayTime", local_user_data->stats.GetPlayTime());
 
@@ -746,7 +858,7 @@ namespace universelan {
 			CSimpleIniA ini;
 			ini.SetUnicode();
 
-			LoadIni(ini, GetPath(UserDataFile));
+			LoadIni(ini, GetPath(UserDataFile), false);
 
 			local_user_data->stats.run_locked_userdata<void>([&](auto& UserData) {
 				for (const auto& user_data : UserData) {

@@ -1,10 +1,12 @@
 #pragma once
 
 #include "GalaxyUserData.hxx"
+#include "MachineInfo.hxx"
 
 #include <GalaxyID.h>
 
 #include <chrono>
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -14,8 +16,6 @@ namespace universelan {
 	class IniData
 	{
 	private:
-		const std::string BootFile = "UniverseLAN.ini";
-
 		const std::string StoragePathSection = "Storage";
 		std::string GameDataPath;
 		std::string ServerDataPath;
@@ -33,7 +33,9 @@ namespace universelan {
 		std::string AuthenticationKey;
 
 	protected:
-		static std::string GetPath(std::string base, const std::string& filename);
+		const MachineInfo MachineInformation;
+
+		std::filesystem::path GetPath(const std::filesystem::path& base, const std::filesystem::path& filename) const;
 
 	public:
 		IniData();
@@ -52,6 +54,7 @@ namespace universelan {
 		bool ShouldTraceToConsole() const;
 
 		const std::chrono::system_clock::time_point BootTime;
+
 	};
 
 	class ServerIniData : public IniData
@@ -69,7 +72,7 @@ namespace universelan {
 		uint32_t MaxConnections;
 		uint32_t MaxTickRate;
 
-		std::string GetPath(const std::string& filename) const;
+		std::filesystem::path GetPath(const std::filesystem::path& filename) const;
 
 	public:
 		ServerIniData();
@@ -148,8 +151,7 @@ namespace universelan {
 		const std::string UserDataSection = "UserData";
 		// container see local_user_data
 
-
-		std::string GetPath(const std::string& filename) const;
+		std::filesystem::path GetPath(const std::filesystem::path& filename) const;
 
 	public:
 		ClientIniData();

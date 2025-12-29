@@ -1,6 +1,6 @@
 #include "MachineInfo.hxx"
 
-#include <EnvUtils.hxx>
+#include "EnvUtils.hxx"
 
 #include <nlohmann/json.hpp>
 
@@ -24,12 +24,14 @@
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <iomanip>
 #include <memory>
 #include <mutex>
 #include <sstream>
 #include <string>
 #include <system_error> 
+#include <vector>
 
 namespace universelan {
 	namespace {
@@ -359,6 +361,8 @@ namespace universelan {
 			known_paths.local_appdata_directory.available = false;
 			known_paths.local_appdata_game_directory.available = false;
 			known_paths.temporary_directory.available = false;
+			known_paths.chosen_operating_directory.available = false;
+			known_paths.boot_file_path.available = false;
 
 			known_paths.working_directory.path = std::filesystem::current_path(ec);
 			if (!ec) {
@@ -406,6 +410,66 @@ namespace universelan {
 			GetLocalAppDataDirectory(known_paths.local_appdata_directory);
 
 			GetCurrentGameLocalAppDataDirectory(known_paths);
+		}
+
+		void GetCurrentOperatingDirectory(const std::string& boot_file, MachineInfo::KnownPaths& known_paths) {
+			known_paths.chosen_operating_directory.available = false;
+			known_paths.boot_file_path.available = false;
+
+			std::error_code ec;
+			std::vector<std::reference_wrapper<MachineInfo::KnownPath>> arr{
+				known_paths.working_directory, known_paths.library_directory,
+				known_paths.executable_directory, known_paths.local_appdata_game_directory,
+				known_paths.temporary_directory };
+
+			/* Select the storage directory, maintaining legacy behaviour (working directory first) */
+			for (const auto& p : arr) {
+				if (p.get().available) {
+					auto universelan_file = p.get().path / boot_file;
+					if (std::filesystem::is_regular_file(universelan_file, ec) && std::filesystem::exists(universelan_file)) {
+						known_paths.chosen_operating_directory.available = true;
+						known_paths.chosen_operating_directory.path = p.get().path;
+
+						known_paths.boot_file_path.available = true;
+						known_paths.boot_file_path.path = universelan_file;
+
+						break;
+					}
+				}
+			}
+
+			/* Select local app data dir */
+			if (!known_paths.chosen_operating_directory.available &&
+				known_paths.local_appdata_directory.available &&
+				known_paths.local_appdata_game_directory.available) {
+
+				auto universelan_file_global = known_paths.local_appdata_directory.path / boot_file;
+				auto universelan_file_local = known_paths.local_appdata_game_directory.path / boot_file;
+
+				/* Choose game-local UniverseLAN.ini,
+				   else choose UniverseLAN.ini in local app data directory */
+				known_paths.boot_file_path.available = true;
+				if (std::filesystem::is_regular_file(universelan_file_local, ec) && std::filesystem::exists(universelan_file_local, ec)) {
+					known_paths.boot_file_path.path = universelan_file_local;
+				}
+				else {
+					known_paths.boot_file_path.path = universelan_file_global;
+				}
+
+				known_paths.chosen_operating_directory.available = true;
+				known_paths.chosen_operating_directory.path = known_paths.local_appdata_game_directory.path;
+
+			}
+			else if (!known_paths.chosen_operating_directory.available) {
+				/* else select temp dir */
+				auto universelan_file = known_paths.temporary_directory.path / boot_file;
+
+				known_paths.boot_file_path.available = true;
+				known_paths.boot_file_path.path = universelan_file;
+
+				known_paths.chosen_operating_directory.available = true;
+				known_paths.chosen_operating_directory.path = known_paths.temporary_directory.path;
+			}
 		}
 	}
 
@@ -502,7 +566,11 @@ namespace universelan {
 #endif
 
 		/* Get Known Folder Paths */
-		::universelan::GetCurrentLibraryPaths(known_paths);
+		GetCurrentLibraryPaths(known_paths);
+		GetCurrentOperatingDirectory(BootFile, known_paths);
+
+		std::error_code ec;
+		std::filesystem::create_directories(known_paths.chosen_operating_directory.path, ec);
 	}
 
 	std::string MachineInfo::GetLocalMachineName() const
@@ -530,20 +598,19 @@ namespace universelan {
 		return process_id;
 	}
 
-	int MachineInfo::GetDebugID(std::string root_temp_path) const {
+	int MachineInfo::GetDebugID(const std::filesystem::path& root_temp_path) const {
 		std::scoped_lock<std::mutex> id_lock{ debug_id_mtx };
 
 		if (my_debug_id != -1) {
 			return my_debug_id;
 		}
 
-		std::filesystem::path root{ root_temp_path };
 		std::error_code ec;
 
-		std::filesystem::create_directories(root, ec);
+		std::filesystem::create_directories(root_temp_path, ec);
 
 		for (int id = 0; id < max_debug_id; ++id) {
-			std::filesystem::path p = root / (debug_temp_filename + std::to_string(id));
+			std::filesystem::path p = root_temp_path / (debug_temp_filename + std::to_string(id));
 
 #ifdef _WIN32
 			bool lock_success = (CreateFile(p.string().c_str(), GENERIC_READ, 0, NULL, OPEN_ALWAYS, 0, NULL) != INVALID_HANDLE_VALUE);
@@ -562,5 +629,50 @@ namespace universelan {
 
 	MachineInfo::KnownPaths MachineInfo::GetKnownPaths() const {
 		return known_paths;
+	}
+
+	MachineInfo::KnownPath MachineInfo::GetOperatingPath() const
+	{
+		return known_paths.chosen_operating_directory;
+	}
+
+	MachineInfo::KnownPath MachineInfo::GetBootFile() const
+	{
+		return known_paths.boot_file_path;
+	}
+
+	std::vector<std::wstring> MachineInfo::GetBootFileSearchLocations() const
+	{
+		const std::vector<std::reference_wrapper<const MachineInfo::KnownPath>> arr{
+			known_paths.working_directory, known_paths.library_directory,
+			known_paths.executable_directory, known_paths.local_appdata_game_directory,
+			known_paths.temporary_directory
+		};
+
+		std::vector<std::wstring> search_paths{};
+
+		for (const auto& p : arr) {
+			if (p.get().available) {
+				auto universelan_file = p.get().path / BootFile;
+
+				bool has_entry = false;
+				for (const auto& e : search_paths) {
+					if (e == universelan_file) {
+						has_entry = true;
+						break;
+					}
+				}
+
+				if (!has_entry) {
+					search_paths.push_back(universelan_file);
+				}
+			}
+		}
+
+		auto universelan_file_global = known_paths.local_appdata_directory.path / BootFile;
+
+		search_paths.push_back(universelan_file_global);
+
+		return search_paths;
 	}
 }
