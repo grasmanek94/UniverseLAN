@@ -470,7 +470,6 @@ enet_socket_receive (ENetSocket socket,
     int socketAddressLen = sizeof(sockAddrBuf);
     DWORD flags = 0,
           recvLength = 0;
-    struct sockaddr_in sin;
 
     if (WSARecvFrom (socket,
                      (LPWSABUF) buffers,

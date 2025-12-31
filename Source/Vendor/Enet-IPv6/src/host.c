@@ -276,7 +276,7 @@ enet_host_connect (ENetHost * host, const ENetAddress * address, size_t channelC
         memset (channel -> reliableWindows, 0, sizeof (channel -> reliableWindows));
     }
 
-    command.header.command = ENET_PROTOCOL_COMMAND_CONNECT | ENET_PROTOCOL_COMMAND_FLAG_ACKNOWLEDGE;
+    command.header.command = (enet_uint8)ENET_PROTOCOL_COMMAND_CONNECT | (enet_uint8)ENET_PROTOCOL_COMMAND_FLAG_ACKNOWLEDGE;
     command.header.channelID = 0xFF;
     command.connect.outgoingPeerID = ENET_HOST_TO_NET_16 (currentPeer -> incomingPeerID);
     command.connect.incomingSessionID = currentPeer -> incomingSessionID;
@@ -520,7 +520,7 @@ enet_host_bandwidth_throttle (ENetHost * host)
            if (peer -> state != ENET_PEER_STATE_CONNECTED && peer -> state != ENET_PEER_STATE_DISCONNECT_LATER)
              continue;
 
-           command.header.command = ENET_PROTOCOL_COMMAND_BANDWIDTH_LIMIT | ENET_PROTOCOL_COMMAND_FLAG_ACKNOWLEDGE;
+           command.header.command = (enet_uint8)ENET_PROTOCOL_COMMAND_BANDWIDTH_LIMIT | (enet_uint8)ENET_PROTOCOL_COMMAND_FLAG_ACKNOWLEDGE;
            command.header.channelID = 0xFF;
            command.bandwidthLimit.outgoingBandwidth = ENET_HOST_TO_NET_32 (host -> outgoingBandwidth);
 
