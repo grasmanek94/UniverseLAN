@@ -5,7 +5,7 @@
 #ifndef __ENET_PROTOCOL_H__
 #define __ENET_PROTOCOL_H__
 
-#include "enet/types.h"
+#include "enet6/types.h"
 
 enum
 {
@@ -52,6 +52,14 @@ typedef enum _ENetProtocolFlag
    ENET_PROTOCOL_HEADER_SESSION_MASK    = (3 << 12),
    ENET_PROTOCOL_HEADER_SESSION_SHIFT   = 12
 } ENetProtocolFlag;
+
+typedef enum _ENetProtocolExtendedFlag
+{
+   /* bits [0-3] are reserved for future peer id extension */
+
+   ENET_PROTOCOL_HEADER_EXTENDED_FLAG_ENCRYPTED  = (1 << 4),
+   ENET_PROTOCOL_HEADER_EXTENDED_FLAG_MASK       = ENET_PROTOCOL_HEADER_EXTENDED_FLAG_ENCRYPTED,
+} ENetProtocolExtendedFlag;
 
 #ifdef _MSC_VER
 #pragma pack(push, 1)

@@ -5,27 +5,22 @@
 #ifndef __ENET_ENET_H__
 #define __ENET_ENET_H__
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 #include <stdlib.h>
 
 #ifdef _WIN32
-#include "enet/win32.h"
+#include "enet6/win32.h"
 #else
-#include "enet/unix.h"
+#include "enet6/unix.h"
 #endif
 
-#include "enet/types.h"
-#include "enet/protocol.h"
-#include "enet/list.h"
-#include "enet/callbacks.h"
+#include "enet6/types.h"
+#include "enet6/protocol.h"
+#include "enet6/list.h"
+#include "enet6/callbacks.h"
 
-#define ENET_VERSION_MAJOR 1
-#define ENET_VERSION_MINOR 3
-#define ENET_VERSION_PATCH 18
+#define ENET_VERSION_MAJOR 6
+#define ENET_VERSION_MINOR 1
+#define ENET_VERSION_PATCH 2
 #define ENET_VERSION_CREATE(major, minor, patch) (((major)<<16) | ((minor)<<8) | (patch))
 #define ENET_VERSION_GET_MAJOR(version) (((version)>>16)&0xFF)
 #define ENET_VERSION_GET_MINOR(version) (((version)>>8)&0xFF)
@@ -63,7 +58,8 @@ typedef enum _ENetSocketOption
    ENET_SOCKOPT_SNDTIMEO  = 7,
    ENET_SOCKOPT_ERROR     = 8,
    ENET_SOCKOPT_NODELAY   = 9,
-   ENET_SOCKOPT_TTL       = 10
+   ENET_SOCKOPT_TTL       = 10,
+   ENET_SOCKOPT_IPV6ONLY  = 11
 } ENetSocketOption;
 
 typedef enum _ENetSocketShutdown
@@ -73,25 +69,31 @@ typedef enum _ENetSocketShutdown
     ENET_SOCKET_SHUTDOWN_READ_WRITE = 2
 } ENetSocketShutdown;
 
-#define ENET_HOST_ANY       0
-#define ENET_HOST_BROADCAST 0xFFFFFFFFU
-#define ENET_PORT_ANY       0
+typedef enum _ENetAddressType
+{
+    ENET_ADDRESS_TYPE_ANY  = 0,
+    ENET_ADDRESS_TYPE_IPV4 = 1,
+    ENET_ADDRESS_TYPE_IPV6 = 2
+} ENetAddressType;
 
 /**
  * Portable internet address structure. 
  *
  * The host must be specified in network byte-order, and the port must be in host 
- * byte-order. The constant ENET_HOST_ANY may be used to specify the default 
- * server host. The constant ENET_HOST_BROADCAST may be used to specify the
- * broadcast address (255.255.255.255).  This makes sense for enet_host_connect,
- * but not for enet_host_create.  Once a server responds to a broadcast, the
- * address is updated from ENET_HOST_BROADCAST to the server's actual IP address.
+ * byte-order.
  */
 typedef struct _ENetAddress
 {
-   enet_uint32 host;
+   ENetAddressType type;
    enet_uint16 port;
+   union 
+   {
+       enet_uint8 v4[4];
+       enet_uint16 v6[8];
+   } host;
 } ENetAddress;
+
+#define ENET_PORT_ANY       0
 
 /**
  * Packet flag bit constants.
@@ -108,7 +110,6 @@ typedef enum _ENetPacketFlag
      * made until the packet is delivered */
    ENET_PACKET_FLAG_RELIABLE    = (1 << 0),
    /** packet will not be sequenced with other packets
-     * not supported for reliable packets
      */
    ENET_PACKET_FLAG_UNSEQUENCED = (1 << 1),
    /** packet will not allocate data, and user must supply it instead */
@@ -121,6 +122,7 @@ typedef enum _ENetPacketFlag
    ENET_PACKET_FLAG_SENT = (1<<8)
 } ENetPacketFlag;
 
+typedef void (ENET_CALLBACK * ENetPacketAcknowledgedCallback) (struct _ENetPacket *);
 typedef void (ENET_CALLBACK * ENetPacketFreeCallback) (struct _ENetPacket *);
 
 /**
@@ -148,12 +150,14 @@ typedef void (ENET_CALLBACK * ENetPacketFreeCallback) (struct _ENetPacket *);
  */
 typedef struct _ENetPacket
 {
-   size_t                   referenceCount;  /**< internal use only */
-   enet_uint32              flags;           /**< bitwise-or of ENetPacketFlag constants */
-   enet_uint8 *             data;            /**< allocated data for packet */
-   size_t                   dataLength;      /**< length of data */
-   ENetPacketFreeCallback   freeCallback;    /**< function to be called when the packet is no longer in use */
-   void *                   userData;        /**< application private data, may be freely modified */
+   size_t                         referenceCount;      /**< internal use only */
+   enet_uint32                    flags;               /**< bitwise-or of ENetPacketFlag constants */
+   enet_uint8 *                   data;                /**< allocated data for packet */
+   size_t                         dataLength;          /**< length of data */
+   ENetPacketFreeCallback         freeCallback;        /**< function to be called when the packet is no longer in use */
+   void *                         userData;            /**< application private data, may be freely modified */
+   enet_uint32                    remainingFragments;  /**< how many fragments were not acknowledged by the peer, when it reaches 0 acknowledgeCallback is triggered */
+   ENetPacketAcknowledgedCallback acknowledgeCallback; /**< function to be called when the reliable packet has been acknowledged by the peer */
 } ENetPacket;
 
 typedef struct _ENetAcknowledgement
@@ -201,7 +205,8 @@ typedef enum _ENetPeerState
    ENET_PEER_STATE_DISCONNECT_LATER            = 6,
    ENET_PEER_STATE_DISCONNECTING               = 7,
    ENET_PEER_STATE_ACKNOWLEDGING_DISCONNECT    = 8,
-   ENET_PEER_STATE_ZOMBIE                      = 9 
+   ENET_PEER_STATE_ZOMBIE                      = 9,
+   ENET_PEER_STATE_TIMEDOUT                    = 10 
 } ENetPeerState;
 
 #ifndef ENET_BUFFER_MAXIMUM
@@ -340,6 +345,21 @@ typedef struct _ENetCompressor
    void (ENET_CALLBACK * destroy) (void * context);
 } ENetCompressor;
 
+/** An ENet packet encryptor for encrypting UDP packets before socket sends or receives (happens before compression).
+ * It's similar to ENetCompressor but receives the sender/receiver peer as a parameter and can produce a bigger packet on encryption
+ */
+typedef struct _ENetEncryptor
+{
+   /** Context data for the encryptor. Must be non-NULL. */
+   void * context;
+   /** Compresses from inBuffers[0:inBufferCount-1], containing inLimit bytes, to outData, outputting at most outLimit bytes. Should return 0 on failure. */
+   size_t (ENET_CALLBACK * encrypt) (void * context, ENetPeer * peer, const ENetBuffer * inBuffers, size_t inBufferCount, size_t inLimit, enet_uint8 * outData, size_t outLimit);
+   /** Decompresses a packet received from peer (may be null if connection packet) from inData, containing inLimit bytes, to outData, outputting at most outLimit bytes. Should return 0 on failure. */
+   size_t (ENET_CALLBACK * decrypt) (void * context, ENetPeer * peer, const enet_uint8 * inData, size_t inLimit, enet_uint8 * outData, size_t outLimit);
+   /** Destroys the context when encryption is disabled or the host is destroyed. May be NULL. */
+   void (ENET_CALLBACK * destroy) (void * context);
+} ENetEncryptor;
+
 /** Callback that computes the checksum of the data held in buffers[0:bufferCount-1] */
 typedef enet_uint32 (ENET_CALLBACK * ENetChecksumCallback) (const ENetBuffer * buffers, size_t bufferCount);
 
@@ -400,6 +420,8 @@ typedef struct _ENetHost
    size_t               duplicatePeers;              /**< optional number of allowed peers from duplicate IPs, defaults to ENET_PROTOCOL_MAXIMUM_PEER_ID */
    size_t               maximumPacketSize;           /**< the maximum allowable packet size that may be sent or received on a peer */
    size_t               maximumWaitingData;          /**< the maximum aggregate amount of buffer space a peer may use waiting for packets to be delivered */
+   /* enet6 fields start here */
+   ENetEncryptor        encryptor;
 } ENetHost;
 
 /**
@@ -416,11 +438,10 @@ typedef enum _ENetEventType
    ENET_EVENT_TYPE_CONNECT    = 1,  
 
    /** a peer has disconnected.  This event is generated on a successful 
-     * completion of a disconnect initiated by enet_peer_disconnect, if 
-     * a peer has timed out, or if a connection request intialized by 
-     * enet_host_connect has timed out.  The peer field contains the peer 
-     * which disconnected. The data field contains user supplied data 
-     * describing the disconnection, or 0, if none is available.
+     * completion of a disconnect initiated by enet_peer_disconnect. 
+     * The peer field contains the peer which disconnected. 
+     * The data field contains user supplied data describing the disconnection, 
+     * or 0, if none is available.
      */
    ENET_EVENT_TYPE_DISCONNECT = 2,  
 
@@ -430,7 +451,16 @@ typedef enum _ENetEventType
      * the packet that was received; this packet must be destroyed with
      * enet_packet_destroy after use.
      */
-   ENET_EVENT_TYPE_RECEIVE    = 3
+   ENET_EVENT_TYPE_RECEIVE    = 3,
+
+   /** a peer has timed out.  This event is generated if 
+     * a peer has timed out, or if a connection request intialized by 
+     * enet_host_connect has timed out.  The peer field contains the peer 
+     * which disconnected. The data field contains user supplied data 
+     * describing the disconnection, or 0, if none is available.
+     */
+   ENET_EVENT_TYPE_DISCONNECT_TIMEOUT = 4, 
+
 } ENetEventType;
 
 /**
@@ -446,6 +476,11 @@ typedef struct _ENetEvent
    enet_uint32          data;      /**< data associated with the event, if appropriate */
    ENetPacket *         packet;    /**< packet associated with the event, if appropriate */
 } ENetEvent;
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 /** @defgroup global ENet global functions
     @{ 
@@ -496,7 +531,7 @@ ENET_API void enet_time_set (enet_uint32);
 /** @defgroup socket ENet socket functions
     @{
 */
-ENET_API ENetSocket enet_socket_create (ENetSocketType);
+ENET_API ENetSocket enet_socket_create (ENetAddressType, ENetSocketType);
 ENET_API int        enet_socket_bind (ENetSocket, const ENetAddress *);
 ENET_API int        enet_socket_get_address (ENetSocket, ENetAddress *);
 ENET_API int        enet_socket_listen (ENetSocket, int);
@@ -517,6 +552,45 @@ ENET_API int        enet_socketset_select (ENetSocket, ENetSocketSet *, ENetSock
     @{
 */
 
+/** Compares two addresses (only the host part)
+    @param firstAddress first address to compare
+    @param secondAddress second address to compare
+    @retval 1 if addresses are equal
+    @retval 0 if addresses are different
+    @returns if the addresses are equal
+*/
+ENET_API int enet_address_equal_host (const ENetAddress * firstAddress, const ENetAddress * secondAddress);
+
+/** Compares two addresses and their port
+    @param firstAddress first address to compare
+    @param secondAddress second address to compare
+    @retval 1 if addresses are equal
+    @retval 0 if addresses are different
+    @returns if the addresses are equal
+*/
+ENET_API int enet_address_equal(const ENetAddress * firstAddress, const ENetAddress * secondAddress);
+
+/** Checks if an address is the special any address
+    @param address address to check
+    @retval 1 if address is any
+    @returns if the address is the any one for its family
+*/
+ENET_API int enet_address_is_any(const ENetAddress * address);
+
+/** Checks if an address is the special broadcast address
+    @param address address to check
+    @retval 1 if address is broadcast
+    @returns if the address is the broadcast one for its family
+*/
+ENET_API int enet_address_is_broadcast(const ENetAddress * address);
+
+/** Checks if an address is a loopback one
+    @param address address to check
+    @retval 1 if address is loopback
+    @returns if the address is a loopback one for its family
+*/
+ENET_API int enet_address_is_loopback(const ENetAddress * address);
+
 /** Attempts to parse the printable form of the IP address in the parameter hostName
     and sets the host field in the address parameter if successful.
     @param address destination to store the parsed IP address
@@ -529,13 +603,16 @@ ENET_API int enet_address_set_host_ip (ENetAddress * address, const char * hostN
 
 /** Attempts to resolve the host named by the parameter hostName and sets
     the host field in the address parameter if successful.
+    @param type address type (any/ipv4/ipv6)
     @param address destination to store resolved address
     @param hostName host name to lookup
     @retval 0 on success
     @retval < 0 on failure
     @returns the address of the given hostName in address on success
 */
-ENET_API int enet_address_set_host (ENetAddress * address, const char * hostName);
+ENET_API int enet_address_set_host (ENetAddress * address, ENetAddressType type, const char * hostName);
+
+#define ENET_ADDRESS_MAX_LENGTH 40 /*full IPv6 addresses take 39 characters + 1 null byte */
 
 /** Gives the printable form of the IP address specified in the address parameter.
     @param address    address printed
@@ -557,14 +634,18 @@ ENET_API int enet_address_get_host_ip (const ENetAddress * address, char * hostN
 */
 ENET_API int enet_address_get_host (const ENetAddress * address, char * hostName, size_t nameLength);
 
+ENET_API void enet_address_build_any(ENetAddress * address, ENetAddressType type);
+ENET_API void enet_address_build_loopback(ENetAddress * address, ENetAddressType type);
+ENET_API void enet_address_convert_ipv6(ENetAddress * address);
+
 /** @} */
 
 ENET_API ENetPacket * enet_packet_create (const void *, size_t, enet_uint32);
 ENET_API void         enet_packet_destroy (ENetPacket *);
 ENET_API int          enet_packet_resize  (ENetPacket *, size_t);
 ENET_API enet_uint32  enet_crc32 (const ENetBuffer *, size_t);
-                
-ENET_API ENetHost * enet_host_create (const ENetAddress *, size_t, size_t, enet_uint32, enet_uint32);
+
+ENET_API ENetHost * enet_host_create (ENetAddressType type, const ENetAddress *, size_t, size_t, enet_uint32, enet_uint32);
 ENET_API void       enet_host_destroy (ENetHost *);
 ENET_API ENetPeer * enet_host_connect (ENetHost *, const ENetAddress *, size_t, enet_uint32);
 ENET_API int        enet_host_check_events (ENetHost *, ENetEvent *);
@@ -578,6 +659,7 @@ ENET_API void       enet_host_bandwidth_limit (ENetHost *, enet_uint32, enet_uin
 extern   void       enet_host_bandwidth_throttle (ENetHost *);
 extern  enet_uint32 enet_host_random_seed (void);
 extern  enet_uint32 enet_host_random (ENetHost *);
+ENET_API void       enet_host_encrypt(ENetHost*, const ENetEncryptor*);
 
 ENET_API int                 enet_peer_send (ENetPeer *, enet_uint8, ENetPacket *);
 ENET_API ENetPacket *        enet_peer_receive (ENetPeer *, enet_uint8 * channelID);
@@ -605,8 +687,45 @@ ENET_API void * enet_range_coder_create (void);
 ENET_API void   enet_range_coder_destroy (void *);
 ENET_API size_t enet_range_coder_compress (void *, const ENetBuffer *, size_t, size_t, enet_uint8 *, size_t);
 ENET_API size_t enet_range_coder_decompress (void *, const enet_uint8 *, size_t, enet_uint8 *, size_t);
-   
+
 extern size_t enet_protocol_command_size (enet_uint8);
+
+/** @defgroup Extended API for easier binding in other programming languages
+    @{
+*/
+
+ENET_API void* enet_packet_get_data(const ENetPacket*);
+ENET_API void* enet_packet_get_user_data(const ENetPacket*);
+ENET_API void enet_packet_set_user_data(ENetPacket*, void* userData);
+ENET_API int enet_packet_get_length(const ENetPacket*);
+ENET_API void enet_packet_set_acknowledge_callback(ENetPacket*, ENetPacketAcknowledgedCallback);
+ENET_API void enet_packet_set_free_callback(ENetPacket*, ENetPacketFreeCallback);
+ENET_API int enet_packet_check_references(const ENetPacket*);
+ENET_API void enet_packet_dispose(ENetPacket*);
+
+ENET_API enet_uint32 enet_host_get_peers_count(const ENetHost*);
+ENET_API enet_uint32 enet_host_get_packets_sent(const ENetHost*);
+ENET_API enet_uint32 enet_host_get_packets_received(const ENetHost*);
+ENET_API enet_uint32 enet_host_get_bytes_sent(const ENetHost*);
+ENET_API enet_uint32 enet_host_get_bytes_received(const ENetHost*);
+ENET_API void enet_host_set_max_duplicate_peers(ENetHost*, enet_uint16);
+ENET_API void enet_host_set_intercept_callback(ENetHost*, ENetInterceptCallback);
+ENET_API void enet_host_set_checksum_callback(ENetHost*, ENetChecksumCallback);
+
+ENET_API enet_uint32 enet_peer_get_id(const ENetPeer*);
+ENET_API int enet_peer_get_ip(const ENetPeer*, char*, size_t);
+ENET_API enet_uint16 enet_peer_get_port(const ENetPeer*);
+ENET_API enet_uint32 enet_peer_get_mtu(const ENetPeer*);
+ENET_API ENetPeerState enet_peer_get_state(const ENetPeer*);
+ENET_API enet_uint32 enet_peer_get_rtt(const ENetPeer*);
+ENET_API enet_uint32 enet_peer_get_last_rtt(const ENetPeer* peer);
+ENET_API enet_uint32 enet_peer_get_lastsendtime(const ENetPeer*);
+ENET_API enet_uint32 enet_peer_get_lastreceivetime(const ENetPeer*);
+ENET_API float enet_peer_get_packets_throttle(const ENetPeer*);
+ENET_API void* enet_peer_get_data(const ENetPeer*);
+ENET_API void enet_peer_set_data(ENetPeer*, const void*);
+
+/** @} */
 
 #ifdef __cplusplus
 }

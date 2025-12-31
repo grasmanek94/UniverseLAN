@@ -4,7 +4,7 @@
 */
 #define ENET_BUILDING_LIB 1
 #include <string.h>
-#include "enet/enet.h"
+#include "enet6/enet.h"
 
 /** @defgroup host ENet host functions
     @{
@@ -26,13 +26,16 @@
     at any given time.
 */
 ENetHost *
-enet_host_create (const ENetAddress * address, size_t peerCount, size_t channelLimit, enet_uint32 incomingBandwidth, enet_uint32 outgoingBandwidth)
+enet_host_create (ENetAddressType type, const ENetAddress * address, size_t peerCount, size_t channelLimit, enet_uint32 incomingBandwidth, enet_uint32 outgoingBandwidth)
 {
     ENetHost * host;
     ENetPeer * currentPeer;
 
     if (peerCount > ENET_PROTOCOL_MAXIMUM_PEER_ID)
       return NULL;
+
+    if (address && address->type != type && type != ENET_ADDRESS_TYPE_ANY)
+        return NULL;
 
     host = (ENetHost *) enet_malloc (sizeof (ENetHost));
     if (host == NULL)
@@ -48,7 +51,11 @@ enet_host_create (const ENetAddress * address, size_t peerCount, size_t channelL
     }
     memset (host -> peers, 0, peerCount * sizeof (ENetPeer));
 
-    host -> socket = enet_socket_create (ENET_SOCKET_TYPE_DATAGRAM);
+    host -> socket = enet_socket_create (type, ENET_SOCKET_TYPE_DATAGRAM);
+
+    if (host -> socket != ENET_SOCKET_NULL && type == ENET_ADDRESS_TYPE_ANY)
+        enet_socket_set_option (host -> socket, ENET_SOCKOPT_IPV6ONLY, 0);
+
     if (host -> socket == ENET_SOCKET_NULL || (address != NULL && enet_socket_bind (host -> socket, address) < 0))
     {
        if (host -> socket != ENET_SOCKET_NULL)
@@ -87,7 +94,7 @@ enet_host_create (const ENetAddress * address, size_t peerCount, size_t channelL
     host -> commandCount = 0;
     host -> bufferCount = 0;
     host -> checksum = NULL;
-    host -> receivedAddress.host = ENET_HOST_ANY;
+    host -> receivedAddress.type = ENET_ADDRESS_TYPE_ANY;
     host -> receivedAddress.port = 0;
     host -> receivedData = NULL;
     host -> receivedDataLength = 0;
@@ -108,6 +115,11 @@ enet_host_create (const ENetAddress * address, size_t peerCount, size_t channelL
     host -> compressor.compress = NULL;
     host -> compressor.decompress = NULL;
     host -> compressor.destroy = NULL;
+
+    host -> encryptor.context = NULL;
+    host -> encryptor.encrypt = NULL;
+    host -> encryptor.decrypt = NULL;
+    host -> encryptor.destroy = NULL;
 
     host -> intercept = NULL;
 
@@ -156,6 +168,9 @@ enet_host_destroy (ENetHost * host)
 
     if (host -> compressor.context != NULL && host -> compressor.destroy)
       (* host -> compressor.destroy) (host -> compressor.context);
+      
+    if (host -> encryptor.context != NULL && host ->encryptor.destroy)
+      (* host ->encryptor.destroy) (host ->encryptor.context);
 
     enet_free (host -> peers);
     enet_free (host);
@@ -169,6 +184,25 @@ enet_host_random (ENetHost * host)
     n = (n ^ (n >> 15)) * (n | 1U);
     n ^= n + (n ^ (n >> 7)) * (n | 61U);
     return n ^ (n >> 14);
+}
+
+/** Sets the packet encryptor the host should use to encrypt and decrypt packets.
+    @param host host to enable or disable encryption for
+    @param compressor callbacks for for the packet encryptor; if NULL, then encryption is disabled
+
+    @remarks enabling encryption enables the enet6 extended protocol and breaks compatibility 
+    with the regular enet protocol.
+*/
+void
+enet_host_encrypt(ENetHost* host, const ENetEncryptor* encryptor)
+{
+    if (host->encryptor.context != NULL && host->encryptor.destroy)
+        (*host->encryptor.destroy) (host->encryptor.context);
+
+    if (encryptor)
+        host->encryptor = *encryptor;
+    else
+        host->encryptor.context = NULL;
 }
 
 /** Initiates a connection to a foreign host.
@@ -241,7 +275,7 @@ enet_host_connect (ENetHost * host, const ENetAddress * address, size_t channelC
         channel -> usedReliableWindows = 0;
         memset (channel -> reliableWindows, 0, sizeof (channel -> reliableWindows));
     }
-        
+
     command.header.command = ENET_PROTOCOL_COMMAND_CONNECT | ENET_PROTOCOL_COMMAND_FLAG_ACKNOWLEDGE;
     command.header.channelID = 0xFF;
     command.connect.outgoingPeerID = ENET_HOST_TO_NET_16 (currentPeer -> incomingPeerID);
@@ -498,6 +532,44 @@ enet_host_bandwidth_throttle (ENetHost * host)
            enet_peer_queue_outgoing_command (peer, & command, NULL, 0, 0);
        } 
     }
+}
+
+enet_uint32 enet_host_get_peers_count(const ENetHost* host) {
+  return host->connectedPeers;
+}
+
+enet_uint32 enet_host_get_packets_sent(const ENetHost* host) {
+  return host->totalSentPackets;
+}
+
+enet_uint32 enet_host_get_packets_received(const ENetHost* host) {
+  return host->totalReceivedPackets;
+}
+
+enet_uint32 enet_host_get_bytes_sent(const ENetHost* host) {
+  return host->totalSentData;
+}
+
+enet_uint32 enet_host_get_bytes_received(const ENetHost* host) {
+  return host->totalReceivedData;
+}
+
+void enet_host_set_max_duplicate_peers(ENetHost* host, enet_uint16 number) {
+  if (number < 1)
+    number = 1;
+
+  if (number > ENET_PROTOCOL_MAXIMUM_PEER_ID)
+    number = ENET_PROTOCOL_MAXIMUM_PEER_ID;
+
+  host->duplicatePeers = number;
+}
+
+void enet_host_set_intercept_callback(ENetHost* host, ENetInterceptCallback callback) {
+  host->intercept = callback;
+}
+
+void enet_host_set_checksum_callback(ENetHost* host, ENetChecksumCallback callback) {
+  host->checksum = callback;
 }
     
 /** @} */

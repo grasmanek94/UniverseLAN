@@ -7,12 +7,16 @@
 
 #ifdef _MSC_VER
 #ifdef ENET_BUILDING_LIB
-#pragma warning (disable: 4267) // size_t to int conversion
-#pragma warning (disable: 4244) // 64bit to 32bit int
-#pragma warning (disable: 4018) // signed/unsigned mismatch
-#pragma warning (disable: 4146) // unary minus operator applied to unsigned type
+#pragma warning (disable: 4267) /* size_t to int conversion */
+#pragma warning (disable: 4244) /* 64bit to 32bit int */
+#pragma warning (disable: 4018) /* signed/unsigned mismatch */
+#pragma warning (disable: 4146) /* unary minus operator applied to unsigned type */
+#ifndef _CRT_SECURE_NO_DEPRECATE
 #define _CRT_SECURE_NO_DEPRECATE
+#endif
+#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
+#endif
 #endif
 #endif
 

@@ -4,7 +4,8 @@
 */
 #include <string.h>
 #define ENET_BUILDING_LIB 1
-#include "enet/enet.h"
+#include "enet6/utility.h"
+#include "enet6/enet.h"
 
 /** @defgroup peer ENet peer functions 
     @{
@@ -147,6 +148,8 @@ enet_peer_send (ENetPeer * peer, enet_uint8 channelID, ENetPacket * packet)
         
       enet_list_clear (& fragments);
 
+      packet -> remainingFragments = fragmentCount;
+
       for (fragmentNumber = 0,
              fragmentOffset = 0;
            fragmentOffset < packet -> dataLength;
@@ -195,6 +198,8 @@ enet_peer_send (ENetPeer * peer, enet_uint8 channelID, ENetPacket * packet)
 
       return 0;
    }
+
+   packet -> remainingFragments = 1;
 
    command.header.channelID = channelID;
 
@@ -249,13 +254,13 @@ enet_peer_receive (ENetPeer * peer, enet_uint8 * channelID)
 
    enet_free (incomingCommand);
 
-   peer -> totalWaitingData -= packet -> dataLength;
+   peer -> totalWaitingData -= ENET_MIN (peer -> totalWaitingData, packet -> dataLength);
 
    return packet;
 }
 
 static void
-enet_peer_reset_outgoing_commands (ENetList * queue)
+enet_peer_reset_outgoing_commands (ENetPeer * peer, ENetList * queue)
 {
     ENetOutgoingCommand * outgoingCommand;
 
@@ -276,7 +281,7 @@ enet_peer_reset_outgoing_commands (ENetList * queue)
 }
 
 static void
-enet_peer_remove_incoming_commands (ENetList * queue, ENetListIterator startCommand, ENetListIterator endCommand, ENetIncomingCommand * excludeCommand)
+enet_peer_remove_incoming_commands (ENetPeer * peer, ENetList * queue, ENetListIterator startCommand, ENetListIterator endCommand, ENetIncomingCommand * excludeCommand)
 {
     ENetListIterator currentCommand;    
     
@@ -295,6 +300,8 @@ enet_peer_remove_incoming_commands (ENetList * queue, ENetListIterator startComm
        {
           -- incomingCommand -> packet -> referenceCount;
 
+          peer -> totalWaitingData -= ENET_MIN (peer -> totalWaitingData, incomingCommand -> packet -> dataLength);
+
           if (incomingCommand -> packet -> referenceCount == 0)
             enet_packet_destroy (incomingCommand -> packet);
        }
@@ -307,9 +314,9 @@ enet_peer_remove_incoming_commands (ENetList * queue, ENetListIterator startComm
 }
 
 static void
-enet_peer_reset_incoming_commands (ENetList * queue)
+enet_peer_reset_incoming_commands (ENetPeer * peer, ENetList * queue)
 {
-    enet_peer_remove_incoming_commands(queue, enet_list_begin (queue), enet_list_end (queue), NULL);
+    enet_peer_remove_incoming_commands(peer, queue, enet_list_begin (queue), enet_list_end (queue), NULL);
 }
  
 void
@@ -327,10 +334,10 @@ enet_peer_reset_queues (ENetPeer * peer)
     while (! enet_list_empty (& peer -> acknowledgements))
       enet_free (enet_list_remove (enet_list_begin (& peer -> acknowledgements)));
 
-    enet_peer_reset_outgoing_commands (& peer -> sentReliableCommands);
-    enet_peer_reset_outgoing_commands (& peer -> outgoingCommands);
-    enet_peer_reset_outgoing_commands (& peer -> outgoingSendReliableCommands);
-    enet_peer_reset_incoming_commands (& peer -> dispatchedCommands);
+    enet_peer_reset_outgoing_commands (peer, & peer -> sentReliableCommands);
+    enet_peer_reset_outgoing_commands (peer, & peer -> outgoingCommands);
+    enet_peer_reset_outgoing_commands (peer, & peer -> outgoingSendReliableCommands);
+    enet_peer_reset_incoming_commands (peer, & peer -> dispatchedCommands);
 
     if (peer -> channels != NULL && peer -> channelCount > 0)
     {
@@ -338,8 +345,8 @@ enet_peer_reset_queues (ENetPeer * peer)
              channel < & peer -> channels [peer -> channelCount];
              ++ channel)
         {
-            enet_peer_reset_incoming_commands (& channel -> incomingReliableCommands);
-            enet_peer_reset_incoming_commands (& channel -> incomingUnreliableCommands);
+            enet_peer_reset_incoming_commands (peer, & channel -> incomingReliableCommands);
+            enet_peer_reset_incoming_commands (peer, & channel -> incomingUnreliableCommands);
         }
 
         enet_free (peer -> channels);
@@ -512,6 +519,7 @@ enet_peer_disconnect_now (ENetPeer * peer, enet_uint32 data)
       return;
 
     if (peer -> state != ENET_PEER_STATE_ZOMBIE &&
+        peer -> state != ENET_PEER_STATE_TIMEDOUT &&
         peer -> state != ENET_PEER_STATE_DISCONNECTING)
     {
         enet_peer_reset_queues (peer);
@@ -801,7 +809,7 @@ enet_peer_dispatch_incoming_unreliable_commands (ENetPeer * peer, ENetChannel * 
        droppedCommand = currentCommand;
     }
 
-    enet_peer_remove_incoming_commands (& channel -> incomingUnreliableCommands, enet_list_begin (& channel -> incomingUnreliableCommands), droppedCommand, queuedCommand);
+    enet_peer_remove_incoming_commands (peer, & channel -> incomingUnreliableCommands, enet_list_begin (& channel -> incomingUnreliableCommands), droppedCommand, queuedCommand);
 }
 
 void
@@ -1022,6 +1030,54 @@ notifyError:
       enet_packet_destroy (packet);
 
     return NULL;
+}
+
+enet_uint32 enet_peer_get_id(const ENetPeer* peer) {
+  return peer->incomingPeerID;
+}
+
+int enet_peer_get_ip(const ENetPeer* peer, char* ip, size_t ipLength) {
+  return enet_address_get_host_ip(&peer->address, ip, ipLength);
+}
+
+enet_uint16 enet_peer_get_port(const ENetPeer* peer) {
+  return peer->address.port;
+}
+
+enet_uint32 enet_peer_get_mtu(const ENetPeer* peer) {
+  return peer->mtu;
+}
+
+ENetPeerState enet_peer_get_state(const ENetPeer* peer) {
+  return peer->state;
+}
+
+enet_uint32 enet_peer_get_rtt(const ENetPeer* peer) {
+  return peer->roundTripTime;
+}
+
+enet_uint32 enet_peer_get_last_rtt(const ENetPeer* peer) {
+  return peer->lastRoundTripTime;
+}
+
+enet_uint32 enet_peer_get_lastsendtime(const ENetPeer* peer) {
+  return peer->lastSendTime;
+}
+
+enet_uint32 enet_peer_get_lastreceivetime(const ENetPeer* peer) {
+  return peer->lastReceiveTime;
+}
+
+float enet_peer_get_packets_throttle(const ENetPeer* peer) {
+  return peer->packetThrottle / (float)ENET_PEER_PACKET_THROTTLE_SCALE * 100.0f;
+}
+
+void* enet_peer_get_data(const ENetPeer* peer) {
+  return (void*)peer->data;
+}
+
+void enet_peer_set_data(ENetPeer* peer, const void* data) {
+  peer->data = (enet_uint32*)data;
 }
 
 /** @} */
