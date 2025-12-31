@@ -125,9 +125,12 @@ namespace universelan::server {
 			auto peer = disconnect_list.front();
 			disconnect_list.pop();
 
+			/* TODO: fix this */
+			/*
 			std::cout << "Disconnecting Peer(" 
 				<< std::hex << peer->address.host << ":" << std::dec << peer->address.port
 				<< ") due to authentication timeout" << std::endl;
+			*/
 
 			Handle(peer, std::shared_ptr<EventDisconnect>{nullptr});
 			connection.Disconnect(peer);

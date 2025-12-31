@@ -27,9 +27,12 @@ namespace universelan::server {
 		tracer::Trace trace{ "::EventConnect" };
 
 		peer->data = nullptr;
+		/* TODO: fix this */
+		/*
 		std::cout << "Peer("
 			<< std::hex << peer->address.host << ":" << std::dec << peer->address.port
 			<< ") EventConnect" << std::endl;
+		*/
 
 		peer::ptr pd = peer_mapper.Connect(peer);
 		unauthenticated_peers.insert(peer);
@@ -40,10 +43,12 @@ namespace universelan::server {
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<EventDisconnect>& data)
 	{
 		tracer::Trace trace{ "::EventDisconnect" };
-
+		/* TODO: fix this */
+		/*
 		std::cout << "Peer("
 			<< std::hex << peer->address.host << ":" << std::dec << peer->address.port
 			<< ") EventDisconnect" << std::endl;
+		*/
 
 		unauthenticated_peers.erase(peer);
 
@@ -101,12 +106,18 @@ namespace universelan::server {
 					}
 				}
 
+				/* TODO: fix this */
+				/*
 				std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") KeyChallengeMessage ACCEPT" << std::endl;
+				*/
 				return;
 			}
 		}
 
+		/* TODO: fix this */
+		/*
 		std::cout << "Peer(" << peer->address.host << ":" << peer->address.port << ") KeyChallengeMessage FAIL" << std::endl;
+		*/
 		connection.Disconnect(peer);
 	}
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <enet/enetpp.hxx>
+#include <enet6/enetpp.hxx>
 
 #include <ConcurrentQueue.hxx>
 

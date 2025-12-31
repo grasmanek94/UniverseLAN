@@ -35,7 +35,10 @@ namespace universelan::client {
 	{
 		tracer::Trace trace{ "::EventConnect", tracer::Trace::NETCLIENT };
 
+		/* TODO: fix this */
+		/*
 		client_log(interfaces, trace, std::format("Peer connected: {:08x}:{}", peer->address.host, peer->address.port));
+		*/
 
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS
 		interfaces->utils->ConnectionStateChangeReceived(true);
@@ -48,7 +51,10 @@ namespace universelan::client {
 	{
 		tracer::Trace trace{ "::EventDisconnect", tracer::Trace::NETCLIENT };
 
+		/* TODO: fix this */
+		/*
 		client_log(interfaces, trace, std::format("Peer disconnected: {:08x}:{}", peer->address.host, peer->address.port));
+		*/
 
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS
 		interfaces->utils->ConnectionStateChangeReceived(false);

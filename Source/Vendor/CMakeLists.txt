@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 add_subdirectory(Enet-IPv6)
+add_subdirectory(Enet++)
 add_subdirectory(boost)
 add_subdirectory(Detours)
 
