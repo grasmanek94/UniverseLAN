@@ -73,9 +73,13 @@ bool NetworkServer::Create(size_t max_connections)
 	if (member == nullptr)
 	{
 		if (address.type == ENET_ADDRESS_TYPE_ANY) {
+			ENetAddress any_address;
+			enet_address_build_any(&any_address, ENET_ADDRESS_TYPE_IPV6);
+			any_address.port = address.port;
+
 			member = enet_host_create(
 				ENET_ADDRESS_TYPE_ANY           /* Dual stack IPv4+IPv6 support                                     */,
-				nullptr	                        /* the address to bind the server host to							*/,
+				&any_address	                /* the address to bind the server host to							*/,
 				max_connections					/* allow up to max_connections clients and/or outgoing connections	*/,
 				1								/* allow up to 1 channels to be used, 0								*/,
 				0								/* assume any amount of incoming bandwidth							*/,
