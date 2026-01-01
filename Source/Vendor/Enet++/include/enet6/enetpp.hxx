@@ -1,8 +1,11 @@
 #ifndef ENETPP_HEADER
 #define ENETPP_HEADER
 
-#include <string>
 #include <enet6/enet.h>
+
+#include <format>
+#include <ostream>
+#include <string>
 
 class NetworkBase;
 class NetworkServer;
@@ -70,6 +73,39 @@ const size_t MAX_PACKETS_PER_PEER = 512;
 
 extern "C" {
 	ENET_API void       enet_host_broadcast_except(ENetHost*, enet_uint8, ENetPacket*, ENetPeer*);
+}
+
+template <>
+struct std::formatter<ENetAddress> : std::formatter<std::string> {
+	auto format(const ENetAddress& p, format_context& ctx) const {
+		switch (p.type) {
+		case ENET_ADDRESS_TYPE_IPV4:
+			return formatter<string>::format(
+				std::format("{:d}.{:d}.{:d}.{:d}:{:d}",
+					p.host.v4[0], p.host.v4[1], p.host.v4[2], p.host.v4[3], p.port),
+				ctx);
+		case ENET_ADDRESS_TYPE_IPV6:
+			return formatter<string>::format(
+				std::format("[{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}]:{:d}",
+					p.host.v6[0], p.host.v6[1], p.host.v6[2], p.host.v6[3], p.host.v6[4], p.host.v6[5], p.host.v6[6], p.host.v6[7], p.port),
+				ctx);
+		case ENET_ADDRESS_TYPE_ANY:
+			return formatter<string>::format(
+				std::format("[{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}]:{:d} | {:d}.{:d}.{:d}.{:d}:{:d}",
+					p.host.v6[0], p.host.v6[1], p.host.v6[2], p.host.v6[3], p.host.v6[4], p.host.v6[5], p.host.v6[6], p.host.v6[7], p.port,
+					p.host.v4[0], p.host.v4[1], p.host.v4[2], p.host.v4[3], p.port),
+				ctx);
+		default:
+			throw std::format_error("Unkown ENET_ADDRESS_TYPE");
+		}
+	}
+};
+
+inline std::ostream& operator << (std::ostream& os, const ENetAddress& p)
+{
+	os << std::format("{}", p);
+
+	return os;
 }
 
 #endif
