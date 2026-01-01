@@ -75,10 +75,11 @@ namespace universelan::server {
 		std::cout << "Max Connections: " << max_connections << std::endl;
 		if (!connection.Create(max_connections) || !connection.Good())
 		{
+			std::cerr << "ENET host member creation failed (Wrong address:port?)" << std::endl;
 			// TODO custom exception class
 			throw std::exception(
 #ifdef _WIN32
-				"ENET host member creation failed"
+				"ENET host member creation failed (Wrong address:port?)"
 #endif
 			);
 		}

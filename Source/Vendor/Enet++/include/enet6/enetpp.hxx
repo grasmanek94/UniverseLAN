@@ -25,7 +25,7 @@ private:
 	NetworkBase();
 
 public:
-	int SetHost(std::string hostname, unsigned short port);
+	int SetHost(const std::string& hostname, unsigned short port);
 	const ENetAddress Address();
 	const ENetEvent Event();
 	int GetInitCode();

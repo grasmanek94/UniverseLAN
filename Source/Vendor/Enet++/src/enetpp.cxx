@@ -17,9 +17,14 @@ NetworkBase::~NetworkBase()
 	}
 }
 
-int NetworkBase::SetHost(std::string hostname, unsigned short port)
+int NetworkBase::SetHost(const std::string& hostname, unsigned short port)
 {
 	address.port = port;
+	if ((hostname == "localhost") || (hostname == "LOCALHOST")) {
+		address.type = ENET_ADDRESS_TYPE_ANY;
+		return 0;
+	}
+
 	return enet_address_set_host(&address, ENET_ADDRESS_TYPE_ANY, hostname.c_str());
 }
 
@@ -60,21 +65,36 @@ int NetworkBase::Send(ENetPeer* peer, ENetPacket* packet)
 
 NetworkServer::NetworkServer()
 {
-	//TODO: Anything needed here?
-	//address.host = ENET_HOST_ANY;
+	enet_address_build_any(&address, ENET_ADDRESS_TYPE_IPV6);
 }
 
 bool NetworkServer::Create(size_t max_connections)
 {
 	if (member == nullptr)
 	{
-		member = enet_host_create(
-			ENET_ADDRESS_TYPE_ANY           /* dual IPv4 and IPv6                                               */,
-			&address	                    /* the address to bind the server host to							*/,
-			max_connections					/* allow up to max_connections clients and/or outgoing connections	*/,
-			1								/* allow up to 1 channels to be used, 0								*/,
-			0								/* assume any amount of incoming bandwidth							*/,
-			0								/* assume any amount of outgoing bandwidth							*/);
+		if (address.type == ENET_ADDRESS_TYPE_ANY) {
+			member = enet_host_create(
+				ENET_ADDRESS_TYPE_ANY           /* Dual stack IPv4+IPv6 support                                     */,
+				nullptr	                        /* the address to bind the server host to							*/,
+				max_connections					/* allow up to max_connections clients and/or outgoing connections	*/,
+				1								/* allow up to 1 channels to be used, 0								*/,
+				0								/* assume any amount of incoming bandwidth							*/,
+				0								/* assume any amount of outgoing bandwidth							*/);
+		}
+		else {
+			member = enet_host_create(
+				address.type,
+				&address	                    /* the address to bind the server host to							*/,
+				max_connections					/* allow up to max_connections clients and/or outgoing connections	*/,
+				1								/* allow up to 1 channels to be used, 0								*/,
+				0								/* assume any amount of incoming bandwidth							*/,
+				0								/* assume any amount of outgoing bandwidth							*/);
+		}
+
+		if (member == nullptr)
+		{
+			return false;
+		}
 
 		// TODO: make this into something more configurable
 		member->maximumPacketSize = MAX_PACKET_SIZE;
@@ -131,7 +151,12 @@ ENetPeer* NetworkClient::Connect(std::string hostname, unsigned short port)
 	{
 		enet_peer_reset(peer);
 	}
-	SetHost(hostname, port);
+
+	int set_host_code = SetHost(hostname, port);
+	if (set_host_code < 0) {
+		return nullptr;
+	}
+
 	peer = enet_host_connect(member, &address, 1, 0);
 	return peer;
 }
