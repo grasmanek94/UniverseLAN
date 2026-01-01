@@ -237,6 +237,9 @@ AllowFileSharingUpload = 1
 
 [Server]
 
+; Use:
+;   BindAddress = localhost
+; to bind to both IPv4 and IPv6 (dual stack server)
 BindAddress = 0.0.0.0
 Port = 19486
 MaxConnections = 1024
