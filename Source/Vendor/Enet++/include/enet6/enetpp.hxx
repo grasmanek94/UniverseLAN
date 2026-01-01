@@ -91,7 +91,7 @@ struct std::formatter<ENetAddress> : std::formatter<std::string> {
 				ctx);
 		case ENET_ADDRESS_TYPE_ANY:
 			return formatter<string>::format(
-				std::format("[{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}]:{:d} | {:d}.{:d}.{:d}.{:d}:{:d}",
+				std::format("IPv6:[{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}]:{:d} | IPv4:{:d}.{:d}.{:d}.{:d}:{:d}",
 					p.host.v6[0], p.host.v6[1], p.host.v6[2], p.host.v6[3], p.host.v6[4], p.host.v6[5], p.host.v6[6], p.host.v6[7], p.port,
 					p.host.v4[0], p.host.v4[1], p.host.v4[2], p.host.v4[3], p.port),
 				ctx);
