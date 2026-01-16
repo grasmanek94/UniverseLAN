@@ -25,7 +25,7 @@ int NetworkBase::SetHost(const std::string& hostname, unsigned short port)
 		return 0;
 	}
 
-	return enet_address_set_host(&address, ENET_ADDRESS_TYPE_ANY, hostname.c_str());
+	return enet_address_set_host(&address, address.type, hostname.c_str());
 }
 
 const ENetAddress NetworkBase::Address()
@@ -135,7 +135,7 @@ void NetworkServer::Disconnect(ENetPeer* peer) {
 }
 
 NetworkClient::NetworkClient()
-	: peer(nullptr)
+	: peer{ nullptr }
 {
 	enet_address_set_host(&address, ENET_ADDRESS_TYPE_ANY, "localhost");
 }
@@ -195,6 +195,7 @@ bool NetworkClient::Create()
 			1								/* allow up to 1 channels to be used, 0								*/,
 			0								/* assume any amount of incoming bandwidth							*/,
 			0								/* assume any amount of outgoing bandwidth							*/);
+
 		return member != nullptr;
 	}
 	return false;
