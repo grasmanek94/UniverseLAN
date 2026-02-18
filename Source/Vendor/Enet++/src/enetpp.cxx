@@ -26,13 +26,16 @@ namespace enetpp {
 
 	int NetworkBase::SetHost(const std::string& hostname, unsigned short port)
 	{
-		address.port = port;
-		if ((hostname == "localhost") || (hostname == "LOCALHOST")) {
+		if ((hostname == "localhost") || (hostname == "LOCALHOST") || (hostname == "*")) {
+			enet_address_build_any(&address, ENET_ADDRESS_TYPE_ANY);
 			address.type = ENET_ADDRESS_TYPE_ANY;
+			address.port = port;
 			return 0;
 		}
 
-		return enet_address_set_host(&address, address.type, hostname.c_str());
+		int code = enet_address_set_host(&address, ENET_ADDRESS_TYPE_ANY, hostname.c_str());
+		address.port = port;
+		return code;
 	}
 
 	const ENetAddress NetworkBase::Address()
