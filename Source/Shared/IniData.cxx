@@ -304,14 +304,14 @@ namespace universelan {
 		return TraceToConsole;
 	}
 
-	std::string IniData::GetGameDataPath() const
+	std::filesystem::path IniData::GetGameDataPath() const
 	{
-		return env_utils::get_gamedata_path_prefix() + GameDataPath;
+		return MachineInformation.GetOperatingPath().path / (env_utils::get_gamedata_path_prefix() + GameDataPath);
 	}
 
-	const std::string& IniData::GetServerDataPath() const
+	std::filesystem::path IniData::GetServerDataPath() const
 	{
-		return ServerDataPath;
+		return MachineInformation.GetOperatingPath().path / ServerDataPath;
 	}
 
 	const std::string& IniData::GetAuthenticationKey() const

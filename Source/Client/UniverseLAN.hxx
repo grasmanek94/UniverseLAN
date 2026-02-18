@@ -99,6 +99,9 @@ namespace universelan::client {
 		void reset();
 
 		~InterfaceInstances();
+
+	private:
+		void internal_reset();
 	};
 
 	extern InterfaceInstances intf_inst;

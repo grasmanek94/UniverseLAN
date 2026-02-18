@@ -34,10 +34,13 @@ namespace universelan::client {
 			<< std::put_time(&tm, "%Y-%m-%d_%H-%M-%S")
 			<< "-" << std::this_thread::get_id() << "-" << count << ".log";
 
-		auto full_fs_path = std::filesystem::path(path.str());
+		auto full_fs_path = std::filesystem::path(path.str()).remove_filename();
+		std::error_code ec{};
 
-		if (!std::filesystem::create_directories(full_fs_path.remove_filename())) {
-			std::cerr << "Failed to create logging directory: " << full_fs_path.remove_filename() << std::endl;
+		std::filesystem::create_directories(full_fs_path, ec);
+
+		if (ec) {
+			std::cerr << "Failed to create logging directory: " << full_fs_path << ", error: " << ec << std::endl;
 		}
 
 		logfile = std::ofstream{ path.str() };

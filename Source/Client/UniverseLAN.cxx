@@ -15,13 +15,13 @@ namespace universelan::client {
 	namespace fs = std::filesystem;
 	InterfaceInstances intf_inst;
 
-	void InterfaceInstances::init(const InitOptionsModern& initOptions, bool is_gameserver) {
+	void InterfaceInstances::internal_reset() {
 		if (config == nullptr) {
 			config = std::make_unique<ClientIniData>();
 		}
 
 		if (sfu == nullptr) {
-			sfu = std::make_unique<SharedFileUtils>(env_utils::get_gamedata_path_prefix() + config->GetGameDataPath());
+			sfu = std::make_unique<SharedFileUtils>(config->GetGameDataPath());
 		}
 
 		tracer::Trace::InitTracing(
@@ -33,6 +33,10 @@ namespace universelan::client {
 			config->ShouldAlwaysFlushTracing(),
 			config->GetCallTracingFlags()
 		);
+	}
+
+	void InterfaceInstances::init(const InitOptionsModern& initOptions, bool is_gameserver) {
+		internal_reset();
 
 		tracer::Trace::SetTracingEnabled(true);
 
@@ -85,23 +89,7 @@ namespace universelan::client {
 	}
 
 	void InterfaceInstances::reset() {
-		if (config == nullptr) {
-			config = std::make_unique<ClientIniData>();
-		}
-
-		if (sfu == nullptr) {
-			sfu = std::make_unique<SharedFileUtils>(env_utils::get_gamedata_path_prefix() + config->GetGameDataPath());
-		}
-
-		tracer::Trace::InitTracing(
-			(fs::path(config->GetGameDataPath()) / "Tracing").string().c_str(),
-			config->IsUnhandledExceptionLoggingEnabled(),
-			config->IsCallTracingEnabled(),
-			config->CreateMiniDumpOnUnhandledException(),
-			config->GetMiniDumpVerbosityLevel(),
-			config->ShouldAlwaysFlushTracing(),
-			config->GetCallTracingFlags()
-		);
+		internal_reset();
 
 		delay_runner = nullptr;
 
