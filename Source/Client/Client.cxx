@@ -1,5 +1,7 @@
 #include "Client.hxx"
 
+#include <string>
+
 namespace universelan::client {
 	Client::Client(InterfaceInstances* interfaces)
 		: interfaces{ interfaces }, running{ false }, tick_thread{}, connection{}
@@ -30,7 +32,18 @@ namespace universelan::client {
 			);
 		}
 
-		connection.Connect(interfaces->config->GetServerAddress(), interfaces->config->GetPort());
+		std::cout << "Connecting to: " << interfaces->config->GetServerAddress() << ":" << interfaces->config->GetPort() << "\n";
+
+		if (connection.Connect(interfaces->config->GetServerAddress(), interfaces->config->GetPort()) == nullptr) {
+			tracer::Trace trace{ "::ENET connection to host failed", __FUNCTION__, tracer::Trace::NETCLIENT };
+			trace.write_all(std::string("Host: ") + interfaces->config->GetServerAddress() + ":" + std::to_string(interfaces->config->GetPort()));
+			// TODO custom exception class
+			throw std::exception(
+#ifdef _WIN32
+				"ENET connection to host failed"
+#endif
+			);
+		}
 	}
 
 	void Client::Tick()
