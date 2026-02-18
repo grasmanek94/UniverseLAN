@@ -26,13 +26,6 @@ namespace enetpp {
 
 	int NetworkBase::SetHost(const std::string& hostname, unsigned short port)
 	{
-		if ((hostname == "localhost") || (hostname == "LOCALHOST") || (hostname == "*")) {
-			enet_address_build_any(&address, ENET_ADDRESS_TYPE_ANY);
-			address.type = ENET_ADDRESS_TYPE_ANY;
-			address.port = port;
-			return 0;
-		}
-
 		int code = enet_address_set_host(&address, ENET_ADDRESS_TYPE_ANY, hostname.c_str());
 		address.port = port;
 		return code;
@@ -60,16 +53,28 @@ namespace enetpp {
 
 	int NetworkBase::Pull(enet_uint32 timeout)
 	{
+		if (member == nullptr) {
+			return -1;
+		}
+
 		return enet_host_service(member, &event, timeout);
 	}
 
 	int NetworkBase::Send(ENetPeer* peer, const void* data, size_t bytes, _ENetPacketFlag flags)
 	{
+		if ((peer == nullptr) || (data == nullptr)) {
+			return -1;
+		}
+
 		return enet_peer_send(peer, 0, enet_packet_create(data, bytes, flags));
 	}
 
 	int NetworkBase::Send(ENetPeer* peer, ENetPacket* packet)
 	{
+		if ((peer == nullptr) || (packet == nullptr)) {
+			return -1;
+		}
+
 		return enet_peer_send(peer, 0, packet);
 	}
 
@@ -129,6 +134,18 @@ namespace enetpp {
 		enet_peer_reset(peer);
 	}
 
+	int NetworkServer::SetHost(const std::string& hostname, unsigned short port)
+	{
+		if ((hostname == "localhost") || (hostname == "LOCALHOST") || (hostname == "*")) {
+			enet_address_build_any(&address, ENET_ADDRESS_TYPE_ANY);
+			address.type = ENET_ADDRESS_TYPE_ANY;
+			address.port = port;
+			return 0;
+		}
+
+		return NetworkBase::SetHost(hostname, port);
+	}
+
 	NetworkClient::NetworkClient()
 		: peer{ nullptr }
 	{
@@ -141,19 +158,39 @@ namespace enetpp {
 		{
 			enet_peer_disconnect_now(peer, 0);
 			enet_peer_reset(peer);
+			enet_host_destroy(member);
 		}
 	}
 
 	ENetPeer* NetworkClient::Connect(std::string hostname, unsigned short port)
 	{
-		if (peer != nullptr)
-		{
-			enet_peer_reset(peer);
-		}
-
 		int set_host_code = SetHost(hostname, port);
 		if (set_host_code < 0) {
 			return nullptr;
+		}
+
+		if (member != nullptr)
+		{
+			enet_host_destroy(member);
+			member = nullptr;
+		}
+
+		member = enet_host_create(
+			address.type,
+			nullptr,
+			1								/* allow up to max_connections clients and/or outgoing connections	*/,
+			1								/* allow up to 1 channels to be used, 0								*/,
+			0								/* assume any amount of incoming bandwidth							*/,
+			0								/* assume any amount of outgoing bandwidth							*/);
+
+		if (member == nullptr)
+		{
+			return nullptr;
+		}
+
+		if (peer != nullptr)
+		{
+			enet_peer_reset(peer);
 		}
 
 		peer = enet_host_connect(member, &address, 1, 0);
@@ -181,28 +218,24 @@ namespace enetpp {
 
 	bool NetworkClient::Create()
 	{
-		if (member == nullptr)
-		{
-			member = enet_host_create(
-				ENET_ADDRESS_TYPE_ANY           /* dual IPv4 and IPv6                                               */,
-				nullptr,
-				1								/* allow up to max_connections clients and/or outgoing connections	*/,
-				1								/* allow up to 1 channels to be used, 0								*/,
-				0								/* assume any amount of incoming bandwidth							*/,
-				0								/* assume any amount of outgoing bandwidth							*/);
-
-			return member != nullptr;
-		}
-		return false;
+		return true;
 	}
 
 	int NetworkClient::Send(const void* data, size_t bytes, _ENetPacketFlag flags)
 	{
+		if ((peer == nullptr) || (data == nullptr)) {
+			return -1;
+		}
+
 		return NetworkBase::Send(peer, data, bytes, flags);
 	}
 
 	int NetworkClient::Send(ENetPacket* packet)
 	{
+		if ((peer == nullptr) || (packet == nullptr)) {
+			return -1;
+		}
+
 		return NetworkBase::Send(peer, packet);
 	}
 } /* namespace enetpp */

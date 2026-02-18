@@ -31,7 +31,7 @@ namespace enetpp {
 		NetworkBase();
 
 	public:
-		int SetHost(const std::string& hostname, unsigned short port);
+		virtual int SetHost(const std::string& hostname, unsigned short port);
 		const ENetAddress Address();
 		const ENetEvent Event();
 		int GetInitCode();
@@ -55,6 +55,8 @@ namespace enetpp {
 		void Broadcast(const void* data, size_t bytes, _ENetPacketFlag flags, ENetPeer* except);
 		void Broadcast(ENetPacket* packet, ENetPeer* except);
 		void Disconnect(ENetPeer* peer);
+
+		virtual int SetHost(const std::string& hostname, unsigned short port) override;
 	};
 
 	class NetworkClient : public NetworkBase

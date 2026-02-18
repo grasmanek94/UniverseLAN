@@ -21,17 +21,6 @@ namespace universelan::client {
 			);
 		}
 
-		if (!connection.Create() || !connection.Good())
-		{
-			tracer::Trace trace{ "::ENET host member creation failed", __FUNCTION__, tracer::Trace::NETCLIENT };
-			// TODO custom exception class
-			throw std::exception(
-#ifdef _WIN32
-				"ENET host member creation failed"
-#endif
-			);
-		}
-
 		std::cout << "Connecting to: " << interfaces->config->GetServerAddress() << ":" << interfaces->config->GetPort() << "\n";
 
 		if (connection.Connect(interfaces->config->GetServerAddress(), interfaces->config->GetPort()) == nullptr) {
