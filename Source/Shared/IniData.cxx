@@ -257,6 +257,14 @@ namespace universelan {
 		CSimpleIniA ini;
 		ini.SetUnicode();
 
+		if (!MachineInformation.GetBootFile().available) {
+			std::wcerr << L"ERROR: Cannot determine UniverseLAN.ini path! Stuff might break." << std::endl;
+		}
+
+		if (!MachineInformation.GetOperatingPath().available) {
+			std::wcerr << L"ERROR: Cannot determine data path! Stuff might break." << std::endl;
+		}
+
 		std::wcout << L"Opening Global config located at " << MachineInformation.GetBootFile().path << std::endl;
 
 		CheckDefaultConfig(MachineInformation, true);
