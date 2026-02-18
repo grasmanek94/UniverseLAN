@@ -86,7 +86,7 @@ namespace universelan::util {
 	}
 
 #ifndef _WIN32
-	size_t strnlen_s(const char* str, size_t strsz) {
+	inline size_t strnlen_s(const char* str, size_t strsz) {
 		if (str == nullptr) {
 			return 0;
 		}
