@@ -768,10 +768,10 @@ namespace universelan::client {
 			std::size_t min_size = std::min(result, msgLength);
 			trace.write_all(std::format("result: {}", result));
 			if (result > 0) {
-				trace.write_all(std::format("result_msg: {}", util::safe_fix_null_char_ptr_annotate(msg, min_size)));
+				trace.write_all(std::format("result_msg: {}", util::safe_fix_null_char_ptr_annotate(msg, (uint32_t)min_size)));
 				if (msg != nullptr) {
 					trace.write_all(std::format("result_msg_hash: {:x}", const_hash64_data_loop((const char*)msg, min_size)));
-					trace.write_all(std::format("result_msg_hex: {}", bytes_to_hex((void*)msg, min_size)));
+					trace.write_all(std::format("result_msg_hex: {}", bytes_to_hex((void*)msg, (uint32_t)min_size)));
 					trace.write_all(std::format("result_msg_enc: {}", filesystem_container::filename_encode(std::string((char*)msg, min_size))));
 				}
 			}
