@@ -107,7 +107,7 @@ namespace universelan {
 		return ConvertToENetPacket(*object, flags);
 	}
 
-	class GalaxyNetworkClient : public NetworkClient
+	class GalaxyNetworkClient : public enetpp::NetworkClient
 	{
 	private:
 		mutable Concurrency::concurrent_queue<ENetPacket*> delayed_packets_to_send;
@@ -145,7 +145,7 @@ namespace universelan {
 		virtual ~GalaxyNetworkClient();
 	};
 
-	class GalaxyNetworkServer : public NetworkServer
+	class GalaxyNetworkServer : public enetpp::NetworkServer
 	{
 	public:
 		template<typename T>
