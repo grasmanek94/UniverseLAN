@@ -35,7 +35,7 @@ namespace universelan::server {
 	Server::Server()
 		: config{}, connection{}, max_connections{ 1024 },
 		connected_peers{}, authentication_key{ 0 }, random{}, ticks{ 0 },
-		minimum_tick_wait_time{ 0 }, user_data{}, 
+		minimum_tick_wait_time{ 0 }, user_data{},
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
 		chat_room_manager{},
 #endif
@@ -66,9 +66,12 @@ namespace universelan::server {
 			);
 		}
 
-		connection.SetHost(config.GetBindAddress(), config.GetPort());
-
-		std::cout << "Binding address: " << config.GetBindAddress() << ":" << config.GetPort() << std::endl;
+		if (connection.SetHost(config.GetBindAddress(), config.GetPort()) < 0) {
+			std::cout << "Invalid address specified: " << config.GetBindAddress() << ":" << config.GetPort() << std::endl;
+		}
+		else {
+			std::cout << "Binding address: " << config.GetBindAddress() << ":" << config.GetPort() << std::endl;
+		}
 
 		max_connections = config.GetMaxConnections();
 
@@ -104,7 +107,7 @@ namespace universelan::server {
 	}
 
 	void Server::PerformPeerCleanup() {
-		tracer::Trace trace { nullptr, __FUNCTION__ };
+		tracer::Trace trace{ nullptr, __FUNCTION__ };
 
 		auto now = std::chrono::system_clock::now();
 
