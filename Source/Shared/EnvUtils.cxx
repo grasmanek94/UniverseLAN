@@ -4,6 +4,11 @@
 #include <memory>
 #include <string>
 
+#ifndef _WIN32
+#include <codecvt>
+#include <locale>
+#endif
+
 namespace universelan::env_utils
 {
 	namespace {
@@ -51,10 +56,18 @@ namespace universelan::env_utils
 		}
 
 #else
-		const char* env_data = std::getenv(var.c_str());
-		if (env_data != nullptr) {
-			return std::string(env_data);
+		// POSIX: convert wide env name to UTF‑8, call getenv (narrow), then convert value back to wstring.
+		// NOTE: uses std::wstring_convert + codecvt_utf8_utf16 for brevity; replace with your preferred converter if needed.
+
+		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
+		const std::string name_utf8 = conv.to_bytes(var);
+
+		if (!name_utf8.empty()) {
+			if (const char* env_data = std::getenv(name_utf8.c_str())) {
+				return conv.from_bytes(env_data);
+			}
 		}
+
 #endif
 
 		return L"";

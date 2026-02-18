@@ -51,6 +51,6 @@ namespace universelan {
 		KnownPaths GetKnownPaths() const;
 		KnownPath GetOperatingPath() const;
 		KnownPath GetBootFile() const;
-		std::vector<std::wstring> GetBootFileSearchLocations() const;
+		std::vector<std::filesystem::path> GetBootFileSearchLocations() const;
 	};
 }

@@ -7,6 +7,7 @@
 #include "MachineInfo.hxx"
 
 #include <boost/algorithm/string/join.hpp>
+#include <boost/range/adaptor/transformed.hpp>
 #include <magic_enum/magic_enum.hpp>
 #include <Tracer.hxx>
 
@@ -124,13 +125,19 @@ namespace universelan {
 			return flags;
 		}
 
-		void LoadIni(CSimpleIniA& ini, const std::filesystem::path& filename, bool show_error, const std::vector<std::wstring>& search_locations)
+		void LoadIni(CSimpleIniA& ini, const std::filesystem::path& filename, bool show_error, const std::vector<std::filesystem::path>& search_locations)
 		{
 			SI_Error rc = ini.LoadFile(filename.c_str());
 			if (rc < 0) {
+
+				auto joined_search_locations = boost::algorithm::join(
+					search_locations | boost::adaptors::transformed([](const std::filesystem::path& p) { return p.wstring(); }),
+					L"\n"
+				); // std::wstring
+
 				std::wstring problem = L"Cannot load or parse '" + filename.wstring() + L"', error (Return Code / errno): " + std::to_wstring(rc) +
 					L" / " + std::to_wstring(errno) + L"\nWill try to use sane defaults.\nPlease check if the file exists, is readable and accessible.\nTried searching in:\n" +
-					boost::algorithm::join(search_locations, L"\n");
+					joined_search_locations;
 
 #ifdef _WIN32
 				if (show_error) {

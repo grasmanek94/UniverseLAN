@@ -143,77 +143,6 @@ namespace universelan {
 			}
 		}
 
-		void GetLocalAppDataDirectory(MachineInfo::KnownPath& known_path) {
-			known_path.available = false;
-			std::error_code ec;
-
-#ifdef _WIN32
-			const std::wstring WINDOWS_LOCAL_APPDATA{ L"LOCALAPPDATA" };
-			PWSTR local_appdata_path = nullptr;
-
-			const HRESULT hr = SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &local_appdata_path);
-			if (SUCCEEDED(hr) && local_appdata_path) {
-
-				known_path.available = true;
-				known_path.path = std::filesystem::path(local_appdata_path) / universelan_directory;
-
-				CoTaskMemFree(local_appdata_path);
-			}
-			else {
-				std::filesystem::path local_appdata_path_env{ env_utils::get_env(WINDOWS_LOCAL_APPDATA) };
-				if (std::filesystem::exists(local_appdata_path_env, ec) && std::filesystem::is_directory(local_appdata_path_env, ec)) {
-					known_path.available = true;
-					known_path.path = std::filesystem::path(local_appdata_path_env) / universelan_directory;
-				}
-			}
-#else
-			const std::string linux_xdg_dir_env{ "XDG_DATA_HOME" };
-			const std::filesystem::path local_share_universelan_path{ std::filesystem::path{".local"} / "share" / universelan_directory };
-
-
-			const std::string xdg_data_directory = env_utils::get_env(linux_xdg_dir_env);
-			if (!xdg_data_directory.empty()) {
-				std::filesystem::path xdg_data_directory_path{ xdg_data_directory };
-				if (std::filesystem::is_directory(xdg_data_directory_path, ec)) {
-					known_path.available = true;
-					known_path.path = std::filesystem::path(xdg_data_directory_path) / universelan_directory;
-				}
-			}
-
-			if (!known_path.available) {
-				const std::string linux_home_dir_env{ "HOME" };
-				const std::string home_directory = env_utils::get_env(linux_home_dir_env);
-
-				if (!home_directory.empty()) {
-					std::filesystem::path home_directory_path{ home_directory };
-					if (std::filesystem::is_directory(home_directory_path, ec)) {
-						known_path.available = true;
-						known_path.path = std::filesystem::path(home_directory) / local_share_universelan_path;
-					}
-				}
-			}
-
-			if (!known_path.available) {
-				long sys_conf_buffer_size = sysconf(_SC_GETPW_R_SIZE_MAX);
-				if (sys_conf_buffer_size == -1) {
-					sys_conf_buffer_size = 0x4000;
-				}
-
-				std::unique_ptr<char[]> home_path_buffer(new char[sys_conf_buffer_size]);
-				passwd pwd{};
-				passwd* result = nullptr;
-				int s = getpwuid_r(getuid(), &pwd, home_path_buffer.get(), sys_conf_buffer_size, &result);
-				if ((s == 0) && (result != nullptr) && (result->pw_dir != nullptr)) {
-					std::filesystem::path fallback_home_dir{ result->pw_dir };
-					if (std::filesystem::is_directory(fallback_home_dir, ec)) {
-						known_path.available = true;
-						known_path.path = fallback_home_dir / local_share_universelan_path;
-					}
-				}
-			}
-#endif
-		}
-
 #else /* _WIN32 */
 
 		bool lock_file(const std::string& filename) {
@@ -238,6 +167,7 @@ namespace universelan {
 			return true;
 		}
 #endif
+
 		std::optional<uint64_t> TryGetJsonGameID(const nlohmann::json& json, const std::string& entry) {
 			try {
 				auto game_id = json.find(entry);
@@ -315,6 +245,77 @@ namespace universelan {
 			}
 
 			return false;
+		}
+
+		void GetLocalAppDataDirectory(MachineInfo::KnownPath& known_path) {
+			known_path.available = false;
+			std::error_code ec;
+
+#ifdef _WIN32
+			const std::wstring WINDOWS_LOCAL_APPDATA{ L"LOCALAPPDATA" };
+			PWSTR local_appdata_path = nullptr;
+
+			const HRESULT hr = SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &local_appdata_path);
+			if (SUCCEEDED(hr) && local_appdata_path) {
+
+				known_path.available = true;
+				known_path.path = std::filesystem::path(local_appdata_path) / universelan_directory;
+
+				CoTaskMemFree(local_appdata_path);
+			}
+			else {
+				std::filesystem::path local_appdata_path_env{ env_utils::get_env(WINDOWS_LOCAL_APPDATA) };
+				if (std::filesystem::exists(local_appdata_path_env, ec) && std::filesystem::is_directory(local_appdata_path_env, ec)) {
+					known_path.available = true;
+					known_path.path = std::filesystem::path(local_appdata_path_env) / universelan_directory;
+				}
+			}
+#else /* _WIN32 */
+			const std::string linux_xdg_dir_env{ "XDG_DATA_HOME" };
+			const std::filesystem::path local_share_universelan_path{ std::filesystem::path{".local"} / "share" / universelan_directory };
+
+
+			const std::string xdg_data_directory = env_utils::get_env(linux_xdg_dir_env);
+			if (!xdg_data_directory.empty()) {
+				std::filesystem::path xdg_data_directory_path{ xdg_data_directory };
+				if (std::filesystem::is_directory(xdg_data_directory_path, ec)) {
+					known_path.available = true;
+					known_path.path = std::filesystem::path(xdg_data_directory_path) / universelan_directory;
+				}
+			}
+
+			if (!known_path.available) {
+				const std::string linux_home_dir_env{ "HOME" };
+				const std::string home_directory = env_utils::get_env(linux_home_dir_env);
+
+				if (!home_directory.empty()) {
+					std::filesystem::path home_directory_path{ home_directory };
+					if (std::filesystem::is_directory(home_directory_path, ec)) {
+						known_path.available = true;
+						known_path.path = std::filesystem::path(home_directory) / local_share_universelan_path;
+					}
+				}
+			}
+
+			if (!known_path.available) {
+				long sys_conf_buffer_size = sysconf(_SC_GETPW_R_SIZE_MAX);
+				if (sys_conf_buffer_size == -1) {
+					sys_conf_buffer_size = 0x4000;
+				}
+
+				std::unique_ptr<char[]> home_path_buffer(new char[sys_conf_buffer_size]);
+				passwd pwd{};
+				passwd* result = nullptr;
+				int s = getpwuid_r(getuid(), &pwd, home_path_buffer.get(), sys_conf_buffer_size, &result);
+				if ((s == 0) && (result != nullptr) && (result->pw_dir != nullptr)) {
+					std::filesystem::path fallback_home_dir{ result->pw_dir };
+					if (std::filesystem::is_directory(fallback_home_dir, ec)) {
+						known_path.available = true;
+						known_path.path = fallback_home_dir / local_share_universelan_path;
+					}
+				}
+			}
+#endif
 		}
 
 		void GetCurrentGameLocalAppDataDirectory(MachineInfo::KnownPaths& known_paths) {
@@ -399,7 +400,6 @@ namespace universelan {
 			}
 
 			std::filesystem::path executable_path = "/proc/self/exe";
-			std::error_code ec;
 			auto resolved = std::filesystem::read_symlink(executable_path, ec);
 			if (!ec) {
 				known_paths.executable_directory.available = true;
@@ -459,7 +459,8 @@ namespace universelan {
 				known_paths.chosen_operating_directory.available = true;
 				known_paths.chosen_operating_directory.path = known_paths.local_appdata_game_directory.path;
 
-			} else if (!known_paths.chosen_operating_directory.available &&
+			}
+			else if (!known_paths.chosen_operating_directory.available &&
 				known_paths.local_appdata_directory.available) {
 
 				/* Server most likely */
@@ -653,7 +654,7 @@ namespace universelan {
 		return known_paths.boot_file_path;
 	}
 
-	std::vector<std::wstring> MachineInfo::GetBootFileSearchLocations() const
+	std::vector<std::filesystem::path> MachineInfo::GetBootFileSearchLocations() const
 	{
 		const std::vector<std::reference_wrapper<const MachineInfo::KnownPath>> arr{
 			known_paths.working_directory, known_paths.library_directory,
@@ -661,7 +662,7 @@ namespace universelan {
 			known_paths.temporary_directory
 		};
 
-		std::vector<std::wstring> search_paths{};
+		std::vector<std::filesystem::path> search_paths{};
 
 		for (const auto& p : arr) {
 			if (p.get().available) {
