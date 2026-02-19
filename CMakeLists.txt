@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.16)
 
 ######################################################################################
 
@@ -10,6 +10,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 enable_language( CXX )
 enable_language( C )
+
+
+if(NOT EXPERIMENTAL_FAST_BUILD)
+  set(EXPERIMENTAL_FAST_BUILD "" CACHE STRING "[Experimental] [Needs manual file adjustment] Will try to perform an unity build (all .cxx files included in one .cxx file per project)")
+endif()
+
+if(EXPERIMENTAL_FAST_BUILD)
+  set(CMAKE_UNITY_BUILD ON)
+endif()
 
 if(MSVC)
   add_definitions(/MP)
