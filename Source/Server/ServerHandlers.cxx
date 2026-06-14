@@ -624,6 +624,8 @@ namespace universelan::server {
 #if (GALAXY_VERSION) > 11240
 			data->fail_reason = ILobbyDataUpdateListener::FAILURE_REASON_LOBBY_DOES_NOT_EXIST;
 #endif
+
+			data->value = "";
 			connection.Send(peer, data);
 			return;
 		}
@@ -633,6 +635,8 @@ namespace universelan::server {
 #if (GALAXY_VERSION) > 11240
 			data->fail_reason = ILobbyDataUpdateListener::FAILURE_REASON_UNDEFINED;
 #endif
+
+			data->value = lobby->GetData(data->key.c_str());
 			connection.Send(peer, data);
 			return;
 		}
@@ -651,7 +655,12 @@ namespace universelan::server {
 		}
 	}
 
-	template<typename T, typename U> bool BoilerplateHandleLobbyDataUpdate(peer::Mapper& peer_mapper, LobbyManager& lobby_manager, GalaxyNetworkServer& connection, ENetPeer* peer, const T& data, const U& notification, std::function<bool(peer::ptr pd, LobbyManager::lobby_t& lobby)> func) {
+	template<typename T, typename U> bool BoilerplateHandleLobbyDataUpdate(
+		peer::Mapper& peer_mapper, LobbyManager& lobby_manager, 
+		GalaxyNetworkServer& connection, ENetPeer* peer, const T& data, const U& notification, 
+		std::function<bool(peer::ptr pd, LobbyManager::lobby_t& lobby)> func, 
+		std::function<void(peer::ptr pd, LobbyManager::lobby_t& lobby)> rollback_data
+	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__ };
 
 		peer::ptr pd = peer_mapper.Get(peer);
@@ -664,11 +673,13 @@ namespace universelan::server {
 		auto lobby = lobby_manager.GetLobby(data->lobby_id);
 
 		if (!lobby || !lobby->IsMember(pd->id) || (lobby->GetOwner() != pd->id)) {
+			/* fail, so let the user know the max members */
 			connection.Send(peer, data);
 			return false;
 		}
 
 		if (!func(pd, lobby)) {
+			/* here the lambda should handle failure data */
 			connection.Send(peer, data);
 			return false;
 		}
@@ -696,10 +707,15 @@ namespace universelan::server {
 
 		SetLobbyJoinableMessage notification{ 0, data->lobby_id, data->joinable };
 
-		BoilerplateHandleLobbyDataUpdate(peer_mapper, lobby_manager, connection, peer, data, notification, [&](peer::ptr pd, LobbyManager::lobby_t& lobby) -> bool {
-			lobby->SetJoinable(data->joinable);
-			return true;
-			});
+		BoilerplateHandleLobbyDataUpdate(peer_mapper, lobby_manager, connection, peer, data, notification, 
+			[&](peer::ptr pd, LobbyManager::lobby_t& lobby) -> bool {
+				lobby->SetJoinable(data->joinable);
+				return true;
+			},
+			[&](peer::ptr pd, LobbyManager::lobby_t& lobby) -> void {
+				data->joinable = lobby->IsJoinable();
+			}
+		);
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyMaxMembersMessage>& data) {
@@ -708,10 +724,15 @@ namespace universelan::server {
 		REQUIRES_AUTHENTICATION(peer);
 
 		SetLobbyMaxMembersMessage notification{ 0, data->lobby_id, data->max_members };
-		BoilerplateHandleLobbyDataUpdate(peer_mapper, lobby_manager, connection, peer, data, notification, [&](peer::ptr pd, LobbyManager::lobby_t& lobby) -> bool {
-			lobby->SetMaxMembers(data->max_members);
-			return true;
-			});
+		BoilerplateHandleLobbyDataUpdate(peer_mapper, lobby_manager, connection, peer, data, notification, 
+			[&](peer::ptr pd, LobbyManager::lobby_t& lobby) -> bool {
+				lobby->SetMaxMembers(data->max_members);
+				return true;
+			},
+			[&](peer::ptr pd, LobbyManager::lobby_t& lobby) -> void {
+				data->max_members = lobby->GetMaxMembers();
+			}
+		);
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyTypeMessage>& data) {
@@ -720,10 +741,15 @@ namespace universelan::server {
 		REQUIRES_AUTHENTICATION(peer);
 
 		SetLobbyTypeMessage notification{ 0, data->lobby_id, data->type };
-		BoilerplateHandleLobbyDataUpdate(peer_mapper, lobby_manager, connection, peer, data, notification, [&](peer::ptr pd, LobbyManager::lobby_t& lobby) -> bool {
-			lobby->SetType(data->type);
-			return true;
-			});
+		BoilerplateHandleLobbyDataUpdate(peer_mapper, lobby_manager, connection, peer, data, notification, 
+			[&](peer::ptr pd, LobbyManager::lobby_t& lobby) -> bool {
+				lobby->SetType(data->type);
+				return true;
+			},
+			[&](peer::ptr pd, LobbyManager::lobby_t& lobby) -> void {
+				data->type = lobby->GetType();
+			}
+		);
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<SetLobbyMemberDataMessage>& data) {
@@ -739,6 +765,8 @@ namespace universelan::server {
 #if (GALAXY_VERSION) > 11240
 			data->fail_reason = ILobbyMemberDataUpdateListener::FAILURE_REASON_LOBBY_DOES_NOT_EXIST;
 #endif
+
+			data->value = "";
 			connection.Send(peer, data);
 			return;
 		}
@@ -750,6 +778,8 @@ namespace universelan::server {
 #if (GALAXY_VERSION) > 11240
 			data->fail_reason = ILobbyMemberDataUpdateListener::FAILURE_REASON_UNDEFINED;
 #endif
+
+			data->value = "";
 			connection.Send(peer, data);
 			return;
 		}

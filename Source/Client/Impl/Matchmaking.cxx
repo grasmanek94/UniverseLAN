@@ -410,6 +410,21 @@ namespace universelan::client {
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
 
+		/* TODO: DRY this */
+		/* Update locally, later server will let us know if it succeeded */
+		{
+			lock_t lock{ mtx };
+			auto lobby_entry = lobby_list.find(lobbyID);
+			if (lobby_entry == lobby_list.end()) {
+				lobby_entry = lobby_list.emplace(lobbyID, std::make_shared<Lobby>(lobbyID)).first;
+			}
+
+			auto lobby = lobby_entry->second;
+
+			/* Update max members to what the server replies with */
+			lobby->SetMaxMembers(maxNumLobbyMembers);
+		}
+
 		uint64_t request_id = MessageUniqueID::get();
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		listeners->AddRequestListener(request_id, listener);
@@ -428,18 +443,21 @@ namespace universelan::client {
 		listeners->PopRequestListener(data->request_id, listener);
 #endif
 
-		if (data->success) {
-			{
-				lock_t lock{ mtx };
-				auto lobby_entry = lobby_list.find(data->lobby_id);
-				if (lobby_entry == lobby_list.end()) {
-					lobby_entry = lobby_list.emplace(data->lobby_id, std::make_shared<Lobby>(data->lobby_id)).first;
-				}
-
-				auto lobby = lobby_entry->second;
-				lobby->SetMaxMembers(data->max_members);
+		/* TODO: DRY this */
+		{
+			lock_t lock{ mtx };
+			auto lobby_entry = lobby_list.find(data->lobby_id);
+			if (lobby_entry == lobby_list.end()) {
+				lobby_entry = lobby_list.emplace(data->lobby_id, std::make_shared<Lobby>(data->lobby_id)).first;
 			}
 
+			auto lobby = lobby_entry->second;
+
+			/* Update max members to what the server replies with */
+			lobby->SetMaxMembers(data->max_members);
+		}
+
+		if (data->success) {
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			listeners->NotifyAllNow(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
 #endif
@@ -501,6 +519,20 @@ namespace universelan::client {
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
 
+		/* TODO: DRY this */
+		{
+			lock_t lock{ mtx };
+			auto lobby_entry = lobby_list.find(lobbyID);
+			if (lobby_entry == lobby_list.end()) {
+				lobby_entry = lobby_list.emplace(lobbyID, std::make_shared<Lobby>(lobbyID)).first;
+			}
+
+			auto lobby = lobby_entry->second;
+
+			/* Update max members to what the server replies with */
+			lobby->SetType(lobbyType);
+		}
+
 		uint64_t request_id = MessageUniqueID::get();
 
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
@@ -521,18 +553,19 @@ namespace universelan::client {
 		listeners->PopRequestListener(data->request_id, listener);
 #endif
 
-		if (data->success) {
-			{
-				lock_t lock{ mtx };
-				auto lobby_entry = lobby_list.find(data->lobby_id);
-				if (lobby_entry == lobby_list.end()) {
-					lobby_entry = lobby_list.emplace(data->lobby_id, std::make_shared<Lobby>(data->lobby_id)).first;
-				}
-
-				auto lobby = lobby_entry->second;
-				lobby->SetType(data->type);
+		/* TODO: DRY this */
+		{
+			lock_t lock{ mtx };
+			auto lobby_entry = lobby_list.find(data->lobby_id);
+			if (lobby_entry == lobby_list.end()) {
+				lobby_entry = lobby_list.emplace(data->lobby_id, std::make_shared<Lobby>(data->lobby_id)).first;
 			}
 
+			auto lobby = lobby_entry->second;
+			lobby->SetType(data->type);
+		}
+
+		if (data->success) {
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			listeners->NotifyAllNow(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
 #endif
@@ -569,6 +602,20 @@ namespace universelan::client {
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
 
+		/* TODO: DRY this */
+		{
+			lock_t lock{ mtx };
+			auto lobby_entry = lobby_list.find(lobbyID);
+			if (lobby_entry == lobby_list.end()) {
+				lobby_entry = lobby_list.emplace(lobbyID, std::make_shared<Lobby>(lobbyID)).first;
+			}
+
+			auto lobby = lobby_entry->second;
+
+			/* Update max members to what the server replies with */
+			lobby->SetJoinable(joinable);
+		}
+
 		uint64_t request_id = MessageUniqueID::get();
 
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
@@ -588,18 +635,19 @@ namespace universelan::client {
 		listeners->PopRequestListener(data->request_id, listener);
 #endif
 
-		if (data->success) {
-			{
-				lock_t lock{ mtx };
-				auto lobby_entry = lobby_list.find(data->lobby_id);
-				if (lobby_entry == lobby_list.end()) {
-					lobby_entry = lobby_list.emplace(data->lobby_id, std::make_shared<Lobby>(data->lobby_id)).first;
-				}
-
-				auto lobby = lobby_entry->second;
-				lobby->SetJoinable(data->joinable);
+		/* TODO: DRY this */
+		{
+			lock_t lock{ mtx };
+			auto lobby_entry = lobby_list.find(data->lobby_id);
+			if (lobby_entry == lobby_list.end()) {
+				lobby_entry = lobby_list.emplace(data->lobby_id, std::make_shared<Lobby>(data->lobby_id)).first;
 			}
 
+			auto lobby = lobby_entry->second;
+			lobby->SetJoinable(data->joinable);
+		}
+
+		if (data->success) {
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			listeners->NotifyAllNow(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
 #endif
@@ -716,6 +764,18 @@ namespace universelan::client {
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
 
+		/* TODO: DRY this */
+		{
+			lock_t lock{ mtx };
+			auto lobby_entry = lobby_list.find(lobbyID);
+			if (lobby_entry == lobby_list.end()) {
+				lobby_entry = lobby_list.emplace(lobbyID, std::make_shared<Lobby>(lobbyID)).first;
+			}
+
+			auto lobby = lobby_entry->second;
+			lobby->SetData(key, value);
+		}
+
 		uint64_t request_id = MessageUniqueID::get();
 
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
@@ -734,19 +794,19 @@ namespace universelan::client {
 		ILobbyDataUpdateListener* listener = nullptr;
 		listeners->PopRequestListener(data->request_id, listener);
 #endif
-
-		if (data->success) {
-			{
-				lock_t lock{ mtx };
-				auto lobby_entry = lobby_list.find(data->lobby_id);
-				if (lobby_entry == lobby_list.end()) {
-					lobby_entry = lobby_list.emplace(data->lobby_id, std::make_shared<Lobby>(data->lobby_id)).first;
-				}
-
-				auto lobby = lobby_entry->second;
-				lobby->SetData(data->key.c_str(), data->value.c_str());
+		/* TODO: DRY this */
+		{
+			lock_t lock{ mtx };
+			auto lobby_entry = lobby_list.find(data->lobby_id);
+			if (lobby_entry == lobby_list.end()) {
+				lobby_entry = lobby_list.emplace(data->lobby_id, std::make_shared<Lobby>(data->lobby_id)).first;
 			}
 
+			auto lobby = lobby_entry->second;
+			lobby->SetData(data->key.c_str(), data->value.c_str());
+		}
+
+		if (data->success) {
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			listeners->NotifyAllNow(listener, &ILobbyDataUpdateListener::OnLobbyDataUpdateSuccess, data->lobby_id);
 #endif
@@ -848,6 +908,18 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
 
+		/* TODO: DRY this */
+		{
+			lock_t lock{ mtx };
+			auto lobby_entry = lobby_list.find(lobbyID);
+			if (lobby_entry == lobby_list.end()) {
+				lobby_entry = lobby_list.emplace(lobbyID, std::make_shared<Lobby>(lobbyID)).first;
+			}
+
+			auto lobby = lobby_entry->second;
+			lobby->SetMemberData(intf->user->GetGalaxyID(), key, value);
+		}
+
 		uint64_t request_id = MessageUniqueID::get();
 
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
@@ -864,18 +936,19 @@ namespace universelan::client {
 		ILobbyMemberDataUpdateListener* listener = nullptr;
 		listeners->PopRequestListener(data->request_id, listener);
 #endif
+		/* TODO: DRY this */
+		{
+			lock_t lock{ mtx };
+			auto lobby_entry = lobby_list.find(data->lobby_id);
+			if (lobby_entry == lobby_list.end()) {
+				lobby_entry = lobby_list.emplace(data->lobby_id, std::make_shared<Lobby>(data->lobby_id)).first;
+			}
+
+			auto lobby = lobby_entry->second;
+			lobby->SetMemberData(data->member_id, data->key.c_str(), data->value.c_str());
+		}
 
 		if (data->success) {
-			{
-				lock_t lock{ mtx };
-				auto lobby_entry = lobby_list.find(data->lobby_id);
-				if (lobby_entry == lobby_list.end()) {
-					lobby_entry = lobby_list.emplace(data->lobby_id, std::make_shared<Lobby>(data->lobby_id)).first;
-				}
-
-				auto lobby = lobby_entry->second;
-				lobby->SetMemberData(data->member_id, data->key.c_str(), data->value.c_str());
-			}
 
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 			listeners->NotifyAllNow(listener, &ILobbyMemberDataUpdateListener::OnLobbyMemberDataUpdateSuccess, data->lobby_id, data->member_id);
