@@ -1,379 +1,470 @@
-using System.Diagnostics;
-using System.Text;
-using UniverseLanLogAnalyzer.Galaxy;
-using UniverseLanLogAnalyzer.Galaxy.Types;
-using UniverseLanLogAnalyzer.Parser;
-using UniverseLanLogAnalyzer.Projections;
+using UniverseLanLogAnalyzer.Compare;
 
 namespace UniverseLanLogAnalyzer
 {
     public partial class Form1 : Form
     {
-        public static readonly string[] test_files = new string[]
+        private static readonly IReadOnlyList<(ComparisonTargetType Value, string Text)> ProjectionChoices = new[]
         {
-            @"D:\Backup\Desktop202603\SSBD-real-gog-log\Working-A.log",
-            @"D:\Backup\Desktop202603\SSBD-real-gog-log\Working-B.log",
-            @"D:\Backup\Desktop202603\SSBD-real-gog-log\NotWorking-A.log",
-            @"D:\Backup\Desktop202603\SSBD-real-gog-log\NotWorking-B.log"
+            (ComparisonTargetType.Lobby, "Lobby"),
+            (ComparisonTargetType.LobbyData, "Lobby Data"),
+            (ComparisonTargetType.LobbyMemberData, "Lobby Member Data"),
+            (ComparisonTargetType.P2PChannel, "P2P Channel"),
+            (ComparisonTargetType.LobbyList, "Lobby List"),
+            (ComparisonTargetType.UserInformation, "User Information"),
+            (ComparisonTargetType.UserStats, "User Stats"),
+            (ComparisonTargetType.UserAchievements, "User Achievements")
         };
+
+        private ParsedLogDocument? _leftDocument;
+        private ParsedLogDocument? _rightDocument;
+        private ComparisonResult? _lastResult;
 
         public Form1()
         {
             InitializeComponent();
+            InitializeProjectionCombo();
+            HookEvents();
+        }
 
-            foreach (var file in test_files)
+        private void HookEvents()
+        {
+            btnBrowseLeft.Click += (_, _) => BrowseForLog(txtLeftPath);
+            btnBrowseRight.Click += (_, _) => BrowseForLog(txtRightPath);
+            btnLoadLogs.Click += (_, _) => LoadLogs();
+            btnCompare.Click += (_, _) => RunCompare();
+            cmbProjection.SelectedIndexChanged += (_, _) => RefreshSelectors();
+            cmbLeftLobby.SelectedIndexChanged += (_, _) => OnLobbySelectionChanged(isLeft: true);
+            cmbRightLobby.SelectedIndexChanged += (_, _) => OnLobbySelectionChanged(isLeft: false);
+            dgvComparison.SelectionChanged += (_, _) => UpdateSelectedChangeDetails();
+        }
+
+        private void InitializeProjectionCombo()
+        {
+            cmbProjection.DisplayMember = nameof(ComboItem<ComparisonTargetType>.Text);
+            cmbProjection.ValueMember = nameof(ComboItem<ComparisonTargetType>.Value);
+            cmbProjection.Items.Clear();
+            foreach (var choice in ProjectionChoices)
             {
-                Debug.WriteLine("============================================================");
-                Debug.WriteLine($"FILE: {file}");
-                Debug.WriteLine("============================================================");
+                cmbProjection.Items.Add(new ComboItem<ComparisonTargetType>(choice.Value, choice.Text));
+            }
 
-                LoggerStateMachine state_machine = new LoggerStateMachine();
-                LogParser parser = new LogParser(file, state_machine);
-                parser.Parse();
+            if (cmbProjection.Items.Count > 0)
+            {
+                cmbProjection.SelectedIndex = 0;
+            }
 
-                LoggerStateMachineCleanup cleanup = new LoggerStateMachineCleanup(state_machine);
-                cleanup.FoldRecurring();
+            dgvComparison.AutoGenerateColumns = false;
+            dgvComparison.Columns.Clear();
+            dgvComparison.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "Ordinal",
+                HeaderText = "#",
+                DataPropertyName = nameof(ComparedChange.Ordinal),
+                Width = 48,
+                ReadOnly = true
+            });
+            dgvComparison.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "Status",
+                HeaderText = "Status",
+                DataPropertyName = nameof(ComparedChange.StatusText),
+                Width = 96,
+                ReadOnly = true
+            });
+            dgvComparison.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "LeftDescription",
+                HeaderText = "Left Change",
+                DataPropertyName = nameof(ComparedChange.LeftShort),
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+                FillWeight = 50,
+                ReadOnly = true
+            });
+            dgvComparison.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "RightDescription",
+                HeaderText = "Right Change",
+                DataPropertyName = nameof(ComparedChange.RightShort),
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+                FillWeight = 50,
+                ReadOnly = true
+            });
+        }
 
-                state_machine.PopulateStateMachine();
-
-                ProjectionSuite projections = ProjectionSuite.Build(state_machine);
-
-                Debug.WriteLine($"Entries after cleanup: {state_machine.Entries.Count}");
-                Debug.WriteLine($"States captured: {state_machine.States.Count}");
-                Debug.WriteLine("");
-
-                DumpLobbyProjection(projections.Lobby);
-                DumpLobbyDataProjection(projections.LobbyData);
-                DumpLobbyMemberDataProjection(projections.LobbyMemberData);
-                DumpP2PProjection(projections.P2PNetworkingPacket);
-                DumpLobbyListProjection(projections.LobbyList);
-                DumpUserInformationProjection(projections.UserInformation);
-                DumpUserStatsProjection(projections.UserStats);
-                DumpUserAchievementsProjection(projections.UserAchievements);
-
-                Debug.WriteLine("");
-                Debug.WriteLine("END OF FILE");
-                Debug.WriteLine("");
+        private void BrowseForLog(TextBox target)
+        {
+            using OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Filter = "Log files (*.log)|*.log|All files (*.*)|*.*";
+            dialog.CheckFileExists = true;
+            dialog.Multiselect = false;
+            if (dialog.ShowDialog(this) == DialogResult.OK)
+            {
+                target.Text = dialog.FileName;
             }
         }
 
-        private static void DumpLobbyProjection(LobbyProjection projection)
+        private void LoadLogs()
         {
-            Debug.WriteLine("---- LobbyProjection ----");
+            string leftPath = txtLeftPath.Text.Trim();
+            string rightPath = txtRightPath.Text.Trim();
 
-            foreach (var lobbyPair in projection.ByLobbyId.OrderBy(x => x.Key))
+            if (!File.Exists(leftPath))
             {
-                ulong lobbyId = lobbyPair.Key;
-                TimelineProjection<Lobby> timeline = lobbyPair.Value;
-
-                Debug.WriteLine($"Lobby {lobbyId}");
-
-                foreach (var snapshotPair in timeline.Changes.OrderBy(x => x.Key))
-                {
-                    int time = snapshotPair.Key;
-                    Lobby lobby = snapshotPair.Value;
-
-                    Debug.WriteLine($"  [t={time}] Lobby snapshot");
-                    DumpLobby(lobby, "    ");
-                }
-
-                Debug.WriteLine("");
-            }
-        }
-
-        private static void DumpLobbyDataProjection(LobbyDataProjection projection)
-        {
-            Debug.WriteLine("---- LobbyDataProjection ----");
-
-            foreach (var lobbyPair in projection.ByLobbyId.OrderBy(x => x.Key))
-            {
-                ulong lobbyId = lobbyPair.Key;
-                Debug.WriteLine($"Lobby {lobbyId}");
-
-                foreach (var keyPair in lobbyPair.Value.OrderBy(x => x.Key))
-                {
-                    string key = keyPair.Key;
-                    TimelineProjection<string?> timeline = keyPair.Value;
-
-                    Debug.WriteLine($"  Key '{key}'");
-
-                    foreach (var snapshotPair in timeline.Changes.OrderBy(x => x.Key))
-                    {
-                        int time = snapshotPair.Key;
-                        string? value = snapshotPair.Value;
-
-                        Debug.WriteLine($"    [t={time}] value={(value ?? "<null>")}");
-                    }
-                }
-
-                Debug.WriteLine("");
-            }
-        }
-
-        private static void DumpLobbyMemberDataProjection(LobbyMemberDataProjection projection)
-        {
-            Debug.WriteLine("---- LobbyMemberDataProjection ----");
-
-            foreach (var lobbyPair in projection.ByLobbyId.OrderBy(x => x.Key))
-            {
-                ulong lobbyId = lobbyPair.Key;
-                Debug.WriteLine($"Lobby {lobbyId}");
-
-                foreach (var userPair in lobbyPair.Value.OrderBy(x => x.Key))
-                {
-                    ulong userId = userPair.Key;
-                    Debug.WriteLine($"  User {userId}");
-
-                    foreach (var keyPair in userPair.Value.OrderBy(x => x.Key))
-                    {
-                        string key = keyPair.Key;
-                        TimelineProjection<string?> timeline = keyPair.Value;
-
-                        Debug.WriteLine($"    Key '{key}'");
-
-                        foreach (var snapshotPair in timeline.Changes.OrderBy(x => x.Key))
-                        {
-                            int time = snapshotPair.Key;
-                            string? value = snapshotPair.Value;
-
-                            Debug.WriteLine($"      [t={time}] value={(value ?? "<null>")}");
-                        }
-                    }
-                }
-
-                Debug.WriteLine("");
-            }
-        }
-
-        private static void DumpP2PProjection(P2PNetworkingPacketProjection projection)
-        {
-            Debug.WriteLine("---- P2PNetworkingPacketProjection ----");
-
-            foreach (var pair in projection.ByChannel.OrderBy(x => x.Key))
-            {
-                int channel = pair.Key;
-                TimelineProjection<P2PPacketSnapshot> timeline = pair.Value;
-
-                Debug.WriteLine($"Channel {channel}");
-
-                foreach (var snapshotPair in timeline.Changes.OrderBy(x => x.Key))
-                {
-                    int time = snapshotPair.Key;
-                    P2PPacketSnapshot snapshot = snapshotPair.Value;
-
-                    Debug.WriteLine(
-                        $"  [t={time}] from={FormatGalaxyID(snapshot.from)}, data_hex={snapshot.data_hex}");
-                }
-
-                Debug.WriteLine("");
-            }
-        }
-
-        private static void DumpLobbyListProjection(LobbyListProjection projection)
-        {
-            Debug.WriteLine("---- LobbyListProjection ----");
-
-            foreach (var snapshotPair in projection.Timeline.Changes.OrderBy(x => x.Key))
-            {
-                int time = snapshotPair.Key;
-                List<GalaxyID> lobbies = snapshotPair.Value;
-
-                Debug.WriteLine($"  [t={time}] Lobby list snapshot");
-
-                if (lobbies.Count == 0)
-                {
-                    Debug.WriteLine("    <empty>");
-                    continue;
-                }
-
-                for (int i = 0; i < lobbies.Count; ++i)
-                {
-                    Debug.WriteLine($"    [{i}] {FormatGalaxyID(lobbies[i])}");
-                }
+                MessageBox.Show(this, "Select a valid left log file.", "Missing file", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
 
-            Debug.WriteLine("");
-        }
-
-        private static void DumpUserInformationProjection(UserInformationProjection projection)
-        {
-            Debug.WriteLine("---- UserInformationProjection ----");
-
-            foreach (var pair in projection.ByUserId.OrderBy(x => x.Key))
+            if (!File.Exists(rightPath))
             {
-                ulong userId = pair.Key;
-                TimelineProjection<UserInformationSnapshot> timeline = pair.Value;
-
-                Debug.WriteLine($"User {userId}");
-
-                foreach (var snapshotPair in timeline.Changes.OrderBy(x => x.Key))
-                {
-                    int time = snapshotPair.Key;
-                    UserInformationSnapshot snapshot = snapshotPair.Value;
-
-                    Debug.WriteLine(
-                        $"  [t={time}] id={FormatGalaxyID(snapshot.id)}, " +
-                        $"persona_name={snapshot.persona_name}, " +
-                        $"persona_state_change={snapshot.persona_state_change}, " +
-                        $"avatar_criteria={snapshot.avatar_criteria}, " +
-                        $"rich_presence_update_count={snapshot.rich_presence_update_count}");
-                }
-
-                Debug.WriteLine("");
-            }
-        }
-
-        private static void DumpUserStatsProjection(UserStatsProjection projection)
-        {
-            Debug.WriteLine("---- UserStatsProjection ----");
-
-            foreach (var pair in projection.ByUserId.OrderBy(x => x.Key))
-            {
-                ulong userId = pair.Key;
-                TimelineProjection<UserStatsSnapshot> timeline = pair.Value;
-
-                Debug.WriteLine($"User {userId}");
-
-                foreach (var snapshotPair in timeline.Changes.OrderBy(x => x.Key))
-                {
-                    int time = snapshotPair.Key;
-                    UserStatsSnapshot snapshot = snapshotPair.Value;
-
-                    Debug.WriteLine($"  [t={time}] Stats snapshot for {FormatGalaxyID(snapshot.id)}");
-
-                    if (snapshot.values.Count == 0)
-                    {
-                        Debug.WriteLine("    <empty>");
-                        continue;
-                    }
-
-                    foreach (var stat in snapshot.values.OrderBy(x => x.Key))
-                    {
-                        Debug.WriteLine($"    {stat.Key} = {stat.Value}");
-                    }
-                }
-
-                Debug.WriteLine("");
-            }
-        }
-
-        private static void DumpUserAchievementsProjection(UserAchievementsProjection projection)
-        {
-            Debug.WriteLine("---- UserAchievementsProjection ----");
-
-            foreach (var pair in projection.ByUserId.OrderBy(x => x.Key))
-            {
-                ulong userId = pair.Key;
-                TimelineProjection<UserAchievementsSnapshot> timeline = pair.Value;
-
-                Debug.WriteLine($"User {userId}");
-
-                foreach (var snapshotPair in timeline.Changes.OrderBy(x => x.Key))
-                {
-                    int time = snapshotPair.Key;
-                    UserAchievementsSnapshot snapshot = snapshotPair.Value;
-
-                    Debug.WriteLine($"  [t={time}] Achievements snapshot for {FormatGalaxyID(snapshot.id)}");
-
-                    if (snapshot.values.Count == 0)
-                    {
-                        Debug.WriteLine("    <empty>");
-                        continue;
-                    }
-
-                    foreach (var achievement in snapshot.values.OrderBy(x => x.Key))
-                    {
-                        Debug.WriteLine(
-                            $"    {achievement.Key} => unlocked={achievement.Value.unlocked}, unlock_time={achievement.Value.unlock_time}");
-                    }
-                }
-
-                Debug.WriteLine("");
-            }
-        }
-
-        private static void DumpLobby(Lobby lobby, string indent)
-        {
-            Debug.WriteLine($"{indent}id={FormatGalaxyID(lobby.id)}");
-            Debug.WriteLine($"{indent}owner_id={FormatGalaxyID(lobby.owner_id)}");
-            Debug.WriteLine($"{indent}joinable={lobby.joinable}");
-            Debug.WriteLine($"{indent}max_members={lobby.max_members}");
-            Debug.WriteLine($"{indent}topology_type={lobby.topology_type}");
-            Debug.WriteLine($"{indent}type={lobby.type}");
-            Debug.WriteLine($"{indent}created_listener=0x{lobby.created_listener:X}");
-            Debug.WriteLine($"{indent}entered_listener=0x{lobby.entered_listener:X}");
-
-            Debug.WriteLine($"{indent}kv_store:");
-            if (lobby.kv_store.Count == 0)
-            {
-                Debug.WriteLine($"{indent}  <empty>");
-            }
-            else
-            {
-                foreach (var kv in lobby.kv_store.OrderBy(x => x.Key))
-                {
-                    Debug.WriteLine($"{indent}  {kv.Key} = {DecodeBytes(kv.Value)}");
-                }
+                MessageBox.Show(this, "Select a valid right log file.", "Missing file", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
 
-            Debug.WriteLine($"{indent}user_kv_store:");
-            if (lobby.user_kv_store.Count == 0)
-            {
-                Debug.WriteLine($"{indent}  <empty>");
-            }
-            else
-            {
-                foreach (var userKv in lobby.user_kv_store.OrderBy(x => x.Key.raw))
-                {
-                    Debug.WriteLine($"{indent}  user {FormatGalaxyID(userKv.Key)}");
-
-                    if (userKv.Value.Count == 0)
-                    {
-                        Debug.WriteLine($"{indent}    <empty>");
-                        continue;
-                    }
-
-                    foreach (var kv in userKv.Value.OrderBy(x => x.Key))
-                    {
-                        Debug.WriteLine($"{indent}    {kv.Key} = {DecodeBytes(kv.Value)}");
-                    }
-                }
-            }
-
-            Debug.WriteLine($"{indent}messages:");
-            if (lobby.messages.Count == 0)
-            {
-                Debug.WriteLine($"{indent}  <empty>");
-            }
-            else
-            {
-                foreach (var msg in lobby.messages.OrderBy(x => x.Key))
-                {
-                    Debug.WriteLine($"{indent}  [{msg.Key}] = {DecodeBytes(msg.Value)}");
-                }
-            }
-        }
-
-        private static string DecodeBytes(byte[] data)
-        {
             try
             {
-                return Encoding.UTF8.GetString(data);
+                UseWaitCursor = true;
+                Enabled = false;
+                _leftDocument = ParsedLogDocument.Load(leftPath);
+                _rightDocument = ParsedLogDocument.Load(rightPath);
+                lblLoadState.Text = $"Loaded {Path.GetFileName(leftPath)} and {Path.GetFileName(rightPath)}";
+                RefreshSelectors();
+                RunCompare();
             }
-            catch
+            catch (Exception ex)
             {
-                return BitConverter.ToString(data);
+                MessageBox.Show(this, ex.ToString(), "Failed to load log(s)", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                lblLoadState.Text = "Load failed.";
+            }
+            finally
+            {
+                Enabled = true;
+                UseWaitCursor = false;
             }
         }
 
-        private static string FormatGalaxyID(GalaxyID? id)
+        private void RefreshSelectors()
         {
-            if (id == null)
+            ComparisonTargetType projection = GetSelectedProjection();
+            PopulateSideSelectors(_leftDocument, true, projection);
+            PopulateSideSelectors(_rightDocument, false, projection);
+            ApplySelectorVisibility(projection);
+            btnCompare.Enabled = _leftDocument != null && _rightDocument != null;
+        }
+
+        private void OnLobbySelectionChanged(bool isLeft)
+        {
+            if (GetSelectedProjection() != ComparisonTargetType.LobbyMemberData)
             {
-                return "<null>";
+                return;
             }
 
-            return $"{id.GetID()}({id.GetIDType()})";
+            ParsedLogDocument? document = isLeft ? _leftDocument : _rightDocument;
+            ComboBox lobbyCombo = isLeft ? cmbLeftLobby : cmbRightLobby;
+            ComboBox userCombo = isLeft ? cmbLeftUser : cmbRightUser;
+
+            var selectedLobby = GetSelectedComboValue<ulong>(lobbyCombo);
+            PopulateLobbyMemberUsers(document, userCombo, selectedLobby);
+        }
+
+        private void PopulateSideSelectors(ParsedLogDocument? doc, bool isLeft, ComparisonTargetType target)
+        {
+            ComboBox lobbyCombo = isLeft ? cmbLeftLobby : cmbRightLobby;
+            ComboBox userCombo = isLeft ? cmbLeftUser : cmbRightUser;
+            ComboBox channelCombo = isLeft ? cmbLeftChannel : cmbRightChannel;
+
+            PopulateLobbyChoices(doc, lobbyCombo, target);
+            PopulateUserChoices(doc, userCombo, target);
+            PopulateChannelChoices(doc, channelCombo, target);
+
+            if (target == ComparisonTargetType.LobbyMemberData)
+            {
+                var selectedLobby = GetSelectedComboValue<ulong>(lobbyCombo);
+                PopulateLobbyMemberUsers(doc, userCombo, selectedLobby);
+            }
+        }
+
+        private void PopulateLobbyChoices(ParsedLogDocument? doc, ComboBox combo, ComparisonTargetType target)
+        {
+            combo.BeginUpdate();
+            try
+            {
+                object? previous = combo.SelectedItem;
+                combo.DisplayMember = nameof(ComboItem<ulong>.Text);
+                combo.ValueMember = nameof(ComboItem<ulong>.Value);
+                combo.Items.Clear();
+
+                if (doc == null)
+                {
+                    return;
+                }
+
+                IEnumerable<ulong> source = target switch
+                {
+                    ComparisonTargetType.Lobby => doc.Projections.Lobby.ByLobbyId.Keys,
+                    ComparisonTargetType.LobbyData => doc.Projections.LobbyData.ByLobbyId.Keys,
+                    ComparisonTargetType.LobbyMemberData => doc.Projections.LobbyMemberData.ByLobbyId.Keys,
+                    _ => Array.Empty<ulong>()
+                };
+
+                foreach (ulong lobbyId in source.OrderBy(x => x))
+                {
+                    combo.Items.Add(new ComboItem<ulong>(lobbyId, $"{lobbyId}"));
+                }
+
+                if (combo.Items.Count > 0)
+                {
+                    combo.SelectedIndex = 0;
+                }
+            }
+            finally
+            {
+                combo.EndUpdate();
+            }
+        }
+
+        private void PopulateUserChoices(ParsedLogDocument? doc, ComboBox combo, ComparisonTargetType target)
+        {
+            combo.BeginUpdate();
+            try
+            {
+                combo.DisplayMember = nameof(ComboItem<ulong>.Text);
+                combo.ValueMember = nameof(ComboItem<ulong>.Value);
+                combo.Items.Clear();
+
+                if (doc == null)
+                {
+                    return;
+                }
+
+                IEnumerable<ulong> ids = target switch
+                {
+                    ComparisonTargetType.UserInformation => doc.Projections.UserInformation.ByUserId.Keys,
+                    ComparisonTargetType.UserStats => doc.Projections.UserStats.ByUserId.Keys,
+                    ComparisonTargetType.UserAchievements => doc.Projections.UserAchievements.ByUserId.Keys,
+                    _ => Array.Empty<ulong>()
+                };
+
+                foreach (ulong userId in ids.OrderBy(x => x))
+                {
+                    combo.Items.Add(new ComboItem<ulong>(userId, $"{userId}"));
+                }
+
+                if (combo.Items.Count > 0)
+                {
+                    combo.SelectedIndex = 0;
+                }
+            }
+            finally
+            {
+                combo.EndUpdate();
+            }
+        }
+
+        private void PopulateLobbyMemberUsers(ParsedLogDocument? doc, ComboBox combo, ulong? lobbyId)
+        {
+            combo.BeginUpdate();
+            try
+            {
+                combo.DisplayMember = nameof(ComboItem<ulong>.Text);
+                combo.ValueMember = nameof(ComboItem<ulong>.Value);
+                combo.Items.Clear();
+
+                if (doc == null || !lobbyId.HasValue)
+                {
+                    return;
+                }
+
+                if (!doc.Projections.LobbyMemberData.ByLobbyId.TryGetValue(lobbyId.Value, out var members))
+                {
+                    return;
+                }
+
+                foreach (ulong userId in members.Keys.OrderBy(x => x))
+                {
+                    combo.Items.Add(new ComboItem<ulong>(userId, $"{userId}"));
+                }
+
+                if (combo.Items.Count > 0)
+                {
+                    combo.SelectedIndex = 0;
+                }
+            }
+            finally
+            {
+                combo.EndUpdate();
+            }
+        }
+
+        private void PopulateChannelChoices(ParsedLogDocument? doc, ComboBox combo, ComparisonTargetType target)
+        {
+            combo.BeginUpdate();
+            try
+            {
+                combo.DisplayMember = nameof(ComboItem<int>.Text);
+                combo.ValueMember = nameof(ComboItem<int>.Value);
+                combo.Items.Clear();
+
+                if (doc == null || target != ComparisonTargetType.P2PChannel)
+                {
+                    return;
+                }
+
+                foreach (int channel in doc.Projections.P2PNetworkingPacket.ByChannel.Keys.OrderBy(x => x))
+                {
+                    combo.Items.Add(new ComboItem<int>(channel, channel.ToString()));
+                }
+
+                if (combo.Items.Count > 0)
+                {
+                    combo.SelectedIndex = 0;
+                }
+            }
+            finally
+            {
+                combo.EndUpdate();
+            }
+        }
+
+        private void ApplySelectorVisibility(ComparisonTargetType target)
+        {
+            bool needsLobby = target is ComparisonTargetType.Lobby or ComparisonTargetType.LobbyData or ComparisonTargetType.LobbyMemberData;
+            bool needsUser = target is ComparisonTargetType.UserInformation or ComparisonTargetType.UserStats or ComparisonTargetType.UserAchievements or ComparisonTargetType.LobbyMemberData;
+            bool needsChannel = target == ComparisonTargetType.P2PChannel;
+
+            lblLeftLobby.Visible = cmbLeftLobby.Visible = needsLobby;
+            lblRightLobby.Visible = cmbRightLobby.Visible = needsLobby;
+            lblLeftUser.Visible = cmbLeftUser.Visible = needsUser;
+            lblRightUser.Visible = cmbRightUser.Visible = needsUser;
+            lblLeftChannel.Visible = cmbLeftChannel.Visible = needsChannel;
+            lblRightChannel.Visible = cmbRightChannel.Visible = needsChannel;
+        }
+
+        private void RunCompare()
+        {
+            if (_leftDocument == null || _rightDocument == null)
+            {
+                return;
+            }
+
+            try
+            {
+                ProjectionSelection leftSelection = BuildSelection(isLeft: true);
+                ProjectionSelection rightSelection = BuildSelection(isLeft: false);
+
+                _lastResult = ProjectionComparisonEngine.Compare(_leftDocument, leftSelection, _rightDocument, rightSelection);
+                dgvComparison.DataSource = _lastResult.Changes;
+                txtSummary.Text = _lastResult.Summary;
+                if (dgvComparison.Rows.Count > 0)
+                {
+                    dgvComparison.Rows[0].Selected = true;
+                }
+                else
+                {
+                    txtDetails.Text = "No state changes were captured for the selected targets.";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "Comparison failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private ProjectionSelection BuildSelection(bool isLeft)
+        {
+            ComparisonTargetType target = GetSelectedProjection();
+            var selection = new ProjectionSelection { TargetType = target };
+
+            ComboBox lobbyCombo = isLeft ? cmbLeftLobby : cmbRightLobby;
+            ComboBox userCombo = isLeft ? cmbLeftUser : cmbRightUser;
+            ComboBox channelCombo = isLeft ? cmbLeftChannel : cmbRightChannel;
+
+            if (target is ComparisonTargetType.Lobby or ComparisonTargetType.LobbyData or ComparisonTargetType.LobbyMemberData)
+            {
+                selection.LobbyId = GetRequiredUInt64(lobbyCombo, isLeft ? "left lobby" : "right lobby");
+            }
+
+            if (target is ComparisonTargetType.UserInformation or ComparisonTargetType.UserStats or ComparisonTargetType.UserAchievements or ComparisonTargetType.LobbyMemberData)
+            {
+                selection.UserId = GetRequiredUInt64(userCombo, isLeft ? "left user" : "right user");
+            }
+
+            if (target == ComparisonTargetType.P2PChannel)
+            {
+                selection.Channel = GetRequiredInt32(channelCombo, isLeft ? "left channel" : "right channel");
+            }
+
+            return selection;
+        }
+
+        private static ulong GetRequiredUInt64(ComboBox combo, string description)
+        {
+            if (combo.SelectedItem is ComboItem<ulong> item)
+            {
+                return item.Value;
+            }
+
+            throw new InvalidOperationException($"Select a {description} before comparing.");
+        }
+
+        private static int GetRequiredInt32(ComboBox combo, string description)
+        {
+            if (combo.SelectedItem is ComboItem<int> item)
+            {
+                return item.Value;
+            }
+
+            throw new InvalidOperationException($"Select a {description} before comparing.");
+        }
+
+        private static ulong? GetSelectedComboValue<T>(ComboBox combo)
+        {
+            if (typeof(T) == typeof(ulong) && combo.SelectedItem is ComboItem<ulong> ulongItem)
+            {
+                return ulongItem.Value;
+            }
+
+            return null;
+        }
+
+        private ComparisonTargetType GetSelectedProjection()
+        {
+            if (cmbProjection.SelectedItem is ComboItem<ComparisonTargetType> item)
+            {
+                return item.Value;
+            }
+
+            return ComparisonTargetType.Lobby;
+        }
+
+        private void UpdateSelectedChangeDetails()
+        {
+            if (_lastResult == null)
+            {
+                txtDetails.Text = string.Empty;
+                return;
+            }
+
+            if (dgvComparison.CurrentRow?.DataBoundItem is not ComparedChange change)
+            {
+                txtDetails.Text = string.Empty;
+                return;
+            }
+
+            txtDetails.Text = change.BuildDetailedText();
+        }
+
+        private sealed class ComboItem<T>
+        {
+            public ComboItem(T value, string text)
+            {
+                Value = value;
+                Text = text;
+            }
+
+            public T Value { get; }
+            public string Text { get; }
+            public override string ToString() => Text;
         }
     }
 }

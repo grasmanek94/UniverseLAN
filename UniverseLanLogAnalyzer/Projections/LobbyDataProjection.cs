@@ -55,16 +55,43 @@ namespace UniverseLanLogAnalyzer.Projections
         {
             if (!current.TryGetValue(lobbyId, out Dictionary<string, string?>? kv))
             {
+                // Ignore no-op deletions for lobbies we have never observed state for.
+                if (value == null)
+                {
+                    return;
+                }
+
                 kv = new Dictionary<string, string?>(StringComparer.Ordinal);
                 current.Add(lobbyId, kv);
             }
 
-            if (kv.TryGetValue(key, out string? existing) && StringComparer.Ordinal.Equals(existing, value))
+            if (!kv.TryGetValue(key, out string? existing))
+            {
+                // Ignore deleting a value that does not exist; it is not a state change.
+                if (value == null)
+                {
+                    return;
+                }
+
+                kv[key] = value;
+                GetOrCreateTimeline(lobbyId, key).AddSnapshot(timePoint, value);
+                return;
+            }
+
+            if (StringComparer.Ordinal.Equals(existing, value))
             {
                 return;
             }
 
-            kv[key] = value;
+            if (value == null)
+            {
+                kv.Remove(key);
+            }
+            else
+            {
+                kv[key] = value;
+            }
+
             GetOrCreateTimeline(lobbyId, key).AddSnapshot(timePoint, value);
         }
 

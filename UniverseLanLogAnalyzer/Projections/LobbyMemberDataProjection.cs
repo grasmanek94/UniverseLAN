@@ -68,22 +68,54 @@ namespace UniverseLanLogAnalyzer.Projections
         {
             if (!current.TryGetValue(lobbyId, out Dictionary<ulong, Dictionary<string, string?>>? users))
             {
+                // Ignore no-op deletions for unknown lobbies/users.
+                if (value == null)
+                {
+                    return;
+                }
+
                 users = new Dictionary<ulong, Dictionary<string, string?>>();
                 current.Add(lobbyId, users);
             }
 
             if (!users.TryGetValue(userId, out Dictionary<string, string?>? kv))
             {
+                if (value == null)
+                {
+                    return;
+                }
+
                 kv = new Dictionary<string, string?>(StringComparer.Ordinal);
                 users.Add(userId, kv);
             }
 
-            if (kv.TryGetValue(key, out string? existing) && StringComparer.Ordinal.Equals(existing, value))
+            if (!kv.TryGetValue(key, out string? existing))
+            {
+                // Ignore deleting a value that does not exist; it is not a state change.
+                if (value == null)
+                {
+                    return;
+                }
+
+                kv[key] = value;
+                GetOrCreateTimeline(lobbyId, userId, key).AddSnapshot(timePoint, value);
+                return;
+            }
+
+            if (StringComparer.Ordinal.Equals(existing, value))
             {
                 return;
             }
 
-            kv[key] = value;
+            if (value == null)
+            {
+                kv.Remove(key);
+            }
+            else
+            {
+                kv[key] = value;
+            }
+
             GetOrCreateTimeline(lobbyId, userId, key).AddSnapshot(timePoint, value);
         }
 
