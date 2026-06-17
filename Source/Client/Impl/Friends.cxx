@@ -403,7 +403,10 @@ namespace universelan::client {
 			if (data->success) {
 				listeners->NotifyAllNow(listener, &IRichPresenceChangeListener::OnRichPresenceChangeSuccess);
 #if GALAXY_BUILD_FEATURE_ADDED_RICH_PRESENCE_LISTENERS
-				listeners->NotifyAllNow(&IRichPresenceListener::OnRichPresenceUpdated, intf->config->GetApiGalaxyID());
+				if (!intf->config->IsSelfUserID(data->id))
+				{
+					listeners->NotifyAllNow(&IRichPresenceListener::OnRichPresenceUpdated, data->id);
+				}
 #endif
 			}
 			else {

@@ -907,7 +907,13 @@ namespace universelan::server {
 			break;
 		}
 
-		connection.Broadcast(data);
+		if (data->success)
+		{
+			connection.Broadcast(data);
+		}
+		else {
+			connection.Send(peer, data);
+		}
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
