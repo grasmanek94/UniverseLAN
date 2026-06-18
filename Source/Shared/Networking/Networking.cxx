@@ -69,7 +69,10 @@ namespace universelan {
 		ENetPacket* packet = nullptr;
 		while (delayed_packets_to_send.try_pop(packet))
 		{
-			NetworkClient::Send(packet);
+			if (NetworkClient::Send(packet) != 0)
+			{
+				enet_packet_destroy(packet);
+			}
 		}
 
 		bool disconnected{ false };
