@@ -25,7 +25,7 @@ namespace universelan::client {
 	class CloudStorageImpl : public ICloudStorage
 	{
 	public:
-		using FuncT = functional::xt<std::function<GALAXY_DLL_EXPORT ICloudStorage* GALAXY_CALLTYPE(void)>>;
+		using FuncT = functional::xt<std::function<ICloudStorage* GALAXY_CALLTYPE(void)>>;
 		using FuncPtr = typename FuncT::PTR;
 
 	private:
