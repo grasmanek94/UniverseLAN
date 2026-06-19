@@ -102,7 +102,7 @@ namespace enetpp {
 
 			// TODO: make this into something more configurable
 			member->maximumPacketSize = MAX_PACKET_SIZE;
-			member->maximumWaitingData = MAX_PACKETS_PER_PEER * MAX_PACKET_SIZE;
+			member->maximumWaitingData = MAX_WAITING_DATA;
 
 			return member != nullptr;
 		}

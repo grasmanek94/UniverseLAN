@@ -76,8 +76,8 @@ namespace enetpp {
 		int Send(ENetPacket* packet);
 	};
 
-	const size_t MAX_PACKET_SIZE = 32 * 1024;//k bytes
-	const size_t MAX_PACKETS_PER_PEER = 512;
+	const size_t MAX_PACKET_SIZE = 32 * 1024 * 1024;//k bytes
+	const size_t MAX_WAITING_DATA = 512 * 1024 * 1024;//k bytes
 
 } /* namespace enetpp */
 
