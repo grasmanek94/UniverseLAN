@@ -134,13 +134,13 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Battlestar Galactica Deadlock             | :white_check_mark:(2)     | 1.114.9                       | Tested with build 423 | 
 | Driftland - The Magic Revival             | :white_check_mark:(2)     | 1.133.6                       | Works since build 436, apparently UniverseLAN had a bug where the server was sending the packet "as user" and not "as lobby" (when the user is the lobby owner) |
 | Knights and Bikes                         | :white_check_mark:(2)     | 1.133.6                       | Tested with build 440, other player needs to join via commandline with --JoinLobby <id>, id will be displayed in the console of the host after clicking invite friend. |
-| Metal Slug                                | :white_check_mark:(2)     | 1.100.2                       | Works fine since build 464 |
-| Metal Slug 3                              | :white_check_mark:(2)     | 1.100.2                       | Works fine since build 464 |
-| Metal Slug X                              | :white_check_mark:(2)     | 1.100.2                       | Works fine since build 464 |
-| Shock Troopers                            | :white_check_mark:(2)     | 1.100.2                       | Works fine since build 464 |
-| The Last Blade                            | :white_check_mark:(2)     | 1.100.2                       | Works fine since build 464 |
-| Shock Troopers - 2nd Squad                | :white_check_mark:(2)     | 1.100.2                       | Works fine since build 464 |
-| Twinkle Star Sprites                      | :white_check_mark:(2)     | 1.100.2                       | Works fine since build 464 |
+| Metal Slug                                | :white_check_mark:(2)     | 1.100.2                       | Works since build 464 |
+| Metal Slug 3                              | :white_check_mark:(2)     | 1.100.2                       | Works since build 464 |
+| Metal Slug X                              | :white_check_mark:(2)     | 1.100.2                       | Works since build 464 |
+| Shock Troopers                            | :white_check_mark:(2)     | 1.100.2                       | Works since build 464 |
+| The Last Blade                            | :white_check_mark:(2)     | 1.100.2                       | Works since build 464 |
+| Shock Troopers - 2nd Squad                | :white_check_mark:(2)     | 1.100.2                       | Works since build 464 |
+| Twinkle Star Sprites                      | :white_check_mark:(2)     | 1.100.2                       | Works since build 464 |
 | Streets of Rage 4                         | :white_check_mark:(2)     | 1.144.1                       | Tested with build 440 |
 | The Witcher Adventure Game                | :white_check_mark:(2)     | 1.69                          | Tested with build 440 - 1.68 |
 | Blood - Fresh Supply                      | :white_check_mark:(2)     | 1.133.6                       | Tested with build 464 |
@@ -155,9 +155,9 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Gloomhaven                                | :white_check_mark:(2)     | 1.148.3                       | Tested with build 487 |
 | Grand Ages Medieval                       | :white_check_mark:(2)     | 1.68.0                        | Must apply `set OPENSSL_ia32cap=:~0x20000000` on newer CPU's for this game to start without crashing.<br> This issue is not caused by UniverseLAN or GOG, but OpenSSL / Unity/Unreal.<br> Tested with build 487 |
 | The Original Strife - Veteran Edition     | :white_check_mark:(2)     | 1.144.1                       | Tested with build 487 |
+| Niffelheim                                | :white_check_mark:(2)     | 1.139.2                       | Works since build 623 | 
 | Serious Sams Bogus Detour                 | :construction:            | 1.100.2                       | Can join lobby since build 360 and start game, but both players stuck on black "Loading..." screen |
 | Dying Light                               | :construction:            | 1.148.3                       | Doesn't seem to work for now and crashes when EncryptedAppTicket is not disabled. I think LAN may be internet-bound unfortunately. |
-| Niffelheim                                | :construction:            | 1.139.2                       | Stuck at "Loading..." (save transfer?) | 
 | Homeworld: Deserts of Kharak              | :construction:            | 1.101                         | Tested with 1.100.2. After build 362 lobbies can now be created, but connecting doesn't work. Seems like host game is stuck in SetLobbyJoinable loop? | 
 | Ancestors Legacy                          | :construction:            | 1.133.6                       | Requires Leaderboards features to be implemented | 
 | Offworld Trading Company                  | :construction:            | 1.94                          | Tested with 1.95 build 440, stuck on game load in a GetUserData loop |
