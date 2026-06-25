@@ -127,7 +127,6 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Shadow Warrior 2                          | :white_check_mark:(2)     | 1.95.0                        | Tested with build 338 | 
 | Hammerwatch                               | :white_check_mark:(2)     | 1.139.2                       | Tested with build 360 |
 | Warhammer: Chaosbane                      | :white_check_mark:(2)     | 1.139.2                       | Tested with build 389 | 
-| Mutant Football League - Dynasty Edition  | :white_check_mark:(2)     | 1.130.0                       | Tested with build 395 |
 | Oriental Empires                          | :white_check_mark:(2)     | 1.113.3                       | Tested with build 397 |
 | River City Ransom - Underground           | :white_check_mark:(2)     | 1.104.2                       | Tested with build 399 |
 | Warhammer 40K - Dakka Squadron Flyboyz Ed.| :white_check_mark:(2)     | 1.144.1                       | Tested with build 421 |
@@ -207,6 +206,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Dark Envoy                                | :x:                       | 1.152.6                       | UniverseLAN can't make this game LAN-able, this game uses custom/free multiplayer (Photon Engine) that does not use Steam or Galaxy, but online multiplayer is DRM Free. |
 | Dungeons 2                                | :x:                       | 1.68                          | UniverseLAN can't make this game LAN-able, this game uses custom/free multiplayer that does not use Steam or Galaxy, but online multiplayer is DRM Free. |
 | MechWarrior 5: Mercenaries                | :x:                       | 1.139.2                       | Doesn't seem to use Galaxy for multiplayer. |
+| Mutant Football League - Dynasty Edition  | :x:                       | 1.130.0                       | Tested with build 395, 2026-06-25: It seems this doesn't use Galaxy for multiplayer |
 
 # Notice
 I'm not affiliated in any way with GOG or CD Projekt RED.  
