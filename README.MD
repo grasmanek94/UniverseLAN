@@ -131,7 +131,6 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | River City Ransom - Underground           | :white_check_mark:(2)     | 1.104.2                       | Tested with build 399 |
 | Warhammer 40K - Dakka Squadron Flyboyz Ed.| :white_check_mark:(2)     | 1.144.1                       | Tested with build 421 |
 | Star Wars Battlefront II (Classic, 2005)  | :white_check_mark:(2)/:construction: | 1.112.2            | There are no lobbies visible on the internet tab, but using UniverseLAN does unlock the LAN tab option when you don't have internet access. |
-| Battlestar Galactica Deadlock             | :white_check_mark:(2)     | 1.114.9                       | Tested with build 423 | 
 | Driftland - The Magic Revival             | :white_check_mark:(2)     | 1.133.6                       | Works since build 436, apparently UniverseLAN had a bug where the server was sending the packet "as user" and not "as lobby" (when the user is the lobby owner) |
 | Knights and Bikes                         | :white_check_mark:(2)     | 1.133.6                       | Tested with build 440, other player needs to join via commandline with --JoinLobby <id>, id will be displayed in the console of the host after clicking invite friend. |
 | Metal Slug                                | :white_check_mark:(2)     | 1.100.2                       | Works since build 464 |
@@ -206,7 +205,8 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Dark Envoy                                | :x:                       | 1.152.6                       | UniverseLAN can't make this game LAN-able, this game uses custom/free multiplayer (Photon Engine) that does not use Steam or Galaxy, but online multiplayer is DRM Free. |
 | Dungeons 2                                | :x:                       | 1.68                          | UniverseLAN can't make this game LAN-able, this game uses custom/free multiplayer that does not use Steam or Galaxy, but online multiplayer is DRM Free. |
 | MechWarrior 5: Mercenaries                | :x:                       | 1.139.2                       | Doesn't seem to use Galaxy for multiplayer. |
-| Mutant Football League - Dynasty Edition  | :x:                       | 1.130.0                       | Tested with build 395, 2026-06-25: It seems this doesn't use Galaxy for multiplayer |
+| Mutant Football League - Dynasty Edition  | :x:                       | 1.130.0                       | Doesn't seem to use Galaxy for multiplayer. |
+| Battlestar Galactica Deadlock             | :x:                       | 1.114.9                       | Doesn't seem to use Galaxy for Multiplayer. | 
 
 # Notice
 I'm not affiliated in any way with GOG or CD Projekt RED.  
