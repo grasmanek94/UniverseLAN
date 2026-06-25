@@ -106,6 +106,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 
 | Game                                      | Status                    | Tested GOG Galaxy SDK Version | Notes |
 | :---------                                | :-------:                 | :---------:                   | :---------: |
+| Barely Racing                             | :white_check_mark:(2)     | 1.152.11                      | Tested with build 626 |
 | Ashen                                     | :white_check_mark:(2)     | 1.139.2                       | Tested with build 487, both players need to enter the same key and leave the rest area |
 | Praetorians - HD Remaster                 | :white_check_mark:(2)     | 1.139.2                       | Tested with build 487 |
 | Core Keeper                               | :white_check_mark:(2)     | 1.152.11                      | Tested with build 487 |
@@ -115,7 +116,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | ENDLESS™ Space 2                          | :white_check_mark:(2)     | 1.152.8                       | Tested with build 487 |
 | Vikings - Wolves of Midgard               | :white_check_mark:(2)     | 1.100.2                       | Must apply `set OPENSSL_ia32cap=:~0x20000000` on newer CPU's for this game to start without crashing.<br> This issue is not caused by UniverseLAN or GOG, but OpenSSL / Unity/Unreal.<br> Tested with build 440 |
 | Phantom Doctrine                          | :white_check_mark:(2)     | 1.124.0                       | Must apply `set OPENSSL_ia32cap=:~0x20000000` on newer CPU's for this game to start without crashing.<br> This issue is not caused by UniverseLAN or GOG, but OpenSSL / Unity.<br> Tested with build 301 |
-| SYNTHETIK: Legion Rising                  | :white_check_mark:(2)     | 1.113.3                       | Works since build 301 |
+| SYNTHETIK: Legion Rising                  | :white_check_mark:(2)     | 1.113.3                       | Works since build 301, "seems" to work I think this doesn't use GOG Galaxy for multiplayer. |
 | Aragami 1                                 | :white_check_mark:(2)     | 1.121.2                       | |
 | Forsaken Remastered                       | :white_check_mark:(3)     | 1.124.0                       | |
 | Guns, Gore & Cannoli 2                    | :white_check_mark:(3)     | 1.124.0                       | |
@@ -156,12 +157,6 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Grand Ages Medieval                       | :white_check_mark:(2)     | 1.68.0                        | Must apply `set OPENSSL_ia32cap=:~0x20000000` on newer CPU's for this game to start without crashing.<br> This issue is not caused by UniverseLAN or GOG, but OpenSSL / Unity/Unreal.<br> Tested with build 487 |
 | The Original Strife - Veteran Edition     | :white_check_mark:(2)     | 1.144.1                       | Tested with build 487 |
 | Niffelheim                                | :white_check_mark:(2)     | 1.139.2                       | Works since build 623 | 
-| Serious Sams Bogus Detour                 | :construction:            | 1.100.2                       | Can join lobby since build 360 and start game, but both players stuck on black "Loading..." screen |
-| Dying Light                               | :construction:            | 1.148.3                       | Doesn't seem to work for now and crashes when EncryptedAppTicket is not disabled. I think LAN may be internet-bound unfortunately. |
-| Homeworld: Deserts of Kharak              | :construction:            | 1.101                         | Tested with 1.100.2. After build 362 lobbies can now be created, but connecting doesn't work. Seems like host game is stuck in SetLobbyJoinable loop? | 
-| Ancestors Legacy                          | :construction:            | 1.133.6                       | Requires Leaderboards features to be implemented | 
-| Alien vs Predator 2000                    | :question:                |                               | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176? |
-| Double Dragon Trilogy                     | :question:                |                               | Unknown version, Galaxy.dll SHA1: `789f3b02ced8dbac2e5f8c2c98448569f70960cc` |
 | Rise of the Triad (2013)                  | :left_right_arrow:        |                               | Native LAN available | 
 | Rage of Mages II: Necromancer             | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
 | Neverwinter Nights 2 Complete             | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
@@ -180,6 +175,14 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Bound By Blades                           | :left_right_arrow:        | 1.150.0                       | UniverseLAN can't make this game LAN-able, this game uses custom/free multiplayer (Photon Engine) that does not use Steam or Galaxy, but online multiplayer is DRM Free. Would need to develop a custom Photon Engine API. When dev stops paying for Photon CCU's the game multiplayer will stop working. A project for another time maybe. |
 | Saints Row - Gat Out of Hell              | :left_right_arrow:        | 1.96                          | Has Native LAN |
 | Turok 2 - Seeds of Evil                   | :left_right_arrow:        | 1.130.0                       | Has Native LAN / DirectIP |
+| Monster Roadtrip                          | :left_right_arrow:        | 1.131.3                       | Has free online multiplayer, but does not use Galaxy Multiplayer which means that this game is internet-only. UniverseLAN can't make it LAN-able. |
+| SOS OPS!                                  | :left_right_arrow:        | 1.152.9                       | Has Native LAN, doesn't use Galaxy for multiplayer, but online multiplayer. |
+| Serious Sams Bogus Detour                 | :construction:            | 1.100.2                       | Can join lobby since build 360 and start game, but both players stuck on black "Loading..." screen |
+| Homeworld: Deserts of Kharak              | :construction:            | 1.101                         | Tested with 1.100.2. After build 362 lobbies can now be created, but connecting doesn't work. Seems like host game is stuck in SetLobbyJoinable loop? | 
+| Ancestors Legacy                          | :construction:            | 1.133.6                       | Requires Leaderboards features to be implemented | 
+| Alien vs Predator 2000                    | :question:                |                               | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176? |
+| Double Dragon Trilogy                     | :question:                |                               | Unknown version, Galaxy.dll SHA1: `789f3b02ced8dbac2e5f8c2c98448569f70960cc` |
+| Dying Light                               | :x:                       | 1.148.3                       | Doesn't seem to use Galaxy for multiplayer. |
 | Offworld Trading Company                  | :x:                       | 1.152.1                       | Uses Stardock Tachyon networking API |
 | Ashes of the Singularity - Escalation     | :x:                       | 1.100.2                       | Requires .exe patches to patch out modification checks so that entering lobby is possible, unfortunately both players are seen as 'Host' and other side doesn't 'see' clicking 'ready'. UniverseLAN needs to support .exe patching, and the both players being 'host' needs to be analyzed and fixed. Afters analysis it seems that for the "real" networking the game uses Epic Online Services. No dice here. |
 | Battlefleet Gothic Armada                 | :x:                       | 1.139.2                       | Doesn't seem to use Galaxy for multiplayer. | 
