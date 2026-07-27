@@ -994,4 +994,19 @@ namespace universelan::server {
 		data->user_id = pd->id;
 		connection.Send(target->peer, data);
 	}
+
+	void Server::Handle(ENetPeer* peer, const std::shared_ptr<PingMessage>& data)
+	{
+		tracer::Trace trace{ "::PingMessage" };
+
+		peer::ptr pd = peer_mapper.Get(peer);
+
+		if (pd != nullptr)
+		{
+
+		}
+
+		connection.Send(peer, data);
+	}
+
 }

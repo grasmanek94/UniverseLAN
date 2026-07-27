@@ -37,6 +37,7 @@ namespace universelan::client {
 
 		client_log(interfaces, trace, std::format("Peer connected: {}", peer->address));
 		
+		Ping();
 
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS
 		interfaces->utils->ConnectionStateChangeReceived(true);
@@ -72,6 +73,13 @@ namespace universelan::client {
 		client_log(interfaces, trace, std::format("Replying to challenge with ID {}", message.id.ToUint64()));
 
 		connection.SendAsync(message);
+	}
+
+	void Client::Handle(ENetPeer* peer, const std::shared_ptr<PingMessage>& data)
+	{
+		tracer::Trace trace{ "::PingMessage", tracer::Trace::NETCLIENT };
+
+		Ping();
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAcceptedMessage>& data)

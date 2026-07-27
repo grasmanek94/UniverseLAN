@@ -5,6 +5,7 @@
 #include <Networking/Networking.hxx>
 
 #include <atomic>
+#include <chrono>
 #include <thread>
 
 namespace universelan::client {
@@ -12,10 +13,14 @@ namespace universelan::client {
 
 	class Client : public MessageReceiver
 	{
+	public:
+		using timepoint_t = std::chrono::time_point<std::chrono::steady_clock>;
+
 	private:
 		InterfaceInstances* interfaces;
 		std::atomic_bool running;
 		std::thread tick_thread;
+		std::atomic<timepoint_t> last_ping;
 		GalaxyNetworkClient connection;
 
 		// Handlers:
@@ -25,6 +30,7 @@ namespace universelan::client {
 #include <Networking/MessageHandlersDeclareOverride.hxx>
 
 		void Tick();
+		void Ping();
 
 	public:
 

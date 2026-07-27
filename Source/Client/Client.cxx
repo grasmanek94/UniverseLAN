@@ -4,7 +4,7 @@
 
 namespace universelan::client {
 	Client::Client(InterfaceInstances* interfaces)
-		: interfaces{ interfaces }, running{ false }, tick_thread{}, connection{}
+		: interfaces{ interfaces }, running{ false }, tick_thread{}, last_ping{}, connection{}
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::NETCLIENT };
 
@@ -33,6 +33,11 @@ namespace universelan::client {
 #endif
 			);
 		}
+	}
+
+	void Client::Ping()
+	{
+		last_ping = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
 	}
 
 	void Client::Tick()

@@ -121,7 +121,6 @@ namespace universelan {
 		Cleanup();
 	}
 
-
 	void GalaxyNetworkClient::Cleanup() {
 		ENetEvent event{};
 		while (!received_events_to_process.empty()) {
