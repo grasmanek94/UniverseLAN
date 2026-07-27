@@ -32,6 +32,9 @@ namespace universelan {
 		const std::string AuthenticationSection = "Authentication";
 		std::string AuthenticationKey;
 
+		const std::string NetworkingSection = "Networking";
+		std::chrono::milliseconds NetworkingTimeoutTime;
+
 	protected:
 		const MachineInfo MachineInformation;
 
@@ -52,9 +55,9 @@ namespace universelan {
 		bool ShouldAlwaysFlushTracing() const;
 		uint64_t GetCallTracingFlags() const;
 		bool ShouldTraceToConsole() const;
+		std::chrono::milliseconds GetNetworkTimeoutTime() const;
 
 		const std::chrono::system_clock::time_point BootTime;
-
 	};
 
 	class ServerIniData : public IniData

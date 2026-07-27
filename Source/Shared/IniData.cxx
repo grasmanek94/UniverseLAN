@@ -258,6 +258,7 @@ namespace universelan {
 		CallTracingFlags{ 0 },
 		TraceToConsole{ false },
 		AuthenticationKey{ "" },
+		NetworkingTimeoutTime{ 0 },
 		MachineInformation{},
 		BootTime{ std::chrono::system_clock::now() }
 	{
@@ -289,6 +290,11 @@ namespace universelan {
 		TraceToConsole = ini.GetBoolValue(TracingSection.c_str(), "TraceToConsole", false);
 
 		AuthenticationKey = ini.GetValue(AuthenticationSection.c_str(), "Key", "9g5tA53SLyiNkBTqsX3BmBgy/PPVTU6VGKWNNw3wUIY5nK1C2MOT4UsZ2pauCb8fm5UQSJRijid+w1t9WpDaKQ==");
+
+		NetworkingTimeoutTime = std::max(
+			std::chrono::milliseconds(ini.GetLongLongValue(NetworkingSection.c_str(), "Timeout", 5000)),
+			std::chrono::milliseconds(100)
+		);
 	}
 
 	bool IniData::IsCallTracingEnabled() const {
@@ -317,6 +323,10 @@ namespace universelan {
 
 	bool IniData::ShouldTraceToConsole() const {
 		return TraceToConsole;
+	}
+
+	std::chrono::milliseconds IniData::GetNetworkTimeoutTime() const {
+		return NetworkingTimeoutTime;
 	}
 
 	std::filesystem::path IniData::GetGameDataPath() const
