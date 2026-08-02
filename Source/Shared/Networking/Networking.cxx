@@ -1,5 +1,7 @@
 #include "Networking.hxx"
 
+#include <chrono>
+
 namespace universelan {
 	bool MessageReceiver::ProcessEvent(const ENetEvent& event)
 	{
@@ -13,6 +15,7 @@ namespace universelan {
 			ENetPacket* packet = event.packet;
 			if (packet->dataLength >= sizeof(uint64_t))
 			{
+				// TODO: Make this code not have UB (aliasing, alignment) and make it portable (endianness)
 				uint64_t unique_class_id = (*reinterpret_cast<uint64_t*>(packet->data));
 
 #define SHARED_NETWORK_IMPLEMENT_CASE_FOR(class_name) \
@@ -64,7 +67,22 @@ namespace universelan {
 		return return_value;
 	}
 
-	void GalaxyNetworkClient::RunNetworking(uint32_t timeout)
+	void GalaxyNetworkClient::CheckSendPing()
+	{
+		if (network_timeout != duration_t::zero())
+		{
+			auto now = steady_clock_t::now();
+			if (now > next_ping_time)
+			{
+				next_ping_time = now + calculated_ping_delay;
+
+				PingMessage message{ static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count()) };
+				SendAsync(message, (ENetPacketFlag)(ENET_PACKET_FLAG_UNRELIABLE_FRAGMENT | ENET_PACKET_FLAG_UNSEQUENCED));
+			}
+		}
+	}
+
+	void GalaxyNetworkClient::DispatchQueuedPackets()
 	{
 		ENetPacket* packet = nullptr;
 		while (delayed_packets_to_send.try_pop(packet))
@@ -74,8 +92,19 @@ namespace universelan {
 				enet_packet_destroy(packet);
 			}
 		}
+	}
+
+	GalaxyNetworkClient::RunNetworkingResult GalaxyNetworkClient::RunNetworking(uint32_t timeout)
+	{
+		GalaxyNetworkClient::RunNetworkingResult result = GalaxyNetworkClient::RunNetworkingResult::NONE;
+
+		CheckSendPing();
+		DispatchQueuedPackets();
 
 		bool disconnected{ false };
+		bool reconnect{ false };
+		auto now = steady_clock_t::now();
+
 		if (NetworkClient::Pull(timeout))
 		{
 			ENetEvent event = NetworkClient::Event();
@@ -83,19 +112,64 @@ namespace universelan {
 			{
 				if (event.type == ENET_EVENT_TYPE_CONNECT) {
 					is_connected = true;
+					next_reconnect_time.reset();
+					next_ping_time = now + calculated_ping_delay;
+
+					result = GalaxyNetworkClient::RunNetworkingResult::CONNECTED_EVENT;
 				}
 				else if (event.type == ENET_EVENT_TYPE_DISCONNECT) {
 					is_connected = false;
 					disconnected = true;
+					
+					result = GalaxyNetworkClient::RunNetworkingResult::DISCONNECTED_EVENT;
 				}
 
 				received_events_to_process.push(event);
+
+				last_network_activity = std::chrono::steady_clock::now();
+			}
+		}
+
+		if (!disconnected && 
+			is_connected && 
+			(network_timeout != duration_t::zero()))
+		{
+			auto inactivity_time = now - last_network_activity;
+
+			if (inactivity_time > network_timeout)
+			{
+				is_connected = false;
+				disconnected = true;
+
+				result = GalaxyNetworkClient::RunNetworkingResult::DISCONNECTED_TIMEOUT;
 			}
 		}
 
 		if (disconnected) {
 			Cleanup();
+
+			reconnect = true;
+
+			ENetEvent event = NetworkClient::Event();
+			event.type = ENET_EVENT_TYPE_DISCONNECT;
+			received_events_to_process.push(event);
 		}
+
+		if (next_reconnect_time.has_value() && (now > next_reconnect_time.value()))
+		{
+			reconnect = true;
+		}
+
+		if (reconnect)
+		{
+			if (network_timeout != duration_t::zero())
+			{
+				next_reconnect_time = now + (network_timeout * RECONNECT_NETWORK_TIMEOUT_FACTOR);
+			}
+			Reconnect();
+		}
+
+		return result;
 	}
 
 	void GalaxyNetworkClient::ProcessEvents(MessageReceiver* receiver)
@@ -113,8 +187,13 @@ namespace universelan {
 	}
 
 	GalaxyNetworkClient::GalaxyNetworkClient() :
-		is_connected{ false }
-	{ }
+		is_connected{ false }, is_timeout{ false }, 
+		last_network_activity{ steady_clock_t::now() },
+		next_ping_time{ steady_clock_t::now() },
+		next_reconnect_time{ },
+		network_timeout{ duration_t::zero() },
+		calculated_ping_delay{ duration_t::zero() }
+	{}
 
 
 	GalaxyNetworkClient::~GalaxyNetworkClient() {
@@ -137,5 +216,11 @@ namespace universelan {
 				enet_packet_destroy(packet);
 			}
 		}
+	}
+
+	void GalaxyNetworkClient::SetNetworkReconnectTimeout(const GalaxyNetworkClient::duration_t& duration)
+	{
+		network_timeout = duration;
+		calculated_ping_delay = (network_timeout / AMOUNT_OF_PINGS_IN_TIMEOUT_DURATION);
 	}
 }

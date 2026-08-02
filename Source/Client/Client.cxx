@@ -4,7 +4,7 @@
 
 namespace universelan::client {
 	Client::Client(InterfaceInstances* interfaces)
-		: interfaces{ interfaces }, running{ false }, tick_thread{}, last_ping{}, connection{}
+		: interfaces{ interfaces }, running{ false }, tick_thread{}, connection{}
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::NETCLIENT };
 
@@ -22,6 +22,8 @@ namespace universelan::client {
 		}
 
 		std::cout << "Connecting to: " << interfaces->config->GetServerAddress() << ":" << interfaces->config->GetPort() << "\n";
+		
+		connection.SetNetworkReconnectTimeout(interfaces->config->GetNetworkTimeoutTime());
 
 		if (connection.Connect(interfaces->config->GetServerAddress(), interfaces->config->GetPort()) == nullptr) {
 			tracer::Trace trace{ "::ENET connection to host failed", __FUNCTION__, tracer::Trace::NETCLIENT };
@@ -33,11 +35,6 @@ namespace universelan::client {
 #endif
 			);
 		}
-	}
-
-	void Client::Ping()
-	{
-		last_ping = std::chrono::time_point<std::chrono::steady_clock>::clock::now();
 	}
 
 	void Client::Tick()
@@ -66,7 +63,7 @@ namespace universelan::client {
 
 	void Client::Start()
 	{
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::NETCLIENT };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::NETCLIENT };
 
 		running = true;
 		tick_thread = std::thread{ &Client::Tick, this };
@@ -74,7 +71,7 @@ namespace universelan::client {
 
 	void Client::Stop()
 	{
-		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::NETCLIENT };
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::NETCLIENT };
 
 		running = false;
 		if (tick_thread.joinable()) {

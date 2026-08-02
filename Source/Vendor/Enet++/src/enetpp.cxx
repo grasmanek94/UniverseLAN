@@ -188,13 +188,7 @@ namespace enetpp {
 			return nullptr;
 		}
 
-		if (peer != nullptr)
-		{
-			enet_peer_reset(peer);
-		}
-
-		peer = enet_host_connect(member, &address, 1, 0);
-		return peer;
+		return Reconnect();
 	}
 
 	ENetPeer* NetworkClient::Reconnect()

@@ -6,9 +6,11 @@
 
 #include "Messages.hxx"
 
+#include <atomic>
+#include <chrono>
 #include <cstdlib>
 #include <memory>
-#include <atomic>
+#include <utility>
 
 namespace universelan {
 	class MessageReceiver
@@ -82,6 +84,7 @@ namespace universelan {
 		Well reduced it to double-buffer, I think we're not going to get any faster with this
 		*/
 		std::stringstream ss(std::ios::in | std::ios::out | std::ios::binary);
+		// TODO: Make this code not have UB (aliasing, alignment) and make it portable (endianness)
 		uint64_t unique_id = object.UniqueClassId();
 		ss.write(reinterpret_cast<char*>(&unique_id), sizeof(uint64_t));
 		cereal::BinaryOutputArchive oarchive(ss);
@@ -109,13 +112,40 @@ namespace universelan {
 
 	class GalaxyNetworkClient : public enetpp::NetworkClient
 	{
+	public:
+		enum class RunNetworkingResult
+		{
+			NONE,
+			CONNECTED_EVENT,
+			DISCONNECTED_EVENT,
+			DISCONNECTED_TIMEOUT
+		};
+
 	private:
+		using steady_clock_t = std::chrono::steady_clock;
+		using timepoint_t = steady_clock_t::time_point;
+		using duration_t = steady_clock_t::duration;
+
+		static constexpr unsigned long AMOUNT_OF_PINGS_IN_TIMEOUT_DURATION = 3;
+		static constexpr unsigned long RECONNECT_NETWORK_TIMEOUT_FACTOR = 2;
+
 		mutable Concurrency::concurrent_queue<ENetPacket*> delayed_packets_to_send;
 		mutable Concurrency::concurrent_queue<ENetEvent> received_events_to_process;
 
 		bool is_connected;
+		bool is_timeout;
+
+		timepoint_t last_network_activity;
+		timepoint_t next_ping_time;
+		std::optional<timepoint_t> next_reconnect_time;
+
+		duration_t network_timeout;
+		duration_t calculated_ping_delay;
 
 		void Cleanup();
+		void CheckSendPing();
+		void DispatchQueuedPackets();
+
 	public:
 		template<typename T>
 		bool SendAsync(const T& object, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE) const
@@ -137,9 +167,10 @@ namespace universelan {
 			return SendAsync(*object, flags);
 		}
 
-		void RunNetworking(uint32_t timeout);
+		RunNetworkingResult RunNetworking(uint32_t timeout);
 		void ProcessEvents(MessageReceiver* receiver);
 		bool IsConnected() const;
+		void SetNetworkReconnectTimeout(const duration_t& duration);
 
 		GalaxyNetworkClient();
 		virtual ~GalaxyNetworkClient();

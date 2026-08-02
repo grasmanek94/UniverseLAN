@@ -36,8 +36,6 @@ namespace universelan::client {
 		tracer::Trace trace{ "::EventConnect", tracer::Trace::NETCLIENT };
 
 		client_log(interfaces, trace, std::format("Peer connected: {}", peer->address));
-		
-		Ping();
 
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS
 		interfaces->utils->ConnectionStateChangeReceived(true);
@@ -50,15 +48,13 @@ namespace universelan::client {
 	{
 		tracer::Trace trace{ "::EventDisconnect", tracer::Trace::NETCLIENT };
 
-		client_log(interfaces, trace, std::format("Peer disconnected: {}", peer->address));
+		client_log(interfaces, trace, "Peer disconnected");
 
 #if GALAXY_BUILD_FEATURE_HAS_IUTILS
 		interfaces->utils->ConnectionStateChangeReceived(false);
 #endif
 
 		interfaces->user->ConnectionStateChangeReceived(false, false);
-
-		connection.Reconnect();
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<KeyChallengeMessage>& data)
@@ -77,9 +73,7 @@ namespace universelan::client {
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<PingMessage>& data)
 	{
-		tracer::Trace trace{ "::PingMessage", tracer::Trace::NETCLIENT };
-
-		Ping();
+		tracer::Trace trace{ "::PingMessage", tracer::Trace::NETCLIENT | tracer::Trace::HIGH_FREQUENCY_CALLS };
 	}
 
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAcceptedMessage>& data)
