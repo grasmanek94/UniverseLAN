@@ -30,7 +30,6 @@ namespace universelan {
 
 			if (packet->dataLength >= sizeof(uint64_t))
 			{
-				// TODO: Make this code not have UB (aliasing, alignment) and make it portable (endianness)
 				uint64_t unique_class_id = 0;
 				bool got_unique_class_id{ false };
 
