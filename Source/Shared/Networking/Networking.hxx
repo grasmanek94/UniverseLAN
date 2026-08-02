@@ -6,6 +6,9 @@
 
 #include "Messages.hxx"
 
+#include <boost/iostreams/device/array.hpp>
+#include <boost/iostreams/stream.hpp>
+
 #include <atomic>
 #include <chrono>
 #include <cstdlib>
@@ -32,44 +35,36 @@ namespace universelan {
 				return false;
 			}
 
-			uint64_t unique_class_id = (*reinterpret_cast<uint64_t*>(packet->data));
+			uint64_t unique_class_id = 0;
+			std::shared_ptr<T> var(std::make_shared<T>());
 
-			if (unique_class_id != T::UniqueClassId()) {
+			try
+			{
+				boost::iostreams::array_source source(
+					reinterpret_cast<const char*>(packet->data),
+					packet->dataLength);
+
+				boost::iostreams::stream<boost::iostreams::array_source> stream(source);
+
+				cereal::PortableBinaryInputArchive iarchive(stream);
+
+				// Get the class ID
+				iarchive(unique_class_id);
+
+				if (unique_class_id != T::UniqueClassId()) {
+					return false;
+				}
+
+				// Get the struct data
+				iarchive(*var);
+			}
+			catch (const std::exception&)
+			{
 				return false;
 			}
 
-			std::shared_ptr<T> var(std::make_shared<T>());
-
-			if (packet->dataLength > sizeof(uint64_t))
-			{
-				bool errorOccured = false;
-
-				std::stringstream stream(std::ios::in | std::ios::out | std::ios::binary);
-
-				stream.write(reinterpret_cast<char*>(packet->data + sizeof(uint64_t)), packet->dataLength - sizeof(uint64_t));
-
-				try
-				{
-					cereal::BinaryInputArchive iarchive(stream);
-					iarchive(*var);
-
-				}
-				catch (const std::exception&)
-				{
-					errorOccured = true;
-				}
-
-				if (!errorOccured) {
-					Handle(event.peer, var);
-					return true;
-				}
-			}
-			else {
-				Handle(event.peer, var);
-				return true;
-			}
-
-			return false;
+			Handle(event.peer, var);
+			return true;
 		}
 
 		bool ProcessEvent(const ENetEvent& event);
@@ -84,10 +79,9 @@ namespace universelan {
 		Well reduced it to double-buffer, I think we're not going to get any faster with this
 		*/
 		std::stringstream ss(std::ios::in | std::ios::out | std::ios::binary);
-		// TODO: Make this code not have UB (aliasing, alignment) and make it portable (endianness)
-		uint64_t unique_id = object.UniqueClassId();
-		ss.write(reinterpret_cast<char*>(&unique_id), sizeof(uint64_t));
-		cereal::BinaryOutputArchive oarchive(ss);
+		constexpr uint64_t unique_id = object.UniqueClassId();
+		cereal::PortableBinaryOutputArchive oarchive(ss);
+		oarchive(unique_id);
 		oarchive(object);
 
 		size_t x = (size_t)ss.tellp();

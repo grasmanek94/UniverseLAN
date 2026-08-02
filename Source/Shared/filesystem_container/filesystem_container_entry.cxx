@@ -3,6 +3,7 @@
 #include "filesystem_container.hxx"
 
 #include <cereal/archives/binary.hpp>
+#include <cereal/archives/portable_binary.hpp>
 
 #include <cstdint>
 #include <filesystem>
@@ -31,12 +32,23 @@ namespace filesystem_container {
 			if (metadata_stream) {
 				try
 				{
-					cereal::BinaryInputArchive iarchive(metadata_stream);
+					cereal::PortableBinaryInputArchive iarchive(metadata_stream);
 					iarchive(metadata);
 				}
-				catch (const std::exception& ex)
+				catch (const std::exception&)
 				{
-					throw std::runtime_error(ex.what() + std::string(" [occurred when trying to deserialize metadata archive]: " + abs_metadata_path.string()));
+					/* Legacy support */
+					try
+					{
+						metadata_stream.clear();
+						metadata_stream.seekg(0);
+						cereal::BinaryInputArchive iarchive(metadata_stream);
+						iarchive(metadata);
+					}
+					catch (const std::exception& ex)
+					{
+						throw std::runtime_error(ex.what() + std::string(" [occurred when trying to deserialize metadata archive]: " + abs_metadata_path.string()));
+					}
 				}
 			}
 		}
@@ -312,7 +324,7 @@ namespace filesystem_container {
 
 		try
 		{
-			cereal::BinaryOutputArchive oarchive(metadata_stream);
+			cereal::PortableBinaryOutputArchive oarchive(metadata_stream);
 			oarchive(metadata);
 			return true;
 		}

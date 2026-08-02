@@ -104,7 +104,15 @@ namespace universelan::server {
 			}
 		}
 
-		std::cout << "Peer(" << peer->address << ") KeyChallengeMessage FAIL" << std::endl;
+		if (!data->id.IsValid()) {
+			std::cout << "Peer(" << peer->address << ") KeyChallengeMessage FAIL: GalaxyID invalid" << std::endl;
+		} 
+		else if (!pd->challenge.Validate(*data)) {
+			std::cout << "Peer(" << peer->address << ") KeyChallengeMessage FAIL: Incorrect challenge response" << std::endl;
+		} 
+		else {
+			std::cout << "Peer(" << peer->address << ") KeyChallengeMessage FAIL: Cannot map peer to GalaxyID (already taken?)" << std::endl;
+		}
 
 		connection.Disconnect(peer);
 	}
