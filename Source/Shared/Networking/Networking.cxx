@@ -185,15 +185,21 @@ namespace universelan {
 		if (disconnected) {
 			Cleanup();
 
-			reconnect = true;
-
 			ENetEvent event = NetworkClient::Event();
 			event.type = ENET_EVENT_TYPE_DISCONNECT;
 			received_events_to_process.push(event);
+
+			if (result == GalaxyNetworkClient::RunNetworkingResult::DISCONNECTED_TIMEOUT) {
+				reconnect = true;
+			}
+			else {
+				next_reconnect_time = now + FORCE_DISCONNECT_RECONNECT_TIME;
+			}
 		}
 
 		if (next_reconnect_time.has_value() && (now > next_reconnect_time.value()))
 		{
+			next_reconnect_time.reset();
 			reconnect = true;
 		}
 

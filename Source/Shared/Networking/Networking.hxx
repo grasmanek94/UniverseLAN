@@ -121,6 +121,7 @@ namespace universelan {
 
 		static constexpr unsigned long AMOUNT_OF_PINGS_IN_TIMEOUT_DURATION = 3;
 		static constexpr unsigned long RECONNECT_NETWORK_TIMEOUT_FACTOR = 2;
+		static constexpr duration_t FORCE_DISCONNECT_RECONNECT_TIME = std::chrono::seconds(5);
 
 	private:
 		mutable Concurrency::concurrent_queue<ENetPacket*> delayed_packets_to_send;
