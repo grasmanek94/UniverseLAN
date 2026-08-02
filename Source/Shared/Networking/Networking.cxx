@@ -1,8 +1,16 @@
 #include "Networking.hxx"
 
 #include <chrono>
+#include <functional>
 
 namespace universelan {
+	namespace {
+		struct Finally {
+				std::function<void()> f;
+				~Finally() { f(); }
+		};
+	}
+
 	bool MessageReceiver::ProcessEvent(const ENetEvent& event)
 	{
 		bool return_value = false;
@@ -13,33 +21,63 @@ namespace universelan {
 		{
 			//Handle packet
 			ENetPacket* packet = event.packet;
+			auto cleanup = [&]() {
+				/* Clean up the packet now that we're done using it. */
+				enet_packet_destroy(event.packet);
+			};
+
+			Finally guard{ cleanup };
+
 			if (packet->dataLength >= sizeof(uint64_t))
 			{
 				// TODO: Make this code not have UB (aliasing, alignment) and make it portable (endianness)
-				uint64_t unique_class_id = (*reinterpret_cast<uint64_t*>(packet->data));
+				uint64_t unique_class_id = 0;
+				bool got_unique_class_id{ false };
 
+				try
+				{
+					boost::iostreams::array_source source(
+						reinterpret_cast<const char*>(packet->data),
+						packet->dataLength);
+
+					boost::iostreams::stream<boost::iostreams::array_source> stream(source);
+
+					cereal::PortableBinaryInputArchive iarchive(stream);
+
+					// Get the class ID
+					iarchive(unique_class_id);
+
+					got_unique_class_id = true;
+				}
+				catch (const std::exception&)
+				{
+					return_value = false;
+				}
+
+				if (got_unique_class_id)
+				{
+					// VVV PROCESS EVENT PACKET VVV
 #define SHARED_NETWORK_IMPLEMENT_CASE_FOR(class_name) \
-					case class_name::UniqueClassId(): { return_value = ProcessEventFor<class_name>(event); } break
+				case class_name::UniqueClassId(): { return_value = ProcessEventFor<class_name>(event); } break
 
 #pragma warning( push )
 #pragma warning( disable : 4307 )
 
-				switch (unique_class_id)
-				{
-					SHARED_NETWORK_IMPLEMENT_ALL_CASES();
+					switch (unique_class_id)
+					{
+						SHARED_NETWORK_IMPLEMENT_ALL_CASES();
 
-				default:
-					return_value = false;
-					break;
-				}
+					default:
+						return_value = false;
+						break;
+					}
 
 #pragma warning( pop )
 
 #undef SHARED_NETWORK_IMPLEMENT_CASE_FOR
+					// ^^^ PROCESS EVENT PACKET ^^^
+				}
 			}
-
-			/* Clean up the packet now that we're done using it. */
-			enet_packet_destroy(event.packet);
 
 			break;
 		}
