@@ -16,12 +16,16 @@ namespace universelan::server {
 	class Server : public MessageReceiver
 	{
 	public:
+		using steady_clock_t = peer::Data::steady_clock_t;
+		using timepoint_t = peer::Data::timepoint_t;
+		using duration_t = peer::Data::duration_t;
+
+		static constexpr duration_t UNAUTHENTICATED_TIMEOUT_TIME = std::chrono::seconds(60);
 
 	private:
 		ServerIniData config;
 		GalaxyNetworkServer connection;
 		size_t max_connections;
-		std::unordered_set<ENetPeer*> connected_peers;
 		std::unordered_set<ENetPeer*> unauthenticated_peers;
 		uint64_t authentication_key;
 		std::mt19937_64 random;
@@ -39,6 +43,8 @@ namespace universelan::server {
 		uint32_t shared_file_counter;
 		const std::string shared_file_counter_file{ "shared-id.counter" };
 
+		duration_t network_timeout;
+
 		bool KickUnauthenticated(ENetPeer* peer);
 
 		virtual void Handle(ENetPeer* peer, const std::shared_ptr<EventConnect>& data) override;
@@ -55,7 +61,9 @@ namespace universelan::server {
 		bool HandleMemberChatLeave(ENetPeer* peer, galaxy::api::ChatRoomID chat_room_id);
 #endif
 
-		void PerformPeerCleanup();
+		void PerformUnauthenticatedPeerCleanup();
+		void PerformTimeoutPeerCleanup();
+		void UpdatePeerNetworkTimeout(ENetPeer* peer);
 
 	public:
 		Server();

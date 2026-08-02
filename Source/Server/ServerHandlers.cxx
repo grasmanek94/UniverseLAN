@@ -9,11 +9,22 @@
 #include <format>
 #include <string>
 
-#define REQUIRES_AUTHENTICATION(peer) {if(!KickUnauthenticated(peer)) { return; }}
+#define REQUIRES_AUTHENTICATION(peer) {if(!KickUnauthenticated(peer)) { return; } UpdatePeerNetworkTimeout(peer); }
 
 namespace universelan::server {
 	using namespace galaxy::api;
 	using namespace universelan::util;
+
+	void Server::UpdatePeerNetworkTimeout(ENetPeer* peer) {
+		tracer::Trace trace{ "::UpdatePeerNetworkTimeout", tracer::Trace::HIGH_FREQUENCY_CALLS };
+
+		peer::ptr pd = peer_mapper.Get(peer);
+
+		if (pd != nullptr) {
+			pd->UpdateNetworkActivityTimeout();
+		}
+
+	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<ConnectionAcceptedMessage>& data) { tracer::Trace trace{ "::ConnectionAcceptedMessage" }; REQUIRES_AUTHENTICATION(peer); /* Not handled in server */ }
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<FileShareResponseMessage>& data) { tracer::Trace trace{ "::FileShareResponseMessage" }; REQUIRES_AUTHENTICATION(peer); }
@@ -76,6 +87,7 @@ namespace universelan::server {
 				tracer::Trace validated{ "::challenge.Validate" };
 
 				pd->user_data = entry.first->second;
+				pd->UpdateNetworkActivityTimeout();
 
 				unauthenticated_peers.erase(peer);
 				connection.Send(peer, ConnectionAcceptedMessage{});
@@ -1006,6 +1018,12 @@ namespace universelan::server {
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<PingMessage>& data)
 	{
 		tracer::Trace trace{ "::PingMessage", tracer::Trace::HIGH_FREQUENCY_CALLS };
+
+		peer::ptr pd = peer_mapper.Get(peer);
+
+		if (pd != nullptr) {
+			pd->UpdateNetworkActivityTimeout();
+		}
 
 		connection.Send(peer, data);
 	}

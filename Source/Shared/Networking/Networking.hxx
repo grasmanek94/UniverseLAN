@@ -115,7 +115,6 @@ namespace universelan {
 			DISCONNECTED_TIMEOUT
 		};
 
-	private:
 		using steady_clock_t = std::chrono::steady_clock;
 		using timepoint_t = steady_clock_t::time_point;
 		using duration_t = steady_clock_t::duration;
@@ -123,6 +122,7 @@ namespace universelan {
 		static constexpr unsigned long AMOUNT_OF_PINGS_IN_TIMEOUT_DURATION = 3;
 		static constexpr unsigned long RECONNECT_NETWORK_TIMEOUT_FACTOR = 2;
 
+	private:
 		mutable Concurrency::concurrent_queue<ENetPacket*> delayed_packets_to_send;
 		mutable Concurrency::concurrent_queue<ENetEvent> received_events_to_process;
 

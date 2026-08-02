@@ -34,13 +34,14 @@ namespace universelan::server {
 
 	Server::Server()
 		: config{}, connection{}, max_connections{ 1024 },
-		connected_peers{}, authentication_key{ 0 }, random{}, ticks{ 0 },
+		authentication_key{ 0 }, random{}, ticks{ 0 },
 		minimum_tick_wait_time{ 0 }, user_data{},
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT
 		chat_room_manager{},
 #endif
 		lobby_manager{}, peer_mapper{}, sfu{ config.GetServerDataPath() },
-		shared_file_counter{ 1 }
+		shared_file_counter{ 1 },
+		network_timeout{ duration_t::zero() }
 	{
 		tracer::Trace::InitTracing(
 			(std::filesystem::path(config.GetServerDataPath()) / "Tracing").string().c_str(),
@@ -66,6 +67,8 @@ namespace universelan::server {
 			);
 		}
 
+		network_timeout = config.GetNetworkTimeoutTime();
+
 		if (connection.SetHost(config.GetBindAddress(), config.GetPort()) < 0) {
 			std::cout << "Invalid address specified: " << config.GetBindAddress() << ":" << config.GetPort() << std::endl;
 		}
@@ -89,8 +92,7 @@ namespace universelan::server {
 
 		authentication_key = const_hash64(config.GetAuthenticationKey());
 		uint64_t milliseconds_since_epoch =
-			std::chrono::system_clock::now().time_since_epoch() /
-			std::chrono::milliseconds(1);
+			std::chrono::duration_cast<std::chrono::milliseconds>(steady_clock_t::now().time_since_epoch()).count();
 
 		random.seed(authentication_key ^ milliseconds_since_epoch);
 
@@ -106,10 +108,10 @@ namespace universelan::server {
 		//ready
 	}
 
-	void Server::PerformPeerCleanup() {
+	void Server::PerformUnauthenticatedPeerCleanup() {
 		tracer::Trace trace{ nullptr, __FUNCTION__ };
 
-		auto now = std::chrono::system_clock::now();
+		auto now = steady_clock_t::now();
 
 		std::queue<ENetPeer*> disconnect_list{};
 		for (auto& peer : unauthenticated_peers) {
@@ -118,8 +120,8 @@ namespace universelan::server {
 				connection.Disconnect(peer);
 			}
 			else {
-				auto time = ((now - pd->connected_time) / std::chrono::milliseconds(1));
-				if (time > 600000) {
+				auto time = now - pd->connected_time;
+				if (time > UNAUTHENTICATED_TIMEOUT_TIME) {
 					disconnect_list.push(peer);
 				}
 			}
@@ -136,6 +138,40 @@ namespace universelan::server {
 		}
 	}
 
+	void Server::PerformTimeoutPeerCleanup() {
+		tracer::Trace trace{ nullptr, __FUNCTION__ };
+
+		std::queue<ENetPeer*> disconnect_list{};
+
+		for (auto& peer : peer_mapper.connected_peers) {
+			peer::ptr pd = peer_mapper.Get(peer);
+			if (pd != nullptr) {
+				if (pd->challenge.completed) {
+					if (pd->GetNetworkActivityTimeout() > network_timeout) {
+						disconnect_list.push(peer);
+					}
+				}
+			}
+		}
+
+		while (!disconnect_list.empty()) {
+			auto peer = disconnect_list.front();
+			disconnect_list.pop();
+
+			peer::ptr pd = peer_mapper.Get(peer);
+
+			std::cout << "Disconnecting Peer(" << peer->address << ")";
+			if (pd != nullptr)
+			{
+				std::cout << std::format(" with GalaxyID({})", pd->id);
+			}
+			std::cout << " due to network timeout" << std::endl;
+
+			Handle(peer, std::shared_ptr<EventDisconnect>{nullptr});
+			connection.Disconnect(peer);
+		}
+	}
+
 	void Server::Tick()
 	{
 		while (connection.Pull())
@@ -145,8 +181,13 @@ namespace universelan::server {
 
 		if (++ticks > 50) {
 			ticks = 0;
+
 			if (!unauthenticated_peers.empty()) {
-				PerformPeerCleanup();
+				PerformUnauthenticatedPeerCleanup();
+			}
+
+			if (!peer_mapper.connected_peers.empty()) {
+				PerformTimeoutPeerCleanup();
 			}
 		}
 	}

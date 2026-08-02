@@ -42,7 +42,13 @@ namespace universelan::server::peer {
 	class Data {
 		friend class Mapper;
 
+	public:
+		using steady_clock_t = GalaxyNetworkClient::steady_clock_t;
+		using timepoint_t = GalaxyNetworkClient::timepoint_t;
+		using duration_t = GalaxyNetworkClient::duration_t;
+
 	private:
+
 		Mapper* mapper;
 
 		Data(ENetPeer* peer, Mapper* map);
@@ -52,7 +58,7 @@ namespace universelan::server::peer {
 		ENetPeer* peer;
 		galaxy::api::GalaxyID id;
 		Challenge challenge;
-		std::chrono::system_clock::time_point connected_time;
+		timepoint_t connected_time;
 		GalaxyUserData::ptr_t user_data;
 		bool hello_performed;
 
@@ -61,10 +67,15 @@ namespace universelan::server::peer {
 #endif
 		LobbyManager::lobbies_t lobbies;
 
+		timepoint_t last_network_activity;
+
 		bool link(const galaxy::api::GalaxyID& id);
 		LobbyManager::lobby_t GetLobby(const galaxy::api::GalaxyID& lobby_id) const;
 		bool AddLobby(const LobbyManager::lobby_t& lobby);
 		bool RemoveLobby(const galaxy::api::GalaxyID& lobby_id);
 		bool RemoveLobby(const LobbyManager::lobby_t& lobby);
+
+		duration_t GetNetworkActivityTimeout() const;
+		void UpdateNetworkActivityTimeout();
 	};
 }
