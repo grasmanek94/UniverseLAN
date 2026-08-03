@@ -1,18 +1,15 @@
 if ((Get-Command "7z.exe" -ErrorAction SilentlyContinue) -eq $null) 
 { 
     echo "7z.exe not found!"
-    pause
-    exit
+    exit 1
 }
 elseif(git status --porcelain |Where {$_ -match '^\?\?'}){
     echo "Untracked files detected!"
-    pause
-    exit
+    exit 1
 } 
 elseif(git status --porcelain |Where {$_ -notmatch '^\?\?'}) {
     echo "Uncommited changes detected!"
-    pause
-    exit
+    exit 1
 }
 else {
     echo "Packaging releases..."
@@ -66,5 +63,3 @@ foreach ($version in $subdirs)
         }
     }
 }
-
-pause
