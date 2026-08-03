@@ -19,6 +19,7 @@ endif()
 if(EXPERIMENTAL_FAST_BUILD)
   set(CMAKE_UNITY_BUILD ON)
   set(CMAKE_UNITY_BUILD_BATCH_SIZE 100)
+  add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/bigobj>)
 endif()
 
 if(MSVC)
