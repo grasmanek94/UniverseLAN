@@ -99,7 +99,7 @@ namespace universelan::tracer {
 
 		std::atomic<IUnhandledExceptionCallback*> callback{ nullptr };
 
-		void UnhandledExceptionCallback(IUnhandledExceptionCallback* cb) {
+		void StackerUnhandledExceptionCallback(IUnhandledExceptionCallback* cb) {
 			const std::exception_ptr exception{ std::current_exception() };
 			static thread_local UECData data{};
 			if (data.call_is_nested) {
@@ -210,7 +210,7 @@ namespace universelan::tracer {
 			if (cb != nullptr)
 			{
 				KeepCount keeper{};
-				UnhandledExceptionCallback(cb);
+				StackerUnhandledExceptionCallback(cb);
 			}
 
 			while (entered_counter.load()) {
