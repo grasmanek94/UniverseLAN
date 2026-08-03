@@ -1,3 +1,9 @@
+@echo off
+
+if "%BUILD_JOBS%"=="" set BUILD_JOBS=2
+
+echo Using %BUILD_JOBS% build jobs
+
 cd "%~dp0"
 rd /S /Q bin
 rd /S /Q cmake-x64

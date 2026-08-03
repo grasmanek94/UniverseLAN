@@ -1,5 +1,6 @@
 cd "%~dp0"
 
-z-compile+release-gh.bat
+set BUILD_JOBS=24
+call z-compile+release-gh.bat
 
 pause
