@@ -1,15 +1,13 @@
 #ifndef UNIVERSELAN_IMPL_LISTENER_H
 #define UNIVERSELAN_IMPL_LISTENER_H
 
-#include "DelayRunner.hxx"
-
 /**
  * @file
  * Contains data structures and interfaces related to callback listeners.
  */
 
-#include "NotificationParamScopeExtender.hxx"
-
+#include <Impl/DelayRunner.hxx>
+#include <Impl/NotificationParamScopeExtender.hxx>
 #include <Tracer.hxx>
 
 #include <stdint.h>

@@ -11,11 +11,17 @@ endif()
 add_subdirectory(Vendor)
 add_subdirectory(Version)
 add_subdirectory(Tracer)
+
+add_subdirectory(Shared_NoVer)
+add_subdirectory(Client_NoVer)
+
 add_subdirectory(Shared)
 add_subdirectory(Client)
+
 if(BUILD_INTERCEPTOR)
   add_subdirectory(InterceptionLogger)
 endif()
+
 add_subdirectory(Server)
 add_subdirectory(DLLs)
 

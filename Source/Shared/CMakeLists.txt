@@ -19,6 +19,7 @@ function(define_shared GALAXY_VERSION)
   target_link_libraries(
     universelan-common-shared-${GALAXY_VERSION}
     PUBLIC
+      universelan-common-shared-no-ver
       universelan-galaxy-${GALAXY_VERSION}
       universelan-magic_enum
       universelan-cereal
