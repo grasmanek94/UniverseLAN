@@ -15,4 +15,11 @@ function(define_client GALAXY_VERSION)
     universelan-lib-${GALAXY_VERSION}
     PUBLIC universelan-common-shared-${GALAXY_VERSION} universelan-lib-no-ver websocketpp boost
   )
+
+  if(EXPERIMENTAL_FAST_BUILD)
+    set_source_files_properties(
+      "${CMAKE_SOURCE_DIR}/Source/Client/Factory.cxx"
+      PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON
+    )
+  endif()
 endfunction()

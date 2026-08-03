@@ -13,7 +13,7 @@ namespace galaxy::api {
 	 * @param clientSecret The secret of the client.
 	 * @param throwExceptions Indicates if Galaxy should throw exceptions.
 	 */
-	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Init(const char* clientID, const char* clientSecret, bool throwExceptions = true)
+	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE Init(const char* clientID, const char* clientSecret, bool throwExceptions)
 	{
 		GalaxyFactory::CreateInstance()->Init(clientID, clientSecret, throwExceptions);
 	}
@@ -38,7 +38,7 @@ namespace galaxy::api {
 	 * @param galaxyPeerPath Path to the galaxyPeer library location.
 	 * @param throwExceptions indicates if Galaxy should throw exceptions.
 	 */
-	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE InitLocal(const char* clientID, const char* clientSecret, const char* galaxyPeerPath = ".", bool throwExceptions = true)
+	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE InitLocal(const char* clientID, const char* clientSecret, const char* galaxyPeerPath, bool throwExceptions)
 	{
 		GalaxyFactory::CreateInstance()->InitLocal(clientID, clientSecret, galaxyPeerPath, throwExceptions);
 	}
