@@ -1,6 +1,11 @@
 @echo off
 
-if "%BUILD_JOBS%"=="" set BUILD_JOBS=2
+REM We're in Github Actions most likely if this is not set
+if "%BUILD_JOBS%"=="" (
+  set BUILD_JOBS=4
+  set EXTRA_CONFIG_PARAM=-DEXPERIMENTAL_FAST_BUILD=1
+  echo Limiting to %BUILD_JOBS% parallel jobs and Unity/Amalgamation build
+)
 
 echo Using %BUILD_JOBS% build jobs
 
@@ -15,10 +20,10 @@ mkdir cmake-x64
 mkdir cmake-x86
 mkdir release-packages
 
-cmake -A x64 -B cmake-x64
-cmake -A Win32 -B cmake-x86
+cmake -A x64 -B cmake-x64 %EXTRA_CONFIG_PARAM%
+cmake -A Win32 -B cmake-x86 %EXTRA_CONFIG_PARAM%
 
-cmake --build cmake-x64 --config Release -j 24
-cmake --build cmake-x86 --config Release -j 24
+cmake --build cmake-x64 --config Release -j %BUILD_JOBS%
+cmake --build cmake-x86 --config Release -j %BUILD_JOBS%
 
 powershell -File ".\package-release.ps1"
