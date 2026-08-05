@@ -6,6 +6,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -19,8 +22,19 @@ jobs:
         shell: cmd
         run: z-compile+release-gh.bat
 
-      - name: Upload packages
-        uses: actions/upload-artifact@v4
+
+      - name: Determine version
+        id: version
+        shell: pwsh
+        run: |
+          $count = git rev-list --count HEAD
+          "tag=$count" >> $env:GITHUB_OUTPUT
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: release-packages
-          path: release-packages/*.zip
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Build ${{ steps.version.outputs.tag }}
+          draft: true
+          files: |
+            release-packages/*.zip
