@@ -35,6 +35,13 @@ jobs:
         with:
           tag_name: ${{ steps.version.outputs.tag }}
           name: Build ${{ steps.version.outputs.tag }}
+          generate_release_notes: true
           draft: true
           files: |
             release-packages/*.zip
+          body: |
+            ## UniverseLAN
+            
+            Automated build release.
+            
+            See the automatically generated changelog below.
