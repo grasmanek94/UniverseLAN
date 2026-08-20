@@ -46,17 +46,10 @@ Do expect bugs, possibly lost save files, updates and fixes.
 They can use other services or custom networking implementations.  
 Such games might not be able to be played together using UniverseLAN wrapper.</small>
 
-# How do you get .def files?
-Check the [`Util README`](https://github.com/grasmanek94/UniverseLAN/blob/master/Util/README.md) folder, or alternatively:
-
-To generate the module definition files, use [wrap_dll](https://github.com/mavenlin/wrap_dll):  
-- `python3 wrap_dll.py Galaxy64.dll`  
-
-Then remove on each line everything after (and including) **`=` sign** in .def file.
-Place in `Source/DLLs/<version>/UniverseLAN.def`
-  
 # Instructions
 
+## Installation
+- Backup the original `Galaxy.dll`, `Galaxy64.dll`, `REDGalaxy.dll` or `REDGalaxy64.dll` file(s)
 - Replace target game `Galaxy.dll`, `Galaxy64.dll`, `REDGalaxy.dll` or `REDGalaxy64.dll` to use UniverseLAN (check the .dll file properties to view the version information, else make an sha1 checksum and look in [sha1_hashes.txt](ZipFileHasher/sha1_hashes.txt) for the hash to determine the sdk version).
 - Place [config files](https://github.com/grasmanek94/UniverseLAN/blob/master/Config/) in the working directory* of the game
 - Place Server executable where config files are located.
@@ -70,29 +63,80 @@ Place in `Source/DLLs/<version>/UniverseLAN.def`
 
 > `*` - Usually the working directory is the root directory of the game, or where the .exe file is located. Some games use a proxy launcher .exe in the game root directory like `Game_Name\Launcher.exe`, which launches and executable from a subfolder like `Game_Name\Binaries\Win64\RealGame.exe`, this might indicate that config and server files should be placed in `Game_Name\Binaries\Win64\`.
 
+## Uninstallation
+
+To uninstall UniverseLAN:
+
+- Remove the files that have been extracted from the .zip to the game, but at a minimum remove `Galaxy.dll`, `Galaxy64.dll`, `REDGalaxy.dll` or `REDGalaxy64.dll`
+- To fully remove UniverseLAN, remove any files and folders such as:
+  - `Galaxy.dll`, `Galaxy64.dll`, `REDGalaxy.dll`, `REDGalaxy64.dll`
+  - `UniverseLANServer.exe`, `UniverseLANServer64.exe`
+  - `UniverseLAN.ini`
+  - `UniverseLANServerData`, `UniverseLANData`
+  - `UniverseLAN` folder from `%localappdata%`, for example `C:\Users\<username>\AppData\Local\UniverseLAN\`
+- Restore the original Galaxy dynamic library files from backup
+
+# For developers
+
 For developers:  
 - Don't add GOG stdint.h when adding new SDK versions, remove it. If you try it WILL cause errors.
 - It is possible to support Galaxy SDK versions from 1.57 up to the newest ones (1.152.6+).
 - If someone has earlier SDK headers and/or documentation files please share <3
 
-# Debug Information
+# How do you get .def files?
+Check the [`Util README`](https://github.com/grasmanek94/UniverseLAN/blob/master/Util/README.md) folder, or alternatively:
+
+To generate the module definition files, use [wrap_dll](https://github.com/mavenlin/wrap_dll):  
+- `python3 wrap_dll.py Galaxy64.dll`  
+
+Then remove on each line everything after (and including) **`=` sign** in .def file.
+Place in `Source/DLLs/<version>/UniverseLAN.def`
+  
+## Debug Information
 Debug (tracing) files can be found in `<Configuration Files Directory>/tracing/<date time when application was launched>/`.
 
-# Compilation
-## Windows
+## Compilation
+### Windows
 - Visual Studio 2019 16.10 or newer required  
   
-## Linux
+### Linux
 - Requires GCC 13 or newer.  
 - Requires libtbb to be present (libtbb:i386 on 64-bit systems when compiling for x86)  
    
-## Space
+### Space
 Please keep in mind that if *all* projects (tests, debug+release, interceptor, client, server, etc.) are built, around 50GiB of free space is required.
 
 # Help! My game and or GOG Galaxy version my game uses is not supported?
 Please [create an issue](https://github.com/grasmanek94/UniverseLAN/issues/new) with the name of the game, game version, and if known the GOG Galaxy SDK version or `Galaxy.dll` / `Galaxy64.dll` sha1 or md5 hash.  
 For games I don't own I need other people to test UniverseLAN development builds.  
 Another option would be to gift the game to people working on UniverseLAN project.  
+
+# Privacy Policy
+UniverseLAN respects the privacy and freedoms of the user.  
+
+UniverseLAN software and/or components do not collect, store or transmit any user identifiable data and/or private data.  
+Any data transfers for simulating online multiplayer *only* occur to the specified IP address in `Config.ini` configuration that the user specifies.  
+
+UniverseLAN does not control, modify, or otherwise influence which non-Galaxy data a game is transferring outside the system of the user.  
+Refer to the privacy policy of the game you are executing for more information.
+
+UniverseLAN has logging facilities for the purposes of debugging. Any collected logs can only be shared by the user of the software by manual upload outside of the users system. UniverseLAN, the author(s), GitHub and other external entities do not have the means to remotely access, transmit, upload or download the collected log data. It is the users responsibility, when sharing log files, to check for sensitive contents.
+
+# Author(s)
+
+The current maintainer(s), approver(s) and author(s) of UniverseLAN:
+
+- [grasmanek94](https://github.com/grasmanek94)
+
+For other contributors, please see the [Github Contributors page](https://github.com/grasmanek94/UniverseLAN/graphs/contributors?all=1).
+
+# Security
+
+Any security issues which are not appropriate for the public issue tracker can be reported to `universelan-security` [at] `gz0.nl`.
+
+# Code Signing
+
+Free code signing provided by [SignPath.io](https://about.signpath.io/), certificate by [SignPath Foundation](https://signpath.org/).
 
 # List / status of games
 
