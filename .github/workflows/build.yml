@@ -44,25 +44,6 @@ jobs:
           wait-for-completion: true
           output-artifact-directory: signed-output
 
-      - name: Extract signed bundle
-        shell: pwsh
-        run: |
-          $bundle = Get-ChildItem signed-output -Filter *.zip | Select-Object -First 1
-
-          if ($null -eq $bundle) {
-            throw "No signed ZIP returned by SignPath."
-          }
-
-          New-Item `
-            -ItemType Directory `
-            -Force `
-            -Path extracted-signed | Out-Null
-
-          Expand-Archive `
-            -Path $bundle.FullName `
-            -DestinationPath extracted-signed `
-            -Force
-
       - name: Determine version
         id: version
         shell: pwsh
@@ -78,7 +59,7 @@ jobs:
           generate_release_notes: true
           draft: true
           files: |
-            extracted-signed/*.zip
+            signed-output/*.zip
           body: |
             ## UniverseLAN
 
