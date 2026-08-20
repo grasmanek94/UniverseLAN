@@ -22,20 +22,12 @@ jobs:
         shell: cmd
         run: z-compile+release-gh.bat
 
-      - name: Create SignPath bundle
-        shell: pwsh
-        run: |
-          Compress-Archive `
-            -Path "release-packages\*.zip" `
-            -DestinationPath "UniverseLAN-SignPath.zip" `
-            -Force
-
       - name: Upload unsigned artifact
         id: upload-unsigned-artifact
         uses: actions/upload-artifact@v7
         with:
           name: universelan-signpath-bundle
-          path: UniverseLAN-SignPath.zip
+          path: release-packages/*.zip
 
       - name: Submit signing request
         uses: signpath/github-action-submit-signing-request@v2
