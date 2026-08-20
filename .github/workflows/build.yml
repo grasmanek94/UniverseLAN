@@ -14,7 +14,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -22,6 +22,54 @@ jobs:
         shell: cmd
         run: z-compile+release-gh.bat
 
+      - name: Create SignPath bundle
+        shell: pwsh
+        run: |
+          Compress-Archive `
+            -Path "release-packages\*.zip" `
+            -DestinationPath "UniverseLAN-SignPath.zip" `
+            -Force
+
+      - name: Upload unsigned artifact
+        id: upload-unsigned-artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: universelan-signpath-bundle
+          path: UniverseLAN-SignPath.zip
+
+      - name: Submit signing request
+        uses: signpath/github-action-submit-signing-request@v2
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ secrets.SIGNPATH_ORGANIZATION_ID }}
+
+          project-slug: UniverseLAN
+          signing-policy-slug: test-signing
+          artifact-configuration-slug: nested-zip
+
+          github-artifact-id: ${{ steps.upload-unsigned-artifact.outputs.artifact-id }}
+
+          wait-for-completion: true
+          output-artifact-directory: signed-output
+
+      - name: Extract signed bundle
+        shell: pwsh
+        run: |
+          $bundle = Get-ChildItem signed-output -Filter *.zip | Select-Object -First 1
+
+          if ($null -eq $bundle) {
+            throw "No signed ZIP returned by SignPath."
+          }
+
+          New-Item `
+            -ItemType Directory `
+            -Force `
+            -Path extracted-signed | Out-Null
+
+          Expand-Archive `
+            -Path $bundle.FullName `
+            -DestinationPath extracted-signed `
+            -Force
 
       - name: Determine version
         id: version
@@ -30,18 +78,20 @@ jobs:
           $count = git rev-list --count HEAD
           "tag=$count" >> $env:GITHUB_OUTPUT
 
-      - name: Release
-        uses: softprops/action-gh-release@v2
+      - name: Create draft release
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.version.outputs.tag }}
           name: Build ${{ steps.version.outputs.tag }}
           generate_release_notes: true
           draft: true
           files: |
-            release-packages/*.zip
+            extracted-signed/*.zip
           body: |
             ## UniverseLAN
-            
+
             Automated build release.
-            
+
+            Signed with SignPath.
+
             See the automatically generated changelog below.
