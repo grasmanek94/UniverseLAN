@@ -8,8 +8,8 @@
 #include <string>
 
 namespace universelan::util {
-	inline uint32_t safe_copy_str_n(const std::string& data, char* buffer, uint32_t buffer_len) {
-		if (buffer == nullptr) {
+	inline uint32_t safe_copy_str_n(const std::string& data, char* const buffer, const uint32_t buffer_len) {
+		if ((buffer == nullptr) || (buffer_len < 1)) {
 			return 0;
 		}
 
@@ -24,8 +24,8 @@ namespace universelan::util {
 		return copy_size;
 	}
 
-	inline uint32_t safe_copy_str_n(const char* const data, char* buffer, uint32_t buffer_len) {
-		if (buffer == nullptr) {
+	inline uint32_t safe_copy_str_n(const char* const data, char* const buffer, const uint32_t buffer_len) {
+		if ((buffer == nullptr) || (buffer_len < 1)) {
 			return 0;
 		}
 
@@ -40,8 +40,8 @@ namespace universelan::util {
 		return copy_size;
 	}
 
-	inline uint32_t safe_copy_binary_n(const std::string& data, char* buffer, uint32_t buffer_len) {
-		if (buffer == nullptr) {
+	inline uint32_t safe_copy_binary_n(const std::string& data, char* const buffer, const uint32_t buffer_len) {
+		if ((buffer == nullptr) || (buffer_len < 1)) {
 			return 0;
 		}
 
@@ -52,8 +52,8 @@ namespace universelan::util {
 		return copy_size;
 	}
 
-	inline uint32_t safe_copy_binary_n(const char* const data, uint32_t data_len, char* buffer, uint32_t buffer_len) {
-		if (buffer == nullptr) {
+	inline uint32_t safe_copy_binary_n(const char* const data, uint32_t data_len, char* const buffer, const uint32_t buffer_len) {
+		if ((buffer == nullptr) || (buffer_len < 1)) {
 			return 0;
 		}
 
@@ -71,14 +71,14 @@ namespace universelan::util {
 		return value;
 	}
 
-	inline const char* safe_fix_null_char_ptr_ret(const char* value) {
+	inline const char* safe_fix_null_char_ptr_ret(const char* const value) {
 		if (value == nullptr) {
 			return "";
 		}
 		return value;
 	}
 
-	inline const char* safe_fix_null_char_ptr_annotate_ret(const char* value) {
+	inline const char* safe_fix_null_char_ptr_annotate_ret(const char* const value) {
 		if (value == nullptr) {
 			return "!!(nullptr)";
 		}
@@ -86,7 +86,7 @@ namespace universelan::util {
 	}
 
 #ifndef _WIN32
-	inline size_t strnlen_s(const char* str, size_t strsz) {
+	inline size_t strnlen_s(const char* const str, const size_t strsz) {
 		if (str == nullptr) {
 			return 0;
 		}
@@ -102,7 +102,7 @@ namespace universelan::util {
 		return std::string(buffer, std::min((size_t)buffer_len, strnlen_s(buffer, buffer_len)));
 	}
 
-	inline std::string bytes_to_hex(const void* data, uint32_t dataSize) {
+	inline std::string bytes_to_hex(const void* const data, const uint32_t dataSize) {
 		std::string hex;
 		for (uint32_t i = 0; i < dataSize; ++i) {
 			hex += std::format("{:02x}", ((const unsigned char*)data)[i]);
