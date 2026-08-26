@@ -18,26 +18,31 @@ namespace universelan::client {
 		, galaxyThreadFactory{ nullptr }
 		, host{ "" }
 		, port{ 0 }
+		, local_init { false }
 	{
-		clientID = initOptions.clientID;
-		clientSecret = initOptions.clientSecret;
-		configFilePath = initOptions.configFilePath != nullptr ? initOptions.configFilePath : ".";
+		SetClientID(initOptions.clientID);
+		SetClientSecret(initOptions.clientSecret);
+		SetConfigFilePath(initOptions.configFilePath != nullptr ? initOptions.configFilePath : ".");
 
 #if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_GALAXYPEERPATH
-		galaxyPeerPath = initOptions.galaxyPeerPath != nullptr ? initOptions.galaxyPeerPath : "";
+		SetGalaxyPeerPath(initOptions.galaxyPeerPath != nullptr ? initOptions.galaxyPeerPath : "");
+#endif
+
 		throwExceptions = initOptions.throwExceptions;
-#endif
+		
 #if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_STORAGEPATH
-		storagePath = initOptions.storagePath != nullptr ? initOptions.storagePath : "";
+		SetStoragePath(initOptions.storagePath != nullptr ? initOptions.storagePath : "");
 #endif
+
 #if GALAXY_BUILD_FEATURE_ALLOCATOR
 		galaxyAllocator = initOptions.galaxyAllocator;
 #endif
 #if GALAXY_BUILD_FEATURE_HAS_IGALAXYTHREADFACTORY
 		galaxyThreadFactory = initOptions.galaxyThreadFactory;
 #endif
+
 #if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_HOST_PORT
-		host = initOptions.host != nullptr ? initOptions.host : "";
+		SetHost(initOptions.host != nullptr ? initOptions.host : "");
 		port = initOptions.port;
 #endif
 	}
@@ -53,32 +58,84 @@ namespace universelan::client {
 		, galaxyThreadFactory{ nullptr }
 		, host{ "" }
 		, port{ 0 }
+		, local_init { false }
 	{}
 
-	InitOptionsImpl InitOptionsModern::ToClassicOptions() const
-	{
-		return InitOptionsImpl{
-			clientID.c_str()
-			,clientSecret.c_str()
-#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_GALAXYPEERPATH
-			,galaxyPeerPath.c_str()
-			,throwExceptions
-#endif
-			,configFilePath.c_str()
-#if GALAXY_BUILD_FEATURE_ALLOCATOR
-			,galaxyAllocator
-#endif
-#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_STORAGEPATH
-			,(storagePath.length() > 0 ? storagePath.c_str() : nullptr)
-#endif
-#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_HOST_PORT
-			,(host.length() > 0 ? host.c_str() : nullptr)
-			,port
-#endif
-#if GALAXY_BUILD_FEATURE_HAS_IGALAXYTHREADFACTORY
-			, galaxyThreadFactory
-#endif
-		};
+	void InitOptionsModern::SetClientID(const char* client_id) {
+		if (client_id != nullptr) {
+			clientID.emplace(client_id);
+		}
+		else {
+			clientID.reset();
+		}
+	}
 
+	void InitOptionsModern::SetClientSecret(const char* client_secret) {
+		if (client_secret != nullptr) {
+			clientSecret.emplace(client_secret);
+		}
+		else {
+			clientSecret.reset();
+		}
+	}
+
+	void InitOptionsModern::SetConfigFilePath(const char* config_file_path) {
+		if (config_file_path != nullptr) {
+			configFilePath.emplace(config_file_path);
+		}
+		else {
+			configFilePath.reset();
+		}
+	}
+
+	void InitOptionsModern::SetStoragePath(const char* storage_path) {
+		if (storage_path != nullptr) {
+			storagePath.emplace(storage_path);
+		}
+		else {
+			storagePath.reset();
+		}
+	}
+
+	void InitOptionsModern::SetGalaxyPeerPath(const char* galaxy_peer_path) {
+		if (galaxy_peer_path == nullptr || *galaxy_peer_path == '\0') {
+			galaxyPeerPath.emplace(".");
+		}
+		else {
+			galaxyPeerPath.emplace(galaxy_peer_path);
+		}
+	}
+
+	void InitOptionsModern::SetHost(const char* host_addr) {
+		if (host_addr != nullptr) {
+			host.emplace(host_addr);
+		}
+		else {
+			host.reset();
+		}
+	}
+
+	const char* InitOptionsModern::GetClientID() {
+		return clientID.has_value() ? clientID->c_str() : nullptr;
+	}
+
+	const char* InitOptionsModern::GetClientSecret() {
+		return clientSecret.has_value() ? clientSecret->c_str() : nullptr;
+	}
+
+	const char* InitOptionsModern::GetConfigFilePath() {
+		return configFilePath.has_value() ? configFilePath->c_str() : nullptr;
+	}
+
+	const char* InitOptionsModern::GetStoragePath() {
+		return storagePath.has_value() ? storagePath->c_str() : nullptr;
+	}
+
+	const char* InitOptionsModern::GetGalaxyPeerPath() {
+		return galaxyPeerPath.has_value() ? galaxyPeerPath->c_str() : nullptr;
+	}
+
+	const char* InitOptionsModern::GetHost() {
+		return host.has_value() ? host->c_str() : nullptr;
 	}
 }

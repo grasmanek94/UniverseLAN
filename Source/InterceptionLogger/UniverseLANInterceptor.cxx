@@ -122,8 +122,8 @@ namespace universelan::client {
 		init_options = std::make_unique<InitOptionsModern>(initOptions);
 
 		if (config->OverrideInitKeysEnabled()) {
-			init_options->clientID = config->GetOverrideInitKeyId();
-			init_options->clientSecret = config->GetOverrideInitKeySecret();
+			init_options->clientID.emplace(config->GetOverrideInitKeyId());
+			init_options->clientSecret.emplace(config->GetOverrideInitKeySecret());
 		}
 
 #if GALAXY_BUILD_FEATURE_HAS_IGALAXY
@@ -140,15 +140,17 @@ namespace universelan::client {
 		real_ierror_manager = real_factory_get_error_manager();
 #endif
 
-		real_init = [this](InitOptionsImpl initOptions) -> void {
+		real_init = [this](InitOptionsModern initOptions) -> void {
 			try {
-				if (initOptions.galaxyPeerPath == nullptr || *initOptions.galaxyPeerPath == '\0') {
-					initOptions.galaxyPeerPath = ".";
-				}
-#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
+#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_MODERN
 				real_igalaxy_instance->Init(initOptions);
 #else
-				real_igalaxy_instance->Init(initOptions.clientID, initOptions.clientSecret, initOptions.galaxyPeerPath);
+				if (initOptions.local_init) {
+					real_igalaxy_instance->InitLocal(initOptions.GetClientID(), initOptions.GetClientSecret(), initOptions.GetGalaxyPeerPath(), initOptions.throwExceptions);
+				}
+				else {
+					real_igalaxy_instance->Init(initOptions.GetClientID(), initOptions.GetClientSecret(), initOptions.throwExceptions);
+				}
 #endif
 			}
 			catch (const IError& error) {
@@ -162,7 +164,7 @@ namespace universelan::client {
 		real_process_data = std::bind(&IGalaxy::ProcessData, real_igalaxy_instance);
 		real_shutdown = std::bind(&IGalaxy::Shutdown, real_igalaxy_instance);
 
-		real_init(init_options->ToClassicOptions());
+		real_init(*init_options);
 
 		auto real_notification_ptr = std::bind(&IGalaxy::GetListenerRegistrar, real_igalaxy_instance);
 		auto real_notification = real_notification_ptr();
@@ -215,7 +217,7 @@ namespace universelan::client {
 		assign_func(real_process_data, (gameserver ? "?ProcessGameServerData" : "?ProcessData@api@galaxy@"));
 		assign_func(real_shutdown, (gameserver ? "?ShutdownGameServer@api@galaxy@" : "?Shutdown@api@galaxy@"));
 
-		real_init(init_options->ToClassicOptions());
+		real_init(*init_options);
 
 		auto real_notification_ptr = interceptor_make_unique(notification, (gameserver ? "?GameServerListenerRegistrar@api@galaxy@" : "?ListenerRegistrar@api@galaxy@"));
 		auto real_notification = real_notification_ptr();

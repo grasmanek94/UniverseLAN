@@ -35,28 +35,42 @@ namespace galaxy::api
 		}
 #endif
 
-		virtual void Init(const char* clientID, const char* clientSecret, bool throwExceptions = true) override {
-			universelan::client::InitOptionsImpl init_options{ nullptr, nullptr };
-			init_options.clientID = clientID;
-			init_options.clientSecret = clientSecret;
-			init_options.configFilePath = ".";
-#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_STORAGEPATH
-			init_options.storagePath = "";
-#endif
+		virtual void Init(const char* clientID, const char* clientSecret, bool throwExceptions) override {
+			universelan::client::InitOptionsModern init_options{};
+
+			init_options.SetClientID(clientID);
+			init_options.SetClientSecret(clientSecret);
+			init_options.SetConfigFilePath(".");
+			init_options.SetStoragePath(".");
+			init_options.SetGalaxyPeerPath(".");
+			init_options.SetHost("");
+
+			init_options.galaxyAllocator = nullptr;
+			init_options.galaxyThreadFactory = nullptr;
+			init_options.port = 0;
+			init_options.throwExceptions = throwExceptions;
+			init_options.local_init = false;
 
 			// TODO: Implement throwExceptions
 
 			universelan::client::Init(init_options);
 		}
 
-		virtual void InitLocal(const char* clientID, const char* clientSecret, const char* galaxyPeerPath = ".", bool throwExceptions = true) override {
-			universelan::client::InitOptionsImpl init_options{ nullptr, nullptr };
-			init_options.clientID = clientID;
-			init_options.clientSecret = clientSecret;
-			init_options.configFilePath = ".";
-#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_STORAGEPATH
-			init_options.storagePath = "";
-#endif
+		virtual void InitLocal(const char* clientID, const char* clientSecret, const char* galaxyPeerPath, bool throwExceptions) override {
+			universelan::client::InitOptionsModern init_options{};
+
+			init_options.SetClientID(clientID);
+			init_options.SetClientSecret(clientSecret);
+			init_options.SetConfigFilePath(".");
+			init_options.SetStoragePath(".");
+			init_options.SetGalaxyPeerPath(galaxyPeerPath);
+			init_options.SetHost("");
+
+			init_options.galaxyAllocator = nullptr;
+			init_options.galaxyThreadFactory = nullptr;
+			init_options.port = 0;
+			init_options.throwExceptions = throwExceptions;
+			init_options.local_init = true;
 
 			// TODO: Implement throwExceptions
 

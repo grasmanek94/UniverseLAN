@@ -47,7 +47,7 @@ namespace universelan::client {
 #endif
 #endif
 
-		std::function<void GALAXY_CALLTYPE(InitOptionsImpl const& initOptions)> real_init = nullptr;
+		std::function<void GALAXY_CALLTYPE(InitOptionsModern const& initOptions)> real_init = nullptr;
 
 		std::function<void GALAXY_CALLTYPE(void)> real_process_data = nullptr;
 		std::function<void GALAXY_CALLTYPE(void)> real_shutdown = nullptr;
