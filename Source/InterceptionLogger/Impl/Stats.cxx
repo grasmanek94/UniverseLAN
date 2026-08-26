@@ -545,6 +545,7 @@ namespace universelan::client {
 			trace.write_all(std::format("rank: {}", rank));
 			trace.write_all(std::format("score: {}", score));
 			trace.write_all(std::format("outDetailsSize: {}", outDetailsSize));
+			trace.write_all(std::format("outDetails: {}", util::bytes_to_hex(details, outDetailsSize)));
 			trace.write_all(std::format("userID: {}", userID));
 		}
 	}
@@ -564,8 +565,9 @@ namespace universelan::client {
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
 			trace.write_all(std::format("score: {}", score));
-			trace.write_all(std::format("details: {}", details));
+			trace.write_all(std::format("details(addr): {}", details));
 			trace.write_all(std::format("detailsSize: {}", detailsSize));
+			trace.write_all(std::format("details: {}", util::bytes_to_hex(details, detailsSize)));
 			trace.write_all(std::format("forceUpdate: {}", forceUpdate));
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 			trace.write_all(std::format("listener: {}", (void*)listener));
@@ -732,7 +734,7 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format("index: {}", index));
-			trace.write_all(std::format("buffer: {}", (void*)buffer));
+			trace.write_all(std::format("buffer(addr): {}", (void*)buffer));
 			trace.write_all(std::format("bufferLength: {}", bufferLength));
 		}
 
