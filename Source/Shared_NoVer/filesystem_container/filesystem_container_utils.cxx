@@ -82,6 +82,9 @@ namespace filesystem_container {
 		const auto index = abspath.string().rfind(baseabspath.string(), 0);
 
 		[[unlikely]]
+		// REVIEW: A raw string prefix treats /base2 as inside /base. Canonical
+		// path traversal can therefore escape the sandbox; compare path
+		// components (or require a separator boundary) instead.
 		if (index != 0) {
 			return false;
 		}

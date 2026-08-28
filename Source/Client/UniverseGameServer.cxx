@@ -22,6 +22,10 @@ namespace universelan::client {
 	}
 
 	void UniverseGameServer::InitGameServer(const InitOptions& initOptions) {
+		// REVIEW: The game-server path omits the `true` argument required to
+		// configure NetworkingImpl as GameServer. The resulting wrappers are
+		// classified as Client/Server (depending on the SDK feature set), so
+		// game-server P2P routing uses the wrong protocol variant.
 		gameserver_intf_inst.init(initOptions);
 
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL_GAMESERVERAPI };
@@ -33,6 +37,9 @@ namespace universelan::client {
 		std::cout << " == UniverseLAN GameServer == " << std::endl;
 		std::cout << "Version: " << Version_Number << std::endl;
 		std::cout << "Using username: " << gameserver_intf_inst.config->GetCustomPersonaName() << std::endl;
+		// REVIEW: This reads the process-wide client configuration instead of the
+		// game-server instance. If the client was not initialized, it can
+		// dereference null; if it was, the log reports the wrong authentication key.
 		std::cout << "Using key: " << const_hash64(intf_inst.config->GetAuthenticationKey()) << std::endl;
 		std::cout << "Using GalaxyID: " << gameserver_intf_inst.config->GetCustomGalaxyID() << " (" << gameserver_intf_inst.config->GetApiGalaxyID().ToUint64() << ")" << std::endl;
 

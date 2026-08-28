@@ -10,6 +10,10 @@ void ProxifySyncHandler::add(galaxy::api::IGalaxyListener* real, galaxy::api::IG
 	ProxifySyncHandler* _this = ProxifySyncHandler::get();
 
 	lock_t lock{ _this->mtx_proxify };
+	// REVIEW: The map is keyed only by `real`, and emplace silently ignores a second proxy for
+	// the same target. Two active operations sharing one listener then cannot both be tracked:
+	// the first callback removes the only entry and the second callback is left untracked.
+	// Track registrations by proxy/operation or reject duplicate active registrations.
 	_this->proxify.emplace(real, proxy);
 }
 

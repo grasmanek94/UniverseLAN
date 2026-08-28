@@ -125,7 +125,9 @@ namespace universelan::client {
 			return;
 		}
 
-		// !!! LEAK !!! (albeit temporary when thread exits)
+		// REVIEW: This detached thread captures `this`, `intf`, and `listeners`.
+		// Shutdown destroys StorageImpl without joining it, so the worker can
+		// dereference freed state. Keep the worker owned and joined before teardown.
 		std::thread([=, this] {
 			uint64_t request_id = MessageUniqueID::get();
 

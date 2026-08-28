@@ -46,9 +46,10 @@ namespace universelan {
 		galaxy::api::LobbyTopologyType topology_type;
 		galaxy::api::LobbyType type;
 		uint32_t current_message_id;
-		data_t data;
-		user_data_t user_data; // also used as members list
-		messages_t messages;
+		
+		data_t data;                          // Lobby metadata
+		user_data_t user_data;               // Member list (also accessed as "members")
+		messages_t messages;                 // Message queue
 
 	public:
 		template<class Archive>
@@ -76,6 +77,9 @@ namespace universelan {
 		void SetOwner(galaxy::api::GalaxyID new_owner);
 		galaxy::api::GalaxyID ChooseNewOwner();
 
+		// REVIEW: This view references user_data rather than a snapshot. It dangles after
+		// Lobby destruction and is invalidated by member-map mutation; return a snapshot or
+		// document an immediate-use/lifetime contract.
 		const view_members_t GetMembers() const;
 		bool AddMember(galaxy::api::GalaxyID id);
 		bool RemoveMember(galaxy::api::GalaxyID id);

@@ -9,6 +9,9 @@ namespace galaxy::api {
 	using namespace universelan::client;
 	using namespace universelan::tracer;
 
+	// REVIEW: All exports share this mutable server instance without synchronization;
+	// ProcessGameServerData/getters can race InitGameServer or ShutdownGameServer and
+	// observe destroyed interface pointers. Serialize the game-server lifecycle.
 	static UniverseGameServer gameserver;
 
 	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE InitGameServer(const InitOptions& initOptions) {
@@ -24,6 +27,9 @@ namespace galaxy::api {
 #if GALAXY_BUILD_FEATURE_HAS_SHUTDOWNOPTIONS
 	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE ShutdownGameServerEx(const ShutdownOptions& shutdownOptions) {
 		Trace trace{ nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL_GAMESERVERAPI };
+		// REVIEW: shutdownOptions is ignored and this entry point calls the
+		// non-Ex shutdown path; forward the options or document/implement equivalent
+		// behavior to preserve the exported SDK contract.
 		gameserver.ShutdownGameServer();
 	}
 #endif
@@ -40,6 +46,9 @@ namespace galaxy::api {
 		return gameserver.GameServerNetworking();
 	}
 
+	// REVIEW: UniverseGameServer::GameServerUtils is feature-gated by
+	// HAS_IUTILS, but this export is not. A game-server build without IUtils
+	// therefore references a missing member; use the same conditional guard.
 	GALAXY_DLL_EXPORT IUtils* GALAXY_CALLTYPE GameServerUtils() {
 		return gameserver.GameServerUtils();
 	}

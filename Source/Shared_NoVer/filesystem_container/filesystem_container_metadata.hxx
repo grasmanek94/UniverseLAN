@@ -63,6 +63,9 @@ namespace filesystem_container {
 	};
 
 	struct file_entry_metadata {
+		// REVIEW: share_id is not protected by either metadata mutex, yet it is
+		// read/written by entry and container operations concurrently. Guard it
+		// under a common lock (and keep the reverse index synchronized).
 		uint64_t share_id;
 
 		template<class Archive>

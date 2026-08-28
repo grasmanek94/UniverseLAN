@@ -26,6 +26,9 @@ namespace universelan {
 	}
 
 	const LobbyManager::lobbies_t& LobbyManager::GetLobbies() const {
+		// REVIEW: Exposing a reference to the internal map prevents the manager from
+		// synchronizing iteration with CreateLobby/RemoveLobby. Return a snapshot or
+		// provide an iteration API with a documented lock/lifetime contract.
 		return lobbies;
 	}
 

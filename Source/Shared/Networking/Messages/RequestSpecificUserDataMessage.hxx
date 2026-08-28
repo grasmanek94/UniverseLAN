@@ -39,6 +39,10 @@ namespace universelan {
 			type{ RequestTypeUserData }, nickname{} {}
 		RequestSpecificUserDataMessage(RequestType type, const galaxy::api::GalaxyID& id)
 			: request_id{}, id{ id }, found{ false }, asuc{}, 
+			// REVIEW: Both constructors ignore their `type` argument and force
+			// RequestTypeUserData. Achievement/play-time/friends/rich-presence
+			// requests are therefore dispatched as user-data requests; initialize
+			// this field from the parameter.
 			type{ RequestTypeUserData }, nickname{} {}
 		RequestSpecificUserDataMessage(RequestType type, uint64_t request_id, const galaxy::api::GalaxyID& id) 
 			: request_id{ request_id }, id{ id }, found{ false },

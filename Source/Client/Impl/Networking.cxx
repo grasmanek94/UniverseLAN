@@ -34,6 +34,9 @@ namespace universelan::client {
 	bool NetworkingImpl::SendP2PPacket(GalaxyID galaxyID, const void* data, uint32_t dataSize, P2PSendType sendType, uint8_t channel) {
 		ENetPacketFlag flag{};
 
+		// REVIEW: A nonzero dataSize with data == nullptr reaches the packet
+		// constructor and performs invalid pointer-range arithmetic. Validate the
+		// buffer/length contract before constructing the message.
 		switch (sendType) {
 		case P2P_SEND_RELIABLE:
 #if GALAXY_BUILD_FEATURE_HAS_P2P_SEND_IMMEDIATE
@@ -77,6 +80,9 @@ namespace universelan::client {
 
 		assert(packet != nullptr);
 
+		// REVIEW: outMsgSize and dest are not validated before they are written
+		// or used by copy_n. A null output pointer, or a null destination with a
+		// nonzero packet, crashes this API.
 		outGalaxyID = packet->id;
 		*outMsgSize = std::min((uint32_t)packet->data.size(), destSize);
 		std::copy_n(packet->data.begin(), *outMsgSize, (char*)dest);
@@ -100,6 +106,9 @@ namespace universelan::client {
 			return false;
 		}
 
+		// REVIEW: outMsgSize is an output pointer but is dereferenced without a
+		// null check. Reject invalid output arguments consistently with the other
+		// packet accessors.
 		*outMsgSize = (int32_t)channel_var->packets.front()->data.size();
 		return true;
 	}
@@ -108,6 +117,8 @@ namespace universelan::client {
 		auto channel_var = &buffer[channel];
 
 		lock_t lock{ channel_var->mtx };
+		// REVIEW: pop() on an empty queue is undefined. Check empty before
+		// removing so stale notifications or invalid lifecycle calls cannot crash.
 		channel_var->packets.pop();
 	}
 
@@ -153,6 +164,11 @@ namespace universelan::client {
 		}
 
 		if (listeners->NotifyAllNow(&INetworkingListener::OnP2PPacketAvailable, (uint32_t)packet->data.size(), packet->channel)) {
+			// REVIEW: The SDK contract says listeners should use PeekP2PPacket();
+			// the notified packet is removed after all notifications. This manual
+			// pop must happen exactly once. If a callback calls ReadP2PPacket or
+			// PopP2PPacket despite that contract, it can remove the next packet or
+			// pop an empty queue. Keep notification/removal semantics explicit.
 			PopP2PPacket(packet->channel);
 		}
 	}

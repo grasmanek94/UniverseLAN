@@ -12,6 +12,9 @@ namespace universelan {
 		template<class Archive>
 		void serialize(Archive& ar)
 		{
+			// REVIEW: Only the numeric address is archived; loading a persisted or
+			// cross-process archive recreates a dangling pointer. Use an object ID
+			// or restrict this wrapper to explicitly transient, same-process data.
 			ar(value);
 		}
 

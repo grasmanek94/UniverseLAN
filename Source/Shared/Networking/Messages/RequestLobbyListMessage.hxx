@@ -16,6 +16,9 @@ namespace universelan {
 		template<class Archive>
 		void serialize(Archive& ar)
 		{
+			// REVIEW: `error` is populated by the response constructor but omitted
+			// from serialization, so clients always deserialize the default false.
+			// Include it to preserve request failure status on the wire.
 			ar(request_id, lobby_list);
 		}
 

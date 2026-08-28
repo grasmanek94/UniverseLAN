@@ -23,6 +23,10 @@ namespace universelan::client {
 	 * Wait until IGalaxyThread execution is finished. Internal callers of this function are blocked until the function returns.
 	 */
 	void GalaxyThreadImpl::Join() {
+		// REVIEW: std::thread::join throws when the wrapper was already joined,
+		// detached, or never started. The interface method is called by SDK code
+		// where an invalid lifecycle state should be handled explicitly rather
+		// than allowing an exception to escape through the ABI.
 		_thread.join();
 	}
 
@@ -42,6 +46,9 @@ namespace universelan::client {
 	 * Separate the thread of execution from the IGalaxyThread object, allowing execution to continue independently.
 	 */
 	void GalaxyThreadImpl::Detach() {
+		// REVIEW: detach() also throws for a non-joinable thread. Check
+		// joinable() (or make repeated detach idempotent) before calling it so
+		// lifecycle races do not terminate the process from a noexcept boundary.
 		_thread.detach();
 	}
 #endif
@@ -53,9 +60,12 @@ namespace universelan::client {
 			_thread.join();
 		}*/
 
-		// !!! LEAK !!!
+		// REVIEW: A destructor must not unconditionally detach: std::thread
+		// throws if it is not joinable, and this implicitly-noexcept destructor
+		// then terminates the process. More importantly, detaching leaves SDK
+		// work running after the wrapper is destroyed; join or coordinate
+		// shutdown, and only act when joinable().
 		_thread.detach();
-		// !!! LEAK !!!
 	};
 
 	/**

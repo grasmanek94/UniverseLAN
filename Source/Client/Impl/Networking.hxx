@@ -56,6 +56,9 @@ namespace universelan::client {
 			ProtectedChannel() : mtx{}, packets{} {}
 		};
 
+		// REVIEW: uint8_t channels include 255, but max() elements only provide
+		// indices 0..254. Allocate max()+1 to prevent channel 255 from indexing
+		// past the array.
 		using channels_array = std::array<ProtectedChannel, std::numeric_limits<uint8_t>::max()>;
 
 	private:

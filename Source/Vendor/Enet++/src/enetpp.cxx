@@ -10,6 +10,11 @@ namespace enetpp {
 	NetworkBase::NetworkBase()
 		: address{}, member{ nullptr }, event{}
 	{
+		// REVIEW: Every NetworkBase instance initializes ENet and registers a
+		// separate atexit callback. This library creates multiple base objects
+		// (client/server and per-version builds), so global initialization and
+		// cleanup are not paired safely. Centralize initialization with
+		// one-time/ref-counted ownership and only deinitialize after all hosts die.
 		initialisation_code = enet_initialize();
 		atexit(enet_deinitialize);
 
@@ -20,6 +25,10 @@ namespace enetpp {
 	{
 		if (member != nullptr)
 		{
+			// REVIEW: `member` is owned here, but NetworkClient::~NetworkClient
+			// also destroys it without clearing the pointer. That derived
+			// destructor is followed by this base destructor, so the same ENet
+			// host can be destroyed twice.
 			enet_host_destroy(member);
 		}
 	}
@@ -66,6 +75,9 @@ namespace enetpp {
 			return -1;
 		}
 
+		// REVIEW: enet_packet_create may return nullptr. enet_peer_send
+		// dereferences the packet before checking it, so pass only an allocated
+		// packet and return failure without leaking it.
 		return enet_peer_send(peer, 0, enet_packet_create(data, bytes, flags));
 	}
 
@@ -111,25 +123,36 @@ namespace enetpp {
 
 	void NetworkServer::Broadcast(const void* data, size_t bytes, _ENetPacketFlag flags)
 	{
+		// REVIEW: This forwards member, data, and the allocation result without
+		// validation. ENet's broadcast path dereferences the host and packet;
+		// surface a failed/uninitialized server or packet allocation safely.
 		enet_host_broadcast(member, 0, enet_packet_create(data, bytes, flags));
 	}
 
 	void NetworkServer::Broadcast(ENetPacket* packet)
 	{
+		// REVIEW: No host or packet check is performed before ENet dereferences
+		// both. Make the initialized-server and ownership preconditions explicit.
 		enet_host_broadcast(member, 0, packet);
 	}
 
 	void NetworkServer::Broadcast(const void* data, size_t bytes, _ENetPacketFlag flags, ENetPeer* except)
 	{
+		// REVIEW: The custom except-broadcast has the same unchecked host/data/
+		// allocation inputs as the normal broadcast path.
 		enet_host_broadcast_except(member, 0, enet_packet_create(data, bytes, flags), except);
 	}
 
 	void NetworkServer::Broadcast(ENetPacket* packet, ENetPeer* except)
 	{
+		// REVIEW: The custom helper dereferences both host and packet; reject
+		// calls made before Create() or with a null packet.
 		enet_host_broadcast_except(member, 0, packet, except);
 	}
 
 	void NetworkServer::Disconnect(ENetPeer* peer) {
+		// REVIEW: ENet's disconnect/reset functions require a valid peer. A stale
+		// mapper entry or failed connection can pass nullptr and crash here.
 		enet_peer_disconnect_now(peer, 0);
 		enet_peer_reset(peer);
 	}
@@ -158,6 +181,9 @@ namespace enetpp {
 		{
 			enet_peer_disconnect_now(peer, 0);
 			enet_peer_reset(peer);
+			// REVIEW: NetworkBase owns `member` and destroys it immediately after
+			// this body. Destroying it here as well leaves a dangling non-null
+			// pointer for the base destructor, causing a double destroy.
 			enet_host_destroy(member);
 		}
 	}
@@ -171,6 +197,9 @@ namespace enetpp {
 
 		if (member != nullptr)
 		{
+			// REVIEW: `peer` points into this host. Replacing member without
+			// resetting/clearing peer leaves a pointer into freed storage; the
+			// subsequent Reconnect() calls enet_peer_reset(peer) on that storage.
 			enet_host_destroy(member);
 			member = nullptr;
 		}
@@ -195,9 +224,14 @@ namespace enetpp {
 	{
 		if (peer != nullptr)
 		{
+			// REVIEW: This peer may belong to a host already destroyed by
+			// Connect(). Reset it only while its owning member is alive, then
+			// clear the handle before creating a replacement.
 			enet_peer_reset(peer);
 		}
 
+		// REVIEW: Reconnect does not validate member. After host creation fails,
+		// enet_host_connect receives nullptr and dereferences it.
 		peer = enet_host_connect(member, &address, 1, 0);
 		return peer;
 	}
@@ -206,12 +240,19 @@ namespace enetpp {
 	{
 		if (peer != nullptr)
 		{
+			// REVIEW: Disconnect leaves peer non-null. A later Connect() destroys
+			// member while this handle still points into the old host, and a later
+			// Send() can also use a disconnected peer. Clear or replace the handle
+			// as part of the lifecycle transition.
 			enet_peer_disconnect_now(peer, 0);
 		}
 	}
 
 	bool NetworkClient::Create()
 	{
+		// REVIEW: The public Create() operation reports success without creating
+		// a host. Callers relying on Good() or Pull() then observe an uninitialized
+		// client; either implement creation or make the unsupported operation clear.
 		return true;
 	}
 

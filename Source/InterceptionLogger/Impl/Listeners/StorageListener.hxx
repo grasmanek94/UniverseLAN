@@ -4,6 +4,10 @@
 
 #include <IStorage.h>
 
+// REVIEW: The implementation is excluded by GALAXY_BUILD_FEATURE_HAS_ISTORAGE in
+// StorageListener.cxx, but these declarations remain visible in feature-off builds. A consumer
+// can therefore instantiate a declared listener and reach missing definitions at link time.
+// Apply the same feature guard to this header (or provide feature-off definitions).
 namespace universelan::client {
 	using namespace galaxy::api;
 

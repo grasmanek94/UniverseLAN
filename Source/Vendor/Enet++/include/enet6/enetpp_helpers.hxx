@@ -13,6 +13,10 @@ extern "C" {
 	ENET_API void enet_host_broadcast_except(ENetHost*, enet_uint8, ENetPacket*, ENetPeer*);
 }
 
+// REVIEW: The custom broadcast helper is an ABI-visible declaration but does
+// not document ownership on failure or null-argument behavior. Its implementation
+// may destroy the packet when no peer accepts it; callers need one clear ownership
+// contract to avoid leaks/double frees.
 template <>
 struct std::formatter<ENetAddress> : std::formatter<std::string> {
 	auto format(const ENetAddress& p, std::format_context& ctx) const {

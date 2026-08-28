@@ -13,6 +13,9 @@ namespace universelan::console {
 	{}
 
 	void Redirector::capture_tee() {
+		// REVIEW: std::cout's process-wide stream buffer is replaced without
+		// synchronization; concurrent capture/release or output can race. Restrict
+		// this utility to an externally synchronized, single-threaded scope.
 		if (oldbuf) {
 			return;
 		}
@@ -40,6 +43,8 @@ namespace universelan::console {
 		std::cout.rdbuf(oldbuf);
 		std::cout << sbuf.str();
 
+		// REVIEW: sbuf is never cleared, so a second capture/release replays all
+		// earlier captured output. Reset the string buffer after releasing.
 		oldbuf = nullptr;
 	}
 

@@ -29,8 +29,14 @@ int main()
 #endif
 
 	server = std::make_unique<Server>();
+	// REVIEW: A malformed or missing MaxTickRate can be zero, making this
+	// division undefined before the server loop starts. Validate the configured
+	// rate and reject invalid values in Server construction/configuration.
 	milliseconds wait_time = milliseconds(1000 / server->GetMaxTickRate());
 
+	// REVIEW: The unconditional loop has no signal/stop path and no top-level
+	// exception boundary. The process cannot perform an orderly peer/host
+	// shutdown, and an escaping handler exception terminates the server.
 	while (true)
 	{
 		server->Tick();

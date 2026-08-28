@@ -48,6 +48,9 @@ namespace universelan::client {
 	{
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::CUSTOMCONSOLE };
 
+		// REVIEW: This function-local flag is read and written non-atomically;
+		// concurrent startup calls race (and can allocate/configure twice). Use
+		// call_once or synchronize the initialization.
 		static bool CustomConsoleEnabled = false;
 
 		if (CustomConsoleEnabled)

@@ -23,6 +23,9 @@ namespace universelan::client {
 #ifdef _WIN32
 		{
 			TCHAR szFileName[MAX_PATH];
+			// REVIEW: GetModuleFileName returns zero on failure and a length on
+			// success. This condition is reversed, so the failure path prints an
+			// uninitialized buffer while successful calls print nothing.
 			if (GetModuleFileName(NULL, szFileName, MAX_PATH) == ERROR_SUCCESS) {
 				std::cout << "Process: " << szFileName << std::endl;
 			}
@@ -41,6 +44,10 @@ namespace universelan::client {
 			std::cout << "Exception occurred during init: " << ex.what() << std::endl;
 #endif
 
+			// REVIEW: A failed init can leave config/client unset or partially
+			// initialized, but execution continues through unconditional config
+			// dereferences and client->Start(). Return after reporting the error
+			// instead of handling the original failure as a valid initialization.
 		}
 
 		tracer::Trace::SetLogToCout(intf_inst.config->ShouldTraceToConsole());
@@ -78,6 +85,8 @@ namespace universelan::client {
 	void ShutdownEx(const ShutdownOptions& shutdownOptions) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
+		// REVIEW: shutdownOptions is accepted at the ABI boundary but ignored.
+		// Preserve the SDK option semantics or document the unsupported fields.
 		intf_inst.reset();
 	}
 #endif
@@ -174,6 +183,9 @@ namespace universelan::client {
 	* Seems this gets called after each ProcessData call.
 	*/
 	const IError* GetError() {
+		// REVIEW: Returning nullptr unconditionally prevents callers from
+		// observing initialization and API failures through the Galaxy contract.
+		// Keep the last translated error, matching the interceptor path.
 		return nullptr;
 	}
 

@@ -34,6 +34,10 @@ namespace universelan::client {
 	inline typename std::enable_if<std::is_same<V, NotificationParamScopeExtender>::value, char*&&>::type 
 		notification_param_push_identity(V&& v)
 	{
+		// REVIEW: This overload promises char*&& but receives a
+		// NotificationParamScopeExtender and cannot convert its const char*
+		// view to mutable char*. Instantiate this path with a temporary extender
+		// and compilation fails; return a const-char-compatible view instead.
 		return std::forward<char*>(v);
 	}
 

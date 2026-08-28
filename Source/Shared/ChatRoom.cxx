@@ -89,6 +89,9 @@ namespace universelan {
 			longest_message = (uint32_t)contents.size();
 		}
 
+		// REVIEW: ChatRoom retains every message in this vector and has no eviction path.
+		// Impact: a long-lived room can grow without bound and eventually exhaust memory.
+		// Suggested fix: enforce a bounded history (or explicit pruning) before push_back.
 		messages.push_back(message);
 
 		return message;
@@ -102,6 +105,8 @@ namespace universelan {
 			longest_message = (uint32_t)message.GetContents().size();
 		}
 
+		// REVIEW: This overload has the same unbounded retention as AddMessage above.
+		// Suggested fix: apply the same bounded-history policy to deserialized messages.
 		messages.push_back(message_ptr);
 
 		return message_ptr;

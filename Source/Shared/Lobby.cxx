@@ -39,6 +39,9 @@ namespace universelan {
 		messages{ chat_room.messages } {}
 
 	const char* Lobby::GetData(const data_t& data, const char* key) {
+		// REVIEW: `key` is converted to std::string by unordered_map::find without
+		// validation. Passing nullptr is undefined/throws before the empty fallback;
+		// reject null keys in this helper and its mutating counterpart.
 		auto entry = data.find(key);
 		if (entry == data.end()) {
 			return "";
@@ -52,6 +55,9 @@ namespace universelan {
 	}
 
 	void Lobby::SetData(data_t& data, const char* key, const char* value) {
+		// REVIEW: emplace/assignment construct std::string from both raw pointers.
+		// A null key or value is not checked and can throw/trigger undefined behavior;
+		// validate both before touching the map.
 		auto entry = data.find(key);
 		if (entry == data.end()) {
 			data.emplace(key, value);
@@ -159,6 +165,9 @@ namespace universelan {
 	}
 
 	void Lobby::DeleteData(const char* key) {
+		// REVIEW: DeleteData delegates to SetData(key, ""), which leaves the key
+		// in the map and keeps it counted/enumerable. Erase the key so Galaxy's
+		// delete operation has deletion semantics rather than empty data.
 		SetData(key, "");
 	}
 
@@ -200,6 +209,9 @@ namespace universelan {
 	}
 
 	void Lobby::DeleteMemberData(GalaxyID id, const char* key, const char* value) {
+		// REVIEW: This writes an empty value instead of removing the member key;
+		// the unused `value` parameter further obscures the behavior. Erase the
+		// key from the selected member map.
 		SetMemberData(id, key, "");
 	}
 
@@ -214,6 +226,9 @@ namespace universelan {
 
 		Message message{ current_message_id, sender, data };
 
+		// REVIEW: Every accepted message remains in this map; neither SendMsg nor AddMsg
+		// provides eviction. Impact: a long-lived lobby can exhaust memory.
+		// Suggested fix: enforce a bounded history or explicit pruning policy.
 		if (!messages.emplace(message.message_id, message).second) {
 			return 0;
 		}
@@ -224,6 +239,8 @@ namespace universelan {
 	}
 
 	bool Lobby::AddMsg(const Message& message) {
+		// REVIEW: Deserialized messages are retained indefinitely, just like SendMsg above.
+		// Suggested fix: apply the same bounded-history policy here.
 		return messages.emplace(message.message_id, message).second;
 	}
 

@@ -105,6 +105,10 @@ namespace universelan::client {
 	};
 
 	extern InterfaceInstances intf_inst;
+	// REVIEW: gameserver_intf_inst is declared as a namespace-scope extern,
+	// but UniverseGameServer owns only a member with this name and no
+	// definition appears in this module. Any consumer that references this
+	// symbol gets an unresolved external; remove the declaration or define it.
 	extern InterfaceInstances gameserver_intf_inst;
 }
 

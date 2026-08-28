@@ -176,6 +176,10 @@ namespace universelan::server {
 	{
 		while (connection.Pull())
 		{
+			// REVIEW: ProcessEvent can invoke handlers that allocate, format, or
+			// access protocol data and may throw. There is no server boundary that
+			// converts a malformed/unexpected event into a rejected packet, so one
+			// exception escapes Tick() and terminates the process.
 			ProcessEvent(connection.Event());
 		}
 
@@ -199,5 +203,9 @@ namespace universelan::server {
 	Server::~Server()
 	{
 		tracer::Trace destructor{  };
+		// REVIEW: Mapper owns raw Data allocations associated with ENet peers, but
+		// no disconnect/cleanup is performed here before the networking host is
+		// destroyed. Normal shutdown therefore leaks Data and skips leave cleanup;
+		// explicitly quiesce peers and release mapper state before host teardown.
 	}
 }

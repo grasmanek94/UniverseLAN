@@ -23,6 +23,9 @@ namespace universelan::client {
 	{
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ICUSTOMNETWORKING };
 
+		// REVIEW: A null connectionString is passed into websocketpp before the
+		// error path can run. Validate the ABI input before initializing a
+		// connection so malformed callers receive the documented failure.
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 			trace.write_all(std::format(
 				"connectionString: {} listener: {}",
@@ -41,6 +44,9 @@ namespace universelan::client {
 
 		websocketpp::lib::error_code ec;
 		custom_networking::client::connection_ptr con = client.get_connection(connectionString, ec);
+		// REVIEW: `con` is never stored in Channel::connection. CloseConnection
+		// consequently cannot close the socket and SendData dereferences null;
+		// assign the successful connection before starting the channel.
 		connection_string = connectionString;
 		listener_open = listener;
 
@@ -89,6 +95,10 @@ namespace universelan::client {
 		// delete
 		{
 			lock_t lock(mtx);
+			// REVIEW: The map is keyed by the Channel address, but this erases
+			// the CustomNetworkingImpl address (`this`). The completed channel
+			// therefore remains in the map with a cleared connection and is
+			// returned by later GetChannel calls; erase `channel.get()` instead.
 			channels.erase((ConnectionID)this);
 		}
 
@@ -120,6 +130,9 @@ namespace universelan::client {
 	CustomNetworkingImpl::~CustomNetworkingImpl()
 	{
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ICUSTOMNETWORKING };
+		// REVIEW: channels own active jthreads whose callbacks retain this raw
+		// CustomNetworkingImpl pointer. Destroying the map without stopping those
+		// clients permits callbacks into a freed object; stop/join all channels first.
 	}
 
 	void CustomNetworkingImpl::WebSocketOnOpen(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl)
@@ -140,6 +153,10 @@ namespace universelan::client {
 			const std::string& data = msg->get_payload();
 
 			data_size = (uint32_t)data.size();
+			// REVIEW: Incoming WebSocket payloads are appended without a
+			// configured bound. A peer can keep a channel's deque growing until
+			// memory is exhausted; enforce a maximum buffered payload and define
+			// the overflow notification behavior.
 			channel->buffer.insert(channel->buffer.end(), data.c_str(), data.c_str() + data.size());
 		}
 
@@ -150,6 +167,9 @@ namespace universelan::client {
 	{
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ICUSTOMNETWORKING };
 
+		// REVIEW: Report the channel ID, not the CustomNetworkingImpl address.
+		// Returning this pointer makes the close callback refer to a connection
+		// that callers cannot pass back to GetChannel().
 		listeners->NotifyAll(channel->listener_close, &IConnectionCloseListener::OnConnectionClosed, (ConnectionID)this, IConnectionCloseListener::CLOSE_REASON_UNDEFINED);
 
 		if (!channel->client.stopped()) {
@@ -192,6 +212,9 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::ICUSTOMNETWORKING };
 
+		// REVIEW: OpenConnection accepts a null connectionString and forwards it
+		// into Channel::connect/websocketpp. Validate the public ABI argument
+		// before creating a channel or formatting/logging the URL.
 		auto channel = std::make_shared<Channel>(this);
 
 		if (channel->connect(connectionString,
@@ -230,6 +253,12 @@ namespace universelan::client {
 
 		std::shared_ptr<Channel> channel{ GetChannel(connectionID) };
 
+		// REVIEW: Neither channel nor channel->connection is checked. Invalid IDs
+		// (and every channel before the missing assignment in connect()) crash here;
+		// return a failure/no-op when the connection is unavailable.
+		// REVIEW: The data pointer is also converted to a string without
+		// validation. Reject null data for nonzero dataSize (and define the
+		// zero-length/null-pointer contract) before constructing the payload.
 		channel->connection->send(std::string((const char*)data, dataSize), websocketpp::frame::opcode::value::BINARY);
 	}
 
@@ -239,6 +268,9 @@ namespace universelan::client {
 			return 0;
 		}
 
+		// REVIEW: WebSocketOnMessage writes buffer under buffer_mtx, but this read
+		// is unlocked. Concurrent delivery and polling is a data race; take the
+		// channel lock before reading size.
 		return (uint32_t)channel->buffer.size();
 	}
 
@@ -249,6 +281,9 @@ namespace universelan::client {
 		}
 
 		lock_t guard(channel->buffer_mtx);
+		// REVIEW: PeekData/ReadData copy into dest without checking it. A null
+		// destination with available bytes is an immediate invalid write; reject
+		// the argument or require a zero-length read.
 		std::copy_n(channel->buffer.begin(), std::min(dataSize, (uint32_t)channel->buffer.size()), (char*)dest);
 	}
 
@@ -260,6 +295,9 @@ namespace universelan::client {
 
 		lock_t guard(channel->buffer_mtx);
 		size_t size = std::min(dataSize, (uint32_t)channel->buffer.size());
+		// REVIEW: As in PeekData, a null dest with a nonzero copy length is
+		// dereferenced by copy_n. Validate the destination before consuming
+		// bytes so an invalid call cannot partially alter the stream.
 		std::copy_n(channel->buffer.begin(), size, (char*)dest);
 		channel->buffer.erase(channel->buffer.begin(), channel->buffer.begin() + size);
 	}

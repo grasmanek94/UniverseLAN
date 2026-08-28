@@ -144,9 +144,17 @@ namespace filesystem_container {
 		std::filesystem::create_directories(std::filesystem::path(other_entry.get_abs_path()).remove_filename(), ec);
 		std::filesystem::create_directories(std::filesystem::path(other_entry.get_abs_metadata_path()).remove_filename(), ec);
 
+		// REVIEW: The file leg copies abs_metadata_path, putting metadata bytes in
+		// the destination data file. Copy abs_file_path here; otherwise copy_to()
+		// reports success while corrupting the target file contents.
 		bool file = std::filesystem::copy_file(abs_metadata_path, other_entry.get_abs_path());
 		bool metadata = std::filesystem::copy_file(abs_metadata_path, other_entry.get_abs_metadata_path());
 
+		// REVIEW: notify_copy_done() is called even when either copy failed and
+		// unconditionally publishes the destination in the parent indexes. A
+		// partial copy can therefore appear as a valid entry with incomplete or
+		// stale data; notify completion only after both operations succeed, or
+		// roll back the destination and metadata on failure.
 		other_entry.notify_copy_done(*this, file, metadata);
 
 		return file && metadata;
@@ -268,6 +276,8 @@ namespace filesystem_container {
 		data_stream.unsetf(std::ios::skipws);
 		data_stream.write(data, data_length);
 
+		// REVIEW: write() returns true even when the stream reports a short write
+		// or disk error. Check the stream state after write before claiming success.
 		return true;
 	}
 

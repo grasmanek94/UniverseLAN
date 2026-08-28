@@ -9,6 +9,8 @@ long long GetTimeNow() {
 }
 
 void TimerThread() {
+	// REVIEW: This loop has no stop token and is detached below. It can continue
+	// scheduling Galaxy calls after the test's API state is torn down.
 	while (true) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
@@ -69,6 +71,8 @@ void OnLobbyCreated(const GalaxyID& lobbyID, LobbyCreateResult result)
 
 	matchmaking_ptr->SetLobbyData(lobbyID, "timer", std::to_string(GetTimeNow()).c_str());
 
+	// REVIEW: Detaching this unbounded producer prevents orderly test teardown
+	// and leaves delay_runner/Galaxy pointers usable after deinitialization.
 	std::thread{ TimerThread }.detach(); // !!! LEAK !!! (until thread exits)
 }
 

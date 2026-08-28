@@ -24,6 +24,9 @@ namespace universelan::client {
 
 	void AuthListener::OnAuthSuccess()
 	{
+		// REVIEW: The globally registered trace listener has a null target, but an
+		// operation-specific proxy has a non-null target. This success callback only
+		// traces, so sign-in callers never receive success; forward it when targeted.
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 	}
 
@@ -40,6 +43,9 @@ namespace universelan::client {
 
 	void AuthListener::OnAuthLost()
 	{
+		// REVIEW: As with OnAuthSuccess, an operation-specific proxy never forwards
+		// OnAuthLost to its caller. Keep the null-target trace-only behavior for the
+		// persistent listener, but forward this callback for a non-null target.
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 	}
 

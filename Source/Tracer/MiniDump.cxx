@@ -65,6 +65,9 @@ namespace universelan::tracer {
 
 		///
 
+		// REVIEW: This crash-path helper allocates three objects with `new`; an
+		// exhausted heap can throw while handling the original failure. Capture
+		// context without throwing (or use a preallocated/checked path).
 		EXCEPTION_RECORD* pExceptionRecord = new EXCEPTION_RECORD;
 		memcpy(pExceptionRecord, &ExceptionRecord, sizeof(EXCEPTION_RECORD));
 		CONTEXT* pContextRecord = new CONTEXT;
@@ -98,6 +101,9 @@ namespace universelan::tracer {
 		}
 
 		// Create the minidump file
+		// REVIEW: _T(filename) is not a portable conversion of a runtime
+		// `char*`; in UNICODE builds it expands to an invalid wide token (or
+		// mismatched API). Call CreateFileA explicitly or convert the path.
 		hFile = CreateFile(
 			_T(filename),
 			GENERIC_WRITE,
@@ -110,6 +116,8 @@ namespace universelan::tracer {
 		if (hFile == INVALID_HANDLE_VALUE)
 		{
 			// Couldn't create file
+			// REVIEW: Every return after LoadLibrary leaks hDbgHelp (and later
+			// hFile). Use RAII/one cleanup path so diagnostics do not leak handles.
 			return;
 		}
 

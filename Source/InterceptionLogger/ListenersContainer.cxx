@@ -23,6 +23,9 @@ namespace universelan::client {
 		while (listeners.size() > 0) {
 			auto item = *listeners.begin();
 			registrar->Unregister(item.second, item.first);
+			// REVIEW: AddListener allocates item.first with new, but unregistering
+			// only erases the map entry. Every persistent listener is leaked; delete
+			// it (or store ownership in RAII) after successful unregistration.
 			listeners.erase(listeners.begin());
 		}
 	}

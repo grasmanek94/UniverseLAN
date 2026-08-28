@@ -176,6 +176,9 @@ namespace universelan::tracer {
 	}
 
 	void Trace::SetLogToCout(bool enabled) {
+		// REVIEW: trace_to_console is read by logging threads without atomic or
+		// mutex protection. Toggling it concurrently with write_all/Enter/Exit
+		// is a data race; make the flag atomic or synchronize access.
 		trace_to_console = enabled;
 	}
 
@@ -184,6 +187,9 @@ namespace universelan::tracer {
 		bool in_unhandled_exception_logging, bool in_tracing_enabled,
 		bool mindump_on_unhandled_exception, int in_minidump_verbosity_level,
 		bool in_should_always_flush_tracing, uint64_t mask) {
+		// REVIEW: The check and all global logger initialization are unsynchronized.
+		// Concurrent callers can both open/replace global_trace_file and race
+		// readers. Serialize initialization (e.g. call_once/mutex).
 		if (tracing_initialized) {
 			return false;
 		}

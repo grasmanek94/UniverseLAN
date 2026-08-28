@@ -219,6 +219,10 @@ namespace galaxy::api
 #ifndef _DEBUG
 		IGalaxy();
 #endif
+		// REVIEW: In _DEBUG the default constructor is omitted while the user-declared
+		// copy constructor suppresses implicit default construction; GalaxyImpl's
+		// default constructor then has no constructible IGalaxy base. Keep a declared
+		// and defined default constructor in every build configuration.
 		IGalaxy(IGalaxy const& other);
 		IGalaxy& operator=(IGalaxy const& other);
 	};

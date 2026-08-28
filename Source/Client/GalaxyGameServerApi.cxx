@@ -12,6 +12,9 @@ namespace galaxy::api {
 
 	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE InitGameServer(const InitOptions& initOptions) {
 		Trace trace{ nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL_GAMESERVERAPI };
+		// REVIEW: InitGameServer is an extern "C" ABI boundary, but init exceptions
+		// are not caught here. A failed initialization can therefore unwind through
+		// the Galaxy DLL boundary; catch/map the failure before returning to the game.
 		gameserver.InitGameServer(initOptions);
 	}
 
@@ -23,6 +26,8 @@ namespace galaxy::api {
 #if GALAXY_BUILD_FEATURE_HAS_SHUTDOWNOPTIONS
 	GALAXY_DLL_EXPORT void GALAXY_CALLTYPE ShutdownGameServerEx(const ShutdownOptions& shutdownOptions) {
 		Trace trace{ nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL_GAMESERVERAPI };
+		// REVIEW: shutdownOptions is discarded, so callers using the extended
+		// shutdown ABI cannot request the behavior represented by those options.
 		gameserver.ShutdownGameServer();
 	}
 #endif

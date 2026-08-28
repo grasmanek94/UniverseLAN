@@ -12,6 +12,9 @@ namespace universelan {
 	{}
 
 	AchievementsAndStatsContainer::AchievementsAndStatsContainer(const AchievementsAndStatsContainer& other)
+		// REVIEW: Copying `other` reads all mutable maps without their mutexes.
+		// A concurrent setter/serialization can race; lock the source maps (and
+		// define a consistent lock order) before copying.
 		: mtx_achievements{}, mtx_stats{}, mtx_userdata{}, mtx_richpresence{},
 		Achievements{ other.Achievements }, Stats{ other.Stats }, UserData{ other.UserData },
 		BootTime{ other.BootTime }, PlayTime{ other.PlayTime },
@@ -32,6 +35,9 @@ namespace universelan {
 
 	AchievementsAndStatsContainer& AchievementsAndStatsContainer::operator=(const AchievementsAndStatsContainer& other)
 	{
+		// REVIEW: Assignment accesses both objects' maps and scalar state without
+		// locks, racing run_locked_* and other assignments. Acquire all locks with
+		// std::lock (including the source) before copying.
 		this->Achievements = other.Achievements;
 		this->Stats = other.Stats;
 		this->UserData = other.UserData;
