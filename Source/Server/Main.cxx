@@ -9,7 +9,7 @@
 #include <thread>
 
 #ifdef _WIN32
-#include <consoleapi2.h>
+#include <wincon.h>
 #endif
 
 using namespace universelan::tracer;

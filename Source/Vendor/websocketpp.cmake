@@ -12,3 +12,7 @@ target_sources(websocketpp PRIVATE dummy.c)
 target_link_libraries(websocketpp PUBLIC websocketpp::websocketpp)
 
 target_include_directories(websocketpp PUBLIC "websocketpp-0.8.2/include")
+
+target_compile_definitions(websocketpp PUBLIC
+    _WEBSOCKETPP_CPP11_THREAD_
+)

@@ -92,9 +92,15 @@ endfunction()
 
 function(add_universelan_executables GALAXY_VERSION_NUMBER)
   set(GALAXY_VERSION "${GALAXY_ARCH}-${GALAXY_VERSION_NUMBER}")
-  set(MODULE_DEFINITION_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/${GALAXY_ARCH}/UniverseLAN.def)
-  set(DLL_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/Dll.cxx)
-  set(FACTORY_FILE ${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/Factory.cxx)
+  set(MODULE_DEFINITION_FILE_SUFFIX ".def")
+  if(MINGW)
+    message(WARNING "UniverseLAN doesn't ship with MinGW compatible .def files. You need to create your own. MinGW toolset not oficially supported. MinGW Module Definition Files differ from MSVC.")
+    set(MODULE_DEFINITION_FILE_SUFFIX ".mingw.def")
+  endif()
+
+  set(MODULE_DEFINITION_FILE "${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/${GALAXY_ARCH}/UniverseLAN${MODULE_DEFINITION_FILE_SUFFIX}")
+  set(DLL_FILE "${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/Dll.cxx")
+  set(FACTORY_FILE "${UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR}/${GALAXY_VERSION_NUMBER}/Factory.cxx")
 
   set(UNIVERSELAN_OUT_TYPE "DLL")
   set(UNIVERSELAN_SOURCE_CLIENT "${DLL_FILE}")
@@ -108,6 +114,7 @@ function(add_universelan_executables GALAXY_VERSION_NUMBER)
   endif()
 
   if(NOT EXISTS "${MODULE_DEFINITION_FILE}")
+    message(WARNING "${MODULE_DEFINITION_FILE} does not exist but is required, skipping processing")
     return()
   endif()
 

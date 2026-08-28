@@ -5,7 +5,7 @@ add_subdirectory(Enet++)
 add_subdirectory(boost)
 add_subdirectory(Detours)
 
-if(MSVC)
+if(WIN32)
 add_subdirectory(StackWalker)
 endif()
 

@@ -1,10 +1,11 @@
 #include "MiniDump.hxx"
 
+#include "ReturnAddress.hxx"
+
 #ifdef _WIN32
 #include <tchar.h>
 #include <windows.h>
 #include <dbghelp.h>
-#include <intrin.h>
 #endif
 
 namespace universelan::tracer {

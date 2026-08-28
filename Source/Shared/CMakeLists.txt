@@ -30,8 +30,8 @@ function(define_shared GALAXY_VERSION)
       json
       $<$<PLATFORM_ID:Linux>:tbb>
     PRIVATE
-      $<$<PLATFORM_ID:Windows>:IPHLPAPI>
-      $<$<PLATFORM_ID:Windows>:Shell32>
-      $<$<PLATFORM_ID:Windows>:Ole32>
+      $<$<PLATFORM_ID:Windows>:iphlpapi>
+      $<$<PLATFORM_ID:Windows>:shell32>
+      $<$<PLATFORM_ID:Windows>:ole32>
   )
 endfunction()

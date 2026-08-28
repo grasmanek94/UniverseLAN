@@ -9,6 +9,7 @@
 #include <exception>
 #include <filesystem>
 #include <iostream>
+#include <stdexcept>
 
 namespace universelan::server {
 	bool Server::KickUnauthenticated(ENetPeer* peer) {
@@ -60,10 +61,8 @@ namespace universelan::server {
 		if (init_code)
 		{
 			// TODO custom exception class
-			throw std::exception(
-#ifdef _WIN32
-			("Cannot initialize ENET, error code: " + std::to_string(init_code)).c_str()
-#endif
+			throw std::runtime_error(
+				("Cannot initialize ENET, error code: " + std::to_string(init_code)).c_str()
 			);
 		}
 
@@ -83,10 +82,8 @@ namespace universelan::server {
 		{
 			std::cerr << "ENET host member creation failed (Wrong address:port?)" << std::endl;
 			// TODO custom exception class
-			throw std::exception(
-#ifdef _WIN32
+			throw std::runtime_error(
 				"ENET host member creation failed (Wrong address:port?)"
-#endif
 			);
 		}
 

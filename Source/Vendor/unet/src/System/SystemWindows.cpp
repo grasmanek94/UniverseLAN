@@ -4,9 +4,9 @@
 #include <Windows.h>
 
 #include <Shlwapi.h>
-#pragma comment(lib, "Shlwapi.lib")
+#pragma comment(lib, "shlwapi.lib")
 #include <ShlObj.h>
-#pragma comment(lib, "Shell32.lib")
+#pragma comment(lib, "shell32.lib")
 
 std::string Unet::System::ResolvePathName(const std::string &path)
 {

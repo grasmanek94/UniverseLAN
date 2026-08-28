@@ -13,5 +13,5 @@ target_link_libraries(
       $<$<PLATFORM_ID:Windows>:detours>
       $<$<PLATFORM_ID:Windows>:StackWalker>
     PRIVATE
-      $<$<PLATFORM_ID:Windows>:Imagehlp>
+      $<$<PLATFORM_ID:Windows>:imagehlp>
 )

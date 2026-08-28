@@ -12,6 +12,6 @@ target_link_libraries(
     PUBLIC
       enet-ipv6
     PRIVATE
-        $<$<PLATFORM_ID:Windows>:Winmm>
-        $<$<PLATFORM_ID:Windows>:Ws2_32>
+        $<$<PLATFORM_ID:Windows>:winmm>
+        $<$<PLATFORM_ID:Windows>:ws2_32>
 )

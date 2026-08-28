@@ -48,8 +48,8 @@ return function(options, core)
 		if os.get() == 'windows' then
 			configuration(options.config)
 				links {
-					'Ws2_32',
-					'Winmm',
+					'ws2_32',
+					'winmm',
 				}
 		end
 	end

@@ -11,6 +11,6 @@ target_include_directories(enet-ipv6 PUBLIC "include/")
 target_link_libraries(
     enet-ipv6
     PRIVATE
-        $<$<PLATFORM_ID:Windows>:Winmm>
-        $<$<PLATFORM_ID:Windows>:Ws2_32>
+        $<$<PLATFORM_ID:Windows>:winmm>
+        $<$<PLATFORM_ID:Windows>:ws2_32>
 )

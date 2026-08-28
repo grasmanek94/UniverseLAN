@@ -1,5 +1,6 @@
 #include "Client.hxx"
 
+#include <stdexcept>
 #include <string>
 
 namespace universelan::client {
@@ -14,10 +15,8 @@ namespace universelan::client {
 		{
 			tracer::Trace trace{ ("::Cannot initialize ENET, error code: " + std::to_string(init_code)).c_str(), __FUNCTION__, tracer::Trace::NETCLIENT };
 			// TODO custom exception class
-			throw std::exception(
-#ifdef _WIN32
-			("Cannot initialize ENET, error code: " + std::to_string(init_code)).c_str()
-#endif
+			throw std::runtime_error(
+				("Cannot initialize ENET, error code: " + std::to_string(init_code)).c_str()
 			);
 		}
 
@@ -29,10 +28,8 @@ namespace universelan::client {
 			tracer::Trace trace{ "::ENET connection to host failed", __FUNCTION__, tracer::Trace::NETCLIENT };
 			trace.write_all(std::string("Host: ") + interfaces->config->GetServerAddress() + ":" + std::to_string(interfaces->config->GetPort()));
 			// TODO custom exception class
-			throw std::exception(
-#ifdef _WIN32
+			throw std::runtime_error(
 				"ENET connection to host failed"
-#endif
 			);
 		}
 	}

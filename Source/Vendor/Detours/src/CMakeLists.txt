@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
-if (MSVC)
-  if("${MSVC_C_ARCHITECTURE_ID}" STREQUAL "x64")
+if(WIN32)
+  if("${GALAXY_ARCH}" STREQUAL "x64")
 
     add_library(detours STATIC 
       creatwth.cpp
@@ -20,7 +20,7 @@ if (MSVC)
         "_WIN32_WINNT=0x601"
     )
 
-  elseif("${MSVC_C_ARCHITECTURE_ID}" STREQUAL "X86")
+  elseif("${GALAXY_ARCH}" STREQUAL "x86")
 
     add_library(detours STATIC 
       creatwth.cpp

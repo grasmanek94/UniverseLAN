@@ -7,6 +7,9 @@ if(NOT CMAKE_BUILD_TYPE)
     #set(CMAKE_BUILD_TYPE Debug)
 endif()
 
+if(MINGW)
+    set(StackWalker_DISABLE_TESTS ON CACHE BOOL "Disable StackWalker tests for MinGW" FORCE)
+endif()
 
 option(StackWalker_DISABLE_TESTS  "Disable tests" OFF)
 
@@ -21,6 +24,8 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set (CMAKE_COMPILER_IS_CLANG true)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     set (CMAKE_COMPILER_IS_MSVC true)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    set (CMAKE_COMPILER_IS_GNU true)
 endif()
 
 if(CMAKE_COMPILER_IS_MSVC)
@@ -63,6 +68,8 @@ if(CMAKE_COMPILER_IS_MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_SCL_SECURE_NO_DEPRECATE")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Zi")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4740")
+elseif(CMAKE_COMPILER_IS_GNU)
+    message(WARNING "${CMAKE_CXX_COMPILER_ID} is UNTESTED")
 else()
     message(FATAL_ERROR "${CMAKE_CXX_COMPILER_ID} is not supported yet")
 endif()
@@ -103,6 +110,10 @@ install(FILES
     RENAME "${TARGET_StackWalker}.pdb"
     OPTIONAL)
 
+target_link_libraries(${TARGET_StackWalker}
+  PUBLIC
+    version
+)
 
 if (StackWalker_DISABLE_TESTS)
     message(STATUS "Skipping tests")

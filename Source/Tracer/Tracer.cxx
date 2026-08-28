@@ -1,9 +1,9 @@
 #include "Tracer.hxx"
 
+#include "ReturnAddress.hxx"
 #include "Stacker.hxx"
 
 #ifdef _WIN32
-#include <intrin.h>
 #include <Windows.h>
 #endif
 
