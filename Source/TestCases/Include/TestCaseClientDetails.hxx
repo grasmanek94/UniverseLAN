@@ -68,6 +68,10 @@ namespace galaxy::api {
 	};
 
 #else
+	// REVIEW: These values are injected through target_compile_definitions, which
+	// places test usernames/passwords and client credentials in compiler command
+	// lines, build metadata, and every test binary. Load test secrets at runtime
+	// (or from a protected CI secret store) instead of embedding them in targets.
 	constexpr std::array USER_CREDENTIALS = {
 		std::array{GALAXY_SDK_USER_CREDENTIALS_USER1_NAME,GALAXY_SDK_USER_CREDENTIALS_USER1_PASSWORD},
 		std::array{GALAXY_SDK_USER_CREDENTIALS_USER2_NAME,GALAXY_SDK_USER_CREDENTIALS_USER2_PASSWORD}

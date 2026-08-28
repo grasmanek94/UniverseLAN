@@ -39,6 +39,10 @@ namespace universelan::client {
 
 	void Client::Tick()
 	{
+		// REVIEW: This is the std::thread entry point and has no exception
+		// boundary. An allocation, serialization, or ENet exception escaping
+		// RunNetworking invokes std::terminate; report the failure and shut down
+		// the client through an explicit thread-safe error path.
 		while (running) {
 			connection.RunNetworking(2);
 		}
@@ -52,6 +56,9 @@ namespace universelan::client {
 	}
 
 	bool Client::IsConnected() const {
+		// REVIEW: IsConnected reads connection state maintained by Tick's
+		// networking thread. The state must be atomic or otherwise synchronized
+		// before exposing it to API callers.
 		return connection.IsConnected();
 	}
 
@@ -65,6 +72,9 @@ namespace universelan::client {
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::NETCLIENT };
 
+		// REVIEW: Assigning a new std::thread while tick_thread is still
+		// joinable invokes std::terminate. Reject duplicate starts (or join/clear
+		// the previous thread) before creating another worker.
 		running = true;
 		tick_thread = std::thread{ &Client::Tick, this };
 	}
@@ -81,6 +91,10 @@ namespace universelan::client {
 
 	void Client::ProcessEvents()
 	{
+		// REVIEW: ProcessEvents dispatches queued network events through raw
+		// InterfaceInstances pointers. Serialize this call with InterfaceInstances
+		// reset/destruction; Stop() only joins Tick and does not quiesce this
+		// caller or protect wrapper teardown.
 		connection.ProcessEvents(this);
 	}
 }

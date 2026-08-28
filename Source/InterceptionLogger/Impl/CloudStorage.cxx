@@ -309,6 +309,9 @@ namespace universelan::client {
 #endif	
 		}
 
+		// REVIEW: expectedHash is accepted when HASHING is enabled but is omitted
+		// from the underlying call, so conditional-delete integrity checks are lost.
+		// Forward expectedHash in that ABI variant.
 		intf()->DeleteFile(container, name, CloudStorageDeleteFileListener::encapsulate(listener));
 	}
 #pragma pop_macro ("DeleteFile")

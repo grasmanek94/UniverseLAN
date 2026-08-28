@@ -122,8 +122,8 @@ namespace universelan::client {
 		init_options = std::make_unique<InitOptionsModern>(initOptions);
 
 		if (config->OverrideInitKeysEnabled()) {
-			init_options->clientID.emplace(config->GetOverrideInitKeyId());
-			init_options->clientSecret.emplace(config->GetOverrideInitKeySecret());
+			init_options->clientID = config->GetOverrideInitKeyId();
+			init_options->clientSecret = config->GetOverrideInitKeySecret();
 		}
 
 #if GALAXY_BUILD_FEATURE_HAS_IGALAXY
@@ -140,17 +140,15 @@ namespace universelan::client {
 		real_ierror_manager = real_factory_get_error_manager();
 #endif
 
-		real_init = [this](InitOptionsModern initOptions) -> void {
+		real_init = [this](InitOptionsImpl initOptions) -> void {
 			try {
-#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_MODERN
+				if (initOptions.galaxyPeerPath == nullptr || *initOptions.galaxyPeerPath == '\0') {
+					initOptions.galaxyPeerPath = ".";
+				}
+#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
 				real_igalaxy_instance->Init(initOptions);
 #else
-				if (initOptions.local_init) {
-					real_igalaxy_instance->InitLocal(initOptions.GetClientID(), initOptions.GetClientSecret(), initOptions.GetGalaxyPeerPath(), initOptions.throwExceptions);
-				}
-				else {
-					real_igalaxy_instance->Init(initOptions.GetClientID(), initOptions.GetClientSecret(), initOptions.throwExceptions);
-				}
+				real_igalaxy_instance->Init(initOptions.clientID, initOptions.clientSecret, initOptions.galaxyPeerPath);
 #endif
 			}
 			catch (const IError& error) {
@@ -164,7 +162,11 @@ namespace universelan::client {
 		real_process_data = std::bind(&IGalaxy::ProcessData, real_igalaxy_instance);
 		real_shutdown = std::bind(&IGalaxy::Shutdown, real_igalaxy_instance);
 
-		real_init(*init_options);
+		// REVIEW: real_init catches the SDK's IError and then returns normally,
+		// so wrapper construction continues even when the real SDK did not
+		// initialize. Track initialization success and stop/clean up on failure;
+		// otherwise later wrapper calls dereference an unusable SDK instance.
+		real_init(init_options->ToClassicOptions());
 
 		auto real_notification_ptr = std::bind(&IGalaxy::GetListenerRegistrar, real_igalaxy_instance);
 		auto real_notification = real_notification_ptr();
@@ -217,7 +219,7 @@ namespace universelan::client {
 		assign_func(real_process_data, (gameserver ? "?ProcessGameServerData" : "?ProcessData@api@galaxy@"));
 		assign_func(real_shutdown, (gameserver ? "?ShutdownGameServer@api@galaxy@" : "?Shutdown@api@galaxy@"));
 
-		real_init(*init_options);
+		real_init(init_options->ToClassicOptions());
 
 		auto real_notification_ptr = interceptor_make_unique(notification, (gameserver ? "?GameServerListenerRegistrar@api@galaxy@" : "?ListenerRegistrar@api@galaxy@"));
 		auto real_notification = real_notification_ptr();
@@ -285,6 +287,10 @@ namespace universelan::client {
 			config->GetCallTracingFlags()
 		);
 
+		// REVIEW: reset clears real_shutdown and the wrapper objects without invoking
+		// the underlying Galaxy shutdown/factory reset. Client Shutdown calls reset
+		// directly, so the SDK remains initialized and the real IGalaxy instance is
+		// leaked; call shutdown/factory reset before clearing these handles.
 		real_init = nullptr;
 		real_process_data = nullptr;
 		real_shutdown = nullptr;

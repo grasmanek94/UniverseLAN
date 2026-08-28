@@ -17,6 +17,9 @@ namespace filesystem_container {
 
 	class filesystem_entry : public std::enable_shared_from_this<filesystem_entry> {
 	private:
+		// REVIEW: This raw back-pointer is not lifetime-tracked. An fs_entry_ptr
+		// retained after its container is destroyed makes unlink/copy dereference
+		// a dangling parent; use a lifetime-safe relationship or enforce ownership.
 		filesystem_container* parent_fc;
 
 		std::filesystem::path path;

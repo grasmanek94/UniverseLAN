@@ -56,6 +56,11 @@ namespace universelan::client {
 
 	bool Error::HasError() const
 	{
+		// REVIEW: This only checks whether the callback wrapper currently returns
+		// a non-null IError. Each getter invokes the callback again and
+		// immediately dereferences the result, so a transient/null second result
+		// can crash callers after HasError() succeeds. Snapshot or guard the
+		// delegated result.
 		return intf() != nullptr;
 	}
 }

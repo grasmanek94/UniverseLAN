@@ -39,6 +39,9 @@ int main()
 
 	trace.write_all(".OK");
 
+	// REVIEW: This unconditional loop makes GALAXY_DEINIT and the return below
+	// unreachable. A failed sign-in or broken callback cannot terminate the test;
+	// use a bounded wait/explicit test completion condition.
 	while (true)
 	{
 #if GALAXY_BUILD_FEATURE_HAS_IGALAXY

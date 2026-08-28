@@ -20,6 +20,7 @@ namespace universelan {
 
 	private:
 		galaxy::api::ChatRoomID id;
+		
 		messages_t messages;
 		members_t members;
 		uint32_t longest_message;
@@ -31,12 +32,16 @@ namespace universelan {
 
 		galaxy::api::ChatRoomID GetID() const;
 
+		// REVIEW: Returns an alias to the mutable member set; retaining it across Add/RemoveMember
+		// permits an iterator/data race. Return a snapshot or document synchronization/lifetime rules.
 		const members_t& GetMembers() const;
 		bool AddMember(galaxy::api::GalaxyID id);
 		bool RemoveMember(galaxy::api::GalaxyID id);
 		bool IsMember(galaxy::api::GalaxyID id);
 		uint32_t GetMemberCount() const;
 
+		// REVIEW: Returns an alias to the mutable message vector; callers can observe reallocation
+		// while AddMessage mutates it. Return a snapshot or require external synchronization.
 		const messages_t& GetMessages() const;
 		messages_t GetMessages(galaxy::api::ChatMessageID exclusive_from) const;
 		const message_t& GetMessageByIndex(uint32_t index) const;

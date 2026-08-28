@@ -18,6 +18,9 @@
 
 namespace universelan::client {
 	namespace {
+		// REVIEW: Init/Shutdown/getter exports all access this shared object without
+		// synchronization. A getter or ProcessData racing Shutdown can call through
+		// a unique_ptr while reset destroys it; serialize lifecycle and API access.
 		InterfaceInstances universe_client_api;
 	}
 
@@ -28,6 +31,9 @@ namespace universelan::client {
 #ifdef _WIN32
 		{
 			TCHAR szFileName[MAX_PATH];
+			// REVIEW: GetModuleFileName returns zero on failure and a length on
+			// success. This condition is reversed, so the failure path prints an
+			// uninitialized buffer while successful calls print nothing.
 			if (GetModuleFileName(NULL, szFileName, MAX_PATH) == ERROR_SUCCESS) {
 				std::cout << "Process: " << szFileName << std::endl;
 			}
@@ -45,9 +51,11 @@ namespace universelan::client {
 #else
 			std::cout << "Exception occurred during init: " << ex.what() << std::endl;
 #endif
-
 		}
 
+		// REVIEW: If init throws before allocating config (for example bad_alloc),
+		// this unconditional dereference crashes while handling the original error.
+		// Return or guard when initialization failed before using config.
 		tracer::Trace::SetLogToCout(universe_client_api.config->ShouldTraceToConsole());
 
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
@@ -78,6 +86,8 @@ namespace universelan::client {
 	void ShutdownEx(const ShutdownOptions& shutdownOptions) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
+		// REVIEW: shutdownOptions is accepted at the ABI boundary but ignored.
+		// Preserve the SDK option semantics or document the unsupported fields.
 		universe_client_api.reset();
 	}
 #endif
@@ -157,6 +167,10 @@ namespace universelan::client {
 #endif
 
 	void ProcessData() {
+		// REVIEW: real_process_data is an empty std::function before a successful
+		// Init and after reset(). Calling ProcessData in either state throws
+		// std::bad_function_call through the exported ABI; guard the lifecycle or
+		// return a documented initialization error.
 		universe_client_api.real_process_data();
 	}
 
@@ -176,6 +190,9 @@ namespace universelan::client {
 	}
 
 	uint32_t load() {
+		// REVIEW: real_load is a shared std::function initialized lazily without
+		// synchronization; concurrent load() calls race during assignment. Protect
+		// lazy resolution with call_once or equivalent locking.
 		if (!universe_client_api.real_load) {
 			universe_client_api.real_load = SharedLibUtils::get_func<functional::xt<decltype(universe_client_api.real_load)>::PTR>("load");
 		}

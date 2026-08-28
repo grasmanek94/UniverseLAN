@@ -16,6 +16,9 @@ namespace universelan {
 #if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LEAVE_REASON
 		galaxy::api::ILobbyLeftListener::LobbyLeaveReason reason = galaxy::api::ILobbyLeftListener::LOBBY_LEAVE_REASON_UNDEFINED;
 #else
+		// REVIEW: In SDKs without LobbyLeaveReason, this fallback has no initializer.
+		// The default constructor then leaves it indeterminate and serializing a
+		// default LeaveLobbyMessage transmits undefined data; initialize it to false.
 		bool reason; // ioFailure
 #endif
 

@@ -19,6 +19,9 @@ int main()
 
 	GET_GALAXY_API(User())->SignInGalaxy();
 
+	// REVIEW: If authentication fails, no listener updates signed_in or end_time,
+	// so this loop has no failure deadline and the test hangs forever. Add a
+	// bounded timeout and assert/report the authentication failure.
 	while (!signed_in || (std::chrono::steady_clock::now() < end_time))
 	{
 		GET_GALAXY_API_AS_IS(ProcessData());

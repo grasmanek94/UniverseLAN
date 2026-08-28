@@ -10,6 +10,9 @@ std::string GetTimeNow() {
 }
 
 void TimerThread() {
+	// REVIEW: This loop has no stop token and is detached below. It continues
+	// enqueueing callbacks and dereferencing Galaxy globals after test teardown,
+	// so the harness cannot safely call GALAXY_DEINIT or release its state.
 	while (true) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
@@ -43,6 +46,8 @@ void OnLobbyCreated(const GalaxyID& lobbyID, LobbyCreateResult result)
 
 	matchmaking_ptr->SetLobbyData(lobbyID, "timer", GetTimeNow().c_str());
 
+	// REVIEW: Detaching the unbounded TimerThread makes its lifetime exceed the
+	// test and leaves a use-after-teardown path through delay_runner/API globals.
 	std::thread{ TimerThread }.detach(); // !!! LEAK !!! (until thread exits)
 }
 

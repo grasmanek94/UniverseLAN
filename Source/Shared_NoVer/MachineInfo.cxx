@@ -95,6 +95,9 @@ namespace universelan {
 				}
 
 				*pszAddress = (unsigned char*)HeapAlloc(hHeap, 0x00, MAX_ADAPTER_ADDRESS_LENGTH * nAddressCount);
+				// REVIEW: This allocation is not checked before the loop below
+				// dereferences *pszAddress. An OOM during adapter discovery becomes
+				// a null-pointer crash; return failure when the allocation fails.
 				pCurrAddresses = pAddresses;
 				nAddressCount = 0;
 				while (pCurrAddresses)
@@ -500,6 +503,9 @@ namespace universelan {
 			// Get the user name.
 			if (GetUserName(infoBuf, &bufCharCount)) {
 				if (bufCharCount > 0) {
+					// REVIEW: TCHAR may be wchar_t in UNICODE builds, but this
+					// assigns its bytes directly to std::string. Use the explicit
+					// A API or convert the wide result to preserve the username.
 					user_name.assign((const char* const)infoBuf, (const size_t)(bufCharCount - 1));
 				}
 			}
@@ -518,6 +524,9 @@ namespace universelan {
 			// Get the computer name.
 			if (GetComputerName(infoBuf, &bufCharCount)) {
 				if (bufCharCount > 0) {
+					// REVIEW: The TCHAR buffer is byte-cast into std::string;
+					// UNICODE builds therefore corrupt/truncate the machine name.
+					// Use GetComputerNameA or perform an explicit conversion.
 					machine_name.assign((const char* const)infoBuf, (const size_t)(bufCharCount - 1));
 				}
 			}

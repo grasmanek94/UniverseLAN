@@ -14,6 +14,9 @@ namespace universelan {
 	{ }
 
 	MessageUniqueID::MessageUniqueID(uint64_t id) :
+		// REVIEW: Explicit IDs do not advance or coordinate with the atomic
+		// counter, so MessageUniqueID(1) can collide with an auto-generated ID.
+		// Validate/reserve explicit IDs or separate externally assigned IDs.
 		id{ id }
 	{ }
 

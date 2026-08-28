@@ -40,6 +40,9 @@ namespace universelan::tracer {
 
 	public:
 		static Stacker* GetInstance();
+		// REVIEW: The atomic callback slot does not own `target`; a handler may
+		// load the pointer while its owner destroys it, causing use-after-free.
+		// Require process-lifetime ownership or synchronize unregister/destruction.
 		void SetUnhandledExceptionCallback(IUnhandledExceptionCallback* target);
 	};
 }

@@ -91,6 +91,11 @@ namespace universelan::client {
 	void InterfaceInstances::reset() {
 		internal_reset();
 
+		// REVIEW: reset is not synchronized with ProcessData or API calls. The
+		// notification path keeps raw InterfaceInstances/DelayRunner pointers, so
+		// clearing dependencies can race an in-flight callback even though the
+		// networking worker only queues events. Quiesce API dispatch, stop/join
+		// producers, and drain/cancel callbacks before destroying dependencies.
 		delay_runner = nullptr;
 
 		if (client) {

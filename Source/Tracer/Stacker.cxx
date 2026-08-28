@@ -100,6 +100,10 @@ namespace universelan::tracer {
 		std::atomic<IUnhandledExceptionCallback*> callback{ nullptr };
 
 		void StackerUnhandledExceptionCallback(IUnhandledExceptionCallback* cb) {
+			// REVIEW: This runs from a Windows SEH handler but uses exception_ptr,
+			// std::string/vector, formatting, StackWalker, and the user callback;
+			// each may allocate or throw. A failure here can replace the original
+			// crash, so provide a no-throw, preallocated crash path.
 			const std::exception_ptr exception{ std::current_exception() };
 			static thread_local UECData data{};
 			if (data.call_is_nested) {
@@ -167,6 +171,10 @@ namespace universelan::tracer {
 			if (create_minidump_on_unhandles_exception) {
 		
 				// Write minidump file
+				// REVIEW: OurCrashHandler receives the original ExceptionInfo, but
+				// this path discards it and synthesizes a new context in
+				// CreateMiniDump, so the dump can describe the handler rather than
+				// the fault. Pass the original exception pointers through.
 				TCHAR szFileName[MAX_PATH];
 
 				GetModuleFileName(NULL, szFileName, MAX_PATH);

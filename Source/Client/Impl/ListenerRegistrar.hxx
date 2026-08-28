@@ -84,6 +84,10 @@ namespace universelan::client {
 					return false;
 				}
 
+				// REVIEW: The reverse map allows only one request per listener. A
+				// second concurrent request leaves its forward entry untracked, so
+				// Unregister cannot cancel it and a later pop can erase the wrong
+				// reverse entry. Track all request IDs per listener.
 				listeners.emplace(listener, request_id);
 				return true;
 			}

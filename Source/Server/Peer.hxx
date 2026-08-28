@@ -36,6 +36,9 @@ namespace universelan::server::peer {
 		ptr Connect(ENetPeer* peer);
 		void Disconnect(ENetPeer* peer);
 
+		// REVIEW: This header uses std::unordered_set without including its
+		// declaration. It currently relies on a transitive include, so standalone
+		// inclusion can fail; include <unordered_set> directly.
 		std::unordered_set<ENetPeer*> connected_peers;
 	};
 

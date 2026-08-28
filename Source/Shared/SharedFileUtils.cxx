@@ -23,6 +23,9 @@ namespace universelan {
 
 	SharedFileUtils::SharedFileUtils(const std::filesystem::path& basepath) :
 		storage{ std::make_shared<fs_container>(std::filesystem::current_path() / basepath / ROOT_LOCAL) },
+		// REVIEW: These two roots are reversed: the member named `shared` points at
+		// Cloud and `cloud` points at Shared. Impact: all callers using those handles
+		// read/write the other storage area. Initialize each handle from its matching root.
 		shared{ std::make_shared<fs_container>(std::filesystem::current_path() / basepath / ROOT_CLOUD) },
 		cloud{ std::make_shared<fs_container>(std::filesystem::current_path() / basepath / ROOT_SHARED) },
 		avatars{ std::make_shared<fs_container>(std::filesystem::current_path() / basepath / ROOT_AVATARS) }
@@ -156,6 +159,9 @@ namespace universelan {
 
 	bool SharedFileUtils::Write(const fs_container_ptr& container, const char* file_name, const char* data, size_t data_length) const
 	{
+		// REVIEW: Unlike the ID overload, this path does not reject a null data
+		// pointer before forwarding it to fs_entry::write. A null buffer can crash
+		// even when the caller supplies a non-zero length; validate data first.
 		if (!container || file_name == nullptr || *file_name == '\0') {
 			return false;
 		}

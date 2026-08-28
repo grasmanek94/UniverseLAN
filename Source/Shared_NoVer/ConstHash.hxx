@@ -8,6 +8,9 @@ namespace universelan {
 
 	// compile time FNV-1a
 	inline constexpr uint32_t const_hash(const char* const str, const uint32_t value = 0x811c9dc5) noexcept {
+		// REVIEW: Casting plain char to an unsigned hash word makes bytes >=
+		// 0x80 sign-extend on platforms with signed char, producing different
+		// hashes across platforms. Cast through unsigned char before widening.
 		return (str[0] == '\0') ? value : const_hash(&str[1], (value ^ uint32_t(str[0])) * 0x1000193);
 	}
 
@@ -20,6 +23,9 @@ namespace universelan {
 	}
 
 	inline constexpr uint64_t const_hash64(const std::string& str, const uint64_t value = 0x811c9dc5) noexcept {
+		// REVIEW: The string overload's default seed differs from the char*
+		// overload, so identical input hashes differently depending on overload.
+		// Use the 64-bit FNV-1a offset basis here.
 		return const_hash64(str.c_str(), value);
 	}
 

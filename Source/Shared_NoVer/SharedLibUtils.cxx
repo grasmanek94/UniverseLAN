@@ -106,9 +106,18 @@ namespace universelan
 		}
 	}
 
-	SharedLibUtils::~SharedLibUtils() {}
+	SharedLibUtils::~SharedLibUtils() {
+		// REVIEW: The singleton and RealGalaxyDLL handle are never released.
+		// Function pointers can outlive an unload, but a reloadable interceptor
+		// needs explicit shutdown ownership (and must unload only after every
+		// wrapper is gone) instead of leaking the real SDK for the process life.
+	}
 
 	void* SharedLibUtils::get_func_ptr(const char* name) {
+		// REVIEW: instance, dll_name, dll_functions, and RealGalaxyDLL are shared
+		// globals but initialization is unsynchronized. Concurrent first calls
+		// can corrupt the name/vector and load different handles; guard one-time
+		// initialization (and all shared access) with call_once/mutex.
 		if (!instance) {
 			instance = new SharedLibUtils();
 		}
@@ -128,6 +137,9 @@ namespace universelan
 	}
 
 	const char* SharedLibUtils::get_function_match(const char* search) {
+		// REVIEW: This repeats the unsynchronized singleton initialization; a
+		// concurrent first call can race the vector traversal and invalidate the
+		// returned pointer. Share the same synchronized initialization path.
 		if (!instance) {
 			instance = new SharedLibUtils();
 		}

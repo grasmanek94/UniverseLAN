@@ -161,6 +161,11 @@ namespace universelan {
 					result = GalaxyNetworkClient::RunNetworkingResult::DISCONNECTED_EVENT;
 				}
 
+				// REVIEW: event.peer is an ENet-owned pointer, not an event-owned
+				// snapshot. The event is deferred until ProcessEvents(), so a
+				// reconnect or host replacement can invalidate or reuse this pointer
+				// before the handler runs. Queue a stable peer identity or quiesce
+				// and drain this queue before changing the ENet host.
 				received_events_to_process.push(event);
 
 				last_network_activity = std::chrono::steady_clock::now();
@@ -187,6 +192,11 @@ namespace universelan {
 
 			ENetEvent event = NetworkClient::Event();
 			event.type = ENET_EVENT_TYPE_DISCONNECT;
+			// REVIEW: A timeout synthesizes a disconnect by copying the last ENet
+			// event. If no current peer exists (or the host was replaced), this
+			// carries a null/stale peer into the deferred handler, whose
+			// disconnect path dereferences peer. Queue a stable client-level
+			// disconnect event instead of reusing ENet storage.
 			received_events_to_process.push(event);
 
 			if (result == GalaxyNetworkClient::RunNetworkingResult::DISCONNECTED_TIMEOUT) {

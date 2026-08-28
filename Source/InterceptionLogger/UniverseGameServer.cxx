@@ -37,6 +37,9 @@ namespace universelan::client {
 	void UniverseGameServer::ShutdownGameServer() {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL_GAMESERVERAPI };
 
+		// REVIEW: reset() clears real_shutdown before the next line invokes it,
+		// leaving an empty std::function and causing bad_function_call on every
+		// shutdown. Invoke the real shutdown before resetting the handles.
 		gameserver_intf_inst.reset();
 
 		gameserver_intf_inst.real_shutdown();

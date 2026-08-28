@@ -10,6 +10,9 @@
 namespace universelan::tracer {
 	static constexpr uint64_t bit(uint64_t N) { return 1ULL << N; }
 
+	// REVIEW: Trace is copyable, but each copy's destructor calls Exit without a
+	// matching Enter. Copying an enabled Trace underflows depth and emits a
+	// spurious exit; delete copy/move or implement ownership transfer.
 	class Trace
 	{
 	private:

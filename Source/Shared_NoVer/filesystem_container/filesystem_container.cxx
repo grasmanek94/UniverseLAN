@@ -180,6 +180,9 @@ namespace filesystem_container {
 
 			// "Share" the current entry
 			entry->set_share_id(share_id);
+			// REVIEW: The new share ID is never inserted into shareid_to_entry,
+			// so get(share_id)/remove(share_id) cannot find this existing file.
+			// Add the reverse-map entry while the locks are held.
 			entry->save_metadata();
 			return entry;
 		}
@@ -440,6 +443,9 @@ namespace filesystem_container {
 			return entry->second;
 		}
 
+		// REVIEW: nameless_subcontainer is still null on the first named lookup;
+		// dereferencing it here crashes and the newly created named container is
+		// discarded. Store the emplaced container and return it instead.
 		named_subcontainers.emplace(container, std::make_shared<filesystem_container>(basepath / named_containers_name / container));
 		nameless_subcontainer->rel_basepath = rel_basepath / named_containers_name / container;
 

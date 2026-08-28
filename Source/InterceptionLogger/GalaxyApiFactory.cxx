@@ -35,44 +35,32 @@ namespace galaxy::api
 		}
 #endif
 
-		virtual void Init(const char* clientID, const char* clientSecret, bool throwExceptions) override {
-			universelan::client::InitOptionsModern init_options{};
+		virtual void Init(const char* clientID, const char* clientSecret, bool throwExceptions = true) override {
+			universelan::client::InitOptionsImpl init_options{ nullptr, nullptr };
+			init_options.clientID = clientID;
+			init_options.clientSecret = clientSecret;
+			init_options.configFilePath = ".";
+#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_STORAGEPATH
+			init_options.storagePath = "";
+#endif
 
-			init_options.SetClientID(clientID);
-			init_options.SetClientSecret(clientSecret);
-			init_options.SetConfigFilePath(".");
-			init_options.SetStoragePath(".");
-			init_options.SetGalaxyPeerPath(".");
-			init_options.SetHost("");
-
-			init_options.galaxyAllocator = nullptr;
-			init_options.galaxyThreadFactory = nullptr;
-			init_options.port = 0;
-			init_options.throwExceptions = throwExceptions;
-			init_options.local_init = false;
-
-			// TODO: Implement throwExceptions
+			// REVIEW: throwExceptions is accepted but never copied into init_options, so
+			// callers cannot select the SDK's exception behavior. Preserve this flag.
 
 			universelan::client::Init(init_options);
 		}
 
-		virtual void InitLocal(const char* clientID, const char* clientSecret, const char* galaxyPeerPath, bool throwExceptions) override {
-			universelan::client::InitOptionsModern init_options{};
+		virtual void InitLocal(const char* clientID, const char* clientSecret, const char* galaxyPeerPath = ".", bool throwExceptions = true) override {
+			universelan::client::InitOptionsImpl init_options{ nullptr, nullptr };
+			init_options.clientID = clientID;
+			init_options.clientSecret = clientSecret;
+			init_options.configFilePath = ".";
+#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_STORAGEPATH
+			init_options.storagePath = "";
+#endif
 
-			init_options.SetClientID(clientID);
-			init_options.SetClientSecret(clientSecret);
-			init_options.SetConfigFilePath(".");
-			init_options.SetStoragePath(".");
-			init_options.SetGalaxyPeerPath(galaxyPeerPath);
-			init_options.SetHost("");
-
-			init_options.galaxyAllocator = nullptr;
-			init_options.galaxyThreadFactory = nullptr;
-			init_options.port = 0;
-			init_options.throwExceptions = throwExceptions;
-			init_options.local_init = true;
-
-			// TODO: Implement throwExceptions
+			// REVIEW: InitLocal ignores both galaxyPeerPath and throwExceptions; it always
+			// initializes with the default path and behavior. Forward both arguments.
 
 			universelan::client::Init(init_options);
 		}
@@ -164,6 +152,9 @@ namespace galaxy::api
 		}
 
 		virtual api::IError* GetLastError() override {
+			// REVIEW: The exported error manager always returns nullptr, so callers
+			// lose errors even though InterfaceInstances binds the real manager.
+			// Delegate this method to the underlying IErrorManager.
 			return nullptr;
 		}
 	};
@@ -176,6 +167,9 @@ namespace galaxy::api
 #endif
 
 	IGalaxy* FACTORY_CALLTYPE GalaxyFactory::GetInstance() {
+		// REVIEW: GetInstance/CreateInstance/Reset access the shared raw pointer
+		// without synchronization. Concurrent creation or Reset can race and return
+		// a pointer that Reset has already deleted; serialize the factory lifecycle.
 		if (instance == nullptr) {
 			//Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
@@ -187,6 +181,8 @@ namespace galaxy::api
 
 #if GALAXY_BUILD_FEATURE_HAS_IERRORMANAGER
 	IErrorManager* FACTORY_CALLTYPE GalaxyFactory::GetErrorManager() {
+		// REVIEW: This lazy raw-pointer write is also unsynchronized; concurrent
+		// callers can allocate multiple managers. Use the same factory lock.
 		if (errorManager == nullptr) {
 			//Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
@@ -207,9 +203,15 @@ namespace galaxy::api
 			delete instance;
 			instance = nullptr;
 		}
+		// REVIEW: errorManager is allocated by GetErrorManager but is never released
+		// here, leaking the manager and leaving a stale factory-owned object alive.
+		// Destroy/reset it together with instance.
 	}
 
 	IGalaxy* FACTORY_CALLTYPE GalaxyFactory::CreateInstance() {
+		// REVIEW: CreateInstance duplicates the unsynchronized singleton access in
+		// GetInstance; concurrent calls can allocate multiple GalaxyImpl objects.
+		// Use the same synchronized path for both entry points.
 		if (instance == nullptr) {
 			instance = new GalaxyImpl();
 		}

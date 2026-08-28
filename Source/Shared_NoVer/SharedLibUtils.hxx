@@ -14,6 +14,9 @@ namespace universelan
 
 		template<typename T>
 		static T get_func(const char* name) {
+			// REVIEW: Converting a void* from dlsym/GetProcAddress to a function
+			// pointer is not portable ISO C++; use the platform's supported
+			// function-pointer conversion and keep this API ABI-specific.
 			return (T)SharedLibUtils::get_func_ptr(name);
 		}
 

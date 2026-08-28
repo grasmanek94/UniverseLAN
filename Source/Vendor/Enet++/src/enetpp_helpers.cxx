@@ -10,6 +10,10 @@ extern "C" void enet_host_broadcast_except(ENetHost* host, enet_uint8 channelID,
 {
 	ENetPeer* currentPeer;
 
+	// REVIEW: This helper is called directly by the wrapper without checking
+	// host or packet. Both are dereferenced below (and packet is dereferenced
+	// again for referenceCount), so invalid broadcast calls crash instead of
+	// returning a failure result.
 	for (currentPeer = host->peers;
 		currentPeer < &host->peers[host->peerCount];
 		++currentPeer)

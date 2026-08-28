@@ -16,6 +16,10 @@ namespace universelan {
 		template<class Archive>
 		void serialize(Archive& ar)
 		{
+			// REVIEW: StatsDataContainer serializes only `i`; it cannot preserve
+			// whether SetStat(float) selected `f`, and loading then reading `f`
+			// relies on implementation-defined union type-punning. Serialize a type
+			// tag (or separate int/float representations).
 			ar(i);
 		}
 	};
@@ -50,6 +54,9 @@ namespace universelan {
 		template<class Archive>
 		void serialize(Archive& ar)
 		{
+			// REVIEW: This archive operation does not acquire the per-map mutexes.
+			// Concurrent setters/serializers can race; serialize under a coherent
+			// container lock or document exclusive access.
 			ar(Achievements, Stats, UserData, BootTime, PlayTime, RichPresence);
 		}
 
@@ -80,13 +87,20 @@ namespace universelan {
 			return func(RichPresence);
 		}
 
+		// REVIEW: PlayTime is read and written without synchronization, so
+		// SetPlayTime concurrent with GetPlayTime is a data race.
 		void SetPlayTime(uint32_t play_time);
 		uint32_t GetPlayTime() const;
 
 		AchievementsAndStatsContainer& operator=(const AchievementsAndStatsContainer& other);
 
+		// REVIEW: The returned pointer outlives the lock and can be invalidated by
+		// assignment (or a future erase). Return a value/handle or keep access
+		// inside the lock to prevent dangling/racing use.
 		AchievementData* GetAchievementData(const std::string& name);
 
+		// REVIEW: These references outlive the mutex guard; concurrent assignment
+		// or value mutation can invalidate or race with the caller's access.
 		const StatsDataContainer& GetStat(const std::string& name);
 		void SetStat(const std::string& name, int32_t value);
 		void SetStat(const std::string& name, float value);

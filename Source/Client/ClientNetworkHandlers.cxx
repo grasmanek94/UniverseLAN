@@ -8,6 +8,13 @@
 namespace universelan::client {
 	using namespace galaxy::api;
 
+	// REVIEW: RunNetworking only queues ENet events; these handlers are invoked
+	// later by ProcessEvents(), normally from ProcessData(). They nevertheless
+	// dereference raw InterfaceInstances dependencies without a lifecycle guard.
+	// Serialize ProcessData with Init/Shutdown and define an exception boundary
+	// for wrapper/listener calls rather than treating these as worker-thread
+	// callbacks.
+
 	void Client::Handle(ENetPeer* peer, const std::shared_ptr<FileShareMessage>& data) {
 		tracer::Trace trace{ "::FileShareMessage(SHOULDNTHAPPN)", tracer::Trace::NETCLIENT };
 	} // For server only, client uses FileShareResponseMessage
@@ -20,6 +27,14 @@ namespace universelan::client {
 
 	namespace {
 		void client_log(const universelan::client::InterfaceInstances* const interfaces, tracer::Trace& trace, const std::string& what) {
+			// REVIEW: config is dereferenced unconditionally. A ProcessData call
+			// that overlaps failed initialization or reset can reach this helper
+			// after config has been cleared; make the lifecycle contract explicit
+			// or guard the dependency.
+			// REVIEW: The condition is inverted: with the default
+			// TraceToConsole=false, this writes every network diagnostic to
+			// std::cout, while enabling console tracing suppresses it. Use the
+			// configured value directly so the setting controls output as named.
 			if (!interfaces->config->ShouldTraceToConsole()) {
 				std::cout << what << '\n';
 			}
@@ -114,6 +129,12 @@ namespace universelan::client {
 
 		case RequestSpecificUserDataMessage::RequestTypeRichPresence:
 			interfaces->friends->RequestRichPresenceProcessed(data);
+			break;
+
+		default:
+			// REVIEW: Unknown request types are silently discarded. A newer
+			// protocol/SDK value will never notify a caller; log or return an
+			// explicit unsupported result so compatibility failures are visible.
 			break;
 		}
 	}

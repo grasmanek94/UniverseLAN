@@ -97,6 +97,10 @@ namespace universelan::client {
 			auto& temp_set_ref = listeners[listenerType].set;
 
 			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
+				// REVIEW: Both diagnostics pass an argument to a format string
+				// without a replacement field. Standard format validation can
+				// reject this (often at compile time); use "{}" so tracing cannot
+				// fail the notification path.
 				trace.write_all(std::format("temp_set_ref.size(): ", temp_set_ref.size()));
 			}
 
@@ -178,6 +182,9 @@ namespace universelan::client {
 				trace.write_all(std::format("temp_set_ref.size(): ", temp_set_ref.size()));
 			}
 
+			// REVIEW: `set` is still empty because it is copied below. With no
+			// `extra`, this returns false even when persistent listeners exist,
+			// suppressing the notification. Test temp_set_ref or copy first.
 			if (set.size() == 0 && extra == nullptr) {
 
 				if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {

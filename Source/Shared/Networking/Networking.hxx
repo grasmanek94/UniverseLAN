@@ -55,6 +55,10 @@ namespace universelan {
 					return false;
 				}
 
+				// REVIEW: This archive is populated directly from network-controlled bytes.
+				// Vector/string/map lengths in messages are not bounded before allocation,
+				// so a peer can send a valid-looking packet that causes excessive memory
+				// use. Validate per-message sizes (or enforce an archive-wide limit) first.
 				// Get the struct data
 				iarchive(*var);
 			}
@@ -101,6 +105,9 @@ namespace universelan {
 	template<typename T>
 	ENetPacket* ConvertToENetPacket(const std::shared_ptr<T>& object, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE)
 	{
+		// REVIEW: This overload dereferences `object` without checking it. The
+		// Send/Broadcast/SendAsync shared_ptr overloads therefore crash on null.
+		// Suggested fix: reject null and return the same failure result as allocation.
 		return ConvertToENetPacket(*object, flags);
 	}
 
@@ -127,6 +134,9 @@ namespace universelan {
 		mutable Concurrency::concurrent_queue<ENetPacket*> delayed_packets_to_send;
 		mutable Concurrency::concurrent_queue<ENetEvent> received_events_to_process;
 
+		// REVIEW: RunNetworking writes this flag from its worker while
+		// IsConnected is callable from API threads. A plain bool makes those
+		// accesses a data race; use atomic state or synchronize the access.
 		bool is_connected;
 		bool is_timeout;
 
@@ -159,10 +169,14 @@ namespace universelan {
 		template<typename T>
 		bool SendAsync(const std::shared_ptr<T>& object, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE) const
 		{
+			// REVIEW: A null shared_ptr is dereferenced before SendAsync can
+			// report packet allocation failure. Validate object first.
 			return SendAsync(*object, flags);
 		}
 
 		RunNetworkingResult RunNetworking(uint32_t timeout);
+		// REVIEW: ProcessEvents unconditionally calls receiver->ProcessEvent; a null
+		// receiver is an immediate crash. Reject null (or use a non-null reference).
 		void ProcessEvents(MessageReceiver* receiver);
 		bool IsConnected() const;
 		void SetNetworkReconnectTimeout(const duration_t& duration);
@@ -190,6 +204,8 @@ namespace universelan {
 		template<typename T>
 		int Send(ENetPeer* peer, const std::shared_ptr<T>& object, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE)
 		{
+			// REVIEW: A null shared_ptr is dereferenced before Send can report
+			// failure. Validate object first.
 			return Send(peer, *object, flags);
 		}
 
@@ -210,6 +226,8 @@ namespace universelan {
 		template<typename T>
 		bool Broadcast(const std::shared_ptr<T>& object, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE)
 		{
+			// REVIEW: A null shared_ptr is dereferenced before Broadcast can
+			// report failure. Validate object first.
 			return Broadcast(*object, flags);
 		}
 
@@ -231,6 +249,8 @@ namespace universelan {
 		template<typename T>
 		bool Broadcast(const std::shared_ptr<T>& object, ENetPeer* except, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE)
 		{
+			// REVIEW: A null shared_ptr is dereferenced before Broadcast can
+			// report failure. Validate object first.
 			return Broadcast(*object, except, flags);
 		}
 

@@ -27,6 +27,9 @@ namespace universelan {
 			: id{ 0 }, channel{ 0 }, send_type{ galaxy::api::P2P_SEND_UNRELIABLE }, data{} {}
 
 		P2PNetworkPacketMessage(galaxy::api::GalaxyID id, uint8_t channel, galaxy::api::P2PSendType send_type, const char* data, uint32_t data_length)
+			// REVIEW: Constructing a range from a null `data` pointer (including
+			// `data + 0`) is undefined behavior. Validate null/length before pointer
+			// arithmetic or represent zero-length payloads without a pointer range.
 			: id{ id }, channel{ channel }, send_type{ send_type }, data{ data, data + data_length } {}
 	};
 }

@@ -24,6 +24,9 @@ namespace universelan::client {
 #endif
 
 	{
+		// REVIEW: clientID/clientSecret are assigned to std::string without null
+		// checks, unlike configFilePath. A null Galaxy option is undefined behavior;
+		// normalize both required strings (and copy throwExceptions) explicitly.
 		clientID = initOptions.clientID;
 		clientSecret = initOptions.clientSecret;
 		configFilePath = initOptions.configFilePath != nullptr ? initOptions.configFilePath : "";

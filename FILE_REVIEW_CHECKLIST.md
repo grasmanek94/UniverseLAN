@@ -1,0 +1,2186 @@
+# UniverseLAN file-by-file baseline review checklist
+
+This inventory is generated from tracked files on the review branch. Every in-scope path is listed exactly once and assigned to a focused review track; a check mark means the path is included in the baseline review, not that a defect exists. Findings are recorded inline when the file can safely carry comments, or in a `*.review.md` sidecar for build/config/generated/binary-oriented paths.
+
+## Scope accounting
+
+| Set | Count |
+| --- | ---: |
+| Tracked files | 5,820 |
+| Excluded by `.github/copilot-instructions.md` | 3,684 |
+| In-scope paths listed below | 2,136 |
+| Current-branch review artifacts included in that inventory | 14 |
+| Baseline subject files after removing those artifacts | 2,122 |
+| Handwritten C++ (`.cxx`, `.hxx`, `.h`) | 318 |
+| Generated SDK C/C++ | 1,381 across 69 families |
+
+The SDK exception is intentional: generated families are covered by representative earliest/latest and feature-transition comparisons, both architectures, and manifest review. They are not edited one-by-one because generated changes would be overwritten.
+
+## Review tracks
+
+| Track | Focus |
+| --- | --- |
+| Client | Thread lifecycle, API state, callbacks, Galaxy compatibility |
+| Client_NoVer | Queue, value ownership, and utility exception safety |
+| Server | Tick lifecycle, peer ownership, authentication, handler invariants |
+| Shared | Protocol fields, lobby/chat state, API/lifetime contracts |
+| Shared_NoVer | Filesystem, serialization, utilities, and synchronization |
+| Networking | ENet ownership, event lifetime, packet validation |
+| InterceptionLogger | ABI forwarding, dynamic exports, listeners, teardown |
+| Tracer | Global state, callback safety, file/thread lifetime |
+| SDK generated | Version transitions, exports, feature guards, x86/x64 manifests |
+| Build/config/data | CMake, scripts, credentials, generated resources, package inputs |
+| Tests | Test lifetime, secrets, waits, and coverage signal |
+| Version/root/docs | Release/version metadata and documented integration contracts |
+
+## In-scope files
+
+- [x] `.gitattributes` - Version/root/docs
+- [x] `.gitignore` - Version/root/docs
+- [x] `cmake-linux-x64.sh` - Build/config/data
+- [x] `cmake-linux-x86.sh` - Build/config/data
+- [x] `CMakeLists.txt` - Build/config/data
+- [x] `CMakeLists.txt.review.md` - Version/root/docs
+- [x] `cmake-x64.bat` - Build/config/data
+- [x] `cmake-x64-with-interceptor.bat` - Build/config/data
+- [x] `cmake-x64-with-limited-versions.bat` - Build/config/data
+- [x] `cmake-x64-with-tests.bat` - Build/config/data
+- [x] `cmake-x64-with-tests-limited-versions-interceptor.bat` - Build/config/data
+- [x] `cmake-x86.bat` - Build/config/data
+- [x] `cmake-x86-with-interceptor.bat` - Build/config/data
+- [x] `cmake-x86-with-limited-versions.bat` - Build/config/data
+- [x] `cmake-x86-with-tests.bat` - Build/config/data
+- [x] `cmake-x86-with-tests-limited-versions-interceptor.bat` - Build/config/data
+- [x] `COMPREHENSIVE_REVIEW_FINAL.md` - Version/root/docs
+- [x] `COMPREHENSIVE_REVIEW_STATUS.md` - Version/root/docs
+- [x] `Config/UniverseLAN.ini` - Build/config/data
+- [x] `Config/UniverseLAN.ini.review.md` - Build/config/data
+- [x] `Config/UniverseLANData/Achievements.ini` - Build/config/data
+- [x] `Config/UniverseLANData/Avatars/files/me.png` - Build/config/data
+- [x] `Config/UniverseLANData/Cloud/.gitkeep` - Build/config/data
+- [x] `Config/UniverseLANData/Config.ini` - Build/config/data
+- [x] `Config/UniverseLANData/DLC.ini` - Build/config/data
+- [x] `Config/UniverseLANData/Local/.gitkeep` - Build/config/data
+- [x] `Config/UniverseLANData/Logging/.gitkeep` - Build/config/data
+- [x] `Config/UniverseLANData/Shared/.gitkeep` - Build/config/data
+- [x] `Config/UniverseLANData/Stats.ini` - Build/config/data
+- [x] `Config/UniverseLANData/Telemetry/.gitkeep` - Build/config/data
+- [x] `Config/UniverseLANData/Tracing/.gitkeep` - Build/config/data
+- [x] `Config/UniverseLANData/UserData.ini` - Build/config/data
+- [x] `Config/UniverseLANServerData/Avatars/me.png` - Build/config/data
+- [x] `Config/UniverseLANServerData/Cloud/.gitkeep` - Build/config/data
+- [x] `Config/UniverseLANServerData/Config.ini` - Build/config/data
+- [x] `Config/UniverseLANServerData/Config.ini.review.md` - Build/config/data
+- [x] `Config/UniverseLANServerData/Local/.gitkeep` - Build/config/data
+- [x] `Config/UniverseLANServerData/Logging/.gitkeep` - Build/config/data
+- [x] `Config/UniverseLANServerData/Shared/.gitkeep` - Build/config/data
+- [x] `Config/UniverseLANServerData/Telemetry/.gitkeep` - Build/config/data
+- [x] `Config/UniverseLANServerData/Tracing/.gitkeep` - Build/config/data
+- [x] `ConfigDebug/UniverseLAN.ini` - Build/config/data
+- [x] `ConfigDebug/UniverseLANData/Achievements.ini` - Build/config/data
+- [x] `ConfigDebug/UniverseLANData/Avatars/files/me.png` - Build/config/data
+- [x] `ConfigDebug/UniverseLANData/Cloud/.gitkeep` - Build/config/data
+- [x] `ConfigDebug/UniverseLANData/Config.ini` - Build/config/data
+- [x] `ConfigDebug/UniverseLANData/DLC.ini` - Build/config/data
+- [x] `ConfigDebug/UniverseLANData/Local/.gitkeep` - Build/config/data
+- [x] `ConfigDebug/UniverseLANData/Logging/.gitkeep` - Build/config/data
+- [x] `ConfigDebug/UniverseLANData/Shared/.gitkeep` - Build/config/data
+- [x] `ConfigDebug/UniverseLANData/Stats.ini` - Build/config/data
+- [x] `ConfigDebug/UniverseLANData/Telemetry/.gitkeep` - Build/config/data
+- [x] `ConfigDebug/UniverseLANData/Tracing/.gitkeep` - Build/config/data
+- [x] `ConfigDebug/UniverseLANData/UserData.ini` - Build/config/data
+- [x] `ConfigDebug/UniverseLANServerData/Avatars/me.png` - Build/config/data
+- [x] `ConfigDebug/UniverseLANServerData/Cloud/.gitkeep` - Build/config/data
+- [x] `ConfigDebug/UniverseLANServerData/Config.ini` - Build/config/data
+- [x] `ConfigDebug/UniverseLANServerData/Local/.gitkeep` - Build/config/data
+- [x] `ConfigDebug/UniverseLANServerData/Logging/.gitkeep` - Build/config/data
+- [x] `ConfigDebug/UniverseLANServerData/Shared/.gitkeep` - Build/config/data
+- [x] `ConfigDebug/UniverseLANServerData/Telemetry/.gitkeep` - Build/config/data
+- [x] `ConfigDebug/UniverseLANServerData/Tracing/.gitkeep` - Build/config/data
+- [x] `FILE_REVIEW_CHECKLIST.md` - Version/root/docs
+- [x] `LICENSE` - Version/root/docs
+- [x] `package-release.ps1` - Build/config/data
+- [x] `package-release.ps1.review.md` - Version/root/docs
+- [x] `README.MD` - Version/root/docs
+- [x] `Source/Client/Client.cxx` - Client
+- [x] `Source/Client/Client.hxx` - Client
+- [x] `Source/Client/ClientNetworkHandlers.cxx` - Client
+- [x] `Source/Client/CMakeLists.txt` - Build/config/data
+- [x] `Source/Client/Factory.cxx` - Client
+- [x] `Source/Client/GalaxyApi.cxx` - Client
+- [x] `Source/Client/GalaxyApiFactory.cxx` - Client
+- [x] `Source/Client/GalaxyDLL.cxx` - Client
+- [x] `Source/Client/GalaxyDLL.hxx` - Client
+- [x] `Source/Client/GalaxyGameServerApi.cxx` - Client
+- [x] `Source/Client/Impl/Apps.cxx` - Client
+- [x] `Source/Client/Impl/Apps.hxx` - Client
+- [x] `Source/Client/Impl/Chat.cxx` - Client
+- [x] `Source/Client/Impl/Chat.hxx` - Client
+- [x] `Source/Client/Impl/CloudStorage.cxx` - Client
+- [x] `Source/Client/Impl/CloudStorage.hxx` - Client
+- [x] `Source/Client/Impl/CustomNetworking.cxx` - Client
+- [x] `Source/Client/Impl/CustomNetworking.hxx` - Client
+- [x] `Source/Client/Impl/Errors.cxx` - Client
+- [x] `Source/Client/Impl/Errors.hxx` - Client
+- [x] `Source/Client/Impl/Friends.cxx` - Client
+- [x] `Source/Client/Impl/Friends.hxx` - Client
+- [x] `Source/Client/Impl/GalaxyThread.cxx` - Client
+- [x] `Source/Client/Impl/GalaxyThread.hxx` - Client
+- [x] `Source/Client/Impl/InitOptionsFactory.hxx` - Client
+- [x] `Source/Client/Impl/InitOptionsModern.cxx` - Client
+- [x] `Source/Client/Impl/InitOptionsModern.hxx` - Client
+- [x] `Source/Client/Impl/ListenerRegistrar.cxx` - Client
+- [x] `Source/Client/Impl/ListenerRegistrar.hxx` - Client
+- [x] `Source/Client/Impl/Logger.cxx` - Client
+- [x] `Source/Client/Impl/Logger.hxx` - Client
+- [x] `Source/Client/Impl/Matchmaking.cxx` - Client
+- [x] `Source/Client/Impl/Matchmaking.hxx` - Client
+- [x] `Source/Client/Impl/Networking.cxx` - Client
+- [x] `Source/Client/Impl/Networking.hxx` - Client
+- [x] `Source/Client/Impl/Stats.cxx` - Client
+- [x] `Source/Client/Impl/Stats.hxx` - Client
+- [x] `Source/Client/Impl/Storage.cxx` - Client
+- [x] `Source/Client/Impl/Storage.hxx` - Client
+- [x] `Source/Client/Impl/Telemetry.cxx` - Client
+- [x] `Source/Client/Impl/Telemetry.hxx` - Client
+- [x] `Source/Client/Impl/User.cxx` - Client
+- [x] `Source/Client/Impl/User.hxx` - Client
+- [x] `Source/Client/Impl/Utils.cxx` - Client
+- [x] `Source/Client/Impl/Utils.hxx` - Client
+- [x] `Source/Client/UniverseGameServer.cxx` - Client
+- [x] `Source/Client/UniverseGameServer.hxx` - Client
+- [x] `Source/Client/UniverseLAN.cxx` - Client
+- [x] `Source/Client/UniverseLAN.hxx` - Client
+- [x] `Source/Client_NoVer/CMakeLists.txt` - Build/config/data
+- [x] `Source/Client_NoVer/Impl/DelayRunner.cxx` - Client_NoVer
+- [x] `Source/Client_NoVer/Impl/DelayRunner.hxx` - Client_NoVer
+- [x] `Source/Client_NoVer/Impl/NotificationParamScopeExtender.cxx` - Client_NoVer
+- [x] `Source/Client_NoVer/Impl/NotificationParamScopeExtender.hxx` - Client_NoVer
+- [x] `Source/CMakeLists.txt` - Build/config/data
+- [x] `Source/DLLs/.gitignore` - SDK generated
+- [x] `Source/DLLs/1.100.2/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.100.2/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.100.2/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.100.2/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.100.2/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.100.2/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.100.2/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.100.2/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.100.2/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.100.2/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.100.2/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.100.2/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.100.2/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.100.2/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.100.2/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.100.2/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.100.2/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.100.2/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.100.2/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.100.2/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.100.2/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.100.2/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.100.2/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.104.2/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.104.2/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.104.2/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.104.2/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.104.2/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.104.2/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.104.2/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.104.2/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.104.2/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.104.2/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.104.2/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.104.2/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.104.2/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.104.2/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.104.2/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.104.2/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.104.2/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.104.2/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.104.2/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.104.2/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.104.2/x64/interceptor_versioninfo.rc` - SDK generated
+- [x] `Source/DLLs/1.104.2/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.104.2/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.104.2/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.104.3/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.104.3/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.104.3/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.104.3/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.104.3/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.104.3/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.104.3/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.104.3/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.104.3/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.104.3/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.104.3/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.104.3/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.104.3/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.104.3/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.104.3/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.104.3/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.104.3/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.104.3/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.104.3/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.104.3/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.104.3/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.104.3/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.104.3/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.104.4/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.104.4/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.104.4/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.104.4/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.104.4/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.104.4/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.104.4/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.104.4/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.104.4/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.104.4/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.104.4/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.104.4/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.104.4/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.104.4/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.104.4/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.104.4/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.104.4/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.104.4/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.104.4/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.104.4/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.104.4/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.104.4/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.104.4/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.104.4/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.106.0/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.106.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.106.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.106.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.106.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.106.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.106.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.106.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.106.0/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.106.0/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.106.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.106.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.106.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.106.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.106.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.106.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.106.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.106.0/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.106.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.106.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.106.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.106.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.106.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.106.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.109.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.109.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.109.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.109.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.109.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.109.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.109.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.109.0/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.109.0/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.109.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.109.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.109.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.109.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.109.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.109.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.109.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.109.0/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.109.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.109.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.109.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.109.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.109.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.109.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.112.2/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.112.2/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.112.2/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.112.2/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.112.2/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.112.2/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.112.2/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.112.2/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.112.2/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.112.2/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.112.2/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.112.2/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.112.2/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.112.2/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.112.2/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.112.2/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.112.2/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.112.2/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.112.2/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.112.2/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.112.2/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.112.2/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.112.2/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.112.2/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.113.1/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.113.1/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.113.1/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.113.1/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.113.1/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.113.1/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.113.1/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.113.1/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.113.1/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.113.1/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.113.1/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.113.1/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.113.1/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.113.1/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.113.1/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.113.1/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.113.1/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.113.1/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.113.1/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.113.1/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.113.1/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.113.1/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.113.1/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.113.1/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.113.3/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.113.3/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.113.3/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.113.3/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.113.3/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.113.3/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.113.3/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.113.3/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.113.3/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.113.3/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.113.3/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.113.3/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.113.3/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.113.3/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.113.3/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.113.3/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.113.3/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.113.3/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.113.3/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.113.3/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.113.3/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.113.3/x64/interceptor_versioninfo.rc` - SDK generated
+- [x] `Source/DLLs/1.113.3/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.113.3/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.113.3/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.114.9/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.114.9/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.114.9/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.114.9/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.114.9/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.114.9/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.114.9/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.114.9/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.114.9/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.114.9/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.114.9/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.114.9/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.114.9/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.114.9/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.114.9/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.114.9/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.114.9/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.114.9/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.114.9/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.114.9/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.114.9/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.114.9/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.114.9/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.114.9/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.121.2/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.121.2/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.121.2/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.121.2/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.121.2/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.121.2/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.121.2/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.121.2/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.121.2/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.121.2/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.121.2/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.121.2/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.121.2/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.121.2/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.121.2/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.121.2/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.121.2/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.121.2/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.121.2/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.121.2/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.121.2/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.121.2/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.121.2/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.121.2/x64/interceptor_versioninfo.rc` - SDK generated
+- [x] `Source/DLLs/1.121.2/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.121.2/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.121.2/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.124.0/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.124.0/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.124.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.124.0/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.124.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.124.0/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.124.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.124.0/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.124.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.124.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.124.0/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.124.0/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.124.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.124.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.124.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.124.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.124.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.124.0/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.124.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.124.0/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.124.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.124.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.124.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.124.0/x64/interceptor_versioninfo.rc` - SDK generated
+- [x] `Source/DLLs/1.124.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.124.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.124.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.125.2/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.125.2/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.125.2/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.125.2/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.125.2/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.125.2/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.125.2/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.125.2/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.125.2/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.125.2/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.125.2/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.125.2/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.125.2/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.125.2/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.125.2/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.125.2/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.125.2/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.125.2/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.125.2/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.125.2/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.125.2/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.125.2/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.125.2/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.125.2/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.125.2/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.125.2/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.126.1/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.126.1/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.126.1/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.126.1/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.126.1/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.126.1/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.126.1/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.126.1/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.126.1/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.126.1/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.126.1/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.126.1/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.126.1/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.126.1/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.126.1/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.126.1/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.126.1/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.126.1/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.126.1/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.126.1/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.126.1/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.126.1/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.126.1/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.126.1/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.126.1/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.126.1/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.127.0/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.127.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.127.0/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.127.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.127.0/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.127.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.127.0/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.127.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.127.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.127.0/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.127.0/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.127.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.127.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.127.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.127.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.127.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.127.0/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.127.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.127.0/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.127.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.127.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.127.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.127.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.127.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.127.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.128.3/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.128.3/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.128.3/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.128.3/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.128.3/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.128.3/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.128.3/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.128.3/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.128.3/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.128.3/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.128.3/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.128.3/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.128.3/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.128.3/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.128.3/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.128.3/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.128.3/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.128.3/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.128.3/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.128.3/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.128.3/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.128.3/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.128.3/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.128.3/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.128.3/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.128.3/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.130.0/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.130.0/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.130.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.130.0/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.130.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.130.0/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.130.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.130.0/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.130.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.130.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.130.0/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.130.0/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.130.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.130.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.130.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.130.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.130.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.130.0/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.130.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.130.0/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.130.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.130.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.130.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.130.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.130.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.130.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.131.3/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.131.3/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.131.3/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.131.3/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.131.3/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.131.3/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.131.3/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.131.3/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.131.3/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.131.3/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.131.3/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.131.3/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.131.3/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.131.3/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.131.3/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.131.3/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.131.3/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.131.3/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.131.3/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.131.3/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.131.3/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.131.3/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.131.3/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.131.3/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.131.3/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.131.3/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.132.1/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.132.1/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.132.1/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.132.1/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.132.1/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.132.1/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.132.1/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.132.1/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.132.1/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.132.1/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.132.1/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.132.1/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.132.1/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.132.1/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.132.1/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.132.1/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.132.1/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.132.1/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.132.1/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.132.1/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.132.1/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.132.1/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.132.1/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.132.1/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.132.1/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.132.1/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.133.0/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.133.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.133.0/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.133.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.133.0/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.133.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.133.0/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.133.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.133.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.133.0/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.133.0/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.133.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.133.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.133.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.133.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.133.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.133.0/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.133.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.133.0/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.133.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.133.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.133.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.133.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.133.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.133.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.133.6/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.133.6/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.133.6/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.133.6/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.133.6/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.133.6/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.133.6/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.133.6/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.133.6/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.133.6/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.133.6/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.133.6/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.133.6/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.133.6/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.133.6/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.133.6/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.133.6/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.133.6/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.133.6/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.133.6/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.133.6/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.133.6/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.133.6/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.133.6/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.133.6/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.133.6/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.134.10/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.134.10/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.134.10/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.134.10/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.134.10/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.134.10/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.134.10/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.134.10/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.134.10/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.134.10/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.134.10/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.134.10/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.134.10/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.134.10/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.134.10/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.134.10/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.134.10/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.134.10/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.134.10/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.134.10/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.134.10/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.134.10/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.134.10/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.134.10/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.134.10/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.134.10/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.134.8/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.134.8/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.134.8/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.134.8/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.134.8/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.134.8/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.134.8/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.134.8/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.134.8/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.134.8/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.134.8/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.134.8/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.134.8/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.134.8/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.134.8/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.134.8/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.134.8/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.134.8/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.134.8/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.134.8/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.134.8/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.134.8/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.134.8/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.134.8/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.134.8/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.134.8/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.134.8/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.134.9/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.134.9/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.134.9/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.134.9/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.134.9/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.134.9/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.134.9/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.134.9/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.134.9/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.134.9/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.134.9/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.134.9/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.134.9/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.134.9/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.134.9/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.134.9/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.134.9/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.134.9/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.134.9/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.134.9/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.134.9/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.134.9/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.134.9/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.134.9/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.134.9/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.134.9/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.135.0/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.135.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.135.0/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.135.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.135.0/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.135.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.135.0/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.135.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.135.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.135.0/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.135.0/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.135.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.135.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.135.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.135.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.135.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.135.0/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.135.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.135.0/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.135.0/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.135.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.135.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.135.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.135.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.135.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.135.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.138.0/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.138.0/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.138.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.138.0/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.138.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.138.0/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.138.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.138.0/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.138.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.138.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.138.0/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.138.0/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.138.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.138.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.138.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.138.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.138.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.138.0/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.138.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.138.0/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.138.0/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.138.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.138.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.138.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.138.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.138.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.138.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.139.2/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.139.2/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.139.2/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.139.2/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.139.2/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.139.2/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.139.2/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.139.2/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.139.2/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.139.2/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.139.2/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.139.2/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.139.2/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.139.2/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.139.2/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.139.2/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.139.2/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.139.2/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.139.2/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.139.2/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.139.2/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.139.2/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.139.2/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.139.2/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.139.2/x64/interceptor_versioninfo.rc` - SDK generated
+- [x] `Source/DLLs/1.139.2/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.139.2/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.139.2/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.139.5/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.139.5/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.139.5/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.139.5/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.139.5/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.139.5/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.139.5/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.139.5/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.139.5/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.139.5/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.139.5/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.139.5/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.139.5/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.139.5/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.139.5/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.139.5/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.139.5/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.139.5/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.139.5/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.139.5/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.139.5/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.139.5/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.139.5/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.139.5/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.139.5/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.139.5/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.139.5/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.139.6/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.139.6/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.139.6/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.139.6/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.139.6/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.139.6/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.139.6/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.139.6/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.139.6/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.139.6/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.139.6/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.139.6/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.139.6/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.139.6/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.139.6/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.139.6/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.139.6/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.139.6/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.139.6/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.139.6/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.139.6/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.139.6/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.139.6/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.139.6/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.139.6/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.139.6/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.139.9/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.139.9/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.139.9/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.139.9/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.139.9/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.139.9/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.139.9/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.139.9/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.139.9/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.139.9/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.139.9/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.139.9/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.139.9/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.139.9/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.139.9/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.139.9/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.139.9/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.139.9/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.139.9/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.139.9/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.139.9/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.139.9/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.139.9/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.139.9/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.139.9/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.139.9/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.139.9/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.140.0/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/GalaxyThread.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.140.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.140.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.140.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.140.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.142.0/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.142.0/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/GalaxyThread.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.142.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.142.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.142.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.142.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.144.1/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.144.1/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/GalaxyThread.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.144.1/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.144.1/x64/interceptor_versioninfo.rc` - SDK generated
+- [x] `Source/DLLs/1.144.1/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.144.1/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.144.1/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.148.1/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.148.1/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/GalaxyThread.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.148.1/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.148.1/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.148.1/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.148.1/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.148.11/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.148.11/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/GalaxyThread.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/ICloudStorage.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.148.11/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.148.11/x64/interceptor_versioninfo.rc` - SDK generated
+- [x] `Source/DLLs/1.148.11/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.148.11/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.148.11/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.148.14/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/GalaxyThread.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/ICloudStorage.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.148.14/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.148.14/x64/interceptor_versioninfo.rc` - SDK generated
+- [x] `Source/DLLs/1.148.14/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.148.14/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.148.14/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.148.2/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/GalaxyThread.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.148.2/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.148.2/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.148.2/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.148.2/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.148.3/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.148.3/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/GalaxyThread.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.148.3/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.148.3/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.148.3/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.148.3/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.148.5/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/GalaxyThread.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.148.5/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.148.5/x64/interceptor_versioninfo.rc` - SDK generated
+- [x] `Source/DLLs/1.148.5/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.148.5/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.148.5/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.148.6/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/GalaxyThread.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/ICloudStorage.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.148.6/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.148.6/x64/interceptor_versioninfo.rc` - SDK generated
+- [x] `Source/DLLs/1.148.6/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.148.6/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.148.6/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.148.7/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.148.7/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/GalaxyThread.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/ICloudStorage.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.148.7/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.148.7/x64/interceptor_versioninfo.rc` - SDK generated
+- [x] `Source/DLLs/1.148.7/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.148.7/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.148.7/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.149.0/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.149.0/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/GalaxyThread.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/ICloudStorage.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.149.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.149.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.149.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.149.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.150.0/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/GalaxyThread.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/ICloudStorage.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.150.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.150.0/x64/interceptor_versioninfo.rc` - SDK generated
+- [x] `Source/DLLs/1.150.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.150.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.150.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.151.0/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/GalaxyThread.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/ICloudStorage.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/galaxy/ShutdownOptions.h` - SDK generated
+- [x] `Source/DLLs/1.151.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.151.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.151.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.151.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.152.1/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/GalaxyThread.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/ICloudStorage.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/galaxy/ShutdownOptions.h` - SDK generated
+- [x] `Source/DLLs/1.152.1/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.152.1/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.152.1/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.152.1/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.152.11/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/GalaxyThread.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/ICloudStorage.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/galaxy/ShutdownOptions.h` - SDK generated
+- [x] `Source/DLLs/1.152.11/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.152.11/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.152.11/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.152.11/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.152.2/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/GalaxyThread.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/ICloudStorage.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/galaxy/ShutdownOptions.h` - SDK generated
+- [x] `Source/DLLs/1.152.2/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.152.2/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.152.2/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.152.2/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.152.6/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/GalaxyThread.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/ICloudStorage.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/galaxy/ShutdownOptions.h` - SDK generated
+- [x] `Source/DLLs/1.152.6/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.152.6/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.152.6/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.152.6/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.152.9/Dll.cxx` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/GalaxyAllocator.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/GalaxyExceptionHelper.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/GalaxyGameServerApi.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/GalaxyThread.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/IChat.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/ICloudStorage.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/InitOptions.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/ITelemetry.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/galaxy/ShutdownOptions.h` - SDK generated
+- [x] `Source/DLLs/1.152.9/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.152.9/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.152.9/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.152.9/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.57.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.57.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.57.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.57.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.57.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.57.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.57.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.57.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.57.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.57.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.57.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.57.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.57.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.57.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.57.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.57.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.57.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.57.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.60.0/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.60.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.60.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.60.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.60.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.60.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.60.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.60.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.60.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.60.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.60.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.60.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.60.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.60.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.60.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.60.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.60.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.60.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.60.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.61.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.61.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.61.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.61.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.61.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.61.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.61.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.61.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.61.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.61.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.61.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.61.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.61.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.61.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.61.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.61.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.61.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.61.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.64.0/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.64.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.64.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.64.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.64.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.64.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.64.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.64.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.64.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.64.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.64.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.64.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.64.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.64.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.64.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.64.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.64.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.64.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.64.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.66.0/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.66.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.66.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.66.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.66.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.66.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.66.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.66.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.66.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.66.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.66.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.66.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.66.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.66.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.66.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.66.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.66.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.66.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.66.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.67.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.67.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.67.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.67.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.67.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.67.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.67.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.67.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.67.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.67.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.67.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.67.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.67.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.67.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.67.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.67.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.67.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.67.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.67.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.68.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.68.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.68.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.68.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.68.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.68.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.68.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.68.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.68.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.68.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.68.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.68.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.68.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.68.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.68.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.68.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.68.0/x64/interceptor_versioninfo.rc` - SDK generated
+- [x] `Source/DLLs/1.68.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.68.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.68.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.69.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.69.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.69.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.69.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.69.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.69.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.69.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.69.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.69.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.69.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.69.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.69.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.69.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.69.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.69.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.69.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.69.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.69.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.69.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.70.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.70.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.70.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.70.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.70.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.70.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.70.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.70.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.70.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.70.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.70.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.70.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.70.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.70.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.70.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.70.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.70.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.70.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.70.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.72.0/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.72.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.72.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.72.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.72.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.72.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.72.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.72.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.72.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.72.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.72.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.72.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.72.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.72.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.72.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.72.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.72.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.72.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.72.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.72.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.73.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.73.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.73.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.73.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.73.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.73.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.73.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.73.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.73.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.73.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.73.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.73.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.73.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.73.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.73.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.73.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.73.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.73.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.73.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.73.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.74.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.74.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.74.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.74.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.74.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.74.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.74.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.74.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.74.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.74.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.74.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.74.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.74.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.74.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.74.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.74.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.74.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.74.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.74.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.74.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.75.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.75.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.75.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.75.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.75.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.75.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.75.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.75.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.75.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.75.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.75.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.75.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.75.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.75.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.75.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.75.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.75.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.75.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.75.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.75.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.76.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.76.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.76.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.76.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.76.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.76.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.76.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.76.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.76.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.76.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.76.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.76.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.76.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.76.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.76.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.76.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.76.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.76.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.76.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.76.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.77.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.77.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.77.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.77.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.77.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.77.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.77.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.77.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.77.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.77.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.77.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.77.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.77.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.77.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.77.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.77.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.77.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.77.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.77.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.77.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.80.0/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.80.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.80.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.80.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.80.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.80.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.80.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.80.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.80.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.80.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.80.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.80.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.80.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.80.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.80.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.80.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.80.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.80.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.80.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.80.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.80.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.87.0/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.87.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.87.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.87.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.87.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.87.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.87.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.87.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.87.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.87.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.87.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.87.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.87.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.87.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.87.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.87.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.87.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.87.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.87.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.87.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.87.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.92.0/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.92.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.92.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.92.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.92.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.92.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.92.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.92.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.92.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.92.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.92.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.92.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.92.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.92.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.92.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.92.0/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.92.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.92.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.92.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.92.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.92.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.92.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.95.0/compat_list.txt` - SDK generated
+- [x] `Source/DLLs/1.95.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.95.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.95.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.95.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.95.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.95.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.95.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.95.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.95.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.95.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.95.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.95.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.95.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.95.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.95.0/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.95.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.95.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.95.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.95.0/x64/interceptor_versioninfo.rc` - SDK generated
+- [x] `Source/DLLs/1.95.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.95.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.95.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.99.0/Factory.cxx` - SDK generated
+- [x] `Source/DLLs/1.99.0/galaxy/Errors.h` - SDK generated
+- [x] `Source/DLLs/1.99.0/galaxy/GalaxyApi.h` - SDK generated
+- [x] `Source/DLLs/1.99.0/galaxy/GalaxyExport.h` - SDK generated
+- [x] `Source/DLLs/1.99.0/galaxy/GalaxyFactory.h` - SDK generated
+- [x] `Source/DLLs/1.99.0/galaxy/GalaxyID.h` - SDK generated
+- [x] `Source/DLLs/1.99.0/galaxy/IApps.h` - SDK generated
+- [x] `Source/DLLs/1.99.0/galaxy/ICustomNetworking.h` - SDK generated
+- [x] `Source/DLLs/1.99.0/galaxy/IFriends.h` - SDK generated
+- [x] `Source/DLLs/1.99.0/galaxy/IGalaxy.h` - SDK generated
+- [x] `Source/DLLs/1.99.0/galaxy/IListenerRegistrar.h` - SDK generated
+- [x] `Source/DLLs/1.99.0/galaxy/ILogger.h` - SDK generated
+- [x] `Source/DLLs/1.99.0/galaxy/IMatchmaking.h` - SDK generated
+- [x] `Source/DLLs/1.99.0/galaxy/INetworking.h` - SDK generated
+- [x] `Source/DLLs/1.99.0/galaxy/IStats.h` - SDK generated
+- [x] `Source/DLLs/1.99.0/galaxy/IStorage.h` - SDK generated
+- [x] `Source/DLLs/1.99.0/galaxy/IUser.h` - SDK generated
+- [x] `Source/DLLs/1.99.0/galaxy/IUtils.h` - SDK generated
+- [x] `Source/DLLs/1.99.0/x64/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.99.0/x64/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/1.99.0/x86/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/1.99.0/x86/UniverseLAN.def` - SDK generated
+- [x] `Source/DLLs/CMakeLists.txt` - SDK generated
+- [x] `Source/DLLs/determine_galaxy_version_feature_definitions.cmake` - SDK generated
+- [x] `Source/DLLs/versioninfo.rc.cmake.in` - SDK generated
+- [x] `Source/galaxy_sdk_features.cmake` - Build/config/data
+- [x] `Source/InterceptionLogger/CMakeLists.txt` - Build/config/data
+- [x] `Source/InterceptionLogger/GalaxyApi.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/GalaxyApiFactory.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/GalaxyDLL.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/GalaxyDLL.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/GalaxyFunctional.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/GalaxyGameServerApi.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/IGalaxyFix.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Apps.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Apps.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Chat.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Chat.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/CloudStorage.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/CloudStorage.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/CustomNetworking.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/CustomNetworking.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Errors.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Errors.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Friends.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Friends.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/InitOptionsFactory.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/InitOptionsModern.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/InitOptionsModern.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/ListenerRegistrar.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/ListenerRegistrar.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/AppsListener.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/AppsListener.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/ChatListener.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/ChatListener.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/CloudStorageListener.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/CloudStorageListener.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/CustomNetworkingListener.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/CustomNetworkingListener.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/FriendsListener.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/FriendsListener.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/MatchmakingListener.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/MatchmakingListener.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/NetworkingListener.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/NetworkingListener.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/ProxifySingleShotListener.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/ProxifySingleShotListener.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/StatsListener.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/StatsListener.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/StorageListener.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/StorageListener.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/TelemetryListener.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/TelemetryListener.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/UserListener.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/UserListener.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/UtilsListener.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Listeners/UtilsListener.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Logger.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Logger.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Matchmaking.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Matchmaking.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Networking.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Networking.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Stats.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Stats.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Storage.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Storage.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Telemetry.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Telemetry.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/User.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/User.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Utils.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/Impl/Utils.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/InterceptionLogger.review.md` - InterceptionLogger
+- [x] `Source/InterceptionLogger/ListenersContainer.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/ListenersContainer.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/README.MD` - InterceptionLogger
+- [x] `Source/InterceptionLogger/UniverseGameServer.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/UniverseGameServer.hxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/UniverseLANInterceptor.cxx` - InterceptionLogger
+- [x] `Source/InterceptionLogger/UniverseLANInterceptor.hxx` - InterceptionLogger
+- [x] `Source/Server/Challenge.cxx` - Server
+- [x] `Source/Server/Challenge.hxx` - Server
+- [x] `Source/Server/CMakeLists.txt` - Build/config/data
+- [x] `Source/Server/CMakeLists.txt.review.md` - Server
+- [x] `Source/Server/GalaxyApiFactory.cxx` - Server
+- [x] `Source/Server/Main.cxx` - Server
+- [x] `Source/Server/Peer.cxx` - Server
+- [x] `Source/Server/Peer.hxx` - Server
+- [x] `Source/Server/Server.cxx` - Server
+- [x] `Source/Server/Server.hxx` - Server
+- [x] `Source/Server/ServerHandlers.cxx` - Server
+- [x] `Source/Shared/ChatMessage.cxx` - Shared
+- [x] `Source/Shared/ChatMessage.hxx` - Shared
+- [x] `Source/Shared/ChatRoom.cxx` - Shared
+- [x] `Source/Shared/ChatRoom.hxx` - Shared
+- [x] `Source/Shared/ChatRoomManager.cxx` - Shared
+- [x] `Source/Shared/ChatRoomManager.hxx` - Shared
+- [x] `Source/Shared/CMakeLists.txt` - Build/config/data
+- [x] `Source/Shared/DynamicReturn.hxx` - Shared
+- [x] `Source/Shared/GalaxyID.hxx` - Shared
+- [x] `Source/Shared/GalaxyIDSerialization.hxx` - Shared
+- [x] `Source/Shared/GalaxyUserData.cxx` - Shared
+- [x] `Source/Shared/GalaxyUserData.hxx` - Shared
+- [x] `Source/Shared/GalaxyVersionedTypes.hxx` - Shared
+- [x] `Source/Shared/IniData.cxx` - Shared
+- [x] `Source/Shared/IniData.hxx` - Shared
+- [x] `Source/Shared/Lobby.cxx` - Shared
+- [x] `Source/Shared/Lobby.hxx` - Shared
+- [x] `Source/Shared/LobbyManager.cxx` - Shared
+- [x] `Source/Shared/LobbyManager.hxx` - Shared
+- [x] `Source/Shared/Networking/MessageHandlersDeclareOverride.hxx` - Networking
+- [x] `Source/Shared/Networking/MessageHandlersDeclarePureVirtual.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/ConnectionAcceptedMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/CreateLobbyMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/CreateLobbyResponseMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/EventConnect.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/EventDisconnect.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/FileRequestMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/FileShareMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/FileShareResponseMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/InvitationMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/JoinLobbyMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/KeyChallengeMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/LeaveLobbyMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/LobbyMemberStateChangeMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/LobbyOwnerChangeMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/MESSAGE_HANDLERS.review.md` - Networking
+- [x] `Source/Shared/Networking/Messages/OnlineStatusChangeMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/P2PNetworkPacketMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/P2PServerNetworkPacketMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/PingMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/RequestChatRoomMessagesMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/RequestChatRoomWithUserMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/RequestLobbyDataMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/RequestLobbyListMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/RequestSpecificUserDataMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/RichPresenceChangeMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/SendToChatRoomMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/SendToLobbyMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/SetLobbyDataMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/SetLobbyJoinableMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/SetLobbyMaxMembersMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/SetLobbyMemberDataMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/SetLobbyTypeMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/SetUserDataMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Messages/UserHelloDataMessage.hxx` - Networking
+- [x] `Source/Shared/Networking/Networking.cxx` - Networking
+- [x] `Source/Shared/Networking/Networking.hxx` - Networking
+- [x] `Source/Shared/SharedFileUtils.cxx` - Shared
+- [x] `Source/Shared/SharedFileUtils.hxx` - Shared
+- [x] `Source/Shared_NoVer/AchievementData.cxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/AchievementData.hxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/AchievementsAndStatsContainer.cxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/AchievementsAndStatsContainer.hxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/CerealRawPtrWrapper.hxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/CMakeLists.txt` - Build/config/data
+- [x] `Source/Shared_NoVer/ConcurrentQueue.hxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/ConsoleCoutRedirector.cxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/ConsoleCoutRedirector.hxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/ConstHash.hxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/ContainerGetByIndex.hxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/CustomConsole.cxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/CustomConsole.hxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/DefaultConfigFiles.cxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/DefaultConfigFiles.hxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/EnvUtils.cxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/EnvUtils.hxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/filesystem_container/filesystem_container.cxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/filesystem_container/filesystem_container.hxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/filesystem_container/filesystem_container_entry.cxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/filesystem_container/filesystem_container_entry.hxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/filesystem_container/filesystem_container_metadata.cxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/filesystem_container/filesystem_container_metadata.hxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/filesystem_container/filesystem_container_utils.cxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/filesystem_container/filesystem_container_utils.hxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/GlobalUniqueID.cxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/GlobalUniqueID.hxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/MachineInfo.cxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/MachineInfo.hxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/Networking/MessageUniqueID.cxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/Networking/MessageUniqueID.hxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/Networking/SendableEventMessage.hxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/SafeStringCopy.hxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/SharedLibUtils.cxx` - Shared_NoVer
+- [x] `Source/Shared_NoVer/SharedLibUtils.hxx` - Shared_NoVer
+- [x] `Source/TestCases/.gitignore` - Tests
+- [x] `Source/TestCases/batch/test_gog_user1.bat.in` - Tests
+- [x] `Source/TestCases/batch/test_gog_user2.bat.in` - Tests
+- [x] `Source/TestCases/CMakeLists.txt` - Build/config/data
+- [x] `Source/TestCases/credentials.cmake.example` - Tests
+- [x] `Source/TestCases/Include/TestCaseAccessTokenListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseAchievementChangeListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseAuthListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseChatRoomMessageSendListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseChatRoomMessagesListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseChatRoomMessagesRetrieveListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseChatRoomWithUserRetrieveListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseClientDetails.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseConcurrentQueue.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseConnectionCloseListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseConnectionDataListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseConnectionOpenListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseDelayRunner.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseEncryptedAppTicketListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseFileShareListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseFriendAddListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseFriendDeleteListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseFriendInvitationListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseFriendInvitationListRetrieveListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseFriendInvitationRespondToListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseFriendInvitationSendListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseFriendListListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseGameInvitationReceivedListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseGameJoinRequestedListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseGogServicesConnectionStateListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseInitListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseLeaderboardEntriesRetrieveListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseLeaderboardRetrieveListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseLeaderboardScoreUpdateListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseLeaderboardsRetrieveListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseLobbyCreatedListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseLobbyDataListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseLobbyDataRetrieveListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseLobbyEnteredListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseLobbyLeftListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseLobbyListListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseLobbyMemberStateListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseLobbyMessageListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseLobbyOwnerChangeListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseNatTypeDetectionListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseNetworkingListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseNotificationListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseOperationalStateChangeListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseOtherSessionStartListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseOverlayInitializationStateChangeListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseOverlayStateChangeListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseOverlayVisibilityChangeListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCasePersonaDataChangedListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseRichPresenceChangeListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseRichPresenceListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseRichPresenceRetrieveListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseSendInvitationListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseSentFriendInvitationListRetrieveListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseServerNetworkingListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseSharedFileDownloadListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseSpecificUserDataListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseStatsAndAchievementsStoreListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseTelemetryEventSendListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseUserDataListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseUserFindListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseUserInformationRetrieveListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseUserStatsAndAchievementsRetrieveListener.hxx` - Tests
+- [x] `Source/TestCases/Include/TestCaseUserTimePlayedRetrieveListener.hxx` - Tests
+- [x] `Source/TestCases/Listeners-2023-09-18.txt` - Tests
+- [x] `Source/TestCases/README.MD` - Tests
+- [x] `Source/TestCases/Source/TestCase_BigPacket.cxx` - Tests
+- [x] `Source/TestCases/Source/TestCase_CreateLobby.cxx` - Tests
+- [x] `Source/TestCases/Source/TestCase_CreateLobbyWithData.cxx` - Tests
+- [x] `Source/TestCases/Source/TestCase_CreateLobbyWithMessages.cxx` - Tests
+- [x] `Source/TestCases/Source/TestCase_ExtendedClient.cxx` - Tests
+- [x] `Source/TestCases/Source/TestCase_ExtendedHost.cxx` - Tests
+- [x] `Source/TestCases/Source/TestCase_IStorageLocal.cxx` - Tests
+- [x] `Source/TestCases/Source/TestCase_IUserFunctions.cxx` - Tests
+- [x] `Source/TestCases/Source/TestCase_JoinLobby.cxx` - Tests
+- [x] `Source/TestCases/Source/TestCase_JoinLobbyShowData.cxx` - Tests
+- [x] `Source/TestCases/Source/TestCase_JoinLobbyShowMessages.cxx` - Tests
+- [x] `Source/TestCases/Source/TestCase_ListLobbiesAndLobbyData.cxx` - Tests
+- [x] `Source/TestCases/Source/TestCase_SignInGalaxy.cxx` - Tests
+- [x] `Source/TestCases/Source/TestCase_SignInUsernameAndPassword.cxx` - Tests
+- [x] `Source/TestCases/Source-unet/s2string.h` - Tests
+- [x] `Source/TestCases/Source-unet/termcolor.hpp` - Tests
+- [x] `Source/TestCases/Source-unet/TestCase_unet_cli_a.cxx` - Tests
+- [x] `Source/TestCases/Source-unet/TestCase_unet_cli_b.cxx` - Tests
+- [x] `Source/Tracer/CMakeLists.txt` - Build/config/data
+- [x] `Source/Tracer/MiniDump.cxx` - Tracer
+- [x] `Source/Tracer/MiniDump.hxx` - Tracer
+- [x] `Source/Tracer/Stacker.cxx` - Tracer
+- [x] `Source/Tracer/Stacker.hxx` - Tracer
+- [x] `Source/Tracer/Tracer.cxx` - Tracer
+- [x] `Source/Tracer/Tracer.hxx` - Tracer
+- [x] `Source/Vendor/cereal.cmake` - Build/config/data
+- [x] `Source/Vendor/CMakeLists.txt` - Build/config/data
+- [x] `Source/Vendor/dummy.c` - Version/root/docs
+- [x] `Source/Vendor/Enet++/CMakeLists.txt` - Build/config/data
+- [x] `Source/Vendor/Enet++/CMakeLists.txt.review.md` - Networking
+- [x] `Source/Vendor/Enet++/include/enet6/enetpp.hxx` - Networking
+- [x] `Source/Vendor/Enet++/include/enet6/enetpp_helpers.hxx` - Networking
+- [x] `Source/Vendor/Enet++/src/enetpp.cxx` - Networking
+- [x] `Source/Vendor/Enet++/src/enetpp_helpers.cxx` - Networking
+- [x] `Source/Vendor/galaxy.cmake` - Build/config/data
+- [x] `Source/Vendor/json.cmake` - Build/config/data
+- [x] `Source/Vendor/magic_enum.cmake` - Build/config/data
+- [x] `Source/Vendor/miniz-cpp.cmake` - Build/config/data
+- [x] `Source/Vendor/simpleini.cmake` - Build/config/data
+- [x] `Source/Vendor/unet.cmake` - Build/config/data
+- [x] `Source/Vendor/websocketpp.cmake` - Build/config/data
+- [x] `Source/Version/CMakeLists.txt` - Build/config/data
+- [x] `Source/Version/CMakeLists.txt.review.md` - Version/root/docs
+- [x] `Source/Version/stringize.h` - Version/root/docs
+- [x] `Source/Version/Version.cxx` - Version/root/docs
+- [x] `Source/Version/Version.hxx` - Version/root/docs
+- [x] `z-compile+release.bat` - Build/config/data
+- [x] `z-compile+release.bat.review.md` - Version/root/docs
+- [x] `z-compile+release-gh.bat` - Build/config/data
+- [x] `z-compile+release-gh.bat.review.md` - Version/root/docs
+
+## Review artifacts
+
+- `COMPREHENSIVE_REVIEW_FINAL.md` - authoritative findings, design, severity, limitations, and remediation order.
+- `COMPREHENSIVE_REVIEW_STATUS.md` - concise completion and coverage status.
+- `Source/DLLs/SDK_GENERATED_FAMILIES.review.md` - generated SDK methodology and manifest-count clarification.
+- `Source/InterceptionLogger/InterceptionLogger.review.md` - interceptor lifecycle and listener findings.
+- `Source/Shared/Networking/Messages/MESSAGE_HANDLERS.review.md` - wire-format and deserialization findings.
+- Other sidecars cover build/config/script paths where inline comments would modify or invalidate the artifact.
+
+## Exclusions
+
+Excluded paths remain intentionally out of the checklist: `.git`, `.github`, root vendor/build/documentation/package directories, utility projects, `Source/EnetTest`, `Source/DLLs/*/gog`, and the explicitly listed third-party vendor trees in `.github/copilot-instructions.md`.

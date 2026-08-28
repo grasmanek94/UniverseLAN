@@ -39,6 +39,9 @@ namespace universelan {
 			for (;; ++left) {
 				if (left == in.end())
 					return std::string_view();
+				// REVIEW: Both isspace calls require EOF or an unsigned-char value.
+				// Passing a negative signed char makes non-ASCII config text undefined;
+				// cast each character to unsigned char before classification.
 				if (!isspace(*left))
 					break;
 			}
@@ -289,6 +292,9 @@ namespace universelan {
 		CallTracingFlags = parse_flags(ini.GetValue(TracingSection.c_str(), "CallTracingFlags", "INFORMATIONAL"));
 		TraceToConsole = ini.GetBoolValue(TracingSection.c_str(), "TraceToConsole", false);
 
+		// REVIEW: The fallback authentication key is embedded and identical for every
+		// installation. If the config omits Authentication/Key, any party knowing this
+		// public default can complete the challenge; require a per-installation secret.
 		AuthenticationKey = ini.GetValue(AuthenticationSection.c_str(), "Key", "9g5tA53SLyiNkBTqsX3BmBgy/PPVTU6VGKWNNw3wUIY5nK1C2MOT4UsZ2pauCb8fm5UQSJRijid+w1t9WpDaKQ==");
 
 		NetworkingTimeoutTime = std::max(

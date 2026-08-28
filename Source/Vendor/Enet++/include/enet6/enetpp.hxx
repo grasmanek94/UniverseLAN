@@ -28,6 +28,10 @@ namespace enetpp {
 
 		int initialisation_code;
 
+		// REVIEW: NetworkBase owns a raw ENetHost and the derived client also
+		// manages a raw peer into that host. The public lifecycle API needs an
+		// explicit ownership/thread-safety contract; callers cannot tell whether
+		// Connect, Disconnect, Pull, or destruction may overlap.
 		NetworkBase();
 
 	public:
@@ -71,6 +75,9 @@ namespace enetpp {
 		ENetPeer* Reconnect();
 		void Disconnect();
 
+		// REVIEW: Create() is exposed but currently always returns true without
+		// allocating an ENet host, so its success result does not establish a
+		// usable client.
 		bool Create();
 		int Send(const void* data, size_t bytes, _ENetPacketFlag flags = ENET_PACKET_FLAG_RELIABLE);
 		int Send(ENetPacket* packet);

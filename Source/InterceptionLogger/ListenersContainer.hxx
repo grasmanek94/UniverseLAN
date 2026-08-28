@@ -24,6 +24,8 @@ namespace universelan::client {
 
 		template<typename T>
 		void AddListener() {
+			// REVIEW: If RegisterListener throws, this raw allocation is never
+			// reclaimed. Use ownership/rollback so failed registration cannot leak T.
 			T* listener = new T();
 			listeners.emplace(listener, (ListenerType)T::GetListenerType());
 			RegisterListener(listener, (ListenerType)T::GetListenerType());

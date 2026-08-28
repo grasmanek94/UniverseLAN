@@ -836,6 +836,9 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
+		// REVIEW: The second parameter is titleID, but secretKey is passed twice;
+		// PlayFab receives the wrong title and OpenID connection setup can fail.
+		// Forward titleID as declared by the interface.
 		intf()->CreateOpenIDConnection(secretKey, secretKey, connectionID, ignoreNonce, PlayFabCreateOpenIDConnectionListener::encapsulate(listener));
 	}
 

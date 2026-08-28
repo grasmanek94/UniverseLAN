@@ -47,6 +47,9 @@ namespace galaxy::api
 #endif
 
 			// TODO: Implement throwExceptions
+			// REVIEW: throwExceptions is ignored, so callers cannot select the
+			// documented throwing/non-throwing behavior. Honor the flag or
+			// consistently translate failures to the documented error.
 
 			universelan::client::Init(init_options);
 		}
@@ -61,6 +64,9 @@ namespace galaxy::api
 #endif
 
 			// TODO: Implement throwExceptions
+			// REVIEW: galaxyPeerPath is accepted by the ABI but discarded; InitLocal
+			// therefore cannot load the caller-selected Galaxy peer/configuration.
+			// Preserve and pass this path through the initialization options.
 
 			universelan::client::Init(init_options);
 		}
@@ -152,6 +158,9 @@ namespace galaxy::api
 		}
 
 		virtual api::IError* GetLastError() override {
+			// REVIEW: Always returning nullptr hides every initialization/API error,
+			// violating IErrorManager's observable contract. Store and return the
+			// last translated error (or explicitly report unsupported behavior).
 			return nullptr;
 		}
 	};
@@ -165,6 +174,9 @@ namespace galaxy::api
 
 	IGalaxy* FACTORY_CALLTYPE GalaxyFactory::GetInstance() {
 		if (instance == nullptr) {
+			// REVIEW: This lazy singleton is a plain pointer. Concurrent first calls
+			// race on the read/write and can publish different GalaxyImpl objects;
+			// use std::call_once (and synchronize Reset) or require single-threaded use.
 			//Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
 			instance = new GalaxyImpl();
@@ -195,10 +207,18 @@ namespace galaxy::api
 			delete instance;
 			instance = nullptr;
 		}
+#if GALAXY_BUILD_FEATURE_HAS_IERRORMANAGER
+		// REVIEW: GetErrorManager allocates a separate factory-owned object, but
+		// Reset currently leaves it alive. Release it under the same synchronized
+		// lifecycle policy as instance to avoid a leak across resets.
+#endif
 	}
 
 	IGalaxy* FACTORY_CALLTYPE GalaxyFactory::CreateInstance() {
 		if (instance == nullptr) {
+			// REVIEW: CreateInstance duplicates the unsynchronized lazy publication
+			// in GetInstance. Concurrent callers can race and leak one instance;
+			// share a synchronized initialization path with GetInstance.
 			instance = new GalaxyImpl();
 		}
 
