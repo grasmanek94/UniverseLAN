@@ -42,6 +42,7 @@ else()
     set(GALAXY_ARCH "" CACHE STRING "Architecture which is being compiled for (x86 or x64)")
   endif()
 
+  message("Selected GALAXY_ARCH: '${GALAXY_ARCH}'")
   if(NOT "--${GALAXY_ARCH}--" STREQUAL "--x86--")
     if(NOT "--${GALAXY_ARCH}--" STREQUAL "--x64--")   
       message("Unknown GALAXY_ARCH, please define GALAXY_ARCH manually (x86 or x64)")
@@ -61,7 +62,9 @@ else()
     set(CMAKE_CXX_FLAGS -m32)
 
     # here is the target environment located
-    set(CMAKE_FIND_ROOT_PATH   /usr/i486-linux-gnu )
+    if(NOT DEFINED CMAKE_FIND_ROOT_PATH OR CMAKE_FIND_ROOT_PATH STREQUAL "")
+      set(CMAKE_FIND_ROOT_PATH   /usr/i486-linux-gnu )
+    endif()
   else()
     set(CMAKE_C_FLAGS -m64)
     set(CMAKE_CXX_FLAGS -m64)

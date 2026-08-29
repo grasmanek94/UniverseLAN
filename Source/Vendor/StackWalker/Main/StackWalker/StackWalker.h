@@ -1,7 +1,3 @@
-#ifndef _WIN32
-#define __STACKWALKER_H__
-#endif
-
 #ifndef __STACKWALKER_H__
 #define __STACKWALKER_H__
 
@@ -210,46 +206,6 @@ protected:
 //       But I currently use it in x64/IA64 environments...
 //#if defined(_M_IX86) && (_WIN32_WINNT <= 0x0500) && (_MSC_VER < 1400)
 
-#if defined(_M_IX86)
-#ifdef CURRENT_THREAD_VIA_EXCEPTION
-// TODO: The following is not a "good" implementation,
-// because the callstack is only valid in the "__except" block...
-#define GET_CURRENT_CONTEXT_STACKWALKER_CODEPLEX(c, contextFlags)               \
-  do                                                                            \
-  {                                                                             \
-    memset(&c, 0, sizeof(CONTEXT));                                             \
-    EXCEPTION_POINTERS* pExp = NULL;                                            \
-    __try                                                                       \
-    {                                                                           \
-      throw 0;                                                                  \
-    }                                                                           \
-    __except (((pExp = GetExceptionInformation()) ? EXCEPTION_EXECUTE_HANDLER   \
-                                                  : EXCEPTION_EXECUTE_HANDLER)) \
-    {                                                                           \
-    }                                                                           \
-    if (pExp != NULL)                                                           \
-      memcpy(&c, pExp->ContextRecord, sizeof(CONTEXT));                         \
-    c.ContextFlags = contextFlags;                                              \
-  } while (0);
-#else
-// clang-format off
-// The following should be enough for walking the callstack...
-#define GET_CURRENT_CONTEXT_STACKWALKER_CODEPLEX(c, contextFlags) \
-  do                                                              \
-  {                                                               \
-    memset(&c, 0, sizeof(CONTEXT));                               \
-    c.ContextFlags = contextFlags;                                \
-    __asm    call x                                               \
-    __asm x: pop eax                                              \
-    __asm    mov c.Eip, eax                                       \
-    __asm    mov c.Ebp, ebp                                       \
-    __asm    mov c.Esp, esp                                       \
-  } while (0)
-// clang-format on
-#endif
-
-#else
-
 // The following is defined for x86 (XP and higher), x64 and IA64:
 #define GET_CURRENT_CONTEXT_STACKWALKER_CODEPLEX(c, contextFlags) \
   do                                                              \
@@ -258,7 +214,6 @@ protected:
     c.ContextFlags = contextFlags;                                \
     RtlCaptureContext(&c);                                        \
   } while (0);
-#endif
 
 #endif //defined(_WIN32)
 
