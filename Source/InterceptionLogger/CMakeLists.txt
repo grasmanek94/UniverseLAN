@@ -15,4 +15,17 @@ function(define_interception_logger GALAXY_VERSION)
     universelan-interception-logger-lib-${GALAXY_VERSION}
     PUBLIC universelan-common-shared-${GALAXY_VERSION}
   )
+
+  if(EXPERIMENTAL_FAST_BUILD)
+    message(WARNING "Interceptor does not work with Unity build, disabling Unity build for Interceptor sources")
+    file(GLOB_RECURSE NO_UNITY_SOURCES
+      "${CMAKE_SOURCE_DIR}/Source/InterceptionLogger/*.cxx"
+    )
+
+    set_source_files_properties(
+      ${NO_UNITY_SOURCES}
+      PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON
+    )
+  endif()
+
 endfunction()
