@@ -12,7 +12,7 @@ namespace universelan::client {
 		, clientSecret{ "" }
 		, configFilePath{ "" }
 		, galaxyPeerPath{ "" }
-		, throwExceptions{ true }
+		, throwExceptions{ false }
 		, storagePath{ "" }
 		, galaxyAllocator{ nullptr }
 		, galaxyThreadFactory{ nullptr }
@@ -28,8 +28,10 @@ namespace universelan::client {
 		SetGalaxyPeerPath(initOptions.galaxyPeerPath != nullptr ? initOptions.galaxyPeerPath : "");
 #endif
 
+#if !GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
 		throwExceptions = initOptions.throwExceptions;
-		
+#endif
+
 #if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_STORAGEPATH
 		SetStoragePath(initOptions.storagePath != nullptr ? initOptions.storagePath : "");
 #endif

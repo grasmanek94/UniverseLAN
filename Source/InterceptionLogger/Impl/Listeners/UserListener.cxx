@@ -10,10 +10,12 @@
 
 #include <format>
 
+#if GALAXY_BUILD_FEATURE_HAS_OPERATIONALSTATECHANGELISTENER
 template <>
 struct magic_enum::customize::enum_range<galaxy::api::IOperationalStateChangeListener::OperationalState> {
 	static constexpr bool is_flags = true;
 };
+#endif
 
 namespace universelan::client {
 	using namespace galaxy::api;

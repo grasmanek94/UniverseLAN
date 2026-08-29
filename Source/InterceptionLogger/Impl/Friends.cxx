@@ -11,10 +11,12 @@
 
 #include <format>
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_HAS_PERSONANAME_AND_AVATARURL
 template <>
 struct magic_enum::customize::enum_range<galaxy::api::AvatarType> {
 	static constexpr bool is_flags = true;
 };
+#endif
 
 namespace universelan::client {
 	using namespace galaxy::api;
