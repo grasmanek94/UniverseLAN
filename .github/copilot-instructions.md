@@ -24,7 +24,7 @@ Ignore all code under:
 - Source/Vendor/simpleini-4.22/**
 - Source/Vendor/StackWalker/**
 - Source/Vendor/unet/**
-- Source/Vendor/websocketpp-0.8.2/**
+- Source/Vendor/IXWebSocket-12.0.1/**
 
 Focus on:
 

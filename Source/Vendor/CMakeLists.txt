@@ -4,6 +4,7 @@ add_subdirectory(Enet-IPv6)
 add_subdirectory(Enet++)
 add_subdirectory(boost)
 add_subdirectory(Detours)
+add_subdirectory(IXWebSocket-12.0.1)
 
 if(WIN32)
 add_subdirectory(StackWalker)
