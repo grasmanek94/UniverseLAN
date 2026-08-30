@@ -13,7 +13,7 @@ function(define_client GALAXY_VERSION)
 
   target_link_libraries(
     universelan-lib-${GALAXY_VERSION}
-    PUBLIC universelan-common-shared-${GALAXY_VERSION} universelan-lib-no-ver websocketpp boost
+    PUBLIC universelan-common-shared-${GALAXY_VERSION} universelan-lib-no-ver ixwebsocket boost
   )
 
   if(EXPERIMENTAL_FAST_BUILD)

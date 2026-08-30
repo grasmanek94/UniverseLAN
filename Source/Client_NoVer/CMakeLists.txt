@@ -9,5 +9,5 @@ target_compile_definitions(universelan-lib-no-ver PUBLIC "CLIENT_NO_VER")
 
 target_link_libraries(
   universelan-lib-no-ver
-  PUBLIC universelan-common-shared-no-ver websocketpp boost
+  PUBLIC universelan-common-shared-no-ver ixwebsocket boost
 )

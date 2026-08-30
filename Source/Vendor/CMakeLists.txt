@@ -4,7 +4,6 @@ add_subdirectory(Enet-IPv6)
 add_subdirectory(Enet++)
 add_subdirectory(boost)
 add_subdirectory(Detours)
-add_subdirectory(IXWebSocket-12.0.1)
 
 if(WIN32)
 add_subdirectory(StackWalker)
@@ -15,7 +14,7 @@ include(miniz-cpp.cmake)
 include(magic_enum.cmake)
 
 include(cereal.cmake)
-include(websocketpp.cmake)
+include(ixwebsocket.cmake)
 
 include(galaxy.cmake)
 include(unet.cmake)
