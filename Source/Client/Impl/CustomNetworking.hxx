@@ -13,14 +13,15 @@
 #include <ICustomNetworking.h>
 #include <IListenerRegistrar.h>
 
-#include <websocketpp/config/asio_no_tls_client.hpp>
-#include <websocketpp/client.hpp>
+#include <ixwebsocket/IXWebSocket.h>
+#include <ixwebsocket/IXWebSocketMessage.h>
 
+#include <atomic>
 #include <deque>
 #include <memory>
 #include <mutex>
 #include <set>
-#include <thread>
+#include <string>
 #include <unordered_map>
 
 namespace universelan::client {
@@ -29,10 +30,7 @@ namespace universelan::client {
 
 	namespace custom_networking
 	{
-		typedef websocketpp::client<websocketpp::config::asio_client> client;
-
-		// pull out the type of messages sent by our config
-		typedef websocketpp::config::asio_client::message_type::ptr message_ptr;
+		using client = ix::WebSocket;
 	}
 	/**
 	 * @addtogroup api
@@ -49,10 +47,8 @@ namespace universelan::client {
 		using lock_t = std::scoped_lock<mutex_t>;
 
 		struct Channel : public std::enable_shared_from_this<Channel> {
-			CustomNetworkingImpl* custom_network;
+			ListenerRegistrarImpl* listeners;
 			custom_networking::client client;
-			std::jthread runner;
-			custom_networking::client::connection_ptr connection;
 			IConnectionOpenListener* listener_open;
 			IConnectionDataListener* listener_data;
 			IConnectionCloseListener* listener_close;
@@ -60,11 +56,19 @@ namespace universelan::client {
 
 			mutex_t buffer_mtx;
 			std::deque<char> buffer;
+			std::atomic_bool cleanup{ false };
 
 			Channel(CustomNetworkingImpl* custom_network);
 			bool connect(const char* connectionString, IConnectionOpenListener* listener);
 			virtual ~Channel();
-			void start();
+			void close();
+
+			void WebSocketOnOpen();
+			void WebSocketOnMessage(const std::string& data, const bool binary);
+			void WebSocketOnClose();
+			void WebSocketOnFail(const std::string& reason);
+
+			void WebSocketCallback(const ix::WebSocketMessagePtr& message);
 		};
 
 	private:
@@ -72,13 +76,9 @@ namespace universelan::client {
 		mutable mutex_t mtx;
 		std::unordered_map<ConnectionID, std::shared_ptr<Channel>> channels;
 
-		void WebSocketOnOpen(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl);
-		void WebSocketOnMessage(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl, custom_networking::message_ptr msg);
-		void WebSocketOnClose(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl);
-		void WebSocketOnFail(std::shared_ptr<Channel> channel, websocketpp::connection_hdl hdl);
-
 		std::shared_ptr<Channel> GetChannel(ConnectionID connectionID) const;
-		void ChannelThread(std::shared_ptr<Channel> channel);
+
+		void PerformCleanup();
 	public:
 
 		CustomNetworkingImpl(InterfaceInstances* intf);
