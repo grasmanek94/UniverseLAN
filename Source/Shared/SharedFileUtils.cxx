@@ -23,8 +23,8 @@ namespace universelan {
 
 	SharedFileUtils::SharedFileUtils(const std::filesystem::path& basepath) :
 		storage{ std::make_shared<fs_container>(std::filesystem::current_path() / basepath / ROOT_LOCAL) },
-		shared{ std::make_shared<fs_container>(std::filesystem::current_path() / basepath / ROOT_CLOUD) },
-		cloud{ std::make_shared<fs_container>(std::filesystem::current_path() / basepath / ROOT_SHARED) },
+		shared{ std::make_shared<fs_container>(std::filesystem::current_path() / basepath / ROOT_SHARED) },
+		cloud{ std::make_shared<fs_container>(std::filesystem::current_path() / basepath / ROOT_CLOUD) },
 		avatars{ std::make_shared<fs_container>(std::filesystem::current_path() / basepath / ROOT_AVATARS) }
 	{ }
 
