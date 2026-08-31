@@ -11,19 +11,38 @@
 #ifndef BOOST_STATIC_STRING_STATIC_STRING_HPP
 #define BOOST_STATIC_STRING_STATIC_STRING_HPP
 
+#if defined(__GNUC__) && __GNUC__ >= 8
+#pragma GCC diagnostic push
+#pragma GCC system_header
+// false positives
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#pragma GCC diagnostic ignored "-Wrestrict"
+#pragma GCC diagnostic ignored "-Wstringop-overflow"
+#endif
+
+#if defined(__GNUC__) && __GNUC__ >= 7
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnoexcept-type"
+#endif
+
 // External include guard
 #ifndef BOOST_STATIC_STRING_CONFIG_HPP
 #include <boost/static_string/config.hpp>
+#include <boost/config/workaround.hpp>
 #endif
 
 #include <algorithm>
 #include <cstdint>
 #include <cstdio>
-#include <cwchar>
+#if defined(BOOST_STATIC_STRING_USE_STD_FORMAT)
+#include <format>
+#endif
 #include <functional>
 #include <initializer_list>
+#include <limits>
 #include <iosfwd>
 #include <type_traits>
+#include <utility>
 
 namespace boost {
 namespace static_strings {
@@ -42,9 +61,11 @@ template<std::size_t N>
 using static_string =
   basic_static_string<N, char, std::char_traits<char>>;
 
+#ifdef BOOST_STATIC_STRING_HAS_WCHAR
 template<std::size_t N>
 using static_wstring =
   basic_static_string<N, wchar_t, std::char_traits<wchar_t>>;
+#endif
 
 template<std::size_t N>
 using static_u16string =
@@ -54,7 +75,7 @@ template<std::size_t N>
 using static_u32string =
   basic_static_string<N, char32_t, std::char_traits<char32_t>>;
 
-#ifdef BOOST_STATIC_STRING_CPP20
+#ifdef __cpp_char8_t
 template<std::size_t N>
 using static_u8string =
   basic_static_string<N, char8_t, std::char_traits<char8_t>>;
@@ -111,22 +132,107 @@ struct void_t_helper
 template<typename... Ts>
 using void_t = typename void_t_helper<Ts...>::type;
 
+template <class T, typename CharT, typename = void>
+struct is_string_like : std::false_type {};
+
+template<typename T, typename CharT>
+struct is_string_like<
+    T, CharT,
+    void_t<
+      decltype(std::declval<CharT const*&>() = std::declval<T>().data()),
+      decltype(std::declval<std::size_t&>() = std::declval<T>().size())>>
+  : std::true_type
+{};
+
 // Check if a type can be used for templated
 // overloads string_view_type
-template<typename T, typename CharT, typename Traits, typename = void>
+// This will be used by overloads that accept the string_view types
+// directly and other convertible types such as std::string.
+// When no string_view type is available, then we check for the
+// data and size member functions, and use them directly for assignments.
+// Types convertible to basic_static_string are not considered viewable
+// to prevent any ambiguity during overload resolution.
+template<std::size_t N, typename T, typename CharT, typename Traits, typename = void>
 struct enable_if_viewable { };
 
-template<typename T, typename CharT, typename Traits>
-struct enable_if_viewable<T, CharT, Traits,
-  typename std::enable_if<
-    std::is_convertible<const T&, basic_string_view<CharT, Traits>>::value &&
-      !std::is_convertible<const T&, const CharT*>::value>::type>
+template<std::size_t N, typename T, typename CharT, typename Traits>
+struct enable_if_viewable<N, T, CharT, Traits,
+    typename std::enable_if<
+#if !defined(BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW)
+        is_string_like<T, CharT>::value &&
+        !std::is_convertible<const T&, const basic_static_string<N, CharT, Traits>&>::value
+#elif defined(BOOST_STATIC_STRING_STANDALONE)
+        std::is_convertible<const T&, std::basic_string_view<CharT, Traits>>::value &&
+        !std::is_convertible<const T&, const CharT*>::value &&
+        !std::is_convertible<const T&, const basic_static_string<N, CharT, Traits>&>::value
+#else
+        (
+            std::is_convertible<const T&, basic_string_view<CharT, Traits>>::value ||
+            std::is_convertible<const T&, core::basic_string_view<CharT>>::value
+        ) &&
+        !std::is_convertible<const T&, const CharT*>::value &&
+        !std::is_convertible<const T&, const basic_static_string<N, CharT, Traits>&>::value
+#endif
+    >::type>
 {
   using type = void;
 };
 
+template<std::size_t N, typename T, typename CharT, typename Traits>
+using enable_if_viewable_t = typename enable_if_viewable<N, T, CharT, Traits>::type;
+
+// The common string_view type used in private operations with enable_if_viewable_t
+// - T const& itself when no string_view type is available
+// - basic_string_view (boost::string_view or std::string_view) when in
+//   standalone because core::detail::string_view is unavailable
+// - core::detail::basic_string_view otherwise because it's convertible
+//   to and from most types, including std::string_view
+// After converting a parameter to a common_string_view_type reference, we
+// can use the data() and size() member functions.
+#if !defined(BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW)
 template<typename T, typename CharT, typename Traits>
-using enable_if_viewable_t = typename enable_if_viewable<T, CharT, Traits>::type;
+using common_string_view_type = T const&;
+#elif defined(BOOST_STATIC_STRING_STANDALONE)
+template<typename T, typename CharT, typename Traits>
+using common_string_view_type = basic_string_view<CharT, Traits>;
+#else
+template <class T, typename CharT, typename Traits, typename = void>
+struct common_string_view_type_impl {};
+
+template<typename T, typename CharT, typename Traits>
+struct common_string_view_type_impl<
+    T, CharT, Traits,
+    typename std::enable_if<
+        is_string_like<T, CharT>::value &&
+        !std::is_convertible<const T&, basic_string_view<CharT, Traits>>::value &&
+        !std::is_convertible<const T&, core::basic_string_view<CharT>>::value>::type>
+{
+  using type = T const&;
+};
+
+template<typename T, typename CharT, typename Traits>
+struct common_string_view_type_impl<
+    T, CharT, Traits,
+    typename std::enable_if<
+        std::is_convertible<const T&, basic_string_view<CharT, Traits>>::value &&
+        !std::is_convertible<const T&, core::basic_string_view<CharT>>::value>::type>
+{
+  using type = basic_string_view<CharT, Traits>;
+};
+
+template<typename T, typename CharT, typename Traits>
+struct common_string_view_type_impl<
+    T, CharT, Traits,
+    typename std::enable_if<
+        std::is_convertible<const T&, core::basic_string_view<CharT>>::value>::type>
+{
+  using type = core::basic_string_view<CharT>;
+};
+
+template<typename T, typename CharT, typename Traits>
+using common_string_view_type = typename common_string_view_type_impl<T, CharT, Traits>::type;
+#endif
+
 
 // Simplified check for if a type is an iterator
 template<typename T, typename = void>
@@ -208,106 +314,129 @@ copy_with_traits(
 template<std::size_t N, typename CharT, typename Traits>
 class static_string_base
 {
-private:
+  using derived_type = basic_static_string<N, CharT, Traits>;
+  friend derived_type;
+
   using size_type = smallest_width<N>;
   using value_type = typename Traits::char_type;
   using pointer = value_type*;
   using const_pointer = const value_type*;
-public:
-  BOOST_STATIC_STRING_CPP11_CONSTEXPR
-  static_string_base() noexcept { };
 
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  pointer
-  data_impl() noexcept
+BOOST_STATIC_STRING_GCC_NESTED_CLASS_WORKAROUND
+
+  struct size
   {
-    return data_;
-  }
+    class basic_static_string
+    {
+      friend derived_type;
 
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  const_pointer
-  data_impl() const noexcept
+      BOOST_STATIC_STRING_CPP11_CONSTEXPR
+      size_type
+      size_impl() const noexcept
+      {
+        return size;
+      }
+
+      BOOST_STATIC_STRING_CPP14_CONSTEXPR
+      size_type
+      size_impl(std::size_t n) noexcept
+      {
+        // Functions that set size will throw
+        // if the new size would exceed max_size()
+        // therefore we can guarantee that this will
+        // not lose data.
+        return size = static_cast<size_type>(n);
+      }
+
+    public:
+      size_type size = 0;
+    };
+  };
+
+  struct data
   {
-    return data_;
-  }
+    class basic_static_string
+    {
+      friend derived_type;
 
-  BOOST_STATIC_STRING_CPP11_CONSTEXPR
-  std::size_t
-  size_impl() const noexcept
-  {
-    return size_;
-  }
+      BOOST_STATIC_STRING_CPP14_CONSTEXPR
+      pointer
+      data_impl() noexcept
+      {
+        return data;
+      }
 
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  std::size_t
-  set_size(std::size_t n) noexcept
-  {
-    // Functions that set size will throw
-    // if the new size would exceed max_size()
-    // therefore we can guarantee that this will
-    // not lose data.
-    return size_ = size_type(n);
-  }
+      BOOST_STATIC_STRING_CPP11_CONSTEXPR
+      const_pointer
+      data_impl() const noexcept
+      {
+        return data;
+      }
 
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  void
-  term_impl() noexcept
-  {
-    Traits::assign(data_[size_], value_type());
-  }
-
-  size_type size_ = 0;
-#ifdef BOOST_STATIC_STRING_CPP20
-  value_type data_[N + 1];
-#else
-  value_type data_[N + 1]{};
-#endif
+    public:
+      value_type data[N + 1]{};
+    };
+  };
 };
 
 // Optimization for when the size is 0
 template<typename CharT, typename Traits>
 class static_string_base<0, CharT, Traits>
 {
-private:
+  using derived_type = basic_static_string<0, CharT, Traits>;
+  friend derived_type;
+
+  using size_type = std::size_t;
   using value_type = typename Traits::char_type;
   using pointer = value_type*;
-public:
-  BOOST_STATIC_STRING_CPP11_CONSTEXPR
-  static_string_base() noexcept { }
 
-  // Modifying the null terminator is UB
-  BOOST_STATIC_STRING_CPP11_CONSTEXPR
-  pointer
-  data_impl() const noexcept
+BOOST_STATIC_STRING_GCC_NESTED_CLASS_WORKAROUND
+
+  struct size
   {
-    return const_cast<pointer>(&null_);
-  }
+    class basic_static_string
+    {
+      friend derived_type;
 
-  BOOST_STATIC_STRING_CPP11_CONSTEXPR
-  std::size_t
-  size_impl() const noexcept
+      BOOST_STATIC_STRING_CPP11_CONSTEXPR
+      size_type
+      size_impl() const noexcept
+      {
+        return 0;
+      }
+
+      BOOST_STATIC_STRING_CPP11_CONSTEXPR
+      size_type
+      size_impl(std::size_t) const noexcept
+      {
+        return 0;
+      }
+    };
+  };
+
+  struct data
   {
-    return 0;
-  }
+    class basic_static_string
+    {
+      friend derived_type;
 
-  BOOST_STATIC_STRING_CPP11_CONSTEXPR
-  std::size_t
-  set_size(std::size_t) const noexcept
-  {
-    return 0;
-  }
+      BOOST_STATIC_STRING_CPP11_CONSTEXPR
+      pointer
+      data_impl() const noexcept
+      {
+        return const_cast<pointer>(&data);
+      }
 
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  void
-  term_impl() const noexcept { }
-
-private:
-  static constexpr const value_type null_{};
+    public:
+      static constexpr value_type data{};
+    };
+  };
 };
 
 // This is only needed in C++14 and lower.
 // see http://eel.is/c++draft/depr.static.constexpr
 #ifndef BOOST_STATIC_STRING_CPP17
+#if 0
 template<typename CharT, typename Traits>
 constexpr
 const
@@ -315,6 +444,13 @@ typename static_string_base<0, CharT, Traits>::value_type
 static_string_base<0, CharT, Traits>::
 null_;
 #endif
+
+template<typename CharT, typename Traits>
+constexpr
+typename static_string_base<0, CharT, Traits>::value_type
+static_string_base<0, CharT, Traits>::data::basic_static_string::data;
+#endif
+
 
 template<typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -450,24 +586,47 @@ inline
 static_string<N>
 to_static_string_int_impl(Integer value) noexcept
 {
-  char buffer[N];
-  const auto digits_end = std::end(buffer);
-  const auto digits_begin = integer_to_string<std::char_traits<char>, Integer>(
-    digits_end, value, std::is_signed<Integer>{});
-  return static_string<N>(digits_begin, std::distance(digits_begin, digits_end));
+  using size_type = typename static_string<N>::size_type;
+  static_string<N> result;
+  result.resize_and_overwrite(
+    N, 
+    [&](char* buffer, size_type) -> size_type
+    {
+      char* const digits_end = buffer + N;
+      char* const digits_begin = integer_to_string<std::char_traits<char>, Integer>(
+          digits_end, value, std::is_signed<Integer>{});
+      const size_type len = digits_end - digits_begin;
+      std::char_traits<char>::move(buffer, digits_begin, len);
+      return len;
+    }
+  );
+
+  return result;
 }
 
+#ifdef BOOST_STATIC_STRING_HAS_WCHAR
 template<std::size_t N, typename Integer>
 inline
 static_wstring<N>
 to_static_wstring_int_impl(Integer value) noexcept
 {
-  wchar_t buffer[N];
-  const auto digits_end = std::end(buffer);
-  const auto digits_begin = integer_to_wstring<std::char_traits<wchar_t>, Integer>(
-    digits_end, value, std::is_signed<Integer>{});
-  return static_wstring<N>(digits_begin, std::distance(digits_begin, digits_end));
+  using size_type = typename static_wstring<N>::size_type;
+  static_wstring<N> result;
+  result.resize_and_overwrite(
+    N,
+    [&](wchar_t* buffer, size_type) -> size_type
+    {
+      wchar_t* const digits_end = buffer + N;
+      wchar_t* const digits_begin = integer_to_wstring<std::char_traits<wchar_t>, Integer>(
+          digits_end, value, std::is_signed<Integer>{});
+      const size_type len = digits_end - digits_begin;
+      std::char_traits<wchar_t>::move(buffer, digits_begin, len);
+      return len;
+    }
+  );
+  return result;
 }
+#endif
 
 BOOST_STATIC_STRING_CPP11_CONSTEXPR
 inline
@@ -485,33 +644,78 @@ count_digits(std::size_t value)
 #pragma GCC diagnostic ignored "-Wformat-truncation"
 #endif
 
+#if defined(BOOST_STATIC_STRING_USE_STD_FORMAT)
+
+template<std::size_t N, typename FloatingPoint>
+inline
+static_string<N>
+cpp26_to_static_string(FloatingPoint value) noexcept
+{
+  using size_type = typename static_string<N>::size_type;
+  static_string<N> result;
+  result.resize_and_overwrite(
+    N,
+    [&](char* buffer, size_type) -> size_type
+    {
+      const auto formatted = std::format_to_n(buffer, N, "{}", value);
+      return formatted.size;
+    }
+  );
+  return result;
+}
+
+#endif
+
 template<std::size_t N>
 inline
 static_string<N>
 to_static_string_float_impl(double value) noexcept
 {
+#if defined(BOOST_STATIC_STRING_USE_STD_FORMAT)
+  return cpp26_to_static_string<N>(value);
+#else
+  using size_type = typename static_string<N>::size_type;
+  static_string<N> result;
   // we have to assume here that no reasonable implementation
   // will require more than 2^63 chars to represent a float value.
   const long long narrow =
     static_cast<long long>(N);
-  // extra one needed for null terminator
-  char buffer[N + 1];
-  // we know that a formatting error will not occur, so
-  // we assume that the result is always positive
-  if (std::size_t(std::snprintf(buffer, N + 1, "%f", value)) > N)
-  {
-    // the + 4 is for the decimal, 'e',
-    // its sign, and the sign of the integral portion
-    const int reserved_count =
-      (std::max)(2, count_digits(
-      std::numeric_limits<double>::max_exponent10)) + 4;
-    const int precision = narrow > reserved_count ?
-      N - reserved_count : 0;
-    // switch to scientific notation
-    std::snprintf(buffer, N + 1, "%.*e", precision, value);
-  }
-  // this will not throw
-  return static_string<N>(buffer);
+  result.resize_and_overwrite(
+    N,
+    [&](char* buffer, size_type) -> size_type
+    {
+      // we know that a formatting error will not occur, so
+      // we assume that the result is always positive
+      std::size_t length = std::snprintf(buffer, N + 1, "%f", value);
+      if (length > N)
+      {
+        // the + 4 is for the decimal, 'e',
+        // its sign, and the sign of the integral portion
+        const int reserved_count =
+            (std::max)(2, count_digits(
+                std::numeric_limits<double>::max_exponent10)) + 4;
+        const int precision = narrow > reserved_count ?
+            N - reserved_count : 0;
+        // switch to scientific notation
+        length = std::snprintf(buffer, N + 1, "%.*e", precision, value);
+      }
+      return length;
+    }
+  );
+  return result;
+#endif
+}
+
+template<std::size_t N>
+inline
+static_string<N>
+to_static_string_float_impl(float value) noexcept
+{
+#if defined(BOOST_STATIC_STRING_USE_STD_FORMAT)
+  return cpp26_to_static_string<N>(value);
+#else
+  return to_static_string_float_impl<N>(static_cast<double>(value));
+#endif
 }
 
 template<std::size_t N>
@@ -519,67 +723,123 @@ inline
 static_string<N>
 to_static_string_float_impl(long double value) noexcept
 {
+#if defined(BOOST_STATIC_STRING_USE_STD_FORMAT)
+  return cpp26_to_static_string<N>(value);
+#else
+  using size_type = typename static_string<N>::size_type;
+  static_string<N> result;
   // we have to assume here that no reasonable implementation
   // will require more than 2^63 chars to represent a float value.
   const long long narrow =
     static_cast<long long>(N);
-  // extra one needed for null terminator
-  char buffer[N + 1];
-  // snprintf returns the number of characters
-  // that would have been written
-  // we know that a formatting error will not occur, so
-  // we assume that the result is always positive
-  if (std::size_t(std::snprintf(buffer, N + 1, "%Lf", value)) > N)
-  {
-    // the + 4 is for the decimal, 'e',
-    // its sign, and the sign of the integral portion
-    const int reserved_count =
-      (std::max)(2, count_digits(
-      std::numeric_limits<long double>::max_exponent10)) + 4;
-    const int precision = narrow > reserved_count ?
-      N - reserved_count : 0;
-    // switch to scientific notation
-    std::snprintf(buffer, N + 1, "%.*Le", precision, value);
-  }
-  // this will not throw
-  return static_string<N>(buffer);
+  result.resize_and_overwrite(
+    N,
+    [&](char* buffer, size_type)->size_type
+    {
+      // snprintf returns the number of characters
+      // that would have been written
+      // we know that a formatting error will not occur, so
+      // we assume that the result is always positive
+      std::size_t length = std::snprintf(buffer, N + 1, "%Lf", value);
+      if (length > N)
+      {
+          // the + 4 is for the decimal, 'e',
+          // its sign, and the sign of the integral portion
+          const int reserved_count =
+              (std::max)(2, count_digits(
+                  std::numeric_limits<long double>::max_exponent10)) + 4;
+          const int precision = narrow > reserved_count ?
+              N - reserved_count : 0;
+          // switch to scientific notation
+          length = std::snprintf(buffer, N + 1, "%.*Le", precision, value);
+      }
+      return length;
+    }
+  );
+  return result;
+#endif
 }
+
+#ifdef BOOST_STATIC_STRING_HAS_WCHAR
+
+#if defined(BOOST_STATIC_STRING_USE_STD_FORMAT)
+template<std::size_t N, typename FloatingPoint>
+inline
+static_wstring<N>
+cpp26_to_static_wstring(FloatingPoint value) noexcept
+{
+  using size_type = typename static_wstring<N>::size_type;
+  static_wstring<N> result;
+  result.resize_and_overwrite(
+    N,
+    [&](wchar_t* buffer, size_type) -> size_type
+    {
+      const auto formatted = std::format_to_n(buffer, N, L"{}", value);
+      return formatted.size;
+    }
+  );
+  return result;
+}
+
+#endif
 
 template<std::size_t N>
 inline
 static_wstring<N>
 to_static_wstring_float_impl(double value) noexcept
 {
+#if defined(BOOST_STATIC_STRING_USE_STD_FORMAT)
+  return cpp26_to_static_wstring<N>(value);
+#else
+  using size_type = typename static_wstring<N>::size_type;
+  static_wstring<N> result;
   // we have to assume here that no reasonable implementation
   // will require more than 2^63 chars to represent a float value.
   const long long narrow =
     static_cast<long long>(N);
-  // extra one needed for null terminator
-  wchar_t buffer[N + 1];
-  // swprintf returns a negative number if it can't
-  // fit all the characters in the buffer.
-  // mingw has a non-standard swprintf, so
-  // this just covers all the bases. short
-  // circuit evaluation will ensure that the
-  // second operand is not evaluated on conforming
-  // implementations.
-  const long long num_written =
-    std::swprintf(buffer, N + 1, L"%f", value);
-  if (num_written < 0 ||
-    num_written > narrow)
-  {
-    // the + 4 is for the decimal, 'e',
-    // its sign, and the sign of the integral portion
-    const int reserved_count =
-      (std::max)(2, count_digits(
-      std::numeric_limits<double>::max_exponent10)) + 4;
-    const int precision = narrow > reserved_count ?
-      N - reserved_count : 0;
-    // switch to scientific notation
-    std::swprintf(buffer, N + 1, L"%.*e", precision, value);
-  }
-  // this will not throw
-  return static_wstring<N>(buffer);
+  result.resize_and_overwrite(
+    N,
+    [&](wchar_t* buffer, size_type) -> size_type
+    {
+      // swprintf returns a negative number if it can't
+      // fit all the characters in the buffer.
+      // mingw has a non-standard swprintf, so
+      // this just covers all the bases. short
+      // circuit evaluation will ensure that the
+      // second operand is not evaluated on conforming
+      // implementations.
+      int num_written =
+          std::swprintf(buffer, N + 1, L"%f", value);
+      if (num_written < 0 ||
+          num_written > narrow)
+      {
+          // the + 4 is for the decimal, 'e',
+          // its sign, and the sign of the integral portion
+          const int reserved_count =
+              (std::max)(2, count_digits(
+                  std::numeric_limits<double>::max_exponent10)) + 4;
+          const int precision = narrow > reserved_count ?
+              N - reserved_count : 0;
+          // switch to scientific notation
+          num_written = std::swprintf(buffer, N + 1, L"%.*e", precision, value);
+      }
+      return num_written;
+    }
+  );
+  return result;
+#endif
+}
+
+template<std::size_t N>
+inline
+static_wstring<N>
+to_static_wstring_float_impl(float value) noexcept
+{
+#if defined(BOOST_STATIC_STRING_USE_STD_FORMAT)
+  return cpp26_to_static_wstring<N>(value);
+#else
+    return to_static_wstring_float_impl<N>(static_cast<double>(value));
+#endif
 }
 
 template<std::size_t N>
@@ -587,37 +847,48 @@ inline
 static_wstring<N>
 to_static_wstring_float_impl(long double value) noexcept
 {
+#if defined(BOOST_STATIC_STRING_USE_STD_FORMAT)
+  return cpp26_to_static_wstring<N>(value);
+#else
+  using size_type = typename static_wstring<N>::size_type;
+  static_wstring<N> result;
   // we have to assume here that no reasonable implementation
   // will require more than 2^63 chars to represent a float value.
   const long long narrow =
     static_cast<long long>(N);
-  // extra one needed for null terminator
-  wchar_t buffer[N + 1];
-  // swprintf returns a negative number if it can't
-  // fit all the characters in the buffer.
-  // mingw has a non-standard swprintf, so
-  // this just covers all the bases. short
-  // circuit evaluation will ensure that the
-  // second operand is not evaluated on conforming
-  // implementations.
-  const long long num_written =
-    std::swprintf(buffer, N + 1, L"%Lf", value);
-  if (num_written < 0 ||
-    num_written > narrow)
-  {
-    // the + 4 is for the decimal, 'e',
-    // its sign, and the sign of the integral portion
-    const int reserved_count =
-      (std::max)(2, count_digits(
-      std::numeric_limits<long double>::max_exponent10)) + 4;
-    const int precision = narrow > reserved_count ?
-      N - reserved_count : 0;
-    // switch to scientific notation
-    std::swprintf(buffer, N + 1, L"%.*Le", precision, value);
-  }
-  // this will not throw
-  return static_wstring<N>(buffer);
+  result.resize_and_overwrite(
+    N,
+    [&](wchar_t* buffer, size_type) -> size_type
+    {
+      // swprintf returns a negative number if it can't
+      // fit all the characters in the buffer.
+      // mingw has a non-standard swprintf, so
+      // this just covers all the bases. short
+      // circuit evaluation will ensure that the
+      // second operand is not evaluated on conforming
+      // implementations.
+      int num_written =
+          std::swprintf(buffer, N + 1, L"%Lf", value);
+      if (num_written < 0 ||
+          num_written > narrow)
+      {
+          // the + 4 is for the decimal, 'e',
+          // its sign, and the sign of the integral portion
+          const int reserved_count =
+              (std::max)(2, count_digits(
+                  std::numeric_limits<long double>::max_exponent10)) + 4;
+          const int precision = narrow > reserved_count ?
+              N - reserved_count : 0;
+          // switch to scientific notation
+          num_written = std::swprintf(buffer, N + 1, L"%.*Le", precision, value);
+      }
+      return num_written;
+    }
+  );
+  return result;
+#endif
 }
+#endif
 
 #if defined(__GNUC__) && __GNUC__ >= 7
 #pragma GCC diagnostic pop
@@ -810,18 +1081,23 @@ throw_exception(const char* msg)
       basic_static_string<N, char8_t, std::char_traits<char8_t>>;
     @endcode
 
-    @see to_static_string
+    @see @ref to_static_string.
 */
 template<std::size_t N, typename CharT,
   typename Traits = std::char_traits<CharT>>
 class basic_static_string
 #ifndef BOOST_STATIC_STRING_DOCS
-  : private detail::static_string_base<N, CharT, Traits>
+  // : public detail::static_string_base<N, CharT, Traits>
+  : public detail::static_string_base<
+    N, CharT, Traits>::size::basic_static_string
+  , public detail::static_string_base<
+    N, CharT, Traits>::data::basic_static_string
 #endif
 {
 private:
   template<std::size_t, class, class>
   friend class basic_static_string;
+
 public:
   //--------------------------------------------------------------------------
   //
@@ -867,9 +1143,11 @@ public:
   using const_reverse_iterator =
     std::reverse_iterator<const_iterator>;
 
+#ifdef BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW
   /// The string view type.
   using string_view_type =
     basic_string_view<value_type, traits_type>;
+#endif
 
   //--------------------------------------------------------------------------
   //
@@ -961,7 +1239,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string(const_pointer s)
   {
-    assign(s);
+    assign(s, s + traits_type::length(s));
   }
 
   /** Constructor.
@@ -988,11 +1266,7 @@ public:
 
       Copy constructor.
   */
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  basic_static_string(const basic_static_string& other) noexcept
-  {
-    assign(other);
-  }
+  basic_static_string(const basic_static_string& other) = default;
 
   /** Constructor.
 
@@ -1022,7 +1296,7 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   explicit
@@ -1042,7 +1316,7 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1059,6 +1333,29 @@ public:
   // Assignment
   //
   //--------------------------------------------------------------------------
+
+  /** Assign to the string.
+
+      Replaces the contents with those of
+      the string `s`.
+
+      @par Complexity
+
+      Linear in `s.size()`.
+
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @return `*this`
+
+      @param s The string to replace
+      the contents with.
+
+      @throw std::length_error `s.size() > max_size()`.
+  */
+  basic_static_string&
+  operator=(const basic_static_string& s) = default;
 
   /** Assign to the string.
 
@@ -1113,7 +1410,7 @@ public:
   basic_static_string&
   operator=(const_pointer s)
   {
-    return assign(s);
+    return assign(s, s + traits_type::length(s));
   }
 
   /** Assign to the string.
@@ -1192,7 +1489,8 @@ public:
 
       @code
       std::is_convertible<const T&, string_view>::value &&
-      !std::is_convertible<const T&, const CharT*>::value
+      !std::is_convertible<const T&, const CharT*>::value &&
+      !std::is_convertible<const T&, const basic_static_string&>::value
       @endcode
 
       @return `*this`
@@ -1203,7 +1501,7 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1280,7 +1578,7 @@ public:
   basic_static_string&
   assign(const basic_static_string& s) noexcept
   {
-    if (this == &s)
+    if (data() == s.data())
       return *this;
     return assign_unchecked(s.data(), s.size());
   }
@@ -1481,7 +1779,8 @@ public:
 
       @code
       std::is_convertible<const T&, string_view>::value &&
-      !std::is_convertible<const T&, const CharT*>::value
+      !std::is_convertible<const T&, const CharT*>::value &&
+      !std::is_convertible<const T&, const basic_static_string&>::value
       @endcode
 
       @return `*this`
@@ -1492,14 +1791,14 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   assign(const T& t)
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return assign(sv.data(), sv.size());
   }
 
@@ -1526,7 +1825,8 @@ public:
 
       @code
       std::is_convertible<const T&, string_view>::value &&
-      !std::is_convertible<const T&, const CharT*>::value
+      !std::is_convertible<const T&, const CharT*>::value &&
+      !std::is_convertible<const T&, const basic_static_string&>::value
       @endcode
 
       @return `*this`
@@ -1542,7 +1842,7 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   basic_static_string&
@@ -1551,8 +1851,12 @@ public:
     size_type pos,
     size_type count = npos)
   {
-    const auto sv = string_view_type(t).substr(pos, count);
-    return assign(sv.data(), sv.size());
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
+    if( pos > sv.size() )
+      detail::throw_exception<std::out_of_range>(
+          "pos >= t.size()");
+    std::size_t rlen = (std::min)( count, sv.size() - pos );
+    return assign(sv.data() + pos, rlen);
   }
 
   //--------------------------------------------------------------------------
@@ -1798,6 +2102,7 @@ public:
     return data();
   }
 
+#ifdef BOOST_STATIC_STRING_DOCS
   /** Convert to a string view referring to the string.
 
       Returns a string view referring to the
@@ -1812,6 +2117,28 @@ public:
   {
     return string_view_type(data(), size());
   }
+#else
+#ifdef BOOST_STATIC_STRING_HAS_STD_STRING_VIEW
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  operator std::basic_string_view<CharT, Traits>() const noexcept
+  {
+    return std::basic_string_view<CharT, Traits>(data(), size());
+  }
+#endif
+#ifndef BOOST_STATIC_STRING_STANDALONE
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  operator ::boost::basic_string_view<CharT, Traits>() const noexcept
+  {
+    return ::boost::basic_string_view<CharT, Traits>(data(), size());
+  }
+
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  operator ::boost::core::basic_string_view<CharT>() const noexcept
+  {
+    return ::boost::core::basic_string_view<CharT>(data(), size());
+  }
+#endif
+#endif
 
   //--------------------------------------------------------------------------
   //
@@ -1987,6 +2314,23 @@ public:
     return N;
   }
 
+  /** Return the number of additional characters that can be stored.
+
+      Returns `max_size() - size()`, i.e. the number of characters
+      that can still be inserted before the string reaches its
+      capacity.
+
+      @par Complexity
+
+      Constant.
+   */
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  size_type
+  available() const noexcept
+  {
+    return max_size() - size();
+  }
+
   /** Increase the capacity.
 
       This function has no effect.
@@ -2049,7 +2393,7 @@ public:
   void
   clear() noexcept
   {
-    this->set_size(0);
+    this->size_impl(0);
     term();
   }
 
@@ -2445,7 +2789,8 @@ public:
       @par Constraints
 
       `std::is_convertible<const T&, string_view>::value &&
-      !std::is_convertible<const T&, const CharT*>::value`.
+      !std::is_convertible<const T&, const CharT*>::value &&
+      !std::is_convertible<const T&, const basic_static_string&>::value`.
 
       @param index The index to insert at.
       @param t The string to insert from.
@@ -2455,7 +2800,7 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2464,7 +2809,7 @@ public:
     size_type index,
     const T& t)
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return insert(index, sv.data(), sv.size());
   }
 
@@ -2486,7 +2831,8 @@ public:
       @par Constraints
 
       `std::is_convertible<const T&, string_view>::value &&
-      !std::is_convertible<const T&, const_pointer>::value`.
+      !std::is_convertible<const T&, const_pointer>::value &&
+      !std::is_convertible<const T&, const basic_static_string&>::value`.
 
       @return `*this`
 
@@ -2502,7 +2848,7 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2513,8 +2859,10 @@ public:
     size_type index_str,
     size_type count = npos)
   {
-    const auto sv = string_view_type(t).substr(index_str, count);
-    return insert(index, sv.data(), sv.size());
+    detail::common_string_view_type<T, CharT, Traits> sv(t);
+    if ( index_str > sv.size() )
+      detail::throw_exception<std::out_of_range>("index_str > t.size()");
+    return insert(index, sv.data() + index_str, (std::min)(sv.size() - index_str, count));
   }
 
   /** Erase from the string.
@@ -2637,7 +2985,7 @@ public:
   pop_back() noexcept
   {
     BOOST_STATIC_STRING_ASSERT(!empty());
-    this->set_size(size() - 1);
+    this->size_impl(size() - 1);
     term();
   }
 
@@ -2813,7 +3161,7 @@ public:
     InputIterator first,
     InputIterator last)
   {
-    this->set_size(size() + read_back(true, first, last));
+    this->size_impl(size() + read_back(true, first, last));
     return term();
   }
 
@@ -2855,7 +3203,8 @@ public:
 
       @code
       std::is_convertible<T const&, string_view>::value &&
-      !std::is_convertible<T const&, char const*>::value
+      !std::is_convertible<T const&, char const*>::value &&
+      !std::is_convertible<const T&, const basic_static_string&>::value
       @endcode
 
       @return `*this`
@@ -2866,14 +3215,14 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   append(const T& t)
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return append(sv.data(), sv.size());
   }
 
@@ -2892,7 +3241,8 @@ public:
 
       @code
       std::is_convertible<T const&, string_view>::value &&
-      !std::is_convertible<T const&, char const*>::value
+      !std::is_convertible<T const&, char const*>::value &&
+      !std::is_convertible<const T&, const basic_static_string&>::value
       @endcode
 
       @return `*this`
@@ -2908,7 +3258,7 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2918,8 +3268,10 @@ public:
     size_type pos,
     size_type count = npos)
   {
-    const auto sv = string_view_type(t).substr(pos, count);
-    return append(sv.data(), sv.size());
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
+    if ( pos > sv.size() )
+      detail::throw_exception<std::out_of_range>("pos > t.size()");
+    return append(sv.data() + pos, (std::min)(sv.size() - pos, count));
   }
 
   /** Append to the string.
@@ -3028,7 +3380,8 @@ public:
 
       @code
       std::is_convertible<T const&, string_view>::value &&
-      !std::is_convertible<T const&, char const*>::value
+      !std::is_convertible<T const&, char const*>::value &&
+      !std::is_convertible<const T&, const basic_static_string&>::value
       @endcode
 
       @return `*this`
@@ -3039,7 +3392,7 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -3287,7 +3640,8 @@ public:
 
       @code
       std::is_convertible<const T&, string_view>::value &&
-      !std::is_convertible<const T&, const_pointer>::value.
+      !std::is_convertible<const T&, const_pointer>::value &&
+      !std::is_convertible<const T&, const basic_static_string&>::value.
       @endcode
 
       @return The result of lexicographically comparing `s` and the string.
@@ -3296,14 +3650,14 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   int
   compare(const T& t) const noexcept
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return detail::lexicographical_compare<CharT, Traits>(
       data(), size(), sv.data(), sv.size());
   }
@@ -3331,7 +3685,8 @@ public:
 
       @code
       std::is_convertible<const T&, string_view>::value &&
-      !std::is_convertible<const T&, const_pointer>::value.
+      !std::is_convertible<const T&, const_pointer>::value &&
+      !std::is_convertible<const T&, const basic_static_string&>::value.
       @endcode
 
       @return The result of lexicographically comparing `s` and `sub`.
@@ -3344,7 +3699,7 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -3354,7 +3709,7 @@ public:
     size_type count1,
     const T& t) const
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return detail::lexicographical_compare<CharT, Traits>(
       data() + pos1, capped_length(pos1, count1), sv.data(), sv.size());
   }
@@ -3382,7 +3737,8 @@ public:
 
       @code
       std::is_convertible<const T&, string_view>::value &&
-      !std::is_convertible<const T&, const_pointer>::value.
+      !std::is_convertible<const T&, const_pointer>::value &&
+      !std::is_convertible<const T&, const basic_static_string&>::value.
       @endcode
 
       @return The result of lexicographically comparing `sub1` and `sub2`.
@@ -3399,7 +3755,7 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -3411,9 +3767,12 @@ public:
     size_type pos2,
     size_type count2 = npos) const
   {
-    const auto sv = string_view_type(t).substr(pos2, count2);
-    return compare(pos1, count1,
-      sv.data(), sv.size());
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
+    if ( pos2 > sv.size())
+      detail::throw_exception<std::out_of_range>("pos2 > sv.size()");
+    return compare(
+        pos1, count1, sv.data() + pos2,
+        (std::min)(sv.size() - pos2, count2));
   }
 
   /** Return a substring.
@@ -3428,8 +3787,8 @@ public:
       `{data() + pos, std::min(count, size() - pos))`.
 
       @param pos The index to being the substring at. The
-      default arugment for this parameter is `0`.
-      @param count The length of the substring. The default arugment
+      default argument for this parameter is `0`.
+      @param count The length of the substring. The default argument
       for this parameter is @ref npos.
 
       @throw std::out_of_range `pos > size()`
@@ -3446,6 +3805,7 @@ public:
       data() + pos, capped_length(pos, count));
   }
 
+#ifdef BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW
   /** Return a string view of a substring.
 
       Returns a view of a substring.
@@ -3458,8 +3818,8 @@ public:
       to `{data() + pos, std::min(count, size() - pos))`.
 
       @param pos The index to being the substring at. The
-      default arugment for this parameter is `0`.
-      @param count The length of the substring. The default arugment
+      default argument for this parameter is `0`.
+      @param count The length of the substring. The default argument
       for this parameter is @ref npos.
 
       @throw std::out_of_range `pos > size()`
@@ -3473,6 +3833,7 @@ public:
     return string_view_type(
       data() + pos, capped_length(pos, count));
   }
+#endif
 
   /** Copy a substring to another string.
 
@@ -3536,6 +3897,31 @@ public:
   resize(
     size_type n,
     value_type c);
+
+  /**
+      Resize the string and overwrite its contents.
+
+      Resizes the string to contain `n` characters, and uses the
+      provided function object `op` to overwrite the string contents.
+      The function object is called with two arguments: a pointer to
+      the string internal buffer, and the size of the string. The
+      function object shall return the number of characters written to
+      the buffer, which shall be less than or equal to `n`. The string
+      size is set to the value returned by the function object.
+
+      @par Exception Safety
+
+      Strong guarantee. However, if an exception is thrown by
+      `std::move(op)(p, count)`, the behavior is undefined.
+
+      @throw std::length_error `n > max_size()`
+  */
+  template<typename Operation>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  void
+  resize_and_overwrite(
+    size_type n,
+    Operation op);
 
   /** Swap two strings.
 
@@ -3709,7 +4095,8 @@ public:
       @par Constraints
 
       `std::is_convertible<const T&, string_view>::value &&
-      !std::is_convertible<const T&, const CharT*>::value`.
+      !std::is_convertible<const T&, const CharT*>::value &&
+      !std::is_convertible<const T&, const basic_static_string&>::value`.
 
       @return `*this`
 
@@ -3722,7 +4109,7 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -3732,7 +4119,7 @@ public:
     size_type n1,
     const T& t)
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return replace(pos1, n1, sv.data(), sv.size());
   }
 
@@ -3755,7 +4142,8 @@ public:
       @par Constraints
 
       `std::is_convertible<const T&, string_view>::value &&
-      !std::is_convertible<const T&, const CharT*>::value`.
+      !std::is_convertible<const T&, const CharT*>::value &&
+      !std::is_convertible<const T&, const basic_static_string&>::value`.
 
       @return `*this`
 
@@ -3772,7 +4160,7 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -3784,8 +4172,12 @@ public:
     size_type pos2,
     size_type n2 = npos)
   {
-    const string_view_type sv = t;
-    return replace(pos1, n1, sv.substr(pos2, n2));
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
+    if ( pos2 > sv.size())
+      detail::throw_exception<std::out_of_range>("pos2 > t.size()");
+    return replace(
+        pos1, n1, sv.data() + pos2,
+        (std::min)(sv.size() - pos2, n2));
   }
 
   /** Replace a part of the string.
@@ -3967,7 +4359,8 @@ public:
       @par Constraints
 
       `std::is_convertible<const T&, string_view>::value &&
-      !std::is_convertible<const T&, const CharT*>::value`.
+      !std::is_convertible<const T&, const CharT*>::value &&
+      !std::is_convertible<const T&, const basic_static_string&>::value`.
 
       @return `*this`
 
@@ -3980,7 +4373,7 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -3990,8 +4383,8 @@ public:
     const_iterator i2,
     const T& t)
   {
-    const string_view_type sv = t;
-    return replace(i1, i2, sv.begin(), sv.end());
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
+    return replace(i1, i2, sv.data(), sv.data() + sv.size());
   }
 
   /** Replace a part of the string.
@@ -4230,7 +4623,8 @@ public:
       @par Constraints
 
       `std::is_convertible<const T&, string_view>::value &&
-      !std::is_convertible<const T&, const CharT*>::value`.
+      !std::is_convertible<const T&, const CharT*>::value &&
+      !std::is_convertible<const T&, const basic_static_string&>::value`.
 
       @return The lowest index `idx` greater than or equal to `pos`
       where each element of `{sv.begin(), sv.end())` is equal to
@@ -4243,7 +4637,7 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -4251,9 +4645,13 @@ public:
   find(
     const T& t,
     size_type pos = 0) const
+#ifdef BOOST_STATIC_STRING_DOCS
       noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
+#else
+      noexcept(detail::is_nothrow_convertible<const T&, detail::common_string_view_type<T, CharT, Traits>>::value)
+#endif
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return find(sv.data(), pos, sv.size());
   }
 
@@ -4383,7 +4781,8 @@ public:
       @par Constraints
 
       `std::is_convertible<const T&, string_view>::value &&
-      !std::is_convertible<const T&, const CharT*>::value`.
+      !std::is_convertible<const T&, const CharT*>::value &&
+      !std::is_convertible<const T&, const basic_static_string&>::value`.
 
       @return The highest index `idx` less than or equal to `pos`
       where each element of `{sv.begin(), sv.end())` is equal to
@@ -4396,7 +4795,7 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -4404,9 +4803,13 @@ public:
   rfind(
     const T& t,
     size_type pos = npos) const
+#ifdef BOOST_STATIC_STRING_DOCS
       noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
+#else
+      noexcept(detail::is_nothrow_convertible<const T&, detail::common_string_view_type<T, CharT, Traits>>::value)
+#endif
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return rfind(sv.data(), pos, sv.size());
   }
 
@@ -4532,7 +4935,8 @@ public:
       @par Constraints
 
       `std::is_convertible<const T&, string_view>::value &&
-      !std::is_convertible<const T&, const CharT*>::value`.
+      !std::is_convertible<const T&, const CharT*>::value &&
+      !std::is_convertible<const T&, const basic_static_string&>::value`.
 
       @return The index corrosponding to the first occurrence of
       any of the characters in `{sv.begin(), sv.end())` within
@@ -4544,7 +4948,7 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -4552,9 +4956,13 @@ public:
   find_first_of(
     const T& t,
     size_type pos = 0) const
+#ifdef BOOST_STATIC_STRING_DOCS
       noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
+#else
+      noexcept(detail::is_nothrow_convertible<const T&, detail::common_string_view_type<T, CharT, Traits>>::value)
+#endif
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return find_first_of(sv.data(), pos, sv.size());
   }
 
@@ -4675,7 +5083,8 @@ public:
       @par Constraints
 
       `std::is_convertible<const T&, string_view>::value &&
-      !std::is_convertible<const T&, const CharT*>::value`.
+      !std::is_convertible<const T&, const CharT*>::value &&
+      !std::is_convertible<const T&, const basic_static_string&>::value`.
 
       @return The index corrosponding to the last occurrence of
       any of the characters in `{sv.begin(), sv.end())` within
@@ -4687,7 +5096,7 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -4695,9 +5104,13 @@ public:
   find_last_of(
     const T& t,
     size_type pos = npos) const
+#ifdef BOOST_STATIC_STRING_DOCS
       noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
+#else
+      noexcept(detail::is_nothrow_convertible<const T&, detail::common_string_view_type<T, CharT, Traits>>::value)
+#endif
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return find_last_of(sv.data(), pos, sv.size());
   }
 
@@ -4817,7 +5230,8 @@ public:
       @par Constraints
 
       `std::is_convertible<const T&, string_view>::value &&
-      !std::is_convertible<const T&, const CharT*>::value`.
+      !std::is_convertible<const T&, const CharT*>::value &&
+      !std::is_convertible<const T&, const basic_static_string&>::value`.
 
       @return The index corrosponding to the first occurrence of
       a character that is not in `{sv.begin(), sv.end())` within
@@ -4829,7 +5243,7 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -4837,9 +5251,13 @@ public:
   find_first_not_of(
     const T& t,
     size_type pos = 0) const
+#ifdef BOOST_STATIC_STRING_DOCS
       noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
+#else
+      noexcept(detail::is_nothrow_convertible<const T&, detail::common_string_view_type<T, CharT, Traits>>::value)
+#endif
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return find_first_not_of(sv.data(), pos, sv.size());
   }
 
@@ -4958,7 +5376,8 @@ public:
       @par Constraints
 
       `std::is_convertible<const T&, string_view>::value &&
-      !std::is_convertible<const T&, const CharT*>::value`.
+      !std::is_convertible<const T&, const CharT*>::value &&
+      !std::is_convertible<const T&, const basic_static_string&>::value`.
 
       @return The index corrosponding to the last occurrence of
       a character that is not in `{sv.begin(), sv.end())` within
@@ -4970,7 +5389,7 @@ public:
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
-    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+    , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
 #endif
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -4978,9 +5397,13 @@ public:
   find_last_not_of(
     const T& t,
     size_type pos = npos) const
+#ifdef BOOST_STATIC_STRING_DOCS
       noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
+#else
+      noexcept(detail::is_nothrow_convertible<const T&, detail::common_string_view_type<T, CharT, Traits>>::value)
+#endif
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return find_last_not_of(sv.data(), pos, sv.size());
   }
 
@@ -5094,15 +5517,21 @@ public:
 
       Linear.
 
-      @param s The string view to check for.
+      @param t The string view to check for.
   */
+  template<typename T
+#ifndef BOOST_STATIC_STRING_DOCS
+            , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
+#endif
+  >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   bool
   starts_with(
-    string_view_type s) const noexcept
+    T const& t) const noexcept
   {
-    const size_type len = s.size();
-    return size() >= len && !traits_type::compare(data(), s.data(), len);
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
+    const size_type len = sv.size();
+    return size() >= len && !traits_type::compare(data(), sv.data(), len);
   }
 
   /** Return whether the string begins with a character.
@@ -5152,15 +5581,21 @@ public:
 
       Linear.
 
-      @param s The string view to check for.
+      @param t The string view to check for.
   */
+  template<typename T
+#ifndef BOOST_STATIC_STRING_DOCS
+            , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
+#endif
+  >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   bool
   ends_with(
-    string_view_type s) const noexcept
+    T const& t) const noexcept
   {
-    const size_type len = s.size();
-    return size() >= len && !traits_type::compare(data() + (size() - len), s.data(), len);
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
+    const size_type len = sv.size();
+    return size() >= len && !traits_type::compare(data() + (size() - len), sv.data(), len);
   }
 
   /** Return whether the string ends with a character.
@@ -5204,10 +5639,21 @@ public:
 
 private:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  void term_impl(std::true_type) noexcept
+  {
+    traits_type::assign(data()[size()], value_type());
+  }
+
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  void term_impl(std::false_type) noexcept
+  {
+  }
+
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   term() noexcept
   {
-    this->term_impl();
+    term_impl(std::integral_constant<bool, N != 0>());
     return *this;
   }
 
@@ -5215,7 +5661,7 @@ private:
   basic_static_string&
   assign_char(value_type ch, std::true_type) noexcept
   {
-    this->set_size(1);
+    this->size_impl(1);
     traits_type::assign(data()[0], ch);
     return term();
   }
@@ -5289,7 +5735,7 @@ private:
     const_pointer s,
     size_type count) noexcept
   {
-    this->set_size(count);
+    this->size_impl(count);
     traits_type::copy(data(), s, size() + 1);
     return *this;
   }
@@ -5417,6 +5863,42 @@ operator==(
     rhs, Traits::length(rhs)) == 0;
 }
 
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator==(
+  const T& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> lhsv = lhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhsv.data(), lhsv.size(),
+    rhs.data(), rhs.size()) == 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator==(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const T& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> rhsv = rhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhsv.data(), rhsv.size()) == 0;
+}
+
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
@@ -5441,6 +5923,42 @@ operator!=(
   return detail::lexicographical_compare<CharT, Traits>(
     lhs.data(), lhs.size(),
     rhs, Traits::length(rhs)) != 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator!=(
+  const T& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> lhsv = lhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhsv.data(), lhsv.size(),
+    rhs.data(), rhs.size()) != 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator!=(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const T& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> rhsv = rhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhsv.data(), rhsv.size()) != 0;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -5469,6 +5987,42 @@ operator<(
     rhs, Traits::length(rhs)) < 0;
 }
 
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator<(
+  const T& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> lhsv = lhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhsv.data(), lhsv.size(),
+    rhs.data(), rhs.size()) < 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator<(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const T& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> rhsv = rhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhsv.data(), rhsv.size()) < 0;
+}
+
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
@@ -5493,6 +6047,42 @@ operator<=(
   return detail::lexicographical_compare<CharT, Traits>(
     lhs.data(), lhs.size(),
     rhs, Traits::length(rhs)) <= 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator<=(
+  const T& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> lhsv = lhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhsv.data(), lhsv.size(),
+    rhs.data(), rhs.size()) <= 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator<=(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const T& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> rhsv = rhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhsv.data(), rhsv.size()) <= 0;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -5521,6 +6111,43 @@ operator>(
     rhs, Traits::length(rhs)) > 0;
 }
 
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator>(
+  const T& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> lhsv = lhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhsv.data(), lhsv.size(),
+    rhs.data(), rhs.size()) > 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator>(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const T& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> rhsv = rhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhsv.data(), rhsv.size()) > 0;
+}
+
+
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
@@ -5545,6 +6172,42 @@ operator>=(
   return detail::lexicographical_compare<CharT, Traits>(
     lhs.data(), lhs.size(),
     rhs, Traits::length(rhs)) >= 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator>=(
+  const T& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> lhsv = lhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhsv.data(), lhsv.size(),
+    rhs.data(), rhs.size()) >= 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<N, T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator>=(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const T& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> rhsv = rhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhsv.data(), rhsv.size()) >= 0;
 }
 
 template<
@@ -5682,7 +6345,13 @@ operator<<(
   std::basic_ostream<CharT, Traits>& os,
   const basic_static_string<N, CharT, Traits>& s)
 {
+#ifdef BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW
   return os << basic_string_view<CharT, Traits>(s.data(), s.size());
+#else
+  for (auto c: s)
+    os << c;
+  return os;
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -5696,9 +6365,13 @@ operator<<(
 
 // Unsigned overloads have a + 1, for the missing digit.
 
-// Floating point overloads have a + 4, for the sign
-// of the integral part, sign of the exponent, the 'e',
-// and the decimal.
+// Floating point overloads have a +8 (for float), + 8
+// (for double), and +10 for long double (that accounts
+// for the sign of the integral part, the missing digit,
+// the decimal point, the sign of the exponent, the 'e'
+// and up to two, three or five digits of exponent---float
+// uses the same value as double, because we sometimes
+// reuse the conversion from double for floats).
 
 /// Converts `value` to a `static_string`
 static_string<std::numeric_limits<int>::digits10 + 2>
@@ -5755,32 +6428,33 @@ to_static_string(unsigned long long value) noexcept
 }
 
 /// Converts `value` to a `static_string`
-static_string<std::numeric_limits<float>::max_digits10 + 4>
+static_string<std::numeric_limits<float>::max_digits10 + 8>
 inline
 to_static_string(float value) noexcept
 {
   return detail::to_static_string_float_impl<
-    std::numeric_limits<float>::max_digits10 + 4>(value);
+    std::numeric_limits<float>::max_digits10 + 8>(value);
 }
 
 /// Converts `value` to a `static_string`
-static_string<std::numeric_limits<double>::max_digits10 + 4>
+static_string<std::numeric_limits<double>::max_digits10 + 8>
 inline
 to_static_string(double value) noexcept
 {
   return detail::to_static_string_float_impl<
-    std::numeric_limits<double>::max_digits10 + 4>(value);
+    std::numeric_limits<double>::max_digits10 + 8>(value);
 }
 
 /// Converts `value` to a `static_string`
-static_string<std::numeric_limits<long double>::max_digits10 + 4>
+static_string<std::numeric_limits<long double>::max_digits10 + 10>
 inline
 to_static_string(long double value) noexcept
 {
   return detail::to_static_string_float_impl<
-    std::numeric_limits<long double>::max_digits10 + 4>(value);
+    std::numeric_limits<long double>::max_digits10 + 10>(value);
 }
 
+#ifdef BOOST_STATIC_STRING_HAS_WCHAR
 /// Converts `value` to a `static_wstring`
 static_wstring<std::numeric_limits<int>::digits10 + 2>
 inline
@@ -5836,31 +6510,32 @@ to_static_wstring(unsigned long long value) noexcept
 }
 
 /// Converts `value` to a `static_wstring`
-static_wstring<std::numeric_limits<float>::max_digits10 + 4>
+static_wstring<std::numeric_limits<float>::max_digits10 + 8>
 inline
 to_static_wstring(float value) noexcept
 {
   return detail::to_static_wstring_float_impl<
-    std::numeric_limits<float>::max_digits10 + 4>(value);
+    std::numeric_limits<float>::max_digits10 + 8>(value);
 }
 
 /// Converts `value` to a `static_wstring`
-static_wstring<std::numeric_limits<double>::max_digits10 + 4>
+static_wstring<std::numeric_limits<double>::max_digits10 + 8>
 inline
 to_static_wstring(double value) noexcept
 {
   return detail::to_static_wstring_float_impl<
-    std::numeric_limits<double>::max_digits10 + 4>(value);
+    std::numeric_limits<double>::max_digits10 + 8>(value);
 }
 
 /// Converts `value` to a `static_wstring`
-static_wstring<std::numeric_limits<long double>::max_digits10 + 4>
+static_wstring<std::numeric_limits<long double>::max_digits10 + 10>
 inline
 to_static_wstring(long double value) noexcept
 {
   return detail::to_static_wstring_float_impl<
-    std::numeric_limits<long double>::max_digits10 + 4>(value);
+    std::numeric_limits<long double>::max_digits10 + 10>(value);
 }
+#endif
 
 //------------------------------------------------------------------------------
 //
@@ -5871,7 +6546,7 @@ to_static_wstring(long double value) noexcept
 #ifdef BOOST_STATIC_STRING_USE_DEDUCT
 template<std::size_t N, typename CharT>
 basic_static_string(const CharT(&)[N]) ->
-  basic_static_string<N, CharT, std::char_traits<CharT>>;
+  basic_static_string<N - 1, CharT, std::char_traits<CharT>>;
 #endif
 
 //------------------------------------------------------------------------------
@@ -5901,7 +6576,9 @@ hash_value(
 //------------------------------------------------------------------------------
 
 using static_strings::static_string;
+#ifdef BOOST_STATIC_STRING_HAS_WCHAR
 using static_strings::static_wstring;
+#endif
 using static_strings::static_u16string;
 using static_strings::static_u32string;
 } // boost
@@ -5922,12 +6599,36 @@ struct hash<
   operator()(
     const boost::static_strings::basic_static_string<N, CharT, Traits>& str) const noexcept
   {
-#ifndef BOOST_STATIC_STRING_STANDALONE
+#if !defined(BOOST_STATIC_STRING_STANDALONE)
     return boost::hash_range(str.begin(), str.end());
-#else
+#elif defined(BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW)
     using view_type = typename
       boost::static_strings::basic_string_view<CharT, Traits>;
     return std::hash<view_type>()(view_type(str.data(), str.size()));
+#else
+    std::size_t seed = 0;
+    for (CharT const& c : str)
+    {
+#if BOOST_STATIC_STRING_ARCH == 64
+      seed += 0x9e3779b9 + std::hash<CharT>()( c );
+      std::size_t const m = (std::size_t(0xe9846af) << 32) + 0x9b1a615d;
+      seed ^= seed >> 32;
+      seed *= m;
+      seed ^= seed >> 32;
+      seed *= m;
+      seed ^= seed >> 28;
+#elif BOOST_STATIC_STRING_ARCH == 32
+      seed += 0x9e3779b9 + std::hash<CharT>()( c );
+      std::size_t const m1 = 0x21f0aaad;
+      std::size_t const m2 = 0x735a2d97;
+      seed ^= seed >> 16;
+      seed *= m1;
+      seed ^= seed >> 15;
+      seed *= m2;
+      seed ^= seed >> 15;
+#endif
+    }
+    return seed;
 #endif
   }
 };
@@ -5955,7 +6656,7 @@ assign(
   if (count > max_size())
     detail::throw_exception<std::length_error>(
       "count > max_size()");
-  this->set_size(count);
+  this->size_impl(count);
   traits_type::assign(data(), size(), ch);
   return term();
 }
@@ -5972,7 +6673,7 @@ assign(
   if (count > max_size())
     detail::throw_exception<std::length_error>(
       "count > max_size()");
-  this->set_size(count);
+  this->size_impl(count);
   traits_type::move(data(), s, size());
   return term();
 }
@@ -5994,13 +6695,13 @@ assign(
   {
     if (i >= max_size())
     {
-      this->set_size(i);
+      this->size_impl(i);
       term();
       detail::throw_exception<std::length_error>("n > max_size()");
     }
     traits_type::assign(*ptr, *first);
   }
-  this->set_size(ptr - data());
+  this->size_impl(ptr - data());
   return term();
 }
 
@@ -6022,7 +6723,10 @@ insert(
   const auto index = pos - curr_data;
   traits_type::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
   traits_type::assign(&curr_data[index], count, ch);
-  this->set_size(curr_size + count);
+  this->size_impl(curr_size + count);
+#if defined(__clang__) && __clang_major__ == 3 && __clang_minor__ == 7
+  term();
+#endif
   return &curr_data[index];
 }
 
@@ -6039,36 +6743,43 @@ insert(
       detail::is_forward_iterator<
         ForwardIterator>::value, iterator>::type
 {
+  // input
+  const std::size_t count = detail::distance(first, last);
+  const auto first_addr = &*first;
+  const auto last_addr = first_addr + count;
+
+  // output
   const auto curr_size = size();
   const auto curr_data = data();
-  const std::size_t count = detail::distance(first, last);
   const std::size_t index = pos - curr_data;
-  const auto first_addr = &*first;
+  auto dest = &curr_data[index];
+
   if (count > max_size() - curr_size)
     detail::throw_exception<std::length_error>(
       "count > max_size() - curr_size");
+
+  traits_type::move(dest + count, dest, curr_size - index + 1);
   const bool inside = detail::ptr_in_range(curr_data, curr_data + curr_size, first_addr);
-  if (!inside || (inside && (first_addr + count <= pos)))
+  if (!inside || last_addr <= pos)
   {
-    traits_type::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
-    detail::copy_with_traits<Traits>(first, last, &curr_data[index]);
+    detail::copy_with_traits<Traits>(first, last, dest);
   }
-  else
+  else /* if (inside) */
   {
     const size_type offset = first_addr - curr_data;
-    traits_type::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
     if (offset < index)
     {
       const size_type diff = index - offset;
-      traits_type::copy(&curr_data[index], &curr_data[offset], diff);
-      traits_type::copy(&curr_data[index + diff], &curr_data[index + count], count - diff);
+      traits_type::copy(dest, &curr_data[offset], diff);
+      traits_type::copy(&curr_data[index + diff], dest + count, count - diff);
     }
     else
     {
-      traits_type::copy(&curr_data[index], &curr_data[offset + count], count);
+      auto src = &curr_data[offset + count];
+      traits_type::copy(dest, src, count);
     }
   }
-  this->set_size(curr_size + count);
+  this->size_impl(curr_size + count);
   return curr_data + index;
 }
 
@@ -6092,7 +6803,7 @@ insert(
   const auto count = read_back(false, first, last);
   const std::size_t index = pos - curr_data;
   std::rotate(&curr_data[index], &curr_data[curr_size + 1], &curr_data[curr_size + count + 1]);
-  this->set_size(curr_size + count);
+  this->size_impl(curr_size + count);
   return curr_data + index;
 }
 
@@ -6108,7 +6819,7 @@ erase(
   const auto curr_data = data();
   const std::size_t index = first - curr_data;
   traits_type::move(&curr_data[index], last, (end() - last) + 1);
-  this->set_size(size() - std::size_t(last - first));
+  this->size_impl(size() - std::size_t(last - first));
   return curr_data + index;
 }
 
@@ -6124,7 +6835,7 @@ push_back(
     detail::throw_exception<std::length_error>(
       "curr_size >= max_size()");
   traits_type::assign(data()[curr_size], ch);
-  this->set_size(curr_size + 1);
+  this->size_impl(curr_size + 1);
   term();
 }
 
@@ -6142,7 +6853,7 @@ append(
     detail::throw_exception<std::length_error>(
       "count > max_size() - size()");
   traits_type::assign(end(), count, ch);
-  this->set_size(curr_size + count);
+  this->size_impl(curr_size + count);
   return term();
 }
 
@@ -6160,7 +6871,7 @@ append(
     detail::throw_exception<std::length_error>(
       "count > max_size() - size()");
   traits_type::copy(end(), s, count);
-  this->set_size(curr_size + count);
+  this->size_impl(curr_size + count);
   return term();
 }
 
@@ -6176,7 +6887,27 @@ resize(size_type n, value_type c)
   const auto curr_size = size();
   if(n > curr_size)
     traits_type::assign(data() + curr_size, n - curr_size, c);
-  this->set_size(n);
+  this->size_impl(n);
+  term();
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+template<typename Operation>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+void
+basic_static_string<N, CharT, Traits>::
+resize_and_overwrite(
+  size_type n,
+  Operation op)
+{
+  if (n > max_size()) {
+    detail::throw_exception<std::length_error>("n > max_size() in resize_and_overwrite()");
+  }
+
+  CharT* p = data();
+  const auto new_size = std::move(op)(p, n);
+  BOOST_STATIC_STRING_ASSERT(new_size >= 0 && size_type(new_size) <= n);
+  this->size_impl(size_type(new_size));
   term();
 }
 
@@ -6188,9 +6919,9 @@ swap(basic_static_string& s) noexcept
 {
   const auto curr_size = size();
   basic_static_string tmp(s);
-  s.set_size(curr_size);
+  s.size_impl(curr_size);
   traits_type::copy(&s.data()[0], data(), curr_size + 1);
-  this->set_size(tmp.size());
+  this->size_impl(tmp.size());
   traits_type::copy(data(), tmp.data(), size() + 1);
 }
 
@@ -6209,10 +6940,8 @@ swap(basic_static_string<M, CharT, Traits>& s)
     detail::throw_exception<std::length_error>(
       "s.size() > max_size()");
   basic_static_string tmp(s);
-  s.set_size(curr_size);
-  traits_type::copy(&s.data()[0], data(), curr_size + 1);
-  this->set_size(tmp.size());
-  traits_type::copy(data(), &tmp.data()[0], size() + 1);
+  s.assign_unchecked(data(), curr_size);
+  assign_unchecked(tmp.data(), tmp.size());
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -6235,7 +6964,7 @@ replace(
   const auto pos = i1 - curr_data;
   traits_type::move(&curr_data[pos + n], i2, (end() - i2) + 1);
   traits_type::assign(&curr_data[pos], n, c);
-  this->set_size((curr_size - n1) + n);
+  this->size_impl((curr_size - n1) + n);
   return *this;
 }
 
@@ -6296,7 +7025,7 @@ replace(
       traits_type::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
     }
   }
-  this->set_size((curr_size - n1) + n2);
+  this->size_impl((curr_size - n1) + n2);
   return *this;
 }
 
@@ -6328,7 +7057,7 @@ replace(
   // Move everything from the end of the splice point to the end of the rotated string to
   // the begining of the splice point
   traits_type::move(&curr_data[pos + n2], &curr_data[pos + n2 + n1], ((curr_size - n1) + n2) - pos);
-  this->set_size((curr_size - n1) + n2);
+  this->size_impl((curr_size - n1) + n2);
   return *this;
 }
 
@@ -6500,7 +7229,7 @@ replace_unchecked(
       "replaced string exceeds max_size()");
   traits_type::move(&curr_data[pos + n2], i2, (end() - i2) + 1);
   traits_type::copy(&curr_data[pos], s, n2);
-  this->set_size((curr_size - n1) + n2);
+  this->size_impl((curr_size - n1) + n2);
   return *this;
 }
 
@@ -6522,10 +7251,21 @@ insert_unchecked(
   const std::size_t index = pos - curr_data;
   traits_type::move(&curr_data[index + count], pos, (end() - pos) + 1);
   traits_type::copy(&curr_data[index], s, count);
-  this->set_size(curr_size + count);
+  this->size_impl(curr_size + count);
   return curr_data + index;
 }
+
 } // static_strings
 } // boost
+
+#if defined(__GNUC__) && __GNUC__ >= 7
+#pragma GCC diagnostic pop
+#endif
+
+#if defined(__GNUC__) && __GNUC__ >= 8
+#pragma GCC diagnostic pop
+#endif
+
+
 #endif
 #endif

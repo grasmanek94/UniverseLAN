@@ -6,8 +6,6 @@
 #include "EnvUtils.hxx"
 #include "MachineInfo.hxx"
 
-#include <boost/algorithm/string/join.hpp>
-#include <boost/range/adaptor/transformed.hpp>
 #include <magic_enum/magic_enum.hpp>
 #include <Tracer.hxx>
 
@@ -18,6 +16,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <ranges>
 #include <sstream>
 #include <stdexcept>
 #include <string_view>
@@ -125,13 +124,32 @@ namespace universelan {
 			return flags;
 		}
 
+		template<typename T>
+		std::wstring JoinPaths(
+			const T& paths,
+			std::wstring_view separator)
+		{
+			std::wstring result;
+
+			bool first = true;
+			for (const auto& path : paths) {
+				if (!first) {
+					result.append(separator);
+				}
+
+				result.append(path);
+				first = false;
+			}
+
+			return result;
+		}
+
 		void LoadIni(CSimpleIniA& ini, const std::filesystem::path& filename, bool show_error, const std::vector<std::filesystem::path>& search_locations)
 		{
 			SI_Error rc = ini.LoadFile(filename.c_str());
 			if (rc < 0) {
-
-				auto joined_search_locations = boost::algorithm::join(
-					search_locations | boost::adaptors::transformed([](const std::filesystem::path& p) { return p.wstring(); }),
+				auto joined_search_locations = JoinPaths(
+					search_locations | std::views::transform([](const std::filesystem::path& p) { return p.wstring(); }),
 					L"\n"
 				); // std::wstring
 

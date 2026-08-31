@@ -3,9 +3,9 @@
 #include "UniverseLAN.hxx"
 
 #include <ContainerGetByIndex.hxx>
+#include <PreprocessorControlIf.hxx>
 #include <SafeStringCopy.hxx>
 
-#include <boost/preprocessor/control/if.hpp>
 #include <string>
 
 namespace universelan::client {
@@ -352,7 +352,7 @@ namespace universelan::client {
 	) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IUSER };
 
-		GalaxyID id = BOOST_PP_IF(GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER, userID, 0);
+		GalaxyID id = UNIVERSELAN_PP_IF(GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER, userID, 0);
 		const std::string& str = GetGalaxyUserData(id)->stats.GetUserData(key);
 		universelan::util::safe_copy_str_n(str, buffer, bufferLength);
 	}

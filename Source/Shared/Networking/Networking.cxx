@@ -1,5 +1,7 @@
 #include "Networking.hxx"
 
+#include <MemoryInputBuffer.hxx>
+
 #include <chrono>
 #include <functional>
 
@@ -35,13 +37,12 @@ namespace universelan {
 
 				try
 				{
-					boost::iostreams::array_source source(
+					MemoryInputStream source{
 						reinterpret_cast<const char*>(packet->data),
-						packet->dataLength);
+						static_cast<std::size_t>(packet->dataLength)
+					};
 
-					boost::iostreams::stream<boost::iostreams::array_source> stream(source);
-
-					cereal::PortableBinaryInputArchive iarchive(stream);
+					cereal::PortableBinaryInputArchive iarchive(source.stream());
 
 					// Get the class ID
 					iarchive(unique_class_id);

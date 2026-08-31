@@ -168,4 +168,18 @@
 #  define BOOST_NO_CXX14_HDR_SHARED_MUTEX
 #endif
 
+#if _LIBCPP_VERSION >= 15000
+//
+// Unary function is now deprecated in C++11 and later:
+//
+#if __cplusplus >= 201103L
+#define BOOST_NO_CXX98_FUNCTION_BASE
+#endif
+#endif
+
+#if _LIBCPP_VERSION <= 170006
+// no std::ranges::join_view
+#  define BOOST_NO_CXX20_HDR_RANGES
+#endif
+
 //  --- end ---

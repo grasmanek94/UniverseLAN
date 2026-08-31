@@ -5,6 +5,8 @@
 #include "UniverseLAN.hxx"
 #include "Tracer.hxx"
 
+#include <PreprocessorControlIf.hxx>
+
 #include <ixwebsocket/IXWebSocketMessage.h>
 #include <ixwebsocket/IXWebSocketMessageType.h>
 
@@ -203,7 +205,7 @@ namespace universelan::client {
 		auto channel = std::make_shared<Channel>(this);
 
 		if (channel->connect(connectionString,
-			BOOST_PP_IF(GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS, listener, nullptr)
+			UNIVERSELAN_PP_IF(GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS, listener, nullptr)
 		))
 		{
 			lock_t lock(mtx);
@@ -226,7 +228,7 @@ namespace universelan::client {
 			return;
 		}
 
-		channel->listener_close = BOOST_PP_IF(GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS, listener, nullptr);
+		channel->listener_close = UNIVERSELAN_PP_IF(GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS, listener, nullptr);
 		channel->client.close();
 	}
 

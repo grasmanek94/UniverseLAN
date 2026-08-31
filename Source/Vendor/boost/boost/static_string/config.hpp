@@ -14,6 +14,17 @@
 // Are we dependent on Boost?
 // #define BOOST_STATIC_STRING_STANDALONE
 
+#include <cstdint>
+
+// detect 32/64 bit
+#if UINTPTR_MAX == UINT64_MAX
+#define BOOST_STATIC_STRING_ARCH 64
+#elif UINTPTR_MAX == UINT32_MAX
+#define BOOST_STATIC_STRING_ARCH 32
+#else
+#error Unknown or unsupported architecture, please open an issue
+#endif
+
 // Can we have deduction guides?
 #if __cpp_deduction_guides >= 201703L
 #define BOOST_STATIC_STRING_USE_DEDUCT
@@ -128,9 +139,6 @@
 #ifndef BOOST_STATIC_STRING_THROW
 #define BOOST_STATIC_STRING_THROW(ex) BOOST_THROW_EXCEPTION(ex)
 #endif
-#ifndef BOOST_STATIC_STRING_STATIC_ASSERT
-#define BOOST_STATIC_STRING_STATIC_ASSERT(cond, msg) BOOST_STATIC_ASSERT_MSG(cond, msg)
-#endif
 #ifndef BOOST_STATIC_STRING_ASSERT
 #define BOOST_STATIC_STRING_ASSERT(cond) BOOST_ASSERT(cond)
 #endif
@@ -138,24 +146,60 @@
 #ifndef BOOST_STATIC_STRING_THROW
 #define BOOST_STATIC_STRING_THROW(ex) throw ex
 #endif
-#ifndef BOOST_STATIC_STRING_STATIC_ASSERT
-#define BOOST_STATIC_STRING_STATIC_ASSERT(cond, msg) static_assert(cond, msg)
-#endif
 #ifndef BOOST_STATIC_STRING_ASSERT
 #define BOOST_STATIC_STRING_ASSERT(cond) assert(cond)
 #endif
 #endif
 
 #ifndef BOOST_STATIC_STRING_STANDALONE
+#include <boost/config.hpp>
 #include <boost/assert.hpp>
 #include <boost/container_hash/hash.hpp>
-#include <boost/static_assert.hpp>
 #include <boost/utility/string_view.hpp>
+#include <boost/core/detail/string_view.hpp>
 #include <boost/throw_exception.hpp>
+
+#if !defined(BOOST_NO_CXX17_HDR_STRING_VIEW) || \
+     defined(BOOST_STATIC_STRING_CXX17_STRING_VIEW)
+#include <string_view>
+#define BOOST_STATIC_STRING_HAS_STD_STRING_VIEW
+#endif
 #else
 #include <cassert>
 #include <stdexcept>
+
+#if defined(__has_include)
+#  if !__has_include(<string_view>)
+#    define BOOST_STATIC_STRING_NO_CXX17_HDR_STRING_VIEW
+#  endif
+/*
+ * Replicate the logic from Boost.Config
+ */
+// GNU libstdc++3:
+#elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
+#  if ((__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) < 70100) || (__cplusplus <= 201402L)
+#    define BOOST_STATIC_STRING_NO_CXX17_HDR_STRING_VIEW
+#  endif
+// libc++:
+#elif defined(_LIBCPP_VERSION)
+#  if (_LIBCPP_VERSION < 4000) || (__cplusplus <= 201402L)
+#    define BOOST_STATIC_STRING_NO_CXX17_HDR_STRING_VIEW
+#  endif
+// MSVC uses logic from catch all for BOOST_NO_CXX17_HDR_STRING_VIEW
+// catch all:
+#elif !defined(_YVALS) && !defined(_CPPLIB_VER)
+#  if (!defined(__has_include) || (__cplusplus < 201700))
+#    define BOOST_STATIC_STRING_NO_CXX17_HDR_STRING_VIEW
+#  elif !__has_include(<string_view>)
+#    define BOOST_STATIC_STRING_NO_CXX17_HDR_STRING_VIEW
+#  endif
+#endif
+
+#if !defined(BOOST_STATIC_STRING_NO_CXX17_HDR_STRING_VIEW) || \
+     defined(BOOST_STATIC_STRING_CXX17_STRING_VIEW)
 #include <string_view>
+#define BOOST_STATIC_STRING_HAS_STD_STRING_VIEW
+#endif
 #endif
 
 // Compiler bug prevents constexpr from working with clang 4.x and 5.x
@@ -192,6 +236,30 @@ defined(BOOST_STATIC_STRING_CPP14)
 #define BOOST_STATIC_STRING_GCC5_BAD_CONSTEXPR
 #endif
 
+#ifndef BOOST_STATIC_STRING_STANDALONE
+#if ! defined(BOOST_NO_CWCHAR) && ! defined(BOOST_NO_SWPRINTF)
+#define BOOST_STATIC_STRING_HAS_WCHAR
+#endif
+#else
+#ifndef __has_include
+// If we don't have __has_include in standalone,
+// we will assume that <cwchar> exists.
+#define BOOST_STATIC_STRING_HAS_WCHAR
+#elif __has_include(<cwchar>)
+#define BOOST_STATIC_STRING_HAS_WCHAR
+#endif
+#endif
+
+#ifdef BOOST_STATIC_STRING_HAS_WCHAR
+#include <cwchar>
+#endif
+
+// Define the basic string_view type used by the library
+// Conversions to and from other available string_view types
+// are still defined.
+#if !defined(BOOST_STATIC_STRING_STANDALONE) || \
+     defined(BOOST_STATIC_STRING_HAS_STD_STRING_VIEW)
+#define BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW
 namespace boost {
 namespace static_strings {
 
@@ -205,4 +273,27 @@ using basic_string_view =
 #endif
 } // static_strings
 } // boost
+#endif
+
+#if defined(__cpp_lib_to_string) && __cpp_lib_to_string >= 202306L // std::to_[w]string() redefined in terms of std::format()
+#define BOOST_STATIC_STRING_USE_STD_FORMAT
+#endif
+
+#if defined(__GNUC__) && (__GNUC__ >= 5) && (__GNUC__ <= 10) && !defined(__clang__)
+// Workaround for GCC complaining about nested classes being private.
+#define BOOST_STATIC_STRING_GCC_NESTED_CLASS_WORKAROUND public:
+#else
+#define BOOST_STATIC_STRING_GCC_NESTED_CLASS_WORKAROUND
+#endif
+
+// GCC 9 incorrectly rejects the pointer equality comparison in
+// ptr_in_range() in constant expressions. GCC 10 and later handle
+// it correctly.
+//
+// Clang 3.7 and 9-19 have the same issue.
+#if (defined(__GNUC__) && !defined(__clang__) && (__GNUC__ == 9)) \
+    || (defined(__clang__) && ((__clang_major__ == 3 && __clang_minor__ == 7) || ((__clang_major__ >= 9) && (__clang_major__ <= 19))))
+#define BOOST_STATIC_STRING_CONSTEXPR_PTR_CMP_BROKEN
+#endif
+
 #endif

@@ -1,4 +1,4 @@
-//  This file was automatically generated on Sun Jun  5 16:50:18 2022
+//  This file was automatically generated on Mon Sep 22 20:16:25 2025
 //  by libs/config/tools/generate.cpp
 //  Copyright John Maddock 2002-21.
 //  Use, modification and distribution are subject to the 
@@ -17,6 +17,9 @@
 #endif
 #ifdef BOOST_NO_CXX11_ALIGNAS
 #  error "Your compiler appears not to be fully C++11 compliant.  Detected via defect macro BOOST_NO_CXX11_ALIGNAS."
+#endif
+#ifdef BOOST_NO_CXX11_ALIGNOF
+#  error "Your compiler appears not to be fully C++11 compliant.  Detected via defect macro BOOST_NO_CXX11_ALIGNOF."
 #endif
 #ifdef BOOST_NO_CXX11_ALLOCATOR
 #  error "Your compiler appears not to be fully C++11 compliant.  Detected via defect macro BOOST_NO_CXX11_ALLOCATOR."

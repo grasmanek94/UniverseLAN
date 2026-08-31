@@ -3,11 +3,9 @@
 #include <enet6/enetpp.hxx>
 
 #include <ConcurrentQueue.hxx>
+#include <MemoryInputStream.hxx>
 
 #include "Messages.hxx"
-
-#include <boost/iostreams/device/array.hpp>
-#include <boost/iostreams/stream.hpp>
 
 #include <atomic>
 #include <chrono>
@@ -40,13 +38,12 @@ namespace universelan {
 
 			try
 			{
-				boost::iostreams::array_source source(
+				MemoryInputStream source{
 					reinterpret_cast<const char*>(packet->data),
-					packet->dataLength);
+					static_cast<std::size_t>(packet->dataLength)
+				};
 
-				boost::iostreams::stream<boost::iostreams::array_source> stream(source);
-
-				cereal::PortableBinaryInputArchive iarchive(stream);
+				cereal::PortableBinaryInputArchive iarchive(source.stream());
 
 				// Get the class ID
 				iarchive(unique_class_id);

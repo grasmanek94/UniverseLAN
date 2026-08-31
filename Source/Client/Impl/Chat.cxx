@@ -5,9 +5,8 @@
 #include "UniverseLAN.hxx"
 
 #include <ContainerGetByIndex.hxx>
+#include <PreprocessorControlIf.hxx>
 #include <SafeStringCopy.hxx>
-
-#include <boost/preprocessor/control/if.hpp>
 
 namespace universelan::client {
 	using namespace galaxy::api;
@@ -32,7 +31,7 @@ namespace universelan::client {
 			trace.write_all(std::format(
 				"userID: {} listener: {}",
 				userID,
-				(void*)BOOST_PP_IF(GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS, listener, nullptr)
+				(void*)UNIVERSELAN_PP_IF(GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS, listener, nullptr)
 			));
 		}
 
@@ -90,7 +89,7 @@ namespace universelan::client {
 			trace.write_all(std::format(
 				"chatRoomID: {} limit: {} referenceMessageID: {} listener: {}",
 				chatRoomID, limit, referenceMessageID,
-				(void*)BOOST_PP_IF(GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS, listener, nullptr)
+				(void*)UNIVERSELAN_PP_IF(GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS, listener, nullptr)
 			));
 		}
 
@@ -174,7 +173,7 @@ namespace universelan::client {
 			trace.write_all(std::format(
 				"chatRoomID: {} msg: {} listener: {}",
 				chatRoomID, msg,
-				(void*)BOOST_PP_IF(GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS, listener, nullptr)
+				(void*)UNIVERSELAN_PP_IF(GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS, listener, nullptr)
 			));
 		}
 
