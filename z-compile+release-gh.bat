@@ -1,29 +1,41 @@
 @echo off
+setlocal
 
-REM We're in Github Actions most likely if this is not set
-if "%BUILD_JOBS%"=="" (
-  set BUILD_JOBS=4
-  set EXTRA_CONFIG_PARAM=-DEXPERIMENTAL_FAST_BUILD=1
-  echo Limiting to %BUILD_JOBS% parallel jobs and Unity/Amalgamation build
+REM Use conservative defaults when BUILD_JOBS is not provided.
+if not defined BUILD_JOBS (
+    set "BUILD_JOBS=4"
+    set "EXTRA_CONFIG_PARAM=-DEXPERIMENTAL_FAST_BUILD=1"
+    echo Limiting parallel jobs and enabling Unity/Amalgamation build
 )
 
 echo Using %BUILD_JOBS% build jobs
 
-cd "%~dp0"
-rd /S /Q bin
-rd /S /Q cmake-x64
-rd /S /Q cmake-x86
-rd /S /Q release-packages
+pushd "%~dp0" || exit /b 1
 
-mkdir bin
-mkdir cmake-x64
-mkdir cmake-x86
-mkdir release-packages
+rd /S /Q "bin" 2>nul
+rd /S /Q "cmake-x64" 2>nul
+rd /S /Q "cmake-x86" 2>nul
+rd /S /Q "release-packages" 2>nul
 
-cmake -A x64 -B cmake-x64 %EXTRA_CONFIG_PARAM% -D BUILD_INTERCEPTOR=1
-cmake -A Win32 -B cmake-x86 %EXTRA_CONFIG_PARAM% -D BUILD_INTERCEPTOR=1
+mkdir "bin" || exit /b 1
+mkdir "cmake-x64" || exit /b 1
+mkdir "cmake-x86" || exit /b 1
+mkdir "release-packages" || exit /b 1
 
-cmake --build cmake-x64 --config Release -j %BUILD_JOBS%
-cmake --build cmake-x86 --config Release -j %BUILD_JOBS%
+cmake -A x64 -B "cmake-x64" %EXTRA_CONFIG_PARAM%
+if errorlevel 1 exit /b 1
 
-powershell -File ".\package-release.ps1"
+cmake -A Win32 -B "cmake-x86" %EXTRA_CONFIG_PARAM%
+if errorlevel 1 exit /b 1
+
+cmake --build "cmake-x64" --config Release -j %BUILD_JOBS%
+if errorlevel 1 exit /b 1
+
+cmake --build "cmake-x86" --config Release -j %BUILD_JOBS%
+if errorlevel 1 exit /b 1
+
+powershell.exe -NoProfile -File ".\package-release.ps1"
+if errorlevel 1 exit /b 1
+
+popd
+exit /b 0
