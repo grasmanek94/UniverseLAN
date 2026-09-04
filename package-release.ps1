@@ -119,6 +119,16 @@ foreach ($version in $subdirs)
         throw "No expected binaries found in $version_release_dir"
     }
 
+    $packageCount++
+}
+
+if ($packageCount -eq 0)
+{
+    throw "No release packages will be produced."
+}
+
+foreach ($version in $subdirs)
+{
     if (-not (Test-Path ".\$output_folder"))
     {
         Write-Host "Creating .\$output_folder"
@@ -143,13 +153,7 @@ foreach ($version in $subdirs)
         throw "Archive was not created: $destinationPath"
     }
 
-    $packageCount++
     Write-Host "Done"
-}
-
-if ($packageCount -eq 0)
-{
-    throw "No release packages were produced."
 }
 
 Write-Host "Successfully produced $packageCount package(s)."
