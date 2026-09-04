@@ -1,18 +1,25 @@
 $ErrorActionPreference = 'Stop'
 
-if ((Get-Command "7z.exe" -ErrorAction SilentlyContinue) -eq $null)
+if ($null -eq (Get-Command "7z.exe" -ErrorAction SilentlyContinue))
 {
     throw "7z.exe not found!"
 }
 
-if (git status --porcelain | Where-Object { $_ -match '^\?\?' })
+if (Test-Path ".\.git" -PathType Container)
 {
-    throw "Untracked files detected!"
-}
+    if (git status --porcelain | Where-Object { $_ -match '^\?\?' })
+    {
+        throw "Untracked files detected!"
+    }
 
-if (git status --porcelain | Where-Object { $_ -notmatch '^\?\?' })
+    if (git status --porcelain | Where-Object { $_ -notmatch '^\?\?' })
+    {
+        throw "Uncommitted changes detected!"
+    }
+}
+else
 {
-    throw "Uncommitted changes detected!"
+    Write-Host "No .git directory found. Skipping Git working-tree checks."
 }
 
 Write-Host "Packaging releases..."
@@ -38,7 +45,10 @@ if (Test-Path $versionFile)
 
 if (-not $build_number)
 {
-    $build_number = git rev-list HEAD --count
+    if (Test-Path ".\.git" -PathType Container)
+    {
+        $build_number = git rev-list HEAD --count
+    } 
 
     if (-not $build_number)
     {
@@ -70,7 +80,24 @@ foreach ($version in $subdirs)
     }
 
     $exists_x86 = Test-Path "$version_release_dir\UniverseLANServer.exe" -PathType Leaf
+    $exists_x86_dll =
+        (Test-Path "$version_release_dir\Galaxy.exe" -PathType Leaf) -or
+        (Test-Path "$version_release_dir\REDGalaxy.exe" -PathType Leaf)
+
     $exists_x64 = Test-Path "$version_release_dir\UniverseLANServer64.exe" -PathType Leaf
+    $exists_x64_dll =
+        (Test-Path "$version_release_dir\Galaxy64.exe" -PathType Leaf) -or
+        (Test-Path "$version_release_dir\REDGalaxy64.exe" -PathType Leaf)
+
+    if($exists_x86 -xor $exists_x86_dll)
+    {
+        throw "Incomplete x86 release: $version_release_dir"
+    }
+
+    if($exists_x64 -xor $exists_x64_dll)
+    {
+        throw "Incomplete x64 release: $version_release_dir"
+    }
 
     $ext = ''
 
