@@ -81,13 +81,13 @@ foreach ($version in $subdirs)
 
     $exists_x86 = Test-Path "$version_release_dir\UniverseLANServer.exe" -PathType Leaf
     $exists_x86_dll =
-        (Test-Path "$version_release_dir\Galaxy.exe" -PathType Leaf) -or
-        (Test-Path "$version_release_dir\REDGalaxy.exe" -PathType Leaf)
+        (Test-Path "$version_release_dir\Galaxy.dll" -PathType Leaf) -or
+        (Test-Path "$version_release_dir\REDGalaxy.dll" -PathType Leaf)
 
     $exists_x64 = Test-Path "$version_release_dir\UniverseLANServer64.exe" -PathType Leaf
     $exists_x64_dll =
-        (Test-Path "$version_release_dir\Galaxy64.exe" -PathType Leaf) -or
-        (Test-Path "$version_release_dir\REDGalaxy64.exe" -PathType Leaf)
+        (Test-Path "$version_release_dir\Galaxy64.dll" -PathType Leaf) -or
+        (Test-Path "$version_release_dir\REDGalaxy64.dll" -PathType Leaf)
 
     if($exists_x86 -xor $exists_x86_dll)
     {
