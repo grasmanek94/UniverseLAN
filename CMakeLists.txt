@@ -34,7 +34,7 @@ if(MSVC)
 
   # Enable EHa 
   #string(REGEX REPLACE "/EHsc" "/EHa" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-else()
+else() # if (MSVC)
   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
   set(UNIVERSELAN_EXTRA_BIN_FOLDER "${CMAKE_BUILD_TYPE}/")
 
@@ -58,16 +58,16 @@ else()
   set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
   if("--${GALAXY_ARCH}--" STREQUAL "--x86--")
-    set(CMAKE_C_FLAGS -m32)
-    set(CMAKE_CXX_FLAGS -m32)
+    add_compile_options(-m32)
+    add_link_options(-m32)
 
     # here is the target environment located
     if(NOT DEFINED CMAKE_FIND_ROOT_PATH OR CMAKE_FIND_ROOT_PATH STREQUAL "")
       set(CMAKE_FIND_ROOT_PATH   /usr/i486-linux-gnu )
     endif()
   else()
-    set(CMAKE_C_FLAGS -m64)
-    set(CMAKE_CXX_FLAGS -m64)
+    add_compile_options(-m64)
+    add_link_options(-m64)
   endif()
 endif()
 
