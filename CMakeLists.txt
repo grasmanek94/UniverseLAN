@@ -30,6 +30,8 @@ if(MSVC)
     set(GALAXY_ARCH "x86")
   elseif("${MSVC_C_ARCHITECTURE_ID}" STREQUAL "x64")
     set(GALAXY_ARCH "x64")
+  else()
+      message(FATAL_ERROR "Unknown architecture '${MSVC_C_ARCHITECTURE_ID}' (not x86 or x64?)")
   endif()
 
   # Enable EHa 
@@ -45,8 +47,7 @@ else() # if (MSVC)
   message("Selected GALAXY_ARCH: '${GALAXY_ARCH}'")
   if(NOT "--${GALAXY_ARCH}--" STREQUAL "--x86--")
     if(NOT "--${GALAXY_ARCH}--" STREQUAL "--x64--")   
-      message(FATAL_ERROR "Unknown GALAXY_ARCH, please define GALAXY_ARCH manually (x86 or x64)")
-      return()
+      message(FATAL_ERROR "Unknown GALAXY_ARCH '${GALAXY_ARCH}', please define GALAXY_ARCH manually (x86 or x64)")
     endif()
   endif()
 
