@@ -19,10 +19,10 @@ namespace universelan::env_utils
 	{
 #ifdef _WIN32
 		size_t required = 0;
-		getenv_s(&required, NULL, 0, var.c_str());
+		getenv_s(&required, nullptr, 0, var.c_str());
 
 		if (required != 0) {
-			std::unique_ptr<char[]> env_data(new char[required]);
+			auto env_data = std::make_unique<char[]>(required);
 			if (getenv_s(&required, env_data.get(), required, var.c_str()) == 0) {
 				if (required > 0) {
 					return std::string(env_data.get(), required - 1);
@@ -44,10 +44,10 @@ namespace universelan::env_utils
 	{
 #ifdef _WIN32
 		size_t required = 0;
-		_wgetenv_s(&required, NULL, 0, var.c_str());
+		_wgetenv_s(&required, nullptr, 0, var.c_str());
 
 		if (required != 0) {
-			std::unique_ptr<wchar_t[]> env_data(new wchar_t[required]);
+			auto env_data = std::make_unique<wchar_t[]>(required);
 			if (_wgetenv_s(&required, env_data.get(), required, var.c_str()) == 0) {
 				if (required > 0) {
 					return std::wstring(env_data.get(), required - 1);
