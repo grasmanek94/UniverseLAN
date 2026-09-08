@@ -20,11 +20,42 @@ function(add_simple_test_case GALAXY_VERSION_NUMBER TEST_CASE_NAME PREFIX)
   set(CURRENT_TEST_OUTPUT "${CMAKE_SOURCE_DIR}/bin/tests/${GALAXY_VERSION_NUMBER}/${UNIVERSELAN_EXTRA_BIN_FOLDER}")
   set(CURRENT_TEST_REFERENCE_DIR "${GALAXY_DLL_VERSIONS_DIR}/${GALAXY_VERSION_NUMBER}/gog")
 
+  # Some SDK versions use REDGalaxy instead of Galaxy for the library name.
+  get_property(GALAXY_BUILD_FEATURE_HAS_RED_PREFIX GLOBAL PROPERTY "GALAXY_${GALAXY_VERSION_NUMBER}_BUILD_FEATURE_HAS_RED_PREFIX")
+  if(GALAXY_BUILD_FEATURE_HAS_RED_PREFIX)
+    set(MAYBE_RED_GALAXY_PREFIX "RED")
+  else()
+    set(MAYBE_RED_GALAXY_PREFIX "")
+  endif()
+
+  # Validate required SDK artifacts before creating the target. This produces a
+  # single, actionable configure error instead of failing during a later copy.
+  if(MSVC)
+    set(GALAXY_LINK_LIBRARY "${CURRENT_TEST_REFERENCE_DIR}/${MAYBE_RED_GALAXY_PREFIX}Galaxy${ARCH_ADDITION}.lib")
+    set(GALAXY_RUNTIME_LIBRARY "${CURRENT_TEST_REFERENCE_DIR}/${MAYBE_RED_GALAXY_PREFIX}Galaxy${ARCH_ADDITION}.dll")
+    set(PEER_RUNTIME_LIBRARY "${CURRENT_TEST_REFERENCE_DIR}/GalaxyPeer${ARCH_ADDITION}.dll")
+
+    foreach(REQUIRED_ARTIFACT IN ITEMS "${GALAXY_LINK_LIBRARY}" "${GALAXY_RUNTIME_LIBRARY}")
+      if(NOT EXISTS "${REQUIRED_ARTIFACT}")
+        message(FATAL_ERROR
+          "Missing Galaxy SDK artifact for version ${GALAXY_VERSION_NUMBER}, architecture ${GALAXY_ARCH}: ${REQUIRED_ARTIFACT}")
+      endif()
+    endforeach()
+  else()
+    set(GALAXY_LINK_LIBRARY "${CURRENT_TEST_REFERENCE_DIR}/lib${MAYBE_RED_GALAXY_PREFIX}Galaxy${ARCH_ADDITION}.so")
+    set(GALAXY_RUNTIME_LIBRARY "${GALAXY_LINK_LIBRARY}")
+
+    if(NOT EXISTS "${GALAXY_RUNTIME_LIBRARY}")
+      message(FATAL_ERROR
+        "Missing Galaxy SDK artifact for version ${GALAXY_VERSION_NUMBER}, architecture ${GALAXY_ARCH}: ${GALAXY_RUNTIME_LIBRARY}")
+    endif()
+  endif()
+
   file(GLOB_RECURSE TEST_CASES_HEADERS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/Source/TestCases/Include/*.*")
 
   add_executable(${CURRENT_TEST_TARGET} "${PREFIX}${TEST_CASE_NAME}.cxx" ${TEST_CASES_HEADERS})
   target_include_directories(${CURRENT_TEST_TARGET} PUBLIC "." "Include/")
-  target_compile_definitions(${CURRENT_TEST_TARGET} PUBLIC 
+  target_compile_definitions(${CURRENT_TEST_TARGET} PUBLIC
     "TEST_CASE=1"
     "TEST_CASE_${TEST_CASE_NAME}=1"
     "GALAXY_SDK_USER_CREDENTIALS_USER1_NAME=\"${GALAXY_SDK_USER_CREDENTIALS_USER1_NAME}\"sv"
@@ -34,25 +65,15 @@ function(add_simple_test_case GALAXY_VERSION_NUMBER TEST_CASE_NAME PREFIX)
     "GALAXY_SDK_CLIENT_ID=\"${GALAXY_SDK_CLIENT_ID}\""
     "GALAXY_SDK_CLIENT_SECRET=\"${GALAXY_SDK_CLIENT_SECRET}\""
   )
-
-  # some SDK versions use REDGalaxy instead of Galaxy for lib name
-  get_property(GALAXY_BUILD_FEATURE_HAS_RED_PREFIX GLOBAL PROPERTY "GALAXY_${GALAXY_VERSION_NUMBER}_BUILD_FEATURE_HAS_RED_PREFIX")
-  if(GALAXY_BUILD_FEATURE_HAS_RED_PREFIX)
-    set(MAYBE_RED_GALAXY_PREFIX "RED")
-  else()
-    set(MAYBE_RED_GALAXY_PREFIX "")
-  endif()
-
-  
-  target_link_libraries(${CURRENT_TEST_TARGET} PUBLIC 
+  target_link_libraries(${CURRENT_TEST_TARGET} PUBLIC
     universelan-magic_enum
-    universelan-galaxy-${GALAXY_VERSION} 
+    universelan-galaxy-${GALAXY_VERSION}
     universelan-common-tracer
     universelan-common-version
-    "${CURRENT_TEST_REFERENCE_DIR}/${MAYBE_RED_GALAXY_PREFIX}Galaxy${ARCH_ADDITION}.lib"
+    "${GALAXY_LINK_LIBRARY}"
   )
  
-  set_target_properties(${CURRENT_TEST_TARGET} PROPERTIES 
+  set_target_properties(${CURRENT_TEST_TARGET} PROPERTIES
     OUTPUT_NAME "TestCase${ARCH_ADDITION}_${TEST_CASE_NAME}"
     RUNTIME_OUTPUT_DIRECTORY "${CURRENT_TEST_OUTPUT}"
     LIBRARY_OUTPUT_DIRECTORY "${CURRENT_TEST_OUTPUT}"
@@ -63,37 +84,47 @@ function(add_simple_test_case GALAXY_VERSION_NUMBER TEST_CASE_NAME PREFIX)
   if(NOT MSVC)
 
     target_link_options(${CURRENT_TEST_TARGET} PRIVATE -static-libgcc -static-libstdc++)
+
+    # Keep project config files available immediately after configuration.
     file(COPY "${CMAKE_SOURCE_DIR}/ConfigDebug/" DESTINATION "${CURRENT_TEST_OUTPUT}")
-    file(COPY "${CURRENT_TEST_REFERENCE_DIR}/lib${MAYBE_RED_GALAXY_PREFIX}Galaxy${ARCH_ADDITION}.so" DESTINATION "${CURRENT_TEST_OUTPUT}/Debug/")
 
+    # Copy only the external SDK runtime as a per-target build operation.
+    add_custom_command(TARGET ${CURRENT_TEST_TARGET} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${GALAXY_RUNTIME_LIBRARY}"
+        "$<TARGET_FILE_DIR:${CURRENT_TEST_TARGET}>"
+      VERBATIM
+    )
   else()
-
-    set(DLL_FILENAME "${MAYBE_RED_GALAXY_PREFIX}Galaxy${ARCH_ADDITION}.dll")
-    if(EXISTS   "${CURRENT_TEST_REFERENCE_DIR}/${DLL_FILENAME}")    
- 
-      if(BUILD_INTERCEPTOR)
-        set(DLL_OUT_DIR "gog/")
-      else()
-        set(DLL_OUT_DIR "")
-      endif()
-
-      file(COPY "${CURRENT_TEST_REFERENCE_DIR}/${DLL_FILENAME}" DESTINATION "${CURRENT_TEST_OUTPUT}/Debug/${DLL_OUT_DIR}")
-      file(COPY "${CURRENT_TEST_REFERENCE_DIR}/${DLL_FILENAME}" DESTINATION "${CURRENT_TEST_OUTPUT}/Release/${DLL_OUT_DIR}")
-
-      if(BUILD_INTERCEPTOR)
-        file(RENAME "${CURRENT_TEST_OUTPUT}/Debug/${DLL_OUT_DIR}${DLL_FILENAME}" "${CURRENT_TEST_OUTPUT}/Debug/${DLL_OUT_DIR}Real${DLL_FILENAME}")
-        file(RENAME "${CURRENT_TEST_OUTPUT}/Release/${DLL_OUT_DIR}${DLL_FILENAME}" "${CURRENT_TEST_OUTPUT}/Release/${DLL_OUT_DIR}Real${DLL_FILENAME}")
-      endif()
+    if(BUILD_INTERCEPTOR)
+      set(GALAXY_RUNTIME_OUTPUT "gog/Real${MAYBE_RED_GALAXY_PREFIX}Galaxy${ARCH_ADDITION}.dll")
+    else()
+      set(GALAXY_RUNTIME_OUTPUT "${MAYBE_RED_GALAXY_PREFIX}Galaxy${ARCH_ADDITION}.dll")
     endif()
 
-    set(PEER_FILENAME "GalaxyPeer${ARCH_ADDITION}.dll")
-    if(EXISTS   "${CURRENT_TEST_REFERENCE_DIR}/${PEER_FILENAME}")
-      file(COPY "${CURRENT_TEST_REFERENCE_DIR}/${PEER_FILENAME}" DESTINATION "${CURRENT_TEST_OUTPUT}/Debug/")
-      file(COPY "${CURRENT_TEST_REFERENCE_DIR}/${PEER_FILENAME}" DESTINATION "${CURRENT_TEST_OUTPUT}/Release/")
-    endif()
-
+    # Keep project config files available immediately after configuration.
     file(COPY "${CMAKE_SOURCE_DIR}/ConfigDebug/" DESTINATION "${CURRENT_TEST_OUTPUT}/Debug/")
     file(COPY "${CMAKE_SOURCE_DIR}/Config/" DESTINATION "${CURRENT_TEST_OUTPUT}/Release/")
+
+    # Copy only external SDK runtimes as per-target build operations.
+    add_custom_command(TARGET ${CURRENT_TEST_TARGET} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E make_directory
+        "$<TARGET_FILE_DIR:${CURRENT_TEST_TARGET}>/$<IF:$<BOOL:${BUILD_INTERCEPTOR}>,gog,.>"
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${GALAXY_RUNTIME_LIBRARY}"
+        "$<TARGET_FILE_DIR:${CURRENT_TEST_TARGET}>/${GALAXY_RUNTIME_OUTPUT}"
+      VERBATIM
+    )
+
+    # GalaxyPeer is optional, but copy it when that SDK version supplies it.
+    if(EXISTS "${PEER_RUNTIME_LIBRARY}")
+      add_custom_command(TARGET ${CURRENT_TEST_TARGET} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+          "${PEER_RUNTIME_LIBRARY}"
+          "$<TARGET_FILE_DIR:${CURRENT_TEST_TARGET}>"
+        VERBATIM
+      )
+    endif()
 
     if(BUILD_INTERCEPTOR)
       configure_file("${CMAKE_CURRENT_SOURCE_DIR}/batch/test_gog_user1.bat.in" "${CURRENT_TEST_OUTPUT}/Debug/test_gog_user1.bat" @ONLY)
