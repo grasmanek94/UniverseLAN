@@ -59,6 +59,7 @@ namespace universelan::client {
 		console::Redirector::get()->release();
 
 		std::cout << " == UniverseLAN Interceptor == " << std::endl;
+		std::cout << "Galaxy Version: " << GALAXY_VERSION_MAJOR << "." << GALAXY_VERSION_MINOR << "." << GALAXY_VERSION_PATCH << "-x" << GALAXY_VERSION_PLATFORM << std::endl;
 		std::cout << "Build: " << Version_Number << std::endl;
 	}
 

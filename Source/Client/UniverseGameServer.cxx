@@ -31,7 +31,8 @@ namespace universelan::client {
 		}
 
 		std::cout << " == UniverseLAN GameServer == " << std::endl;
-		std::cout << "Version: " << Version_Number << std::endl;
+		std::cout << "Galaxy Version: " << GALAXY_VERSION_MAJOR << "." << GALAXY_VERSION_MINOR << "." << GALAXY_VERSION_PATCH << "-x" << GALAXY_VERSION_PLATFORM << std::endl;
+		std::cout << "Build: " << Version_Number << std::endl;
 		std::cout << "Using username: " << gameserver_intf_inst.config->GetCustomPersonaName() << std::endl;
 		std::cout << "Using key: " << const_hash64(intf_inst.config->GetAuthenticationKey()) << std::endl;
 		std::cout << "Using GalaxyID: " << gameserver_intf_inst.config->GetCustomGalaxyID() << " (" << gameserver_intf_inst.config->GetApiGalaxyID().ToUint64() << ")" << std::endl;

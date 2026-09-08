@@ -22,6 +22,8 @@ int main()
 {
 	Trace trace_main{  };
 
+	std::cout << " == UniverseLAN Server == " << std::endl;
+	std::cout << "Galaxy Version: " << GALAXY_VERSION_MAJOR << "." << GALAXY_VERSION_MINOR << "." << GALAXY_VERSION_PATCH << "-x" << GALAXY_VERSION_PLATFORM << std::endl;
 	std::cout << "Build: " << universelan::Version_Number << std::endl;
 
 #ifdef _WIN32

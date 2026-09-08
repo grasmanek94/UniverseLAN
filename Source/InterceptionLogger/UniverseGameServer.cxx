@@ -32,7 +32,8 @@ namespace universelan::client {
 		}
 
 		std::cout << " == UniverseLAN GameServer Interceptor == " << std::endl;
-		std::cout << "Version: " << Version_Number << std::endl;
+		std::cout << "Galaxy Version: " << GALAXY_VERSION_MAJOR << "." << GALAXY_VERSION_MINOR << "." << GALAXY_VERSION_PATCH << "-x" << GALAXY_VERSION_PLATFORM << std::endl;
+		std::cout << "Build: " << Version_Number << std::endl;
 	}
 	void UniverseGameServer::ShutdownGameServer() {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL_GAMESERVERAPI };
