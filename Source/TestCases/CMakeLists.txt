@@ -111,7 +111,7 @@ set(GALAXY_DLL_VERSIONS_DIR "${CMAKE_SOURCE_DIR}/Source/DLLs")
 get_property(PROJECT_GALAXY_VERSION_NUMBER_LIST GLOBAL PROPERTY PROJECT_GALAXY_VERSION_NUMBER_LIST)
 
 function(add_test_cases)
-  file(GLOB test_cases "Source/TestCase_*.cxx")
+  file(GLOB test_cases CONFIGURE_DEPENDS "Source/TestCase_*.cxx")
   foreach(test_case_file ${test_cases})
     get_filename_component(test_case ${test_case_file} NAME_WE)
     string(REPLACE "TestCase_" "" test_case ${test_case})
