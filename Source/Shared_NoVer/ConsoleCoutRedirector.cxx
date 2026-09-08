@@ -36,11 +36,14 @@ namespace universelan::console {
 			return;
 		}
 
-		// restore old behaviour of cout
+		std::cout.flush();
+
 		std::cout.rdbuf(oldbuf);
 		std::cout << sbuf.str();
 
+		sbuf.str("");
 		oldbuf = nullptr;
+		tbuf.reset();
 	}
 
 	Redirector::~Redirector() {

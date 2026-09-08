@@ -18,7 +18,10 @@
 namespace universelan::client {
 	void Init(const InitOptionsModern& initOptions)
 	{
-		console::Redirector::get()->capture_tee();
+		/*
+			Capture the intended console output before we are sure that we need to create a console.
+		*/
+		console::Redirector::get()->capture();
 
 #ifdef _WIN32
 		{
@@ -51,6 +54,9 @@ namespace universelan::client {
 			EnableCustomConsole();
 		}
 
+		/* 
+			When we do have a console, replay the output.
+		*/
 		console::Redirector::get()->release();
 
 		std::cout << " == UniverseLAN Client == " << std::endl;
