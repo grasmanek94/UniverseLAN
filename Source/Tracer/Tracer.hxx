@@ -80,5 +80,8 @@ namespace universelan::tracer {
 
 		static void write_all(const char* const data);
 		static void write_all(const std::string& data);
+
+		Trace(const Trace&) = delete;
+		Trace& operator= (const Trace&) = delete;
 	};
 }
