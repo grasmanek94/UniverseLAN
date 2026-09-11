@@ -40,9 +40,9 @@ namespace universelan::env_utils
 		return "";
 	}
 
+#ifdef _WIN32
 	std::wstring get_env(const std::wstring& var)
 	{
-#ifdef _WIN32
 		size_t required = 0;
 		_wgetenv_s(&required, nullptr, 0, var.c_str());
 
@@ -55,23 +55,10 @@ namespace universelan::env_utils
 			}
 		}
 
-#else
-		// POSIX: convert wide env name to UTF‑8, call getenv (narrow), then convert value back to wstring.
-		// NOTE: uses std::wstring_convert + codecvt_utf8_utf16 for brevity; replace with your preferred converter if needed.
-
-		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
-		const std::string name_utf8 = conv.to_bytes(var);
-
-		if (!name_utf8.empty()) {
-			if (const char* env_data = std::getenv(name_utf8.c_str())) {
-				return conv.from_bytes(env_data);
-			}
-		}
-
-#endif
-
 		return L"";
 	}
+#endif
+
 	std::string get_gamedata_path_prefix()
 	{
 		return get_env(UNIVERSELAN_GAMEDATA_PREFIX);
