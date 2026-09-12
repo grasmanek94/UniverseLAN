@@ -27,7 +27,7 @@ namespace filesystem_container {
 		metadata{}, cache_index{}
 	{
 		std::error_code ec;
-		bool metadata_file_ok = false;
+
 		if (std::filesystem::exists(abs_metadata_path, ec)) {
 			std::fstream metadata_stream{ abs_metadata_path, file_read_mode };
 
@@ -36,7 +36,6 @@ namespace filesystem_container {
 				{
 					cereal::PortableBinaryInputArchive iarchive(metadata_stream);
 					iarchive(metadata);
-					metadata_file_ok = true;
 				}
 				catch (const std::exception&)
 				{
@@ -47,7 +46,6 @@ namespace filesystem_container {
 						metadata_stream.seekg(0);
 						cereal::BinaryInputArchive iarchive(metadata_stream);
 						iarchive(metadata);
-						metadata_file_ok = true;
 					}
 					catch (const std::exception& ex)
 					{
@@ -56,17 +54,13 @@ namespace filesystem_container {
 				}
 			}
 		}
-
-		if(!metadata_file_ok) {
-			save_metadata();
-		}
 	}
 
 	filesystem_entry::filesystem_entry(filesystem_container* parent_file_container, std::filesystem::path path, uint64_t share_id) :
 		filesystem_entry{parent_file_container, path}
 	{
 		metadata.share_id = share_id;
-		save_metadata();
+		(void)save_metadata();
 	}
 
 	filesystem_entry::~filesystem_entry() {
@@ -147,7 +141,7 @@ namespace filesystem_container {
 		metadata.system_metadata = source.metadata.system_metadata;
 		metadata.user_metadata = source.metadata.user_metadata;
 
-		bool save_metadata_result = save_metadata();
+		bool save_metadata_result = metadata.empty() || save_metadata();
 
 		parent_fc->notify_file_copied(shared_from_this());
 
@@ -165,22 +159,22 @@ namespace filesystem_container {
 		std::filesystem::create_directories(std::filesystem::path(other_entry.get_abs_metadata_path()).remove_filename(), ec);
 
 		bool file = std::filesystem::copy_file(abs_file_path, other_entry.get_abs_path(), ec);
-		bool metadata = std::filesystem::copy_file(abs_metadata_path, other_entry.get_abs_metadata_path(), ec);
+		bool metadata_result = metadata.empty() || std::filesystem::copy_file(abs_metadata_path, other_entry.get_abs_metadata_path(), ec);
 		bool notify_result = false;
 
-		if (file && metadata) {
-			notify_result = other_entry.notify_copy_done(*this, file, metadata);
+		if (file && metadata_result) {
+			notify_result = other_entry.notify_copy_done(*this, file, metadata_result);
 		}
 		else {
 			if (file) {
 				std::filesystem::remove(other_entry.get_abs_path(), ec);
 			}
-			if (metadata) {
+			if (metadata_result && !metadata.empty()) {
 				std::filesystem::remove(other_entry.get_abs_metadata_path(), ec);
 			}
 		}
 
-		return file && metadata && notify_result;
+		return file && metadata_result && notify_result;
 	}
 
 	bool filesystem_entry::copy_to(fs_entry_ptr other_entry) const
@@ -197,7 +191,7 @@ namespace filesystem_container {
 		try {
 			return std::filesystem::last_write_time(abs_file_path).time_since_epoch() / std::chrono::seconds(1);
 		}
-		catch (std::exception) {
+		catch (std::exception&) {
 			return 0;
 		}
 	}
@@ -232,7 +226,7 @@ namespace filesystem_container {
 		try {
 			return (size_t)std::filesystem::file_size(abs_file_path);
 		}
-		catch (std::exception) {
+		catch (std::exception&) {
 			return 0;
 		}
 	}

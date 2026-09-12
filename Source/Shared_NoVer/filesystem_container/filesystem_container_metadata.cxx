@@ -28,7 +28,12 @@ namespace filesystem_container {
 			return default_value;
 		}
 
-		return std::stoll(entry->second);
+		try {
+			return std::stoll(entry->second);
+		}
+		catch (std::exception&) {
+			return default_value;
+		}
 	}
 
 	std::string file_entry_metadata_container::get_str(const std::string& key, const std::string& default_value) const {
@@ -80,9 +85,7 @@ namespace filesystem_container {
 
 		file_entry_metadata_vector_t v{};
 		v.reserve(data.size());
-		for (auto& k : data) {
-			v.push_back(k);
-		}
+		v.insert(v.end(), data.begin(), data.end());
 
 		return v;
 	}
@@ -107,7 +110,7 @@ namespace filesystem_container {
 
 	file_entry_metadata_container& file_entry_metadata_container::operator=(const file_entry_metadata_container& other)
 	{
-		if (this == &other) // not a self-assignment
+		if (this == &other) // don't do self-assignment
 		{
 			return *this;
 		}
