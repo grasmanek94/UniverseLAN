@@ -82,4 +82,19 @@ TEST(ListenerRegistrar, RequestHelperPreservesExtraStateAndUnregisters)
 	EXPECT_FALSE(helper.unregister(&listener));
 }
 
+TEST(ListenerRegistrar, RequestHelperUnregistersAllPendingRequestsForListener)
+{
+	universelan::client::ListenerRegistrarImpl::InternalRequestHelper helper;
+	TestListener listener;
+	TestListener* restored = nullptr;
+
+	EXPECT_TRUE(helper.emplace(7, &listener));
+	EXPECT_TRUE(helper.emplace(8, &listener));
+	EXPECT_TRUE(helper.unregister(&listener));
+	EXPECT_FALSE(helper.pop(7, restored));
+	EXPECT_EQ(restored, nullptr);
+	EXPECT_FALSE(helper.pop(8, restored));
+	EXPECT_EQ(restored, nullptr);
+}
+
 } // namespace

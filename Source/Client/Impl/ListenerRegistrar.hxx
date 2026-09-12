@@ -54,7 +54,7 @@ namespace universelan::client {
 		using listener_set = std::set<IGalaxyListener*>;
 		using request_helper_entry_t = std::pair<IGalaxyListener*, std::any>;
 		using request_helper_map_t = std::unordered_map<uint64_t, request_helper_entry_t>;
-		using unregister_helper_map_t = std::unordered_map<IGalaxyListener*, uint64_t>;
+		using unregister_helper_map_t = std::unordered_map<IGalaxyListener*, std::set<uint64_t>>;
 
 		struct data {
 
@@ -84,7 +84,7 @@ namespace universelan::client {
 					return false;
 				}
 
-				listeners.emplace(listener, request_id);
+				listeners[listener].insert(request_id);
 				return true;
 			}
 
@@ -99,7 +99,11 @@ namespace universelan::client {
 
 				listener = (T*)it->second.first;
 
-				listeners.erase(it->second.first);
+				auto listener_it = listeners.find(it->second.first);
+				listener_it->second.erase(request_id);
+				if (listener_it->second.empty()) {
+					listeners.erase(listener_it);
+				}
 				requests.erase(it);
 
 				return true;
@@ -117,7 +121,11 @@ namespace universelan::client {
 				listener = (T*)it->second.first;
 				extra = std::any_cast<std::shared_ptr<U>>(it->second.second);
 
-				listeners.erase(it->second.first);
+				auto listener_it = listeners.find(it->second.first);
+				listener_it->second.erase(request_id);
+				if (listener_it->second.empty()) {
+					listeners.erase(listener_it);
+				}
 				requests.erase(it);
 
 				return true;
@@ -130,7 +138,9 @@ namespace universelan::client {
 					return false;
 				}
 
-				requests.erase(it->second);
+				for (const auto request_id : it->second) {
+					requests.erase(request_id);
+				}
 				listeners.erase(it);
 
 				return true;
