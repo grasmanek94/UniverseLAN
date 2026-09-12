@@ -13,11 +13,13 @@ add_executable(universelan-common-shared-no-ver-unit-tests
   Shared_NoVer/MemoryInputBufferTests.cxx
   Shared_NoVer/MemoryInputStreamTests.cxx
   Shared_NoVer/Networking/MessageUniqueIDTests.cxx
+  Shared_NoVer/Networking/SendableEventMessageTests.cxx
   Shared_NoVer/PreprocessorControlIfTests.cxx
   Shared_NoVer/SafeStringCopyTests.cxx
   Shared_NoVer/filesystem_container/filesystem_container_metadataTests.cxx
   Shared_NoVer/filesystem_container/filesystem_container_utilsTests.cxx
   Shared_NoVer/filesystem_container/filesystem_containerTests.cxx
+  Shared_NoVer/filesystem_container/filesystem_container_entryTests.cxx
   Shared_NoVer/ConcurrentQueueTests.cxx
 )
 

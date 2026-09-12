@@ -22,11 +22,11 @@
 | `Shared_NoVer/filesystem_container/filesystem_container_metadata.hxx` | `Shared_NoVer/filesystem_container/filesystem_container_metadataTests.cxx` | Defaults, conversions, invalid values, reset state |
 | `Shared_NoVer/filesystem_container/filesystem_container_utils.hxx` | `Shared_NoVer/filesystem_container/filesystem_container_utilsTests.cxx` | Filename escaping, traversal rejection, normalization, timestamps |
 | `Shared_NoVer/filesystem_container/filesystem_container.hxx` | `Shared_NoVer/filesystem_container/filesystem_containerTests.cxx` | File lifecycle, binary I/O, sharing, removal |
+| `Shared_NoVer/filesystem_container/filesystem_container_entry.hxx` | `Shared_NoVer/filesystem_container/filesystem_container_entryTests.cxx` | Metadata persistence, defaults, cache index state |
+| `Shared_NoVer/Networking/SendableEventMessage.hxx` | `Shared_NoVer/Networking/SendableEventMessageTests.cxx` | Compile-time class-ID macro |
 
 ## Remaining _NoVer headers
 
 | Component | Production headers | Planned focus |
 | --- | --- | --- |
-| Shared message helpers | `Networking/SendableEventMessage.hxx` | Serialization, compile-time class identifier macro |
-| Shared filesystem entry | `filesystem_container_entry.hxx` | Metadata persistence, copying, cache indexes, partial reads |
 | Shared system integration | `MachineInfo.hxx`, `SharedLibUtils.hxx`, `ConsoleCoutRedirector.hxx`, `CustomConsole.hxx` | Platform-guarded, deterministic portions only; avoid machine/global console side effects where impractical |
