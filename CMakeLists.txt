@@ -11,7 +11,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 enable_language( CXX )
 enable_language( C )
 
-if(BUILD_TEST_CASES)
+option(BUILD_UNIVERSELAN_TEST_CASES "Build UniverseLAN test cases" OFF)
+option(BUILD_UNIVERSELAN_UNIT_TESTS "Build UniverseLAN unit tests" OFF)
+option(BUILD_ALL_TESTS "Build all UniverseLAN test cases and unit tests" OFF)
+
+if(BUILD_ALL_TESTS)
+  set(BUILD_UNIVERSELAN_TEST_CASES ON CACHE BOOL "Build UniverseLAN test cases" FORCE)
+  set(BUILD_UNIVERSELAN_UNIT_TESTS ON CACHE BOOL "Build UniverseLAN unit tests" FORCE)
+endif()
+
+if(BUILD_UNIVERSELAN_UNIT_TESTS)
   enable_testing()
 endif()
 

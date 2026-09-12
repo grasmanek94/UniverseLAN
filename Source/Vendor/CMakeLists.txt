@@ -20,7 +20,7 @@ include(galaxy.cmake)
 include(unet.cmake)
 include(json.cmake)
 
-if(BUILD_TEST_CASES)
+if(BUILD_UNIVERSELAN_UNIT_TESTS)
   set(INSTALL_GTEST OFF CACHE BOOL "Disable GoogleTest installation" FORCE)
   set(gtest_build_tests OFF CACHE BOOL "Disable GoogleTest self-tests" FORCE)
   set(BUILD_GMOCK OFF CACHE BOOL "Disable GoogleMock" FORCE)

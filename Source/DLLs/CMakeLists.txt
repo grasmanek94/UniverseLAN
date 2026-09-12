@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.12)
 set(UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 include(determine_galaxy_version_feature_definitions.cmake)
-if(BUILD_TEST_CASES)
+if(BUILD_UNIVERSELAN_UNIT_TESTS)
   include("${CMAKE_SOURCE_DIR}/Source/UnitTests/Versioned.cmake")
 endif()
  
@@ -88,8 +88,11 @@ function(define_projects_for_version)
 
   define_server(${GALAXY_VERSION} ${GALAXY_VERSION_NUMBER} "${ARCH_ADDITION}")
 
-  if(BUILD_TEST_CASES)
+  if(BUILD_UNIVERSELAN_UNIT_TESTS)
     define_versioned_unit_tests(${GALAXY_VERSION} ${GALAXY_VERSION_NUMBER})
+  endif()
+
+  if(BUILD_UNIVERSELAN_TEST_CASES)
     define_unet_library(${GALAXY_VERSION} ${GALAXY_VERSION_NUMBER} "${ARCH_ADDITION}")
   endif()
 endfunction()
@@ -162,7 +165,7 @@ function(add_universelan_executables GALAXY_VERSION_NUMBER)
       target_link_options(universelan-interceptor-${GALAXY_VERSION} PRIVATE -static-libgcc -static-libstdc++)
     endif()
 
-    if(BUILD_TEST_CASES)
+    if(BUILD_UNIVERSELAN_TEST_CASES)
       # Copy the UniverseLAN.dll to the test dir prefixed with "Real"
       add_custom_command(TARGET universelan-client-${GALAXY_VERSION} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:universelan-client-${GALAXY_VERSION}> "${CMAKE_SOURCE_DIR}/bin/tests/${GALAXY_VERSION_NUMBER}/$<CONFIG>/Real$<TARGET_FILE_NAME:universelan-client-${GALAXY_VERSION}>"

@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
 
-if(NOT BUILD_TEST_CASES)
-  set(BUILD_TEST_CASES "" CACHE STRING "If enabled, all test cases will be built")
-endif()
-
 if(NOT BUILD_INTERCEPTOR)
   set(BUILD_INTERCEPTOR "" CACHE STRING "If enabled, builds GOG Galaxy SDK call interceptor+logger")
 endif()
@@ -25,8 +21,11 @@ endif()
 add_subdirectory(Server)
 add_subdirectory(DLLs)
 
-if(BUILD_TEST_CASES)
+if(BUILD_UNIVERSELAN_UNIT_TESTS)
   add_subdirectory(UnitTests)
+endif()
+
+if(BUILD_UNIVERSELAN_TEST_CASES)
   add_subdirectory(TestCases)
   add_subdirectory(EnetTest)
 endif()
