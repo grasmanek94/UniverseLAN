@@ -12,6 +12,7 @@ namespace universelan::client {
 		,clientSecret{ ""}
 		,configFilePath{ "" }
 		,storagePath{  "" }
+		,throwExceptions{ false }
 #if GALAXY_BUILD_FEATURE_ALLOCATOR
 		,galaxyAllocator{ nullptr }
 #endif

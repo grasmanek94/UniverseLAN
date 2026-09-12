@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 
+#include <cstring>
 #include <string>
 
 namespace {
@@ -27,7 +28,21 @@ TEST(NotificationParamScopeExtender, OwnsCopiedStringDataAcrossSourceLifetime)
     }
 
     ASSERT_NE(static_cast<const char*>(value), nullptr);
-    EXPECT_STREQ(static_cast<const char*>(value), "temporary");
+	EXPECT_STREQ(static_cast<const char*>(value), "temporary");
+}
+
+TEST(NotificationParamScopeExtender, ExtendsConstCharacterPointerLifetime)
+{
+	constexpr char text[] = "dynamically allocated notification text that exceeds small-string storage";
+    char* source = new char[sizeof(text)];
+    std::memcpy(source, text, sizeof(text));
+    const auto extended = universelan::client::notification_param_extend_life(static_cast<const char*>(source));
+
+    delete[] source;
+
+    const char* retained = universelan::client::notification_param_push_identity(extended);
+    ASSERT_NE(retained, nullptr);
+    EXPECT_STREQ(retained, text);
 }
 
 TEST(NotificationParamScopeExtender, SupportsCopyMoveAndIdentityHelpers)
