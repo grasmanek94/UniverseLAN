@@ -13,6 +13,7 @@
 | SDKs with `HAS_ICHAT` | `Shared/ChatRoomManager.hxx` | `Shared/Versioned/ChatRoomManagerTests.cxx` | Create, lookup, remove, and duplicate copied-room handling |
 | All configured SDK versions | `Shared/Lobby.hxx` | `Shared/Versioned/LobbyTests.cxx` | Membership, capacity boundaries, lobby/member data, and bounded member-message retrieval |
 | All configured SDK versions | `Shared/LobbyManager.hxx` | `Shared/Versioned/LobbyManagerTests.cxx` | Creation, configured state, lookup, and removal |
+| All configured SDK versions | `Shared/SharedFileUtils.hxx` | `Shared/Versioned/SharedFileUtilsTests.cxx` | File I/O by name and shared ID, bounded reads, cleanup, and invalid input handling |
 
 ## Next Batches
 

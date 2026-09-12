@@ -13,6 +13,7 @@ function(define_versioned_unit_tests GALAXY_VERSION GALAXY_VERSION_NUMBER)
     "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Shared/Versioned/ChatRoomManagerTests.cxx"
     "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Shared/Versioned/LobbyTests.cxx"
     "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Shared/Versioned/LobbyManagerTests.cxx"
+    "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Shared/Versioned/SharedFileUtilsTests.cxx"
   )
 
   target_link_libraries(universelan-shared-${GALAXY_VERSION}-unit-tests PRIVATE

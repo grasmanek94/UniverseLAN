@@ -136,7 +136,7 @@ namespace filesystem_container {
 		[[maybe_unused]] bool copied_file,
 		[[maybe_unused]] bool copied_metadata) {
 
-		metadata.share_id = 0;
+		// The destination may already have a shared ID assigned by create_shared().
 		metadata.system_metadata = source.metadata.system_metadata;
 		metadata.user_metadata = source.metadata.user_metadata;
 
@@ -157,8 +157,8 @@ namespace filesystem_container {
 		std::filesystem::create_directories(std::filesystem::path(other_entry.get_abs_path()).remove_filename(), ec);
 		std::filesystem::create_directories(std::filesystem::path(other_entry.get_abs_metadata_path()).remove_filename(), ec);
 
-		bool file = std::filesystem::copy_file(abs_file_path, other_entry.get_abs_path(), ec);
-		bool metadata_result = metadata.empty() || std::filesystem::copy_file(abs_metadata_path, other_entry.get_abs_metadata_path(), ec);
+		bool file = std::filesystem::copy_file(abs_file_path, other_entry.get_abs_path(), std::filesystem::copy_options::overwrite_existing, ec);
+		bool metadata_result = metadata.empty() || std::filesystem::copy_file(abs_metadata_path, other_entry.get_abs_metadata_path(), std::filesystem::copy_options::overwrite_existing, ec);
 		bool notify_result = false;
 
 		if (file && metadata_result) {
