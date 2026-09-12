@@ -105,10 +105,9 @@ namespace filesystem_container {
 			success = false;
 		}
 
-		metadata.reset();
-
 		/* Kind of unsure what to do, as consistency is bad at this point anyway if success if false... */
 		bool remove_parent = parent_fc->remove(shared_from_this(), true);
+		metadata.reset();
 
 		return remove_parent && success;
 	}

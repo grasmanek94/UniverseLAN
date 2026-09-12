@@ -293,15 +293,17 @@ namespace filesystem_container {
 			return false;
 		}
 
+		const uint64_t share_id = entry->get_share_id();
+
 		if (!unlink_performed) {
-			entry->unlink();
+			return entry->unlink();
 		}
 
 		std::unique_lock<mutex_t> lk1(mtx_fs_entry_index, std::defer_lock);
 		std::unique_lock<mutex_t> lk2(mtx_filename_to_entry, std::defer_lock);
 		std::unique_lock<mutex_t> lk3(mtx_shareid_to_entry, std::defer_lock);
 
-		if (entry->get_share_id()) {
+		if (share_id) {
 			std::lock(lk1, lk2, lk3);
 		}
 		else {
@@ -309,8 +311,8 @@ namespace filesystem_container {
 		}
 
 		size_t erased_elements = filename_to_entry.erase(entry->get_path());
-		if (entry->get_share_id()) {
-			erased_elements += shareid_to_entry.erase(entry->get_share_id());
+		if (share_id) {
+			erased_elements += shareid_to_entry.erase(share_id);
 		}
 
 		if (erased_elements) {

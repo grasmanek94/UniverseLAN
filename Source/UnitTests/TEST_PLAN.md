@@ -17,14 +17,16 @@
 | `Shared_NoVer/AchievementsAndStatsContainer.hxx` | `Shared_NoVer/AchievementsAndStatsContainerTests.cxx` | Achievement, stat, user-data, rich-presence, copy, play-time state |
 | `Client_NoVer/Impl/DelayRunner.hxx` | `Client_NoVer/DelayRunnerTests.cxx` | Empty queue, FIFO callbacks, reentrant enqueueing |
 | `Client_NoVer/Impl/NotificationParamScopeExtender.hxx` | `Client_NoVer/NotificationParamScopeExtenderTests.cxx` | Null/string construction, ownership, copy/move, identity helpers |
+| `Shared_NoVer/EnvUtils.hxx` | `Shared_NoVer/EnvUtilsTests.cxx` | Missing and configured environment variables, game-data prefix |
+| `Shared_NoVer/DefaultConfigFiles.hxx` | `Shared_NoVer/DefaultConfigFilesTests.cxx` | Nested directory creation and required default settings |
+| `Shared_NoVer/filesystem_container/filesystem_container_metadata.hxx` | `Shared_NoVer/filesystem_container/filesystem_container_metadataTests.cxx` | Defaults, conversions, invalid values, reset state |
+| `Shared_NoVer/filesystem_container/filesystem_container_utils.hxx` | `Shared_NoVer/filesystem_container/filesystem_container_utilsTests.cxx` | Filename escaping, traversal rejection, normalization, timestamps |
+| `Shared_NoVer/filesystem_container/filesystem_container.hxx` | `Shared_NoVer/filesystem_container/filesystem_containerTests.cxx` | File lifecycle, binary I/O, sharing, removal |
 
 ## Remaining _NoVer headers
 
 | Component | Production headers | Planned focus |
 | --- | --- | --- |
 | Shared message helpers | `Networking/SendableEventMessage.hxx` | Serialization, compile-time class identifier macro |
-| Shared filesystem metadata | `filesystem_container_metadata.hxx` | Metadata conversion, defaults, copying, reset, timestamps |
-| Shared filesystem paths | `filesystem_container_utils.hxx` | Traversal resistance, encoding round trips, empty directories, file enumeration, paths with spaces |
-| Shared filesystem storage | `filesystem_container.hxx`, `filesystem_container_entry.hxx` | Temporary-directory lifecycle, file I/O, copying, metadata persistence, sharing and removal |
-| Shared configuration and environment | `EnvUtils.hxx`, `DefaultConfigFiles.hxx` | Isolated environment variables, generated config contents, error handling |
+| Shared filesystem entry | `filesystem_container_entry.hxx` | Metadata persistence, copying, cache indexes, partial reads |
 | Shared system integration | `MachineInfo.hxx`, `SharedLibUtils.hxx`, `ConsoleCoutRedirector.hxx`, `CustomConsole.hxx` | Platform-guarded, deterministic portions only; avoid machine/global console side effects where impractical |
