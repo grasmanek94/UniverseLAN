@@ -9,6 +9,8 @@
 | All configured SDK versions | `Shared/GalaxyIDSerialization.hxx` | `Shared/Versioned/GalaxyIDSerializationTests.cxx` | Minimal save/load round trip |
 | All configured SDK versions | `Shared/GalaxyUserData.hxx` | `Shared/Versioned/GalaxyUserDataTests.cxx` | Initial profile state and hashed user lookup |
 | SDKs with `HAS_ICHAT` | `Shared/ChatMessage.hxx` | `Shared/Versioned/ChatMessageTests.cxx` | Constructor and default state; uses `HAS_ICHAT_MESSAGETYPE` for the signature and type API change |
+| SDKs with `HAS_ICHAT` | `Shared/ChatRoom.hxx` | `Shared/Versioned/ChatRoomTests.cxx` | Member uniqueness, messages, longest-message tracking, and read state; uses `HAS_ICHAT_MESSAGETYPE` for message construction |
+| SDKs with `HAS_ICHAT` | `Shared/ChatRoomManager.hxx` | `Shared/Versioned/ChatRoomManagerTests.cxx` | Create, lookup, remove, and duplicate copied-room handling |
 
 ## Next Batches
 

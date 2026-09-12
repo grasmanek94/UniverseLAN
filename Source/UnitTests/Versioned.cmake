@@ -9,6 +9,8 @@ function(define_versioned_unit_tests GALAXY_VERSION GALAXY_VERSION_NUMBER)
     "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Shared/Versioned/GalaxyIDSerializationTests.cxx"
     "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Shared/Versioned/GalaxyUserDataTests.cxx"
     "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Shared/Versioned/ChatMessageTests.cxx"
+    "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Shared/Versioned/ChatRoomTests.cxx"
+    "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Shared/Versioned/ChatRoomManagerTests.cxx"
   )
 
   target_link_libraries(universelan-shared-${GALAXY_VERSION}-unit-tests PRIVATE
