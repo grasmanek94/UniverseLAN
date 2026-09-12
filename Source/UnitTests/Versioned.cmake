@@ -56,4 +56,19 @@ function(define_versioned_unit_tests GALAXY_VERSION GALAXY_VERSION_NUMBER)
   )
 
   gtest_discover_tests(universelan-shared-${GALAXY_VERSION}-unit-tests)
+
+  add_executable(universelan-client-${GALAXY_VERSION}-unit-tests
+    "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Client/Versioned/ErrorsTests.cxx"
+  )
+
+  target_link_libraries(universelan-client-${GALAXY_VERSION}-unit-tests PRIVATE
+    universelan-lib-${GALAXY_VERSION}
+    GTest::gtest_main
+  )
+
+  set_target_properties(universelan-client-${GALAXY_VERSION}-unit-tests PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tests/${GALAXY_VERSION_NUMBER}/${UNIVERSELAN_EXTRA_BIN_FOLDER}"
+  )
+
+  gtest_discover_tests(universelan-client-${GALAXY_VERSION}-unit-tests)
 endfunction()

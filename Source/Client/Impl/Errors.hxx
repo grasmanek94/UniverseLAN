@@ -49,6 +49,7 @@ namespace universelan::client {
 	 */
 	class UnauthorizedAccessError : public Error
 	{
+	public:
 		/**
 		 * Returns the type of the error.
 		 *
@@ -62,6 +63,7 @@ namespace universelan::client {
 	 */
 	class InvalidArgumentError : public Error
 	{
+	public:
 		/**
 		 * Returns the type of the error.
 		 *
@@ -76,6 +78,7 @@ namespace universelan::client {
 	 */
 	class InvalidStateError : public Error
 	{
+	public:
 		/**
 		 * Returns the type of the error.
 		 *
@@ -89,6 +92,7 @@ namespace universelan::client {
 	 */
 	class RuntimeError : public Error
 	{
+	public:
 		/**
 		 * Returns the type of the error.
 		 *
