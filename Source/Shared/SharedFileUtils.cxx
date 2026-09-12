@@ -338,7 +338,7 @@ namespace universelan {
 			return false;
 		}
 
-		auto local_file = storage->get(file_name);
+		auto local_file = storage->get_or_create(file_name);
 		if (!local_file) {
 			return false;
 		}

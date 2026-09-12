@@ -77,10 +77,11 @@ namespace filesystem_container {
 
 	fs_entry_ptr filesystem_container::get(const std::filesystem::path& file_name) const
 	{
+		std::error_code ec;
 		auto p = sanitize_relative_path(file_name);
 		auto abs = get_path(p);
 
-		bool exists = std::filesystem::exists(abs);
+		bool exists = std::filesystem::exists(abs, ec);
 		fs_entry_ptr ptr = nullptr;
 
 		{
