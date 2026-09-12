@@ -6,9 +6,14 @@
 
 namespace universelan
 {
-    MemoryInputBuffer::MemoryInputBuffer(std::span<const std::byte> contents) noexcept
-    {
-        // std::streambuf's interface requires char*, even for input-only data.
+	MemoryInputBuffer::MemoryInputBuffer(std::span<const std::byte> contents) noexcept
+	{
+		if (contents.empty() || contents.data() == nullptr) {
+			setg(nullptr, nullptr, nullptr);
+			return;
+		}
+
+		// std::streambuf's interface requires char*, even for input-only data.
         auto* begin = reinterpret_cast<char*>(
             const_cast<std::byte*>(contents.data()));
 

@@ -42,4 +42,12 @@ TEST(MemoryInputStream, ReportsEndOfFileForEmptyInput)
     EXPECT_TRUE(input.stream().eof());
 }
 
+TEST(MemoryInputStream, TreatsNullPointerAsEmptyInput)
+{
+    universelan::MemoryInputStream input(nullptr, 1);
+
+    EXPECT_EQ(input.stream().peek(), std::char_traits<char>::eof());
+    EXPECT_TRUE(input.stream().eof());
+}
+
 } // namespace

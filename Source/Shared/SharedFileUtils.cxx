@@ -315,13 +315,13 @@ namespace universelan {
 			return false;
 		}
 
-		auto shared_file = shared->create_shared(file_name, id);
-		if (!shared_file) {
+		auto local_file = storage->get(file_name);
+		if (!local_file) {
 			return false;
 		}
 
-		auto local_file = storage->get(file_name);
-		if (!local_file) {
+		auto shared_file = shared->create_shared(file_name, id);
+		if (!shared_file) {
 			return false;
 		}
 

@@ -7,14 +7,12 @@
 
 namespace universelan
 {
-    MemoryInputStream::MemoryInputStream(
-        const void* data,
-        std::size_t size) noexcept
-        : MemoryInputStream(
-            std::span<const std::byte>{
-        static_cast<const std::byte*>(data),
-            size
-    })
+	MemoryInputStream::MemoryInputStream(
+		const void* data,
+		std::size_t size) noexcept
+		: MemoryInputStream(
+			data == nullptr ? std::span<const std::byte>{} : std::span<const std::byte>{
+				static_cast<const std::byte*>(data), size })
     {
     }
 

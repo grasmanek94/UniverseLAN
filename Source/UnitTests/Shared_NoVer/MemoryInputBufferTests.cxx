@@ -33,4 +33,13 @@ TEST(MemoryInputBuffer, IsImmediatelyAtEndForAnEmptySpan)
     EXPECT_TRUE(stream.eof());
 }
 
+TEST(MemoryInputBuffer, TreatsNullSpanDataAsEmptyInput)
+{
+    universelan::MemoryInputBuffer buffer(std::span<const std::byte>{});
+    std::istream stream(&buffer);
+
+    EXPECT_EQ(stream.peek(), std::char_traits<char>::eof());
+    EXPECT_TRUE(stream.eof());
+}
+
 } // namespace

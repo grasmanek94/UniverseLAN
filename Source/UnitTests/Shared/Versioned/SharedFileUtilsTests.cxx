@@ -61,7 +61,19 @@ TEST(SharedFileUtils, RejectsInvalidInputs)
     EXPECT_FALSE(files.Write(files.storage, "", "x", 1));
     EXPECT_FALSE(files.Exists(nullptr, "file"));
     EXPECT_FALSE(files.Remove(files.storage, static_cast<galaxy::api::SharedFileID>(0)));
-    EXPECT_TRUE(files.Read(files.storage, static_cast<galaxy::api::SharedFileID>(0)).empty());
+	EXPECT_TRUE(files.Read(files.storage, static_cast<galaxy::api::SharedFileID>(0)).empty());
+}
+
+TEST(SharedFileUtils, DoesNotCreateSharedFileWhenLocalSourceIsMissing)
+{
+	TemporaryDirectory directory;
+	universelan::SharedFileUtils files(directory.path());
+	constexpr galaxy::api::SharedFileID id = 42;
+
+	EXPECT_FALSE(files.CopyFromLocalToShared("missing.dat", id));
+	EXPECT_FALSE(files.Exists(files.shared, "missing.dat"));
+	EXPECT_FALSE(files.Exists(files.shared, id));
+	EXPECT_EQ(files.GetFileCount(files.shared), 0U);
 }
 
 } // namespace
