@@ -2,10 +2,36 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
+#include <vector>
+
 namespace {
 
 class TestListener : public galaxy::api::GalaxyTypeAwareListener<galaxy::api::USER_DATA>
 {};
+
+TEST(ListenerRegistrar, RegistersExecutesAndUnregistersListeners)
+{
+	universelan::client::DelayRunner delay_runner;
+	universelan::client::ListenerRegistrarImpl registrar(nullptr, &delay_runner);
+	TestListener first;
+	TestListener second;
+	std::vector<galaxy::api::IGalaxyListener*> called;
+
+	registrar.Register(galaxy::api::USER_DATA, &first);
+	registrar.Register(galaxy::api::USER_DATA, &first);
+	registrar.Register(galaxy::api::USER_DATA, &second);
+	EXPECT_TRUE(registrar.ExecuteForListenerTypePerEntry(galaxy::api::USER_DATA, [&called](galaxy::api::IGalaxyListener* listener) {
+		called.push_back(listener);
+	}));
+	EXPECT_EQ(called.size(), 2U);
+	EXPECT_NE(std::find(called.begin(), called.end(), &first), called.end());
+	EXPECT_NE(std::find(called.begin(), called.end(), &second), called.end());
+
+	registrar.Unregister(galaxy::api::USER_DATA, &first);
+	registrar.Unregister(galaxy::api::USER_DATA, &second);
+	EXPECT_FALSE(registrar.ExecuteForListenerTypePerEntry(galaxy::api::USER_DATA, [](galaxy::api::IGalaxyListener*) {}));
+}
 
 TEST(ListenerRegistrar, RequestHelperPopsEachRegisteredListenerOnce)
 {
