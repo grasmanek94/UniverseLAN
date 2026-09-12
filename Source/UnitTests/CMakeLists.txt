@@ -52,3 +52,18 @@ set_target_properties(universelan-client-no-ver-unit-tests PROPERTIES
 )
 
 gtest_discover_tests(universelan-client-no-ver-unit-tests)
+
+add_executable(universelan-tracer-unit-tests
+  Tracer/TracerValueTests.cxx
+)
+
+target_link_libraries(universelan-tracer-unit-tests PRIVATE
+  universelan-common-tracer
+  GTest::gtest_main
+)
+
+set_target_properties(universelan-tracer-unit-tests PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tests/${UNIVERSELAN_EXTRA_BIN_FOLDER}"
+)
+
+gtest_discover_tests(universelan-tracer-unit-tests)
