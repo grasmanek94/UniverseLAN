@@ -47,6 +47,21 @@ TEST(ListenerRegistrar, ExecutesOneTimeListenerWithoutGlobalRegistration)
 	EXPECT_FALSE(registrar.ExecuteForListenerTypePerEntry(galaxy::api::USER_DATA, nullptr, nullptr));
 }
 
+TEST(ListenerRegistrar, ExecutesRegisteredListenersWithoutOneTimeListener)
+{
+	universelan::client::DelayRunner delay_runner;
+	universelan::client::ListenerRegistrarImpl registrar(nullptr, &delay_runner);
+	TestListener listener;
+	std::vector<galaxy::api::IGalaxyListener*> called;
+
+	registrar.Register(galaxy::api::USER_DATA, &listener);
+	EXPECT_TRUE(registrar.ExecuteForListenerTypePerEntry(galaxy::api::USER_DATA, nullptr, [&called](galaxy::api::IGalaxyListener* entry) {
+		called.push_back(entry);
+	}));
+	ASSERT_EQ(called.size(), 1U);
+	EXPECT_EQ(called.front(), &listener);
+}
+
 TEST(ListenerRegistrar, RejectsInvalidListenerTypes)
 {
 	universelan::client::DelayRunner delay_runner;

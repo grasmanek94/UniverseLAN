@@ -184,7 +184,7 @@ namespace universelan::client {
 				trace.write_all("temp_set_ref.size(): ", temp_set_ref.size());
 			}
 
-			if (set.size() == 0 && extra == nullptr) {
+			if (temp_set_ref.empty() && extra == nullptr) {
 
 				if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
 					trace.write_all("set.size() == 0 && extra == nullptr");
