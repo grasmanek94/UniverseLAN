@@ -60,12 +60,12 @@ namespace universelan {
 	std::fstream SharedFileUtils::Open(const fs_container_ptr& container, const galaxy::api::SharedFileID id, const std::ios::openmode mode) const
 	{
 		if ((container == nullptr) || (id == 0)) {
-			return std::fstream{};
+			return {};
 		}
 
 		auto result = container->get(id);
 		if (!result) {
-			return std::fstream{};
+			return {};
 		}
 
 		return result->open(mode);
@@ -74,12 +74,12 @@ namespace universelan {
 	std::fstream SharedFileUtils::Open(const fs_container_ptr& container, const char* const file_name, const std::ios::openmode mode) const
 	{
 		if ((container == nullptr) || (file_name == nullptr) || (file_name[0] == '\0')) {
-			return std::fstream{};
+			return {};
 		}
 
 		auto result = container->get(file_name);
 		if (!result) {
-			return std::fstream{};
+			return {};
 		}
 
 		return result->open(mode);
@@ -312,7 +312,7 @@ namespace universelan {
 	bool SharedFileUtils::CopyFromLocalToShared(const char* const file_name, const galaxy::api::SharedFileID id) const
 	{
 		if ((file_name == nullptr) || (file_name[0] == '\0') || (id == 0)) {
-			return 0;
+			return false;
 		}
 
 		auto shared_file = shared->create_shared(file_name, id);
@@ -331,7 +331,7 @@ namespace universelan {
 	bool SharedFileUtils::CopyFromSharedToLocal(const char* const file_name) const
 	{
 		if ((file_name == nullptr) || (file_name[0] == '\0')) {
-			return 0;
+			return false;
 		}
 
 		auto shared_file = shared->get(file_name);
