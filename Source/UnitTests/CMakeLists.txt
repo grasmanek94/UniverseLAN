@@ -5,8 +5,12 @@ include(GoogleTest)
 add_executable(universelan-common-shared-no-ver-unit-tests
   Shared_NoVer/ConstHashTests.cxx
   Shared_NoVer/ContainerGetByIndexTests.cxx
+  Shared_NoVer/GlobalUniqueIDTests.cxx
   Shared_NoVer/MemoryInputBufferTests.cxx
   Shared_NoVer/MemoryInputStreamTests.cxx
+  Shared_NoVer/Networking/MessageUniqueIDTests.cxx
+  Shared_NoVer/PreprocessorControlIfTests.cxx
+  Shared_NoVer/SafeStringCopyTests.cxx
   Shared_NoVer/ConcurrentQueueTests.cxx
 )
 
