@@ -32,6 +32,8 @@ function(define_versioned_unit_tests GALAXY_VERSION GALAXY_VERSION_NUMBER)
     "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Shared/Versioned/Networking/RequestChatRoomWithUserMessageTests.cxx"
     "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Shared/Versioned/Networking/RequestChatRoomMessagesMessageTests.cxx"
     "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Shared/Versioned/Networking/RequestLobbyListMessageTests.cxx"
+    "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Shared/Versioned/Networking/SendToLobbyMessageTests.cxx"
+    "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Shared/Versioned/Networking/SendToChatRoomMessageTests.cxx"
   )
 
   target_link_libraries(universelan-shared-${GALAXY_VERSION}-unit-tests PRIVATE
