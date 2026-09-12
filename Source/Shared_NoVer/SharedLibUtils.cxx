@@ -14,23 +14,23 @@
 #include <vector>
 
 namespace {
-	void ListDLLFunctions(std::string sADllName, std::vector<std::string>& slListOfDllFunctions)
+	void ListDLLFunctions(const std::string& sADllName, std::vector<std::string>& slListOfDllFunctions)
 	{
 		slListOfDllFunctions.clear();
 
 #ifdef _WIN32
 		DWORD* dNameRVAs = nullptr;
-		_IMAGE_EXPORT_DIRECTORY* ImageExportDirectory = nullptr;
+		const IMAGE_EXPORT_DIRECTORY* ImageExportDirectory = nullptr;
 		unsigned long cDirSize = 0;
-		_LOADED_IMAGE LoadedImage{};
-		if (MapAndLoad(sADllName.c_str(), nullptr, &LoadedImage, true, true))
+		LOADED_IMAGE LoadedImage{};
+		if (MapAndLoad(sADllName.c_str(), nullptr, &LoadedImage, TRUE, TRUE))
 		{
 			std::exception_ptr ex_ptr = nullptr;
 			try
 			{
-				ImageExportDirectory = (_IMAGE_EXPORT_DIRECTORY*)
+				ImageExportDirectory = (const IMAGE_EXPORT_DIRECTORY*)
 					ImageDirectoryEntryToData(LoadedImage.MappedAddress,
-						false, IMAGE_DIRECTORY_ENTRY_EXPORT, &cDirSize);
+						FALSE, IMAGE_DIRECTORY_ENTRY_EXPORT, &cDirSize);
 				if (ImageExportDirectory != nullptr)
 				{
 					dNameRVAs = (DWORD*)ImageRvaToVa(LoadedImage.FileHeader,
