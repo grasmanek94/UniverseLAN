@@ -23,7 +23,7 @@ namespace universelan::client {
 	{
 	}
 
-	bool CustomNetworkingImpl::Channel::connect(const char* connectionString, IConnectionOpenListener* listener)
+	bool CustomNetworkingImpl::Channel::connect(const char* const connectionString, IConnectionOpenListener* const listener)
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICUSTOMNETWORKING };
 
@@ -37,7 +37,7 @@ namespace universelan::client {
 		client.disableAutomaticReconnection();
 		client.disablePerMessageDeflate();
 
-		if (connectionString == nullptr || connectionString[0] == '\0') {
+		if ((connectionString == nullptr) || (connectionString[0] == '\0')) {
 
 			if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 				trace.write_all("connect: false (null)");
@@ -184,7 +184,7 @@ namespace universelan::client {
 		channels.clear();
 	}
 
-	std::shared_ptr<CustomNetworkingImpl::Channel> CustomNetworkingImpl::GetChannel(ConnectionID connectionID) const
+	std::shared_ptr<CustomNetworkingImpl::Channel> CustomNetworkingImpl::GetChannel(const ConnectionID connectionID) const
 	{
 		lock_t lock(mtx);
 		auto entry = channels.find(connectionID);
@@ -195,7 +195,7 @@ namespace universelan::client {
 		return entry->second;
 	}
 
-	void CustomNetworkingImpl::OpenConnection(const char* connectionString
+	void CustomNetworkingImpl::OpenConnection(const char* const connectionString
 #if GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS
 		, IConnectionOpenListener* const listener
 #endif
@@ -216,7 +216,7 @@ namespace universelan::client {
 		}
 	}
 
-	void CustomNetworkingImpl::CloseConnection(ConnectionID connectionID
+	void CustomNetworkingImpl::CloseConnection(const ConnectionID connectionID
 #if GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS
 		, IConnectionCloseListener* const listener
 #endif
@@ -232,7 +232,7 @@ namespace universelan::client {
 		channel->client.close();
 	}
 
-	void CustomNetworkingImpl::SendData(ConnectionID connectionID, const void* data, uint32_t dataSize) {
+	void CustomNetworkingImpl::SendData(const ConnectionID connectionID, const void* const data, uint32_t dataSize) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICUSTOMNETWORKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		std::shared_ptr<Channel> channel{ GetChannel(connectionID) };
@@ -240,7 +240,7 @@ namespace universelan::client {
 		channel->client.send(std::string((const char*)data, dataSize), true);
 	}
 
-	uint32_t CustomNetworkingImpl::GetAvailableDataSize(ConnectionID connectionID) {
+	uint32_t CustomNetworkingImpl::GetAvailableDataSize(const ConnectionID connectionID) {
 		std::shared_ptr<Channel> channel{ GetChannel(connectionID) };
 		if (!channel) {
 			return 0;
@@ -249,17 +249,17 @@ namespace universelan::client {
 		return (uint32_t)channel->buffer.size();
 	}
 
-	void CustomNetworkingImpl::PeekData(ConnectionID connectionID, void* dest, uint32_t dataSize) {
+	void CustomNetworkingImpl::PeekData(const ConnectionID connectionID, void* const dest, const uint32_t dataSize) {
 		std::shared_ptr<Channel> channel{ GetChannel(connectionID) };
 		if (!channel) {
 			return;
 		}
 
 		lock_t guard(channel->buffer_mtx);
-		std::copy_n(channel->buffer.begin(), std::min(dataSize, (uint32_t)channel->buffer.size()), (char*)dest);
+		std::copy_n(channel->buffer.begin(), std::min(dataSize, (uint32_t)channel->buffer.size()), (char* const)dest);
 	}
 
-	void CustomNetworkingImpl::ReadData(ConnectionID connectionID, void* dest, uint32_t dataSize) {
+	void CustomNetworkingImpl::ReadData(const ConnectionID connectionID, void* const dest, uint32_t const dataSize) {
 		std::shared_ptr<Channel> channel{ GetChannel(connectionID) };
 		if (!channel) {
 			return;
@@ -271,7 +271,7 @@ namespace universelan::client {
 		channel->buffer.erase(channel->buffer.begin(), channel->buffer.begin() + size);
 	}
 
-	void CustomNetworkingImpl::PopData(ConnectionID connectionID, uint32_t dataSize) {
+	void CustomNetworkingImpl::PopData(const ConnectionID connectionID, const uint32_t dataSize) {
 		std::shared_ptr<Channel> channel{ GetChannel(connectionID) };
 		if (!channel) {
 			return;

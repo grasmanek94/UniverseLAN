@@ -59,7 +59,7 @@ namespace universelan::client {
 			std::atomic_bool cleanup{ false };
 
 			Channel(CustomNetworkingImpl* custom_network);
-			bool connect(const char* connectionString, IConnectionOpenListener* listener);
+			bool connect(const char* const connectionString, IConnectionOpenListener* const listener);
 			virtual ~Channel();
 			void close();
 
@@ -76,7 +76,7 @@ namespace universelan::client {
 		mutable mutex_t mtx;
 		std::unordered_map<ConnectionID, std::shared_ptr<Channel>> channels;
 
-		std::shared_ptr<Channel> GetChannel(ConnectionID connectionID) const;
+		std::shared_ptr<Channel> GetChannel(const ConnectionID connectionID) const;
 
 		void PerformCleanup();
 	public:
@@ -94,7 +94,7 @@ namespace universelan::client {
 		 * @param [in] connectionString The string which contains connection info.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void OpenConnection(const char* connectionString
+		virtual void OpenConnection(const char* const connectionString
 #if GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS
 			, IConnectionOpenListener* const listener = NULL
 #endif
@@ -108,7 +108,7 @@ namespace universelan::client {
 		 * @param [in] connectionID The ID of the connection.
 		 * @param [in] listener The listener for specific operation.
 		 */
-		virtual void CloseConnection(ConnectionID connectionID
+		virtual void CloseConnection(const ConnectionID connectionID
 #if GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS
 			, IConnectionCloseListener* const listener = NULL
 #endif
@@ -121,7 +121,7 @@ namespace universelan::client {
 		 * @param [in] data The data to send.
 		 * @param [in] dataSize The size of the data.
 		 */
-		virtual void SendData(ConnectionID connectionID, const void* data, uint32_t dataSize) override;
+		virtual void SendData(const ConnectionID connectionID, const void* const data, uint32_t dataSize) override;
 
 		/**
 		 * Returns the number of bytes in a specific connection incoming buffer.
@@ -129,7 +129,7 @@ namespace universelan::client {
 		 * @param [in] connectionID The ID of the connection.
 		 * @return The number of bytes in the connection incomming buffer.
 		 */
-		virtual uint32_t GetAvailableDataSize(ConnectionID connectionID) override;
+		virtual uint32_t GetAvailableDataSize(const ConnectionID connectionID) override;
 
 		/**
 		 * Reads binary data received from a specific connection.
@@ -139,7 +139,7 @@ namespace universelan::client {
 		 * @param [in, out] dest The buffer to pass the data to.
 		 * @param [in] dataSize The size of the data.
 		 */
-		virtual void PeekData(ConnectionID connectionID, void* dest, uint32_t dataSize) override;
+		virtual void PeekData(const ConnectionID connectionID, void* const dest, const uint32_t dataSize) override;
 
 		/**
 		 * Reads binary data received from a specific connection.
@@ -149,7 +149,7 @@ namespace universelan::client {
 		 * @param [in, out] dest The buffer to pass the data to.
 		 * @param [in] dataSize The size of the data.
 		 */
-		virtual void ReadData(ConnectionID connectionID, void* dest, uint32_t dataSize) override;
+		virtual void ReadData(const ConnectionID connectionID, void* const dest, const uint32_t dataSize) override;
 
 		/**
 		 * Removes a given number of bytes from a specific connection incomming buffer.
@@ -157,7 +157,7 @@ namespace universelan::client {
 		 * @param [in] connectionID The ID of the connection.
 		 * @param [in] dataSize The numbers of bytes to be removed from the buffer.
 		 */
-		virtual void PopData(ConnectionID connectionID, uint32_t dataSize) override;
+		virtual void PopData(const ConnectionID connectionID, const uint32_t dataSize) override;
 	};
 
 	/** @} */
