@@ -26,7 +26,11 @@ namespace universelan {
 		P2PNetworkPacketMessage()
 			: id{ 0 }, channel{ 0 }, send_type{ galaxy::api::P2P_SEND_UNRELIABLE }, data{} {}
 
-		P2PNetworkPacketMessage(galaxy::api::GalaxyID id, uint8_t channel, galaxy::api::P2PSendType send_type, const char* data, uint32_t data_length)
-			: id{ id }, channel{ channel }, send_type{ send_type }, data{ data, data + data_length } {}
+		P2PNetworkPacketMessage(const galaxy::api::GalaxyID id, const uint8_t channel, const galaxy::api::P2PSendType send_type, const char* const arg_data, const uint32_t arg_data_length)
+			: id{ id }, channel{ channel }, send_type{ send_type }, data{ } {
+			if (arg_data != nullptr) {
+					data.assign(arg_data, arg_data + arg_data_length);
+			}
+		}
 	};
 }

@@ -39,9 +39,9 @@ namespace universelan {
 			type{ RequestTypeUserData }, nickname{} {}
 		RequestSpecificUserDataMessage(RequestType type, const galaxy::api::GalaxyID& id)
 			: request_id{}, id{ id }, found{ false }, asuc{}, 
-			type{ RequestTypeUserData }, nickname{} {}
+			type{ type }, nickname{} {}
 		RequestSpecificUserDataMessage(RequestType type, uint64_t request_id, const galaxy::api::GalaxyID& id) 
 			: request_id{ request_id }, id{ id }, found{ false },
-			asuc{}, type{ RequestTypeUserData }, nickname{} {}
+			asuc{}, type{ type }, nickname{} {}
 	};
 }

@@ -16,7 +16,7 @@ namespace universelan {
 #if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LEAVE_REASON
 		galaxy::api::ILobbyLeftListener::LobbyLeaveReason reason = galaxy::api::ILobbyLeftListener::LOBBY_LEAVE_REASON_UNDEFINED;
 #else
-		bool reason; // ioFailure
+		bool reason = false; // ioFailure
 #endif
 
 		template<class Archive>

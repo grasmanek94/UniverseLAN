@@ -16,7 +16,7 @@ namespace universelan {
 		template<class Archive>
 		void serialize(Archive& ar)
 		{
-			ar(request_id, lobby_list);
+			ar(request_id, error, lobby_list);
 		}
 
 		UniqueClassId_Declare(RequestLobbyListMessage);
