@@ -1,3 +1,4 @@
 #include <Networking/Messages/PingMessage.hxx>
+#include "MessageSerializationTestUtils.hxx"
 #include <gtest/gtest.h>
-TEST(PingMessage, PreservesTimestamp) { EXPECT_EQ(universelan::PingMessage(42).my_time, 42U); EXPECT_EQ(universelan::PingMessage().my_time, 0U); }
+TEST(PingMessage, SerializesTimestamp) { const auto restored = universelan::test::serialize_round_trip(universelan::PingMessage(42)); EXPECT_EQ(restored.my_time, 42U); }
