@@ -89,6 +89,6 @@ namespace filesystem_container {
 
 		std::filesystem::path get_basepath() const;
 
-		fs_container_ptr get_subcontainer(const char* name);
+		fs_container_ptr get_subcontainer(const char* const name);
 	};
 }

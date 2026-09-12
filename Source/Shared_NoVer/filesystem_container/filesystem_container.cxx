@@ -417,14 +417,14 @@ namespace filesystem_container {
 		return rel_basepath;
 	}
 
-	fs_container_ptr filesystem_container::get_subcontainer(const char* name)
+	fs_container_ptr filesystem_container::get_subcontainer(const char* const name)
 	{
 		const std::string no_name_containers_name = "nameless_container";
 		const std::string named_containers_name = "named_containers";
 
 		lock_t lock{ mtx_subcontainers };
 
-		if (name == nullptr || name[0] == '\0') {
+		if ((name == nullptr) || (name[0] == '\0')) {
 			if (nameless_subcontainer == nullptr) {
 				nameless_subcontainer = std::make_shared<filesystem_container>(basepath / no_name_containers_name);
 				nameless_subcontainer->rel_basepath = rel_basepath / no_name_containers_name;
@@ -433,16 +433,17 @@ namespace filesystem_container {
 			return nameless_subcontainer;
 		}
 
-		std::string container{ filename_encode_with_slashes(std::string(name))};
+		const std::string container{ filename_encode_with_slashes(std::string(name))};
 
 		auto entry = named_subcontainers.find(container);
 		if (entry != named_subcontainers.end()) {
 			return entry->second;
 		}
 
-		named_subcontainers.emplace(container, std::make_shared<filesystem_container>(basepath / named_containers_name / container));
-		nameless_subcontainer->rel_basepath = rel_basepath / named_containers_name / container;
+		auto named_container = std::make_shared<filesystem_container>(basepath / named_containers_name / container);
+		named_subcontainers.emplace(container, named_container);
+		named_container->rel_basepath = rel_basepath / named_containers_name / container;
 
-		return nullptr;
+		return named_container;
 	}
 }
