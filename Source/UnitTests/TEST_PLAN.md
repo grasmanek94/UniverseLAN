@@ -24,9 +24,12 @@
 | `Shared_NoVer/filesystem_container/filesystem_container.hxx` | `Shared_NoVer/filesystem_container/filesystem_containerTests.cxx` | File lifecycle, binary I/O, sharing, removal |
 | `Shared_NoVer/filesystem_container/filesystem_container_entry.hxx` | `Shared_NoVer/filesystem_container/filesystem_container_entryTests.cxx` | Metadata persistence, defaults, cache index state |
 | `Shared_NoVer/Networking/SendableEventMessage.hxx` | `Shared_NoVer/Networking/SendableEventMessageTests.cxx` | Compile-time class-ID macro |
+| `Shared_NoVer/SharedLibUtils.hxx` | `Shared_NoVer/SharedLibUtilsTests.cxx` | Invalid input before real-DLL loading |
+| `Shared_NoVer/ConsoleCoutRedirector.hxx` | `Shared_NoVer/ConsoleCoutRedirectorTests.cxx` | Tee buffer forwarding |
+| `Shared_NoVer/MachineInfo.hxx` | `Shared_NoVer/MachineInfoTests.cxx` | Process and known-path invariants |
 
 ## Remaining _NoVer headers
 
 | Component | Production headers | Planned focus |
 | --- | --- | --- |
-| Shared system integration | `MachineInfo.hxx`, `SharedLibUtils.hxx`, `ConsoleCoutRedirector.hxx`, `CustomConsole.hxx` | Platform-guarded, deterministic portions only; avoid machine/global console side effects where impractical |
+| Shared custom console | `CustomConsole.hxx` | Windows console allocation has process-global side effects |

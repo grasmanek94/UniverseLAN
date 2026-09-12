@@ -7,6 +7,7 @@ add_executable(universelan-common-shared-no-ver-unit-tests
   Shared_NoVer/AchievementsAndStatsContainerTests.cxx
   Shared_NoVer/DefaultConfigFilesTests.cxx
   Shared_NoVer/EnvUtilsTests.cxx
+  Shared_NoVer/MachineInfoTests.cxx
   Shared_NoVer/ConstHashTests.cxx
   Shared_NoVer/ContainerGetByIndexTests.cxx
   Shared_NoVer/GlobalUniqueIDTests.cxx
@@ -16,6 +17,8 @@ add_executable(universelan-common-shared-no-ver-unit-tests
   Shared_NoVer/Networking/SendableEventMessageTests.cxx
   Shared_NoVer/PreprocessorControlIfTests.cxx
   Shared_NoVer/SafeStringCopyTests.cxx
+  Shared_NoVer/SharedLibUtilsTests.cxx
+  Shared_NoVer/ConsoleCoutRedirectorTests.cxx
   Shared_NoVer/filesystem_container/filesystem_container_metadataTests.cxx
   Shared_NoVer/filesystem_container/filesystem_container_utilsTests.cxx
   Shared_NoVer/filesystem_container/filesystem_containerTests.cxx
