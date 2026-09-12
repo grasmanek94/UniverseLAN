@@ -19,7 +19,7 @@ namespace filesystem_container {
 		basepath_metadata{ sanitize_path(container_basepath) / metadata_modifier },
 		mtx_filename_to_entry{}, mtx_shareid_to_entry{},
 		filename_to_entry{}, shareid_to_entry{},
-		mtx_fs_entry_index{}, fs_entry_index_dirty{ true }, fs_entry_index{},
+		mtx_fs_entry_index{}, fs_entry_index{},
 		mtx_subcontainers{}, named_subcontainers{}, nameless_subcontainer{ nullptr }
 	{
 		std::error_code ec;
@@ -34,13 +34,14 @@ namespace filesystem_container {
 				auto entry_ptr = std::make_shared<filesystem_entry>(this, decoded_filename);
 
 				filename_to_entry.emplace(entry_ptr->get_path(), entry_ptr);
+				fs_entry_index.push_back(entry_ptr);
+				entry_ptr->set_cache_index(fs_entry_index.size() - 1U);
+
 				if (entry_ptr->get_share_id()) {
 					shareid_to_entry.emplace(entry_ptr->get_share_id(), entry_ptr);
 				}
 			}
 		}
-
-		refresh_index();
 	}
 
 	filesystem_container::~filesystem_container() {
@@ -80,14 +81,14 @@ namespace filesystem_container {
 		auto abs = get_path(p);
 
 		bool exists = std::filesystem::exists(abs);
-		bool found = false;
 		fs_entry_ptr ptr = nullptr;
 
 		{
 			lock_t lock{ mtx_filename_to_entry };
 			auto entry = filename_to_entry.find(p);
 			if (entry == filename_to_entry.end()) {
-				assert(exists == found);
+				/* Some inconsistent state, unexpected? */
+				assert(exists == false);
 				return nullptr;
 			}
 
@@ -126,8 +127,10 @@ namespace filesystem_container {
 
 		fs_entry_ptr entry = std::make_shared<filesystem_entry>(this, p);
 		entry->create_empty_file_if_not_exist();
+
 		filename_to_entry.emplace(p, entry);
 		fs_entry_index.push_back(entry);
+		entry->set_cache_index(fs_entry_index.size() - 1U);
 
 		return entry;
 	}
@@ -179,16 +182,22 @@ namespace filesystem_container {
 			}
 
 			// "Share" the current entry
+			shareid_to_entry.emplace(share_id, entry);
+
 			entry->set_share_id(share_id);
 			entry->save_metadata();
+
 			return entry;
 		}
 
 		entry = std::make_shared<filesystem_entry>(this, p, share_id);
 		entry->create_empty_file_if_not_exist();
+
 		shareid_to_entry.emplace(share_id, entry);
 		filename_to_entry.emplace(p, entry);
 		fs_entry_index.push_back(entry);
+		entry->set_cache_index(fs_entry_index.size() - 1U);
+
 		entry->save_metadata();
 
 		return entry;
@@ -270,6 +279,7 @@ namespace filesystem_container {
 
 		filename_to_entry.emplace(entry->get_path(), entry);
 		fs_entry_index.push_back(entry);
+		entry->set_cache_index(fs_entry_index.size() - 1U);
 
 		if (entry->get_share_id()) {
 			shareid_to_entry.emplace(entry->get_share_id(), entry);
@@ -303,12 +313,42 @@ namespace filesystem_container {
 		}
 
 		if (erased_elements) {
-			for (size_t i = 0; i < fs_entry_index.size(); ++i) {
-				if (fs_entry_index[i] == entry) {
-					fs_entry_index.erase(fs_entry_index.begin() + i);
-					break;
+			bool found = false;
+
+			auto remove_func = [&](const size_t i) -> void {
+				/* Remove entry by moving entry from the back to the current entry,
+				   Then removing the back. */
+				const size_t last = fs_entry_index.size() - 1U;
+
+				if (i != last) {
+					fs_entry_index[i] = fs_entry_index.back();
+					fs_entry_index[i]->set_cache_index(i);
+				}
+				
+				entry->clear_cache_index();
+				fs_entry_index.pop_back();
+				found = true;
+			};
+
+			if (entry->get_cache_index().has_value()) {
+				/* Fast path */
+				size_t i = entry->get_cache_index().value();
+				if ((i < fs_entry_index.size()) && (fs_entry_index[i] == entry)) {
+					remove_func(i);
 				}
 			}
+			
+			if (!found) {
+				/* Slow path */
+				for (size_t i = 0; i < fs_entry_index.size(); ++i) {
+					if (fs_entry_index[i] == entry) {
+						remove_func(i);
+						break;
+					}
+				}
+			}
+
+			assert(found == true);
 		}
 
 		return erased_elements > 0;
@@ -345,32 +385,6 @@ namespace filesystem_container {
 	{
 		lock_t lock{ mtx_filename_to_entry };
 		return filename_to_entry.size();
-	}
-
-	bool filesystem_container::is_index_out_of_sync()
-	{
-		return fs_entry_index_dirty;
-	}
-
-	void filesystem_container::refresh_index()
-	{
-		std::unique_lock<mutex_t> lk1(mtx_fs_entry_index, std::defer_lock);
-		std::unique_lock<mutex_t> lk2(mtx_filename_to_entry, std::defer_lock);
-		std::lock(lk1, lk2);
-
-		fs_entry_index.clear();
-		for (auto& entry : filename_to_entry) {
-			fs_entry_index.push_back(entry.second);
-		}
-
-		fs_entry_index_dirty = false;
-	}
-
-	void filesystem_container::refresh_index_if_out_of_sync()
-	{
-		if (is_index_out_of_sync()) {
-			refresh_index();
-		}
 	}
 
 	uint64_t filesystem_container::get_shared_id_by_index(size_t index) const
@@ -433,7 +447,7 @@ namespace filesystem_container {
 			return nameless_subcontainer;
 		}
 
-		const std::string container{ filename_encode_with_slashes(std::string(name))};
+		const std::string container{ filename_encode_with_slashes(std::string(name)) };
 
 		auto entry = named_subcontainers.find(container);
 		if (entry != named_subcontainers.end()) {

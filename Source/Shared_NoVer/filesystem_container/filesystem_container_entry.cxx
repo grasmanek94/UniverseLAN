@@ -24,7 +24,7 @@ namespace filesystem_container {
 		path{ path },
 		abs_file_path{ parent_file_container->get_path(path) },
 		abs_metadata_path{ parent_file_container->get_path_metadata(path) },
-		metadata{}
+		metadata{}, cache_index{}
 	{
 		if (std::filesystem::exists(abs_metadata_path)) {
 			std::fstream metadata_stream{ abs_metadata_path, file_read_mode };
@@ -349,5 +349,17 @@ namespace filesystem_container {
 	uint64_t filesystem_entry::get_timestamp_now()
 	{
 		return 0;
+	}
+
+	void filesystem_entry::set_cache_index(const size_t index) {
+		cache_index = index;
+	}
+
+	void filesystem_entry::clear_cache_index() {
+		cache_index.reset();
+	}
+
+	std::optional<size_t> filesystem_entry::get_cache_index() const {
+		return cache_index;
 	}
 }

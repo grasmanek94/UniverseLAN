@@ -33,9 +33,9 @@ namespace filesystem_container {
 		std::map<std::filesystem::path, fs_entry_ptr> filename_to_entry;
 		std::map<uint64_t, fs_entry_ptr> shareid_to_entry;
 
+		// cache
 		mutable mutex_t mtx_fs_entry_index;
-		std::atomic<bool> fs_entry_index_dirty;
-		std::vector<fs_entry_ptr> fs_entry_index;
+		mutable std::vector<fs_entry_ptr> fs_entry_index;
 
 		mutable mutex_t mtx_subcontainers;
 		std::map<std::string, fs_container_ptr> named_subcontainers;
@@ -49,10 +49,6 @@ namespace filesystem_container {
 		void notify_file_copied(fs_entry_ptr entry);
 		bool remove(fs_entry_ptr entry, bool unlink_performed);
 		bool exists(fs_entry_ptr entry) const;
-
-		bool is_index_out_of_sync();
-		void refresh_index();
-		void refresh_index_if_out_of_sync();
 
 	public:
 		filesystem_container(const std::filesystem::path& container_basepath);

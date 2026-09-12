@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <fstream>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -24,6 +25,8 @@ namespace filesystem_container {
 		std::filesystem::path abs_metadata_path;
 
 		file_entry_metadata metadata;
+
+		std::optional<size_t> cache_index;
 
 		bool notify_copy_start(const filesystem_entry& source);
 		void notify_copy_done(const filesystem_entry& source, bool copied_file, bool copied_metadata);
@@ -80,5 +83,9 @@ namespace filesystem_container {
 		void create_empty_file_if_not_exist();
 
 		static uint64_t get_timestamp_now();
+
+		void set_cache_index(const size_t index);
+		void clear_cache_index();
+		std::optional<size_t> get_cache_index() const;
 	};
 }
