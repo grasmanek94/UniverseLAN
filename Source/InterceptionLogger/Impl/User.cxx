@@ -836,7 +836,7 @@ namespace universelan::client {
 			trace.write_all(std::format("listener: {}", (void*)listener));
 		}
 
-		intf()->CreateOpenIDConnection(secretKey, secretKey, connectionID, ignoreNonce, PlayFabCreateOpenIDConnectionListener::encapsulate(listener));
+		intf()->CreateOpenIDConnection(secretKey, titleID, connectionID, ignoreNonce, PlayFabCreateOpenIDConnectionListener::encapsulate(listener));
 	}
 
 	void UserImpl::LoginWithOpenIDConnect(const char* titleID, const char* connectionID, const char* idToken,
