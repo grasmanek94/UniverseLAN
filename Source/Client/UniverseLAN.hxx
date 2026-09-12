@@ -105,7 +105,6 @@ namespace universelan::client {
 	};
 
 	extern InterfaceInstances intf_inst;
-	extern InterfaceInstances gameserver_intf_inst;
 }
 
 #include <Tracer.hxx>
