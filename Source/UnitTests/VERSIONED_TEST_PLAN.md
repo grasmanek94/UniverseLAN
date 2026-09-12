@@ -16,11 +16,14 @@
 | All configured SDK versions | `Shared/SharedFileUtils.hxx` | `Shared/Versioned/SharedFileUtilsTests.cxx` | File I/O by name and shared ID, bounded reads, cleanup, and invalid input handling |
 | All configured SDK versions | `Shared/Networking/Messages/*.hxx` except marker messages | `Shared/Versioned/Networking/*Tests.cxx` | Binary serialization round trips for all 30 substantive networking messages, including populated lobby, lobby-list, user-data, user-hello, and chat response graphs; feature-gated chat coverage follows `HAS_ICHAT` |
 | All configured SDK versions | `Shared/Networking/Messages/EventConnect.hxx`, `EventDisconnect.hxx`, `ConnectionAcceptedMessage.hxx` | None | Empty marker messages have no serialized state to validate |
+| All configured SDK versions | `Client/Impl/Errors.hxx` | `Client/Versioned/ErrorsTests.cxx` | Generic error details and each public error type |
+| All configured SDK versions | `Client/Impl/ListenerRegistrar.hxx` | `Client/Versioned/ListenerRegistrarTests.cxx` | Request-listener duplicate rejection, removal, retained extra state, and unregister cleanup |
+| All configured SDK versions | `Client/Impl/InitOptionsModern.hxx` | `Client/Versioned/InitOptionsModernTests.cxx` | Default option values across feature-dependent fields |
 
 ## Next Batches
 
 | Component | Planned focus |
 | --- | --- |
 | Shared value types | `GalaxyUserData`, chat and lobby values, feature-gated defaults and copying |
-| Client implementation | Error handling, listener registration, options, and in-memory state transitions without a real server |
+| Client implementation | Additional listener registration and in-memory state transitions without a real server |
 | Other supported versions | Feature-boundary tests for the earliest and latest relevant SDK versions |
