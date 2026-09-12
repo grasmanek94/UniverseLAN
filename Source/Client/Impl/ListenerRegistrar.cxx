@@ -70,6 +70,9 @@ namespace universelan::client {
 	bool ListenerRegistrarImpl::ExecuteForListenerType(ListenerType listenerType, std::function<void(const std::set<IGalaxyListener*>& listeners)> code)
 	{
 		tracer::Trace trace{ "1s", __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
+		if (listenerType < LISTENER_TYPE_BEGIN || listenerType >= LISTENER_TYPE_END) {
+			return false;
+		}
 
 		if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::ARGUMENTS)) {
 			trace.write_all("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType));
@@ -147,6 +150,9 @@ namespace universelan::client {
 	bool ListenerRegistrarImpl::ExecuteForListenerType(ListenerType listenerType, IGalaxyListener* extra, std::function<void(const std::set<IGalaxyListener*>& listeners)> code)
 	{
 		tracer::Trace trace{ "2s", __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
+		if (listenerType < LISTENER_TYPE_BEGIN || listenerType >= LISTENER_TYPE_END) {
+			return false;
+		}
 
 		if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::ARGUMENTS)) {
 			trace.write_all("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType));
