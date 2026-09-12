@@ -272,6 +272,10 @@ namespace filesystem_container {
 
 	size_t filesystem_entry::read(char* const data, const size_t data_length, const size_t offset)
 	{
+		if ((data == nullptr) || (data_length == 0)) {
+			return 0;
+		}
+
 		std::fstream data_stream{ abs_file_path, file_read_mode };
 		if (!data_stream) {
 			return 0;
@@ -287,6 +291,10 @@ namespace filesystem_container {
 
 	bool filesystem_entry::write(const char* const data, const size_t data_length)
 	{
+		if (data == nullptr) {
+			return false;
+		}
+
 		std::error_code ec;
 		std::filesystem::create_directories(std::filesystem::path(abs_file_path).remove_filename(), ec);
 
