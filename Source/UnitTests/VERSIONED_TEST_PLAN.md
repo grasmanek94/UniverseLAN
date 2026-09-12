@@ -27,3 +27,12 @@
 | Shared value types | `GalaxyUserData`, chat and lobby values, feature-gated defaults and copying |
 | Client implementation | Additional listener registration and in-memory state transitions without a real server |
 | Other supported versions | Feature-boundary tests for the earliest and latest relevant SDK versions |
+
+## Planned Work
+
+1. Audit every existing unit test for meaningful behavioral coverage, including ownership, lifetime, boundary, and failure paths. In particular, extend `NotificationParamScopeExtender` coverage to prove that an extended `const char*` remains valid and retains its content after the original allocation is deleted.
+2. Add isolated unit coverage for `Shared/IniData.hxx`, using the available root configuration directories where appropriate, and for currently uncovered `Tracer` components.
+3. Separate CMake test-case and unit-test configuration:
+   - Rename `BUILD_TEST_CASES` to `BUILD_UNIVERSELAN_TEST_CASES` throughout the repository. `-DBUILD_UNIVERSELAN_TEST_CASES=1` builds only test cases.
+   - Add `-DBUILD_UNIVERSELAN_UNIT_TESTS=1` to enable all unit tests.
+   - Add `-DBUILD_ALL_TESTS=1` to enable both options.
