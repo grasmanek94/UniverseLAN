@@ -14,6 +14,7 @@
 | All configured SDK versions | `Shared/Lobby.hxx` | `Shared/Versioned/LobbyTests.cxx` | Membership, capacity boundaries, lobby/member data, and bounded member-message retrieval |
 | All configured SDK versions | `Shared/LobbyManager.hxx` | `Shared/Versioned/LobbyManagerTests.cxx` | Creation, configured state, lookup, and removal |
 | All configured SDK versions | `Shared/SharedFileUtils.hxx` | `Shared/Versioned/SharedFileUtilsTests.cxx` | File I/O by name and shared ID, bounded reads, cleanup, and invalid input handling |
+| All configured SDK versions | `Shared/Networking/Messages/PingMessage.hxx`, `KeyChallengeMessage.hxx`, `OnlineStatusChangeMessage.hxx` | `Shared/Versioned/Networking/*Tests.cxx` | Defaults, value preservation, challenge encryption, and response hashing |
 
 ## Next Batches
 
