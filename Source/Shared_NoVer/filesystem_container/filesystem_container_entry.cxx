@@ -27,6 +27,7 @@ namespace filesystem_container {
 		metadata{}, cache_index{}
 	{
 		std::error_code ec;
+		bool metadata_file_ok = false;
 		if (std::filesystem::exists(abs_metadata_path, ec)) {
 			std::fstream metadata_stream{ abs_metadata_path, file_read_mode };
 
@@ -35,6 +36,7 @@ namespace filesystem_container {
 				{
 					cereal::PortableBinaryInputArchive iarchive(metadata_stream);
 					iarchive(metadata);
+					metadata_file_ok = true;
 				}
 				catch (const std::exception&)
 				{
@@ -45,6 +47,7 @@ namespace filesystem_container {
 						metadata_stream.seekg(0);
 						cereal::BinaryInputArchive iarchive(metadata_stream);
 						iarchive(metadata);
+						metadata_file_ok = true;
 					}
 					catch (const std::exception& ex)
 					{
@@ -53,7 +56,8 @@ namespace filesystem_container {
 				}
 			}
 		}
-		else {
+
+		if(!metadata_file_ok) {
 			save_metadata();
 		}
 	}
