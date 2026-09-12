@@ -24,41 +24,49 @@ namespace universelan::client {
 
 
 	template<typename V>
-	inline typename std::enable_if<!std::is_same<V, NotificationParamScopeExtender>::value, V&&>::type 
+	inline typename std::enable_if<!std::is_same_v<std::remove_cvref_t<V>, NotificationParamScopeExtender>, V&&>::type
 		notification_param_push_identity(V&& v)
 	{
 		return std::forward<V>(v);
 	}
 
 	template<typename V>
-	inline typename std::enable_if<std::is_same<V, NotificationParamScopeExtender>::value, char*&&>::type 
+	inline typename std::enable_if<std::is_same_v<std::remove_cvref_t<V>, NotificationParamScopeExtender>, const char*>::type
 		notification_param_push_identity(V&& v)
 	{
-		return std::forward<char*>(v);
+		return static_cast<const char*>(v);
 	}
 
 	template<typename T>
-	inline T&& notification_param_extend_life(typename std::enable_if<
-		!std::same_as<typename std::remove_reference<T>::type, const char*> &&
-		!std::same_as<typename std::remove_reference<T>::type, char*>, T&&>::type v)
+	inline NotificationParamScopeExtender notification_param_extend_life(T&& v)
+		/*
+			std::remove_cvref_t<T> removes:
+			- top-level const/volatile qualifiers
+			- reference qualifiers (& and &&)
+
+			therefore this overload matches:
+
+			- const char*
+			- const char* const
+			- const char*&
+			- const char*&&
+			- const char* const&
+			- const char* const&&
+		*/
+		requires (std::same_as<std::remove_cvref_t<T>, const char*>)
 	{
-		return std::forward<T>(std::move(v));
+		return NotificationParamScopeExtender(v);
 	}
 
 	template<typename T>
-	inline char*&& notification_param_extend_life(char*&& v)
+	inline T&& notification_param_extend_life(T&& v)
+		requires (!std::same_as<std::remove_cvref_t<T>, const char*>)
 	{
 		// Hey there, 
 		// if you're debugging this code, and passing char* 's to a notification, 
 		// make sure there will be no lifetime/scope issues!
 		// Here I'm just forwarding the char* ptr..
 		// If you want to use automatic life extension then consider casting it to const char*.
-		return std::forward<char*>(std::move(v));
-	}
-
-	template<typename T>
-	inline NotificationParamScopeExtender notification_param_extend_life(const char*&& v)
-	{
-		return std::forward<NotificationParamScopeExtender>(std::move(NotificationParamScopeExtender(v)));
+		return std::forward<T>(v);
 	}
 }
