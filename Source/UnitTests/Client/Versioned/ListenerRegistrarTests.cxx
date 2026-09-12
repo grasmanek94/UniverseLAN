@@ -33,6 +33,20 @@ TEST(ListenerRegistrar, RegistersExecutesAndUnregistersListeners)
 	EXPECT_FALSE(registrar.ExecuteForListenerTypePerEntry(galaxy::api::USER_DATA, [](galaxy::api::IGalaxyListener*) {}));
 }
 
+TEST(ListenerRegistrar, ExecutesOneTimeListenerWithoutGlobalRegistration)
+{
+	universelan::client::DelayRunner delay_runner;
+	universelan::client::ListenerRegistrarImpl registrar(nullptr, &delay_runner);
+	TestListener listener;
+	galaxy::api::IGalaxyListener* called = nullptr;
+
+	EXPECT_TRUE(registrar.ExecuteForListenerTypePerEntry(galaxy::api::USER_DATA, &listener, [&called](galaxy::api::IGalaxyListener* entry) {
+		called = entry;
+	}));
+	EXPECT_EQ(called, &listener);
+	EXPECT_FALSE(registrar.ExecuteForListenerTypePerEntry(galaxy::api::USER_DATA, nullptr, nullptr));
+}
+
 TEST(ListenerRegistrar, RequestHelperPopsEachRegisteredListenerOnce)
 {
 	universelan::client::ListenerRegistrarImpl::InternalRequestHelper helper;
