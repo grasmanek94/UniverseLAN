@@ -26,7 +26,7 @@ namespace filesystem_container {
 		std::filesystem::create_directories(basepath_data, ec);
 		std::filesystem::create_directories(basepath_metadata, ec);
 
-		auto files = recurse_list_files(basepath_data);
+		const auto files = recurse_list_files(basepath_data);
 		for (auto& file : files) {
 			auto decoded_filename = filename_decode(file);
 			auto full_file_path = get_path(decoded_filename);

@@ -26,7 +26,8 @@ namespace filesystem_container {
 		abs_metadata_path{ parent_file_container->get_path_metadata(path) },
 		metadata{}, cache_index{}
 	{
-		if (std::filesystem::exists(abs_metadata_path)) {
+		std::error_code ec;
+		if (std::filesystem::exists(abs_metadata_path, ec)) {
 			std::fstream metadata_stream{ abs_metadata_path, file_read_mode };
 
 			if (metadata_stream) {
@@ -81,29 +82,33 @@ namespace filesystem_container {
 
 	bool filesystem_entry::exists()
 	{
-		return std::filesystem::exists(abs_file_path);
+		std::error_code ec;
+		return std::filesystem::exists(abs_file_path, ec);
 	}
 
 	bool filesystem_entry::unlink()
 	{
-		bool exists_file = std::filesystem::exists(abs_file_path);
-		bool exists_metadata = std::filesystem::exists(abs_metadata_path);
+		std::error_code ec;
+
+		bool exists_file = std::filesystem::exists(abs_file_path, ec);
+		bool exists_metadata = std::filesystem::exists(abs_metadata_path, ec);
 		bool success = exists_file || exists_metadata;
 
 		[[likely]]
-		if (exists_file && !std::filesystem::remove(abs_file_path)) {
+		if (exists_file && !std::filesystem::remove(abs_file_path, ec)) {
 			success = false;
 		}
 
-		if (exists_metadata && !std::filesystem::remove(abs_metadata_path)) {
+		if (exists_metadata && !std::filesystem::remove(abs_metadata_path, ec)) {
 			success = false;
 		}
 
-		if (success) {
-			metadata.reset();
-		}
+		metadata.reset();
 
-		return parent_fc->remove(shared_from_this(), true);
+		/* Kind of unsure what to do, as consistency is bad at this point anyway if success if false... */
+		bool remove_parent = parent_fc->remove(shared_from_this(), true);
+
+		return remove_parent && success;
 	}
 
 	bool filesystem_entry::copy_to(const std::filesystem::path& other_file_path) const
@@ -111,7 +116,7 @@ namespace filesystem_container {
 		std::error_code ec;
 		std::filesystem::create_directories(std::filesystem::path(other_file_path).remove_filename(), ec);
 
-		return std::filesystem::copy_file(abs_file_path, other_file_path);
+		return std::filesystem::copy_file(abs_file_path, other_file_path, ec);
 	}
 
 	bool filesystem_entry::copy_metadata_to(const std::filesystem::path& other_file_path) const
@@ -119,19 +124,26 @@ namespace filesystem_container {
 		std::error_code ec;
 		std::filesystem::create_directories(std::filesystem::path(other_file_path).remove_filename(), ec);
 
-		return std::filesystem::copy_file(abs_metadata_path, other_file_path);
+		return std::filesystem::copy_file(abs_metadata_path, other_file_path, ec);
 	}
 
 	bool filesystem_entry::notify_copy_start(const filesystem_entry& source) {
 		return true;
 	}
 
-	void filesystem_entry::notify_copy_done(const filesystem_entry& source, bool copied_file, bool copied_metadata) {
+	bool filesystem_entry::notify_copy_done(const filesystem_entry& source, 
+		[[maybe_unused]] bool copied_file,
+		[[maybe_unused]] bool copied_metadata) {
+
 		metadata.share_id = 0;
 		metadata.system_metadata = source.metadata.system_metadata;
 		metadata.user_metadata = source.metadata.user_metadata;
 
+		bool save_metadata_result = save_metadata();
+
 		parent_fc->notify_file_copied(shared_from_this());
+
+		return save_metadata_result;
 	}
 
 	bool filesystem_entry::copy_to(filesystem_entry& other_entry) const
@@ -144,12 +156,23 @@ namespace filesystem_container {
 		std::filesystem::create_directories(std::filesystem::path(other_entry.get_abs_path()).remove_filename(), ec);
 		std::filesystem::create_directories(std::filesystem::path(other_entry.get_abs_metadata_path()).remove_filename(), ec);
 
-		bool file = std::filesystem::copy_file(abs_metadata_path, other_entry.get_abs_path());
-		bool metadata = std::filesystem::copy_file(abs_metadata_path, other_entry.get_abs_metadata_path());
+		bool file = std::filesystem::copy_file(abs_file_path, other_entry.get_abs_path(), ec);
+		bool metadata = std::filesystem::copy_file(abs_metadata_path, other_entry.get_abs_metadata_path(), ec);
+		bool notify_result = false;
 
-		other_entry.notify_copy_done(*this, file, metadata);
+		if (file && metadata) {
+			notify_result = other_entry.notify_copy_done(*this, file, metadata);
+		}
+		else {
+			if (file) {
+				std::filesystem::remove(other_entry.get_abs_path(), ec);
+			}
+			if (metadata) {
+				std::filesystem::remove(other_entry.get_abs_metadata_path(), ec);
+			}
+		}
 
-		return file && metadata;
+		return file && metadata && notify_result;
 	}
 
 	bool filesystem_entry::copy_to(fs_entry_ptr other_entry) const
@@ -206,7 +229,7 @@ namespace filesystem_container {
 		}
 	}
 
-	std::fstream filesystem_entry::open(std::ios::openmode mode) const
+	std::fstream filesystem_entry::open(const std::ios::openmode mode) const
 	{
 		return std::fstream { abs_file_path, mode };
 	}
@@ -222,25 +245,30 @@ namespace filesystem_container {
 		data_stream.unsetf(std::ios::skipws);
 
 		// get its size:
-		std::streampos file_size;
+		std::streampos file_size{};
 
 		data_stream.seekg(0, std::ios::end);
 		file_size = data_stream.tellg();
 		data_stream.seekg(0, std::ios::beg);
 
-		// reserve capacity
-		std::vector<char> vec;
-		vec.reserve((size_t)file_size);
+		if (file_size < 0) {
+			return {};
+		}
 
-		// read the data:
-		vec.insert(vec.begin(),
-			std::istream_iterator<char>(data_stream),
-			std::istream_iterator<char>());
+		// reserve capacity
+		std::vector<char> vec{};
+		vec.resize((size_t)file_size);
+
+		data_stream.read(vec.data(), vec.size());
+
+		if (!data_stream && !data_stream.eof()) {
+			return {};
+		}
 
 		return vec;
 	}
 
-	size_t filesystem_entry::read(char* data, size_t data_length, size_t offset)
+	size_t filesystem_entry::read(char* const data, const size_t data_length, const size_t offset)
 	{
 		std::fstream data_stream{ abs_file_path, file_read_mode };
 		if (!data_stream) {
@@ -255,7 +283,7 @@ namespace filesystem_container {
 		return (size_t)data_stream.gcount();
 	}
 
-	bool filesystem_entry::write(const char* data, size_t data_length)
+	bool filesystem_entry::write(const char* const data, const size_t data_length)
 	{
 		std::error_code ec;
 		std::filesystem::create_directories(std::filesystem::path(abs_file_path).remove_filename(), ec);
@@ -268,7 +296,7 @@ namespace filesystem_container {
 		data_stream.unsetf(std::ios::skipws);
 		data_stream.write(data, data_length);
 
-		return true;
+		return data_stream.good();
 	}
 
 	bool filesystem_entry::write(const std::vector<char>& data)
@@ -326,7 +354,7 @@ namespace filesystem_container {
 		{
 			cereal::PortableBinaryOutputArchive oarchive(metadata_stream);
 			oarchive(metadata);
-			return true;
+			return metadata_stream.good();
 		}
 		catch (const std::exception&)
 		{
@@ -344,11 +372,6 @@ namespace filesystem_container {
 		std::filesystem::create_directories(std::filesystem::path(abs_file_path).remove_filename(), ec);
 
 		std::fstream data_stream{ abs_file_path, file_write_mode };
-	}
-
-	uint64_t filesystem_entry::get_timestamp_now()
-	{
-		return 0;
 	}
 
 	void filesystem_entry::set_cache_index(const size_t index) {

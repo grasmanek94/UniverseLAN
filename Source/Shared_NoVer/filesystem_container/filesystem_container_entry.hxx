@@ -29,7 +29,7 @@ namespace filesystem_container {
 		std::optional<size_t> cache_index;
 
 		bool notify_copy_start(const filesystem_entry& source);
-		void notify_copy_done(const filesystem_entry& source, bool copied_file, bool copied_metadata);
+		bool notify_copy_done(const filesystem_entry& source, bool copied_file, bool copied_metadata);
 
 	public:
 		filesystem_entry(filesystem_container* parent_file_container, std::filesystem::path path);
@@ -54,10 +54,10 @@ namespace filesystem_container {
 		uint64_t get_timestamp() const;
 		size_t get_size() const;
 
-		std::fstream open(std::ios::openmode mode) const;
+		std::fstream open(const std::ios::openmode mode) const;
 		std::vector<char> read();
-		size_t read(char* data, size_t data_length, size_t offset = 0);
-		bool write(const char* data, size_t data_length);
+		size_t read(char* const data, const size_t data_length, const size_t offset = 0);
+		bool write(const char* const data, const size_t data_length);
 		bool write(const std::vector<char>& data);
 
 		// Sharing functions
@@ -81,8 +81,6 @@ namespace filesystem_container {
 		bool save_metadata();
 
 		void create_empty_file_if_not_exist();
-
-		static uint64_t get_timestamp_now();
 
 		void set_cache_index(const size_t index);
 		void clear_cache_index();
