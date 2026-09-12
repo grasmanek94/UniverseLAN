@@ -205,7 +205,7 @@ namespace universelan {
 
 		auto result = container->get(file_name);
 		if (!result) {
-			return {};
+			return 0;
 		}
 
 		return (uint32_t)result->read(data, data_length, offset);
@@ -219,7 +219,7 @@ namespace universelan {
 
 		auto result = container->get(id);
 		if (!result) {
-			return {};
+			return 0;
 		}
 
 		return (uint32_t)result->read(data, data_length, offset);
