@@ -1,7 +1,9 @@
 #include "filesystem_container_utils.hxx"
 
+#include <algorithm>
 #include <array>
 #include <chrono>
+#include <exception>
 #include <filesystem>
 #include <stdexcept>
 #include <sstream>
@@ -76,17 +78,42 @@ namespace filesystem_container {
 		const std::filesystem::path& basepath,
 		const std::filesystem::path& relpath) {
 
-		const auto baseabspath = std::filesystem::weakly_canonical(basepath);
-		const auto abspath = std::filesystem::weakly_canonical(basepath / relpath);
+		try
+		{
+			const auto trusted_path = std::filesystem::weakly_canonical(basepath);
+			const auto untrusted_path = std::filesystem::weakly_canonical(basepath / relpath);
 
-		const auto index = abspath.string().rfind(baseabspath.string(), 0);
+			/*
+				Both paths are canonicalized, resolving relative components.
 
-		[[unlikely]]
-		if (index != 0) {
+				Verify that trusted_path is a path-component prefix of
+				untrusted_path. Any remaining components in untrusted_path
+				are allowed.
+
+				trusted_path   = C:/data/container
+				untrusted_path = C:/data/container/files/test.txt
+												  ^= OK
+				trusted_path   = C:/data/container
+				untrusted_path = C:/data/container2/files/test.txt
+												  ^= NOT OK
+
+				trusted_path   = C:/data/container
+				untrusted_path = C:/data/something_else/
+												  ^= NOT OK
+			*/
+			auto mismatch =
+				std::mismatch(
+					trusted_path.begin(),
+					trusted_path.end(),
+					untrusted_path.begin(),
+					untrusted_path.end());
+
+			return mismatch.first == trusted_path.end();
+		}
+		catch (const std::exception&)
+		{
 			return false;
 		}
-
-		return true;
 	}
 
 	std::filesystem::path sandbox_secure_path_concat(const std::filesystem::path& secure_basepath, const std::filesystem::path& untrusted_directories, const std::filesystem::path& untrusted_file_name) {
