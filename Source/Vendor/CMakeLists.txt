@@ -6,6 +6,7 @@ add_subdirectory(boost)
 add_subdirectory(Detours)
 
 if(WIN32)
+set(StackWalker_DISABLE_TESTS ON CACHE BOOL "Disable StackWalker vendor tests" FORCE)
 add_subdirectory(StackWalker)
 endif()
 
@@ -18,6 +19,13 @@ include(ixwebsocket.cmake)
 include(galaxy.cmake)
 include(unet.cmake)
 include(json.cmake)
+
+if(BUILD_TEST_CASES)
+  set(INSTALL_GTEST OFF CACHE BOOL "Disable GoogleTest installation" FORCE)
+  set(gtest_build_tests OFF CACHE BOOL "Disable GoogleTest self-tests" FORCE)
+  set(BUILD_GMOCK OFF CACHE BOOL "Disable GoogleMock" FORCE)
+  add_subdirectory(googletest EXCLUDE_FROM_ALL)
+endif()
 
 if(EXPERIMENTAL_FAST_BUILD)
     function(get_targets_recursive dir out_var)

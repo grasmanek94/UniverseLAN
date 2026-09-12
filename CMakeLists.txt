@@ -11,6 +11,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 enable_language( CXX )
 enable_language( C )
 
+if(BUILD_TEST_CASES)
+  enable_testing()
+endif()
+
 
 if(NOT EXPERIMENTAL_FAST_BUILD)
   set(EXPERIMENTAL_FAST_BUILD "" CACHE STRING "[Experimental] [Needs manual file adjustment] Will try to perform an unity build (all .cxx files included in one .cxx file per project)")

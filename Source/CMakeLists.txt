@@ -26,6 +26,7 @@ add_subdirectory(Server)
 add_subdirectory(DLLs)
 
 if(BUILD_TEST_CASES)
+  add_subdirectory(UnitTests)
   add_subdirectory(TestCases)
   add_subdirectory(EnetTest)
 endif()
