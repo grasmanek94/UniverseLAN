@@ -264,7 +264,7 @@ namespace universelan {
 			return 0;
 		}
 
-		return (uint32_t)std::min(result->get_timestamp(), (size_t)std::numeric_limits<uint32_t>::max());
+		return (uint32_t)std::min(result->get_timestamp(), (uint64_t)std::numeric_limits<uint32_t>::max());
 	}
 
 	uint32_t SharedFileUtils::GetTimestamp(const fs_container_ptr& container, const galaxy::api::SharedFileID id) const
@@ -278,7 +278,7 @@ namespace universelan {
 			return 0;
 		}
 
-		return (uint32_t)std::min(result->get_timestamp(), (size_t)std::numeric_limits<uint32_t>::max());
+		return (uint32_t)std::min(result->get_timestamp(), (uint64_t)std::numeric_limits<uint32_t>::max());
 	}
 
 	uint32_t SharedFileUtils::GetFileCount(const fs_container_ptr& container) const
