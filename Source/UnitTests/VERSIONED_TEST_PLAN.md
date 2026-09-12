@@ -17,7 +17,7 @@
 | All configured SDK versions | `Shared/Networking/Messages/*.hxx` except marker messages | `Shared/Versioned/Networking/*Tests.cxx` | Binary serialization round trips for all 30 substantive networking messages, including populated lobby, lobby-list, user-data, user-hello, and chat response graphs; feature-gated chat coverage follows `HAS_ICHAT` |
 | All configured SDK versions | `Shared/Networking/Messages/EventConnect.hxx`, `EventDisconnect.hxx`, `ConnectionAcceptedMessage.hxx` | None | Empty marker messages have no serialized state to validate |
 | All configured SDK versions | `Client/Impl/Errors.hxx` | `Client/Versioned/ErrorsTests.cxx` | Generic error details and each public error type |
-| All configured SDK versions | `Client/Impl/ListenerRegistrar.hxx` | `Client/Versioned/ListenerRegistrarTests.cxx` | Request-listener duplicate rejection, removal, retained extra state, and unregister cleanup |
+| All configured SDK versions | `Client/Impl/ListenerRegistrar.hxx` | `Client/Versioned/ListenerRegistrarTests.cxx` | Registration, one-time and registered-listener execution, invalid-type rejection, request-listener duplicate rejection, removal, retained extra state, and unregister cleanup |
 | All configured SDK versions | `Client/Impl/InitOptionsModern.hxx` | `Client/Versioned/InitOptionsModernTests.cxx` | Default option values across feature-dependent fields |
 
 ## Next Batches
