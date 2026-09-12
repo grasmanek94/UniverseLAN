@@ -13,17 +13,18 @@
 | `Shared_NoVer/PreprocessorControlIf.hxx` | `Shared_NoVer/PreprocessorControlIfTests.cxx` | Compile-time and runtime true/false macro expansion |
 | `Shared_NoVer/GlobalUniqueID.hxx` | `Shared_NoVer/GlobalUniqueIDTests.cxx` | Monotonic runtime identifiers |
 | `Shared_NoVer/Networking/MessageUniqueID.hxx` | `Shared_NoVer/Networking/MessageUniqueIDTests.cxx` | Generated and explicit identifiers |
+| `Shared_NoVer/AchievementData.hxx` | `Shared_NoVer/AchievementDataTests.cxx` | Defaults, setters, dirty-state reset |
+| `Shared_NoVer/AchievementsAndStatsContainer.hxx` | `Shared_NoVer/AchievementsAndStatsContainerTests.cxx` | Achievement, stat, user-data, rich-presence, copy, play-time state |
+| `Client_NoVer/Impl/DelayRunner.hxx` | `Client_NoVer/DelayRunnerTests.cxx` | Empty queue, FIFO callbacks, reentrant enqueueing |
+| `Client_NoVer/Impl/NotificationParamScopeExtender.hxx` | `Client_NoVer/NotificationParamScopeExtenderTests.cxx` | Null/string construction, ownership, copy/move, identity helpers |
 
 ## Remaining _NoVer headers
 
 | Component | Production headers | Planned focus |
 | --- | --- | --- |
-| Shared achievement and statistics state | `AchievementData.hxx`, `AchievementsAndStatsContainer.hxx` | Defaults, dirty state, getters/setters, copy isolation, stat and metadata lookup behavior |
 | Shared message helpers | `Networking/SendableEventMessage.hxx` | Serialization, compile-time class identifier macro |
 | Shared filesystem metadata | `filesystem_container_metadata.hxx` | Metadata conversion, defaults, copying, reset, timestamps |
 | Shared filesystem paths | `filesystem_container_utils.hxx` | Traversal resistance, encoding round trips, empty directories, file enumeration, paths with spaces |
 | Shared filesystem storage | `filesystem_container.hxx`, `filesystem_container_entry.hxx` | Temporary-directory lifecycle, file I/O, copying, metadata persistence, sharing and removal |
 | Shared configuration and environment | `EnvUtils.hxx`, `DefaultConfigFiles.hxx` | Isolated environment variables, generated config contents, error handling |
 | Shared system integration | `MachineInfo.hxx`, `SharedLibUtils.hxx`, `ConsoleCoutRedirector.hxx`, `CustomConsole.hxx` | Platform-guarded, deterministic portions only; avoid machine/global console side effects where impractical |
-| Client generic scheduling | `Client_NoVer/Impl/DelayRunner.hxx` | FIFO execution, queue draining, callbacks added during execution |
-| Client notification lifetime | `Client_NoVer/Impl/NotificationParamScopeExtender.hxx` | Null and string construction, copy/move/assignment, identity forwarding, pointer lifetime |
