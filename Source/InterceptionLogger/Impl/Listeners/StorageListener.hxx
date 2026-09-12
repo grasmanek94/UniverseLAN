@@ -1,4 +1,5 @@
 #pragma once
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 
 #include "ProxifySingleShotListener.hxx"
 
@@ -25,3 +26,5 @@ namespace universelan::client {
 		virtual void OnSharedFileDownloadFailure(SharedFileID sharedFileID, FailureReason failureReason);
 	};
 }
+
+#endif
