@@ -59,6 +59,7 @@ function(define_versioned_unit_tests GALAXY_VERSION GALAXY_VERSION_NUMBER)
 
   add_executable(universelan-client-${GALAXY_VERSION}-unit-tests
     "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Client/Versioned/ErrorsTests.cxx"
+    "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Client/Versioned/InitOptionsModernTests.cxx"
     "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Client/Versioned/ListenerRegistrarTests.cxx"
   )
 
