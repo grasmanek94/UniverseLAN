@@ -3,6 +3,7 @@
 #include "filesystem_container/filesystem_container.hxx"
 
 #include <filesystem>
+#include <limits>
 
 namespace universelan {
 	using fs_container = filesystem_container::filesystem_container;
@@ -45,12 +46,12 @@ namespace universelan {
 	std::filesystem::path SharedFileUtils::GetSharedFileName(const fs_container_ptr& container, const galaxy::api::SharedFileID id) const
 	{
 		if ((container == nullptr) || (id == 0)) {
-			return std::filesystem::path("");
+			return {};
 		}
 
 		auto result = container->get(id);
 		if (!result) {
-			return std::filesystem::path("");
+			return {};
 		}
 
 		return result->get_path();
@@ -235,7 +236,7 @@ namespace universelan {
 			return 0;
 		}
 
-		return (uint32_t)result->get_size();
+		return (uint32_t)std::min(result->get_size(), (size_t)std::numeric_limits<uint32_t>::max());
 	}
 
 	uint32_t SharedFileUtils::GetSize(const fs_container_ptr& container, const galaxy::api::SharedFileID id) const
@@ -249,7 +250,7 @@ namespace universelan {
 			return 0;
 		}
 
-		return (uint32_t)result->get_size();
+		return (uint32_t)std::min(result->get_size(), (size_t)std::numeric_limits<uint32_t>::max());
 	}
 
 	uint32_t SharedFileUtils::GetTimestamp(const fs_container_ptr& container, const char* const file_name) const
@@ -263,7 +264,7 @@ namespace universelan {
 			return 0;
 		}
 
-		return (uint32_t)result->get_timestamp();
+		return (uint32_t)std::min(result->get_timestamp(), (size_t)std::numeric_limits<uint32_t>::max());
 	}
 
 	uint32_t SharedFileUtils::GetTimestamp(const fs_container_ptr& container, const galaxy::api::SharedFileID id) const
@@ -277,7 +278,7 @@ namespace universelan {
 			return 0;
 		}
 
-		return (uint32_t)result->get_timestamp();
+		return (uint32_t)std::min(result->get_timestamp(), (size_t)std::numeric_limits<uint32_t>::max());
 	}
 
 	uint32_t SharedFileUtils::GetFileCount(const fs_container_ptr& container) const
@@ -286,7 +287,7 @@ namespace universelan {
 			return 0;
 		}
 
-		return (uint32_t)container->get_file_count();
+		return (uint32_t)std::min(container->get_file_count(), (size_t)std::numeric_limits<uint32_t>::max());
 	}
 
 
@@ -302,7 +303,7 @@ namespace universelan {
 	std::filesystem::path SharedFileUtils::GetFileNameByIndex(const fs_container_ptr& container, const uint32_t index) const
 	{
 		if (container == nullptr) {
-			return std::filesystem::path("");
+			return {};
 		}
 
 		return container->get_file_name_by_index(index);
@@ -352,7 +353,7 @@ namespace universelan {
 			return 0;
 		}
 
-		return (uint32_t)container->get_total_disk_space();
+		return (uint32_t)std::min(container->get_total_disk_space(), (size_t)std::numeric_limits<uint32_t>::max());
 	}
 
 	uint32_t SharedFileUtils::GetAvailableDiskSpace(const fs_container_ptr& container) const
@@ -361,7 +362,7 @@ namespace universelan {
 			return 0;
 		}
 
-		return (uint32_t)container->get_available_disk_space();
+		return (uint32_t)std::min(container->get_available_disk_space(), (size_t)std::numeric_limits<uint32_t>::max());
 	}
 
 	uint32_t SharedFileUtils::GetUsedDiskSpace(const fs_container_ptr& container) const
@@ -370,7 +371,7 @@ namespace universelan {
 			return 0;
 		}
 
-		return (uint32_t)container->get_used_disk_space();
+		return (uint32_t)std::min(container->get_used_disk_space(), (size_t)std::numeric_limits<uint32_t>::max());
 	}
 
 	std::vector<filesystem_container::fs_entry_ptr> SharedFileUtils::GetDirectoryFileList(const fs_container_ptr& container) const
