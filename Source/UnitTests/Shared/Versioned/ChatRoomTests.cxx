@@ -42,13 +42,21 @@ TEST(ChatRoom, TracksMessagesAndReadState)
     EXPECT_EQ(room.GetUnreadCount(), 2U);
     EXPECT_FALSE(room.IsRead());
 
-    room.MarkAsRead();
-    EXPECT_TRUE(room.IsRead());
-    EXPECT_EQ(room.GetUnreadCount(), 0U);
+	room.MarkAsRead();
+	EXPECT_TRUE(room.IsRead());
+	EXPECT_EQ(room.GetUnreadCount(), 0U);
 
-    room.MarkAsUnread();
-    EXPECT_FALSE(room.IsRead());
-    EXPECT_EQ(room.GetUnreadCount(), 2U);
+	#if GALAXY_BUILD_FEATURE_HAS_ICHAT_MESSAGETYPE
+	room.AddMessage(sender, galaxy::api::CHAT_MESSAGE_TYPE_CHAT_MESSAGE, "new");
+	#else
+	room.AddMessage(sender, "new");
+	#endif
+	EXPECT_FALSE(room.IsRead());
+	EXPECT_EQ(room.GetUnreadCount(), 1U);
+
+	room.MarkAsUnread();
+	EXPECT_FALSE(room.IsRead());
+	EXPECT_EQ(room.GetUnreadCount(), 3U);
 }
 
 } // namespace

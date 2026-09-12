@@ -131,11 +131,11 @@ namespace universelan {
 	}
 
 	bool ChatRoom::IsRead() const {
-		return (read_messages == (uint32_t)messages.size());
+		return read_messages >= messages.size();
 	}
 
 	uint32_t ChatRoom::GetUnreadCount() const {
-		return (uint32_t)(messages.size() - read_messages);
+		return read_messages >= messages.size() ? 0 : (uint32_t)(messages.size() - read_messages);
 	}
 	}
 #endif
