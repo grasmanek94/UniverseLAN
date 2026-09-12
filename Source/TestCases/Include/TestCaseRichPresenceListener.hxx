@@ -26,10 +26,10 @@ public:
 	virtual void OnRichPresenceUpdated(GalaxyID userID) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {}",
 			userID
-		).c_str());
+		);
 
 
 		if (on_rich_presence_updated != nullptr) {
@@ -60,10 +60,10 @@ public:
 	virtual void OnRichPresenceUpdated(GalaxyID userID) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {}",
 			userID
-		).c_str());
+		);
 
 
 		if (on_rich_presence_updated != nullptr) {

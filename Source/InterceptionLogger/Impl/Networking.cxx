@@ -41,23 +41,23 @@ namespace universelan::client {
 		tracer::Trace trace{ networking_type, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("galaxyID: {}", galaxyID));
-			trace.write_all(std::format("data: {}", data));
-			trace.write_all(std::format("dataSize: {}", dataSize));
-			trace.write_all(std::format("sendType: {}", magic_enum::enum_name(sendType)));
-			trace.write_all(std::format("channel: {}", channel));
-			trace.write_all(std::format("data_hash: {:x}", const_hash64_data_loop((const char*)data, dataSize)));
+			trace.write_all("galaxyID: {}", galaxyID);
+			trace.write_all("data: {}", data);
+			trace.write_all("dataSize: {}", dataSize);
+			trace.write_all("sendType: {}", magic_enum::enum_name(sendType));
+			trace.write_all("channel: {}", channel);
+			trace.write_all("data_hash: {:x}", const_hash64_data_loop((const char*)data, dataSize));
 
 			if (trace.has_flags(tracer::Trace::NETWORK_P2P_CONTENTS)) {
-				trace.write_all(std::format("data_contents_hex: {}", bytes_to_hex(data, dataSize)));
-				trace.write_all(std::format("data_contents_enc: {}", filesystem_container::filename_encode(std::string((char*)data, (size_t)dataSize))));
+				trace.write_all("data_contents_hex: {}", bytes_to_hex(data, dataSize));
+				trace.write_all("data_contents_enc: {}", filesystem_container::filename_encode(std::string((char*)data, (size_t)dataSize)));
 			}
 		}
 
 		auto result = intf()->SendP2PPacket(galaxyID, data, dataSize, sendType, channel);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -67,26 +67,26 @@ namespace universelan::client {
 		tracer::Trace trace{ networking_type, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("dest: {}", dest));
-			trace.write_all(std::format("destSize: {}", destSize));
-			trace.write_all(std::format("outMsgSize(addr): {}", (void*)outMsgSize));
-			trace.write_all(std::format("channel: {}", channel));
+			trace.write_all("dest: {}", dest);
+			trace.write_all("destSize: {}", destSize);
+			trace.write_all("outMsgSize(addr): {}", (void*)outMsgSize);
+			trace.write_all("channel: {}", channel);
 		}
 
 		auto result = intf()->PeekP2PPacket(dest, destSize, outMsgSize, outGalaxyID, channel);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 			if (result) {
-				trace.write_all(std::format("outGalaxyID: {}", outGalaxyID));
+				trace.write_all("outGalaxyID: {}", outGalaxyID);
 
 				if (outMsgSize) {
-					trace.write_all(std::format("outMsgSize: {}", *outMsgSize));
-					trace.write_all(std::format("data_hash: {:x}", const_hash64_data_loop((const char*)dest, *outMsgSize)));
+					trace.write_all("outMsgSize: {}", *outMsgSize);
+					trace.write_all("data_hash: {:x}", const_hash64_data_loop((const char*)dest, *outMsgSize));
 
 					if (trace.has_flags(tracer::Trace::NETWORK_P2P_CONTENTS)) {
-						trace.write_all(std::format("data_contents_hex: {}", bytes_to_hex(dest, *outMsgSize)));
-						trace.write_all(std::format("data_contents_enc: {}", filesystem_container::filename_encode(std::string((char*)dest, (size_t)*outMsgSize))));
+						trace.write_all("data_contents_hex: {}", bytes_to_hex(dest, *outMsgSize));
+						trace.write_all("data_contents_enc: {}", filesystem_container::filename_encode(std::string((char*)dest, (size_t)*outMsgSize)));
 					}
 				}
 			}
@@ -99,26 +99,26 @@ namespace universelan::client {
 		tracer::Trace trace{ networking_type, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("dest: {}", dest));
-			trace.write_all(std::format("destSize: {}", destSize));
-			trace.write_all(std::format("outMsgSize(addr): {}", (void*)outMsgSize));
-			trace.write_all(std::format("channel: {}", channel));
+			trace.write_all("dest: {}", dest);
+			trace.write_all("destSize: {}", destSize);
+			trace.write_all("outMsgSize(addr): {}", (void*)outMsgSize);
+			trace.write_all("channel: {}", channel);
 		}
 
 		auto result = intf()->ReadP2PPacket(dest, destSize, outMsgSize, outGalaxyID, channel);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 			if (result) {
-				trace.write_all(std::format("outGalaxyID: {}", outGalaxyID));
+				trace.write_all("outGalaxyID: {}", outGalaxyID);
 
 				if (outMsgSize) {
-					trace.write_all(std::format("outMsgSize: {}", *outMsgSize));
-					trace.write_all(std::format("data_hash: {:x}", const_hash64_data_loop((const char*)dest, *outMsgSize)));
+					trace.write_all("outMsgSize: {}", *outMsgSize);
+					trace.write_all("data_hash: {:x}", const_hash64_data_loop((const char*)dest, *outMsgSize));
 
 					if (trace.has_flags(tracer::Trace::NETWORK_P2P_CONTENTS)) {
-						trace.write_all(std::format("data_contents_hex: {}", bytes_to_hex(dest, *outMsgSize)));
-						trace.write_all(std::format("data_contents_enc: {}", filesystem_container::filename_encode(std::string((char*)dest, (size_t)*outMsgSize))));
+						trace.write_all("data_contents_hex: {}", bytes_to_hex(dest, *outMsgSize));
+						trace.write_all("data_contents_enc: {}", filesystem_container::filename_encode(std::string((char*)dest, (size_t)*outMsgSize)));
 					}
 				}
 			}
@@ -131,16 +131,16 @@ namespace universelan::client {
 		tracer::Trace trace{ networking_type, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::DETAILED };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("outMsgSize(addr): {}", (void*)outMsgSize));
-			trace.write_all(std::format("channel: {}", channel));
+			trace.write_all("outMsgSize(addr): {}", (void*)outMsgSize);
+			trace.write_all("channel: {}", channel);
 		}
 
 		auto result = intf()->IsP2PPacketAvailable(outMsgSize, channel);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 			if (outMsgSize) {
-				trace.write_all(std::format("outMsgSize: {}", *outMsgSize));
+				trace.write_all("outMsgSize: {}", *outMsgSize);
 			}
 		}
 
@@ -151,7 +151,7 @@ namespace universelan::client {
 		tracer::Trace trace{ networking_type, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("channel: {}", channel));
+			trace.write_all("channel: {}", channel);
 		}
 
 		intf()->PopP2PPacket(channel);
@@ -161,13 +161,13 @@ namespace universelan::client {
 		tracer::Trace trace{ networking_type, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("galaxyID: {}", galaxyID));
+			trace.write_all("galaxyID: {}", galaxyID);
 		}
 
 		auto result = intf()->GetPingWith(galaxyID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -186,7 +186,7 @@ namespace universelan::client {
 		auto result = intf()->GetNatType();
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));
+			trace.write_all("result: {}", magic_enum::enum_name(result));
 		}
 
 		return result;
@@ -198,13 +198,13 @@ namespace universelan::client {
 		tracer::Trace trace{ networking_type, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all("userID: {}", userID);
 		}
 
 		auto result = intf()->GetConnectionType(userID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));
+			trace.write_all("result: {}", magic_enum::enum_name(result));
 		}
 
 		return result;

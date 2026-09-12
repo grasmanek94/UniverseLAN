@@ -26,10 +26,10 @@ public:
 	virtual void OnOverlayVisibilityChanged(bool overlayVisible) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"overlayVisible: {}",
 			overlayVisible
-		).c_str());
+		);
 
 
 		if (on_overlay_visibility_changed != nullptr) {
@@ -60,10 +60,10 @@ public:
 	virtual void OnOverlayVisibilityChanged(bool overlayVisible) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"overlayVisible: {}",
 			overlayVisible
-		).c_str());
+		);
 
 
 		if (on_overlay_visibility_changed != nullptr) {

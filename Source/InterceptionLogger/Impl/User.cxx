@@ -66,7 +66,7 @@ namespace universelan::client {
 		auto result = intf()->SignedIn();
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -78,7 +78,7 @@ namespace universelan::client {
 		auto result = intf()->GetGalaxyID();
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -92,11 +92,11 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("steamAppTicket: {}", (void*)steamAppTicket));
-			trace.write_all(std::format("steamAppTicketSize: {}", steamAppTicketSize));
-			trace.write_all(std::format("personaName: {}", util::safe_fix_null_char_ptr_annotate_ret(personaName)));
+			trace.write_all("steamAppTicket: {}", (void*)steamAppTicket);
+			trace.write_all("steamAppTicketSize: {}", steamAppTicketSize);
+			trace.write_all("personaName: {}", util::safe_fix_null_char_ptr_annotate_ret(personaName));
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -115,11 +115,11 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("login: {}", util::safe_fix_null_char_ptr_annotate_ret(login)));
-			trace.write_all(std::format("password: {}", (void*)password)); // Only print pw address
+			trace.write_all("login: {}", util::safe_fix_null_char_ptr_annotate_ret(login));
+			trace.write_all("password: {}", (void*)password); // Only print pw address
 
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -145,13 +145,13 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINSTEAM
-			trace.write_all(std::format("requireOnline: {}", requireOnline));
+			trace.write_all("requireOnline: {}", requireOnline);
 #endif
 #if GALAXY_BUILD_FEATURE_HAS_IUSER_SIGNINGALAXY_TIMEOUT
-			trace.write_all(std::format("timeout: {}", timeout));
+			trace.write_all("timeout: {}", timeout);
 #endif
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -199,9 +199,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("serverKey: {}", util::safe_fix_null_char_ptr_annotate_ret(serverKey)));
+			trace.write_all("serverKey: {}", util::safe_fix_null_char_ptr_annotate_ret(serverKey));
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 		intf()->USER_SIGN_IN_SERVER_KEY(serverKey
@@ -222,7 +222,7 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 		intf()->SignInAnonymous(
@@ -238,8 +238,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("refreshToken: {}", util::safe_fix_null_char_ptr_annotate_ret(refreshToken)));
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("refreshToken: {}", util::safe_fix_null_char_ptr_annotate_ret(refreshToken));
+			trace.write_all("listener: {}", (void*)listener);
 		}
 		intf()->SignInToken(refreshToken
 			, AuthListener::encapsulate(listener)
@@ -253,7 +253,7 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 		intf()->SignInLauncher(
@@ -269,10 +269,10 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("epicAccessToken: {}", util::safe_fix_null_char_ptr_annotate_ret(epicAccessToken)));
-			trace.write_all(std::format("epicUsername: {}", util::safe_fix_null_char_ptr_annotate_ret(epicUsername)));
+			trace.write_all("epicAccessToken: {}", util::safe_fix_null_char_ptr_annotate_ret(epicAccessToken));
+			trace.write_all("epicUsername: {}", util::safe_fix_null_char_ptr_annotate_ret(epicUsername));
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 		intf()->SignInEpic(epicAccessToken, epicUsername
@@ -288,9 +288,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("xboxID: {}", xboxID));
+			trace.write_all("xboxID: {}", xboxID);
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 		intf()->SignInXbox(xboxID
@@ -306,7 +306,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 		}
 
 		intf()->SignInUWP(AuthListener::encapsulate(listener));
@@ -318,8 +318,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("ps4ClientID: {}", util::safe_fix_null_char_ptr_annotate_ret(ps4ClientID)));
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("ps4ClientID: {}", util::safe_fix_null_char_ptr_annotate_ret(ps4ClientID));
+			trace.write_all("listener: {}", (void*)listener);
 		}
 
 		intf()->USER_SIGN_IN_PS4(ps4ClientID, AuthListener::encapsulate(listener));
@@ -331,8 +331,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("xboxOneUserID: {}", util::safe_fix_null_char_ptr_annotate_ret(xboxOneUserID)));
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("xboxOneUserID: {}", util::safe_fix_null_char_ptr_annotate_ret(xboxOneUserID));
+			trace.write_all("listener: {}", (void*)listener);
 		}
 
 		intf()->SignInXB1(xboxOneUserID, AuthListener::encapsulate(listener));
@@ -344,11 +344,11 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("token: {}", util::safe_fix_null_char_ptr_annotate_ret(token)));
-			trace.write_all(std::format("signature: {}", util::safe_fix_null_char_ptr_annotate_ret(signature)));
-			trace.write_all(std::format("marketplaceID: {}", util::safe_fix_null_char_ptr_annotate_ret(marketplaceID)));
-			trace.write_all(std::format("locale: {}", util::safe_fix_null_char_ptr_annotate_ret(locale)));
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("token: {}", util::safe_fix_null_char_ptr_annotate_ret(token));
+			trace.write_all("signature: {}", util::safe_fix_null_char_ptr_annotate_ret(signature));
+			trace.write_all("marketplaceID: {}", util::safe_fix_null_char_ptr_annotate_ret(marketplaceID));
+			trace.write_all("locale: {}", util::safe_fix_null_char_ptr_annotate_ret(locale));
+			trace.write_all("listener: {}", (void*)listener);
 		}
 
 		intf()->SignInXBLive(token, signature, marketplaceID, locale, AuthListener::encapsulate(listener));
@@ -360,7 +360,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 		}
 
 		intf()->SignInAnonymousTelemetry(AuthListener::encapsulate(listener));
@@ -376,9 +376,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("xboxOneUserID: {}", xboxOneUserID));
+			trace.write_all("xboxOneUserID: {}", xboxOneUserID);
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 		intf()->SignIn(xboxOneUserID
@@ -398,13 +398,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("ps4ClientID: {}", util::safe_fix_null_char_ptr_annotate_ret(ps4ClientID)));
-			trace.write_all(std::format("ps4TitleID: {}", util::safe_fix_null_char_ptr_annotate_ret(ps4TitleID)));
-			trace.write_all(std::format("ps4TitleSecret (addr): {}", (void*)ps4TitleSecret));
-			trace.write_all(std::format("ps4TitleSecretLength: {}", ps4TitleSecretLength));
-			trace.write_all(std::format("ps4TitleSecret: {}", util::safe_fix_null_char_ptr_annotate(ps4TitleSecret, ps4TitleSecretLength)));
+			trace.write_all("ps4ClientID: {}", util::safe_fix_null_char_ptr_annotate_ret(ps4ClientID));
+			trace.write_all("ps4TitleID: {}", util::safe_fix_null_char_ptr_annotate_ret(ps4TitleID));
+			trace.write_all("ps4TitleSecret (addr): {}", (void*)ps4TitleSecret);
+			trace.write_all("ps4TitleSecretLength: {}", ps4TitleSecretLength);
+			trace.write_all("ps4TitleSecret: {}", util::safe_fix_null_char_ptr_annotate(ps4TitleSecret, ps4TitleSecretLength));
 #if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 		intf()->SignIn(ps4ClientID, ps4TitleID, ps4TitleSecret, ps4TitleSecretLength
@@ -435,10 +435,10 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
-			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all("userID: {}", userID);
 #endif
 #if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -457,13 +457,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all("userID: {}", userID);
 		}
 
 		auto result = intf()->IsUserDataAvailable(userID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -478,9 +478,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
+			trace.write_all("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key));
 #if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
-			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all("userID: {}", userID);
 #endif
 		}
 
@@ -491,7 +491,7 @@ namespace universelan::client {
 		);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+			trace.write_all("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result));
 		}
 
 		return result;
@@ -506,11 +506,11 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
-			trace.write_all(std::format("buffer: {}", (void*)buffer));
-			trace.write_all(std::format("bufferLength: {}", bufferLength));
+			trace.write_all("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key));
+			trace.write_all("buffer: {}", (void*)buffer);
+			trace.write_all("bufferLength: {}", bufferLength);
 #if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
-			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all("userID: {}", userID);
 #endif
 		}
 
@@ -521,7 +521,7 @@ namespace universelan::client {
 		);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
+			trace.write_all("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength));
 		}
 	}
 #endif
@@ -534,10 +534,10 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
-			trace.write_all(std::format("value: {}", util::safe_fix_null_char_ptr_annotate_ret(value)));
+			trace.write_all("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key));
+			trace.write_all("value: {}", util::safe_fix_null_char_ptr_annotate_ret(value));
 #if GALAXY_BUILD_FEATURE_HAS_SETUSERDATA_ISPECIFICLISTENER
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -557,7 +557,7 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
-			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all("userID: {}", userID);
 #endif
 		}
 
@@ -568,7 +568,7 @@ namespace universelan::client {
 		);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -582,13 +582,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("index: {}", index));
-			trace.write_all(std::format("key: {}", (void*)key));
-			trace.write_all(std::format("keyLength: {}", keyLength));
-			trace.write_all(std::format("value: {}", (void*)value));
-			trace.write_all(std::format("valueLength: {}", valueLength));
+			trace.write_all("index: {}", index);
+			trace.write_all("key: {}", (void*)key);
+			trace.write_all("keyLength: {}", keyLength);
+			trace.write_all("value: {}", (void*)value);
+			trace.write_all("valueLength: {}", valueLength);
 #if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
-			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all("userID: {}", userID);
 #endif
 		}
 
@@ -599,9 +599,9 @@ namespace universelan::client {
 		);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
-			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate(key, keyLength)));
-			trace.write_all(std::format("value: {}", util::safe_fix_null_char_ptr_annotate(value, valueLength)));
+			trace.write_all("result: {}", result);
+			trace.write_all("key: {}", util::safe_fix_null_char_ptr_annotate(key, keyLength));
+			trace.write_all("value: {}", util::safe_fix_null_char_ptr_annotate(value, valueLength));
 		}
 
 		return result;
@@ -615,9 +615,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
+			trace.write_all("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key));
 #if GALAXY_BUILD_FEATURE_HAS_SETUSERDATA_ISPECIFICLISTENER
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -635,7 +635,7 @@ namespace universelan::client {
 		auto result = intf()->IsLoggedOn();
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -651,10 +651,10 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("data: {}", (void*)data));
-			trace.write_all(std::format("dataSize: {}", dataSize));
+			trace.write_all("data: {}", (void*)data);
+			trace.write_all("dataSize: {}", dataSize);
 #if GALAXY_BUILD_FEATURE_HAS_REQUESTUSERDATA_ISPECIFICLISTENER
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -669,14 +669,14 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("encryptedAppTicket: {}", (void*)encryptedAppTicket));
-			trace.write_all(std::format("maxEncryptedAppTicketSize: {}", maxEncryptedAppTicketSize));
+			trace.write_all("encryptedAppTicket: {}", (void*)encryptedAppTicket);
+			trace.write_all("maxEncryptedAppTicketSize: {}", maxEncryptedAppTicketSize);
 		}
 
 		intf()->GetEncryptedAppTicket(encryptedAppTicket, maxEncryptedAppTicketSize, currentEncryptedAppTicketSize);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("currentEncryptedAppTicketSize: {}", currentEncryptedAppTicketSize));
+			trace.write_all("currentEncryptedAppTicketSize: {}", currentEncryptedAppTicketSize);
 		}
 	}
 #endif
@@ -688,7 +688,7 @@ namespace universelan::client {
 		auto result = intf()->GetSessionID();
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -702,7 +702,7 @@ namespace universelan::client {
 		auto result = intf()->GetAccessToken();
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+			trace.write_all("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result));
 		}
 
 		return result;
@@ -713,14 +713,14 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("buffer: {}", (void*)buffer));
-			trace.write_all(std::format("bufferLength: {}", bufferLength));
+			trace.write_all("buffer: {}", (void*)buffer);
+			trace.write_all("bufferLength: {}", bufferLength);
 		}
 
 		intf()->GetAccessTokenCopy(buffer, bufferLength);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
+			trace.write_all("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength));
 		}
 	}
 #endif
@@ -733,9 +733,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("accessToken: {}", util::safe_fix_null_char_ptr_annotate_ret(accessToken)));
+			trace.write_all("accessToken: {}", util::safe_fix_null_char_ptr_annotate_ret(accessToken));
 #if GALAXY_BUILD_FEATURE_USER_ACCESS_TOKEN_INFO
-			trace.write_all(std::format("info: {}", util::safe_fix_null_char_ptr_annotate_ret(info)));
+			trace.write_all("info: {}", util::safe_fix_null_char_ptr_annotate_ret(info));
 #endif
 		}
 
@@ -746,7 +746,7 @@ namespace universelan::client {
 		);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -758,14 +758,14 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("buffer: {}", (void*)buffer));
-			trace.write_all(std::format("bufferLength: {}", bufferLength));
+			trace.write_all("buffer: {}", (void*)buffer);
+			trace.write_all("bufferLength: {}", bufferLength);
 		}
 
 		intf()->GetRefreshTokenCopy(buffer, bufferLength);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
+			trace.write_all("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength));
 		}
 	}
 
@@ -775,7 +775,7 @@ namespace universelan::client {
 		auto result = intf()->GetRefreshToken();
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+			trace.write_all("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result));
 		}
 
 		return result;
@@ -787,9 +787,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("authorizationCode: {}", util::safe_fix_null_char_ptr_annotate_ret(authorizationCode)));
-			trace.write_all(std::format("redirectURI: {}", util::safe_fix_null_char_ptr_annotate_ret(redirectURI)));
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("authorizationCode: {}", util::safe_fix_null_char_ptr_annotate_ret(authorizationCode));
+			trace.write_all("redirectURI: {}", util::safe_fix_null_char_ptr_annotate_ret(redirectURI));
+			trace.write_all("listener: {}", (void*)listener);
 		}
 
 		intf()->SignInAuthorizationCode(authorizationCode, redirectURI, AuthListener::encapsulate(listener));
@@ -801,7 +801,7 @@ namespace universelan::client {
 		auto result = intf()->GetIDToken();
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+			trace.write_all("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result));
 		}
 
 		return result;
@@ -811,14 +811,14 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("buffer: {}", (void*)buffer));
-			trace.write_all(std::format("bufferLength: {}", bufferLength));
+			trace.write_all("buffer: {}", (void*)buffer);
+			trace.write_all("bufferLength: {}", bufferLength);
 		}
 
 		intf()->GetIDTokenCopy(buffer, bufferLength);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
+			trace.write_all("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength));
 		}
 	}
 #endif
@@ -829,11 +829,11 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("secretKey: {}", util::safe_fix_null_char_ptr_annotate_ret(secretKey)));
-			trace.write_all(std::format("titleID: {}", util::safe_fix_null_char_ptr_annotate_ret(titleID)));
-			trace.write_all(std::format("connectionID: {}", util::safe_fix_null_char_ptr_annotate_ret(connectionID)));
-			trace.write_all(std::format("ignoreNonce: {}", ignoreNonce));
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("secretKey: {}", util::safe_fix_null_char_ptr_annotate_ret(secretKey));
+			trace.write_all("titleID: {}", util::safe_fix_null_char_ptr_annotate_ret(titleID));
+			trace.write_all("connectionID: {}", util::safe_fix_null_char_ptr_annotate_ret(connectionID));
+			trace.write_all("ignoreNonce: {}", ignoreNonce);
+			trace.write_all("listener: {}", (void*)listener);
 		}
 
 		intf()->CreateOpenIDConnection(secretKey, titleID, connectionID, ignoreNonce, PlayFabCreateOpenIDConnectionListener::encapsulate(listener));
@@ -844,13 +844,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("titleID: {}", util::safe_fix_null_char_ptr_annotate_ret(titleID)));
-			trace.write_all(std::format("connectionID: {}", util::safe_fix_null_char_ptr_annotate_ret(connectionID)));
-			trace.write_all(std::format("idToken: {}", util::safe_fix_null_char_ptr_annotate_ret(idToken)));
-			trace.write_all(std::format("createAccount: {}", createAccount));
-			trace.write_all(std::format("encryptedRequest: {}", util::safe_fix_null_char_ptr_annotate_ret(encryptedRequest)));
-			trace.write_all(std::format("playerSecret: {}", util::safe_fix_null_char_ptr_annotate_ret(playerSecret)));
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("titleID: {}", util::safe_fix_null_char_ptr_annotate_ret(titleID));
+			trace.write_all("connectionID: {}", util::safe_fix_null_char_ptr_annotate_ret(connectionID));
+			trace.write_all("idToken: {}", util::safe_fix_null_char_ptr_annotate_ret(idToken));
+			trace.write_all("createAccount: {}", createAccount);
+			trace.write_all("encryptedRequest: {}", util::safe_fix_null_char_ptr_annotate_ret(encryptedRequest));
+			trace.write_all("playerSecret: {}", util::safe_fix_null_char_ptr_annotate_ret(playerSecret));
+			trace.write_all("listener: {}", (void*)listener);
 		}
 
 		intf()->LoginWithOpenIDConnect(titleID, connectionID, idToken, createAccount, encryptedRequest,

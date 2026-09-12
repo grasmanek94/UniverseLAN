@@ -23,8 +23,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", producId));
-			trace.write_all(std::format("chatRoomID: {}", isOwned));
+			trace.write_all("userID: {}", producId);
+			trace.write_all("chatRoomID: {}", isOwned);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnDlcCheckSuccess(producId, isOwned));
@@ -34,8 +34,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", producId));
-			trace.write_all(std::format("failueReason: {}", magic_enum::enum_name(failueReason)));
+			trace.write_all("userID: {}", producId);
+			trace.write_all("failueReason: {}", magic_enum::enum_name(failueReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnDlcCheckFailure(producId, failueReason));

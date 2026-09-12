@@ -24,10 +24,10 @@ public:
 	virtual void OnP2PPacketAvailable(uint32_t msgSize, uint8_t channel) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"msgSize: {} channel: {}",
 			msgSize, channel
-		).c_str());
+		);
 
 
 		if (on_p2_p_packet_available != nullptr) {
@@ -58,10 +58,10 @@ public:
 	virtual void OnP2PPacketAvailable(uint32_t msgSize, uint8_t channel) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"msgSize: {} channel: {}",
 			msgSize, channel
-		).c_str());
+		);
 
 
 		if (on_p2_p_packet_available != nullptr) {
@@ -94,10 +94,10 @@ public:
 	virtual void OnP2PPacketAvailable(uint32_t msgSize, uint8_t channel) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"msgSize: {} channel: {}",
 			msgSize, channel
-		).c_str());
+		);
 
 
 		if (on_p2_p_packet_available != nullptr) {

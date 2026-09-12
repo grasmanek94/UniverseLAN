@@ -30,10 +30,10 @@ public:
 	virtual void OnChatRoomMessagesRetrieveSuccess(ChatRoomID chatRoomID, uint32_t messageCount, uint32_t longestMessageLenght) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"chatRoomID: {} messageCount: {} longestMessageLenght: {}",
 			chatRoomID, messageCount, longestMessageLenght
-		).c_str());
+		);
 
 
 		if (on_chat_room_messages_retrieve_success != nullptr) {
@@ -44,10 +44,10 @@ public:
 	virtual void OnChatRoomMessagesRetrieveFailure(ChatRoomID chatRoomID, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"chatRoomID: {} failureReason: {}",
 			chatRoomID, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_chat_room_messages_retrieve_failure != nullptr) {
@@ -82,10 +82,10 @@ public:
 	virtual void OnChatRoomMessagesRetrieveSuccess(ChatRoomID chatRoomID, uint32_t messageCount, uint32_t longestMessageLenght) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"chatRoomID: {} messageCount: {} longestMessageLenght: {}",
 			chatRoomID, messageCount, longestMessageLenght
-		).c_str());
+		);
 
 
 		if (on_chat_room_messages_retrieve_success != nullptr) {
@@ -96,10 +96,10 @@ public:
 	virtual void OnChatRoomMessagesRetrieveFailure(ChatRoomID chatRoomID, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"chatRoomID: {} failureReason: {}",
 			chatRoomID, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_chat_room_messages_retrieve_failure != nullptr) {

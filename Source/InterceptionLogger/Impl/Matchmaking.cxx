@@ -60,15 +60,15 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyType: {}", magic_enum::enum_name(lobbyType)));
-			trace.write_all(std::format("maxMembers: {}", maxMembers));
+			trace.write_all("lobbyType: {}", magic_enum::enum_name(lobbyType));
+			trace.write_all("maxMembers: {}", maxMembers);
 #if GALAXY_BUILD_FEATURE_HAS_LOBBYTOPOLOGYTYPE_ENUM
-			trace.write_all(std::format("joinable: {}", joinable));
-			trace.write_all(std::format("lobbyTopologyType: {}", magic_enum::enum_name(lobbyTopologyType)));
+			trace.write_all("joinable: {}", joinable);
+			trace.write_all("lobbyTopologyType: {}", magic_enum::enum_name(lobbyTopologyType));
 #endif
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			trace.write_all(std::format("lobbyCreatedListener: {}", (void*)lobbyCreatedListener));
-			trace.write_all(std::format("lobbyEnteredListener: {}", (void*)lobbyEnteredListener));
+			trace.write_all("lobbyCreatedListener: {}", (void*)lobbyCreatedListener);
+			trace.write_all("lobbyEnteredListener: {}", (void*)lobbyEnteredListener);
 #endif
 		}
 
@@ -96,10 +96,10 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
 #if GALAXY_BUILD_FEATURE_HAS_REQUESTLOBBYLIST_ARGS_ALLOWFULL
-			trace.write_all(std::format("allowFullLobbies: {}", allowFullLobbies));
+			trace.write_all("allowFullLobbies: {}", allowFullLobbies);
 #endif
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif	
 		}
 
@@ -118,7 +118,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("limit: {}", limit));
+			trace.write_all("limit: {}", limit);
 		}
 
 		intf()->AddRequestLobbyListResultCountFilter(limit);
@@ -129,9 +129,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("keyToMatch: {}", util::safe_fix_null_char_ptr_annotate_ret(keyToMatch)));
-			trace.write_all(std::format("valueToMatch: {}", util::safe_fix_null_char_ptr_annotate_ret(valueToMatch)));
-			trace.write_all(std::format("comparisonType: {}", magic_enum::enum_name(comparisonType)));
+			trace.write_all("keyToMatch: {}", util::safe_fix_null_char_ptr_annotate_ret(keyToMatch));
+			trace.write_all("valueToMatch: {}", util::safe_fix_null_char_ptr_annotate_ret(valueToMatch));
+			trace.write_all("comparisonType: {}", magic_enum::enum_name(comparisonType));
 		}
 
 		intf()->AddRequestLobbyListStringFilter(keyToMatch, valueToMatch, comparisonType);
@@ -141,9 +141,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("keyToMatch: {}", util::safe_fix_null_char_ptr_annotate_ret(keyToMatch)));
-			trace.write_all(std::format("valueToMatch: {}", valueToMatch));
-			trace.write_all(std::format("comparisonType: {}", magic_enum::enum_name(comparisonType)));
+			trace.write_all("keyToMatch: {}", util::safe_fix_null_char_ptr_annotate_ret(keyToMatch));
+			trace.write_all("valueToMatch: {}", valueToMatch);
+			trace.write_all("comparisonType: {}", magic_enum::enum_name(comparisonType));
 		}
 
 		intf()->AddRequestLobbyListNumericalFilter(keyToMatch, valueToMatch, comparisonType);
@@ -153,8 +153,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("keyToMatch: {}", util::safe_fix_null_char_ptr_annotate_ret(keyToMatch)));
-			trace.write_all(std::format("valueToBeCloseTo: {}", valueToBeCloseTo));
+			trace.write_all("keyToMatch: {}", util::safe_fix_null_char_ptr_annotate_ret(keyToMatch));
+			trace.write_all("valueToBeCloseTo: {}", valueToBeCloseTo);
 		}
 
 		intf()->AddRequestLobbyListNearValueFilter(keyToMatch, valueToBeCloseTo);
@@ -164,13 +164,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("index: {}", index));
+			trace.write_all("index: {}", index);
 		}
 
 		auto result = intf()->GetLobbyByIndex(index);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -184,9 +184,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
+			trace.write_all("lobbyID: {}", lobbyID);
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -205,9 +205,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
+			trace.write_all("lobbyID: {}", lobbyID);
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -228,10 +228,10 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("maxNumLobbyMembers: {}", maxNumLobbyMembers));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("maxNumLobbyMembers: {}", maxNumLobbyMembers);
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -246,7 +246,7 @@ namespace universelan::client {
 
 #if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -258,13 +258,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
+			trace.write_all("lobbyID: {}", lobbyID);
 		}
 
 		auto result = intf()->GetMaxNumLobbyMembers(lobbyID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -274,13 +274,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
+			trace.write_all("lobbyID: {}", lobbyID);
 		}
 
 		auto result = intf()->GetNumLobbyMembers(lobbyID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -290,14 +290,14 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("index: {}", index));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("index: {}", index);
 		}
 
 		auto result = intf()->GetLobbyMemberByIndex(lobbyID, index);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -313,10 +313,10 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("lobbyType: {}", magic_enum::enum_name(lobbyType)));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("lobbyType: {}", magic_enum::enum_name(lobbyType));
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -331,7 +331,7 @@ namespace universelan::client {
 
 #if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -344,13 +344,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
+			trace.write_all("lobbyID: {}", lobbyID);
 		}
 
 		auto result = intf()->GetLobbyType(lobbyID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));
+			trace.write_all("result: {}", magic_enum::enum_name(result));
 		}
 
 		return result;
@@ -366,10 +366,10 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("joinable: {}", joinable));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("joinable: {}", joinable);
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -384,7 +384,7 @@ namespace universelan::client {
 
 #if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -397,13 +397,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
+			trace.write_all("lobbyID: {}", lobbyID);
 		}
 
 		auto result = intf()->IsLobbyJoinable(lobbyID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -419,9 +419,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
+			trace.write_all("lobbyID: {}", lobbyID);
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -436,7 +436,7 @@ namespace universelan::client {
 
 #if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -447,14 +447,14 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key));
 		}
 
 		auto result = intf()->GetLobbyData(lobbyID, key);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+			trace.write_all("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result));
 		}
 
 		return result;
@@ -465,16 +465,16 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
-			trace.write_all(std::format("buffer: {}", (void*)buffer));
-			trace.write_all(std::format("bufferLength: {}", bufferLength));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key));
+			trace.write_all("buffer: {}", (void*)buffer);
+			trace.write_all("bufferLength: {}", bufferLength);
 		}
 
 		intf()->GetLobbyDataCopy(lobbyID, key, buffer, bufferLength);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
+			trace.write_all("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength));
 		}
 	}
 #endif
@@ -488,11 +488,11 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
-			trace.write_all(std::format("value: {}", util::safe_fix_null_char_ptr_annotate_ret(value)));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key));
+			trace.write_all("value: {}", util::safe_fix_null_char_ptr_annotate_ret(value));
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -507,7 +507,7 @@ namespace universelan::client {
 
 #if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -518,13 +518,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
+			trace.write_all("lobbyID: {}", lobbyID);
 		}
 
 		auto result = intf()->GetLobbyDataCount(lobbyID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -534,20 +534,20 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("index: {}", index));
-			trace.write_all(std::format("key: {}", (void*)key));
-			trace.write_all(std::format("keyLength: {}", keyLength));
-			trace.write_all(std::format("value: {}", (void*)value));
-			trace.write_all(std::format("valueLength: {}", valueLength));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("index: {}", index);
+			trace.write_all("key: {}", (void*)key);
+			trace.write_all("keyLength: {}", keyLength);
+			trace.write_all("value: {}", (void*)value);
+			trace.write_all("valueLength: {}", valueLength);
 		}
 
 		auto result = intf()->GetLobbyDataByIndex(lobbyID, index, key, keyLength, value, valueLength);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
-			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate(key, keyLength)));
-			trace.write_all(std::format("value: {}", util::safe_fix_null_char_ptr_annotate(value, valueLength)));
+			trace.write_all("result: {}", result);
+			trace.write_all("key: {}", util::safe_fix_null_char_ptr_annotate(key, keyLength));
+			trace.write_all("value: {}", util::safe_fix_null_char_ptr_annotate(value, valueLength));
 		}
 
 		return result;
@@ -563,10 +563,10 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key));
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -581,7 +581,7 @@ namespace universelan::client {
 
 #if !GALAXY_BUILD_FEATURE_MATCHMAKING_RET_TYPE_VOID
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -592,15 +592,15 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("memberID: {}", memberID));
-			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("memberID: {}", memberID);
+			trace.write_all("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key));
 		}
 
 		auto result = intf()->GetLobbyMemberData(lobbyID, memberID, key);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+			trace.write_all("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result));
 		}
 
 		return result;
@@ -611,17 +611,17 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("memberID: {}", memberID));
-			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
-			trace.write_all(std::format("buffer: {}", (void*)buffer));
-			trace.write_all(std::format("bufferLength: {}", bufferLength));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("memberID: {}", memberID);
+			trace.write_all("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key));
+			trace.write_all("buffer: {}", (void*)buffer);
+			trace.write_all("bufferLength: {}", bufferLength);
 		}
 
 		intf()->GetLobbyMemberDataCopy(lobbyID, memberID, key, buffer, bufferLength);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
+			trace.write_all("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength));
 		}
 	}
 #endif
@@ -634,11 +634,11 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
-			trace.write_all(std::format("value: {}", util::safe_fix_null_char_ptr_annotate_ret(value)));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key));
+			trace.write_all("value: {}", util::safe_fix_null_char_ptr_annotate_ret(value));
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -653,14 +653,14 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("memberID: {}", memberID));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("memberID: {}", memberID);
 		}
 
 		auto result = intf()->GetLobbyMemberDataCount(lobbyID, memberID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -670,21 +670,21 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("memberID: {}", memberID));
-			trace.write_all(std::format("index: {}", index));
-			trace.write_all(std::format("key: {}", (void*)key));
-			trace.write_all(std::format("keyLength: {}", keyLength));
-			trace.write_all(std::format("value: {}", (void*)value));
-			trace.write_all(std::format("valueLength: {}", valueLength));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("memberID: {}", memberID);
+			trace.write_all("index: {}", index);
+			trace.write_all("key: {}", (void*)key);
+			trace.write_all("keyLength: {}", keyLength);
+			trace.write_all("value: {}", (void*)value);
+			trace.write_all("valueLength: {}", valueLength);
 		}
 
 		auto result = intf()->GetLobbyMemberDataByIndex(lobbyID, memberID, index, key, keyLength, value, valueLength);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
-			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate(key, keyLength)));
-			trace.write_all(std::format("value: {}", util::safe_fix_null_char_ptr_annotate(value, valueLength)));
+			trace.write_all("result: {}", result);
+			trace.write_all("key: {}", util::safe_fix_null_char_ptr_annotate(key, keyLength));
+			trace.write_all("value: {}", util::safe_fix_null_char_ptr_annotate(value, valueLength));
 		}
 
 		return result;
@@ -698,10 +698,10 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key)));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("key: {}", util::safe_fix_null_char_ptr_annotate_ret(key));
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -716,13 +716,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
+			trace.write_all("lobbyID: {}", lobbyID);
 		}
 
 		auto result = intf()->GetLobbyOwner(lobbyID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -732,21 +732,21 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("data: {}", (void*)data));
-			trace.write_all(std::format("dataSize: {}", dataSize));
-			trace.write_all(std::format("msg: {}", util::safe_fix_null_char_ptr_annotate((const char*)data, dataSize)));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("data: {}", (void*)data);
+			trace.write_all("dataSize: {}", dataSize);
+			trace.write_all("msg: {}", util::safe_fix_null_char_ptr_annotate((const char*)data, dataSize));
 			if (data != nullptr) {
-				trace.write_all(std::format("msg_hash: {:x}", const_hash64_data_loop((const char*)data, dataSize)));
-				trace.write_all(std::format("msg_hex: {}", bytes_to_hex((void*)data, dataSize)));
-				trace.write_all(std::format("msg_enc: {}", filesystem_container::filename_encode(std::string((char*)data, (size_t)dataSize))));
+				trace.write_all("msg_hash: {:x}", const_hash64_data_loop((const char*)data, dataSize));
+				trace.write_all("msg_hex: {}", bytes_to_hex((void*)data, dataSize));
+				trace.write_all("msg_enc: {}", filesystem_container::filename_encode(std::string((char*)data, (size_t)dataSize)));
 			}
 		}
 
 		auto result = intf()->SendLobbyMessage(lobbyID, data, dataSize);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -756,23 +756,23 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__,  TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("messageID: {}", messageID));
-			trace.write_all(std::format("msg: {}", (void*)msg));
-			trace.write_all(std::format("msgLength: {}", msgLength));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("messageID: {}", messageID);
+			trace.write_all("msg: {}", (void*)msg);
+			trace.write_all("msgLength: {}", msgLength);
 		}
 
 		auto result = intf()->GetLobbyMessage(lobbyID, messageID, senderID, msg, msgLength);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			std::size_t min_size = std::min(result, msgLength);
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 			if (result > 0) {
-				trace.write_all(std::format("result_msg: {}", util::safe_fix_null_char_ptr_annotate(msg, (uint32_t)min_size)));
+				trace.write_all("result_msg: {}", util::safe_fix_null_char_ptr_annotate(msg, (uint32_t)min_size));
 				if (msg != nullptr) {
-					trace.write_all(std::format("result_msg_hash: {:x}", const_hash64_data_loop((const char*)msg, min_size)));
-					trace.write_all(std::format("result_msg_hex: {}", bytes_to_hex((void*)msg, (uint32_t)min_size)));
-					trace.write_all(std::format("result_msg_enc: {}", filesystem_container::filename_encode(std::string((char*)msg, min_size))));
+					trace.write_all("result_msg_hash: {:x}", const_hash64_data_loop((const char*)msg, min_size));
+					trace.write_all("result_msg_hex: {}", bytes_to_hex((void*)msg, (uint32_t)min_size));
+					trace.write_all("result_msg_enc: {}", filesystem_container::filename_encode(std::string((char*)msg, min_size)));
 				}
 			}
 		}

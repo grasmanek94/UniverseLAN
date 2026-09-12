@@ -21,8 +21,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("msgSize: {}", msgSize));
-			trace.write_all(std::format("channel: {}", (int)channel));
+			trace.write_all("msgSize: {}", msgSize);
+			trace.write_all("channel: {}", (int)channel);
 		}
 	}
 
@@ -32,7 +32,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("natType: {}", magic_enum::enum_name(natType)));
+			trace.write_all("natType: {}", magic_enum::enum_name(natType));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnNatTypeDetectionSuccess(natType));

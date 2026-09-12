@@ -38,10 +38,10 @@ public:
 	virtual void OnEncryptedAppTicketRetrieveFailure(FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"failureReason: {}",
 			magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_encrypted_app_ticket_retrieve_failure != nullptr) {
@@ -85,10 +85,10 @@ public:
 	virtual void OnEncryptedAppTicketRetrieveFailure(FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"failureReason: {}",
 			magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_encrypted_app_ticket_retrieve_failure != nullptr) {
@@ -134,10 +134,10 @@ public:
 	virtual void OnEncryptedAppTicketRetrieveFailure(FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"failureReason: {}",
 			magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_encrypted_app_ticket_retrieve_failure != nullptr) {

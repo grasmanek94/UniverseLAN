@@ -30,10 +30,10 @@ public:
 	virtual void OnUserTimePlayedRetrieveSuccess(GalaxyID userID) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {}",
 			userID
-		).c_str());
+		);
 
 
 		if (on_user_time_played_retrieve_success != nullptr) {
@@ -44,10 +44,10 @@ public:
 	virtual void OnUserTimePlayedRetrieveFailure(GalaxyID userID, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {} failureReason: {}",
 			userID, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_user_time_played_retrieve_failure != nullptr) {
@@ -82,10 +82,10 @@ public:
 	virtual void OnUserTimePlayedRetrieveSuccess(GalaxyID userID) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {}",
 			userID
-		).c_str());
+		);
 
 
 		if (on_user_time_played_retrieve_success != nullptr) {
@@ -96,10 +96,10 @@ public:
 	virtual void OnUserTimePlayedRetrieveFailure(GalaxyID userID, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {} failureReason: {}",
 			userID, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_user_time_played_retrieve_failure != nullptr) {

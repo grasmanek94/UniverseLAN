@@ -37,15 +37,15 @@ public:
 		tracer::Trace trace{ "", __FUNCTION__ };
 
 #if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LEAVE_REASON
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} leaveReason: {}",
 			lobbyID, magic_enum::enum_name(leaveReason)
-		).c_str());
+		);
 #else
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} ioFailure: {}",
 			lobbyID, ioFailure
-		).c_str());
+		);
 #endif
 
 
@@ -96,15 +96,15 @@ public:
 		tracer::Trace trace{ "", __FUNCTION__ };
 
 #if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LEAVE_REASON
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} leaveReason: {}",
 			lobbyID, magic_enum::enum_name(leaveReason)
-		).c_str());
+		);
 #else
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} ioFailure: {}",
 			lobbyID, ioFailure
-		).c_str());
+		);
 #endif
 
 
@@ -157,15 +157,15 @@ public:
 		tracer::Trace trace{ "", __FUNCTION__ };
 
 #if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LEAVE_REASON
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} leaveReason: {}",
 			lobbyID, magic_enum::enum_name(leaveReason)
-		).c_str());
+		);
 #else
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} ioFailure: {}",
 			lobbyID, ioFailure
-		).c_str());
+		);
 #endif
 
 

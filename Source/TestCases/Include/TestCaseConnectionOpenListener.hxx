@@ -29,10 +29,10 @@ public:
 	virtual void OnConnectionOpenSuccess(const char* connectionString, ConnectionID connectionID) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"connectionString: {} connectionID: {}",
 			connectionString, connectionID
-		).c_str());
+		);
 
 
 		if (on_connection_open_success != nullptr) {
@@ -43,10 +43,10 @@ public:
 	virtual void OnConnectionOpenFailure(const char* connectionString, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"connectionString: {} failureReason: {}",
 			connectionString, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_connection_open_failure != nullptr) {
@@ -81,10 +81,10 @@ public:
 	virtual void OnConnectionOpenSuccess(const char* connectionString, ConnectionID connectionID) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"connectionString: {} connectionID: {}",
 			connectionString, connectionID
-		).c_str());
+		);
 
 
 		if (on_connection_open_success != nullptr) {
@@ -95,10 +95,10 @@ public:
 	virtual void OnConnectionOpenFailure(const char* connectionString, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"connectionString: {} failureReason: {}",
 			connectionString, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_connection_open_failure != nullptr) {

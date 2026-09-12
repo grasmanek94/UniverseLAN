@@ -38,10 +38,10 @@ public:
 	virtual void OnRichPresenceChangeFailure(FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"failureReason: {}",
 			magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_rich_presence_change_failure != nullptr) {
@@ -84,10 +84,10 @@ public:
 	virtual void OnRichPresenceChangeFailure(FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"failureReason: {}",
 			magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_rich_presence_change_failure != nullptr) {

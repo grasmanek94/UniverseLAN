@@ -24,10 +24,10 @@ public:
 	virtual void OnLobbyDataUpdated(const GalaxyID& lobbyID, const GalaxyID& memberID) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} memberID: {}",
 			lobbyID, memberID
-		).c_str());
+		);
 
 
 		if (on_lobby_data_updated != nullptr) {
@@ -58,10 +58,10 @@ public:
 	virtual void OnLobbyDataUpdated(const GalaxyID& lobbyID, const GalaxyID& memberID) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} memberID: {}",
 			lobbyID, memberID
-		).c_str());
+		);
 
 
 		if (on_lobby_data_updated != nullptr) {
@@ -94,10 +94,10 @@ public:
 	virtual void OnLobbyDataUpdated(const GalaxyID& lobbyID, const GalaxyID& memberID) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} memberID: {}",
 			lobbyID, memberID
-		).c_str());
+		);
 
 
 		if (on_lobby_data_updated != nullptr) {

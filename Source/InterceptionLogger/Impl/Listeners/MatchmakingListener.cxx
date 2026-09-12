@@ -27,8 +27,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyCount: {}", lobbyCount));
-			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));
+			trace.write_all("lobbyCount: {}", lobbyCount);
+			trace.write_all("result: {}", magic_enum::enum_name(result));
 		}
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnLobbyList(lobbyCount, result));
@@ -39,8 +39,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyCount: {}", lobbyCount));
-			trace.write_all(std::format("ioFailure: {}", ioFailure));
+			trace.write_all("lobbyCount: {}", lobbyCount);
+			trace.write_all("ioFailure: {}", ioFailure);
 		}
 #if !GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnLobbyList(lobbyCount, ioFailure));
@@ -52,8 +52,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("result: {}", magic_enum::enum_name(result));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnLobbyCreated(lobbyID, result));
@@ -64,8 +64,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("result: {}", magic_enum::enum_name(result));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnLobbyEntered(lobbyID, result));
@@ -76,8 +76,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("leaveReason: {}", magic_enum::enum_name(leaveReason)));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("leaveReason: {}", magic_enum::enum_name(leaveReason));
 		}
 #if GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnLobbyLeft(lobbyID, leaveReason));
@@ -89,8 +89,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("ioFailure: {}", ioFailure));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("ioFailure: {}", ioFailure);
 		}
 #if !GALAXY_BUILD_FEATURE_LOBBY_LISTENERS
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnLobbyLeft(lobbyID, ioFailure));
@@ -102,8 +102,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("memberID: {}", memberID));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("memberID: {}", memberID);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnLobbyDataUpdated(lobbyID, memberID));
@@ -115,7 +115,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
+			trace.write_all("lobbyID: {}", lobbyID);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnLobbyDataUpdateSuccess(lobbyID));
@@ -126,8 +126,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnLobbyDataUpdateFailure(lobbyID, failureReason));
@@ -138,8 +138,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("memberID: {}", memberID));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("memberID: {}", memberID);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnLobbyMemberDataUpdateSuccess(lobbyID, memberID));
@@ -150,9 +150,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("memberID: {}", memberID));
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("memberID: {}", memberID);
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnLobbyMemberDataUpdateFailure(lobbyID, memberID, failureReason));
@@ -165,7 +165,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
+			trace.write_all("lobbyID: {}", lobbyID);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnLobbyDataRetrieveSuccess(lobbyID));
@@ -176,8 +176,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnLobbyDataRetrieveFailure(lobbyID, failureReason));
@@ -189,9 +189,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("memberID: {}", memberID));
-			trace.write_all(std::format("memberStateChange: {}", magic_enum::enum_flags_name(memberStateChange)));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("memberID: {}", memberID);
+			trace.write_all("memberStateChange: {}", magic_enum::enum_flags_name(memberStateChange));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnLobbyMemberStateChanged(lobbyID, memberID, memberStateChange));
@@ -202,8 +202,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("newOwnerID: {}", newOwnerID));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("newOwnerID: {}", newOwnerID);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnLobbyOwnerChanged(lobbyID, newOwnerID));
@@ -214,10 +214,10 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("lobbyID: {}", lobbyID));
-			trace.write_all(std::format("senderID: {}", senderID));
-			trace.write_all(std::format("messageID: {}", messageID));
-			trace.write_all(std::format("messageLength: {}", messageLength));
+			trace.write_all("lobbyID: {}", lobbyID);
+			trace.write_all("senderID: {}", senderID);
+			trace.write_all("messageID: {}", messageID);
+			trace.write_all("messageLength: {}", messageLength);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnLobbyMessageReceived(lobbyID, senderID, messageID, messageLength));

@@ -23,8 +23,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("fileName: {}", util::safe_fix_null_char_ptr_annotate_ret(fileName)));
-			trace.write_all(std::format("sharedFileID: {}", sharedFileID));
+			trace.write_all("fileName: {}", util::safe_fix_null_char_ptr_annotate_ret(fileName));
+			trace.write_all("sharedFileID: {}", sharedFileID);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnFileShareSuccess(fileName, sharedFileID));
@@ -35,8 +35,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("fileName: {}", util::safe_fix_null_char_ptr_annotate_ret(fileName)));
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("fileName: {}", util::safe_fix_null_char_ptr_annotate_ret(fileName));
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnFileShareFailure(fileName, failureReason));
@@ -47,8 +47,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("sharedFileID: {}", sharedFileID));
-			trace.write_all(std::format("fileName: {}", util::safe_fix_null_char_ptr_annotate_ret(fileName)));
+			trace.write_all("sharedFileID: {}", sharedFileID);
+			trace.write_all("fileName: {}", util::safe_fix_null_char_ptr_annotate_ret(fileName));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnSharedFileDownloadSuccess(sharedFileID, fileName));
@@ -59,8 +59,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("sharedFileID: {}", sharedFileID));
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("sharedFileID: {}", sharedFileID);
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnSharedFileDownloadFailure(sharedFileID, failureReason));

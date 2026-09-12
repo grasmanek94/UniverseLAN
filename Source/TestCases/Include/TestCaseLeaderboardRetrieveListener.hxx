@@ -29,10 +29,10 @@ public:
 	virtual void OnLeaderboardRetrieveSuccess(const char* name) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"name: {}",
 			name
-		).c_str());
+		);
 
 
 		if (on_leaderboard_retrieve_success != nullptr) {
@@ -43,10 +43,10 @@ public:
 	virtual void OnLeaderboardRetrieveFailure(const char* name, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"name: {} failureReason: {}",
 			name, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_leaderboard_retrieve_failure != nullptr) {
@@ -81,10 +81,10 @@ public:
 	virtual void OnLeaderboardRetrieveSuccess(const char* name) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"name: {}",
 			name
-		).c_str());
+		);
 
 
 		if (on_leaderboard_retrieve_success != nullptr) {
@@ -95,10 +95,10 @@ public:
 	virtual void OnLeaderboardRetrieveFailure(const char* name, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"name: {} failureReason: {}",
 			name, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_leaderboard_retrieve_failure != nullptr) {

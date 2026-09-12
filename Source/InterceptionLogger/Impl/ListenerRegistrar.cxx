@@ -25,8 +25,8 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType)));
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType));
+			trace.write_all("listener: {}", (void*)listener);
 		}
 
 		intf()->Register(listenerType, listener);
@@ -36,8 +36,8 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType)));
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType));
+			trace.write_all("listener: {}", (void*)listener);
 		}
 
 		auto ptr = ProxifySyncHandler::pop(listener);

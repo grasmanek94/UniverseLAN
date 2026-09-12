@@ -28,10 +28,10 @@ public:
 	virtual void OnLeaderboardEntriesRetrieveSuccess(const char* name, uint32_t entryCount) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"name: {} entryCount: {}",
 			name, entryCount
-		).c_str());
+		);
 
 
 		if (on_leaderboard_entries_retrieve_success != nullptr) {
@@ -42,10 +42,10 @@ public:
 	virtual void OnLeaderboardEntriesRetrieveFailure(const char* name, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"name: {} failureReason: {}",
 			name, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_leaderboard_entries_retrieve_failure != nullptr) {
@@ -80,10 +80,10 @@ public:
 	virtual void OnLeaderboardEntriesRetrieveSuccess(const char* name, uint32_t entryCount) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"name: {} entryCount: {}",
 			name, entryCount
-		).c_str());
+		);
 
 
 		if (on_leaderboard_entries_retrieve_success != nullptr) {
@@ -94,10 +94,10 @@ public:
 	virtual void OnLeaderboardEntriesRetrieveFailure(const char* name, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"name: {} failureReason: {}",
 			name, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_leaderboard_entries_retrieve_failure != nullptr) {

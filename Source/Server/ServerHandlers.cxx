@@ -306,7 +306,7 @@ namespace universelan::server {
 		}
 
 		if (trace.has_flags(tracer::Trace::NETWORK_P2P_CONTENTS)) {
-			trace.write_all(std::format("data_contents: {}", bytes_to_hex(data->data.data(), (uint32_t)data->data.size())));
+			trace.write_all("data_contents: {}", bytes_to_hex(data->data.data(), (uint32_t)data->data.size()));
 		}
 
 		ENetPacketFlag flag{};
@@ -365,7 +365,7 @@ namespace universelan::server {
 		tracer::Trace trace{ "::P2PNetworkPacketMessage", __FUNCTION__, tracer::Trace::INETWORKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::NETWORK_P2P_CONTENTS)) {
-			trace.write_all(std::format("data_contents: {}", bytes_to_hex(data->data.data(), (uint32_t)data->data.size())));
+			trace.write_all("data_contents: {}", bytes_to_hex(data->data.data(), (uint32_t)data->data.size()));
 		}
 
 		ENetPacketFlag flag{};

@@ -38,10 +38,10 @@ public:
 	virtual void OnFriendListRetrieveFailure(FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"failureReason: {}",
 			magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_friend_list_retrieve_failure != nullptr) {
@@ -85,10 +85,10 @@ public:
 	virtual void OnFriendListRetrieveFailure(FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"failureReason: {}",
 			magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_friend_list_retrieve_failure != nullptr) {

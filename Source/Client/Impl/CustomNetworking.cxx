@@ -28,10 +28,10 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICUSTOMNETWORKING };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format(
+			trace.write_all(
 				"connectionString: {} listener: {}",
 				connectionString, (void*)listener
-			));
+			);
 		}
 
 		client.disableAutomaticReconnection();

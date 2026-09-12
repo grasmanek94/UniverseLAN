@@ -43,9 +43,9 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("fileName: {}", util::safe_fix_null_char_ptr_annotate_ret(fileName)));
-			trace.write_all(std::format("data: {}", (void*)data));
-			trace.write_all(std::format("dataSize: {}", dataSize));
+			trace.write_all("fileName: {}", util::safe_fix_null_char_ptr_annotate_ret(fileName));
+			trace.write_all("data: {}", (void*)data);
+			trace.write_all("dataSize: {}", dataSize);
 		}
 
 		intf()->FileWrite(fileName, data, dataSize);
@@ -55,15 +55,15 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("fileName: {}", util::safe_fix_null_char_ptr_annotate_ret(fileName)));
-			trace.write_all(std::format("data: {}", (void*)data));
-			trace.write_all(std::format("dataSize: {}", dataSize));
+			trace.write_all("fileName: {}", util::safe_fix_null_char_ptr_annotate_ret(fileName));
+			trace.write_all("data: {}", (void*)data);
+			trace.write_all("dataSize: {}", dataSize);
 		}
 
 		auto result = intf()->FileRead(fileName, data, dataSize);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -73,7 +73,7 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("fileName: {}", util::safe_fix_null_char_ptr_annotate_ret(fileName)));
+			trace.write_all("fileName: {}", util::safe_fix_null_char_ptr_annotate_ret(fileName));
 		}
 
 		intf()->FileDelete(fileName);
@@ -83,13 +83,13 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("fileName: {}", util::safe_fix_null_char_ptr_annotate_ret(fileName)));
+			trace.write_all("fileName: {}", util::safe_fix_null_char_ptr_annotate_ret(fileName));
 		}
 
 		auto result = intf()->FileExists(fileName);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -99,13 +99,13 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("fileName: {}", util::safe_fix_null_char_ptr_annotate_ret(fileName)));
+			trace.write_all("fileName: {}", util::safe_fix_null_char_ptr_annotate_ret(fileName));
 		}
 
 		auto result = intf()->GetFileSize(fileName);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -115,13 +115,13 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("fileName: {}", util::safe_fix_null_char_ptr_annotate_ret(fileName)));
+			trace.write_all("fileName: {}", util::safe_fix_null_char_ptr_annotate_ret(fileName));
 		}
 
 		auto result = intf()->GetFileTimestamp(fileName);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -133,7 +133,7 @@ namespace universelan::client {
 		auto result = intf()->GetFileCount();
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -143,13 +143,13 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("index: {}", index));
+			trace.write_all("index: {}", index);
 		}
 
 		auto result = intf()->GetFileNameByIndex(index);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+			trace.write_all("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result));
 		}
 
 		return result;
@@ -159,15 +159,15 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("index: {}", index));
-			trace.write_all(std::format("buffer: {}", (void*)buffer));
-			trace.write_all(std::format("bufferLength: {}", bufferLength));
+			trace.write_all("index: {}", index);
+			trace.write_all("buffer: {}", (void*)buffer);
+			trace.write_all("bufferLength: {}", bufferLength);
 		}
 
 		intf()->GetFileNameCopyByIndex(index, buffer, bufferLength);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
+			trace.write_all("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength));
 		}
 	}
 
@@ -179,9 +179,9 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("fileName: {}", util::safe_fix_null_char_ptr_annotate_ret(fileName)));
+			trace.write_all("fileName: {}", util::safe_fix_null_char_ptr_annotate_ret(fileName));
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -200,9 +200,9 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("sharedFileID: {}", sharedFileID));
+			trace.write_all("sharedFileID: {}", sharedFileID);
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -217,13 +217,13 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("sharedFileID: {}", sharedFileID));
+			trace.write_all("sharedFileID: {}", sharedFileID);
 		}
 
 		auto result = intf()->GetSharedFileName(sharedFileID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+			trace.write_all("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result));
 		}
 
 		return result;
@@ -233,15 +233,15 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("sharedFileID: {}", sharedFileID));
-			trace.write_all(std::format("buffer: {}", (void*)buffer));
-			trace.write_all(std::format("bufferLength: {}", bufferLength));
+			trace.write_all("sharedFileID: {}", sharedFileID);
+			trace.write_all("buffer: {}", (void*)buffer);
+			trace.write_all("bufferLength: {}", bufferLength);
 		}
 
 		intf()->GetSharedFileNameCopy(sharedFileID, buffer, bufferLength);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
+			trace.write_all("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength));
 		}
 	}
 
@@ -249,13 +249,13 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("sharedFileID: {}", sharedFileID));
+			trace.write_all("sharedFileID: {}", sharedFileID);
 		}
 
 		auto result = intf()->GetSharedFileSize(sharedFileID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -265,13 +265,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("sharedFileID: {}", sharedFileID));
+			trace.write_all("sharedFileID: {}", sharedFileID);
 		}
 
 		auto result = intf()->GetSharedFileOwner(sharedFileID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -281,16 +281,16 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("sharedFileID: {}", sharedFileID));
-			trace.write_all(std::format("data: {}", (void*)data));
-			trace.write_all(std::format("dataSize: {}", dataSize));
-			trace.write_all(std::format("offset: {}", offset));
+			trace.write_all("sharedFileID: {}", sharedFileID);
+			trace.write_all("data: {}", (void*)data);
+			trace.write_all("dataSize: {}", dataSize);
+			trace.write_all("offset: {}", offset);
 		}
 
 		auto result = intf()->SharedFileRead(sharedFileID, data, dataSize, offset);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -300,7 +300,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("sharedFileID: {}", sharedFileID));
+			trace.write_all("sharedFileID: {}", sharedFileID);
 		}
 
 		intf()->SharedFileClose(sharedFileID);
@@ -312,7 +312,7 @@ namespace universelan::client {
 		auto result = intf()->GetDownloadedSharedFileCount();
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -322,13 +322,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("index: {}", index));
+			trace.write_all("index: {}", index);
 		}
 
 		auto result = intf()->GetDownloadedSharedFileByIndex(index);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;

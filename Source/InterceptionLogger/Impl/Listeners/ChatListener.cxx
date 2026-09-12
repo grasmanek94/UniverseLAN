@@ -22,8 +22,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("chatRoomID: {}", chatRoomID));
+			trace.write_all("userID: {}", userID);
+			trace.write_all("chatRoomID: {}", chatRoomID);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnChatRoomWithUserRetrieveSuccess(userID, chatRoomID));
@@ -33,8 +33,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("userID: {}", userID);
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnChatRoomWithUserRetrieveFailure(userID, failureReason));
@@ -45,10 +45,10 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("chatRoomID: {}", chatRoomID));
-			trace.write_all(std::format("sentMessageIndex: {}", sentMessageIndex));
-			trace.write_all(std::format("messageID: {}", messageID));
-			trace.write_all(std::format("sendTime: {}", sendTime));
+			trace.write_all("chatRoomID: {}", chatRoomID);
+			trace.write_all("sentMessageIndex: {}", sentMessageIndex);
+			trace.write_all("messageID: {}", messageID);
+			trace.write_all("sendTime: {}", sendTime);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnChatRoomMessageSendSuccess(chatRoomID, sentMessageIndex, messageID, sendTime));
@@ -59,9 +59,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("chatRoomID: {}", chatRoomID));
-			trace.write_all(std::format("sentMessageIndex: {}", sentMessageIndex));
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("chatRoomID: {}", chatRoomID);
+			trace.write_all("sentMessageIndex: {}", sentMessageIndex);
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnChatRoomMessageSendFailure(chatRoomID, sentMessageIndex, failureReason));
@@ -72,9 +72,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("chatRoomID: {}", chatRoomID));
-			trace.write_all(std::format("messageCount: {}", messageCount));
-			trace.write_all(std::format("longestMessageLenght: {}", longestMessageLenght));
+			trace.write_all("chatRoomID: {}", chatRoomID);
+			trace.write_all("messageCount: {}", messageCount);
+			trace.write_all("longestMessageLenght: {}", longestMessageLenght);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnChatRoomMessagesReceived(chatRoomID, messageCount, longestMessageLenght));
@@ -86,9 +86,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("chatRoomID: {}", chatRoomID));
-			trace.write_all(std::format("messageCount: {}", messageCount));
-			trace.write_all(std::format("longestMessageLenght: {}", longestMessageLenght));
+			trace.write_all("chatRoomID: {}", chatRoomID);
+			trace.write_all("messageCount: {}", messageCount);
+			trace.write_all("longestMessageLenght: {}", longestMessageLenght);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnChatRoomMessagesRetrieveSuccess(chatRoomID, messageCount, longestMessageLenght));
@@ -99,8 +99,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("chatRoomID: {}", chatRoomID));
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("chatRoomID: {}", chatRoomID);
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnChatRoomMessagesRetrieveFailure(chatRoomID, failureReason));

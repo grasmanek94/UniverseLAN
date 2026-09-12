@@ -30,10 +30,10 @@ public:
 	virtual void OnTelemetryEventSendSuccess(const char* eventType, uint32_t sentEventIndex) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"eventType: {} sentEventIndex: {}",
 			eventType, sentEventIndex
-		).c_str());
+		);
 
 
 		if (on_telemetry_event_send_success != nullptr) {
@@ -44,10 +44,10 @@ public:
 	virtual void OnTelemetryEventSendFailure(const char* eventType, uint32_t sentEventIndex, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"eventType: {} sentEventIndex: {} failureReason: {}",
 			eventType, sentEventIndex, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_telemetry_event_send_failure != nullptr) {
@@ -82,10 +82,10 @@ public:
 	virtual void OnTelemetryEventSendSuccess(const char* eventType, uint32_t sentEventIndex) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"eventType: {} sentEventIndex: {}",
 			eventType, sentEventIndex
-		).c_str());
+		);
 
 
 		if (on_telemetry_event_send_success != nullptr) {
@@ -96,10 +96,10 @@ public:
 	virtual void OnTelemetryEventSendFailure(const char* eventType, uint32_t sentEventIndex, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"eventType: {} sentEventIndex: {} failureReason: {}",
 			eventType, sentEventIndex, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_telemetry_event_send_failure != nullptr) {
@@ -136,10 +136,10 @@ public:
 	virtual void OnTelemetryEventSendSuccess(const char* eventType, uint32_t sentEventIndex) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"eventType: {} sentEventIndex: {}",
 			eventType, sentEventIndex
-		).c_str());
+		);
 
 
 		if (on_telemetry_event_send_success != nullptr) {
@@ -150,10 +150,10 @@ public:
 	virtual void OnTelemetryEventSendFailure(const char* eventType, uint32_t sentEventIndex, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"eventType: {} sentEventIndex: {} failureReason: {}",
 			eventType, sentEventIndex, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_telemetry_event_send_failure != nullptr) {

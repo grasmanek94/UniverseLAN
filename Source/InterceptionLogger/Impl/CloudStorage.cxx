@@ -37,8 +37,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container));
+			trace.write_all("listener: {}", (void*)listener);
 		}
 
 		intf()->GetFileList(container, CloudStorageGetFileListListener::encapsulate(listener));
@@ -48,13 +48,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("index: {}", index));
+			trace.write_all("index: {}", index);
 		}
 
 		auto result = intf()->GetFileNameByIndex(index);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+			trace.write_all("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result));
 		}
 
 		return result;
@@ -64,13 +64,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("index: {}", index));
+			trace.write_all("index: {}", index);
 		}
 
 		auto result = intf()->GetFileSizeByIndex(index);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -80,13 +80,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("index: {}", index));
+			trace.write_all("index: {}", index);
 		}
 
 		auto result = intf()->GetFileTimestampByIndex(index);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -100,7 +100,7 @@ namespace universelan::client {
 		auto result = intf()->GetFileHashByIndex(index);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+			trace.write_all("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result));
 		}
 
 		return result;
@@ -111,11 +111,11 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
-			trace.write_all(std::format("userParam: {}", userParam));
-			trace.write_all(std::format("writeFunc: {}", (void*)writeFunc));
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
+			trace.write_all("userParam: {}", userParam);
+			trace.write_all("writeFunc: {}", (void*)writeFunc);
+			trace.write_all("listener: {}", (void*)listener);
 		}
 
 		intf()->GetFile(container, name, userParam, writeFunc, CloudStorageGetFileListener::encapsulate(listener));
@@ -125,11 +125,11 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
-			trace.write_all(std::format("buffer: {}", buffer));
-			trace.write_all(std::format("bufferLength: {}", bufferLength));
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
+			trace.write_all("buffer: {}", buffer);
+			trace.write_all("bufferLength: {}", bufferLength);
+			trace.write_all("listener: {}", (void*)listener);
 		}
 
 		intf()->GetFile(container, name, buffer, bufferLength, CloudStorageGetFileListener::encapsulate(listener));
@@ -139,9 +139,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
+			trace.write_all("listener: {}", (void*)listener);
 		}
 
 		intf()->GetFileMetadata(container, name, CloudStorageGetFileListener::encapsulate(listener));
@@ -152,13 +152,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("index: {}", index));
+			trace.write_all("index: {}", index);
 		}
 
 		auto result = intf()->GetFileMetadataKeyByIndex(index);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+			trace.write_all("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result));
 		}
 
 		return result;
@@ -168,13 +168,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("index: {}", index));
+			trace.write_all("index: {}", index);
 		}
 
 		auto result = intf()->GetFileMetadataValueByIndex(index);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+			trace.write_all("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result));
 		}
 
 		return result;
@@ -194,23 +194,23 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
-			trace.write_all(std::format("userParam: {}", userParam));
-			trace.write_all(std::format("readFunc: {}", (void*)readFunc));
-			trace.write_all(std::format("rewindFunc: {}", (void*)rewindFunc));
-			trace.write_all(std::format("listener: {}", (void*)listener));
-			trace.write_all(std::format("metadataKeys: {}", (void*)metadataKeys));
-			trace.write_all(std::format("metadataValues: {}", (void*)metadataValues));
-			trace.write_all(std::format("timeStamp: {}", timeStamp));
+			trace.write_all("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
+			trace.write_all("userParam: {}", userParam);
+			trace.write_all("readFunc: {}", (void*)readFunc);
+			trace.write_all("rewindFunc: {}", (void*)rewindFunc);
+			trace.write_all("listener: {}", (void*)listener);
+			trace.write_all("metadataKeys: {}", (void*)metadataKeys);
+			trace.write_all("metadataValues: {}", (void*)metadataValues);
+			trace.write_all("timeStamp: {}", timeStamp);
 
 			if (metadataKeys != nullptr && metadataValues != nullptr) {
 				int index = 0;
 				while (metadataKeys[index] && metadataValues[index]) {
-					trace.write_all(std::format("[METADATA] {}: {}",
+					trace.write_all("[METADATA] {}: {}",
 						util::safe_fix_null_char_ptr_annotate_ret(metadataKeys[index]),
 						util::safe_fix_null_char_ptr_annotate_ret(metadataValues[index])
-					));
+					);
 					++index;
 				}	
 			}
@@ -236,22 +236,22 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
-			trace.write_all(std::format("buffer: {}", buffer));
-			trace.write_all(std::format("bufferLength: {}", bufferLength));
-			trace.write_all(std::format("listener: {}", (void*)listener));
-			trace.write_all(std::format("metadataKeys: {}", (void*)metadataKeys));
-			trace.write_all(std::format("metadataValues: {}", (void*)metadataValues));
-			trace.write_all(std::format("timeStamp: {}", timeStamp));
+			trace.write_all("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
+			trace.write_all("buffer: {}", buffer);
+			trace.write_all("bufferLength: {}", bufferLength);
+			trace.write_all("listener: {}", (void*)listener);
+			trace.write_all("metadataKeys: {}", (void*)metadataKeys);
+			trace.write_all("metadataValues: {}", (void*)metadataValues);
+			trace.write_all("timeStamp: {}", timeStamp);
 
 			if (metadataKeys != nullptr && metadataValues != nullptr) {
 				int index = 0;
 				while (metadataKeys[index] && metadataValues[index]) {
-					trace.write_all(std::format("[METADATA] {}: {}",
+					trace.write_all("[METADATA] {}: {}",
 						util::safe_fix_null_char_ptr_annotate_ret(metadataKeys[index]),
 						util::safe_fix_null_char_ptr_annotate_ret(metadataValues[index])
-					));
+					);
 					++index;
 				}
 			}
@@ -301,11 +301,11 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
+			trace.write_all("listener: {}", (void*)listener);
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
-			trace.write_all(std::format("expectedHash: {}", util::safe_fix_null_char_ptr_annotate_ret(expectedHash)));
+			trace.write_all("expectedHash: {}", util::safe_fix_null_char_ptr_annotate_ret(expectedHash));
 #endif	
 		}
 
@@ -323,16 +323,16 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
-			trace.write_all(std::format("userParam: {}", userParam));
-			trace.write_all(std::format("readFunc: {}", (void*)readFunc));
-			trace.write_all(std::format("rewindFunc: {}", (void*)rewindFunc));
-			trace.write_all(std::format("listener: {}", (void*)listener));
-			trace.write_all(std::format("savegameType: {}", magic_enum::enum_name(savegameType)));
-			trace.write_all(std::format("timeStamp: {}", timeStamp));
+			trace.write_all("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
+			trace.write_all("userParam: {}", userParam);
+			trace.write_all("readFunc: {}", (void*)readFunc);
+			trace.write_all("rewindFunc: {}", (void*)rewindFunc);
+			trace.write_all("listener: {}", (void*)listener);
+			trace.write_all("savegameType: {}", magic_enum::enum_name(savegameType));
+			trace.write_all("timeStamp: {}", timeStamp);
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
-			trace.write_all(std::format("hash: {}", util::safe_fix_null_char_ptr_annotate_ret(hash)));
+			trace.write_all("hash: {}", util::safe_fix_null_char_ptr_annotate_ret(hash));
 #endif	
 		}
 
@@ -352,15 +352,15 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
-			trace.write_all(std::format("buffer: {}", buffer));
-			trace.write_all(std::format("bufferLength: {}", bufferLength));
-			trace.write_all(std::format("listener: {}", (void*)listener));
-			trace.write_all(std::format("savegameType: {}", magic_enum::enum_name(savegameType)));
-			trace.write_all(std::format("timeStamp: {}", timeStamp));
+			trace.write_all("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
+			trace.write_all("buffer: {}", buffer);
+			trace.write_all("bufferLength: {}", bufferLength);
+			trace.write_all("listener: {}", (void*)listener);
+			trace.write_all("savegameType: {}", magic_enum::enum_name(savegameType));
+			trace.write_all("timeStamp: {}", timeStamp);
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
-			trace.write_all(std::format("hash: {}", util::safe_fix_null_char_ptr_annotate_ret(hash)));
+			trace.write_all("hash: {}", util::safe_fix_null_char_ptr_annotate_ret(hash));
 #endif	
 		}
 
@@ -391,17 +391,17 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userParam: {}", userParam));
-			trace.write_all(std::format("readFunc: {}", (void*)readFunc));
-			trace.write_all(std::format("rewindFunc: {}", (void*)rewindFunc));
-			trace.write_all(std::format("hashBuffer: {}", (void*)hashBuffer));
-			trace.write_all(std::format("hashBufferSize: {}", hashBufferSize));
+			trace.write_all("userParam: {}", userParam);
+			trace.write_all("readFunc: {}", (void*)readFunc);
+			trace.write_all("rewindFunc: {}", (void*)rewindFunc);
+			trace.write_all("hashBuffer: {}", (void*)hashBuffer);
+			trace.write_all("hashBufferSize: {}", hashBufferSize);
 		}
 
 		intf()->CalculateHash(userParam, readFunc, rewindFunc, hashBuffer, hashBufferSize);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("hashBuffer: {}", util::safe_fix_null_char_ptr_annotate(hashBuffer, hashBufferSize)));
+			trace.write_all("hashBuffer: {}", util::safe_fix_null_char_ptr_annotate(hashBuffer, hashBufferSize));
 		}
 	}
 
@@ -409,16 +409,16 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("buffer: {}", (void*)buffer));
-			trace.write_all(std::format("bufferLength: {}", bufferLength));
-			trace.write_all(std::format("hashBuffer: {}", (void*)hashBuffer));
-			trace.write_all(std::format("hashBufferSize: {}", hashBufferSize));
+			trace.write_all("buffer: {}", (void*)buffer);
+			trace.write_all("bufferLength: {}", bufferLength);
+			trace.write_all("hashBuffer: {}", (void*)hashBuffer);
+			trace.write_all("hashBufferSize: {}", hashBufferSize);
 		}
 
 		intf()->CalculateHash(buffer, bufferLength, hashBuffer, hashBufferSize);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("hashBuffer: {}", util::safe_fix_null_char_ptr_annotate(hashBuffer, hashBufferSize)));
+			trace.write_all("hashBuffer: {}", util::safe_fix_null_char_ptr_annotate(hashBuffer, hashBufferSize));
 		}
 	}
 #endif

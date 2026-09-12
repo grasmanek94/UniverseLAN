@@ -25,10 +25,10 @@ public:
 	virtual void OnConnectionDataReceived(ConnectionID connectionID, uint32_t dataSize) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"connectionID: {} dataSize: {}",
 			connectionID, dataSize
-		).c_str());
+		);
 
 
 		if (on_connection_data_received != nullptr) {
@@ -59,10 +59,10 @@ public:
 	virtual void OnConnectionDataReceived(ConnectionID connectionID, uint32_t dataSize) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"connectionID: {} dataSize: {}",
 			connectionID, dataSize
-		).c_str());
+		);
 
 
 		if (on_connection_data_received != nullptr) {

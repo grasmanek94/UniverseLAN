@@ -26,10 +26,10 @@ public:
 	virtual void OnConnectionStateChange(GogServicesConnectionState connectionState) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"connectionState: {}",
 			magic_enum::enum_name(connectionState)
-		).c_str());
+		);
 
 
 		if (on_connection_state_change != nullptr) {
@@ -60,10 +60,10 @@ public:
 	virtual void OnConnectionStateChange(GogServicesConnectionState connectionState) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"connectionState: {}",
 			magic_enum::enum_name(connectionState)
-		).c_str());
+		);
 
 
 		if (on_connection_state_change != nullptr) {
@@ -96,10 +96,10 @@ public:
 	virtual void OnConnectionStateChange(GogServicesConnectionState connectionState) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"connectionState: {}",
 			magic_enum::enum_name(connectionState)
-		).c_str());
+		);
 
 
 		if (on_connection_state_change != nullptr) {

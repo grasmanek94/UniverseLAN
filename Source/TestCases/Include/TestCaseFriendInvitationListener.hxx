@@ -26,10 +26,10 @@ public:
 	virtual void OnFriendInvitationReceived(GalaxyID userID, uint32_t sendTime) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {} sendTime: {}",
 			userID, sendTime
-		).c_str());
+		);
 
 
 		if (on_friend_invitation_received != nullptr) {
@@ -60,10 +60,10 @@ public:
 	virtual void OnFriendInvitationReceived(GalaxyID userID, uint32_t sendTime) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {} sendTime: {}",
 			userID, sendTime
-		).c_str());
+		);
 
 
 		if (on_friend_invitation_received != nullptr) {

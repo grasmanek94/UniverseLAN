@@ -29,10 +29,10 @@ public:
 	virtual void OnLobbyDataRetrieveSuccess(const GalaxyID& lobbyID) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {}",
 			lobbyID
-		).c_str());
+		);
 
 
 		if (on_lobby_data_retrieve_success != nullptr) {
@@ -43,10 +43,10 @@ public:
 	virtual void OnLobbyDataRetrieveFailure(const GalaxyID& lobbyID, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} failureReason: {}",
 			lobbyID, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_lobby_data_retrieve_failure != nullptr) {
@@ -81,10 +81,10 @@ public:
 	virtual void OnLobbyDataRetrieveSuccess(const GalaxyID& lobbyID) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {}",
 			lobbyID
-		).c_str());
+		);
 
 
 		if (on_lobby_data_retrieve_success != nullptr) {
@@ -95,10 +95,10 @@ public:
 	virtual void OnLobbyDataRetrieveFailure(const GalaxyID& lobbyID, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} failureReason: {}",
 			lobbyID, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_lobby_data_retrieve_failure != nullptr) {
@@ -136,10 +136,10 @@ public:
 	virtual void OnLobbyDataRetrieveSuccess(const GalaxyID& lobbyID) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {}",
 			lobbyID
-		).c_str());
+		);
 
 
 		if (on_lobby_data_retrieve_success != nullptr) {
@@ -150,10 +150,10 @@ public:
 	virtual void OnLobbyDataRetrieveFailure(const GalaxyID& lobbyID, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} failureReason: {}",
 			lobbyID, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_lobby_data_retrieve_failure != nullptr) {

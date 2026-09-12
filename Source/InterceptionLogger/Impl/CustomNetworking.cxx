@@ -40,9 +40,9 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("connectionString: {}", util::safe_fix_null_char_ptr_annotate_ret(connectionString)));
+			trace.write_all("connectionString: {}", util::safe_fix_null_char_ptr_annotate_ret(connectionString));
 #if GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -61,9 +61,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("connectionID: {}", connectionID));
+			trace.write_all("connectionID: {}", connectionID);
 #if GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -78,9 +78,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("connectionID: {}", connectionID));
-			trace.write_all(std::format("data: {}", (void*)data));
-			trace.write_all(std::format("dataSize: {}", dataSize));
+			trace.write_all("connectionID: {}", connectionID);
+			trace.write_all("data: {}", (void*)data);
+			trace.write_all("dataSize: {}", dataSize);
 		}
 
 		intf()->SendData(connectionID, data, dataSize);
@@ -90,13 +90,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("connectionID: {}", connectionID));
+			trace.write_all("connectionID: {}", connectionID);
 		}
 
 		auto result = intf()->GetAvailableDataSize(connectionID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -106,9 +106,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("connectionID: {}", connectionID));
-			trace.write_all(std::format("dest: {}", dest));
-			trace.write_all(std::format("dataSize: {}", dataSize));
+			trace.write_all("connectionID: {}", connectionID);
+			trace.write_all("dest: {}", dest);
+			trace.write_all("dataSize: {}", dataSize);
 		}
 
 		intf()->PeekData(connectionID, dest, dataSize);
@@ -118,9 +118,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("connectionID: {}", connectionID));
-			trace.write_all(std::format("dest: {}", dest));
-			trace.write_all(std::format("dataSize: {}", dataSize));
+			trace.write_all("connectionID: {}", connectionID);
+			trace.write_all("dest: {}", dest);
+			trace.write_all("dataSize: {}", dataSize);
 		}
 
 		intf()->ReadData(connectionID, dest, dataSize);
@@ -130,8 +130,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("connectionID: {}", connectionID));
-			trace.write_all(std::format("dataSize: {}", dataSize));
+			trace.write_all("connectionID: {}", connectionID);
+			trace.write_all("dataSize: {}", dataSize);
 		}
 
 		intf()->PopData(connectionID, dataSize);

@@ -26,15 +26,9 @@ void perform_test() {
 	auto gudc = 0; //user_ptr->GetUserDataCount();
 
 	tracer::Trace::write_all(
-		std::format(
-			"SignedIn: {} IsLoggedOn: {} GetAccessToken: {} GetGalaxyID: {} IsUserDataAvailable: {} GetUserDataCount: {}",
-			si,
-			lo,
-			access_token,
-			gid,
-			iuda,
-			gudc
-		).c_str());
+		"SignedIn: {} IsLoggedOn: {} GetAccessToken: {} GetGalaxyID: {} IsUserDataAvailable: {} GetUserDataCount: {}",
+		si, lo, access_token, gid, iuda, gudc
+	);
 }
 
 void register_listeners() {}

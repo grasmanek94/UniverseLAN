@@ -24,10 +24,10 @@ public:
 	virtual void OnLobbyEntered(const GalaxyID& lobbyID, LobbyEnterResult result) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} result: {}",
 			lobbyID, magic_enum::enum_name(result)
-		).c_str());
+		);
 
 
 		if (on_lobby_entered != nullptr) {
@@ -58,10 +58,10 @@ public:
 	virtual void OnLobbyEntered(const GalaxyID& lobbyID, LobbyEnterResult result) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} result: {}",
 			lobbyID, magic_enum::enum_name(result)
-		).c_str());
+		);
 
 
 		if (on_lobby_entered != nullptr) {
@@ -94,10 +94,10 @@ public:
 	virtual void OnLobbyEntered(const GalaxyID& lobbyID, LobbyEnterResult result) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} result: {}",
 			lobbyID, magic_enum::enum_name(result)
-		).c_str());
+		);
 
 
 		if (on_lobby_entered != nullptr) {

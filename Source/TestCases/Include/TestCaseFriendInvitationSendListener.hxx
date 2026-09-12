@@ -30,10 +30,10 @@ public:
 	virtual void OnFriendInvitationSendSuccess(GalaxyID userID) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {}",
 			userID
-		).c_str());
+		);
 
 
 		if (on_friend_invitation_send_success != nullptr) {
@@ -44,10 +44,10 @@ public:
 	virtual void OnFriendInvitationSendFailure(GalaxyID userID, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {} failureReason: {}",
 			userID, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_friend_invitation_send_failure != nullptr) {
@@ -82,10 +82,10 @@ public:
 	virtual void OnFriendInvitationSendSuccess(GalaxyID userID) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {}",
 			userID
-		).c_str());
+		);
 
 
 		if (on_friend_invitation_send_success != nullptr) {
@@ -96,10 +96,10 @@ public:
 	virtual void OnFriendInvitationSendFailure(GalaxyID userID, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {} failureReason: {}",
 			userID, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_friend_invitation_send_failure != nullptr) {

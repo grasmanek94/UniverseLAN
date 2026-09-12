@@ -25,10 +25,10 @@ public:
 	virtual void OnOperationalStateChanged(uint32_t operationalState) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"operationalState: {}",
 			operationalState
-		).c_str());
+		);
 
 
 		if (on_operational_state_changed != nullptr) {
@@ -59,10 +59,10 @@ public:
 	virtual void OnOperationalStateChanged(uint32_t operationalState) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"operationalState: {}",
 			operationalState
-		).c_str());
+		);
 
 
 		if (on_operational_state_changed != nullptr) {
@@ -95,10 +95,10 @@ public:
 	virtual void OnOperationalStateChanged(uint32_t operationalState) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"operationalState: {}",
 			operationalState
-		).c_str());
+		);
 
 
 		if (on_operational_state_changed != nullptr) {

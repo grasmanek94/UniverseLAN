@@ -34,8 +34,8 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
-			trace.write_all(std::format("value: {}", util::safe_fix_null_char_ptr_annotate_ret(value)));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
+			trace.write_all("value: {}", util::safe_fix_null_char_ptr_annotate_ret(value));
 		}
 
 		intf()->AddStringParam(name, value);
@@ -45,8 +45,8 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
-			trace.write_all(std::format("value: {}", value));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
+			trace.write_all("value: {}", value);
 		}
 
 		intf()->AddIntParam(name, value);
@@ -56,8 +56,8 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
-			trace.write_all(std::format("value: {}", value));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
+			trace.write_all("value: {}", value);
 		}
 
 		intf()->AddFloatParam(name, value);
@@ -67,8 +67,8 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
-			trace.write_all(std::format("value: {}", value));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
+			trace.write_all("value: {}", value);
 		}
 
 		intf()->AddBoolParam(name, value);
@@ -78,7 +78,7 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
 		}
 
 		intf()->AddObjectParam(name);
@@ -88,7 +88,7 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
 		}
 
 		intf()->AddArrayParam(name);
@@ -111,7 +111,7 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
 		}
 
 		intf()->SetSamplingClass(name);
@@ -122,14 +122,14 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("eventType: {}", util::safe_fix_null_char_ptr_annotate_ret(eventType)));
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("eventType: {}", util::safe_fix_null_char_ptr_annotate_ret(eventType));
+			trace.write_all("listener: {}", (void*)listener);
 		}
 
 		auto result = intf()->SendTelemetryEvent(eventType, TelemetryEventSendListener::encapsulate(listener));
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -140,14 +140,14 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("eventType: {}", util::safe_fix_null_char_ptr_annotate_ret(eventType)));
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("eventType: {}", util::safe_fix_null_char_ptr_annotate_ret(eventType));
+			trace.write_all("listener: {}", (void*)listener);
 		}
 
 		auto result = intf()->SendAnonymousTelemetryEvent(eventType, TelemetryEventSendListener::encapsulate(listener));
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -161,7 +161,7 @@ namespace universelan::client {
 		auto result = intf()->GetVisitID();
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+			trace.write_all("result: {}", util::safe_fix_null_char_ptr_annotate_ret(result));
 		}
 
 		return result;
@@ -171,14 +171,14 @@ namespace universelan::client {
 		tracer::Trace trace { nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("buffer: {}", (void*)buffer));
-			trace.write_all(std::format("bufferLength: {}", bufferLength));
+			trace.write_all("buffer: {}", (void*)buffer);
+			trace.write_all("bufferLength: {}", bufferLength);
 		}
 
 		intf()->GetVisitIDCopy(buffer, bufferLength);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
+			trace.write_all("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength));
 		}
 	}
 

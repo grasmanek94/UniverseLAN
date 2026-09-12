@@ -30,10 +30,10 @@ public:
 	virtual void OnNatTypeDetectionSuccess(NatType natType) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"natType: {}",
 			magic_enum::enum_name(natType)
-		).c_str());
+		);
 
 
 		if (on_nat_type_detection_success != nullptr) {
@@ -77,10 +77,10 @@ public:
 	virtual void OnNatTypeDetectionSuccess(NatType natType) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"natType: {}",
 			magic_enum::enum_name(natType)
-		).c_str());
+		);
 
 
 		if (on_nat_type_detection_success != nullptr) {
@@ -126,10 +126,10 @@ public:
 	virtual void OnNatTypeDetectionSuccess(NatType natType) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"natType: {}",
 			magic_enum::enum_name(natType)
-		).c_str());
+		);
 
 
 		if (on_nat_type_detection_success != nullptr) {

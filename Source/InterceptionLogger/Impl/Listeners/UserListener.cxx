@@ -34,7 +34,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnAuthFailure(failureReason));
@@ -60,8 +60,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("operationalState: {}({})", operationalState,
-				magic_enum::enum_flags_name((OperationalState)operationalState)));
+			trace.write_all("operationalState: {}({})", operationalState,
+				magic_enum::enum_flags_name((OperationalState)operationalState));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnOperationalStateChanged(operationalState));
@@ -79,7 +79,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all("userID: {}", userID);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnSpecificUserDataUpdated(userID));
@@ -99,7 +99,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnEncryptedAppTicketRetrieveFailure(failureReason));
@@ -121,7 +121,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("connectionAlreadyExists: {}", connectionAlreadyExists));
+			trace.write_all("connectionAlreadyExists: {}", connectionAlreadyExists);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnPlayFabCreateOpenIDConnectionSuccess(connectionAlreadyExists));
@@ -132,7 +132,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnPlayFabCreateOpenIDConnectionFailure(failureReason));
@@ -150,7 +150,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnPlayFabLoginWithOpenIDConnectFailure(failureReason));

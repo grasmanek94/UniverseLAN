@@ -24,10 +24,10 @@ public:
 	virtual void OnLobbyOwnerChanged(const GalaxyID& lobbyID, const GalaxyID& newOwnerID) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} newOwnerID: {}",
 			lobbyID, newOwnerID
-		).c_str());
+		);
 
 
 		if (on_lobby_owner_changed != nullptr) {
@@ -58,10 +58,10 @@ public:
 	virtual void OnLobbyOwnerChanged(const GalaxyID& lobbyID, const GalaxyID& newOwnerID) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} newOwnerID: {}",
 			lobbyID, newOwnerID
-		).c_str());
+		);
 
 
 		if (on_lobby_owner_changed != nullptr) {

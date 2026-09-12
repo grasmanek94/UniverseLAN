@@ -26,10 +26,10 @@ public:
 	virtual void OnFriendAdded(GalaxyID userID, InvitationDirection invitationDirection) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {} invitationDirection: {}",
 			userID, magic_enum::enum_name(invitationDirection)
-		).c_str());
+		);
 
 
 		if (on_friend_added != nullptr) {
@@ -60,10 +60,10 @@ public:
 	virtual void OnFriendAdded(GalaxyID userID, InvitationDirection invitationDirection) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {} invitationDirection: {}",
 			userID, magic_enum::enum_name(invitationDirection)
-		).c_str());
+		);
 
 
 		if (on_friend_added != nullptr) {

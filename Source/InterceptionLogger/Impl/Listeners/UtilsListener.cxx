@@ -24,7 +24,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("overlayVisible: {}", overlayVisible));
+			trace.write_all("overlayVisible: {}", overlayVisible);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnOverlayVisibilityChanged(overlayVisible));
@@ -35,7 +35,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("overlayState: {}", magic_enum::enum_name(overlayState)));
+			trace.write_all("overlayState: {}", magic_enum::enum_name(overlayState));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnOverlayStateChanged(overlayState));
@@ -48,9 +48,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("notificationID: {}", notificationID));
-			trace.write_all(std::format("typeLength: {}", typeLength));
-			trace.write_all(std::format("contentSize: {}", contentSize));
+			trace.write_all("notificationID: {}", notificationID);
+			trace.write_all("typeLength: {}", typeLength);
+			trace.write_all("contentSize: {}", contentSize);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnNotificationReceived(notificationID, typeLength, contentSize));
@@ -63,7 +63,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("connectionState: {}", magic_enum::enum_name(connectionState)));
+			trace.write_all("connectionState: {}", magic_enum::enum_name(connectionState));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnConnectionStateChange(connectionState));

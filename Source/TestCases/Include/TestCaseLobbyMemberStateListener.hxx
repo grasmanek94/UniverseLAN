@@ -24,10 +24,10 @@ public:
 	virtual void OnLobbyMemberStateChanged(const GalaxyID& lobbyID, const GalaxyID& memberID, LobbyMemberStateChange memberStateChange) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} memberID: {} memberStateChange: {}",
 			lobbyID, memberID, magic_enum::enum_name(memberStateChange)
-		).c_str());
+		);
 
 
 		if (on_lobby_member_state_changed != nullptr) {
@@ -58,10 +58,10 @@ public:
 	virtual void OnLobbyMemberStateChanged(const GalaxyID& lobbyID, const GalaxyID& memberID, LobbyMemberStateChange memberStateChange) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} memberID: {} memberStateChange: {}",
 			lobbyID, memberID, magic_enum::enum_name(memberStateChange)
-		).c_str());
+		);
 
 
 		if (on_lobby_member_state_changed != nullptr) {
@@ -94,10 +94,10 @@ public:
 	virtual void OnLobbyMemberStateChanged(const GalaxyID& lobbyID, const GalaxyID& memberID, LobbyMemberStateChange memberStateChange) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} memberID: {} memberStateChange: {}",
 			lobbyID, memberID, magic_enum::enum_name(memberStateChange)
-		).c_str());
+		);
 
 
 		if (on_lobby_member_state_changed != nullptr) {

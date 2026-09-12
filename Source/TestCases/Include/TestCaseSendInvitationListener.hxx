@@ -30,10 +30,10 @@ public:
 	virtual void OnInvitationSendSuccess(GalaxyID userID, const char* connectionString) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {} connectionString: {}",
 			userID, connectionString
-		).c_str());
+		);
 
 
 		if (on_invitation_send_success != nullptr) {
@@ -44,10 +44,10 @@ public:
 	virtual void OnInvitationSendFailure(GalaxyID userID, const char* connectionString, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {} connectionString: {} failureReason: {}",
 			userID, connectionString, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_invitation_send_failure != nullptr) {
@@ -82,10 +82,10 @@ public:
 	virtual void OnInvitationSendSuccess(GalaxyID userID, const char* connectionString) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {} connectionString: {}",
 			userID, connectionString
-		).c_str());
+		);
 
 
 		if (on_invitation_send_success != nullptr) {
@@ -96,10 +96,10 @@ public:
 	virtual void OnInvitationSendFailure(GalaxyID userID, const char* connectionString, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {} connectionString: {} failureReason: {}",
 			userID, connectionString, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_invitation_send_failure != nullptr) {

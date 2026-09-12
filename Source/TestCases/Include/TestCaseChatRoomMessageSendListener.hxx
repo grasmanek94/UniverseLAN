@@ -30,10 +30,10 @@ public:
 	virtual void OnChatRoomMessageSendSuccess(ChatRoomID chatRoomID, uint32_t sentMessageIndex, ChatMessageID messageID, uint32_t sendTime) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"chatRoomID: {} sentMessageIndex: {} messageID:{} sendTime: {}",
 			chatRoomID, sentMessageIndex, messageID, sendTime
-		).c_str());
+		);
 
 		if (on_chat_room_message_send_success != nullptr) {
 			on_chat_room_message_send_success(chatRoomID, sentMessageIndex, messageID, sendTime);
@@ -43,10 +43,10 @@ public:
 	virtual void OnChatRoomMessageSendFailure(ChatRoomID chatRoomID, uint32_t sentMessageIndex, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"chatRoomID: {} sentMessageIndex: {} failureReason: {}",
 			chatRoomID, sentMessageIndex, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 		if (on_chat_room_message_send_failure != nullptr) {
 			on_chat_room_message_send_failure(chatRoomID, sentMessageIndex, failureReason);
@@ -80,10 +80,10 @@ public:
 	virtual void OnChatRoomMessageSendSuccess(ChatRoomID chatRoomID, uint32_t sentMessageIndex, ChatMessageID messageID, uint32_t sendTime) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"chatRoomID: {} sentMessageIndex: {} messageID:{} sendTime: {}",
 			chatRoomID, sentMessageIndex, messageID, sendTime
-		).c_str());
+		);
 
 		if (on_chat_room_message_send_success != nullptr) {
 			on_chat_room_message_send_success(chatRoomID, sentMessageIndex, messageID, sendTime);
@@ -93,10 +93,10 @@ public:
 	virtual void OnChatRoomMessageSendFailure(ChatRoomID chatRoomID, uint32_t sentMessageIndex, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"chatRoomID: {} sentMessageIndex: {} failureReason: {}",
 			chatRoomID, sentMessageIndex, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 		if (on_chat_room_message_send_failure != nullptr) {
 			on_chat_room_message_send_failure(chatRoomID, sentMessageIndex, failureReason);

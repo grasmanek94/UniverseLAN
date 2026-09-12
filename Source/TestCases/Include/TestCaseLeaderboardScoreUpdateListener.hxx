@@ -28,10 +28,10 @@ public:
 	virtual void OnLeaderboardScoreUpdateSuccess(const char* name, int32_t score, uint32_t oldRank, uint32_t newRank) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"name: {} score: {} oldRank: {} newRank: {}",
 			name, score, oldRank, newRank
-		).c_str());
+		);
 
 
 		if (on_leaderboard_score_update_success != nullptr) {
@@ -42,10 +42,10 @@ public:
 	virtual void OnLeaderboardScoreUpdateFailure(const char* name, int32_t score, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"name: {} score: {} failureReason: {}",
 			name, score, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_leaderboard_score_update_failure != nullptr) {
@@ -80,10 +80,10 @@ public:
 	virtual void OnLeaderboardScoreUpdateSuccess(const char* name, int32_t score, uint32_t oldRank, uint32_t newRank) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"name: {} score: {} oldRank: {} newRank: {}",
 			name, score, oldRank, newRank
-		).c_str());
+		);
 
 
 		if (on_leaderboard_score_update_success != nullptr) {
@@ -94,10 +94,10 @@ public:
 	virtual void OnLeaderboardScoreUpdateFailure(const char* name, int32_t score, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"name: {} score: {} failureReason: {}",
 			name, score, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_leaderboard_score_update_failure != nullptr) {

@@ -36,15 +36,15 @@ public:
 	) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 #if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LIST_RESULT
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyCount: {} result: {}",
 			lobbyCount, magic_enum::enum_name(result)
-		).c_str());
+		);
 #else
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyCount: {} ioFailure: {}",
 			lobbyCount, ioFailure
-		).c_str());
+		);
 #endif
 
 
@@ -94,15 +94,15 @@ public:
 	) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 #if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LIST_RESULT
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyCount: {} result: {}",
 			lobbyCount, magic_enum::enum_name(result)
-		).c_str());
+		);
 #else
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyCount: {} ioFailure: {}",
 			lobbyCount, ioFailure
-		).c_str());
+		);
 #endif
 
 

@@ -43,14 +43,14 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("imageID: {}", imageID));
+			trace.write_all("imageID: {}", imageID);
 		}
 
 		intf()->GetImageSize(imageID, width, height);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("width: {}", width));
-			trace.write_all(std::format("height: {}", height));
+			trace.write_all("width: {}", width);
+			trace.write_all("height: {}", height);
 		}
 	}
 
@@ -58,9 +58,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("imageID: {}", imageID));
-			trace.write_all(std::format("buffer: {}", (void*)buffer));
-			trace.write_all(std::format("bufferLength: {}", bufferLength));
+			trace.write_all("imageID: {}", imageID);
+			trace.write_all("buffer: {}", (void*)buffer);
+			trace.write_all("bufferLength: {}", bufferLength);
 		}
 
 		intf()->GetImageRGBA(imageID, buffer, bufferLength);
@@ -71,7 +71,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("type: {}", util::safe_fix_null_char_ptr_annotate_ret(type)));
+			trace.write_all("type: {}", util::safe_fix_null_char_ptr_annotate_ret(type));
 		}
 
 		intf()->RegisterForNotification(type);
@@ -85,11 +85,11 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("notificationID: {}", notificationID));
-			trace.write_all(std::format("type: {}", (void*)type));
-			trace.write_all(std::format("typeLength: {}", typeLength));
-			trace.write_all(std::format("content: {}", (void*)content));
-			trace.write_all(std::format("contentSize: {}", contentSize));
+			trace.write_all("notificationID: {}", notificationID);
+			trace.write_all("type: {}", (void*)type);
+			trace.write_all("typeLength: {}", typeLength);
+			trace.write_all("content: {}", (void*)content);
+			trace.write_all("contentSize: {}", contentSize);
 		}
 
 		auto result = intf()->GetNotification(notificationID
@@ -101,10 +101,10 @@ namespace universelan::client {
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 #if GALAXY_BUILD_FEATURE_IUTILS_GETNOTIFICATION_1_129_CHANGE
-			trace.write_all(std::format("consumable: {}", consumable));
+			trace.write_all("consumable: {}", consumable);
 #endif
-			trace.write_all(std::format("type: {}", util::safe_fix_null_char_ptr_annotate(type, typeLength)));
-			trace.write_all(std::format("content: {}", util::safe_fix_null_char_ptr_annotate((const char*)content, contentSize)));
+			trace.write_all("type: {}", util::safe_fix_null_char_ptr_annotate(type, typeLength));
+			trace.write_all("content: {}", util::safe_fix_null_char_ptr_annotate((const char*)content, contentSize));
 		}
 
 		return result;
@@ -116,7 +116,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("url: {}", util::safe_fix_null_char_ptr_annotate_ret(url)));
+			trace.write_all("url: {}", util::safe_fix_null_char_ptr_annotate_ret(url));
 		}
 
 		intf()->ShowOverlayWithWebPage(url);
@@ -130,7 +130,7 @@ namespace universelan::client {
 		auto result = intf()->IsOverlayVisible();
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -142,7 +142,7 @@ namespace universelan::client {
 		auto result = intf()->GetOverlayState();
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));
+			trace.write_all("result: {}", magic_enum::enum_name(result));
 		}
 
 		return result;
@@ -154,7 +154,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("popupGroup: {}", util::safe_fix_null_char_ptr_annotate_ret(popupGroup)));
+			trace.write_all("popupGroup: {}", util::safe_fix_null_char_ptr_annotate_ret(popupGroup));
 		}
 
 		intf()->DisableOverlayPopups(popupGroup);
@@ -168,7 +168,7 @@ namespace universelan::client {
 		auto result = intf()->GetGogServicesConnectionState();
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", magic_enum::enum_name(result)));
+			trace.write_all("result: {}", magic_enum::enum_name(result));
 		}
 
 		return result;

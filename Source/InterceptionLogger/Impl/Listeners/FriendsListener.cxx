@@ -30,9 +30,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("personaStateChange: {}({})", personaStateChange,
-				magic_enum::enum_flags_name((PersonaStateChange)personaStateChange)));
+			trace.write_all("userID: {}", userID);
+			trace.write_all("personaStateChange: {}({})", personaStateChange,
+				magic_enum::enum_flags_name((PersonaStateChange)personaStateChange));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnPersonaDataChanged(userID, personaStateChange));
@@ -45,7 +45,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all("userID: {}", userID);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnUserInformationRetrieveSuccess(userID));
@@ -56,8 +56,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("userID: {}", userID);
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnUserInformationRetrieveFailure(userID, failureReason));
@@ -77,7 +77,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnFriendListRetrieveFailure(failureReason));
@@ -90,7 +90,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all("userID: {}", userID);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnFriendInvitationSendSuccess(userID));
@@ -101,8 +101,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("userID: {}", userID);
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnFriendInvitationSendFailure(userID, failureReason));
@@ -120,7 +120,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnFriendInvitationListRetrieveFailure(failureReason));
@@ -131,8 +131,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("sendTime: {}", sendTime));
+			trace.write_all("userID: {}", userID);
+			trace.write_all("sendTime: {}", sendTime);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnFriendInvitationReceived(userID, sendTime));
@@ -143,8 +143,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("accept: {}", accept));
+			trace.write_all("userID: {}", userID);
+			trace.write_all("accept: {}", accept);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnFriendInvitationRespondToSuccess(userID, accept));
@@ -155,8 +155,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("userID: {}", userID);
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnFriendInvitationRespondToFailure(userID, failureReason));
@@ -167,7 +167,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all("userID: {}", userID);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnFriendDeleteSuccess(userID));
@@ -178,8 +178,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("userID: {}", userID);
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnFriendDeleteFailure(userID, failureReason));
@@ -200,7 +200,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnSentFriendInvitationListRetrieveFailure(failureReason));
@@ -213,8 +213,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("invitationDirection: {}", magic_enum::enum_name(invitationDirection)));
+			trace.write_all("userID: {}", userID);
+			trace.write_all("invitationDirection: {}", magic_enum::enum_name(invitationDirection));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnFriendAdded(userID, invitationDirection));
@@ -234,7 +234,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnRichPresenceChangeFailure(failureReason));
@@ -247,7 +247,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all("userID: {}", userID);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnRichPresenceUpdated(userID));
@@ -260,7 +260,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all("userID: {}", userID);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnRichPresenceRetrieveSuccess(userID));
@@ -271,8 +271,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("userID: {}", userID);
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnRichPresenceRetrieveFailure(userID, failureReason));
@@ -285,8 +285,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("connectionString: {}", util::safe_fix_null_char_ptr_annotate_ret(connectionString)));
+			trace.write_all("userID: {}", userID);
+			trace.write_all("connectionString: {}", util::safe_fix_null_char_ptr_annotate_ret(connectionString));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnGameJoinRequested(userID, connectionString));
@@ -299,8 +299,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("connectionString: {}", util::safe_fix_null_char_ptr_annotate_ret(connectionString)));
+			trace.write_all("userID: {}", userID);
+			trace.write_all("connectionString: {}", util::safe_fix_null_char_ptr_annotate_ret(connectionString));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnGameInvitationReceived(userID, connectionString));
@@ -313,8 +313,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("connectionString: {}", util::safe_fix_null_char_ptr_annotate_ret(connectionString)));
+			trace.write_all("userID: {}", userID);
+			trace.write_all("connectionString: {}", util::safe_fix_null_char_ptr_annotate_ret(connectionString));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnInvitationSendSuccess(userID, connectionString));
@@ -325,9 +325,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("connectionString: {}", util::safe_fix_null_char_ptr_annotate_ret(connectionString)));
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("userID: {}", userID);
+			trace.write_all("connectionString: {}", util::safe_fix_null_char_ptr_annotate_ret(connectionString));
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnInvitationSendFailure(userID, connectionString, failureReason));
@@ -340,8 +340,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
-			trace.write_all(std::format("userSpecifier: {}", util::safe_fix_null_char_ptr_annotate_ret(userSpecifier)));
+			trace.write_all("userID: {}", userID);
+			trace.write_all("userSpecifier: {}", util::safe_fix_null_char_ptr_annotate_ret(userSpecifier));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnUserFindSuccess(userSpecifier, userID));
@@ -352,8 +352,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userSpecifier: {}", util::safe_fix_null_char_ptr_annotate_ret(userSpecifier)));
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("userSpecifier: {}", util::safe_fix_null_char_ptr_annotate_ret(userSpecifier));
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnUserFindFailure(userSpecifier, failureReason));

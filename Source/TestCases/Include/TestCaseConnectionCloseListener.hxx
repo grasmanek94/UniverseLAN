@@ -25,10 +25,10 @@ public:
 	virtual void OnConnectionClosed(ConnectionID connectionID, CloseReason closeReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"connectionID: {} closeReason: {}",
 			connectionID, magic_enum::enum_name(closeReason)
-		).c_str());
+		);
 
 
 		if (on_connection_closed != nullptr) {
@@ -59,10 +59,10 @@ public:
 	virtual void OnConnectionClosed(ConnectionID connectionID, CloseReason closeReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"connectionID: {} closeReason: {}",
 			connectionID, magic_enum::enum_name(closeReason)
-		).c_str());
+		);
 
 
 		if (on_connection_closed != nullptr) {

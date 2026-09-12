@@ -26,10 +26,10 @@ public:
 	virtual void OnChatRoomMessagesReceived(ChatRoomID chatRoomID, uint32_t messageCount, uint32_t longestMessageLenght) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"chatRoomID: {} messageCount: {} longestMessageLenght: {}",
 			chatRoomID, messageCount, longestMessageLenght
-		).c_str());
+		);
 
 
 		if (on_chat_room_messages_received != nullptr) {
@@ -60,10 +60,10 @@ public:
 	virtual void OnChatRoomMessagesReceived(ChatRoomID chatRoomID, uint32_t messageCount, uint32_t longestMessageLenght) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"chatRoomID: {} messageCount: {} longestMessageLenght: {}",
 			chatRoomID, messageCount, longestMessageLenght
-		).c_str());
+		);
 
 
 		if (on_chat_room_messages_received != nullptr) {

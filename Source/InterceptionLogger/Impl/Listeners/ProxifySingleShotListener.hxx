@@ -52,7 +52,7 @@ private: \
 
 #define IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(func) \
 	if (target) { \
-		trace.write_all(std::format("listener: {}", (void*)target)); \
+		trace.write_all("listener: {}", (void*)target); \
 		ProxifySyncHandler::delete_protection_enable(this); \
 		target->func; \
 		ProxifySyncHandler::delete_protection_disable(this); \

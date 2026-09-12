@@ -2,6 +2,7 @@
 
 #include <cstdint>
 
+#include <format>
 #include <iostream>
 #include <source_location>
 #include <string>
@@ -80,6 +81,12 @@ namespace universelan::tracer {
 
 		static void write_all(const char* const data);
 		static void write_all(const std::string& data);
+
+		template <typename... Args>
+		static void write_all(std::format_string<Args...> fmt, Args&&... args)
+		{
+			write_all(std::format(fmt, std::forward<Args>(args)...));
+		}
 
 		Trace(const Trace&) = delete;
 		Trace& operator= (const Trace&) = delete;

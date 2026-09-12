@@ -24,7 +24,7 @@ namespace universelan::client {
 		auto result = intf()->GetName();
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("GetName: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+			trace.write_all("GetName: {}", util::safe_fix_null_char_ptr_annotate_ret(result));
 		}
 
 		return result;
@@ -36,7 +36,7 @@ namespace universelan::client {
 		auto result = intf()->GetMsg();
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("GetMsg: {}", util::safe_fix_null_char_ptr_annotate_ret(result)));
+			trace.write_all("GetMsg: {}", util::safe_fix_null_char_ptr_annotate_ret(result));
 		}
 
 		return result;
@@ -48,7 +48,7 @@ namespace universelan::client {
 		auto result = intf()->GetType();
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("GetType: {}", magic_enum::enum_name(result)));
+			trace.write_all("GetType: {}", magic_enum::enum_name(result));
 		}
 
 		return result;

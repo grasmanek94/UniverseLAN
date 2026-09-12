@@ -30,10 +30,10 @@ public:
 	virtual void OnFileShareSuccess(const char* fileName, SharedFileID sharedFileID) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"fileName: {} sharedFileID: {}",
 			fileName, sharedFileID
-		).c_str());
+		);
 
 
 		if (on_file_share_success != nullptr) {
@@ -44,10 +44,10 @@ public:
 	virtual void OnFileShareFailure(const char* fileName, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"fileName: {} failureReason: {}",
 			fileName, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_file_share_failure != nullptr) {
@@ -82,10 +82,10 @@ public:
 	virtual void OnFileShareSuccess(const char* fileName, SharedFileID sharedFileID) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"fileName: {} sharedFileID: {}",
 			fileName, sharedFileID
-		).c_str());
+		);
 
 
 		if (on_file_share_success != nullptr) {
@@ -96,10 +96,10 @@ public:
 	virtual void OnFileShareFailure(const char* fileName, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"fileName: {} failureReason: {}",
 			fileName, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_file_share_failure != nullptr) {

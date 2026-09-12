@@ -40,10 +40,10 @@ public:
 	virtual void OnAuthFailure(FailureReason reason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"reason: {}",
 			magic_enum::enum_name(reason)
-		).c_str());
+		);
 
 		if (on_auth_failure) {
 			on_auth_failure(reason);
@@ -97,10 +97,10 @@ public:
 	virtual void OnAuthFailure(FailureReason reason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"reason: {}",
 			magic_enum::enum_name(reason)
-		).c_str());
+		);
 
 		if (on_auth_failure) {
 			on_auth_failure(reason);
@@ -156,10 +156,10 @@ public:
 	virtual void OnAuthFailure(FailureReason reason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"reason: {}",
 			magic_enum::enum_name(reason)
-		).c_str());
+		);
 
 		if (on_auth_failure) {
 			on_auth_failure(reason);

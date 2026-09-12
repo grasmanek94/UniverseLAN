@@ -25,10 +25,10 @@ public:
 	virtual void OnPersonaDataChanged(GalaxyID userID, uint32_t personaStateChange) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {} personaStateChange: {}",
 			userID, personaStateChange
-		).c_str());
+		);
 
 
 		if (on_persona_data_changed != nullptr) {
@@ -59,10 +59,10 @@ public:
 	virtual void OnPersonaDataChanged(GalaxyID userID, uint32_t personaStateChange) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {} personaStateChange: {}",
 			userID, personaStateChange
-		).c_str());
+		);
 
 
 		if (on_persona_data_changed != nullptr) {

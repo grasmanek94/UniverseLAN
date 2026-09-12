@@ -30,10 +30,10 @@ public:
 	virtual void OnUserFindSuccess(const char* userSpecifier, GalaxyID userID) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userSpecifier: {} userID: {}",
 			userSpecifier, userID
-		).c_str());
+		);
 
 
 		if (on_user_find_success != nullptr) {
@@ -43,10 +43,10 @@ public:
 	virtual void OnUserFindFailure(const char* userSpecifier, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userSpecifier: {} failureReason: {}",
 			userSpecifier, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_user_find_failure != nullptr) {
@@ -81,10 +81,10 @@ public:
 	virtual void OnUserFindSuccess(const char* userSpecifier, GalaxyID userID) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userSpecifier: {} userID: {}",
 			userSpecifier, userID
-		).c_str());
+		);
 
 
 		if (on_user_find_success != nullptr) {
@@ -94,10 +94,10 @@ public:
 	virtual void OnUserFindFailure(const char* userSpecifier, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userSpecifier: {} failureReason: {}",
 			userSpecifier, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_user_find_failure != nullptr) {

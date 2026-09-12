@@ -25,10 +25,10 @@ public:
 	virtual void OnGameInvitationReceived(GalaxyID userID, const char* connectionString) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {} connectionString: {}",
 			userID, connectionString
-		).c_str());
+		);
 
 
 		if (on_game_invitation_received != nullptr) {
@@ -60,10 +60,10 @@ public:
 	virtual void OnGameInvitationReceived(GalaxyID userID, const char* connectionString) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"userID: {} connectionString: {}",
 			userID, connectionString
-		).c_str());
+		);
 
 
 		if (on_game_invitation_received != nullptr) {

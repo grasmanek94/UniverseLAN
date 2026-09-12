@@ -23,8 +23,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("eventType: {}", util::safe_fix_null_char_ptr_annotate_ret(eventType)));
-			trace.write_all(std::format("sentEventIndex: {}", sentEventIndex));
+			trace.write_all("eventType: {}", util::safe_fix_null_char_ptr_annotate_ret(eventType));
+			trace.write_all("sentEventIndex: {}", sentEventIndex);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnTelemetryEventSendSuccess(eventType, sentEventIndex));
@@ -35,9 +35,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("eventType: {}", util::safe_fix_null_char_ptr_annotate_ret(eventType)));
-			trace.write_all(std::format("sentEventIndex: {}", sentEventIndex));
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("eventType: {}", util::safe_fix_null_char_ptr_annotate_ret(eventType));
+			trace.write_all("sentEventIndex: {}", sentEventIndex);
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnTelemetryEventSendFailure(eventType, sentEventIndex, failureReason));

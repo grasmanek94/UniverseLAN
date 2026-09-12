@@ -26,10 +26,10 @@ public:
 	virtual void OnOverlayStateChanged(OverlayState overlayState) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"overlayState: {}",
 			magic_enum::enum_name(overlayState)
-		).c_str());
+		);
 
 
 		if (on_overlay_state_changed != nullptr) {
@@ -60,10 +60,10 @@ public:
 	virtual void OnOverlayStateChanged(OverlayState overlayState) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"overlayState: {}",
 			magic_enum::enum_name(overlayState)
-		).c_str());
+		);
 
 
 		if (on_overlay_state_changed != nullptr) {

@@ -43,9 +43,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("userID: {}", userID));
+			trace.write_all("userID: {}", userID);
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -65,11 +65,11 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("chatRoomID: {}", chatRoomID));
-			trace.write_all(std::format("limit: {}", limit));
-			trace.write_all(std::format("referenceMessageID: {}", referenceMessageID));
+			trace.write_all("chatRoomID: {}", chatRoomID);
+			trace.write_all("limit: {}", limit);
+			trace.write_all("referenceMessageID: {}", referenceMessageID);
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -89,10 +89,10 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("chatRoomID: {}", chatRoomID));
-			trace.write_all(std::format("msg: {}", util::safe_fix_null_char_ptr_annotate_ret(msg)));
+			trace.write_all("chatRoomID: {}", chatRoomID);
+			trace.write_all("msg: {}", util::safe_fix_null_char_ptr_annotate_ret(msg));
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listener: {}", (void*)listener);
 #endif
 		}
 
@@ -103,7 +103,7 @@ namespace universelan::client {
 		);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -121,9 +121,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("index: {}", index));
-			trace.write_all(std::format("buffer: {}", (void*)buffer));
-			trace.write_all(std::format("bufferLength: {}", bufferLength));
+			trace.write_all("index: {}", index);
+			trace.write_all("buffer: {}", (void*)buffer);
+			trace.write_all("bufferLength: {}", bufferLength);
 		}
 
 		auto result = intf()->GetChatRoomMessageByIndex(index, 
@@ -137,17 +137,17 @@ namespace universelan::client {
 			senderID, sendTime, buffer, bufferLength);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMID_IN_INDEX
-			trace.write_all(std::format("chatRoomID: {}", chatRoomID));
+			trace.write_all("chatRoomID: {}", chatRoomID);
 #endif
-			trace.write_all(std::format("messageID: {}", messageID));
+			trace.write_all("messageID: {}", messageID);
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT_MESSAGETYPE
-			trace.write_all(std::format("messageType: {}", magic_enum::enum_name(messageType)));
+			trace.write_all("messageType: {}", magic_enum::enum_name(messageType));
 #endif
-			trace.write_all(std::format("senderID: {}", senderID));
-			trace.write_all(std::format("sendTime: {}", sendTime));
-			trace.write_all(std::format("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
+			trace.write_all("senderID: {}", senderID);
+			trace.write_all("sendTime: {}", sendTime);
+			trace.write_all("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength));
 		}
 
 		return result;
@@ -157,13 +157,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("chatRoomID: {}", chatRoomID));
+			trace.write_all("chatRoomID: {}", chatRoomID);
 		}
 
 		auto result = intf()->GetChatRoomMemberCount(chatRoomID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -173,14 +173,14 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("chatRoomID: {}", chatRoomID));
-			trace.write_all(std::format("index: {}", index));
+			trace.write_all("chatRoomID: {}", chatRoomID);
+			trace.write_all("index: {}", index);
 		}
 
 		auto result = intf()->GetChatRoomMemberUserIDByIndex(chatRoomID, index);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -191,13 +191,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("chatRoomID: {}", chatRoomID));
+			trace.write_all("chatRoomID: {}", chatRoomID);
 		}
 
 		auto result = intf()->GetChatRoomUnreadMessageCount(chatRoomID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -208,7 +208,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("chatRoomID: {}", chatRoomID));
+			trace.write_all("chatRoomID: {}", chatRoomID);
 		}
 
 		intf()->MarkChatRoomAsRead(chatRoomID);

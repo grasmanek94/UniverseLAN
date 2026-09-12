@@ -23,9 +23,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("fileCount: {}", fileCount));
-			trace.write_all(std::format("quota: {}", quota));
-			trace.write_all(std::format("quotaUsed: {}", quotaUsed));
+			trace.write_all("fileCount: {}", fileCount);
+			trace.write_all("quota: {}", quota);
+			trace.write_all("quotaUsed: {}", quotaUsed);
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnGetFileListSuccess(fileCount, quota, quotaUsed));
@@ -36,7 +36,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnGetFileListFailure(failureReason));
@@ -47,11 +47,11 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
-			trace.write_all(std::format("fileSize: {}", fileSize));
-			trace.write_all(std::format("savegameType: {}", magic_enum::enum_name(savegameType)));
-			trace.write_all(std::format("savegameID: {}", util::safe_fix_null_char_ptr_annotate_ret(savegameID)));
+			trace.write_all("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
+			trace.write_all("fileSize: {}", fileSize);
+			trace.write_all("savegameType: {}", magic_enum::enum_name(savegameType));
+			trace.write_all("savegameID: {}", util::safe_fix_null_char_ptr_annotate_ret(savegameID));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnGetFileSuccess(container, name, fileSize, savegameType, savegameID));
@@ -62,10 +62,10 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
-			trace.write_all(std::format("fileSize: {}", fileSize));
-			trace.write_all(std::format("metadataCount: {}", metadataCount));
+			trace.write_all("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
+			trace.write_all("fileSize: {}", fileSize);
+			trace.write_all("metadataCount: {}", metadataCount);
 		}
 
 
@@ -78,9 +78,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnGetFileFailure(container, name, failureReason));
@@ -91,8 +91,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnPutFileSuccess(container, name));
@@ -103,9 +103,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnPutFileFailure(container, name, failureReason));
@@ -116,8 +116,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
+			trace.write_all("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnDeleteFileSuccess(container, name));
@@ -128,9 +128,9 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container)));
-			trace.write_all(std::format("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name)));
-			trace.write_all(std::format("failureReason: {}", magic_enum::enum_name(failureReason)));
+			trace.write_all("container: {}", util::safe_fix_null_char_ptr_annotate_ret(container));
+			trace.write_all("name: {}", util::safe_fix_null_char_ptr_annotate_ret(name));
+			trace.write_all("failureReason: {}", magic_enum::enum_name(failureReason));
 		}
 
 		IMPLEMENT_PROXY_CALL_ORIGINAL_LISTENER_FUNC(OnDeleteFileFailure(container, name, failureReason));

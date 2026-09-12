@@ -23,10 +23,10 @@ public:
 	virtual void OnLobbyMessageReceived(const GalaxyID& lobbyID, const GalaxyID& senderID, uint32_t messageID, uint32_t messageLength) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} senderID: {} messageID: {} messageLength: {}",
 			lobbyID, senderID, messageID, messageLength
-		).c_str());
+		);
 
 
 		if (on_lobby_message_received != nullptr) {
@@ -57,10 +57,10 @@ public:
 	virtual void OnLobbyMessageReceived(const GalaxyID& lobbyID, const GalaxyID& senderID, uint32_t messageID, uint32_t messageLength) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} senderID: {} messageID: {} messageLength: {}",
 			lobbyID, senderID, messageID, messageLength
-		).c_str());
+		);
 
 
 		if (on_lobby_message_received != nullptr) {
@@ -92,10 +92,10 @@ public:
 	virtual void OnLobbyMessageReceived(const GalaxyID& lobbyID, const GalaxyID& senderID, uint32_t messageID, uint32_t messageLength) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"lobbyID: {} senderID: {} messageID: {} messageLength: {}",
 			lobbyID, senderID, messageID, messageLength
-		).c_str());
+		);
 
 
 		if (on_lobby_message_received != nullptr) {

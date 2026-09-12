@@ -30,10 +30,10 @@ public:
 	virtual void OnSharedFileDownloadSuccess(SharedFileID sharedFileID, const char* fileName) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"sharedFileID: {} fileName: {}",
 			sharedFileID, fileName
-		).c_str());
+		);
 
 
 		if (on_shared_file_download_success != nullptr) {
@@ -44,10 +44,10 @@ public:
 	virtual void OnSharedFileDownloadFailure(SharedFileID sharedFileID, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"sharedFileID: {} failureReason: {}",
 			sharedFileID, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_shared_file_download_failure != nullptr) {
@@ -82,10 +82,10 @@ public:
 	virtual void OnSharedFileDownloadSuccess(SharedFileID sharedFileID, const char* fileName) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"sharedFileID: {} fileName: {}",
 			sharedFileID, fileName
-		).c_str());
+		);
 
 
 		if (on_shared_file_download_success != nullptr) {
@@ -96,10 +96,10 @@ public:
 	virtual void OnSharedFileDownloadFailure(SharedFileID sharedFileID, FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"sharedFileID: {} failureReason: {}",
 			sharedFileID, magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_shared_file_download_failure != nullptr) {

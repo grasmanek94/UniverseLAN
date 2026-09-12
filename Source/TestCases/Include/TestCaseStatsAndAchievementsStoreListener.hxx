@@ -37,10 +37,10 @@ public:
 	virtual void OnUserStatsAndAchievementsStoreFailure(FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"failureReason: {}",
 			magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_user_stats_and_achievements_store_failure != nullptr) {
@@ -84,10 +84,10 @@ public:
 	virtual void OnUserStatsAndAchievementsStoreFailure(FailureReason failureReason) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"failureReason: {}",
 			magic_enum::enum_name(failureReason)
-		).c_str());
+		);
 
 
 		if (on_user_stats_and_achievements_store_failure != nullptr) {

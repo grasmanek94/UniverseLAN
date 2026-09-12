@@ -39,8 +39,8 @@ namespace universelan::client {
 		}
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType)));
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType));
+			trace.write_all("listener: {}", (void*)listener);
 		}
 
 		lock_t lock{ listeners[listenerType].mtx };
@@ -55,8 +55,8 @@ namespace universelan::client {
 		}
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType)));
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType));
+			trace.write_all("listener: {}", (void*)listener);
 		}
 
 		{
@@ -72,7 +72,7 @@ namespace universelan::client {
 		tracer::Trace trace{ "1s", __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
 
 		if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType)));
+			trace.write_all("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType));
 		}
 
 		if (code == nullptr) {
@@ -97,7 +97,7 @@ namespace universelan::client {
 			auto& temp_set_ref = listeners[listenerType].set;
 
 			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
-				trace.write_all(std::format("temp_set_ref.size(): ", temp_set_ref.size()));
+				trace.write_all("temp_set_ref.size(): {}", temp_set_ref.size());
 			}
 
 			if (temp_set_ref.size() == 0) {
@@ -107,7 +107,7 @@ namespace universelan::client {
 			set = temp_set_ref; // COPY
 
 			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
-				trace.write_all(std::format("set.size(): ", temp_set_ref.size()));
+				trace.write_all("set.size(): {}", temp_set_ref.size());
 			}
 		}
 
@@ -121,7 +121,7 @@ namespace universelan::client {
 		tracer::Trace trace{ "1", __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
 
 		if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType)));
+			trace.write_all("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType));
 		}
 
 		if (code == nullptr) {
@@ -149,8 +149,8 @@ namespace universelan::client {
 		tracer::Trace trace{ "2s", __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
 
 		if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType)));
-			trace.write_all(std::format("extra: {}", (void*)extra));
+			trace.write_all("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType));
+			trace.write_all("extra: {}", (void*)extra);
 		}
 
 		if (extra == nullptr && code == nullptr) {
@@ -175,7 +175,7 @@ namespace universelan::client {
 			auto& temp_set_ref = listeners[listenerType].set;
 
 			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
-				trace.write_all(std::format("temp_set_ref.size(): ", temp_set_ref.size()));
+				trace.write_all("temp_set_ref.size(): ", temp_set_ref.size());
 			}
 
 			if (set.size() == 0 && extra == nullptr) {
@@ -190,7 +190,7 @@ namespace universelan::client {
 			set = temp_set_ref; // COPY
 
 			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
-				trace.write_all(std::format("set.size(): ", temp_set_ref.size()));
+				trace.write_all("set.size(): ", temp_set_ref.size());
 			}
 		}
 
@@ -208,7 +208,7 @@ namespace universelan::client {
 		tracer::Trace trace{ "2", __FUNCTION__, tracer::Trace::LISTENERREGISTRAR };
 
 		if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType)));
+			trace.write_all("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType));
 		}
 
 		if (extra == nullptr && code == nullptr) {

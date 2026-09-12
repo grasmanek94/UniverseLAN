@@ -206,7 +206,7 @@ namespace universelan::client {
 			tracer::Trace trace{ "::nl", __FUNCTION__, tracer::Trace::NOTIFICATION_INVOCATIONS };
 
 			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::ARGUMENTS)) {
-				trace.write_all(std::format("FuncT: {}", typeid(FuncT).name()));
+				trace.write_all("FuncT: {}", typeid(FuncT).name());
 			}
 
 			return ExecuteForListenerTypePerEntry((ListenerType)T::GetListenerType(), [&](IGalaxyListener* listener) {
@@ -229,7 +229,7 @@ namespace universelan::client {
 			tracer::Trace trace{ "::hl", __FUNCTION__, tracer::Trace::NOTIFICATION_INVOCATIONS };
 
 			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::ARGUMENTS)) {
-				trace.write_all(std::format("FuncT: {}", typeid(FuncT).name()));
+				trace.write_all("FuncT: {}", typeid(FuncT).name());
 			}
 
 			return ExecuteForListenerTypePerEntry((ListenerType)BaseT::GetListenerType(), one_time_specific_listener, [&](IGalaxyListener* listener) {
@@ -326,8 +326,8 @@ namespace universelan::client {
 			tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::LISTENERREGISTRAR | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 			if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-				trace.write_all(std::format("request_id: {}", request_id));
-				trace.write_all(std::format("listener: {}", (void*)listener));
+				trace.write_all("request_id: {}", request_id);
+				trace.write_all("listener: {}", (void*)listener);
 			}
 
 			if (listener == nullptr) {
@@ -337,7 +337,7 @@ namespace universelan::client {
 			auto listener_type_id = T::GetListenerType();
 
 			if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-				trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listener_type_id)));
+				trace.write_all("listenerType: {}", magic_enum::enum_name((ListenerType)listener_type_id));
 			}
 
 			return request_helpers[(size_t)listener_type_id].emplace(request_id, (IGalaxyListener*)listener, extra);
@@ -350,8 +350,8 @@ namespace universelan::client {
 			auto listener_type_id = T::GetListenerType();
 
 			if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-				trace.write_all(std::format("request_id: {}", request_id));
-				trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listener_type_id)));
+				trace.write_all("request_id: {}", request_id);
+				trace.write_all("listenerType: {}", magic_enum::enum_name((ListenerType)listener_type_id));
 			}
 
 			return request_helpers[(size_t)listener_type_id].pop(request_id, listener);
@@ -364,8 +364,8 @@ namespace universelan::client {
 			auto listener_type_id = T::GetListenerType();
 
 			if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-				trace.write_all(std::format("request_id: {}", request_id));
-				trace.write_all(std::format("listenerType: {}", magic_enum::enum_name((ListenerType)listener_type_id)));
+				trace.write_all("request_id: {}", request_id);
+				trace.write_all("listenerType: {}", magic_enum::enum_name((ListenerType)listener_type_id));
 			}
 
 			return request_helpers[(size_t)listener_type_id].pop(request_id, listener, extra);

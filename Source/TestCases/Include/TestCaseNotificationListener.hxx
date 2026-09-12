@@ -25,10 +25,10 @@ public:
 	virtual void OnNotificationReceived(NotificationID notificationID, uint32_t typeLength, uint32_t contentSize) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"notificationID: {} typeLength: {} contentSize: {}",
 			notificationID, typeLength, contentSize
-		).c_str());
+		);
 
 
 		if (on_notification_received != nullptr) {
@@ -59,10 +59,10 @@ public:
 	virtual void OnNotificationReceived(NotificationID notificationID, uint32_t typeLength, uint32_t contentSize) {
 		tracer::Trace trace{ "", __FUNCTION__ };
 
-		trace.write_all(std::format(
+		trace.write_all(
 			"notificationID: {} typeLength: {} contentSize: {}",
 			notificationID, typeLength, contentSize
-		).c_str());
+		);
 
 
 		if (on_notification_received != nullptr) {

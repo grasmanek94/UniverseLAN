@@ -35,13 +35,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext | tracer::Trace::HIGH_FREQUENCY_CALLS /* Some games call this frequently */ };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("productID: {}", productID));
+			trace.write_all("productID: {}", productID);
 		}
 
 		auto result = force_dlc_check || intf()->IsDlcInstalled(productID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("result: {}", result));
+			trace.write_all("result: {}", result);
 		}
 
 		return result;
@@ -52,13 +52,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("productID: {}", productID));
+			trace.write_all("productID: {}", productID);
 		}
 
 		auto language = intf()->GetCurrentGameLanguage(productID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("language: {}", language));
+			trace.write_all("language: {}", language);
 		}
 
 		return language;
@@ -68,15 +68,15 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("buffer: {}", (void*)buffer));
-			trace.write_all(std::format("bufferLength: {}", bufferLength));
-			trace.write_all(std::format("productID: {}", productID));
+			trace.write_all("buffer: {}", (void*)buffer);
+			trace.write_all("bufferLength: {}", bufferLength);
+			trace.write_all("productID: {}", productID);
 		}
 
 		intf()->GetCurrentGameLanguageCopy(buffer, bufferLength, productID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("language: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
+			trace.write_all("language: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength));
 		}
 	}
 #endif
@@ -88,13 +88,13 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("productID: {}", productID));
+			trace.write_all("productID: {}", productID);
 		}
 
 		auto lang_code = intf()->GetCurrentGameLanguageCode(productID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("lang_code: {}", lang_code));
+			trace.write_all("lang_code: {}", lang_code);
 		}
 
 		return lang_code;
@@ -105,15 +105,15 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, TraceContext };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("buffer: {}", (void*)buffer));
-			trace.write_all(std::format("bufferLength: {}", bufferLength));
-			trace.write_all(std::format("productID: {}", productID));
+			trace.write_all("buffer: {}", (void*)buffer);
+			trace.write_all("bufferLength: {}", bufferLength);
+			trace.write_all("productID: {}", productID);
 		}
 
 		intf()->GetCurrentGameLanguageCodeCopy(buffer, bufferLength, productID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
-			trace.write_all(std::format("lang_code: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength)));
+			trace.write_all("lang_code: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength));
 		}
 	}
 #endif
@@ -124,8 +124,8 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IAPPS };
 
 		if (trace.has_flags(tracer::Trace::ARGUMENTS)) {
-			trace.write_all(std::format("productID: {}", productID));
-			trace.write_all(std::format("listener: {}", (void*)listener));
+			trace.write_all("productID: {}", productID);
+			trace.write_all("listener: {}", (void*)listener);
 		}
 
 		if (force_dlc_check) {
