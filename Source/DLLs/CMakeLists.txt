@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.12)
 set(UNIVERSELAN_DLL_CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 include(determine_galaxy_version_feature_definitions.cmake)
+if(BUILD_TEST_CASES)
+  include("${CMAKE_SOURCE_DIR}/Source/UnitTests/Versioned.cmake")
+endif()
  
 function(add_version_definitions_to TARGET)
   string(REPLACE "." "" GALAXY_VERSION_DEF ${GALAXY_VERSION})
@@ -84,8 +87,9 @@ function(define_projects_for_version)
   endif()
 
   define_server(${GALAXY_VERSION} ${GALAXY_VERSION_NUMBER} "${ARCH_ADDITION}")
-  
+
   if(BUILD_TEST_CASES)
+    define_versioned_unit_tests(${GALAXY_VERSION} ${GALAXY_VERSION_NUMBER})
     define_unet_library(${GALAXY_VERSION} ${GALAXY_VERSION_NUMBER} "${ARCH_ADDITION}")
   endif()
 endfunction()

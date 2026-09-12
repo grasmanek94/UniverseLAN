@@ -1,0 +1,20 @@
+# Version-Specific Unit Test Plan
+
+## Implemented
+
+| Version | Production header | Test file | Covered behavior |
+| --- | --- | --- | --- |
+| All configured SDK versions | `Shared/DynamicReturn.hxx` | `Shared/Versioned/DynamicReturnTests.cxx` | Boolean and generic return conversion |
+| All configured SDK versions | `Shared/GalaxyID.hxx` | `Shared/Versioned/GalaxyIDTests.cxx` | Type bits, real-ID mask, hashing; uses `GALAXY_BUILD_FEATURE_GALAXYID_HAS_IDTYPE` for the SDK enum change |
+| All configured SDK versions | `Shared/GalaxyIDSerialization.hxx` | `Shared/Versioned/GalaxyIDSerializationTests.cxx` | Minimal save/load round trip |
+| All configured SDK versions | `Shared/GalaxyUserData.hxx` | `Shared/Versioned/GalaxyUserDataTests.cxx` | Initial profile state and hashed user lookup |
+| SDKs with `HAS_ICHAT` | `Shared/ChatMessage.hxx` | `Shared/Versioned/ChatMessageTests.cxx` | Constructor and default state; uses `HAS_ICHAT_MESSAGETYPE` for the signature and type API change |
+
+## Next Batches
+
+| Component | Planned focus |
+| --- | --- |
+| Shared value types | `GalaxyUserData`, chat and lobby values, feature-gated defaults and copying |
+| Shared networking messages | Serialization round trips and feature-gated message fields |
+| Client implementation | Error handling, listener registration, options, and in-memory state transitions without a real server |
+| Other supported versions | Feature-boundary tests for the earliest and latest relevant SDK versions |
