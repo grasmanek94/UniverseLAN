@@ -159,9 +159,9 @@ namespace universelan::client {
 			trace.write_all("extra: {}", (void*)extra);
 		}
 
-		if (extra == nullptr && code == nullptr) {
+		if (code == nullptr) {
 			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
-				trace.write_all("extra == nullptr && code == nullptr");
+				trace.write_all("code == nullptr");
 			}
 			return false;
 		}
@@ -217,9 +217,9 @@ namespace universelan::client {
 			trace.write_all("listenerType: {}", magic_enum::enum_name((ListenerType)listenerType));
 		}
 
-		if (extra == nullptr && code == nullptr) {
+		if (code == nullptr) {
 			if (trace.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
-				trace.write_all("extra == nullptr && code == nullptr");
+				trace.write_all("code == nullptr");
 			}
 			return false;
 		}

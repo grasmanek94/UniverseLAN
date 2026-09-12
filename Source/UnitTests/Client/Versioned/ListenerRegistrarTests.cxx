@@ -45,6 +45,7 @@ TEST(ListenerRegistrar, ExecutesOneTimeListenerWithoutGlobalRegistration)
 	}));
 	EXPECT_EQ(called, &listener);
 	EXPECT_FALSE(registrar.ExecuteForListenerTypePerEntry(galaxy::api::USER_DATA, nullptr, nullptr));
+	EXPECT_FALSE(registrar.ExecuteForListenerTypePerEntry(galaxy::api::USER_DATA, &listener, nullptr));
 }
 
 TEST(ListenerRegistrar, ExecutesRegisteredListenersWithoutOneTimeListener)
