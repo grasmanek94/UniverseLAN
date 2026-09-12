@@ -31,7 +31,7 @@ int main()
 #endif
 
 	server = std::make_unique<Server>();
-	milliseconds wait_time = milliseconds(1000 / server->GetMaxTickRate());
+	milliseconds wait_time = milliseconds(1000U / std::max(server->GetMaxTickRate(), 1U));
 
 	while (true)
 	{

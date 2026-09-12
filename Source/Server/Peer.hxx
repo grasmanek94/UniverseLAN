@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <chrono>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace universelan::server::peer {
 	class Data;
