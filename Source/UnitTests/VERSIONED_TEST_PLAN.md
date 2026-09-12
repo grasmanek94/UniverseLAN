@@ -15,6 +15,7 @@
 | All configured SDK versions | `Shared/LobbyManager.hxx` | `Shared/Versioned/LobbyManagerTests.cxx` | Creation, configured state, lookup, and removal |
 | All configured SDK versions | `Shared/SharedFileUtils.hxx` | `Shared/Versioned/SharedFileUtilsTests.cxx` | File I/O by name and shared ID, bounded reads, cleanup, and invalid input handling |
 | All configured SDK versions | `Shared/Networking/Messages/PingMessage.hxx`, `KeyChallengeMessage.hxx`, `OnlineStatusChangeMessage.hxx` | `Shared/Versioned/Networking/*Tests.cxx` | Defaults, value preservation, challenge encryption, and response hashing |
+| All configured SDK versions | `Shared/Networking/Messages/JoinLobbyMessage.hxx`, `LeaveLobbyMessage.hxx`, `SetLobbyJoinableMessage.hxx` | `Shared/Versioned/Networking/*Tests.cxx` | Binary serialization round trips across request, lobby, state, result, and feature-dependent fields |
 
 ## Next Batches
 

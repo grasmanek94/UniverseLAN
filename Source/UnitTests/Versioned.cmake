@@ -17,6 +17,9 @@ function(define_versioned_unit_tests GALAXY_VERSION GALAXY_VERSION_NUMBER)
     "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Shared/Versioned/Networking/PingMessageTests.cxx"
     "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Shared/Versioned/Networking/KeyChallengeMessageTests.cxx"
     "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Shared/Versioned/Networking/OnlineStatusChangeMessageTests.cxx"
+    "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Shared/Versioned/Networking/JoinLobbyMessageTests.cxx"
+    "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Shared/Versioned/Networking/LeaveLobbyMessageTests.cxx"
+    "${UNIVERSELAN_VERSIONED_UNIT_TESTS_DIR}/Shared/Versioned/Networking/SetLobbyJoinableMessageTests.cxx"
   )
 
   target_link_libraries(universelan-shared-${GALAXY_VERSION}-unit-tests PRIVATE
