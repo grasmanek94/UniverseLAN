@@ -14,14 +14,14 @@
 | All configured SDK versions | `Shared/Lobby.hxx` | `Shared/Versioned/LobbyTests.cxx` | Membership, capacity boundaries, lobby/member data, and bounded member-message retrieval |
 | All configured SDK versions | `Shared/LobbyManager.hxx` | `Shared/Versioned/LobbyManagerTests.cxx` | Creation, configured state, lookup, and removal |
 | All configured SDK versions | `Shared/SharedFileUtils.hxx` | `Shared/Versioned/SharedFileUtilsTests.cxx` | File I/O by name and shared ID, bounded reads, cleanup, and invalid input handling |
-| All configured SDK versions | `Shared/Networking/Messages/PingMessage.hxx`, `KeyChallengeMessage.hxx`, `OnlineStatusChangeMessage.hxx` | `Shared/Versioned/Networking/*Tests.cxx` | Defaults, value preservation, challenge encryption, and response hashing |
-| All configured SDK versions | `Shared/Networking/Messages/JoinLobbyMessage.hxx`, `LeaveLobbyMessage.hxx`, `SetLobbyJoinableMessage.hxx` | `Shared/Versioned/Networking/*Tests.cxx` | Binary serialization round trips across request, lobby, state, result, and feature-dependent fields |
+| All configured SDK versions | `Shared/Networking/Messages/*.hxx` except marker messages | `Shared/Versioned/Networking/*Tests.cxx` | Binary serialization round trips for all 30 substantive networking messages, including lobby, chat, user-data, file-transfer, P2P, and create-lobby payloads; feature-gated chat coverage follows `HAS_ICHAT` |
+| All configured SDK versions | `Shared/Networking/Messages/EventConnect.hxx`, `EventDisconnect.hxx`, `ConnectionAcceptedMessage.hxx` | None | Empty marker messages have no serialized state to validate |
 
 ## Next Batches
 
 | Component | Planned focus |
 | --- | --- |
 | Shared value types | `GalaxyUserData`, chat and lobby values, feature-gated defaults and copying |
-| Shared networking messages | Serialization round trips and feature-gated message fields |
+| Shared networking messages | Populated nested response graphs for lobby, user data, and chat messages where practical |
 | Client implementation | Error handling, listener registration, options, and in-memory state transitions without a real server |
 | Other supported versions | Feature-boundary tests for the earliest and latest relevant SDK versions |
