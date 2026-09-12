@@ -8,10 +8,7 @@
 #include <dlfcn.h>
 #endif
 
-#include <stdlib.h>
-
-#include <functional>
-#include <memory>
+#include <exception>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -19,35 +16,55 @@
 namespace {
 	void ListDLLFunctions(std::string sADllName, std::vector<std::string>& slListOfDllFunctions)
 	{
-#ifdef _WIN32
-		DWORD* dNameRVAs(0);
-		_IMAGE_EXPORT_DIRECTORY* ImageExportDirectory;
-		unsigned long cDirSize;
-		_LOADED_IMAGE LoadedImage;
-		std::string sName;
 		slListOfDllFunctions.clear();
-		if (MapAndLoad(sADllName.c_str(), NULL, &LoadedImage, TRUE, TRUE))
+
+#ifdef _WIN32
+		DWORD* dNameRVAs = nullptr;
+		_IMAGE_EXPORT_DIRECTORY* ImageExportDirectory = nullptr;
+		unsigned long cDirSize = 0;
+		_LOADED_IMAGE LoadedImage{};
+		if (MapAndLoad(sADllName.c_str(), nullptr, &LoadedImage, true, true))
 		{
-			ImageExportDirectory = (_IMAGE_EXPORT_DIRECTORY*)
-				ImageDirectoryEntryToData(LoadedImage.MappedAddress,
-					false, IMAGE_DIRECTORY_ENTRY_EXPORT, &cDirSize);
-			if (ImageExportDirectory != NULL)
+			std::exception_ptr ex_ptr = nullptr;
+			try
 			{
-				dNameRVAs = (DWORD*)ImageRvaToVa(LoadedImage.FileHeader,
-					LoadedImage.MappedAddress,
-					ImageExportDirectory->AddressOfNames, NULL);
-				for (size_t i = 0; i < ImageExportDirectory->NumberOfNames; i++)
+				ImageExportDirectory = (_IMAGE_EXPORT_DIRECTORY*)
+					ImageDirectoryEntryToData(LoadedImage.MappedAddress,
+						false, IMAGE_DIRECTORY_ENTRY_EXPORT, &cDirSize);
+				if (ImageExportDirectory != nullptr)
 				{
-					sName = (char*)ImageRvaToVa(LoadedImage.FileHeader,
+					dNameRVAs = (DWORD*)ImageRvaToVa(LoadedImage.FileHeader,
 						LoadedImage.MappedAddress,
-						dNameRVAs[i], NULL);
-					slListOfDllFunctions.push_back(sName);
+						ImageExportDirectory->AddressOfNames, nullptr);
+					if (dNameRVAs != nullptr)
+					{
+						for (size_t i = 0; i < ImageExportDirectory->NumberOfNames; i++)
+						{
+							char* sName = (char*)ImageRvaToVa(LoadedImage.FileHeader,
+								LoadedImage.MappedAddress,
+								dNameRVAs[i], nullptr);
+							if (sName != nullptr)
+							{
+								slListOfDllFunctions.push_back(sName);
+							}
+						}
+					}
 				}
 			}
-			UnMapAndLoad(&LoadedImage);
+			catch (...) 
+			{ 
+				ex_ptr = std::current_exception();
+			}
+
+			(void)UnMapAndLoad(&LoadedImage);
+
+			if (ex_ptr != nullptr)
+			{
+				std::rethrow_exception(ex_ptr);
+			}
 		}
 #else
-		slListOfDllFunctions.clear();
+#warning SharedLibUtils 'get_function_match' doesn't support non-Windows platforms yet
 #endif
 	}
 }
@@ -65,16 +82,21 @@ namespace universelan
 			;
 
 		HANDLE_T RealGalaxyDLL = nullptr;
-		SharedLibUtils* instance = nullptr;
 		std::string dll_name = "";
 		std::vector<std::string> dll_functions;
 		const char UNIVERSELAN_INTERCEPTOR_REALDLL_PREFIX[] = "UNIVERSELAN_INTERCEPTOR_REALDLL_PREFIX";
 	}
 
+	SharedLibUtils* SharedLibUtils::instance()
+	{
+		static SharedLibUtils value{};
+		return &value;
+	}
+
 	SharedLibUtils::SharedLibUtils() {
 		dll_functions.clear();
 
-		dll_name += env_utils::get_env(UNIVERSELAN_INTERCEPTOR_REALDLL_PREFIX) +
+		dll_name = env_utils::get_env(UNIVERSELAN_INTERCEPTOR_REALDLL_PREFIX) +
 #ifndef _WIN32
 		"lib"
 #endif
@@ -106,17 +128,28 @@ namespace universelan
 		}
 	}
 
-	SharedLibUtils::~SharedLibUtils() {}
-
-	void* SharedLibUtils::get_func_ptr(const char* name) {
-		if (!instance) {
-			instance = new SharedLibUtils();
+	SharedLibUtils::~SharedLibUtils() {
+		if (RealGalaxyDLL != nullptr)
+		{
+#ifdef _WIN32
+			FreeLibrary(RealGalaxyDLL);
+#else
+			dlclose(RealGalaxyDLL);
+#endif
 		}
+	}
+
+	void* SharedLibUtils::get_func_ptr(const char* const name) {
+		if ((name == nullptr) || (name[0] == '\0')) {
+			throw std::runtime_error("RealGalaxyDLL: name is null or empty");
+		}
+
+		(void)instance();
 
 		void* func = (void*)
 #ifdef _WIN32
 			GetProcAddress(RealGalaxyDLL, name);
-#else
+#else	
 			dlsym(RealGalaxyDLL, name);
 #endif
 
@@ -127,10 +160,12 @@ namespace universelan
 		return func;
 	}
 
-	const char* SharedLibUtils::get_function_match(const char* search) {
-		if (!instance) {
-			instance = new SharedLibUtils();
+	const char* SharedLibUtils::get_function_match(const char* const search) {
+		if ((search == nullptr) || (search[0] == '\0')) {
+			throw std::runtime_error("RealGalaxyDLL: search is null or empty");
 		}
+
+		(void)instance();
 
 		const char* match = nullptr;
 		for (auto& func : dll_functions) {
