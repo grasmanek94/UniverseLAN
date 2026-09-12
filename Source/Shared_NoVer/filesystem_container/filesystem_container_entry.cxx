@@ -53,12 +53,16 @@ namespace filesystem_container {
 				}
 			}
 		}
+		else {
+			save_metadata();
+		}
 	}
 
 	filesystem_entry::filesystem_entry(filesystem_container* parent_file_container, std::filesystem::path path, uint64_t share_id) :
 		filesystem_entry{parent_file_container, path}
 	{
 		metadata.share_id = share_id;
+		save_metadata();
 	}
 
 	filesystem_entry::~filesystem_entry() {
