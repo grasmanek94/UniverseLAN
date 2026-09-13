@@ -1,0 +1,37 @@
+{
+  "name": "lobby-create-list-join",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 30,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 8
+    }
+  },
+  "hosts": [
+    {
+      "role": "creator",
+      "scenario": "create-lobby",
+      "identity": {
+        "userId": 1001,
+        "personaName": "SystemCreator"
+      },
+      "waitFor": ["server-ready"],
+      "signals": ["lobby-ready"],
+      "finishAfter": ["lobby-joined"],
+      "timeoutSeconds": 10
+    },
+    {
+      "role": "joiner",
+      "scenario": "list-and-join-lobby",
+      "identity": {
+        "userId": 1002,
+        "personaName": "SystemJoiner"
+      },
+      "waitFor": ["server-ready", "lobby-ready"],
+      "signals": ["lobby-joined"],
+      "timeoutSeconds": 10
+    }
+  ]
+}

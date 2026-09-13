@@ -1,0 +1,39 @@
+{
+  "name": "chat-room-message-delivery",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 30,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 8
+    }
+  },
+  "hosts": [
+    {
+      "role": "receiver",
+      "scenario": "chat-room-message-receiver",
+      "identity": {
+        "userId": 2401,
+        "personaName": "ChatReceiver"
+      },
+      "peerUserIds": [2402],
+      "waitFor": ["server-ready"],
+      "signals": ["receiver-ready", "receiver-received"],
+      "timeoutSeconds": 15
+    },
+    {
+      "role": "sender",
+      "scenario": "chat-room-message-sender",
+      "identity": {
+        "userId": 2402,
+        "personaName": "ChatSender"
+      },
+      "peerUserIds": [2401],
+      "waitFor": ["server-ready", "receiver-ready"],
+      "signals": ["sender-send-succeeded"],
+      "finishAfter": ["receiver-received"],
+      "timeoutSeconds": 15
+    }
+  ]
+}

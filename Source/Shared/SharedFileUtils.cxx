@@ -353,7 +353,7 @@ namespace universelan {
 			return 0;
 		}
 
-		return (uint32_t)std::min(container->get_total_disk_space(), (size_t)std::numeric_limits<uint32_t>::max());
+		return static_cast<uint32_t>(std::min(container->get_total_disk_space(), static_cast<uint64_t>(std::numeric_limits<uint32_t>::max())));
 	}
 
 	uint32_t SharedFileUtils::GetAvailableDiskSpace(const fs_container_ptr& container) const
@@ -362,7 +362,7 @@ namespace universelan {
 			return 0;
 		}
 
-		return (uint32_t)std::min(container->get_available_disk_space(), (size_t)std::numeric_limits<uint32_t>::max());
+		return static_cast<uint32_t>(std::min(container->get_available_disk_space(), static_cast<uint64_t>(std::numeric_limits<uint32_t>::max())));
 	}
 
 	uint32_t SharedFileUtils::GetUsedDiskSpace(const fs_container_ptr& container) const
@@ -371,7 +371,7 @@ namespace universelan {
 			return 0;
 		}
 
-		return (uint32_t)std::min(container->get_used_disk_space(), (size_t)std::numeric_limits<uint32_t>::max());
+		return static_cast<uint32_t>(std::min(container->get_used_disk_space(), static_cast<uint64_t>(std::numeric_limits<uint32_t>::max())));
 	}
 
 	std::vector<filesystem_container::fs_entry_ptr> SharedFileUtils::GetDirectoryFileList(const fs_container_ptr& container) const

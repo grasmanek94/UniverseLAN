@@ -1,0 +1,17 @@
+{
+  "name": "runtime-load",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 10,
+  "hosts": [
+    {
+      "role": "loader",
+      "scenario": "runtime-load",
+      "identity": {
+        "userId": 1001,
+        "personaName": "RuntimeLoader"
+      },
+      "signals": ["runtime-loaded"],
+      "timeoutSeconds": 5
+    }
+  ]
+}

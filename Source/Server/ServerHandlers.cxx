@@ -275,7 +275,7 @@ namespace universelan::server {
 #endif
 				data->message->GetContents());
 
-			connection.Send(peer, SendToChatRoomMessage{ data->request_id, data->id, nullptr });
+			connection.Send(peer, SendToChatRoomMessage{ data->request_id, data->id, message });
 
 			ChatRoom::messages_t messages{};
 			messages.push_back(message);

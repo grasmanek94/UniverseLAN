@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 3.12)
 
-if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/credentials.cmake")
+set(UNIVERSELAN_TEST_CREDENTIALS "${CMAKE_SOURCE_DIR}/Source/TestCommon/credentials.cmake")
+if(NOT EXISTS "${UNIVERSELAN_TEST_CREDENTIALS}")
   message("Refusing to build tests without credentials.cmake")
   return()
 endif()
 message("-- Adding tests...")
 
-include(credentials.cmake)
+include("${UNIVERSELAN_TEST_CREDENTIALS}")
 
 function(add_simple_test_case GALAXY_VERSION_NUMBER TEST_CASE_NAME PREFIX)
   set(GALAXY_VERSION "${GALAXY_ARCH}-${GALAXY_VERSION_NUMBER}")

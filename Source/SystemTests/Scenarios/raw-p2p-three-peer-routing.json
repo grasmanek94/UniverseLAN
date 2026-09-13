@@ -1,0 +1,54 @@
+{
+  "name": "raw-p2p-three-peer-routing",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 50,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 8
+    }
+  },
+  "hosts": [
+    {
+      "role": "sender",
+      "scenario": "raw-p2p-three-sender",
+      "identity": {
+        "userId": 2201,
+        "personaName": "RawP2PSender"
+      },
+      "peerUserIds": [2202],
+      "waitFor": ["server-ready"],
+      "signals": ["lobby-tagged", "sender-sent", "sender-acked"],
+      "actionAfter": ["target-joined", "observer-joined"],
+      "finishAfter": ["target-acked", "observer-quiet"],
+      "timeoutSeconds": 20
+    },
+    {
+      "role": "target",
+      "scenario": "raw-p2p-three-target",
+      "identity": {
+        "userId": 2202,
+        "personaName": "RawP2PTarget"
+      },
+      "peerUserIds": [2201],
+      "waitFor": ["server-ready", "lobby-tagged"],
+      "signals": ["target-joined", "target-acked"],
+      "actionAfter": ["sender-sent"],
+      "finishAfter": ["sender-acked"],
+      "timeoutSeconds": 20
+    },
+    {
+      "role": "observer",
+      "scenario": "raw-p2p-three-observer",
+      "identity": {
+        "userId": 2203,
+        "personaName": "RawP2PObserver"
+      },
+      "waitFor": ["server-ready", "lobby-tagged"],
+      "signals": ["observer-joined", "observer-quiet"],
+      "actionAfter": ["sender-sent"],
+      "timeoutSeconds": 20
+    }
+  ]
+}

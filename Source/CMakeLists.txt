@@ -21,6 +21,10 @@ endif()
 add_subdirectory(Server)
 add_subdirectory(DLLs)
 
+if(BUILD_UNIVERSELAN_SYSTEM_TESTS)
+  add_subdirectory(SystemTests)
+endif()
+
 if(BUILD_UNIVERSELAN_UNIT_TESTS)
   add_subdirectory(UnitTests)
 endif()

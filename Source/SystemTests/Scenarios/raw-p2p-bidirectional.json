@@ -1,0 +1,42 @@
+{
+  "name": "raw-p2p-bidirectional",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 45,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 8
+    }
+  },
+  "hosts": [
+    {
+      "role": "creator",
+      "scenario": "raw-p2p-two-creator",
+      "identity": {
+        "userId": 2101,
+        "personaName": "RawP2PCreator"
+      },
+      "peerUserIds": [2102],
+      "waitFor": ["server-ready"],
+      "signals": ["lobby-tagged", "creator-exchanged"],
+      "actionAfter": ["joiner-joined"],
+      "finishAfter": ["creator-exchanged", "joiner-exchanged"],
+      "timeoutSeconds": 15
+    },
+    {
+      "role": "joiner",
+      "scenario": "raw-p2p-two-joiner",
+      "identity": {
+        "userId": 2102,
+        "personaName": "RawP2PJoiner"
+      },
+      "peerUserIds": [2101],
+      "waitFor": ["server-ready", "lobby-tagged"],
+      "signals": ["joiner-joined", "joiner-exchanged"],
+      "actionAfter": ["joiner-joined"],
+      "finishAfter": ["creator-exchanged", "joiner-exchanged"],
+      "timeoutSeconds": 15
+    }
+  ]
+}

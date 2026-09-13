@@ -1,0 +1,28 @@
+{
+  "name": "custom-networking-echo",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 30,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 4
+    }
+  },
+  "websocket": {
+    "enabled": true,
+    "readyEvent": "websocket-ready"
+  },
+  "hosts": [
+    {
+      "role": "echo-client",
+      "scenario": "custom-networking-echo",
+      "identity": {
+        "userId": 2301,
+        "personaName": "CustomNetworkingEcho"
+      },
+      "waitFor": ["server-ready", "websocket-ready"],
+      "timeoutSeconds": 15
+    }
+  ]
+}

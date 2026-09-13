@@ -1,0 +1,25 @@
+{
+  "name": "initialize-and-sign-in",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 15,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 8,
+      "tickRate": 200
+    }
+  },
+  "hosts": [
+    {
+      "role": "client",
+      "scenario": "initialize-and-sign-in",
+      "identity": {
+        "userId": 1001,
+        "personaName": "SystemClient"
+      },
+      "waitFor": ["server-ready"],
+      "timeoutSeconds": 10
+    }
+  ]
+}

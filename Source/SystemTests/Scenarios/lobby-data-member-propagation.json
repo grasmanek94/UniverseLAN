@@ -1,0 +1,40 @@
+{
+  "name": "lobby-data-member-propagation",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 45,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 8
+    }
+  },
+  "hosts": [
+    {
+      "role": "owner",
+      "scenario": "lobby-data-member-owner",
+      "identity": {
+        "userId": 2401,
+        "personaName": "LobbyDataOwner"
+      },
+      "peerUserIds": [2402],
+      "waitFor": ["server-ready"],
+      "signals": ["lobby-tagged", "owner-observed-joiner", "owner-lobby-data-written"],
+      "finishAfter": ["joiner-verified-owner-data"],
+      "timeoutSeconds": 20
+    },
+    {
+      "role": "joiner",
+      "scenario": "lobby-data-member-joiner",
+      "identity": {
+        "userId": 2402,
+        "personaName": "LobbyDataJoiner"
+      },
+      "peerUserIds": [2401],
+      "waitFor": ["server-ready", "lobby-tagged"],
+      "signals": ["joiner-joined", "joiner-member-data-written", "joiner-verified-owner-data"],
+      "actionAfter": ["owner-observed-joiner"],
+      "timeoutSeconds": 20
+    }
+  ]
+}
