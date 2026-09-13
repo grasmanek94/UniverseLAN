@@ -115,9 +115,10 @@ UniverseLAN configuration into each directory:
 - Tracing, console interaction, and real-service behavior disabled.
 - Server and client data directories below the temporary root only.
 
-The runner receives the selected version's built `UniverseLANServer` target
-path and version-specific DLL host target path from CMake. It therefore always
-launches UniverseLAN artifacts, never a real GOG Galaxy executable or runtime.
+For `universelan` scenarios, the runner receives the selected version's built
+`UniverseLANServer` target path and version-specific DLL host target path from
+CMake. Runtime-provider selection determines whether the host loads that built
+UniverseLAN client DLL or an explicitly requested official GOG runtime.
 
 ## Runtime Providers
 
@@ -126,13 +127,16 @@ to a version-specific DLL host:
 
 - `universelan` is the default. The host uses the selected build's
   `universelan-client-<version>` target and, when required, the matching built
-  `universelan-server-<version>` target.
+  `universelan-server-<version>` target. A declared server is launched only for
+  this provider.
 - `gog` is opt-in. Before launching any process, the orchestrator verifies that
   `Source/DLLs/<version>/gog/` contains the official architecture-specific
   Galaxy runtime and import library: `Galaxy<arch>.dll` and `Galaxy<arch>.lib`
   on Windows, or the corresponding `libGalaxy<arch>.so` on Linux. Some SDKs
   use the `REDGalaxy` prefix, so the resolver follows the version feature flag
-  used by the build.
+  used by the build. `gog` scenarios cannot declare a UniverseLAN server;
+  connectivity is provided by the real GOG environment when the scenario
+  requires it.
 
 If a `gog` scenario lacks any required artifact, it is reported as skipped with
 an explicit diagnostic, never as a UniverseLAN failure. A GOG provider scenario
