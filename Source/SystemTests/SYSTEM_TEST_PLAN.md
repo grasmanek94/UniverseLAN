@@ -4,8 +4,9 @@
 
 System tests validate externally visible UniverseLAN Galaxy API behavior through
 real UniverseLAN client DLLs and, when declared by a scenario, real
-UniverseLAN server executables. They do not load or contact real GOG Galaxy
-libraries or services.
+UniverseLAN server executables. The default runtime provider is `universelan`.
+A scenario can explicitly select the `gog` provider for future behavior
+comparison work, but current SystemTests use `universelan` only.
 
 Each scenario is automatic: it has bounded deadlines, machine-readable
 protocol output, and a single CTest PASS or FAIL result.
@@ -41,6 +42,7 @@ Example: `Scenarios/lobby-create-list-join.json`:
 ```json
 {
   "name": "lobby-create-list-join",
+  "runtimeProvider": "universelan",
   "timeoutSeconds": 30,
   "server": {
     "enabled": true,
@@ -116,6 +118,33 @@ UniverseLAN configuration into each directory:
 The runner receives the selected version's built `UniverseLANServer` target
 path and version-specific DLL host target path from CMake. It therefore always
 launches UniverseLAN artifacts, never a real GOG Galaxy executable or runtime.
+
+## Runtime Providers
+
+`runtimeProvider` determines which Galaxy runtime the orchestrator places next
+to a version-specific DLL host:
+
+- `universelan` is the default. The host uses the selected build's
+  `universelan-client-<version>` target and, when required, the matching built
+  `universelan-server-<version>` target.
+- `gog` is opt-in. Before launching any process, the orchestrator verifies that
+  `Source/DLLs/<version>/gog/` contains the official architecture-specific
+  Galaxy runtime and import library: `Galaxy<arch>.dll` and `Galaxy<arch>.lib`
+  on Windows, or the corresponding `libGalaxy<arch>.so` on Linux. Some SDKs
+  use the `REDGalaxy` prefix, so the resolver follows the version feature flag
+  used by the build.
+
+If a `gog` scenario lacks any required artifact, it is reported as skipped with
+an explicit diagnostic, never as a UniverseLAN failure. A GOG provider scenario
+also declares that network access and an installed, authenticated GOG Galaxy
+environment are prerequisites; the runner does not attempt to create or fake
+that environment.
+
+The provider resolver, manifest schema, process protocol, and isolation code
+are intentionally reusable by future `BehaviourTests`. Behaviour tests can run
+the same scenario once with `universelan` and once with `gog`, compare their
+machine-readable outcome/event traces, and keep provider-specific prerequisites
+outside the core SystemTests suite.
 
 ## Configuration And Identity Management
 
