@@ -44,12 +44,23 @@ Example: `Scenarios/lobby-create-list-join.json`:
   "timeoutSeconds": 30,
   "server": {
     "enabled": true,
-    "readyEvent": "server-ready"
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 8
+    }
   },
   "hosts": [
     {
       "role": "creator",
       "scenario": "create-lobby",
+      "identity": {
+        "userId": 1001,
+        "personaName": "SystemCreator",
+        "credentials": {
+          "login": "creator",
+          "password": "system-test"
+        }
+      },
       "waitFor": ["server-ready"],
       "signals": ["lobby-ready"],
       "timeoutSeconds": 10
@@ -57,6 +68,10 @@ Example: `Scenarios/lobby-create-list-join.json`:
     {
       "role": "joiner",
       "scenario": "list-and-join-lobby",
+      "identity": {
+        "userId": 1002,
+        "personaName": "SystemJoiner"
+      },
       "waitFor": ["server-ready", "lobby-ready"],
       "timeoutSeconds": 10
     }
@@ -101,6 +116,34 @@ UniverseLAN configuration into each directory:
 The runner receives the selected version's built `UniverseLANServer` target
 path and version-specific DLL host target path from CMake. It therefore always
 launches UniverseLAN artifacts, never a real GOG Galaxy executable or runtime.
+
+## Configuration And Identity Management
+
+The orchestrator builds each process configuration from a scenario-wide
+deterministic baseline, then applies validated server or role-specific
+overrides. Scenarios do not copy repository configuration directories or edit
+INI files themselves.
+
+- The baseline supplies the selected loopback port, authentication key, disabled
+  tracing, and all data paths below the run root.
+- `server.configuration` may override supported server settings such as maximum
+  connections and tick rate.
+- Each host has a required unique `identity.userId` and optional stable persona
+  name. The runner rejects duplicate IDs before launching a process.
+- `identity.credentials` is optional and only passed to workers exercising a
+  credential-based Galaxy API path. The default local UniverseLAN sign-in path
+  uses the declared identity and does not need real credentials.
+- Secrets are supplied from the manifest only for test-local credentials. They
+  are never written to stdout, protocol events, CTest command lines, or retained
+  logs. Future CI credentials are injected through named environment variables,
+  resolved by the runner, and redacted from diagnostics.
+- Worker command lines receive only role, scenario, run directory, and a control
+  token. They read their generated `UniverseLAN.ini` and role metadata from the
+  private working directory, preventing cross-host configuration leakage.
+
+This supports a server plus any number of hosts with distinct identities and,
+when needed, distinct credentials, without introducing hand-maintained
+configuration files per test.
 
 ## CMake Contract
 
