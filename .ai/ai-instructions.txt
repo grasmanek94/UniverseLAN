@@ -1,0 +1,193 @@
+Project / working dir:
+
+- C:\Development\Projects\LanSupportForDRMFreeGames\ (ROOT)
+- ROOT\Source will be called SRC
+- THESE INSTRUCTIONS are also present in ROOT\.ai\ai-instructions.txt
+- Branch you will branch from/base your changes on: feature/ixwebsocket
+- Create a branch feature/ixwebsocket-tests for your work
+- Main task: Implement unit tests
+- Skill you must use: ROOT\.ai\SKILLS\UnitTester.MD
+- In case of conflicting instructions, any instructions below override above skill
+- You are working in a sandboxie sandbox, you can do anything you want (just don't turn off the machine or hack the machine)
+- You are NOT to PUSH anything to the git remote, ever
+- Important directories/files to execute task successfully:
+-- ROOT\CMakeLists.txt
+-- SRC\**
+-- ROOT\bin\
+-- SRC\Vendor\*.cmake
+-- SRC\Vendor\*.txt
+- Excluded directories/files from this task:
+-- SRC\EnetTest\**
+-- SRC\InterceptionLogger\**
+-- SRC\Vendor\** (except when explicitly asked to)
+-- ROOT: .git .github cmake-x64 cmake-x86 docs release-packages UniverseLanLogAnalyzer UniverseLanWizard Util ZipFileHasher LICENSE .gitattributes
+- You can use, for extra inspiration and/or analysis and credential files: ROOT\Source\TestCases\credentials.cmake
+- This credential file is in .gitignore and shall never be added to git or leaked in any way
+- Don't reuse the current / old TestCases, only use as inspiration
+- Focus on Windows development only, no linux, but don't write code that will not compile on linux (or ifdef it), do not ever break compilation on linux based systems. Do not build on linux, just ensure that non-portable code gets only compiled inside platform specific ifdefs.
+- The project C++ source and header extensions are: .cxx .hxx
+
+Detailed information needed for task:
+UniverseLAN is a GOG Galaxy wrapper DLL and server backend which re-implements the same public interface that GOG Galaxy library exposes. GOG Galaxy is used in games and UniverseLAN is a drop-in replacement so it can take over GOG Galaxy functionality, such as multiplayer and lobbies.
+The same functions that perform "something" on the internet/GOG backend, are in UniverseLAN performed against its' own server software (SRC: Server, Shared\, Shared\Networtking, Shared\Networking\Messages).
+
+All GOG Galaxy versions are implemented, these are split into a common codebase and version specific projects defined in CMake.
+Output by default go to ROOT\bin\<version>\ or ROOT\bin\tests\<version>\
+Outputs are: Galaxy64.dll Galaxy.dll (dll are sometimes prefixed with RED), UniverseLANServer.exe UniverseLANServer64.exe
+The project uses CMake.
+ROOT\Source\DLLs\<version>\ contains:
+- galaxy: the public SDK headers from GOG itself
+- gog: the official .dll and .lib files from GOG itself
+- x64 and x86: .rc files for the projects dll files and .def files
+- Empty .cxx file that indicates if this is a Galaxy Factory enabled build or not
+
+The UniverseLAN implementation is located inside SRC directory inside these directories:
+- Client (has feature ifdefs) and Client_NoVer (generic library for all versions)
+- Shared (has feature ifdefs) and Shared_NoVer (generic) are libraries for both server and client
+- Server has version specific server projects
+- Features are defined through CMake, inside SRC\galaxy_sdk_features.cmake, this cmake file makes sure that each version has the correct #define GALAXY_BUILD_FEATURE_<feature name> = 0/1
+- When generating/configuring the project(s) with cmake, if it's not necessary to create all version variants, limit the versions with, for example "-D LIMIT_VERSIONS="1.139.2"", speeds up complete project build times dramatically.
+- when a more comprehensive compilation is needed, use -D LIMIT_VERSIONS="1.57.0,1.124.0,1.148.3,1.139.2,1.152.11" (but at this moment in time not all old test cases compile)
+- changes to cmake files logic or creating new cmake loginc is required, but it's prohibited, never allowed, to define version specific configuration in cmake. Cmake must always configure for all requested versions, so no adding hardcoded targets for for example 1.139.2, always use the same mechanism just like definition of client dlls, server targets, etc.
+- The UniverseLAN libraries/server pull config files first from working directory and then other directories like appdata, the config files are located inside the repository in ROOT\Config ROOT\ConfigDebug
+
+Detailed task description:
+- Create a new SRC\UnitTests\ directory
+- Inside vendor, clone GoogleTest and add appropriate changes to the cmake files to expose google test framework
+- Vendor libraries are added as part of the git repo, not as a submodule, not as FetchContent
+- For all functions where creating a unit test makes sense, create a unit test.
+- Create approximately one test source file per tested production header.
+- Group related test source files into one executable per production library or logical component.
+- Split an unusually large test file when doing so improves readability.
+- Start by creating unit tests for not-version-specific libraries/projects (_NoVer)
+- Later add version specific tests
+- Make sure the tests will only be compiled and executed with cmake if(BUILD_TEST_CASES) check
+- Follow cmake and C++20 best practices, follow the structure, style, etc. of the current codebase, keep the output and changes consistent with the current codebase
+- If there are any doubts, ask clarification
+- Create a project plan and execute the plan in stages, quality over quantity, do not do everything at once, work in stages
+- Tests should be buildable with current set of CMake files, they should be an addition to the project, not something standalone, the tests should re-use all currently defined cmake functionality
+
+Do not stop for minor ambiguities. Follow existing repository conventions and record reasonable assumptions.
+Ask before proceeding only if:
+- A change would alter a public API or ABI.
+- Existing user changes may be overwritten.
+- Credentials or external services appear necessary.
+- The build cannot be configured after reasonable investigation.
+- Two requirements directly conflict.
+- The requested scope cannot be completed as a coherent increment.
+
+The task is complete when:
+- BUILD_TEST_CASES=OFF produces no GoogleTest dependency and no unit-test targets.
+- BUILD_TEST_CASES=ON configures successfully.
+- Unit-test targets compile on Windows x64 Debug.
+- CTest discovers all test executables.
+- All implemented tests pass.
+- Tests require no internet access or real credentials.
+- No excluded production directories are modified.
+- Existing non-test targets still compile.
+- The final report lists tested and untested components.
+
+For each tested unit, cover the applicable categories:
+- Normal operation.
+- Empty and minimum-size input.
+- Boundary values.
+- Invalid input.
+- Error propagation.
+- Relevant state transitions.
+- Resource ownership and cleanup.
+- Regression scenarios discovered during implementation.
+- Feature-disabled behavior where applicable.
+
+GoogleTest dependency:
+- Add GoogleTest under SRC\Vendor\googletest.
+- This is the only permitted modification under SRC\Vendor, except for the
+  existing SRC\Vendor\*.cmake and SRC\Vendor\*.txt integration files.
+- Use the official GoogleTest repository:
+  https://github.com/google/googletest.git
+- The test build must not require network access after the dependency has been added.
+- GoogleTest must not be configured or compiled when BUILD_TEST_CASES=OFF.
+
+Stage 1 is an inventory and infrastructure stage:
+- Inspect all in-scope _NoVer production headers.
+- Create SRC\UnitTests and integrate GoogleTest with CMake and CTest.
+- Select 3 to 5 representative, high-priority headers.
+- Implement tests for those headers.
+- Configure, build, and execute the tests.
+- Record the remaining _NoVer headers in SRC\UnitTests\TEST_PLAN.md.
+
+After Stage 1 passes, continue in coherent batches of approximately 3 to 5
+production headers. Each batch must build and pass before the next batch begins.
+
+Git workflow:
+- Git commands may be used normally, but do not directly edit files under
+  ROOT\.git.
+- Inspect the current branch and working-tree status before making changes.
+- Do not reset, clean, stash, discard, overwrite, or amend pre-existing user work.
+- Do not fetch, pull, push, force-push, or modify remote configuration.
+- Local commits are allowed only after the corresponding stage builds and passes.
+
+- If there are bugs in the user code, and the tests are correct, that's allowed to be commited
+
+--
+
+Unit tests are DONE, NOW:
+
+okay then now, in the same spirit, we will continue but introduce SystemTests (instead of UnitTests) and focus on SystemTests. The folder will be SystemTests, not UnitTests now. The new cmake guard variable will be BUILD_UNIVERSELAN_SYSTEM_TESTS, it will also be enabled if the *ALL* variable is enabled.
+
+The system tests must be researched and structured in a testable manner first. This means it will be inspired by the current old TestCases possibly, where the test is an application host for the DLL, and it will test the GOG Galaxy behaviours (external/visible behaviour). The old TestCases are really bad so I prefer not to use them. Come up with a good, clear, readable and understandable, clear testing system for testing visible galaxy behaviour. for now focus on testing UniverseLAN and not real GOG behaviour. The problem with the old TestCases is that they're not automatic, nor PASS/FAIL, they just run and a human must check if it's ok, that's not what I want.
+
+The tests would also need to be (partially?) automated to launch the correct version of UniverseLANServer (if it's not real GOG Galaxy).
+
+The testing harness/framework should also take into account that sometimes it might be required to launch a server and for example two "Test DLL hosts" so that e.g. message exchange can be tested, or even 3, i.e. multiplayer packets, so a good design/framework for this is important.
+
+this includes support inside cmake, maybe automation scripts/batch/bash files (preferably cross platform something), and from the applications (or an test orchestrator application that launches everything needed from some test_<test_name>.json or ini and checks the results of the launched apps).
+
+the orchestrator should also cleverly/easily manage configurations for server, client, and possibly different credentials/user ids for both or all three test runners
+
+I think it would be beneficial for future "behaviour difference tests" (we will also focus on that in the future, that will be BehaviourTests, not SystemTests) to maybe also orchestrate running real Galaxy DLL to check if the tests arew actually correct, for now keep it simple, the orchestrator should be able to be instructed to run just UniverseLAN, or instructed to run against GOG Galaxy (in that case it's implied internet is available and GOG is available), that means that a check will be executed to see if the :
+
+ROOT\Source\DLLs\<version>\ contains:
+- gog: the official .dll and .lib files from GOG itself
+
+are available
+
+okay so in short we have planned:
+- a test orchestrator
+- it can choose to run:
+A) UniverseLAN mode: server (0 or 1 servers) with the correct version and architecture (e.g .1.124.0-x64) and 0..3(or more? dynamic) clients
+B) Official GOG Galaxy mode: It will launch the requested amount of clients with real GOG Galaxy dlls
+- it will manage configuration for the server and clients wherever possible and where it makes sense
+- it will use the already provided credentials in credentials.cmake inside the repo, these credentials should be moved into, for example, Source\TestCommon or something when these will be shared across test directories
+- the orchestrator will suplement some kind of testing framework inside tests which will be the Galaxy DLL host processes, which will load the chosen DLL (UniverseLAN or official) and log in with credentials
+- the Galaxy DLL host processes will use for example Google Test or some other system test appropriate framework (or self developer, or grab something from github into vendor and integrate it into cmake files)
+- the tests will again, use feature definition macros as defined by cmake, and conform to the current structure, style of the whole project and be consistent with the current coding style of the UniverseLAN codebase
+- anything we missed?
+
+==== AI response start ====
+Yes. The plan should explicitly include:
+
+Dynamic topology: 0..N clients, not a fixed maximum of 3. Manifest declares roles and dependencies.
+Provider adapter: Each SDK-version host must load either the matching UniverseLAN DLL or official GOG DLL without changing test logic. Factory-era and exported-API SDK variants need one version-aware host adapter.
+Server rules: universelan mode may declare 0 or 1 matching UniverseLANServer process. gog mode declares no UniverseLAN server.
+Per-version CMake generation: Generate host/orchestrator targets for every requested LIMIT_VERSIONS SDK and architecture, never hardcode 1.124.0 or x64.
+Credential handling: Move the ignored credential configuration to Source/TestCommon/credentials.cmake; keep it ignored, never copy it into manifests, command lines, stdout, CTest output, commits, or retained logs. Add a resolver/redactor shared by SystemTests and future BehaviourTests.
+Configuration model: Scenario baseline plus validated server and role overrides. Generate isolated working directories and UniverseLAN.ini files per process; reject duplicate IDs and invalid ports before launch.
+Worker result model: Hosts should use a narrow machine protocol for the orchestrator, independent of framework output. GoogleTest may be useful inside a host, but the orchestrator must treat process exit, declared events, PASS, FAIL, deadlines, and crashes as the authoritative result.
+Runtime preflight: For gog, verify the correct SDK-version and architecture’s official gog runtime and import library before launch; skip with diagnostics if absent.
+Lifecycle handling: Server readiness detection, host dependency events, stdout/stderr capture, bounded timeouts, forced cleanup, and preserved diagnostics on failure.
+CTest integration: BUILD_UNIVERSELAN_SYSTEM_TESTS, inclusion in BUILD_ALL_TESTS, enable_testing(), TIMEOUT, RUN_SERIAL, and a shared network RESOURCE_LOCK.
+Future reuse: Put generic provider resolution, credential resolution, process control, protocol parsing, and configuration generation in Source/TestCommon; SystemTests and future BehaviourTests reuse it.
+The main unresolved design detail is the per-SDK DLL loading adapter, especially factory-era versus direct-export SDK variants. That should be implemented first, before the initial two-client scenario.
+
+==== AI response end ====
+
+If you encounter any defects of the codebase, if they're really small and easy to fix, fix them. If it requires rework which is bigger, note it in a found_defects.MD, larger codebase redesigns I must do, you shall never do big codebase redesigns.
+
+== System tests done, now move on to behaviour tests ==
+
+okay so if all interfaces are "covered" just not super deep, that's all right. We will continue on to a new/next project now: Difference tests with real GOG Galaxy and UniverseLAN. So now the task will be to create a third set of AI assisted tests (not counting old TestCases). The new BehaviourTests (in addition to UnitTests, SystemTests) will, purely from an GOG Galaxy SDK header/interfaces, test "seen" behaviour: so event, state transitions, callbacks, data in/out, results. No internal workings of code shall be tested here (the tests must assume they know nothing about the internals of the code), only observable behaviour from the Galaxy SDK (Source\DLLs\<version>\galaxy\*.h).
+For each of these tests, just like the SystemTests, an ochestration must happen of the relevant tested UniverseLAN Server, and two UniverseLAN DLL hosts, and then at the same time two real GOG Galaxy DLL hosts which will perform the same operations. The orchestrator then must compare (smartly) if the UniverseLAN and real GOG set have the same events, callbacks, data out/in, results, etc, while accounting for differences (and assuming) like uncontrolable GalaxyID's of the accounts, lobbies, messages etc.. (as that's server/remote controlled). The two real Galaxy apps will use the provided credentials, and to make code the same, the UniverseLAN things will also use the credentials (just, well, we accept in universelan any credentials). Behaviour tests should first be specific, so when we test sign in behaviour, we don't care about rich presence callbacks being executed, friends, etc.. first tests should test simple observable behaviours (so make a folder Simple), and then next up will be advanced combined behaviour (so Advanced behaviour tests, also a separate folder). Either the current orchestrator can be re-used or a new one (inspired by the old one) will be created. Create a plan and first lets clarify the requirements, ask any questions for thing that are unclear. Not what I have told in an AI friendly way so you can efficiently resume later. Make a test/development plan first, index any behaviour that must be tested, then start implementing the orchestrator and framework needed for testing, including all the cmake changes, portable scripts/documentation, and then start implementing the behaviour check tests (simple ones first). Keep in mind sometimes callbacks can arrive in different orders and that can sometimes still be good, but we'll cross that bridge when we get to it. GOG Galaxy behaviour is authoritative over UniverseLAN, UniverseLAN aims to reproduce GOG Galaxy.
+
+for behaviour tests (also make sure it will have it's own cmake variable define like unit tests and system tests) real gog galaxy must actually be enabled by default, only disable if needed for something else..
+
+Do not build a monolith host/runner/test framework (for tests, them being sinle or few files I understand). Build something that's readable, maintainable, and has coherent logic, re-use, common folders/libraries/sources, and all other good development practices for C++ software.
