@@ -120,7 +120,7 @@ combine already-characterized Simple contracts.
 | `IStats` | Retrieve/store operation outcomes, a dedicated test stat/achievement value, post-store public read. | Cross-process durability, reset/failure handling, ordering with presence/user data. |
 | `IStorage` | Local write/read, share/download operation result, metadata/content relationships. | Policy/failure paths, timestamps, invalid IDs, multi-account sharing. |
 | `ICloudStorage` | Put/list/get/metadata callback behavior where the official SDK supports it. | Conflict, quota, synchronization, notification, deletion behavior. |
-| `ICustomNetworking` | Open, send/receive, close, terminal callback/result behavior against a runner-owned endpoint. | Connection failure, concurrency, close/error races. |
+| `ICustomNetworking` | Official-only loopback open/roundtrip/close characterization is implemented. Two 2026-09-14 official trials signed in but observed open failure for both profiles, so no send/receive/close contract is enabled. | Successful endpoint characterization, connection failure, concurrency, close/error races. |
 | `IApps` | DLC installed/owned result and language API behavior for the configured application. | DLC state changes and failure paths. |
 | `ITelemetry` | Public send result/callback behavior only if the official environment accepts deterministic telemetry testing. | Parameter, sampling, visit ID, failure behavior. |
 | `IUtils` | Overlay and post-auth service connection state observable behavior. | Notifications, images/avatars, auth-loss/reconnect behavior. |
@@ -437,7 +437,20 @@ data can be listed and read; they are never printed. These are public
    Official GOG's unmatched exclusion remains strict. UniverseLAN intentionally
    permits an unmatched public candidate as a diagnostic relaxed-filter superset;
    that narrow policy never permits a malformed filter or an unmatched selection
-   or join.
+    or join.
+
+- `Simple/custom-networking-loopback-roundtrip-close` uses public
+  `ICustomNetworking` only. The runner owns an ephemeral loopback WebSocket
+  endpoint that returns opaque binary frames unchanged; it is transport setup,
+  never behavior evidence. A successful host path would open one connection,
+  send one private NUL-containing payload, validate callback-local availability,
+  two non-consuming peeks and one read, then close. Two official-only
+  `1.152.11/x64` trials on 2026-09-14 signed both profiles in but observed open
+  failure for both profiles, leaving send/data/close uncharacterized. No strict
+  UniverseLAN CTest is registered and no product cause or comparison rule is
+  inferred until successful official observations are stable. Connection IDs,
+  endpoint URL/port, bytes/lengths, credentials, timestamps, controls, and
+  runtime output are not retained.
 
 - `Simple/public-lobby-not-joinable-behavior` ran twice as an official-GOG-only
   characterization before its strict four-host baseline on 2026-09-14. Both

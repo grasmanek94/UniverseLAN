@@ -1,0 +1,14 @@
+{
+  "name": "Simple/custom-networking-loopback-roundtrip-close",
+  "sdkVersion": "1.152.11",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 30,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": ["initialize", "sign-in-callback", "sign-in-terminal", "custom-networking-open", "custom-networking-send", "custom-networking-data", "custom-networking-close", "custom-networking-settle", "self-state"],
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "connection IDs, endpoint URL and port, private payload bytes and lengths, credentials, timestamps, controls, and runtime output are never recorded; compare only symbolic open/data/peek/read/close relations"
+  }
+}

@@ -87,6 +87,21 @@ public facts:
 & "bin/Debug/universelan-behaviour-runner-x64-1.152.11.exe" --characterize-official-gog-chat-room-message-delivery --gog-host "bin/Debug/universelan-behaviour-host-gog-x64-1.152.11.exe" --gog-runtime-dir "Source/DLLs/1.152.11/gog"
 ```
 
+Characterize custom networking against official GOG before registering any strict
+comparison:
+
+```powershell
+& "bin/Debug/universelan-behaviour-runner-x64-1.152.11.exe" --characterize-official-gog-custom-networking-loopback-roundtrip-close --gog-host "bin/Debug/universelan-behaviour-host-gog-x64-1.152.11.exe" --gog-runtime-dir "Source/DLLs/1.152.11/gog"
+```
+
+The runner owns an ephemeral loopback WebSocket binary echo endpoint. The host
+uses only public `ICustomNetworking` calls: open, then on success one private
+NUL-containing send, callback-local availability/two-peek/read relations, and
+close. The endpoint is opaque transport, not behavior evidence. Two official
+trials on 2026-09-14 produced open failures for both signed-in profiles, so no
+strict CTest is registered. Do not infer a failure cause or add a comparison
+until successful official open/roundtrip/close observations are repeatable.
+
 Characterize bidirectional direct chat twice before changing its strict facts:
 
 ```powershell

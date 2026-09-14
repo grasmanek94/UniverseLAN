@@ -171,6 +171,16 @@ requires unmatched exclusion; UniverseLAN intentionally permits an unmatched
 candidate in the public result as diagnostic context only. This is not permission
 for malformed filters or wrong-target selection/join.
 
+`Simple/custom-networking-loopback-roundtrip-close` is currently an official-only
+characterization probe, not a registered strict comparison. It uses public
+`ICustomNetworking` against a runner-owned ephemeral loopback WebSocket endpoint
+that echoes opaque binary frames only. Two official `1.152.11/x64` trials on
+2026-09-14 signed in both profiles but each `OpenConnection` terminal failed, so
+no send, callback-local peek/read, or close fact was established. The endpoint
+URL/port, connection IDs, payload bytes/lengths, credentials, timestamps,
+controls, and runtime output are not retained. Do not add a strict UniverseLAN
+comparison until successful official open/roundtrip/close observations repeat.
+
 ## How To Read A Result
 
 Each scenario runs two synchronized lanes: UniverseLAN server plus two

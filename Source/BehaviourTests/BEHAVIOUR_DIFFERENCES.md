@@ -29,6 +29,16 @@ The recorded accepted lobby convergence result passes because eventual-list retr
 timing is explicitly excluded from lane equality. Matched live baselines remain
 strict for every public fact they record.
 
+### `Simple/custom-networking-loopback-roundtrip-close` on `1.152.11/x64`
+
+- Date: 2026-09-14
+- Classification: unresolved
+- Public observation: two official-GOG-only trials signed in both approved profiles, then each independently issued public `ICustomNetworking::OpenConnection` to a runner-owned ephemeral loopback binary echo endpoint. Each host received an open failure terminal; no send, data, peek, read, or close operation was issued.
+- Official normalized result: both profiles had successful initialization/sign-in/self-state records, `openTerminal=failure`, `dataRoundtripRelationsComplete=false`, and `closeTerminal=not-issued` in both trials.
+- UniverseLAN normalized result: not run; a strict comparison is not justified without successful repeatable official open/roundtrip/close evidence.
+- Reproduction command/test name: `--characterize-official-gog-custom-networking-loopback-roundtrip-close`; no CTest is registered.
+- Follow-up: retain the sanitized local characterization report only. The runner endpoint returns opaque binary frames unchanged and is not behavior evidence. Do not infer an SDK cause from the open failure or promote any send/peek/read/close relation before a successful official baseline. No connection ID, endpoint URL/port, payload bytes/lengths, credential, timestamp, control, runtime output, or artifact path is recorded.
+
 ### `Simple/bidirectional-lobby-member-data-propagation` on `1.152.11/x64`
 
 - Date: 2026-09-14

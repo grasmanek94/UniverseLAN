@@ -83,6 +83,7 @@ function(add_universelan_behaviour_host target)
   set(GALAXY_VERSION "${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY}")
   add_version_definitions_to(${target})
   target_compile_definitions(${target} PRIVATE
+    NOMINMAX
     "UNIVERSELAN_BEHAVIOUR_TEST_VERSION=\"${UNIVERSELAN_BEHAVIOUR_TEST_VERSION}\""
     "UNIVERSELAN_BEHAVIOUR_TEST_ARCH=\"${UNIVERSELAN_BEHAVIOUR_TEST_ARCH}\"")
 endfunction()
@@ -101,7 +102,7 @@ endif()
 
 add_executable(universelan-behaviour-runner-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY} Runner/Main.cxx)
 target_include_directories(universelan-behaviour-runner-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_libraries(universelan-behaviour-runner-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY} PRIVATE universelan-behaviour-test-common json)
+target_link_libraries(universelan-behaviour-runner-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY} PRIVATE universelan-behaviour-test-common json ixwebsocket)
 target_compile_definitions(universelan-behaviour-runner-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY} PRIVATE
   "UNIVERSELAN_BEHAVIOUR_TEST_VERSION=\"${UNIVERSELAN_BEHAVIOUR_TEST_VERSION}\""
   "UNIVERSELAN_BEHAVIOUR_TEST_ARCH=\"${UNIVERSELAN_BEHAVIOUR_TEST_ARCH}\"")

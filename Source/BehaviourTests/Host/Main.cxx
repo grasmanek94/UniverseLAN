@@ -26,15 +26,17 @@ struct Arguments
     std::string profile;
     std::filesystem::path trace;
     std::filesystem::path control;
+    std::string webSocketUrl;
     int timeoutSeconds = 0;
 };
 
-    enum class Scenario { initializeAndSignIn, sessionIdRepeatability, gogServicesState, gogServicesStateCharacterization, publicLobbyCreateListJoinLeave, publicLobbyStringFilteringCharacterization, publicLobbyStringFiltering, publicLobbyNotJoinableBehaviorCharacterization, publicLobbyNotJoinableBehavior, publicLobbyFullJoinFailureCharacterization, publicLobbyFullJoinFailure, publicLobbyOwnerCloseLifecycleCharacterization, publicLobbyOwnerCloseLifecycle, publicLobbyOwnerOwnershipTransitionCharacterization, publicLobbyOwnerOwnershipTransition, publicLobbyDataPropagationCharacterization, publicLobbyDataPropagation, reliableP2PListenerPeekCharacterization, reliableP2PListenerPeek, reliableP2PAfterLobbyLeaveCharacterization, reliableP2PAfterLobbyLeave, bidirectionalReliableP2PListenerPeekCharacterization, bidirectionalReliableP2PListenerPeek, bidirectionalUnreliableP2PListenerPeekCharacterization, bidirectionalUnreliableP2PListenerPeek, bidirectionalLobbyMessageDeliveryCharacterization, bidirectionalLobbyMessageDelivery, bidirectionalLobbyMemberDataPropagationCharacterization, bidirectionalLobbyMemberDataPropagation, multipleLobbyMembershipAndMessageIsolationCharacterization, multipleLobbyMembershipAndMessageIsolation, chatRoomMessageDeliveryCharacterization, chatRoomMessageDelivery, bidirectionalChatRoomMessageDeliveryCharacterization, bidirectionalChatRoomMessageDelivery, friendsPeerInformationRetrievalCharacterization, friendsPeerInformationRetrieval };
+    enum class Scenario { initializeAndSignIn, sessionIdRepeatability, gogServicesState, gogServicesStateCharacterization, customNetworkingLoopbackRoundtripCloseCharacterization, customNetworkingLoopbackRoundtripClose, publicLobbyCreateListJoinLeave, publicLobbyStringFilteringCharacterization, publicLobbyStringFiltering, publicLobbyNotJoinableBehaviorCharacterization, publicLobbyNotJoinableBehavior, publicLobbyFullJoinFailureCharacterization, publicLobbyFullJoinFailure, publicLobbyOwnerCloseLifecycleCharacterization, publicLobbyOwnerCloseLifecycle, publicLobbyOwnerOwnershipTransitionCharacterization, publicLobbyOwnerOwnershipTransition, publicLobbyDataPropagationCharacterization, publicLobbyDataPropagation, reliableP2PListenerPeekCharacterization, reliableP2PListenerPeek, reliableP2PAfterLobbyLeaveCharacterization, reliableP2PAfterLobbyLeave, bidirectionalReliableP2PListenerPeekCharacterization, bidirectionalReliableP2PListenerPeek, bidirectionalUnreliableP2PListenerPeekCharacterization, bidirectionalUnreliableP2PListenerPeek, bidirectionalLobbyMessageDeliveryCharacterization, bidirectionalLobbyMessageDelivery, bidirectionalLobbyMemberDataPropagationCharacterization, bidirectionalLobbyMemberDataPropagation, multipleLobbyMembershipAndMessageIsolationCharacterization, multipleLobbyMembershipAndMessageIsolation, chatRoomMessageDeliveryCharacterization, chatRoomMessageDelivery, bidirectionalChatRoomMessageDeliveryCharacterization, bidirectionalChatRoomMessageDelivery, friendsPeerInformationRetrievalCharacterization, friendsPeerInformationRetrieval };
 
 bool isSupportedScenario(const std::string& scenario)
 {
     return scenario == "initialize-and-sign-in" || scenario == "session-id-repeatability" || scenario == "gog-services-state"
-        || scenario == "gog-services-state-characterization" || scenario == "public-lobby-create-list-join-leave"
+        || scenario == "gog-services-state-characterization" || scenario == "custom-networking-loopback-roundtrip-close-characterization"
+        || scenario == "custom-networking-loopback-roundtrip-close" || scenario == "public-lobby-create-list-join-leave"
         || scenario == "public-lobby-string-filtering-characterization" || scenario == "public-lobby-string-filtering"
         || scenario == "public-lobby-not-joinable-behavior-characterization"
         || scenario == "public-lobby-not-joinable-behavior"
@@ -59,6 +61,8 @@ Scenario selectedScenario(const Arguments& arguments)
     if (arguments.scenario == "session-id-repeatability") return Scenario::sessionIdRepeatability;
     if (arguments.scenario == "gog-services-state") return Scenario::gogServicesState;
     if (arguments.scenario == "gog-services-state-characterization") return Scenario::gogServicesStateCharacterization;
+    if (arguments.scenario == "custom-networking-loopback-roundtrip-close-characterization") return Scenario::customNetworkingLoopbackRoundtripCloseCharacterization;
+    if (arguments.scenario == "custom-networking-loopback-roundtrip-close") return Scenario::customNetworkingLoopbackRoundtripClose;
     if (arguments.scenario == "public-lobby-create-list-join-leave") return Scenario::publicLobbyCreateListJoinLeave;
     if (arguments.scenario == "public-lobby-string-filtering-characterization") return Scenario::publicLobbyStringFilteringCharacterization;
     if (arguments.scenario == "public-lobby-string-filtering") return Scenario::publicLobbyStringFiltering;
@@ -106,6 +110,7 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
         else if (option == "--profile") arguments.profile = value;
         else if (option == "--trace") arguments.trace = std::filesystem::u8path(value);
         else if (option == "--control") arguments.control = std::filesystem::u8path(value);
+        else if (option == "--websocket-url") arguments.webSocketUrl = value;
         else if (option == "--timeout-seconds")
         {
             try { arguments.timeoutSeconds = std::stoi(value); }
@@ -132,6 +137,8 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
               && arguments.scenario != "chat-room-message-delivery-characterization" && arguments.scenario != "chat-room-message-delivery"
               && arguments.scenario != "bidirectional-chat-room-message-delivery-characterization" && arguments.scenario != "bidirectional-chat-room-message-delivery"
               && arguments.scenario != "friends-peer-information-retrieval-characterization" && arguments.scenario != "friends-peer-information-retrieval") || !arguments.control.empty())
+        && ((arguments.scenario != "custom-networking-loopback-roundtrip-close-characterization"
+                && arguments.scenario != "custom-networking-loopback-roundtrip-close") || arguments.webSocketUrl.rfind("ws://127.0.0.1:", 0) == 0)
         && arguments.timeoutSeconds > 0 && arguments.timeoutSeconds <= 60;
 }
 
@@ -3352,6 +3359,163 @@ bool runFriendsPeerInformationRetrieval(const Arguments& arguments, galaxy::api:
     // Emit the complete public terminal observation in both lanes; the strict runner normalizer decides compatibility.
     return terminal && retrieve.terminalCount == 1 && retrieve.success && !retrieve.failure;
 }
+
+const char* apiErrorCategory(const galaxy::api::IError* const error)
+{
+    if (error == nullptr) return "none";
+    switch (error->GetType())
+    {
+    case galaxy::api::IError::UNAUTHORIZED_ACCESS: return "unauthorized-access";
+    case galaxy::api::IError::INVALID_ARGUMENT: return "invalid-argument";
+    case galaxy::api::IError::INVALID_STATE: return "invalid-state";
+    case galaxy::api::IError::RUNTIME_ERROR: return "runtime-error";
+    }
+    return "unknown";
+}
+
+const char* customNetworkingOpenFailureReason(const galaxy::api::IConnectionOpenListener::FailureReason reason)
+{
+    switch (reason)
+    {
+    case galaxy::api::IConnectionOpenListener::FAILURE_REASON_UNDEFINED: return "undefined";
+    case galaxy::api::IConnectionOpenListener::FAILURE_REASON_CONNECTION_FAILURE: return "connection-failure";
+    case galaxy::api::IConnectionOpenListener::FAILURE_REASON_UNAUTHORIZED: return "unauthorized";
+    }
+    return "unknown";
+}
+
+struct CustomNetworkingOpenListener final : galaxy::api::IConnectionOpenListener
+{
+    int successes = 0;
+    int failures = 0;
+    galaxy::api::ConnectionID connection = 0;
+    FailureReason failureReason = FAILURE_REASON_UNDEFINED;
+    void OnConnectionOpenSuccess(const char*, const galaxy::api::ConnectionID connectionId) override { ++successes; connection = connectionId; }
+    void OnConnectionOpenFailure(const char*, const FailureReason reason) override { ++failures; failureReason = reason; }
+};
+
+struct CustomNetworkingCloseListener final : galaxy::api::IConnectionCloseListener
+{
+    int callbacks = 0;
+    galaxy::api::ConnectionID connection = 0;
+    CloseReason reason = CLOSE_REASON_UNDEFINED;
+    void OnConnectionClosed(const galaxy::api::ConnectionID connectionId, const CloseReason closeReason) override
+    {
+        ++callbacks;
+        connection = connectionId;
+        reason = closeReason;
+    }
+};
+
+struct CustomNetworkingDataListener final : galaxy::api::GlobalConnectionDataListener
+{
+    galaxy::api::ICustomNetworking* networking = nullptr;
+    galaxy::api::ConnectionID expectedConnection = 0;
+    const std::vector<std::uint8_t>* payload = nullptr;
+    int callbacks = 0;
+    bool connectionMatchesOpen = false;
+    bool availabilityPositive = false;
+    bool availabilityMatchesNotification = false;
+    bool firstPeekMatchesPayload = false;
+    bool availabilityUnchangedAfterFirstPeek = false;
+    bool secondPeekMatchesFirst = false;
+    bool availabilityUnchangedAfterSecondPeek = false;
+    bool readMatchesFirstPeek = false;
+    bool availabilityZeroAfterRead = false;
+
+    void OnConnectionDataReceived(const galaxy::api::ConnectionID connection, const std::uint32_t dataSize) override
+    {
+        ++callbacks;
+        if (networking == nullptr || payload == nullptr || connection != expectedConnection) return;
+        connectionMatchesOpen = true;
+        const std::uint32_t available = networking->GetAvailableDataSize(connection);
+        availabilityPositive = available > 0;
+        availabilityMatchesNotification = available == dataSize;
+        if (available == 0 || available > 4096) return;
+        std::vector<std::uint8_t> first(available);
+        std::vector<std::uint8_t> second(available);
+        std::vector<std::uint8_t> read(available);
+        networking->PeekData(connection, first.data(), available);
+        firstPeekMatchesPayload = first == *payload;
+        availabilityUnchangedAfterFirstPeek = networking->GetAvailableDataSize(connection) == available;
+        networking->PeekData(connection, second.data(), available);
+        secondPeekMatchesFirst = second == first;
+        availabilityUnchangedAfterSecondPeek = networking->GetAvailableDataSize(connection) == available;
+        networking->ReadData(connection, read.data(), available);
+        readMatchesFirstPeek = read == first;
+        availabilityZeroAfterRead = networking->GetAvailableDataSize(connection) == 0;
+    }
+};
+
+bool runCustomNetworkingLoopbackRoundtripClose(const Arguments& arguments, std::vector<std::string>& records)
+{
+    const std::vector<std::uint8_t> payload = arguments.profile == "user1"
+        ? std::vector<std::uint8_t>{'u', '1', 0, 'n'} : std::vector<std::uint8_t>{'u', '2', 0, 'n'};
+
+    bool completed = false;
+    {
+        galaxy::api::ICustomNetworking* const networking = galaxy::api::CustomNetworking();
+        if (networking == nullptr)
+        {
+            records.push_back("{\"record\":\"custom-networking-open\",\"terminal\":\"unavailable\"}");
+            return false;
+        }
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(arguments.timeoutSeconds);
+        CustomNetworkingOpenListener open;
+        networking->OpenConnection(arguments.webSocketUrl.c_str(), &open);
+        // GetError is local-thread and reset by the next API call; retain only its public category.
+        const char* const synchronousApiErrorCategory = apiErrorCategory(galaxy::api::GetError());
+        const bool openTerminal = pumpUntil(arguments, deadline, [&] { return open.successes + open.failures > 0; });
+        const bool openSucceeded = openTerminal && open.successes == 1 && open.failures == 0 && open.connection != 0;
+        records.push_back("{\"record\":\"custom-networking-open\",\"terminal\":" + common::jsonString(openSucceeded ? "success" : "failure")
+            + ",\"exactlyOneSuccess\":" + boolean(open.successes == 1) + ",\"noFailure\":" + boolean(open.failures == 0)
+            + ",\"connectionValid\":" + boolean(open.connection != 0) + ",\"openFailureReason\":"
+            + common::jsonString(open.failures == 1 ? customNetworkingOpenFailureReason(open.failureReason) : "unavailable")
+            + ",\"synchronousApiErrorCategory\":" + common::jsonString(synchronousApiErrorCategory) + "}");
+        if (openSucceeded)
+        {
+            CustomNetworkingDataListener data;
+            data.networking = networking;
+            data.expectedConnection = open.connection;
+            data.payload = &payload;
+            networking->SendData(open.connection, payload.data(), static_cast<std::uint32_t>(payload.size()));
+            records.push_back("{\"record\":\"custom-networking-send\",\"issuedAfterOpen\":true,\"boundedBinaryWithNul\":true,\"privatePayloadDistinctPerProfile\":true}");
+            const bool dataDelivered = pumpUntil(arguments, deadline, [&] { return data.callbacks > 0; });
+            records.push_back("{\"record\":\"custom-networking-data\",\"callbackObserved\":" + boolean(dataDelivered)
+                + ",\"exactlyOneCallback\":" + boolean(data.callbacks == 1) + ",\"callbackConnectionMatchesOpen\":" + boolean(data.connectionMatchesOpen)
+                + ",\"callbackAvailabilityPositive\":" + boolean(data.availabilityPositive) + ",\"callbackAvailabilityMatchesNotification\":" + boolean(data.availabilityMatchesNotification)
+                + ",\"firstPeekMatchesOpaqueRelation\":" + boolean(data.firstPeekMatchesPayload) + ",\"availabilityUnchangedAfterFirstPeek\":" + boolean(data.availabilityUnchangedAfterFirstPeek)
+                + ",\"secondPeekMatchesFirst\":" + boolean(data.secondPeekMatchesFirst) + ",\"availabilityUnchangedAfterSecondPeek\":" + boolean(data.availabilityUnchangedAfterSecondPeek)
+                + ",\"readMatchesPeekRelation\":" + boolean(data.readMatchesFirstPeek) + ",\"availabilityZeroAfterRead\":" + boolean(data.availabilityZeroAfterRead) + "}");
+            CustomNetworkingCloseListener close;
+            networking->CloseConnection(open.connection, &close);
+            const bool closeDelivered = pumpUntil(arguments, deadline, [&] { return close.callbacks > 0; });
+            records.push_back("{\"record\":\"custom-networking-close\",\"terminal\":" + common::jsonString(closeDelivered ? "callback" : "timeout")
+                + ",\"exactlyOneCallback\":" + boolean(close.callbacks == 1) + ",\"connectionMatchesOpen\":" + boolean(close.connection == open.connection)
+                + ",\"reasonUndefined\":" + boolean(close.reason == galaxy::api::IConnectionCloseListener::CLOSE_REASON_UNDEFINED) + "}");
+            for (int pump = 0; pump < 10 && std::chrono::steady_clock::now() < deadline; ++pump)
+            {
+                galaxy::api::ProcessData();
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            }
+            records.push_back("{\"record\":\"custom-networking-settle\",\"noLateOpenTerminal\":" + boolean(open.successes == 1 && open.failures == 0)
+                + ",\"noLateDataCallback\":" + boolean(data.callbacks == 1) + ",\"noLateCloseCallback\":" + boolean(close.callbacks == 1) + "}");
+            completed = dataDelivered && data.callbacks == 1 && data.connectionMatchesOpen && data.availabilityPositive
+                && data.availabilityMatchesNotification && data.firstPeekMatchesPayload && data.availabilityUnchangedAfterFirstPeek
+                && data.secondPeekMatchesFirst && data.availabilityUnchangedAfterSecondPeek && data.readMatchesFirstPeek && data.availabilityZeroAfterRead
+                && closeDelivered && close.callbacks == 1 && close.connection == open.connection
+                && close.reason == galaxy::api::IConnectionCloseListener::CLOSE_REASON_UNDEFINED;
+        }
+        else
+        {
+            records.push_back("{\"record\":\"custom-networking-send\",\"issuedAfterOpen\":false,\"boundedBinaryWithNul\":true,\"privatePayloadDistinctPerProfile\":true}");
+            records.push_back("{\"record\":\"custom-networking-data\",\"callbackObserved\":false,\"exactlyOneCallback\":false,\"callbackConnectionMatchesOpen\":false,\"callbackAvailabilityPositive\":false,\"callbackAvailabilityMatchesNotification\":false,\"firstPeekMatchesOpaqueRelation\":false,\"availabilityUnchangedAfterFirstPeek\":false,\"secondPeekMatchesFirst\":false,\"availabilityUnchangedAfterSecondPeek\":false,\"readMatchesPeekRelation\":false,\"availabilityZeroAfterRead\":false}");
+            records.push_back("{\"record\":\"custom-networking-close\",\"terminal\":\"not-issued\",\"exactlyOneCallback\":false,\"connectionMatchesOpen\":false,\"reasonUndefined\":false}");
+            records.push_back("{\"record\":\"custom-networking-settle\",\"noLateOpenTerminal\":false,\"noLateDataCallback\":true,\"noLateCloseCallback\":true}");
+        }
+    }
+    return completed;
+}
 }
 
 int run(const Arguments& arguments)
@@ -3412,6 +3576,15 @@ int run(const Arguments& arguments)
                 common::writeTrace(arguments.trace, records);
                 galaxy::api::Shutdown();
                 return lobbySucceeded ? 0 : 1;
+            }
+            if (scenario == Scenario::customNetworkingLoopbackRoundtripCloseCharacterization
+                || scenario == Scenario::customNetworkingLoopbackRoundtripClose)
+            {
+                const bool networkingSucceeded = runCustomNetworkingLoopbackRoundtripClose(arguments, records);
+                records.push_back(selfStateRecord(user));
+                common::writeTrace(arguments.trace, records);
+                galaxy::api::Shutdown();
+                return networkingSucceeded || scenario == Scenario::customNetworkingLoopbackRoundtripCloseCharacterization ? 0 : 1;
             }
             if (scenario == Scenario::publicLobbyFullJoinFailureCharacterization || scenario == Scenario::publicLobbyFullJoinFailure)
             {

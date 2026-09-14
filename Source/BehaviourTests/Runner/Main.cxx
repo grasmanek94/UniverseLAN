@@ -1,6 +1,8 @@
 #include "Common/Trace.hxx"
 
 #include <nlohmann/json.hpp>
+#include <ixwebsocket/IXNetSystem.h>
+#include <ixwebsocket/IXWebSocketServer.h>
 
 #include <chrono>
 #include <algorithm>
@@ -60,6 +62,7 @@ struct Arguments
     bool characterizeOfficialGogBidirectionalUnreliableP2PListenerPeek = false;
     bool characterizeOfficialGogBidirectionalLobbyMessageDelivery = false;
     bool characterizeOfficialGogBidirectionalLobbyMemberDataPropagation = false;
+    bool characterizeOfficialGogCustomNetworkingLoopbackRoundtripClose = false;
 };
 
 struct Scenario
@@ -109,6 +112,10 @@ constexpr std::array scenarioContracts{
         {"initialize", "sign-in-callback", "sign-in-terminal", "self-state", "gog-services-state"}, 5, true, false, false, false, false, false},
     ScenarioContract{"Simple/gog-services-state characterization", "gog-services-state-characterization",
         {"initialize", "sign-in-callback", "sign-in-terminal", "self-state", "gog-services-state-characterization"}, 5, true, false, false, false, false, false},
+    ScenarioContract{"Simple/custom-networking-loopback-roundtrip-close characterization", "custom-networking-loopback-roundtrip-close-characterization",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "custom-networking-open", "custom-networking-send", "custom-networking-data", "custom-networking-close", "custom-networking-settle", "self-state"}, 9, false, false, false, false, false, false},
+    ScenarioContract{"Simple/custom-networking-loopback-roundtrip-close", "custom-networking-loopback-roundtrip-close",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "custom-networking-open", "custom-networking-send", "custom-networking-data", "custom-networking-close", "custom-networking-settle", "self-state"}, 9, false, false, false, false, false, false},
     ScenarioContract{"Simple/public-lobby-create-list-join-leave", "public-lobby-create-list-join-leave",
         {"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "metadata", "list", "join",
             "creator-two-member-snapshot", "joiner-two-member-snapshot", "creator-sole-owner-snapshot", "creator-leave"}, 12, false, false, true, false, false, false},
@@ -232,6 +239,7 @@ struct HostLaunch
     fs::path control;
     std::string lane;
     std::string profile;
+    std::string webSocketUrl;
 };
 
 [[noreturn]] void invalidManifest() { throw std::runtime_error("Manifest validation failed"); }
@@ -351,6 +359,12 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
             arguments.characterizeOfficialGogBidirectionalLobbyMemberDataPropagation = true;
             continue;
         }
+        if (option == "--characterize-official-gog-custom-networking-loopback-roundtrip-close")
+        {
+            if (arguments.characterizeOfficialGogCustomNetworkingLoopbackRoundtripClose) return false;
+            arguments.characterizeOfficialGogCustomNetworkingLoopbackRoundtripClose = true;
+            continue;
+        }
         if (++index == argc) return false;
         const fs::path value = fs::u8path(argv[index]);
         if (option == "--manifest") arguments.manifest = value;
@@ -369,11 +383,13 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
                  + static_cast<int>(arguments.characterizeOfficialGogReliableP2PAfterLobbyLeave)
                  + static_cast<int>(arguments.characterizeOfficialGogBidirectionalReliableP2PListenerPeek)
                   + static_cast<int>(arguments.characterizeOfficialGogBidirectionalUnreliableP2PListenerPeek)
-                 + static_cast<int>(arguments.characterizeOfficialGogBidirectionalLobbyMessageDelivery)
-                 + static_cast<int>(arguments.characterizeOfficialGogBidirectionalLobbyMemberDataPropagation)
+                  + static_cast<int>(arguments.characterizeOfficialGogBidirectionalLobbyMessageDelivery)
+                  + static_cast<int>(arguments.characterizeOfficialGogBidirectionalLobbyMemberDataPropagation)
+                  + static_cast<int>(arguments.characterizeOfficialGogCustomNetworkingLoopbackRoundtripClose)
             == static_cast<int>(arguments.manifest.empty())) && !arguments.gogHost.empty() && !arguments.gogRuntimeDirectory.empty()
         && ((arguments.characterizeOfficialGogChatRoomMessageDelivery || arguments.characterizeOfficialGogBidirectionalChatRoomMessageDelivery || arguments.characterizeOfficialGogFriendsPeerInformationRetrieval || arguments.characterizeOfficialGogPublicLobbyOwnerCloseLifecycle || arguments.characterizeOfficialGogPublicLobbyOwnerOwnershipTransition || arguments.characterizeOfficialGogPublicLobbyNotJoinableBehavior || arguments.characterizeOfficialGogPublicLobbyFullJoinFailure || arguments.characterizeOfficialGogReliableP2PListenerPeek || arguments.characterizeOfficialGogReliableP2PAfterLobbyLeave || arguments.characterizeOfficialGogBidirectionalReliableP2PListenerPeek || arguments.characterizeOfficialGogBidirectionalLobbyMessageDelivery)
             || arguments.characterizeOfficialGogBidirectionalUnreliableP2PListenerPeek || arguments.characterizeOfficialGogBidirectionalLobbyMemberDataPropagation
+            || arguments.characterizeOfficialGogCustomNetworkingLoopbackRoundtripClose
             || (!arguments.universelanHost.empty() && !arguments.clientDll.empty() && !arguments.server.empty()));
 }
 
@@ -421,6 +437,12 @@ bool observesPublicLobbyNotJoinableBehavior(const ScenarioContract& contract)
 bool observesPublicLobbyStringFiltering(const ScenarioContract& contract)
 {
     return contract.observesPublicLobbyStringFiltering;
+}
+
+bool observesCustomNetworkingLoopbackRoundtripClose(const ScenarioContract& contract)
+{
+    return contract.hostScenario == "custom-networking-loopback-roundtrip-close"
+        || contract.hostScenario == "custom-networking-loopback-roundtrip-close-characterization";
 }
 
 bool isStrictPublicLobbyNotJoinableBehavior(const ScenarioContract& contract)
@@ -487,7 +509,7 @@ bool requiresSensitiveArtifactRedaction(const ScenarioContract& contract)
           || observesBidirectionalP2PListenerPeek(contract)
            || observesBidirectionalLobbyMessageDelivery(contract) || observesBidirectionalLobbyMemberDataPropagation(contract)
            || observesPublicLobbyStringFiltering(contract)
-          || observesBidirectionalChatRoomMessageDelivery(contract);
+           || observesBidirectionalChatRoomMessageDelivery(contract) || observesCustomNetworkingLoopbackRoundtripClose(contract);
 }
 
 json requiredRecords(const ScenarioContract& contract)
@@ -687,6 +709,16 @@ Scenario characterizationScenario()
     scenario.contract = &scenarioContracts[3];
     scenario.laneMode = "concurrent";
     scenario.timeoutSeconds = 20;
+    scenario.characterization = true;
+    return scenario;
+}
+
+Scenario customNetworkingLoopbackRoundtripCloseCharacterizationScenario()
+{
+    Scenario scenario;
+    scenario.contract = findScenarioContract("Simple/custom-networking-loopback-roundtrip-close characterization");
+    scenario.laneMode = "concurrent";
+    scenario.timeoutSeconds = 30;
     scenario.characterization = true;
     return scenario;
 }
@@ -1093,10 +1125,14 @@ bool runHosts(const std::vector<HostLaunch>& launches, const ScenarioContract& c
         children[index].log = requiresSensitiveArtifactRedaction(contract) ? fs::path() : launches[index].workingDirectory / "stdout.log";
         children[index].lane = launches[index].lane;
         children[index].profile = launches[index].profile;
-        if (!startChild(children[index], launches[index].executable,
-            {"--scenario", std::string(contract.hostScenario), "--profile", launches[index].profile,
-                "--trace", launches[index].trace.string(), "--timeout-seconds", std::to_string(timeoutSeconds)},
-            launches[index].workingDirectory))
+        std::vector<std::string> arguments{"--scenario", std::string(contract.hostScenario), "--profile", launches[index].profile,
+            "--trace", launches[index].trace.string(), "--timeout-seconds", std::to_string(timeoutSeconds)};
+        if (!launches[index].webSocketUrl.empty())
+        {
+            arguments.push_back("--websocket-url");
+            arguments.push_back(launches[index].webSocketUrl);
+        }
+        if (!startChild(children[index], launches[index].executable, arguments, launches[index].workingDirectory))
         {
             for (Child& child : children) stopChild(child);
             completed = std::move(children);
@@ -2608,6 +2644,44 @@ bool normalizePublicLobbyStringFilteringTrace(const fs::path& trace, const std::
     catch (...) { return false; }
 }
 
+bool normalizeCustomNetworkingLoopbackRoundtripCloseTrace(const fs::path& trace, json& normalized)
+{
+    try
+    {
+        std::vector<json> records;
+        for (const std::string& line : common::readTrace(trace)) records.push_back(json::parse(line));
+        const std::array<const char*, 9> expected{"initialize", "sign-in-callback", "sign-in-terminal", "custom-networking-open",
+            "custom-networking-send", "custom-networking-data", "custom-networking-close", "custom-networking-settle", "self-state"};
+        if (records.size() != expected.size()) return false;
+        for (std::size_t index = 0; index < expected.size(); ++index)
+            if (!records[index].is_object() || records[index].value("record", "") != expected[index]) return false;
+        const auto exactTrue = [](const json& record, std::initializer_list<const char*> fields) {
+            if (!fieldsExactly(record, fields)) return false;
+            for (const char* field : fields)
+                if (std::string_view(field) != "record" && record[field] != true) return false;
+            return true;
+        };
+        if (!fieldsExactly(records[0], {"record", "result"}) || records[0]["result"] != "returned"
+            || !fieldsExactly(records[1], {"record", "result"}) || records[1]["result"] != "success"
+            || !fieldsExactly(records[2], {"record", "result"}) || records[2]["result"] != "success"
+            || !fieldsExactly(records[3], {"record", "terminal", "exactlyOneSuccess", "noFailure", "connectionValid"})
+            || records[3]["terminal"] != "success" || !exactTrue(records[3], {"record", "exactlyOneSuccess", "noFailure", "connectionValid"})
+            || !exactTrue(records[4], {"record", "issuedAfterOpen", "boundedBinaryWithNul", "privatePayloadDistinctPerProfile"})
+            || !exactTrue(records[5], {"record", "callbackObserved", "exactlyOneCallback", "callbackConnectionMatchesOpen", "callbackAvailabilityPositive",
+                "callbackAvailabilityMatchesNotification", "firstPeekMatchesOpaqueRelation", "availabilityUnchangedAfterFirstPeek", "secondPeekMatchesFirst",
+                "availabilityUnchangedAfterSecondPeek", "readMatchesPeekRelation", "availabilityZeroAfterRead"})
+            || !fieldsExactly(records[6], {"record", "terminal", "exactlyOneCallback", "connectionMatchesOpen", "reasonUndefined"})
+            || records[6]["terminal"] != "callback" || !exactTrue(records[6], {"record", "exactlyOneCallback", "connectionMatchesOpen", "reasonUndefined"})
+            || !exactTrue(records[7], {"record", "noLateOpenTerminal", "noLateDataCallback", "noLateCloseCallback"})
+            || !fieldsExactly(records[8], {"record", "signedIn", "loggedOn", "idValid", "idType", "selfIdRepeatEqual", "personaAvailable"})
+            || records[8]["signedIn"] != true || records[8]["loggedOn"] != true || records[8]["idValid"] != true || records[8]["idType"] != "user"
+            || records[8]["selfIdRepeatEqual"] != true || !records[8]["personaAvailable"].is_boolean()) return false;
+        normalized = records;
+        return true;
+    }
+    catch (...) { return false; }
+}
+
 bool normalizeTrace(const fs::path& trace, const ScenarioContract& contract, json& normalized)
 {
     try
@@ -2656,6 +2730,8 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
     report["scenario"] = contract.name;
     report["opaqueIdPolicy"] = observesPublicLobbyOwnerOwnershipTransition(contract)
         ? "raw Galaxy IDs, public collision-marker values, and promoted data are never recorded; only symbolic ownership, member, authorization, and list-absence relations are compared"
+        : observesCustomNetworkingLoopbackRoundtripClose(contract)
+        ? "connection IDs, endpoint URL and port, private payload bytes and lengths, credentials, timestamps, controls, and runtime output are never recorded; only symbolic open/data/peek/read/close relations are compared"
         : observesPublicLobbyStringFiltering(contract)
         ? "raw Galaxy IDs, lobby IDs, public collision-marker values, filter values, candidate counts, indexes, and timestamps are never recorded; both lanes require symbolic target appearance, predicate match, selected join, membership, ownership, and cleanup; official stable exclusion is strict while UniverseLAN unmatched-candidate presence/exclusion is diagnostic only"
         : isStrictPublicLobbyNotJoinableBehavior(contract)
@@ -2690,7 +2766,9 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
     {
         json universelan;
         json gog;
-        const bool universelanValid = observesPublicLobbyStringFiltering(contract)
+        const bool universelanValid = observesCustomNetworkingLoopbackRoundtripClose(contract)
+            ? normalizeCustomNetworkingLoopbackRoundtripCloseTrace(root / "universelan" / profile / "trace.jsonl", universelan)
+            : observesPublicLobbyStringFiltering(contract)
             ? normalizePublicLobbyStringFilteringTrace(root / "universelan" / profile / "trace.jsonl", profile, false, universelan)
             : isStrictPublicLobbyNotJoinableBehavior(contract)
             ? normalizePublicLobbyNotJoinableBehaviorTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
@@ -2724,7 +2802,9 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
             : contract.observesPublicLobby
             ? normalizePublicLobbyTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
             : normalizeTrace(root / "universelan" / profile / "trace.jsonl", contract, universelan);
-        const bool gogValid = observesPublicLobbyStringFiltering(contract)
+        const bool gogValid = observesCustomNetworkingLoopbackRoundtripClose(contract)
+            ? normalizeCustomNetworkingLoopbackRoundtripCloseTrace(root / "gog" / profile / "trace.jsonl", gog)
+            : observesPublicLobbyStringFiltering(contract)
             ? normalizePublicLobbyStringFilteringTrace(root / "gog" / profile / "trace.jsonl", profile, true, gog)
             : isStrictPublicLobbyNotJoinableBehavior(contract)
             ? normalizePublicLobbyNotJoinableBehaviorTrace(root / "gog" / profile / "trace.jsonl", profile, gog)
@@ -3634,6 +3714,39 @@ void printCharacterizationResult(const fs::path& root)
         << root.string() << std::endl;
 }
 
+void characterizeCustomNetworkingLoopbackRoundtripCloseTraces(const fs::path& root, json& report)
+{
+    report = json::object();
+    report["scenario"] = "Simple/custom-networking-loopback-roundtrip-close";
+    report["classification"] = "official-gog-only-characterization";
+    report["comparison"] = "none";
+    report["status"] = "characterized";
+    report["opaqueIdPolicy"] = "connection IDs, endpoint URL and port, private payload bytes and lengths, credentials, timestamps, controls, and runtime output are never retained";
+    report["endpointPolicy"] = "the runner returns opaque binary frames unchanged; endpoint activity is not behavior evidence";
+    for (const char* profile : {"user1", "user2"})
+    {
+        json lane = json::object();
+        try
+        {
+            json records = json::array();
+            for (const std::string& line : common::readTrace(root / "gog" / profile / "trace.jsonl")) records.push_back(json::parse(line));
+            lane["orderedICustomNetworkingRecords"] = records;
+            if (records.size() > 7)
+            {
+                lane["openTerminal"] = records[3].value("terminal", "unavailable");
+                lane["dataRoundtripRelationsComplete"] = records[5].value("firstPeekMatchesOpaqueRelation", false)
+                    && records[5].value("secondPeekMatchesFirst", false) && records[5].value("readMatchesPeekRelation", false)
+                    && records[5].value("availabilityZeroAfterRead", false);
+                lane["closeTerminal"] = records[6].value("terminal", "unavailable");
+                lane["settled"] = records[7].value("noLateOpenTerminal", false) && records[7].value("noLateDataCallback", false)
+                    && records[7].value("noLateCloseCallback", false);
+            }
+        }
+        catch (...) { lane["orderedICustomNetworkingRecords"] = "unavailable"; }
+        report["lanes"][profile]["gog"] = lane;
+    }
+}
+
 void printPublicLobbyFullJoinFailureCharacterizationResult(const json& report)
 {
     std::cout << "BEHAVIOUR_TEST CHARACTERIZATION scenario=Simple/public-lobby-full-join-failure comparison=none";
@@ -3672,8 +3785,9 @@ int run(const Arguments& arguments, const Scenario& scenario)
     const bool officialGogOnlyBidirectionalUnreliableP2PListenerPeekCharacterization = arguments.characterizeOfficialGogBidirectionalUnreliableP2PListenerPeek;
     const bool officialGogOnlyBidirectionalLobbyMessageDeliveryCharacterization = arguments.characterizeOfficialGogBidirectionalLobbyMessageDelivery;
     const bool officialGogOnlyBidirectionalLobbyMemberDataPropagationCharacterization = arguments.characterizeOfficialGogBidirectionalLobbyMemberDataPropagation;
+    const bool officialGogOnlyCustomNetworkingLoopbackRoundtripCloseCharacterization = arguments.characterizeOfficialGogCustomNetworkingLoopbackRoundtripClose;
     if (!fs::is_regular_file(arguments.gogHost) || !fs::is_directory(arguments.gogRuntimeDirectory)
-        || (!(officialGogOnlyChatCharacterization || officialGogOnlyBidirectionalChatCharacterization || officialGogOnlyFriendsCharacterization || officialGogOnlyOwnerCloseCharacterization || officialGogOnlyOwnershipTransitionCharacterization || officialGogOnlyNotJoinableBehaviorCharacterization || officialGogOnlyFullJoinFailureCharacterization || officialGogOnlyReliableP2PListenerPeekCharacterization || officialGogOnlyReliableP2PAfterLobbyLeaveCharacterization || officialGogOnlyBidirectionalReliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalUnreliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalLobbyMessageDeliveryCharacterization || officialGogOnlyBidirectionalLobbyMemberDataPropagationCharacterization) && (!fs::is_regular_file(arguments.universelanHost)
+        || (!(officialGogOnlyChatCharacterization || officialGogOnlyBidirectionalChatCharacterization || officialGogOnlyFriendsCharacterization || officialGogOnlyOwnerCloseCharacterization || officialGogOnlyOwnershipTransitionCharacterization || officialGogOnlyNotJoinableBehaviorCharacterization || officialGogOnlyFullJoinFailureCharacterization || officialGogOnlyReliableP2PListenerPeekCharacterization || officialGogOnlyReliableP2PAfterLobbyLeaveCharacterization || officialGogOnlyBidirectionalReliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalUnreliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalLobbyMessageDeliveryCharacterization || officialGogOnlyBidirectionalLobbyMemberDataPropagationCharacterization || officialGogOnlyCustomNetworkingLoopbackRoundtripCloseCharacterization) && (!fs::is_regular_file(arguments.universelanHost)
             || !fs::is_regular_file(arguments.clientDll) || !fs::is_regular_file(arguments.server)))) throw std::runtime_error("Preflight failed");
 
     std::mt19937_64 random(std::random_device{}());
@@ -3690,6 +3804,9 @@ int run(const Arguments& arguments, const Scenario& scenario)
     const std::string privateToken = "bt-" + std::to_string(random()) + std::to_string(random());
     const std::uint16_t privatePort = static_cast<std::uint16_t>(38000 + random() % 2000);
     Child server;
+    std::unique_ptr<ix::WebSocketServer> webSocket;
+    bool webSocketNetSystemInitialized = false;
+    std::string webSocketUrl;
     json report;
     bool success = false;
     bool cleanupAcknowledged = !scenario.contract->observesPublicLobby;
@@ -3702,7 +3819,21 @@ int run(const Arguments& arguments, const Scenario& scenario)
     bool friendsHostsExited = false;
     try
     {
-        if (!(officialGogOnlyChatCharacterization || officialGogOnlyBidirectionalChatCharacterization || officialGogOnlyFriendsCharacterization || officialGogOnlyOwnerCloseCharacterization || officialGogOnlyOwnershipTransitionCharacterization || officialGogOnlyNotJoinableBehaviorCharacterization || officialGogOnlyFullJoinFailureCharacterization || officialGogOnlyReliableP2PListenerPeekCharacterization || officialGogOnlyReliableP2PAfterLobbyLeaveCharacterization || officialGogOnlyBidirectionalReliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalUnreliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalLobbyMessageDeliveryCharacterization || officialGogOnlyBidirectionalLobbyMemberDataPropagationCharacterization))
+        if (observesCustomNetworkingLoopbackRoundtripClose(*scenario.contract))
+        {
+            if (!ix::initNetSystem()) throw std::runtime_error("Unable to initialize loopback WebSocket networking");
+            webSocketNetSystemInitialized = true;
+            webSocket = std::make_unique<ix::WebSocketServer>(0, "127.0.0.1");
+            webSocket->disablePerMessageDeflate();
+            webSocket->setOnClientMessageCallback([](std::shared_ptr<ix::ConnectionState>, ix::WebSocket& client, const ix::WebSocketMessagePtr& message) {
+                if (message->type == ix::WebSocketMessageType::Message && message->binary) client.sendBinary(message->str);
+            });
+            const auto [listening, error] = webSocket->listen();
+            if (!listening) throw std::runtime_error("Unable to start loopback WebSocket endpoint: " + error);
+            webSocket->start();
+            webSocketUrl = "ws://127.0.0.1:" + std::to_string(webSocket->getPort()) + "/echo";
+        }
+        if (!(officialGogOnlyChatCharacterization || officialGogOnlyBidirectionalChatCharacterization || officialGogOnlyFriendsCharacterization || officialGogOnlyOwnerCloseCharacterization || officialGogOnlyOwnershipTransitionCharacterization || officialGogOnlyNotJoinableBehaviorCharacterization || officialGogOnlyFullJoinFailureCharacterization || officialGogOnlyReliableP2PListenerPeekCharacterization || officialGogOnlyReliableP2PAfterLobbyLeaveCharacterization || officialGogOnlyBidirectionalReliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalUnreliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalLobbyMessageDeliveryCharacterization || officialGogOnlyBidirectionalLobbyMemberDataPropagationCharacterization || officialGogOnlyCustomNetworkingLoopbackRoundtripCloseCharacterization))
         {
             const fs::path serverDirectory = root / "universelan" / "server";
             writeServerConfiguration(serverDirectory, privatePort);
@@ -3729,7 +3860,7 @@ int run(const Arguments& arguments, const Scenario& scenario)
 
         const bool officialGogOnlyCharacterization = (scenario.characterization && scenario.contract->observesMultipleLobbyMembership)
             || officialGogOnlyBidirectionalChatCharacterization
-            || officialGogOnlyOwnerCloseCharacterization || officialGogOnlyOwnershipTransitionCharacterization || officialGogOnlyNotJoinableBehaviorCharacterization || officialGogOnlyFullJoinFailureCharacterization || officialGogOnlyReliableP2PListenerPeekCharacterization || officialGogOnlyReliableP2PAfterLobbyLeaveCharacterization || officialGogOnlyBidirectionalReliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalUnreliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalLobbyMessageDeliveryCharacterization || officialGogOnlyBidirectionalLobbyMemberDataPropagationCharacterization;
+            || officialGogOnlyOwnerCloseCharacterization || officialGogOnlyOwnershipTransitionCharacterization || officialGogOnlyNotJoinableBehaviorCharacterization || officialGogOnlyFullJoinFailureCharacterization || officialGogOnlyReliableP2PListenerPeekCharacterization || officialGogOnlyReliableP2PAfterLobbyLeaveCharacterization || officialGogOnlyBidirectionalReliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalUnreliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalLobbyMessageDeliveryCharacterization || officialGogOnlyBidirectionalLobbyMemberDataPropagationCharacterization || officialGogOnlyCustomNetworkingLoopbackRoundtripCloseCharacterization;
         std::vector<HostLaunch> universelanLaunches;
         std::vector<HostLaunch> gogLaunches;
         for (const char* profile : {"user1", "user2"})
@@ -3737,7 +3868,7 @@ int run(const Arguments& arguments, const Scenario& scenario)
             const fs::path gogDirectory = root / "gog" / profile;
             fs::create_directories(gogDirectory);
             const fs::path gogControl = gogDirectory / "control";
-            if (!(officialGogOnlyChatCharacterization || officialGogOnlyBidirectionalChatCharacterization || officialGogOnlyFriendsCharacterization || officialGogOnlyOwnerCloseCharacterization || officialGogOnlyOwnershipTransitionCharacterization || officialGogOnlyNotJoinableBehaviorCharacterization || officialGogOnlyFullJoinFailureCharacterization || officialGogOnlyReliableP2PListenerPeekCharacterization || officialGogOnlyReliableP2PAfterLobbyLeaveCharacterization || officialGogOnlyBidirectionalReliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalUnreliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalLobbyMessageDeliveryCharacterization || officialGogOnlyBidirectionalLobbyMemberDataPropagationCharacterization))
+            if (!(officialGogOnlyChatCharacterization || officialGogOnlyBidirectionalChatCharacterization || officialGogOnlyFriendsCharacterization || officialGogOnlyOwnerCloseCharacterization || officialGogOnlyOwnershipTransitionCharacterization || officialGogOnlyNotJoinableBehaviorCharacterization || officialGogOnlyFullJoinFailureCharacterization || officialGogOnlyReliableP2PListenerPeekCharacterization || officialGogOnlyReliableP2PAfterLobbyLeaveCharacterization || officialGogOnlyBidirectionalReliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalUnreliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalLobbyMessageDeliveryCharacterization || officialGogOnlyBidirectionalLobbyMemberDataPropagationCharacterization || officialGogOnlyCustomNetworkingLoopbackRoundtripCloseCharacterization))
             {
                 const fs::path universelanDirectory = root / "universelan" / profile;
                 fs::create_directories(universelanDirectory);
@@ -3759,6 +3890,7 @@ int run(const Arguments& arguments, const Scenario& scenario)
                     writePrivateControl(universelanControl, "abort=0\n");
                 universelanLaunches.push_back({stageHost(arguments.universelanHost, universelanDirectory), universelanDirectory,
                     universelanDirectory / "trace.jsonl", universelanControl, "universelan", profile});
+                universelanLaunches.back().webSocketUrl = webSocketUrl;
                 stageUniverselanRuntime(arguments, universelanDirectory);
             }
             if (scenario.contract->observesPublicLobby)
@@ -3778,6 +3910,7 @@ int run(const Arguments& arguments, const Scenario& scenario)
             else if (scenario.contract->observesFriendsPeerInformation)
                 writePrivateControl(gogControl, "abort=0\n");
             gogLaunches.push_back({stageHost(arguments.gogHost, gogDirectory), gogDirectory, gogDirectory / "trace.jsonl", gogControl, "gog", profile});
+            gogLaunches.back().webSocketUrl = webSocketUrl;
             stageGogRuntime(arguments, gogDirectory);
         }
 
@@ -3840,6 +3973,8 @@ int run(const Arguments& arguments, const Scenario& scenario)
             {
                 characterizeBidirectionalChatRoomMessageDeliveryTraces(root, officialGogOnlyBidirectionalChatCharacterization, report);
             }
+            else if (scenario.characterization && observesCustomNetworkingLoopbackRoundtripClose(*scenario.contract))
+                characterizeCustomNetworkingLoopbackRoundtripCloseTraces(root, report);
             else if (scenario.characterization && scenario.contract->observesChatRoomMessageDelivery)
             {
                 characterizeChatRoomMessageDeliveryTraces(root, officialGogOnlyChatCharacterization, report);
@@ -3890,6 +4025,8 @@ int run(const Arguments& arguments, const Scenario& scenario)
             {
                 characterizeBidirectionalChatRoomMessageDeliveryTraces(root, officialGogOnlyBidirectionalChatCharacterization, report);
             }
+            else if (observesCustomNetworkingLoopbackRoundtripClose(*scenario.contract))
+                characterizeCustomNetworkingLoopbackRoundtripCloseTraces(root, report);
             else if (scenario.contract->observesChatRoomMessageDelivery)
             {
                 characterizeChatRoomMessageDeliveryTraces(root, officialGogOnlyChatCharacterization, report);
@@ -3967,13 +4104,17 @@ int run(const Arguments& arguments, const Scenario& scenario)
             printPublicLobbyFullJoinFailureCharacterizationResult(report);
         else if (scenario.characterization && observesBidirectionalChatRoomMessageDelivery(*scenario.contract))
             std::cout << "BEHAVIOUR_TEST CHARACTERIZATION comparison=none" << std::endl;
-        else if (scenario.characterization) printCharacterizationResult(root);
+            else if (scenario.characterization && observesCustomNetworkingLoopbackRoundtripClose(*scenario.contract))
+                std::cout << "BEHAVIOUR_TEST CHARACTERIZATION comparison=none" << std::endl;
+            else if (scenario.characterization) printCharacterizationResult(root);
         else printComparisonResult(report, *scenario.contract);
         if (!success) throw std::runtime_error("Trace mismatch");
     }
     catch (...)
     {
         stopChild(server);
+        if (webSocket) webSocket->stop();
+        if (webSocketNetSystemInitialized) ix::uninitNetSystem();
         if (report.empty())
         {
             report["scenario"] = scenario.contract->name;
@@ -4025,6 +4166,8 @@ int run(const Arguments& arguments, const Scenario& scenario)
         return 1;
     }
     stopChild(server);
+    if (webSocket) webSocket->stop();
+    if (webSocketNetSystemInitialized) ix::uninitNetSystem();
     if (scenario.characterization)
     {
         if (requiresSensitiveArtifactRedaction(*scenario.contract))
@@ -4091,6 +4234,7 @@ int main(int argc, char* argv[])
     {
         Scenario scenario;
         if (arguments.characterizeGogServicesState) scenario = characterizationScenario();
+        else if (arguments.characterizeOfficialGogCustomNetworkingLoopbackRoundtripClose) scenario = customNetworkingLoopbackRoundtripCloseCharacterizationScenario();
         else if (arguments.characterizeOfficialGogPublicLobbyOwnerCloseLifecycle) scenario = publicLobbyOwnerCloseLifecycleCharacterizationScenario();
         else if (arguments.characterizeOfficialGogPublicLobbyOwnerOwnershipTransition) scenario = publicLobbyOwnerOwnershipTransitionCharacterizationScenario();
         else if (arguments.characterizeOfficialGogPublicLobbyNotJoinableBehavior) scenario = publicLobbyNotJoinableBehaviorCharacterizationScenario();
