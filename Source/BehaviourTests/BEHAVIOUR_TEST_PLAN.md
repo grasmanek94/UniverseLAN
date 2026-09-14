@@ -113,7 +113,7 @@ combine already-characterized Simple contracts.
 | Interface | Simple behavior index | Advanced follow-up |
 | --- | --- | --- |
 | Initialization / `IUser` | Init outcome, sign-in terminal behavior, `SignedIn`, `IsLoggedOn`, self ID validity/type, persona availability, and consecutive `GetSessionID()` equality. | Reinitialization, sign-out, connection loss/recovery. |
-| `IMatchmaking` | Create/list/join public lobby, operation result, owner/member relationships, basic lobby data. | Multiple concurrent memberships and lobby-message isolation are implemented; leave/owner migration/closure, filters, and other failure paths remain. |
+| `IMatchmaking` | Create/list/join public lobby, operation result, owner/member relationships, basic lobby data, and owner-close lifecycle characterization. | Multiple concurrent memberships, lobby-message isolation, and owner-close comparison are implemented; owner migration, filters, and other failure paths remain. |
 | `INetworking` | Reliable P2P packet scheduling, receive callback/poll state, payload/content, sender relationship. | Three-peer routing, channel behavior, unreliable packets, disconnect/NAT/server-host behavior. |
 | `IChat` | One-to-one room request, room identity reuse, message send terminal result, remote message content/sender relationship. | History/pagination, membership lifecycle, read state, denial/failure behavior. |
 | `IFriends` | Persona information retrieval, persona state, rich-presence set/get callback behavior, game invitations where official accounts permit it. | Friend relationships, invitation/acceptance flows, persistence, richer presence state. |
@@ -262,12 +262,30 @@ phase. These are public `IMatchmaking` setup conditions, not inferred defaults.
   opt-in GOG label. It is the exception for the approved temporary lobby: its
   normal path leaves joiner then creator, and its failure path uses private
   abort-control and cleanup-ack event files with bounded waiting before process
-  termination. It does not assert member callback order. The 2026-09-13 live
+   termination. It does not assert member callback order. The 2026-09-13 live
   official four-host run matched its normalized public facts and acknowledged
    cleanup in every host. The observed official two-attempt versus UniverseLAN
    one-attempt list convergence is an accepted beneficial variation; each lane
    remains required to converge within the documented bound, without equating
-   eventual-consistency timing across lanes.
+    eventual-consistency timing across lanes.
+
+- `Simple/public-lobby-owner-close-lifecycle` first ran twice as an
+  official-GOG-only diagnostic, then as a strict four-host comparison. The
+  `LeaveLobby` header generically documents notifications to other members; its
+  FCM topology description concerns owner *disconnection*, so the observed lack
+  of a targeted prior-owner notification in this normal-close path is empirical,
+  not a header guarantee. The joiner arms global public member-state and
+  lobby-left listeners before a causal release of the creator. Both official
+  runs observed `lobby-closed`, tagged-list absence, and no targeted prior-owner
+  member-state callback. The probe finalizes that absence only after post-close
+  listing and a bounded final settling window. Target-lobby sequence and
+  cross-listener ordering remain diagnostic, while any target global leave
+  reason other than `lobby-closed` fails. UniverseLAN now matches the empirical
+  absence by sending surviving close members only the synthetic close
+  notification. Creator cleanup acknowledgement requires a matching terminal
+  callback, or a safe bounded retry confirmed by its terminal callback. Every
+  host acknowledged cleanup; retained artifacts remove controls, configuration,
+  relays, and runtime output.
 
 - `Simple/public-lobby-data-propagation` uses the same temporary lobby harness.
   After the joiner joins and its public `GlobalLobbyDataListener` is armed, the

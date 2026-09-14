@@ -29,12 +29,13 @@ struct Arguments
     int timeoutSeconds = 0;
 };
 
-    enum class Scenario { initializeAndSignIn, sessionIdRepeatability, gogServicesState, gogServicesStateCharacterization, publicLobbyCreateListJoinLeave, publicLobbyDataPropagationCharacterization, publicLobbyDataPropagation, multipleLobbyMembershipAndMessageIsolationCharacterization, multipleLobbyMembershipAndMessageIsolation, chatRoomMessageDeliveryCharacterization, chatRoomMessageDelivery, friendsPeerInformationRetrievalCharacterization, friendsPeerInformationRetrieval };
+    enum class Scenario { initializeAndSignIn, sessionIdRepeatability, gogServicesState, gogServicesStateCharacterization, publicLobbyCreateListJoinLeave, publicLobbyOwnerCloseLifecycleCharacterization, publicLobbyOwnerCloseLifecycle, publicLobbyDataPropagationCharacterization, publicLobbyDataPropagation, multipleLobbyMembershipAndMessageIsolationCharacterization, multipleLobbyMembershipAndMessageIsolation, chatRoomMessageDeliveryCharacterization, chatRoomMessageDelivery, friendsPeerInformationRetrievalCharacterization, friendsPeerInformationRetrieval };
 
 bool isSupportedScenario(const std::string& scenario)
 {
     return scenario == "initialize-and-sign-in" || scenario == "session-id-repeatability" || scenario == "gog-services-state"
         || scenario == "gog-services-state-characterization" || scenario == "public-lobby-create-list-join-leave"
+            || scenario == "public-lobby-owner-close-lifecycle-characterization" || scenario == "public-lobby-owner-close-lifecycle"
             || scenario == "public-lobby-data-propagation-characterization" || scenario == "public-lobby-data-propagation"
             || scenario == "multiple-lobby-membership-and-message-isolation-characterization" || scenario == "multiple-lobby-membership-and-message-isolation"
         || scenario == "chat-room-message-delivery-characterization" || scenario == "chat-room-message-delivery"
@@ -47,6 +48,8 @@ Scenario selectedScenario(const Arguments& arguments)
     if (arguments.scenario == "gog-services-state") return Scenario::gogServicesState;
     if (arguments.scenario == "gog-services-state-characterization") return Scenario::gogServicesStateCharacterization;
     if (arguments.scenario == "public-lobby-create-list-join-leave") return Scenario::publicLobbyCreateListJoinLeave;
+    if (arguments.scenario == "public-lobby-owner-close-lifecycle-characterization") return Scenario::publicLobbyOwnerCloseLifecycleCharacterization;
+    if (arguments.scenario == "public-lobby-owner-close-lifecycle") return Scenario::publicLobbyOwnerCloseLifecycle;
     if (arguments.scenario == "public-lobby-data-propagation-characterization") return Scenario::publicLobbyDataPropagationCharacterization;
     if (arguments.scenario == "public-lobby-data-propagation") return Scenario::publicLobbyDataPropagation;
     if (arguments.scenario == "multiple-lobby-membership-and-message-isolation-characterization") return Scenario::multipleLobbyMembershipAndMessageIsolationCharacterization;
@@ -78,6 +81,7 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
     }
     return isSupportedScenario(arguments.scenario) && (arguments.profile == "user1" || arguments.profile == "user2")
         && !arguments.trace.empty() && ((arguments.scenario != "public-lobby-create-list-join-leave"
+            && arguments.scenario != "public-lobby-owner-close-lifecycle-characterization" && arguments.scenario != "public-lobby-owner-close-lifecycle"
             && arguments.scenario != "public-lobby-data-propagation-characterization" && arguments.scenario != "public-lobby-data-propagation"
             && arguments.scenario != "multiple-lobby-membership-and-message-isolation-characterization" && arguments.scenario != "multiple-lobby-membership-and-message-isolation"
              && arguments.scenario != "chat-room-message-delivery-characterization" && arguments.scenario != "chat-room-message-delivery"
@@ -325,6 +329,30 @@ const char* leaveReason(const galaxy::api::ILobbyLeftListener::LobbyLeaveReason 
     return "unknown";
 }
 
+const char* memberStateChange(const galaxy::api::LobbyMemberStateChange change)
+{
+    switch (change)
+    {
+    case galaxy::api::LOBBY_MEMBER_STATE_CHANGED_ENTERED: return "entered";
+    case galaxy::api::LOBBY_MEMBER_STATE_CHANGED_LEFT: return "left";
+    case galaxy::api::LOBBY_MEMBER_STATE_CHANGED_DISCONNECTED: return "disconnected";
+    case galaxy::api::LOBBY_MEMBER_STATE_CHANGED_KICKED: return "kicked";
+    case galaxy::api::LOBBY_MEMBER_STATE_CHANGED_BANNED: return "banned";
+    }
+    return "unknown";
+}
+
+std::string symbolicSequence(const std::vector<std::string>& values)
+{
+    std::string result = "[";
+    for (std::size_t index = 0; index < values.size(); ++index)
+    {
+        if (index != 0) result += ',';
+        result += common::jsonString(values[index]);
+    }
+    return result + "]";
+}
+
 struct LobbyCreatedListener final : galaxy::api::ILobbyCreatedListener
 {
     bool called = false;
@@ -394,6 +422,44 @@ struct LobbyLeftListener final : galaxy::api::ILobbyLeftListener
     }
 };
 
+struct OwnerCloseMemberStateListener final : galaxy::api::GlobalLobbyMemberStateListener
+{
+    galaxy::api::GalaxyID lobby;
+    galaxy::api::GalaxyID priorOwner;
+    bool priorOwnerObserved = false;
+    std::vector<std::string> priorOwnerStates;
+    std::vector<std::string>* targetLobbySequence = nullptr;
+
+    void OnLobbyMemberStateChanged(const galaxy::api::GalaxyID& callbackLobby, const galaxy::api::GalaxyID& member,
+        const galaxy::api::LobbyMemberStateChange change) override
+    {
+        if (callbackLobby != lobby || member != priorOwner) return;
+        priorOwnerObserved = true;
+        const char* const state = memberStateChange(change);
+        priorOwnerStates.emplace_back(state);
+        targetLobbySequence->emplace_back(std::string("prior-owner-member-") + state);
+    }
+};
+
+struct OwnerCloseLobbyLeftListener final : galaxy::api::GlobalLobbyLeftListener
+{
+    galaxy::api::GalaxyID lobby;
+    bool targetLobbyObserved = false;
+    bool unexpectedReasonObserved = false;
+    std::vector<std::string> reasons;
+    std::vector<std::string>* targetLobbySequence = nullptr;
+
+    void OnLobbyLeft(const galaxy::api::GalaxyID& callbackLobby, const LobbyLeaveReason reason) override
+    {
+        if (callbackLobby != lobby) return;
+        targetLobbyObserved = true;
+        const char* const value = leaveReason(reason);
+        reasons.emplace_back(value);
+        unexpectedReasonObserved = unexpectedReasonObserved || reason != LOBBY_LEAVE_REASON_LOBBY_CLOSED;
+        targetLobbySequence->emplace_back(std::string("global-lobby-left-") + value);
+    }
+};
+
 struct LobbyListListener final : galaxy::api::ILobbyListListener
 {
     galaxy::api::IMatchmaking* matchmaking = nullptr;
@@ -450,11 +516,30 @@ bool leaveLobby(const Arguments& arguments, galaxy::api::IMatchmaking* const mat
     return completed && listener.reason == galaxy::api::ILobbyLeftListener::LOBBY_LEAVE_REASON_USER_LEFT && listener.lobby == lobby;
 }
 
+bool retryOwnerCloseLeaveIfSafe(const Arguments& arguments, galaxy::api::IMatchmaking* const matchmaking,
+    const galaxy::api::GalaxyID& lobby, const galaxy::api::GalaxyID& self)
+{
+    if (matchmaking->GetLobbyOwner(lobby) != self) return false;
+    const std::uint32_t memberCount = matchmaking->GetNumLobbyMembers(lobby);
+    bool selfPresent = false;
+    for (std::uint32_t index = 0; index < memberCount; ++index)
+        selfPresent = selfPresent || matchmaking->GetLobbyMemberByIndex(lobby, index) == self;
+    if (!selfPresent) return false;
+
+    LobbyLeftListener listener;
+    matchmaking->LeaveLobby(lobby, &listener);
+    const auto cleanupDeadline = std::chrono::steady_clock::now() + std::chrono::seconds(3);
+    return pumpUntil(arguments, cleanupDeadline, [&] { return listener.called; }) && listener.lobby == lobby
+        && listener.reason == galaxy::api::ILobbyLeftListener::LOBBY_LEAVE_REASON_USER_LEFT;
+}
+
 bool runPublicLobby(const Arguments& arguments, galaxy::api::IUser* const user, std::vector<std::string>& records)
 {
     galaxy::api::IMatchmaking* const matchmaking = galaxy::api::Matchmaking();
     const std::string token = controlValue(arguments.control, "token");
     const Scenario scenario = selectedScenario(arguments);
+    const bool ownerClose = scenario == Scenario::publicLobbyOwnerCloseLifecycleCharacterization || scenario == Scenario::publicLobbyOwnerCloseLifecycle;
+    const bool ownerCloseCharacterization = scenario == Scenario::publicLobbyOwnerCloseLifecycleCharacterization;
     const bool dataPropagation = scenario == Scenario::publicLobbyDataPropagationCharacterization || scenario == Scenario::publicLobbyDataPropagation;
     static constexpr const char* propagationKey = "universelan-behaviour-data-propagation";
     const std::string propagationValue = token + "-data";
@@ -504,6 +589,26 @@ bool runPublicLobby(const Arguments& arguments, galaxy::api::IUser* const user, 
         if (!metadataCompleted || !metadata.success || metadata.lobby != lobby) { cleanup(); return false; }
         writeEvent(arguments, "creator-ready");
         if (!pumpUntil(arguments, deadline, [&] { return controlIsSet(arguments, "joiner-joined"); })) { cleanup(); return false; }
+        if (ownerClose)
+        {
+            if (!pumpUntil(arguments, deadline, [&] { return controlIsSet(arguments, "joiner-lifecycle-armed"); })) { cleanup(); return false; }
+            completed = leaveLobby(arguments, matchmaking, lobby, records, "creator-leave", deadline);
+            if (!completed)
+            {
+                // A retry is safe only while public state still identifies this host as the owner and a member.
+                if (retryOwnerCloseLeaveIfSafe(arguments, matchmaking, lobby, self))
+                {
+                    joined = false;
+                    writeEvent(arguments, "creator-left");
+                    writeEvent(arguments, "cleanup-ack");
+                }
+                return false;
+            }
+            joined = false;
+            writeEvent(arguments, "creator-left");
+            writeEvent(arguments, "cleanup-ack");
+            return true;
+        }
         if (dataPropagation)
         {
             if (!pumpUntil(arguments, deadline, [&] { return controlIsSet(arguments, "observer-armed"); })) { cleanup(); return false; }
@@ -565,6 +670,60 @@ bool runPublicLobby(const Arguments& arguments, galaxy::api::IUser* const user, 
         lobby = entered.lobby; joined = true;
         records.push_back(snapshotRecord("joiner-two-member-snapshot", matchmaking, lobby, self, 2));
         writeEvent(arguments, "joiner-joined");
+        if (ownerClose)
+        {
+            const galaxy::api::GalaxyID priorOwner = matchmaking->GetLobbyOwner(lobby);
+            std::vector<std::string> targetLobbySequence;
+            OwnerCloseMemberStateListener memberState;
+            memberState.lobby = lobby;
+            memberState.priorOwner = priorOwner;
+            memberState.targetLobbySequence = &targetLobbySequence;
+            OwnerCloseLobbyLeftListener lobbyLeft;
+            lobbyLeft.lobby = lobby;
+            lobbyLeft.targetLobbySequence = &targetLobbySequence;
+            const bool priorOwnerValidNonSelf = priorOwner.IsValid() && priorOwner.GetIDType() == galaxy::api::GalaxyID::ID_TYPE_USER && priorOwner != self;
+            records.push_back("{\"record\":\"joiner-lifecycle-listeners-armed\",\"memberStateListenerRegistered\":true,\"globalLobbyLeftListenerRegistered\":true,\"priorOwnerValidNonSelf\":"
+                + boolean(priorOwnerValidNonSelf) + "}");
+            writeEvent(arguments, "joiner-lifecycle-armed");
+            if (!pumpUntil(arguments, deadline, [&] { return controlIsSet(arguments, "creator-left"); })) { cleanup(); return false; }
+            pumpUntil(arguments, deadline, [&] { return lobbyLeft.targetLobbyObserved; });
+
+            LobbyListListener postCloseList;
+            int postCloseAttempts = 0;
+            while (std::chrono::steady_clock::now() < deadline && postCloseAttempts < 6 && !controlIsSet(arguments, "abort"))
+            {
+                ++postCloseAttempts;
+                postCloseList = LobbyListListener{};
+                postCloseList.matchmaking = matchmaking;
+                matchmaking->AddRequestLobbyListStringFilter("universelan-behaviour-token", token.c_str(), galaxy::api::LOBBY_COMPARISON_TYPE_EQUAL);
+                matchmaking->AddRequestLobbyListResultCountFilter(2);
+                matchmaking->RequestLobbyList(false, &postCloseList);
+                if (!pumpUntil(arguments, std::min(deadline, std::chrono::steady_clock::now() + std::chrono::seconds(3)), [&] { return postCloseList.called; })) break;
+                if (postCloseList.result == galaxy::api::LOBBY_LIST_RESULT_SUCCESS && postCloseList.candidates.empty()) break;
+                std::this_thread::sleep_for(std::chrono::milliseconds(250));
+            }
+            const bool targetAbsent = postCloseList.called && postCloseList.result == galaxy::api::LOBBY_LIST_RESULT_SUCCESS && postCloseList.candidates.empty();
+            records.push_back("{\"record\":\"post-close-list\",\"result\":" + common::jsonString(postCloseList.called ? listResult(postCloseList.result) : "timeout")
+                + ",\"attempts\":" + std::to_string(postCloseAttempts) + ",\"targetAbsent\":" + boolean(targetAbsent) + "}");
+            // Settle after all close/list pumps so presence and absence include late target-lobby callbacks.
+            for (int pump = 0; pump < 10 && std::chrono::steady_clock::now() < deadline; ++pump)
+            {
+                galaxy::api::ProcessData();
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            }
+            records.push_back("{\"record\":\"owner-close-lifecycle\",\"priorOwnerMemberCallbackObserved\":"
+                + boolean(memberState.priorOwnerObserved) + ",\"priorOwnerMemberStateSequence\":" + symbolicSequence(memberState.priorOwnerStates)
+                + ",\"priorOwnerLeftObserved\":" + boolean(std::find(memberState.priorOwnerStates.begin(), memberState.priorOwnerStates.end(), "left") != memberState.priorOwnerStates.end())
+                + ",\"globalLobbyLeftCallbackObserved\":" + boolean(lobbyLeft.targetLobbyObserved)
+                + ",\"globalLobbyLeaveReasonSequence\":" + symbolicSequence(lobbyLeft.reasons)
+                + ",\"globalLobbyClosedObserved\":" + boolean(std::find(lobbyLeft.reasons.begin(), lobbyLeft.reasons.end(), "lobby-closed") != lobbyLeft.reasons.end())
+                + ",\"unexpectedGlobalLobbyLeaveReasonObserved\":" + boolean(lobbyLeft.unexpectedReasonObserved)
+                + ",\"targetLobbySequence\":" + symbolicSequence(targetLobbySequence) + "}");
+            joined = !lobbyLeft.targetLobbyObserved;
+            if (joined) cleanup();
+            else writeEvent(arguments, "cleanup-ack");
+            return ownerCloseCharacterization || (lobbyLeft.targetLobbyObserved && targetAbsent);
+        }
         if (dataPropagation)
         {
             LobbyDataPropagationListener observer;
@@ -1188,7 +1347,8 @@ int run(const Arguments& arguments)
         {
             records.push_back("{\"record\":\"sign-in-callback\",\"result\":\"success\"}");
             records.push_back("{\"record\":\"sign-in-terminal\",\"result\":\"success\"}");
-            if (scenario == Scenario::publicLobbyCreateListJoinLeave || scenario == Scenario::publicLobbyDataPropagationCharacterization
+            if (scenario == Scenario::publicLobbyCreateListJoinLeave || scenario == Scenario::publicLobbyOwnerCloseLifecycleCharacterization
+                || scenario == Scenario::publicLobbyOwnerCloseLifecycle || scenario == Scenario::publicLobbyDataPropagationCharacterization
                 || scenario == Scenario::publicLobbyDataPropagation)
             {
                 const bool lobbySucceeded = runPublicLobby(arguments, user, records);

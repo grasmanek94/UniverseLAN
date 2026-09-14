@@ -92,6 +92,18 @@ facts. Advanced scenarios require characterized Simple prerequisites.
 Temporary lobby and chat scenarios have special cleanup assumptions. Lobbies
 must use a runner-generated private token, explicitly set public/joinable/capacity
 before a peer joins, and prove all cleanup acknowledgements.
+`Simple/public-lobby-owner-close-lifecycle` additionally isolates the token per
+lane, waits for the joiner's public global listeners before the creator's normal
+leave, and redacts controls, configuration, and runtime output from retained
+artifacts. `LeaveLobby` generically documents member notifications, while the
+topology documentation discusses owner disconnection; neither header guarantees
+the observed narrow normal-FCM-close callback absence. Two official
+characterizations observed joiner `lobby-closed` and subsequent tagged-list
+absence, with no targeted prior-owner member-state callback. UniverseLAN matches
+those empirical facts. The probe settles after all close/list pumps before
+finalizing callback presence or absence; sequence order remains diagnostic, but
+an additional non-close target leave reason fails. Creator cleanup is acknowledged
+only after a matching terminal callback or a safe bounded retry confirms it.
 The public SDK has no chat-room delete API: chat participants exit after their
 bounded callback contracts, and that bounded host exit is the agreed cleanup.
 Details, diagnostics, artifact handling, and the required validation checklist

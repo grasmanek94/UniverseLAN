@@ -29,6 +29,16 @@ The recorded accepted lobby convergence result passes because eventual-list retr
 timing is explicitly excluded from lane equality. Matched live baselines remain
 strict for every public fact they record.
 
+### `Simple/public-lobby-owner-close-lifecycle` on `1.152.11/x64`
+
+- Date: 2026-09-14
+- Classification: matched live baseline
+- Public observation: two official-GOG-only characterizations observed the creator's normal `LeaveLobby` local callback with symbolic `user-left`; the joiner observed global symbolic `lobby-closed` and subsequent tagged-list absence. The armed targeted prior-owner member-state listener received no callback in either official run.
+- Official normalized result: all setup/list/join relations succeeded; the target-lobby sequence contained only the global closure callback. The `LeaveLobby` header generically documents other-member notifications, so this FCM-close absence is an empirical compatibility fact, not a header guarantee.
+- UniverseLAN normalized result: matched creator leave, joiner global closure, targeted prior-owner callback absence, tagged-list absence, and all setup relations.
+- Reproduction command/test name: `--characterize-official-gog-public-lobby-owner-close-lifecycle`; `universelan-behaviour-simple-public-lobby-owner-close-lifecycle-x64-1.152.11`; portable `RunBehaviorCTest.cmake` with `BEHAVIOUR_TEST_LABEL="^public-lobby-owner-close-lifecycle$"`.
+- Follow-up: target-lobby callback sequence and cross-listener ordering remain diagnostic, but any non-`lobby-closed` target global leave reason fails. Presence/absence is finalized after post-close listing and a bounded final settling window. Creator cleanup acknowledgement requires a confirmed `user-left` terminal callback; a failed or timed-out initial leave may acknowledge only after a safe, bounded retry confirms it. All hosts acknowledged cleanup; retained artifacts are sanitized and no token, ID, data, timestamp, log, or private control is recorded here.
+
 ### `Simple/public-lobby-create-list-join-leave` on `1.152.11/x64`
 
 - Date: 2026-09-13

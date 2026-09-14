@@ -210,8 +210,9 @@ When an FCM or STAR owner leaves, the server sends remaining members a synthetic
 only for `USER_LEFT`, leaving closed lobbies, their data, membership, and owner
 visible locally. `LeaveLobbyProcessed` now cleans caches for `LOBBY_CLOSED` as
 well, while leaving unrelated failure reasons untouched. The two-host FCM
-SystemTest requires the close and owner `LEFT` notifications, then verifies the
-tagged lobby is absent from data, list, joined, member, and owner APIs. Legacy
+SystemTest requires the close notification, then verifies the tagged lobby is
+absent from data, list, joined, member, and owner APIs. The BehaviorTest covers
+the empirically absent redundant prior-owner member-state callback. Legacy
 SDKs do not expose a close reason but exercise their compatible successful
 callback path.
 

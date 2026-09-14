@@ -244,21 +244,6 @@ struct LobbyClosedListener final : galaxy::api::GlobalLobbyLeftListener
 #endif
 };
 
-struct LobbyOwnerLeaveMemberStateListener final : galaxy::api::GlobalLobbyMemberStateListener
-{
-    LobbyOwnerLeaveMemberStateListener(const galaxy::api::GalaxyID& lobbyId, const std::uint64_t ownerUserId)
-        : lobbyId(lobbyId), ownerUserId(ownerUserId) {}
-    galaxy::api::GalaxyID lobbyId;
-    std::uint64_t ownerUserId;
-    bool ownerLeft = false;
-    void OnLobbyMemberStateChanged(const galaxy::api::GalaxyID& updatedLobbyId, const galaxy::api::GalaxyID& memberId,
-        galaxy::api::LobbyMemberStateChange change) override
-    {
-        ownerLeft = updatedLobbyId == lobbyId && memberId.GetRealID() == ownerUserId
-            && change == galaxy::api::LOBBY_MEMBER_STATE_CHANGED_LEFT;
-    }
-};
-
 bool lobbyHasMembers(galaxy::api::IMatchmaking* matchmaking, const galaxy::api::GalaxyID& lobbyId,
     const std::uint64_t firstUserId, const std::uint64_t secondUserId)
 {
@@ -507,10 +492,9 @@ bool lobbyOwnerCloseLifecycleJoiner(Api& api, const Arguments& arguments)
     LobbyClosedListener closeListener(lobbyId);
     const std::uint64_t ownerUserId = arguments.peerUserIds.front();
     const std::uint64_t joinerUserId = api.user->GetGalaxyID().GetRealID();
-    LobbyOwnerLeaveMemberStateListener memberStateListener(lobbyId, ownerUserId);
     if (matchmaking->GetLobbyOwner(lobbyId).GetRealID() != ownerUserId
         || !lobbyHasMembers(matchmaking, lobbyId, ownerUserId, joinerUserId) || !emit(arguments, "joiner-ready")) return false;
-    if (!pumpUntil(api, arguments.timeoutSeconds, [&] { return closeListener.closed && memberStateListener.ownerLeft; })) return false;
+    if (!pumpUntil(api, arguments.timeoutSeconds, [&] { return closeListener.closed; })) return false;
     const char* token = matchmaking->GetLobbyData(lobbyId, "universelan.systemtest.lobby");
     const char probe = 0;
     return token != nullptr && token[0] == '\0'

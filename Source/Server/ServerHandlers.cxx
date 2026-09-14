@@ -893,7 +893,6 @@ namespace universelan::server {
 			auto member_peer = peer_mapper.Get(member);
 			if (close) {
 				member_peer->RemoveLobby(lobby);
-				connection.Send(member_peer->peer, leave_notification);
 				connection.Send(member_peer->peer, close_message);
 			}
 			else {

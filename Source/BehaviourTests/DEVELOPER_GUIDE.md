@@ -48,6 +48,7 @@ cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^gog-services-state$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^session-id-repeatability$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^public-lobby-create-list-join-leave$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
+cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^public-lobby-owner-close-lifecycle$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^public-lobby-data-propagation$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^chat-room-message-delivery$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^friends-peer-information-retrieval$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
@@ -98,6 +99,25 @@ The similarly non-CTest lobby-data characterization mode is:
 ```powershell
 & "bin/Debug/universelan-behaviour-runner-x64-1.152.11.exe" --characterize-public-lobby-data-propagation --universelan-host "bin/Debug/universelan-behaviour-host-universelan-x64-1.152.11.exe" --gog-host "bin/Debug/universelan-behaviour-host-gog-x64-1.152.11.exe" --client-dll "bin/1.152.11/Debug/Galaxy64.dll" --server "bin/1.152.11/Debug/UniverseLANServer64.exe" --gog-runtime-dir "Source/DLLs/1.152.11/gog"
 ```
+
+Characterize the owner-close lifecycle against official GOG twice before
+changing its strict facts:
+
+```powershell
+& "bin/Debug/universelan-behaviour-runner-x64-1.152.11.exe" --characterize-official-gog-public-lobby-owner-close-lifecycle --gog-host "bin/Debug/universelan-behaviour-host-gog-x64-1.152.11.exe" --gog-runtime-dir "Source/DLLs/1.152.11/gog"
+```
+
+This official-only command uses two hosts and the authorized temporary tagged
+public FCM lobby. After the joiner joins, it registers public global
+member-state and lobby-left listeners, then the creator calls `LeaveLobby`.
+The header documents a local `user-left` callback and describes FCM owner
+*disconnection* as closing the lobby; `LeaveLobby` generically documents
+other-member notifications but does not guarantee the narrow normal-FCM-close
+callback absence. The diagnostic retains that empirical distinction,
+per-target-lobby listener sequence, and observed post-close list result without
+imposing listener order or multiplicity. Controls, token-bearing configuration,
+runtime output, and relays are removed from retained roots; only symbolic
+traces/reports and staged binaries remain.
 
 Characterize the Advanced multiple-lobby contract against official GOG first:
 
@@ -170,11 +190,11 @@ adding or characterizing a scenario.
 
 The approved comparator host contracts are `initialize-and-sign-in`,
 `session-id-repeatability`, `gog-services-state`,
-`public-lobby-create-list-join-leave`, `public-lobby-data-propagation`, and
+`public-lobby-create-list-join-leave`, `public-lobby-owner-close-lifecycle`, `public-lobby-data-propagation`, and
 `chat-room-message-delivery`, and
 `multiple-lobby-membership-and-message-isolation`; the additional runner-selected diagnostics are
 `gog-services-state-characterization`,
-`public-lobby-data-propagation-characterization`, and
+`public-lobby-owner-close-lifecycle-characterization`, `public-lobby-data-propagation-characterization`, and
 `chat-room-message-delivery-characterization`, and
 `multiple-lobby-membership-and-message-isolation-characterization`. Manifests and host
 arguments outside that fixed registry are rejected. The strict `gog-services-state`
@@ -212,6 +232,24 @@ It never records the token, key, value, raw IDs, personas, credentials, or
 timestamps. The strict comparison preserves per-host `IMatchmaking` record order
 and has no creator/joiner callback-order assertion; callback count, duplicates,
 and runner callback-gate discovery order are characterization diagnostics only.
+
+`Simple/public-lobby-owner-close-lifecycle` uses the same public setup with a
+distinct private token in each lane. The runner releases the creator only after
+the joiner has armed `GlobalLobbyMemberStateListener` and
+`GlobalLobbyLeftListener`. Its only cross-host constraints are listener arming
+before creator leave and cleanup acknowledgements. The host completes post-close
+listing, then performs a bounded final settle before recording target-lobby
+callback presence or absence. Target-lobby sequence and cross-listener ordering
+are diagnostic, but a target global leave reason other than `lobby-closed` is a
+failure. Two official characterizations empirically observed local creator
+`user-left`, joiner global `lobby-closed`, tagged-list absence, and no targeted
+prior-owner member-state callback. `LeaveLobby` generically documents member
+notifications, so that absence is not a header guarantee. UniverseLAN matches
+the characterized narrow close behavior. A creator emits cleanup acknowledgement
+only after its matching terminal leave callback; after failure or timeout it may
+retry only while public owner/member state proves safety, and acknowledges only
+if that retry's terminal callback confirms cleanup. Otherwise the runner reports
+unacknowledged cleanup and fails diagnostics.
 
 `Simple/chat-room-message-delivery` is authorized only for temporary rooms and
 one opaque runner-generated message per lane. Its official lane requires the

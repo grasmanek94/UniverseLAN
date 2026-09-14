@@ -329,10 +329,9 @@ enforce every cross-host ordering edge.
 `lobby-owner-close-lifecycle` is registered under the same lobby and topology
 feature gates, but remains distinct from ownership transfer. The owner creates
 a uniquely tagged closing `LOBBY_TOPOLOGY_TYPE_FCM` lobby. Once the joiner has
-joined, it installs global leave and member-state listeners, verifies the
-initial state, and releases the owner. The owner uses the version-correct
-successful operation callback to leave. The joiner requires the owner `LEFT`
-notification and the global close notification; SDKs from 1.133.0 require
+joined, it installs a global leave listener, verifies the initial state, and
+releases the owner. The owner uses the version-correct successful operation
+callback to leave. The joiner requires the global close notification; SDKs from 1.133.0 require
 `LOBBY_LEAVE_REASON_LOBBY_CLOSED`, while earlier SDKs expose only the legacy
 successful `ioFailure == false` callback. After notification delivery it
 requires the tagged data and list entry to be gone, `SendLobbyMessage` to reject

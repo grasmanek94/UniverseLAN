@@ -1,0 +1,17 @@
+{
+  "name": "Simple/public-lobby-owner-close-lifecycle",
+  "sdkVersion": "1.152.11",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 45,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": {
+      "user1": ["initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata", "creator-leave", "self-state"],
+      "user2": ["initialize", "sign-in-callback", "sign-in-terminal", "list", "join", "joiner-two-member-snapshot", "joiner-lifecycle-listeners-armed", "post-close-list", "owner-close-lifecycle", "self-state"]
+    },
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "private lane tokens and raw Galaxy IDs are never recorded; compare only symbolic prior-owner, leave-reason, and observed list-absence relations"
+  }
+}
