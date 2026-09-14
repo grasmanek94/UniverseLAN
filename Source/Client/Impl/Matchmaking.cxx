@@ -231,7 +231,8 @@ namespace universelan::client {
 		LobbyManager::lobbies_t filtered_list_of_lobbies{};
 		for (auto& entry : data->lobby_list) {
 			auto lobby = entry.second;
-			bool skip{ !filter->allow_full && lobby->IsFull() };
+			// Explicit nonjoinability also removes a public lobby from discoverable results.
+			bool skip{ !lobby->IsJoinable() || (!filter->allow_full && lobby->IsFull()) };
 
 			if (!skip && !ShouldFilterOut(lobby, filter->filters)) {
 				filtered_list_of_lobbies.emplace(entry.first, entry.second);

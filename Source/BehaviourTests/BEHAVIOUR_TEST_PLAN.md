@@ -113,7 +113,7 @@ combine already-characterized Simple contracts.
 | Interface | Simple behavior index | Advanced follow-up |
 | --- | --- | --- |
 | Initialization / `IUser` | Init outcome, sign-in terminal behavior, `SignedIn`, `IsLoggedOn`, self ID validity/type, persona availability, and consecutive `GetSessionID()` equality. | Reinitialization, sign-out, connection loss/recovery. |
-| `IMatchmaking` | Create/list/join public lobby, full-lobby join failure, operation result, owner/member relationships, basic lobby data, owner-close lifecycle, and ownership-transition characterization. | Multiple concurrent memberships, lobby-message isolation, owner-close comparison, and ownership-transition comparison are implemented; other filters and failure paths remain. |
+| `IMatchmaking` | Create/list/join public lobby, nonjoinable public-list behavior, full-lobby join failure, operation result, owner/member relationships, basic lobby data, owner-close lifecycle, and ownership-transition characterization. | Multiple concurrent memberships, lobby-message isolation, owner-close comparison, and ownership-transition comparison are implemented; other filters and failure paths remain. |
 | `INetworking` | Reliable P2P listener-mode scheduling and callback-local non-consuming peek relations. Three clean official 2026-09-14 trials established the exact accepted environmental pair: scheduled send with a non-target callback and no expected-channel delivery/peek versus UniverseLAN expected-channel delivery and two peeks. | Three-peer routing, channel behavior, unreliable packets, disconnect/NAT/server-host behavior. |
 | `IChat` | One-to-one room request, room identity reuse, message send terminal result, remote message content/sender relationship. | History/pagination, membership lifecycle, read state, denial/failure behavior. |
 | `IFriends` | Persona information retrieval, persona state, rich-presence set/get callback behavior, game invitations where official accounts permit it. | Friend relationships, invitation/acceptance flows, persistence, richer presence state. |
@@ -218,9 +218,19 @@ data can be listed and read; they are never printed. These are public
   lobby data/state, and makes exactly one asynchronous join attempt. Official
   characterization must establish its terminal enum before the strict contract.
   The rejected joiner never calls member-data, member-enumeration, or lobby-message
-  APIs. The creator verifies sole ownership/membership after the terminal failure,
-  leaves with a fresh cleanup deadline, and acknowledges only its terminal local
-  leave; the joiner completes after the post-empty filtered-list absence probe.
+   APIs. The creator verifies sole ownership/membership after the terminal failure,
+   leaves with a fresh cleanup deadline, and acknowledges only its terminal local
+   leave; the joiner completes after the post-empty filtered-list absence probe.
+- `Simple/public-lobby-not-joinable-behavior` uses a distinct authorized temporary
+  public capacity-two FCM lobby. The creator sets its marker and explicitly calls
+  `SetLobbyJoinable(false)`, then verifies public type, capacity, joinability, and
+  marker visibility before releasing the joiner. Two official-only trials observed
+  a successful filtered list with no candidate, so the strict contract issues no
+  join and makes no direct-ID fallback. It requires no member/member-data/send
+  access, sole creator ownership, terminal creator leave under a fresh deadline,
+  and successful tagged-list absence after deletion. It does not infer behavior
+  for a list-exposed nonjoinable lobby, direct join, callback order, or an error
+  reason that official GOG did not expose.
 - `Simple/public-lobby-owner-ownership-transition` uses a distinct tagged public
   `LOBBY_TOPOLOGY_TYPE_FCM_OWNERSHIP_TRANSITION` lobby in each lane. It explicitly
   sets and observes joinable true and capacity two before the filtered joiner is
@@ -346,8 +356,19 @@ data can be listed and read; they are never printed. These are public
    only. The comparator preserves per-host `IMatchmaking` order and compares only
    observer-before-update and joiner-before-cleanup causal gates across hosts.
    The coverage and difference registers record a matched live baseline; its
-   retained register did not capture a run date. Callback multiplicity and
-   callback-gate discovery order remain diagnostic rather than equality facts.
+    retained register did not capture a run date. Callback multiplicity and
+    callback-gate discovery order remain diagnostic rather than equality facts.
+
+- `Simple/public-lobby-not-joinable-behavior` ran twice as an official-GOG-only
+  characterization before its strict four-host baseline on 2026-09-14. Both
+  official trials observed the same public branch: `SetLobbyJoinable(false)`
+  completed and was publicly visible with the public/capacity-two/tag setup; one
+  marker-filtered ordinary list returned success with no selected candidate; no
+  join operation was issued; the creator remained sole owner/member; and its
+  terminal leave preceded a successful post-delete absence probe. UniverseLAN
+  initially exposed the lobby, so normal client list filtering now excludes
+  nonjoinable lobbies. The strict contract promotes no broader behavior: no
+  direct-ID join, error reason, callback order, or list-exposed branch is assumed.
 
 - `Advanced/multiple-lobby-membership-and-message-isolation` is the first
   Advanced contract. Its official-GOG-only 2026-09-14 characterization observed

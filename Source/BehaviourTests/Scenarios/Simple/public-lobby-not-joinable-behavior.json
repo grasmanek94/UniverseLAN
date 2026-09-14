@@ -1,0 +1,17 @@
+{
+  "name": "Simple/public-lobby-not-joinable-behavior",
+  "sdkVersion": "1.152.11",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 45,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": {
+      "user1": ["initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "nonjoinable-configuration", "creator-sole-owner-snapshot", "creator-leave", "self-state"],
+      "user2": ["initialize", "sign-in-callback", "sign-in-terminal", "list", "joiner-access", "post-delete-list", "self-state"]
+    },
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "raw Galaxy IDs, public collision-marker values, configuration values, and timestamps are never recorded; compare only public nonjoinable configuration, filtered-list absence, no direct join/member/send access, creator sole ownership, and delete-probe relations"
+  }
+}

@@ -29,12 +29,14 @@ struct Arguments
     int timeoutSeconds = 0;
 };
 
-    enum class Scenario { initializeAndSignIn, sessionIdRepeatability, gogServicesState, gogServicesStateCharacterization, publicLobbyCreateListJoinLeave, publicLobbyFullJoinFailureCharacterization, publicLobbyFullJoinFailure, publicLobbyOwnerCloseLifecycleCharacterization, publicLobbyOwnerCloseLifecycle, publicLobbyOwnerOwnershipTransitionCharacterization, publicLobbyOwnerOwnershipTransition, publicLobbyDataPropagationCharacterization, publicLobbyDataPropagation, reliableP2PListenerPeekCharacterization, reliableP2PListenerPeek, multipleLobbyMembershipAndMessageIsolationCharacterization, multipleLobbyMembershipAndMessageIsolation, chatRoomMessageDeliveryCharacterization, chatRoomMessageDelivery, friendsPeerInformationRetrievalCharacterization, friendsPeerInformationRetrieval };
+    enum class Scenario { initializeAndSignIn, sessionIdRepeatability, gogServicesState, gogServicesStateCharacterization, publicLobbyCreateListJoinLeave, publicLobbyNotJoinableBehaviorCharacterization, publicLobbyNotJoinableBehavior, publicLobbyFullJoinFailureCharacterization, publicLobbyFullJoinFailure, publicLobbyOwnerCloseLifecycleCharacterization, publicLobbyOwnerCloseLifecycle, publicLobbyOwnerOwnershipTransitionCharacterization, publicLobbyOwnerOwnershipTransition, publicLobbyDataPropagationCharacterization, publicLobbyDataPropagation, reliableP2PListenerPeekCharacterization, reliableP2PListenerPeek, multipleLobbyMembershipAndMessageIsolationCharacterization, multipleLobbyMembershipAndMessageIsolation, chatRoomMessageDeliveryCharacterization, chatRoomMessageDelivery, friendsPeerInformationRetrievalCharacterization, friendsPeerInformationRetrieval };
 
 bool isSupportedScenario(const std::string& scenario)
 {
     return scenario == "initialize-and-sign-in" || scenario == "session-id-repeatability" || scenario == "gog-services-state"
         || scenario == "gog-services-state-characterization" || scenario == "public-lobby-create-list-join-leave"
+        || scenario == "public-lobby-not-joinable-behavior-characterization"
+        || scenario == "public-lobby-not-joinable-behavior"
         || scenario == "public-lobby-full-join-failure-characterization" || scenario == "public-lobby-full-join-failure"
              || scenario == "public-lobby-owner-close-lifecycle-characterization" || scenario == "public-lobby-owner-close-lifecycle"
              || scenario == "public-lobby-owner-ownership-transition-characterization" || scenario == "public-lobby-owner-ownership-transition"
@@ -51,6 +53,8 @@ Scenario selectedScenario(const Arguments& arguments)
     if (arguments.scenario == "gog-services-state") return Scenario::gogServicesState;
     if (arguments.scenario == "gog-services-state-characterization") return Scenario::gogServicesStateCharacterization;
     if (arguments.scenario == "public-lobby-create-list-join-leave") return Scenario::publicLobbyCreateListJoinLeave;
+    if (arguments.scenario == "public-lobby-not-joinable-behavior-characterization") return Scenario::publicLobbyNotJoinableBehaviorCharacterization;
+    if (arguments.scenario == "public-lobby-not-joinable-behavior") return Scenario::publicLobbyNotJoinableBehavior;
     if (arguments.scenario == "public-lobby-full-join-failure-characterization") return Scenario::publicLobbyFullJoinFailureCharacterization;
     if (arguments.scenario == "public-lobby-full-join-failure") return Scenario::publicLobbyFullJoinFailure;
     if (arguments.scenario == "public-lobby-owner-close-lifecycle-characterization") return Scenario::publicLobbyOwnerCloseLifecycleCharacterization;
@@ -90,6 +94,8 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
     }
     return isSupportedScenario(arguments.scenario) && (arguments.profile == "user1" || arguments.profile == "user2")
         && !arguments.trace.empty() && ((arguments.scenario != "public-lobby-create-list-join-leave"
+              && arguments.scenario != "public-lobby-not-joinable-behavior-characterization"
+              && arguments.scenario != "public-lobby-not-joinable-behavior"
               && arguments.scenario != "public-lobby-full-join-failure-characterization" && arguments.scenario != "public-lobby-full-join-failure"
              && arguments.scenario != "public-lobby-owner-close-lifecycle-characterization" && arguments.scenario != "public-lobby-owner-close-lifecycle"
              && arguments.scenario != "public-lobby-owner-ownership-transition-characterization" && arguments.scenario != "public-lobby-owner-ownership-transition"
@@ -960,6 +966,128 @@ std::string soleOwnerSnapshotRecord(const char* const record, galaxy::api::IMatc
         + ",\"soleMemberIsSelf\":" + boolean(selfOnlyMember)
         + ",\"configuredLimitObserved\":" + boolean(matchmaking->GetMaxNumLobbyMembers(lobby) == 1)
         + ",\"joinableObserved\":" + boolean(matchmaking->IsLobbyJoinable(lobby)) + "}";
+}
+
+bool runPublicLobbyNotJoinableBehaviorCharacterization(const Arguments& arguments, galaxy::api::IUser* const user,
+    std::vector<std::string>& records)
+{
+    galaxy::api::IMatchmaking* const matchmaking = galaxy::api::Matchmaking();
+    const std::string token = controlValue(arguments.control, "token");
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(arguments.timeoutSeconds);
+    if (matchmaking == nullptr || token.empty()) { writeEvent(arguments, "cleanup-ack"); return false; }
+
+    const galaxy::api::GalaxyID self = user->GetGalaxyID();
+    galaxy::api::GalaxyID lobby;
+    bool joined = false;
+    const bool creator = arguments.profile == "user1";
+    auto leaveWithFreshDeadline = [&](const char* const record)
+    {
+        if (!joined) return true;
+        const auto cleanupDeadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+        const bool left = leaveLobby(arguments, matchmaking, lobby, records, record, cleanupDeadline, true);
+        if (left) joined = false;
+        return left;
+    };
+
+    if (creator)
+    {
+        LobbyCreatedListener created;
+        LobbyEnteredListener entered;
+        matchmaking->CreateLobby(galaxy::api::LOBBY_TYPE_PUBLIC, 2, false, galaxy::api::LOBBY_TOPOLOGY_TYPE_FCM, &created, &entered);
+        const bool callbacks = pumpUntil(arguments, deadline, [&] { return created.called && entered.called; });
+        records.push_back("{\"record\":\"create\",\"result\":" + common::jsonString(callbacks ? createResult(created.result) : "timeout")
+            + ",\"lobbyValid\":" + boolean(callbacks && created.lobby.IsValid()) + ",\"lobbyType\":" + common::jsonString(callbacks ? idType(created.lobby.GetIDType()) : "unavailable") + "}");
+        records.push_back("{\"record\":\"creator-enter\",\"result\":" + common::jsonString(callbacks ? enterResult(entered.result) : "timeout")
+            + ",\"sameCreatedLobby\":" + boolean(callbacks && created.lobby == entered.lobby) + "}");
+        if (entered.result == galaxy::api::LOBBY_ENTER_RESULT_SUCCESS && entered.lobby.IsValid()) { lobby = entered.lobby; joined = true; }
+        if (!callbacks || created.result != galaxy::api::LOBBY_CREATE_RESULT_SUCCESS || entered.result != galaxy::api::LOBBY_ENTER_RESULT_SUCCESS || created.lobby != entered.lobby || !created.lobby.IsValid())
+        {
+            if (leaveWithFreshDeadline("creator-leave")) writeEvent(arguments, "cleanup-ack");
+            return false;
+        }
+
+        LobbyDataUpdateListener capacity;
+        LobbyDataUpdateListener marker;
+        matchmaking->SetMaxNumLobbyMembers(lobby, 2, &capacity);
+        matchmaking->SetLobbyData(lobby, "universelan-behaviour-token", token.c_str(), &marker);
+        const bool configuredAndTagged = pumpUntil(arguments, deadline, [&] { return capacity.called && marker.called; });
+        LobbyDataUpdateListener nonjoinable;
+        matchmaking->SetLobbyJoinable(lobby, false, &nonjoinable);
+        const bool nonjoinableCompleted = pumpUntil(arguments, deadline, [&] { return nonjoinable.called; });
+        std::array<char, 256> copiedMarker{};
+        matchmaking->GetLobbyDataCopy(lobby, "universelan-behaviour-token", copiedMarker.data(), static_cast<std::uint32_t>(copiedMarker.size()));
+        const bool configurationVisible = matchmaking->GetLobbyType(lobby) == galaxy::api::LOBBY_TYPE_PUBLIC && matchmaking->GetMaxNumLobbyMembers(lobby) == 2 && !matchmaking->IsLobbyJoinable(lobby);
+        const bool markerVisible = std::string(copiedMarker.data()) == token;
+        records.push_back("{\"record\":\"nonjoinable-configuration\",\"capacityUpdateSuccess\":" + boolean(configuredAndTagged && capacity.success && capacity.lobby == lobby)
+            + ",\"setLobbyJoinableFalseSuccess\":" + boolean(nonjoinableCompleted && nonjoinable.success && nonjoinable.lobby == lobby)
+            + ",\"publicVisible\":" + boolean(configurationVisible && matchmaking->GetLobbyType(lobby) == galaxy::api::LOBBY_TYPE_PUBLIC)
+            + ",\"capacityVisible\":" + boolean(configurationVisible && matchmaking->GetMaxNumLobbyMembers(lobby) == 2)
+            + ",\"nonjoinableVisible\":" + boolean(configurationVisible && !matchmaking->IsLobbyJoinable(lobby)) + ",\"tagVisible\":" + boolean(markerVisible) + "}");
+        if (!configuredAndTagged || !capacity.success || capacity.lobby != lobby || !marker.success || marker.lobby != lobby || !nonjoinableCompleted || !nonjoinable.success || nonjoinable.lobby != lobby || !configurationVisible || !markerVisible)
+        {
+            if (leaveWithFreshDeadline("creator-leave")) writeEvent(arguments, "cleanup-ack");
+            return false;
+        }
+        writeEvent(arguments, "creator-ready");
+        if (!pumpUntil(arguments, deadline, [&] { return controlIsSet(arguments, "joiner-list-complete"); }))
+        {
+            if (leaveWithFreshDeadline("creator-leave")) writeEvent(arguments, "cleanup-ack");
+            return false;
+        }
+        records.push_back(snapshotRecord("creator-sole-owner-snapshot", matchmaking, lobby, self, 1));
+        const bool soleOwner = matchmaking->GetLobbyOwner(lobby) == self && matchmaking->GetNumLobbyMembers(lobby) == 1 && matchmaking->GetLobbyMemberByIndex(lobby, 0) == self;
+        if (!leaveWithFreshDeadline("creator-leave")) return false;
+        writeEvent(arguments, "creator-left");
+        if (!pumpUntil(arguments, deadline, [&] { return controlIsSet(arguments, "post-delete-list-complete"); })) return false;
+        writeEvent(arguments, "cleanup-ack");
+        return soleOwner;
+    }
+
+    if (!pumpUntil(arguments, deadline, [&] { return controlIsSet(arguments, "creator-ready"); })) { writeEvent(arguments, "cleanup-ack"); return false; }
+    LobbyListListener listed;
+    listed.matchmaking = matchmaking;
+    matchmaking->AddRequestLobbyListStringFilter("universelan-behaviour-token", token.c_str(), galaxy::api::LOBBY_COMPARISON_TYPE_EQUAL);
+    matchmaking->AddRequestLobbyListResultCountFilter(2);
+    matchmaking->RequestLobbyList(false, &listed);
+    const bool listedCompleted = pumpUntil(arguments, deadline, [&] { return listed.called; });
+    const galaxy::api::GalaxyID selected = listed.candidates.size() == 1 ? listed.candidates.front() : galaxy::api::GalaxyID();
+    records.push_back("{\"record\":\"list\",\"result\":" + common::jsonString(listedCompleted ? listResult(listed.result) : "timeout")
+        + ",\"candidateCount\":" + std::to_string(listed.candidates.size()) + ",\"selectedFromFilteredList\":" + boolean(selected.IsValid()) + ",\"selectedValid\":" + boolean(selected.IsValid()) + "}");
+    if (!listedCompleted) { writeEvent(arguments, "cleanup-ack"); return false; }
+
+    bool joinIssued = false;
+    bool joinSucceeded = false;
+    if (listed.result == galaxy::api::LOBBY_LIST_RESULT_SUCCESS && selected.IsValid())
+    {
+        LobbyEnteredListener entered;
+        joinIssued = true;
+        matchmaking->JoinLobby(selected, &entered);
+        const bool terminal = pumpUntil(arguments, deadline, [&] { return entered.called; });
+        joinSucceeded = terminal && entered.result == galaxy::api::LOBBY_ENTER_RESULT_SUCCESS && entered.lobby == selected;
+        records.push_back("{\"record\":\"join\",\"exactlyOneTerminal\":" + boolean(entered.called) + ",\"terminalResult\":" + common::jsonString(terminal ? enterResult(entered.result) : "timeout")
+            + ",\"sameSelectedLobby\":" + boolean(terminal && entered.lobby == selected) + ",\"entered\":" + boolean(joinSucceeded) + "}");
+        if (joinSucceeded)
+        {
+            lobby = entered.lobby;
+            joined = true;
+            if (!leaveWithFreshDeadline("joiner-cleanup-leave")) { writeEvent(arguments, "cleanup-ack"); return false; }
+        }
+        else if (!terminal) { writeEvent(arguments, "cleanup-ack"); return false; }
+    }
+    records.push_back("{\"record\":\"joiner-access\",\"joinIssuedOnlyForFilteredSelection\":" + boolean(!joinIssued || selected.IsValid())
+        + ",\"directIdJoinAttempted\":false,\"memberOnlyCallsAttempted\":false,\"memberDataCallsAttempted\":false,\"sendLobbyMessageAttempted\":false,\"joined\":" + boolean(joinSucceeded) + "}");
+    writeEvent(arguments, "joiner-list-complete");
+    if (!pumpUntil(arguments, deadline, [&] { return controlIsSet(arguments, "creator-left"); })) { writeEvent(arguments, "cleanup-ack"); return false; }
+    LobbyListListener postDelete;
+    postDelete.matchmaking = matchmaking;
+    matchmaking->AddRequestLobbyListStringFilter("universelan-behaviour-token", token.c_str(), galaxy::api::LOBBY_COMPARISON_TYPE_EQUAL);
+    matchmaking->RequestLobbyList(false, &postDelete);
+    const bool postDeleteCompleted = pumpUntil(arguments, deadline, [&] { return postDelete.called; });
+    const bool targetAbsent = postDeleteCompleted && postDelete.result == galaxy::api::LOBBY_LIST_RESULT_SUCCESS && postDelete.candidates.empty();
+    records.push_back("{\"record\":\"post-delete-list\",\"result\":" + common::jsonString(postDeleteCompleted ? listResult(postDelete.result) : "timeout") + ",\"targetAbsent\":" + boolean(targetAbsent) + "}");
+    if (postDeleteCompleted) writeEvent(arguments, "post-delete-list-complete");
+    writeEvent(arguments, "cleanup-ack");
+    return postDeleteCompleted;
 }
 
 bool runPublicLobbyFullJoinFailure(const Arguments& arguments, galaxy::api::IUser* const user, std::vector<std::string>& records)
@@ -1953,6 +2081,14 @@ int run(const Arguments& arguments)
         {
             records.push_back("{\"record\":\"sign-in-callback\",\"result\":\"success\"}");
             records.push_back("{\"record\":\"sign-in-terminal\",\"result\":\"success\"}");
+            if (scenario == Scenario::publicLobbyNotJoinableBehaviorCharacterization || scenario == Scenario::publicLobbyNotJoinableBehavior)
+            {
+                const bool lobbySucceeded = runPublicLobbyNotJoinableBehaviorCharacterization(arguments, user, records);
+                records.push_back(selfStateRecord(user));
+                common::writeTrace(arguments.trace, records);
+                galaxy::api::Shutdown();
+                return lobbySucceeded ? 0 : 1;
+            }
             if (scenario == Scenario::publicLobbyFullJoinFailureCharacterization || scenario == Scenario::publicLobbyFullJoinFailure)
             {
                 const bool lobbySucceeded = runPublicLobbyFullJoinFailure(arguments, user, records);

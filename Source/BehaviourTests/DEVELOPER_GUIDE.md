@@ -48,6 +48,7 @@ cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^gog-services-state$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^session-id-repeatability$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^public-lobby-create-list-join-leave$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
+cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^public-lobby-not-joinable-behavior$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^public-lobby-full-join-failure$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^public-lobby-owner-close-lifecycle$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^public-lobby-owner-ownership-transition$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
@@ -148,6 +149,23 @@ call. Two official-only trials observed terminal `full` with no entry. It never
 uses member-data, member enumeration, or lobby-message APIs. Creator cleanup
 uses a fresh deadline and acknowledges only its matching terminal leave; the
 nonmember joiner performs the bounded post-empty absence probe without a leave.
+
+Characterize nonjoinable public-lobby behavior twice before changing its strict
+facts:
+
+```powershell
+& "bin/Debug/universelan-behaviour-runner-x64-1.152.11.exe" --characterize-official-gog-public-lobby-not-joinable-behavior --gog-host "bin/Debug/universelan-behaviour-host-gog-x64-1.152.11.exe" --gog-runtime-dir "Source/DLLs/1.152.11/gog"
+```
+
+The creator makes an authorized public capacity-two FCM lobby, applies its public
+collision marker, explicitly calls `SetLobbyJoinable(false)`, and verifies public
+type/capacity/joinability/tag visibility. The joiner performs exactly one ordinary
+marker-filtered list request. On the observed empty-list branch it must not
+manufacture a lobby ID or call `JoinLobby`; it makes no member/member-data or
+lobby-send call. Two official `1.152.11/x64` runs observed successful zero-candidate
+lists, terminal creator leave, and successful post-delete absence, so only that
+branch is strict. Direct-ID join, a list-exposed branch, callback order, and join
+failure reason remain characterization-only possibilities, not assumptions.
 
 This official-only command uses two hosts and the authorized temporary tagged
 public FCM lobby. After the joiner joins, it registers public global
@@ -250,11 +268,11 @@ adding or characterizing a scenario.
 
 The approved comparator host contracts are `initialize-and-sign-in`,
 `session-id-repeatability`, `gog-services-state`,
-`public-lobby-create-list-join-leave`, `public-lobby-owner-close-lifecycle`, `public-lobby-owner-ownership-transition`, `public-lobby-data-propagation`, and
+`public-lobby-create-list-join-leave`, `public-lobby-not-joinable-behavior`, `public-lobby-owner-close-lifecycle`, `public-lobby-owner-ownership-transition`, `public-lobby-data-propagation`, and
 `public-lobby-full-join-failure`, `chat-room-message-delivery`, `reliable-p2p-listener-peek`, and
 `multiple-lobby-membership-and-message-isolation`; the additional runner-selected diagnostics are
 `gog-services-state-characterization`,
-`public-lobby-owner-close-lifecycle-characterization`, `public-lobby-owner-ownership-transition-characterization`, `public-lobby-full-join-failure-characterization`, `public-lobby-data-propagation-characterization`, and
+`public-lobby-not-joinable-behavior-characterization`, `public-lobby-owner-close-lifecycle-characterization`, `public-lobby-owner-ownership-transition-characterization`, `public-lobby-full-join-failure-characterization`, `public-lobby-data-propagation-characterization`, and
 `chat-room-message-delivery-characterization`, `reliable-p2p-listener-peek-characterization`, and
 `multiple-lobby-membership-and-message-isolation-characterization`. Manifests and host
 arguments outside that fixed registry are rejected. The strict `gog-services-state`

@@ -81,6 +81,16 @@ strict for every public fact they record.
 
 ## Matched Live Baselines And Accepted Differences
 
+### `Simple/public-lobby-not-joinable-behavior` on `1.152.11/x64`
+
+- Date: 2026-09-14
+- Classification: matched live baseline
+- Public observation: two official-only trials created public tagged capacity-two FCM lobbies, explicitly completed `SetLobbyJoinable(false)`, and verified public configuration/tag visibility. Each marker-filtered non-full list completed successfully with no candidate selected, therefore no join was issued. The creator stayed sole owner/member, its terminal leave completed under a fresh deadline, and the post-delete filtered list was absent.
+- Official normalized result: exact stable public branch is successful zero-candidate list, no selected relationship, no join terminal, no direct-ID/member/member-data/send access, creator sole ownership, and successful post-delete absence.
+- UniverseLAN normalized result: the initial focused comparison exposed the nonjoinable lobby and allowed a selected join; after excluding nonjoinable lobbies from ordinary client list results, the focused strict comparison matched every stable official public fact with acknowledged cleanup.
+- Reproduction command/test name: `--characterize-official-gog-public-lobby-not-joinable-behavior`; `universelan-behaviour-simple-public-lobby-not-joinable-behavior-x64-1.152.11`; portable `RunBehaviorCTest.cmake` with `BEHAVIOUR_TEST_LABEL="^public-lobby-not-joinable-behavior$"`.
+- Follow-up: direct-ID join behavior, join failure reason, callbacks, list order, and any list-exposed branch remain uncharacterized and are not contract assertions. No raw ID, marker value, configuration value, timestamp, control, runtime output, or artifact path is recorded.
+
 ### `Simple/public-lobby-full-join-failure` on `1.152.11/x64`
 
 - Classification: matched live baseline

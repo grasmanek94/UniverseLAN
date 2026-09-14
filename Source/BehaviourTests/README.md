@@ -63,6 +63,15 @@ The manifest accepts only that `GOG no delivery` versus `UniverseLAN delivery`
 pair as a beneficial environmental difference; setup, scheduling, cleanup, and
 all other callback relations remain strict.
 
+`Simple/public-lobby-not-joinable-behavior` uses an authorized tagged public,
+capacity-two FCM lobby. The creator explicitly completes and verifies
+`SetLobbyJoinable(false)` before the joiner makes one marker-filtered ordinary
+list request. Two official-only `1.152.11/x64` trials returned a successful empty
+list, so the strict contract records no selected candidate and issues no join or
+direct-ID fallback. It also requires no member/member-data/send access, creator
+sole ownership, terminal cleanup, and post-delete absence. It does not claim an
+unobserved join error reason, callback order, or list-exposed branch.
+
 ## How To Read A Result
 
 Each scenario runs two synchronized lanes: UniverseLAN server plus two
