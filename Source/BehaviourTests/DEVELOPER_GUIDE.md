@@ -10,6 +10,45 @@ future work and required validation.
 
 ## Build And Opt In
 
+### SDK 1.100.2 Server P2P Characterization
+
+The game-server sender-identity investigation has a UniverseLAN local
+characterization lane and an official public-capability preflight. Configure,
+build, and run both focused tests:
+
+```powershell
+cmake -S . -B cmake-behaviour-1002-vs18-x64 -G "Visual Studio 18 2026" -A x64 -D BUILD_UNIVERSELAN_BEHAVIOUR_TESTS=ON -D LIMIT_VERSIONS="1.100.2"
+cmake --build cmake-behaviour-1002-vs18-x64 --config Debug --target bt1002_runner
+ctest --test-dir cmake-behaviour-1002-vs18-x64 -C Debug --output-on-failure -R "^universelan-behaviour-game-server-p2p-sender-identity-x64-1\.100\.2$"
+ctest --test-dir cmake-behaviour-1002-vs18-x64 -C Debug --output-on-failure -R "^universelan-behaviour-official-gog-first-server-p2p-sender-identity-preflight-x64-1\.100\.2$"
+```
+
+The UniverseLAN lane needs prebuilt local `bin/1.100.2/Debug/Galaxy64.dll` and
+`UniverseLANServer64.exe`. It runs an isolated local server, a public
+lobby-owner game-server host, and a client. The host sends through
+`GetServerNetworking`; client polling retains only delivery, private-marker
+equality, `senderEqualsLobbyOwner`, `senderEqualsSelf`, and
+`senderType=unclassified-by-sdk-1.100.2`. Missing artifacts report
+`classification=blocked-runtime-artifacts-missing` and fail without inventing a
+UniverseLAN result.
+
+The official preflight reads only the versioned public headers and checks local
+official artifacts. It does not load a runtime, authenticate, create a lobby, or
+send a packet. Current `1.100.2` headers provide `GetServerNetworking` and
+polling, but lack a dedicated `GalaxyGameServerApi.h` lifecycle and public
+`GalaxyID` type accessor, so it reports `classification=blocked`.
+
+When GOG supplies the missing public surface, run the matching official probe.
+The probe must create an initially nonjoinable tagged public FCM lobby, join a client,
+must create an initially nonjoinable tagged public FCM lobby, join a client,
+have the server-host send one bounded direct reliable reply to the public member,
+and receive it through callback-local peek or listener-free polling. Retain only
+the symbolic sender-to-lobby-owner/lobby relation and channel/payload relation.
+Do not infer sender type from raw IDs. Compare its stable symbolic relation with
+the existing UniverseLAN characterization. This is a black-box investigation of the
+observable path exercised by `P2PServerNetworkPacketMessage`; never inspect that
+message, its routing implementation, or server state as evidence.
+
 The framework is x64 SDK `1.152.11` only. It builds two different hosts from
 the same public-SDK source: one links to the UniverseLAN import target and one
 links to `gog/Galaxy64.lib`. `BUILD_ALL_TESTS=ON` builds the framework but does

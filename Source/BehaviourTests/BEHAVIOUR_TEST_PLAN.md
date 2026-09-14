@@ -111,6 +111,48 @@ Comparison rules:
   lobby state require a cleanup contract and must be opt-in until confirmed safe
   for the supplied accounts/application.
 
+## SDK 1.100.2 Server P2P Sender Identity Investigation
+
+`game-server-p2p-sender-identity` is a two-lane SDK `1.100.2` x64
+investigation relevant to the historical Vikings - Wolves of Midgard
+game-server report. The UniverseLAN lane is a local characterization and the
+official lane is a public-capability preflight until official dedicated-server
+artifacts exist. Neither is a passing compatibility result.
+
+The public-only UniverseLAN probe is:
+
+1. An authenticated server-host role creates an initially nonjoinable public
+   FCM lobby, tags it privately for discovery, then makes it joinable.
+2. An authenticated client role finds and joins that lobby.
+3. The server-host obtains the member only from public lobby membership and
+   calls its public server networking interface to schedule one bounded direct
+   reliable reply on a fixed channel.
+4. The client uses listener-free `ProcessData`/availability/one-read polling and
+    retains only delivery, private payload-marker equality, symbolic
+    sender-to-public-lobby-owner and sender-to-self relations, and
+    `unclassified-by-sdk-1.100.2`. It retains no raw ID, payload, payload length,
+    marker, credential, control, timestamp, or runtime output.
+5. The UniverseLAN lane requires existing local `1.100.2` client/server runtime
+    artifacts and fails with an explicit artifact block if they are absent. No
+    production code is an assertion.
+
+The selected `1.100.2` public headers block the matching official characterization:
+`IGalaxy::GetServerNetworking()` exists for a lobby host, but no
+`GalaxyGameServerApi.h`/dedicated `InitGameServer` API is supplied, and
+`GalaxyID` exposes neither an ID-type enum nor an ID-type accessor. Equality
+relations such as `sender == GetLobbyOwner(lobby)` can be observed, but labeling
+the sender as user, lobby, or server would require a raw-ID convention or
+implementation detail. Both are prohibited. The preflight reports this block
+without loading either runtime, signing in, creating a lobby, or inventing a
+result.
+
+The investigation is linked only as a black-box target to the current
+`P2PServerNetworkPacketMessage` route: that route is the existing
+server-networking envelope used when the server-host interface schedules a
+direct recipient reply. The probe must not inspect that message, routing code,
+or server state. Its only future evidence is the SDK-visible client sender
+relation described above.
+
 ## Behavior Index
 
 Simple scenarios test one narrow public contract at a time. Advanced scenarios

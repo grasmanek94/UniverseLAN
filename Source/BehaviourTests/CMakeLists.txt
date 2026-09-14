@@ -52,6 +52,54 @@ else()
 endif()
 configure_file(Host/Credentials.hxx.in "${CMAKE_CURRENT_BINARY_DIR}/BehaviourTestCredentials.hxx" @ONLY)
 
+# SDK 1.100.2 is investigated separately from the 1.152.11 host framework.
+# Its preflight is intentionally available even when the newer host targets are not.
+if(GALAXY_ARCH STREQUAL "x64")
+  add_test(NAME "universelan-behaviour-official-gog-first-server-p2p-sender-identity-preflight-x64-1.100.2"
+    COMMAND "${CMAKE_COMMAND}"
+      "-D BEHAVIOUR_TEST_SOURCE_DIR=${CMAKE_SOURCE_DIR}"
+      "-D BEHAVIOUR_TEST_CREDENTIALS_AVAILABLE=${UNIVERSELAN_BEHAVIOUR_TEST_CREDENTIALS_AVAILABLE}"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/GameServerP2PSenderIdentity1002Preflight.cmake")
+  set_tests_properties("universelan-behaviour-official-gog-first-server-p2p-sender-identity-preflight-x64-1.100.2" PROPERTIES
+    LABELS "behavior;gog;preflight;sdk-1.100.2;game-server-p2p"
+    TIMEOUT 15
+    RUN_SERIAL TRUE)
+endif()
+
+set(UNIVERSELAN_BEHAVIOUR_TEST_1002_SDK_IMPORT_LIB "${CMAKE_SOURCE_DIR}/Source/DLLs/1.100.2/gog/Galaxy64.lib")
+set(UNIVERSELAN_BEHAVIOUR_TEST_1002_CLIENT_DLL "${CMAKE_SOURCE_DIR}/bin/1.100.2/Debug/Galaxy64.dll")
+set(UNIVERSELAN_BEHAVIOUR_TEST_1002_SERVER "${CMAKE_SOURCE_DIR}/bin/1.100.2/Debug/UniverseLANServer64.exe")
+if(GALAXY_ARCH STREQUAL "x64" AND EXISTS "${UNIVERSELAN_BEHAVIOUR_TEST_1002_SDK_IMPORT_LIB}")
+  set(UNIVERSELAN_BEHAVIOUR_TEST_1002_RUNTIME_DIR "${CMAKE_BINARY_DIR}/bt1002")
+  file(MAKE_DIRECTORY "${UNIVERSELAN_BEHAVIOUR_TEST_1002_RUNTIME_DIR}/Debug")
+  add_executable(bt1002_host
+    GameServerP2PSenderIdentity1002Host.cxx)
+  target_include_directories(bt1002_host PRIVATE
+    "${CMAKE_CURRENT_BINARY_DIR}"
+    "${CMAKE_SOURCE_DIR}/Source/DLLs/1.100.2")
+  target_link_libraries(bt1002_host PRIVATE
+    "${UNIVERSELAN_BEHAVIOUR_TEST_1002_SDK_IMPORT_LIB}")
+  set_target_properties(bt1002_host PROPERTIES
+    OUTPUT_NAME "bt1002-host"
+    RUNTIME_OUTPUT_DIRECTORY "${UNIVERSELAN_BEHAVIOUR_TEST_1002_RUNTIME_DIR}")
+
+  add_executable(bt1002_runner
+    GameServerP2PSenderIdentity1002Runner.cxx)
+  set_target_properties(bt1002_runner PROPERTIES
+    OUTPUT_NAME "bt1002-runner"
+    RUNTIME_OUTPUT_DIRECTORY "${UNIVERSELAN_BEHAVIOUR_TEST_1002_RUNTIME_DIR}")
+  add_dependencies(bt1002_runner bt1002_host)
+  add_test(NAME "universelan-behaviour-game-server-p2p-sender-identity-x64-1.100.2"
+    COMMAND $<TARGET_FILE:bt1002_runner>
+      --host $<TARGET_FILE:bt1002_host>
+      --client-dll "${UNIVERSELAN_BEHAVIOUR_TEST_1002_CLIENT_DLL}"
+      --server "${UNIVERSELAN_BEHAVIOUR_TEST_1002_SERVER}")
+  set_tests_properties("universelan-behaviour-game-server-p2p-sender-identity-x64-1.100.2" PROPERTIES
+    LABELS "behavior;universelan;characterization;sdk-1.100.2;game-server-p2p"
+    TIMEOUT 60
+    RUN_SERIAL TRUE)
+endif()
+
 if(NOT GALAXY_ARCH STREQUAL UNIVERSELAN_BEHAVIOUR_TEST_ARCH)
   message(STATUS "BehaviourTests support ${UNIVERSELAN_BEHAVIOUR_TEST_ARCH} only; framework targets are unavailable for ${GALAXY_ARCH}")
   return()
