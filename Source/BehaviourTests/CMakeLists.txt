@@ -136,6 +136,7 @@ if(ENABLE_UNIVERSELAN_GOG_BEHAVIOUR_TESTS AND UNIVERSELAN_BEHAVIOUR_TEST_CREDENT
   add_universelan_gog_behaviour_test("simple-gog-services-state" "Simple" "gog-services-state.json" "gog-services-state")
   add_universelan_gog_behaviour_test("simple-public-lobby-create-list-join-leave" "Simple" "public-lobby-create-list-join-leave.json" "public-lobby-create-list-join-leave")
   add_universelan_gog_behaviour_test("simple-public-lobby-owner-close-lifecycle" "Simple" "public-lobby-owner-close-lifecycle.json" "public-lobby-owner-close-lifecycle")
+  add_universelan_gog_behaviour_test("simple-public-lobby-owner-ownership-transition" "Simple" "public-lobby-owner-ownership-transition.json" "public-lobby-owner-ownership-transition")
   add_universelan_gog_behaviour_test("simple-public-lobby-data-propagation" "Simple" "public-lobby-data-propagation.json" "public-lobby-data-propagation")
   add_universelan_gog_behaviour_test("simple-chat-room-message-delivery" "Simple" "chat-room-message-delivery.json" "chat-room-message-delivery")
   add_universelan_gog_behaviour_test("simple-friends-peer-information-retrieval" "Simple" "friends-peer-information-retrieval.json" "friends-peer-information-retrieval")

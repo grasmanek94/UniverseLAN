@@ -44,6 +44,7 @@ struct Arguments
     fs::path gogRuntimeDirectory;
     bool characterizeGogServicesState = false;
     bool characterizeOfficialGogPublicLobbyOwnerCloseLifecycle = false;
+    bool characterizeOfficialGogPublicLobbyOwnerOwnershipTransition = false;
     bool characterizePublicLobbyDataPropagation = false;
     bool characterizeMultipleLobbyMembershipAndMessageIsolation = false;
     bool characterizeChatRoomMessageDelivery = false;
@@ -66,7 +67,7 @@ struct ScenarioContract
 {
     std::string_view name;
     std::string_view hostScenario;
-    std::array<std::string_view, 12> records;
+    std::array<std::string_view, 16> records;
     std::size_t recordCount;
     bool observesGogServicesState;
     bool observesSessionIdRepeatability;
@@ -116,7 +117,13 @@ constexpr std::array scenarioContracts{
             "joiner-lifecycle-listeners-armed", "post-close-list", "owner-close-lifecycle", "self-state"}, 12, false, false, true, false, false, false},
     ScenarioContract{"Simple/public-lobby-owner-close-lifecycle", "public-lobby-owner-close-lifecycle",
         {"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata", "creator-leave",
-            "joiner-lifecycle-listeners-armed", "post-close-list", "owner-close-lifecycle", "self-state"}, 12, false, false, true, false, false, false}
+            "joiner-lifecycle-listeners-armed", "post-close-list", "owner-close-lifecycle", "self-state"}, 12, false, false, true, false, false, false},
+    ScenarioContract{"Simple/public-lobby-owner-ownership-transition characterization", "public-lobby-owner-ownership-transition-characterization",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata", "creator-leave",
+            "joiner-lifecycle-listeners-armed", "owner-ownership-transition", "promoted-owner-data", "joiner-leave", "post-empty-list", "self-state"}, 14, false, false, true, false, false, false},
+    ScenarioContract{"Simple/public-lobby-owner-ownership-transition", "public-lobby-owner-ownership-transition",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata", "creator-leave",
+            "joiner-lifecycle-listeners-armed", "owner-ownership-transition", "promoted-owner-data", "joiner-leave", "post-empty-list", "self-state"}, 14, false, false, true, false, false, false}
 };
 
 struct Child
@@ -166,6 +173,12 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
             arguments.characterizeOfficialGogPublicLobbyOwnerCloseLifecycle = true;
             continue;
         }
+        if (option == "--characterize-official-gog-public-lobby-owner-ownership-transition")
+        {
+            if (arguments.characterizeOfficialGogPublicLobbyOwnerOwnershipTransition) return false;
+            arguments.characterizeOfficialGogPublicLobbyOwnerOwnershipTransition = true;
+            continue;
+        }
         if (option == "--characterize-public-lobby-data-propagation")
         {
             if (arguments.characterizePublicLobbyDataPropagation) return false;
@@ -206,11 +219,11 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
         else if (option == "--gog-runtime-dir") arguments.gogRuntimeDirectory = value;
         else return false;
     }
-    return (static_cast<int>(arguments.characterizeGogServicesState) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyOwnerCloseLifecycle) + static_cast<int>(arguments.characterizePublicLobbyDataPropagation) + static_cast<int>(arguments.characterizeMultipleLobbyMembershipAndMessageIsolation)
+    return (static_cast<int>(arguments.characterizeGogServicesState) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyOwnerCloseLifecycle) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyOwnerOwnershipTransition) + static_cast<int>(arguments.characterizePublicLobbyDataPropagation) + static_cast<int>(arguments.characterizeMultipleLobbyMembershipAndMessageIsolation)
                 + static_cast<int>(arguments.characterizeChatRoomMessageDelivery) + static_cast<int>(arguments.characterizeOfficialGogChatRoomMessageDelivery)
                 + static_cast<int>(arguments.characterizeOfficialGogFriendsPeerInformationRetrieval)
             == static_cast<int>(arguments.manifest.empty())) && !arguments.gogHost.empty() && !arguments.gogRuntimeDirectory.empty()
-        && ((arguments.characterizeOfficialGogChatRoomMessageDelivery || arguments.characterizeOfficialGogFriendsPeerInformationRetrieval || arguments.characterizeOfficialGogPublicLobbyOwnerCloseLifecycle)
+        && ((arguments.characterizeOfficialGogChatRoomMessageDelivery || arguments.characterizeOfficialGogFriendsPeerInformationRetrieval || arguments.characterizeOfficialGogPublicLobbyOwnerCloseLifecycle || arguments.characterizeOfficialGogPublicLobbyOwnerOwnershipTransition)
             || (!arguments.universelanHost.empty() && !arguments.clientDll.empty() && !arguments.server.empty()));
 }
 
@@ -242,6 +255,17 @@ bool observesPublicLobbyOwnerCloseLifecycle(const ScenarioContract& contract)
 {
     return contract.hostScenario == "public-lobby-owner-close-lifecycle"
         || contract.hostScenario == "public-lobby-owner-close-lifecycle-characterization";
+}
+
+bool observesPublicLobbyOwnerOwnershipTransition(const ScenarioContract& contract)
+{
+    return contract.hostScenario == "public-lobby-owner-ownership-transition"
+        || contract.hostScenario == "public-lobby-owner-ownership-transition-characterization";
+}
+
+bool observesSensitivePublicLobbyLifecycle(const ScenarioContract& contract)
+{
+    return observesPublicLobbyOwnerCloseLifecycle(contract) || observesPublicLobbyOwnerOwnershipTransition(contract);
 }
 
 json requiredRecords(const ScenarioContract& contract)
@@ -277,7 +301,14 @@ Scenario parseScenario(const fs::path& manifest)
     const json& comparison = required(root, "comparison");
     objectHasOnly(comparison, {"requiredRecords", "requiredTerminalOutcome", "unexpectedRecords", "opaqueIds", "acceptedStatePair", "acceptedPersonaStatePair"});
     const json& records = required(comparison, "requiredRecords");
-    const bool validRecordDeclaration = observesPublicLobbyOwnerCloseLifecycle(*contract)
+    const bool validRecordDeclaration = observesPublicLobbyOwnerOwnershipTransition(*contract)
+        ? records.is_object() && records.size() == 2
+            && records.value("user1", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter",
+                "configuration", "metadata", "creator-leave", "self-state"})
+            && records.value("user2", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "list", "join",
+                "joiner-two-member-snapshot", "joiner-lifecycle-listeners-armed", "owner-ownership-transition", "promoted-owner-data",
+                "joiner-leave", "post-empty-list", "self-state"})
+        : observesPublicLobbyOwnerCloseLifecycle(*contract)
         ? records.is_object() && records.size() == 2
             && records.value("user1", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter",
                 "configuration", "metadata", "creator-leave", "self-state"})
@@ -368,6 +399,16 @@ Scenario publicLobbyOwnerCloseLifecycleCharacterizationScenario()
     return scenario;
 }
 
+Scenario publicLobbyOwnerOwnershipTransitionCharacterizationScenario()
+{
+    Scenario scenario;
+    scenario.contract = findScenarioContract("Simple/public-lobby-owner-ownership-transition characterization");
+    scenario.laneMode = "concurrent";
+    scenario.timeoutSeconds = 45;
+    scenario.characterization = true;
+    return scenario;
+}
+
 Scenario multipleLobbyMembershipAndMessageIsolationCharacterizationScenario()
 {
     Scenario scenario;
@@ -433,8 +474,8 @@ std::string readControlValue(const fs::path& path, const char* const name)
 void setControlFlag(const fs::path& path, const char* const name)
 {
     const std::string token = readControlValue(path, "token");
-    const std::array<const char*, 10> flags{"creator-ready", "joiner-joined", "creator-two-member", "joiner-left",
-        "joiner-lifecycle-armed", "creator-left", "observer-armed", "creator-data-update-complete", "joiner-data-observed", "abort"};
+    const std::array<const char*, 11> flags{"creator-ready", "joiner-joined", "creator-two-member", "joiner-left",
+        "joiner-lifecycle-armed", "creator-left", "post-empty-list-absent", "observer-armed", "creator-data-update-complete", "joiner-data-observed", "abort"};
     std::string contents = "token=" + token;
     for (const char* const flag : flags)
         contents += "\n" + std::string(flag) + "=" + (std::string(name) == flag || readControlValue(path, flag) == "1" ? "1" : "0");
@@ -633,7 +674,7 @@ bool runHosts(const std::vector<HostLaunch>& launches, const ScenarioContract& c
     std::vector<Child> children(launches.size());
     for (std::size_t index = 0; index < launches.size(); ++index)
     {
-        children[index].log = observesPublicLobbyOwnerCloseLifecycle(contract) ? fs::path() : launches[index].workingDirectory / "stdout.log";
+        children[index].log = observesSensitivePublicLobbyLifecycle(contract) ? fs::path() : launches[index].workingDirectory / "stdout.log";
         children[index].lane = launches[index].lane;
         children[index].profile = launches[index].profile;
         if (!startChild(children[index], launches[index].executable,
@@ -672,7 +713,7 @@ bool runPublicLobbyHosts(const std::vector<HostLaunch>& launches, const Scenario
     std::vector<Child> children(launches.size());
     for (std::size_t index = 0; index < launches.size(); ++index)
     {
-        children[index].log = observesPublicLobbyOwnerCloseLifecycle(contract) ? fs::path() : launches[index].workingDirectory / "stdout.log";
+        children[index].log = observesSensitivePublicLobbyLifecycle(contract) ? fs::path() : launches[index].workingDirectory / "stdout.log";
         children[index].lane = launches[index].lane;
         children[index].profile = launches[index].profile;
         if (!startChild(children[index], launches[index].executable,
@@ -699,10 +740,13 @@ bool runPublicLobbyHosts(const std::vector<HostLaunch>& launches, const Scenario
             const std::size_t joiner = creator + 1;
             if (hasEvent(launches[creator].control, "creator-ready")) setControlFlag(launches[joiner].control, "creator-ready");
             if (hasEvent(launches[joiner].control, "joiner-joined")) setControlFlag(launches[creator].control, "joiner-joined");
-            if (observesPublicLobbyOwnerCloseLifecycle(contract))
+            if (observesSensitivePublicLobbyLifecycle(contract))
             {
                 if (hasEvent(launches[joiner].control, "joiner-lifecycle-armed")) setControlFlag(launches[creator].control, "joiner-lifecycle-armed");
                 if (hasEvent(launches[creator].control, "creator-left")) setControlFlag(launches[joiner].control, "creator-left");
+                if (observesPublicLobbyOwnerOwnershipTransition(contract)
+                    && hasEvent(launches[joiner].control, "post-empty-list-absent"))
+                    setControlFlag(launches[creator].control, "post-empty-list-absent");
             }
             else if (contract.observesPublicLobbyDataPropagation || contract.observesMultipleLobbyMembership)
             {
@@ -1109,6 +1153,70 @@ bool normalizePublicLobbyOwnerCloseLifecycleTrace(const fs::path& trace, const s
     catch (...) { return false; }
 }
 
+bool normalizePublicLobbyOwnerOwnershipTransitionTrace(const fs::path& trace, const std::string& profile, json& normalized)
+{
+    try
+    {
+        std::vector<json> records;
+        for (const std::string& line : common::readTrace(trace)) records.push_back(json::parse(line));
+        const std::vector<std::string> expected = profile == "user1"
+            ? std::vector<std::string>{"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata", "creator-leave", "self-state"}
+            : std::vector<std::string>{"initialize", "sign-in-callback", "sign-in-terminal", "list", "join", "joiner-two-member-snapshot", "joiner-lifecycle-listeners-armed", "owner-ownership-transition", "promoted-owner-data", "joiner-leave", "post-empty-list", "self-state"};
+        if (records.size() != expected.size()) return false;
+        for (std::size_t index = 0; index < expected.size(); ++index)
+            if (!records[index].is_object() || records[index].value("record", "") != expected[index]) return false;
+        if (!fieldsExactly(records[0], {"record", "result"}) || records[0]["result"] != "returned"
+            || !fieldsExactly(records[1], {"record", "result"}) || records[1]["result"] != "success"
+            || !fieldsExactly(records[2], {"record", "result"}) || records[2]["result"] != "success") return false;
+        const auto validSnapshot = [](const json& record, const bool owner) {
+            return fieldsExactly(record, {"record", "lobbyValid", "public", "joinable", "capacity", "memberCount", "selfPresent",
+                    "otherPresent", "membersValid", "membersDistinct", "ownerIsSelf", "ownerValid"})
+                && record["lobbyValid"] == true && record["public"] == true && record["joinable"] == true && record["capacity"] == 2
+                && record["memberCount"] == 2 && record["selfPresent"] == true && record["otherPresent"] == true
+                && record["membersValid"] == true && record["membersDistinct"] == true && record["ownerIsSelf"] == owner && record["ownerValid"] == true;
+        };
+        const auto validLeave = [](const json& record) {
+            return fieldsExactly(record, {"record", "result", "reason", "sameLobby"}) && record["result"] == "callback"
+                && record["reason"] == "user-left" && record["sameLobby"] == true;
+        };
+        if (profile == "user1")
+        {
+            if (!fieldsExactly(records[3], {"record", "result", "lobbyValid", "lobbyType"}) || records[3]["result"] != "success"
+                || records[3]["lobbyValid"] != true || records[3]["lobbyType"] != "lobby"
+                || !fieldsExactly(records[4], {"record", "result", "sameCreatedLobby"}) || records[4]["result"] != "success"
+                || records[4]["sameCreatedLobby"] != true
+                || !fieldsExactly(records[5], {"record", "joinableUpdateSuccess", "capacityUpdateSuccess", "joinableVisible", "capacityVisible"})
+                || records[5]["joinableUpdateSuccess"] != true || records[5]["capacityUpdateSuccess"] != true
+                || records[5]["joinableVisible"] != true || records[5]["capacityVisible"] != true
+                || !fieldsExactly(records[6], {"record", "result", "sameCreatedLobby"}) || records[6]["result"] != "success"
+                || records[6]["sameCreatedLobby"] != true || !validLeave(records[7])) return false;
+        }
+        else
+        {
+            if (!fieldsExactly(records[3], {"record", "result", "attempts", "retryUsed", "selectedCount", "selectedValid"})
+                || records[3]["result"] != "success" || !records[3]["attempts"].is_number_integer() || records[3]["attempts"] < 1 || records[3]["attempts"] > 6
+                || !records[3]["retryUsed"].is_boolean() || records[3]["selectedCount"] != 1 || records[3]["selectedValid"] != true
+                || !fieldsExactly(records[4], {"record", "result", "sameListedLobby"}) || records[4]["result"] != "success" || records[4]["sameListedLobby"] != true
+                || !validSnapshot(records[5], false)
+                || !fieldsExactly(records[6], {"record", "memberStateListenerRegistered", "globalOwnerChangeListenerRegistered", "priorOwnerValidNonSelf"})
+                || records[6]["memberStateListenerRegistered"] != true || records[6]["globalOwnerChangeListenerRegistered"] != true || records[6]["priorOwnerValidNonSelf"] != true
+                || !fieldsExactly(records[7], {"record", "priorOwnerLeftObserved", "ownerChangedToSelfObserved", "ownerNowSelf", "membersOnlySelf", "priorOwnerMemberStateSequence", "ownerChangeSequence", "targetLobbySequence"})
+                || records[7]["priorOwnerLeftObserved"] != true || records[7]["ownerChangedToSelfObserved"] != true || records[7]["ownerNowSelf"] != true || records[7]["membersOnlySelf"] != true
+                || !records[7]["priorOwnerMemberStateSequence"].is_array() || !records[7]["ownerChangeSequence"].is_array() || !records[7]["targetLobbySequence"].is_array()
+                || !fieldsExactly(records[8], {"record", "setLobbyDataSuccess", "copiedValueVisible"}) || records[8]["setLobbyDataSuccess"] != true || records[8]["copiedValueVisible"] != true
+                || !validLeave(records[9])
+                || !fieldsExactly(records[10], {"record", "result", "attempts", "targetAbsent"}) || records[10]["result"] != "success"
+                || !records[10]["attempts"].is_number_integer() || records[10]["attempts"] < 1 || records[10]["attempts"] > 6 || records[10]["targetAbsent"] != true) return false;
+        }
+        if (!fieldsExactly(records.back(), {"record", "signedIn", "loggedOn", "idValid", "idType", "selfIdRepeatEqual", "personaAvailable"})
+            || records.back()["signedIn"] != true || records.back()["loggedOn"] != true || records.back()["idValid"] != true
+            || records.back()["idType"] != "user" || records.back()["selfIdRepeatEqual"] != true || !records.back()["personaAvailable"].is_boolean()) return false;
+        normalized = records;
+        return true;
+    }
+    catch (...) { return false; }
+}
+
 bool normalizePublicLobbyDataPropagationTrace(const fs::path& trace, const std::string& profile, json& normalized)
 {
     try
@@ -1355,7 +1463,9 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
     const ScenarioContract& contract = *scenario.contract;
     report = json::object();
     report["scenario"] = contract.name;
-    report["opaqueIdPolicy"] = observesPublicLobbyOwnerCloseLifecycle(contract)
+    report["opaqueIdPolicy"] = observesPublicLobbyOwnerOwnershipTransition(contract)
+        ? "raw Galaxy IDs, private tokens, tag values, and promoted data are never recorded; only symbolic ownership, member, authorization, and list-absence relations are compared"
+        : observesPublicLobbyOwnerCloseLifecycle(contract)
         ? "raw Galaxy IDs, private tokens, tag values, and timestamps are never recorded; only symbolic prior-owner, leave-reason, and list-absence relations are compared"
         : contract.observesMultipleLobbyMembership
         ? "raw Galaxy IDs, lobby IDs, message IDs, private tags, and message payloads are never recorded; only L0/L1-local public relations are compared"
@@ -1371,7 +1481,9 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
     {
         json universelan;
         json gog;
-        const bool universelanValid = observesPublicLobbyOwnerCloseLifecycle(contract)
+        const bool universelanValid = observesPublicLobbyOwnerOwnershipTransition(contract)
+            ? normalizePublicLobbyOwnerOwnershipTransitionTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
+            : observesPublicLobbyOwnerCloseLifecycle(contract)
             ? normalizePublicLobbyOwnerCloseLifecycleTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
             : contract.observesMultipleLobbyMembership
             ? normalizeMultipleLobbyMembershipTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
@@ -1384,7 +1496,9 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
             : contract.observesPublicLobby
             ? normalizePublicLobbyTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
             : normalizeTrace(root / "universelan" / profile / "trace.jsonl", contract, universelan);
-        const bool gogValid = observesPublicLobbyOwnerCloseLifecycle(contract)
+        const bool gogValid = observesPublicLobbyOwnerOwnershipTransition(contract)
+            ? normalizePublicLobbyOwnerOwnershipTransitionTrace(root / "gog" / profile / "trace.jsonl", profile, gog)
+            : observesPublicLobbyOwnerCloseLifecycle(contract)
             ? normalizePublicLobbyOwnerCloseLifecycleTrace(root / "gog" / profile / "trace.jsonl", profile, gog)
             : contract.observesMultipleLobbyMembership
             ? normalizeMultipleLobbyMembershipTrace(root / "gog" / profile / "trace.jsonl", profile, gog)
@@ -1439,6 +1553,20 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
             comparableGog[7].erase("attempts");
             report["lanes"][profile]["ownerCloseListenerSequenceComparison"] = "official-characterized-diagnostic-context-excluded";
             report["lanes"][profile]["postCloseListConvergenceComparison"] = "diagnostic-context-excluded";
+        }
+        if (observesPublicLobbyOwnerOwnershipTransition(contract) && profile == std::string_view("user2") && universelanValid && gogValid)
+        {
+            // Global member and owner listener classes have no cross-class callback-order guarantee.
+            comparableUniverselan[7].erase("priorOwnerMemberStateSequence");
+            comparableUniverselan[7].erase("ownerChangeSequence");
+            comparableUniverselan[7].erase("targetLobbySequence");
+            comparableUniverselan[10].erase("attempts");
+            comparableGog[7].erase("priorOwnerMemberStateSequence");
+            comparableGog[7].erase("ownerChangeSequence");
+            comparableGog[7].erase("targetLobbySequence");
+            comparableGog[10].erase("attempts");
+            report["lanes"][profile]["ownershipTransitionListenerSequenceComparison"] = "official-characterized-diagnostic-context-excluded";
+            report["lanes"][profile]["postEmptyListConvergenceComparison"] = "diagnostic-context-excluded";
         }
         if (contract.observesPublicLobbyDataPropagation && profile == std::string_view("user2") && universelanValid && gogValid)
         {
@@ -1605,6 +1733,39 @@ void characterizePublicLobbyOwnerCloseLifecycleTraces(const fs::path& root, json
     }
 }
 
+void characterizePublicLobbyOwnerOwnershipTransitionTraces(const fs::path& root, json& report)
+{
+    report = json::object();
+    report["scenario"] = "Simple/public-lobby-owner-ownership-transition";
+    report["classification"] = "official-gog-only-characterization";
+    report["comparison"] = "none";
+    report["status"] = "characterized";
+    report["opaqueIdPolicy"] = "raw Galaxy IDs, private tokens, tag values, promoted data, timestamps, credentials, controls, and runtime output are never retained";
+    report["listenerOrdering"] = "member-state and owner-change target-lobby sequences retain local diagnostic order only; cross-listener order and multiplicity are not contracts";
+    for (const char* profile : {"user1", "user2"})
+    {
+        json laneReport = json::object();
+        try
+        {
+            json records = json::array();
+            for (const std::string& line : common::readTrace(root / "gog" / profile / "trace.jsonl")) records.push_back(json::parse(line));
+            laneReport["orderedIMatchmakingRecords"] = records;
+            if (profile == std::string_view("user2") && records.size() > 10)
+            {
+                laneReport["priorOwnerLeftObserved"] = records[7].value("priorOwnerLeftObserved", false);
+                laneReport["ownerChangedToSelfObserved"] = records[7].value("ownerChangedToSelfObserved", false);
+                laneReport["ownerNowSelf"] = records[7].value("ownerNowSelf", false);
+                laneReport["membersOnlySelf"] = records[7].value("membersOnlySelf", false);
+                laneReport["promotedOwnerDataAuthorized"] = records[8].value("setLobbyDataSuccess", false)
+                    && records[8].value("copiedValueVisible", false);
+                laneReport["postEmptyListAbsentObserved"] = records[10].value("targetAbsent", false);
+            }
+        }
+        catch (...) { laneReport["orderedIMatchmakingRecords"] = "unavailable"; }
+        report["lanes"][profile]["gog"] = laneReport;
+    }
+}
+
 void characterizeMultipleLobbyMembershipTraces(const fs::path& root, json& report)
 {
     report = json::object();
@@ -1762,8 +1923,9 @@ int run(const Arguments& arguments, const Scenario& scenario)
     const bool officialGogOnlyChatCharacterization = arguments.characterizeOfficialGogChatRoomMessageDelivery;
     const bool officialGogOnlyFriendsCharacterization = arguments.characterizeOfficialGogFriendsPeerInformationRetrieval;
     const bool officialGogOnlyOwnerCloseCharacterization = arguments.characterizeOfficialGogPublicLobbyOwnerCloseLifecycle;
+    const bool officialGogOnlyOwnershipTransitionCharacterization = arguments.characterizeOfficialGogPublicLobbyOwnerOwnershipTransition;
     if (!fs::is_regular_file(arguments.gogHost) || !fs::is_directory(arguments.gogRuntimeDirectory)
-        || (!(officialGogOnlyChatCharacterization || officialGogOnlyFriendsCharacterization || officialGogOnlyOwnerCloseCharacterization) && (!fs::is_regular_file(arguments.universelanHost)
+        || (!(officialGogOnlyChatCharacterization || officialGogOnlyFriendsCharacterization || officialGogOnlyOwnerCloseCharacterization || officialGogOnlyOwnershipTransitionCharacterization) && (!fs::is_regular_file(arguments.universelanHost)
             || !fs::is_regular_file(arguments.clientDll) || !fs::is_regular_file(arguments.server)))) throw std::runtime_error("Preflight failed");
 
     std::mt19937_64 random(std::random_device{}());
@@ -1789,7 +1951,7 @@ int run(const Arguments& arguments, const Scenario& scenario)
     bool friendsHostsExited = false;
     try
     {
-        if (!(officialGogOnlyChatCharacterization || officialGogOnlyFriendsCharacterization || officialGogOnlyOwnerCloseCharacterization))
+        if (!(officialGogOnlyChatCharacterization || officialGogOnlyFriendsCharacterization || officialGogOnlyOwnerCloseCharacterization || officialGogOnlyOwnershipTransitionCharacterization))
         {
             const fs::path serverDirectory = root / "universelan" / "server";
             writeServerConfiguration(serverDirectory, privatePort);
@@ -1815,7 +1977,7 @@ int run(const Arguments& arguments, const Scenario& scenario)
         }
 
         const bool officialGogOnlyCharacterization = (scenario.characterization && scenario.contract->observesMultipleLobbyMembership)
-            || officialGogOnlyOwnerCloseCharacterization;
+            || officialGogOnlyOwnerCloseCharacterization || officialGogOnlyOwnershipTransitionCharacterization;
         std::vector<HostLaunch> universelanLaunches;
         std::vector<HostLaunch> gogLaunches;
         for (const char* profile : {"user1", "user2"})
@@ -1823,14 +1985,14 @@ int run(const Arguments& arguments, const Scenario& scenario)
             const fs::path gogDirectory = root / "gog" / profile;
             fs::create_directories(gogDirectory);
             const fs::path gogControl = gogDirectory / "control";
-            if (!(officialGogOnlyChatCharacterization || officialGogOnlyFriendsCharacterization || officialGogOnlyOwnerCloseCharacterization))
+            if (!(officialGogOnlyChatCharacterization || officialGogOnlyFriendsCharacterization || officialGogOnlyOwnerCloseCharacterization || officialGogOnlyOwnershipTransitionCharacterization))
             {
                 const fs::path universelanDirectory = root / "universelan" / profile;
                 fs::create_directories(universelanDirectory);
                 writeUniverselanConfiguration(universelanDirectory, profile, privatePort);
                 const fs::path universelanControl = universelanDirectory / "control";
                 if (scenario.contract->observesPublicLobby)
-                    writePrivateControl(universelanControl, "token=" + privateToken + "-universelan\ncreator-ready=0\njoiner-joined=0\ncreator-two-member=0\njoiner-left=0\njoiner-lifecycle-armed=0\ncreator-left=0\nobserver-armed=0\ncreator-data-update-complete=0\njoiner-data-observed=0\nabort=0\n");
+                    writePrivateControl(universelanControl, "token=" + privateToken + "-universelan\ncreator-ready=0\njoiner-joined=0\ncreator-two-member=0\njoiner-left=0\njoiner-lifecycle-armed=0\ncreator-left=0\npost-empty-list-absent=0\nobserver-armed=0\ncreator-data-update-complete=0\njoiner-data-observed=0\nabort=0\n");
                 else if (scenario.contract->observesChatRoomMessageDelivery)
                 {
                     writePrivateControl(universelanControl, "receiver-armed=0\nabort=0\n");
@@ -1844,7 +2006,7 @@ int run(const Arguments& arguments, const Scenario& scenario)
             }
             if (scenario.contract->observesPublicLobby)
             {
-                writePrivateControl(gogControl, "token=" + privateToken + "-gog\ncreator-ready=0\njoiner-joined=0\ncreator-two-member=0\njoiner-left=0\njoiner-lifecycle-armed=0\ncreator-left=0\nobserver-armed=0\ncreator-data-update-complete=0\njoiner-data-observed=0\nabort=0\n");
+                writePrivateControl(gogControl, "token=" + privateToken + "-gog\ncreator-ready=0\njoiner-joined=0\ncreator-two-member=0\njoiner-left=0\njoiner-lifecycle-armed=0\ncreator-left=0\npost-empty-list-absent=0\nobserver-armed=0\ncreator-data-update-complete=0\njoiner-data-observed=0\nabort=0\n");
             }
             else if (scenario.contract->observesChatRoomMessageDelivery)
             {
@@ -1921,6 +2083,8 @@ int run(const Arguments& arguments, const Scenario& scenario)
             }
             else if (scenario.characterization && observesPublicLobbyOwnerCloseLifecycle(*scenario.contract))
                 characterizePublicLobbyOwnerCloseLifecycleTraces(root, report);
+            else if (scenario.characterization && observesPublicLobbyOwnerOwnershipTransition(*scenario.contract))
+                characterizePublicLobbyOwnerOwnershipTransitionTraces(root, report);
             else if (scenario.characterization) characterizeTraces(root, report);
             else compareTraces(root, scenario, report);
             if (scenario.contract->observesPublicLobby) report["exitCleanup"] = cleanupAcknowledged ? "acknowledged" : "not-acknowledged";
@@ -1949,6 +2113,8 @@ int run(const Arguments& arguments, const Scenario& scenario)
             }
             else if (observesPublicLobbyOwnerCloseLifecycle(*scenario.contract))
                 characterizePublicLobbyOwnerCloseLifecycleTraces(root, report);
+            else if (observesPublicLobbyOwnerOwnershipTransition(*scenario.contract))
+                characterizePublicLobbyOwnerOwnershipTransitionTraces(root, report);
             else characterizeTraces(root, report);
             success = true;
             if (scenario.contract->observesFriendsPeerInformation)
@@ -2001,7 +2167,7 @@ int run(const Arguments& arguments, const Scenario& scenario)
             report["exitCleanup"] = friendsHostsExited ? "all-hosts-exited" : "host-exit-incomplete";
             report["causalGates"] = {{"personaListenersReadyBeforePeerRelay", personaListenersReadyBeforePeerRelay}};
         }
-        if ((scenario.contract->observesChatRoomMessageDelivery || scenario.contract->observesFriendsPeerInformation || observesPublicLobbyOwnerCloseLifecycle(*scenario.contract))
+        if ((scenario.contract->observesChatRoomMessageDelivery || scenario.contract->observesFriendsPeerInformation || observesSensitivePublicLobbyLifecycle(*scenario.contract))
             && !redactSensitiveFailureArtifacts(root))
         {
             std::error_code cleanupError;
@@ -2018,7 +2184,7 @@ int run(const Arguments& arguments, const Scenario& scenario)
     stopChild(server);
     if (scenario.characterization)
     {
-        if (observesPublicLobbyOwnerCloseLifecycle(*scenario.contract))
+        if (observesSensitivePublicLobbyLifecycle(*scenario.contract))
         {
             if (!redactSensitiveFailureArtifacts(root))
             {
@@ -2068,12 +2234,13 @@ int main(int argc, char* argv[])
     }
     try { return run(arguments, arguments.characterizeGogServicesState ? characterizationScenario()
         : (arguments.characterizeOfficialGogPublicLobbyOwnerCloseLifecycle ? publicLobbyOwnerCloseLifecycleCharacterizationScenario()
+            : (arguments.characterizeOfficialGogPublicLobbyOwnerOwnershipTransition ? publicLobbyOwnerOwnershipTransitionCharacterizationScenario()
             : (arguments.characterizePublicLobbyDataPropagation ? publicLobbyDataPropagationCharacterizationScenario()
             : (arguments.characterizeMultipleLobbyMembershipAndMessageIsolation ? multipleLobbyMembershipAndMessageIsolationCharacterizationScenario()
                 : ((arguments.characterizeChatRoomMessageDelivery || arguments.characterizeOfficialGogChatRoomMessageDelivery)
                     ? chatRoomMessageDeliveryCharacterizationScenario()
                     : (arguments.characterizeOfficialGogFriendsPeerInformationRetrieval
-                        ? friendsPeerInformationRetrievalCharacterizationScenario() : parseScenario(arguments.manifest))))))); }
+                        ? friendsPeerInformationRetrievalCharacterizationScenario() : parseScenario(arguments.manifest)))))))); }
     catch (...)
     {
         std::cerr << "BEHAVIOUR_TEST FAIL reason=ManifestOrPreflightFailure" << std::endl;

@@ -49,6 +49,7 @@ cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^session-id-repeatability$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^public-lobby-create-list-join-leave$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^public-lobby-owner-close-lifecycle$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
+cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^public-lobby-owner-ownership-transition$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^public-lobby-data-propagation$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^chat-room-message-delivery$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^friends-peer-information-retrieval$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
@@ -118,6 +119,24 @@ per-target-lobby listener sequence, and observed post-close list result without
 imposing listener order or multiplicity. Controls, token-bearing configuration,
 runtime output, and relays are removed from retained roots; only symbolic
 traces/reports and staged binaries remain.
+
+Characterize ownership transition twice against official GOG before changing
+its strict facts:
+
+```powershell
+& "bin/Debug/universelan-behaviour-runner-x64-1.152.11.exe" --characterize-official-gog-public-lobby-owner-ownership-transition --gog-host "bin/Debug/universelan-behaviour-host-gog-x64-1.152.11.exe" --gog-runtime-dir "Source/DLLs/1.152.11/gog"
+```
+
+It creates a tagged public, explicitly joinable, capacity-two
+`LOBBY_TOPOLOGY_TYPE_FCM_OWNERSHIP_TRANSITION` lobby. The joiner filters and
+joins, then arms public global member-state and owner-change listeners before
+the creator's normal leave. Promote only facts stable across repeated official
+runs: creator local `user-left`; prior-owner `left`; owner-change-to-self;
+owner-only cache; token-derived promoted-owner `SetLobbyData` success and copied
+visibility; joiner local `user-left`; and a post-empty token-filtered list.
+The former owner remains alive until that final probe. Listener-class ordering,
+callback multiplicity, and bounded list attempt count are diagnostics, never
+strict cross-host rules. Successful characterization artifacts are sanitized.
 
 Characterize the Advanced multiple-lobby contract against official GOG first:
 
@@ -190,11 +209,11 @@ adding or characterizing a scenario.
 
 The approved comparator host contracts are `initialize-and-sign-in`,
 `session-id-repeatability`, `gog-services-state`,
-`public-lobby-create-list-join-leave`, `public-lobby-owner-close-lifecycle`, `public-lobby-data-propagation`, and
+`public-lobby-create-list-join-leave`, `public-lobby-owner-close-lifecycle`, `public-lobby-owner-ownership-transition`, `public-lobby-data-propagation`, and
 `chat-room-message-delivery`, and
 `multiple-lobby-membership-and-message-isolation`; the additional runner-selected diagnostics are
 `gog-services-state-characterization`,
-`public-lobby-owner-close-lifecycle-characterization`, `public-lobby-data-propagation-characterization`, and
+`public-lobby-owner-close-lifecycle-characterization`, `public-lobby-owner-ownership-transition-characterization`, `public-lobby-data-propagation-characterization`, and
 `chat-room-message-delivery-characterization`, and
 `multiple-lobby-membership-and-message-isolation-characterization`. Manifests and host
 arguments outside that fixed registry are rejected. The strict `gog-services-state`
@@ -250,6 +269,18 @@ only after its matching terminal leave callback; after failure or timeout it may
 retry only while public owner/member state proves safety, and acknowledges only
 if that retry's terminal callback confirms cleanup. Otherwise the runner reports
 unacknowledged cleanup and fails diagnostics.
+
+`Simple/public-lobby-owner-ownership-transition` is distinct from normal FCM
+close. It uses only public `IMatchmaking` APIs with
+`LOBBY_TOPOLOGY_TYPE_FCM_OWNERSHIP_TRANSITION`. The strict joiner record requires
+the initial two-member non-self owner relation, listener registration before the
+creator release, prior-owner `LEFT`, owner-change-to-self, public owner/cache
+promotion, and successful token-derived `SetLobbyData` plus copied visibility.
+After its matching `user-left` terminal callback, the joiner performs a bounded
+token-filtered empty-list probe. The creator does not acknowledge completion
+until that probe signals absence. Callback sequences across global listener
+classes and list retry counts are retained as diagnostic context only; each
+required relationship remains strict.
 
 `Simple/chat-room-message-delivery` is authorized only for temporary rooms and
 one opaque runner-generated message per lane. Its official lane requires the

@@ -39,6 +39,16 @@ strict for every public fact they record.
 - Reproduction command/test name: `--characterize-official-gog-public-lobby-owner-close-lifecycle`; `universelan-behaviour-simple-public-lobby-owner-close-lifecycle-x64-1.152.11`; portable `RunBehaviorCTest.cmake` with `BEHAVIOUR_TEST_LABEL="^public-lobby-owner-close-lifecycle$"`.
 - Follow-up: target-lobby callback sequence and cross-listener ordering remain diagnostic, but any non-`lobby-closed` target global leave reason fails. Presence/absence is finalized after post-close listing and a bounded final settling window. Creator cleanup acknowledgement requires a confirmed `user-left` terminal callback; a failed or timed-out initial leave may acknowledge only after a safe, bounded retry confirms it. All hosts acknowledged cleanup; retained artifacts are sanitized and no token, ID, data, timestamp, log, or private control is recorded here.
 
+### `Simple/public-lobby-owner-ownership-transition` on `1.152.11/x64`
+
+- Date: 2026-09-14
+- Classification: matched live baseline
+- Public observation: two official-only trials observed creator local `user-left`; joiner prior-owner `left` and owner-change-to-self relationships; self as the sole valid member and owner; successful token-derived promoted-owner `SetLobbyData` with copied visibility; joiner local `user-left`; and tagged-list absence after the lobby emptied.
+- Official normalized result: all stable setup, filtered-list/join, initial two-member owner, ownership transition, authorization, terminal leave, and absence relations succeeded. Both trials delivered owner-change before member-state, but cross-listener sequence remains diagnostic. Initial list convergence varied from one to two attempts.
+- UniverseLAN normalized result: the focused strict four-host comparison matched every stable official relation with acknowledged cleanup.
+- Reproduction command/test name: `--characterize-official-gog-public-lobby-owner-ownership-transition`; `universelan-behaviour-simple-public-lobby-owner-ownership-transition-x64-1.152.11`; portable `RunBehaviorCTest.cmake` with `BEHAVIOUR_TEST_LABEL="^public-lobby-owner-ownership-transition$"`.
+- Follow-up: listener-class ordering, multiplicity, and bounded list-attempt count remain retained diagnostic context, not equality requirements. The former owner waits for the joiner's post-empty token-filtered probe. No raw ID, tag, token-derived value, timestamp, relay, control, configuration, or runtime output is recorded.
+
 ### `Simple/public-lobby-create-list-join-leave` on `1.152.11/x64`
 
 - Date: 2026-09-13

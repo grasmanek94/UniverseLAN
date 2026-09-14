@@ -113,7 +113,7 @@ combine already-characterized Simple contracts.
 | Interface | Simple behavior index | Advanced follow-up |
 | --- | --- | --- |
 | Initialization / `IUser` | Init outcome, sign-in terminal behavior, `SignedIn`, `IsLoggedOn`, self ID validity/type, persona availability, and consecutive `GetSessionID()` equality. | Reinitialization, sign-out, connection loss/recovery. |
-| `IMatchmaking` | Create/list/join public lobby, operation result, owner/member relationships, basic lobby data, and owner-close lifecycle characterization. | Multiple concurrent memberships, lobby-message isolation, and owner-close comparison are implemented; owner migration, filters, and other failure paths remain. |
+| `IMatchmaking` | Create/list/join public lobby, operation result, owner/member relationships, basic lobby data, owner-close lifecycle, and ownership-transition characterization. | Multiple concurrent memberships, lobby-message isolation, owner-close comparison, and ownership-transition comparison are implemented; filters and other failure paths remain. |
 | `INetworking` | Reliable P2P packet scheduling, receive callback/poll state, payload/content, sender relationship. | Three-peer routing, channel behavior, unreliable packets, disconnect/NAT/server-host behavior. |
 | `IChat` | One-to-one room request, room identity reuse, message send terminal result, remote message content/sender relationship. | History/pagination, membership lifecycle, read state, denial/failure behavior. |
 | `IFriends` | Persona information retrieval, persona state, rich-presence set/get callback behavior, game invitations where official accounts permit it. | Friend relationships, invitation/acceptance flows, persistence, richer presence state. |
@@ -206,8 +206,17 @@ phase. These are public `IMatchmaking` setup conditions, not inferred defaults.
   it only in one control file per host. The token is never in a manifest, host
   argument, trace, log, normalized report, console output, or documentation.
   The creator writes its metadata before signalling ready. The runner relays only
-  symbolic event-file gates to the joiner and requires cleanup acknowledgement
-  before forcibly stopping a failed host.
+   symbolic event-file gates to the joiner and requires cleanup acknowledgement
+   before forcibly stopping a failed host.
+- `Simple/public-lobby-owner-ownership-transition` uses a distinct tagged public
+  `LOBBY_TOPOLOGY_TYPE_FCM_OWNERSHIP_TRANSITION` lobby in each lane. It explicitly
+  sets and observes joinable true and capacity two before the filtered joiner is
+  released. The joiner validates the two-member non-self-owner snapshot, arms
+  public global member-state and owner-change listeners, and only then releases
+  the creator's normal leave. The former owner remains alive until the joiner's
+  matching terminal leave and token-filtered post-empty absence probe. Tokens,
+  token-derived data, raw IDs, controls, relays, and runtime output are not
+  retained. Global listener-class ordering and list retries are diagnostics only.
 
 ## Acceptance Criteria
 
@@ -284,8 +293,20 @@ phase. These are public `IMatchmaking` setup conditions, not inferred defaults.
   absence by sending surviving close members only the synthetic close
   notification. Creator cleanup acknowledgement requires a matching terminal
   callback, or a safe bounded retry confirmed by its terminal callback. Every
-  host acknowledged cleanup; retained artifacts remove controls, configuration,
-  relays, and runtime output.
+   host acknowledged cleanup; retained artifacts remove controls, configuration,
+   relays, and runtime output.
+
+- `Simple/public-lobby-owner-ownership-transition` ran twice as an official-GOG-
+  only diagnostic before its strict four-host baseline on 2026-09-14. Both
+  official trials observed the creator local `user-left`, joiner prior-owner
+  `LEFT`, owner-change-to-self, owner-only member and owner cache, successful
+  token-derived promoted-owner data update/copy, joiner local `user-left`, and
+  post-empty tagged-list absence. The two global-listener classes delivered the
+  same local sequence in those trials, but this is not a public ordering promise
+  and remains retained diagnostic context. The initial official list took one and
+  two attempts respectively, so retry count is likewise bounded diagnostic data.
+  The focused strict comparison matched every stable relation in UniverseLAN and
+  acknowledged cleanup for all four hosts.
 
 - `Simple/public-lobby-data-propagation` uses the same temporary lobby harness.
   After the joiner joins and its public `GlobalLobbyDataListener` is armed, the

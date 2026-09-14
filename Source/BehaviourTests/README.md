@@ -104,6 +104,16 @@ those empirical facts. The probe settles after all close/list pumps before
 finalizing callback presence or absence; sequence order remains diagnostic, but
 an additional non-close target leave reason fails. Creator cleanup is acknowledged
 only after a matching terminal callback or a safe bounded retry confirms it.
+`Simple/public-lobby-owner-ownership-transition` uses the ownership-transition
+topology rather than FCM-close. After a filtered join, the joiner arms public
+member-state and owner-change listeners, verifies the two-member prior-owner
+snapshot, and waits for the creator's local `user-left` callback. Stable
+official observations require the prior owner left, ownership changed to the
+joiner, an owner-only cache, and successful token-derived owner-data update.
+The joiner then confirms its own terminal leave and a token-filtered empty list;
+the former owner remains alive until that probe completes. Cross-listener
+callback order and list retry count are retained only as diagnostics. Both
+cleanup acknowledgements require confirmed terminal leaves.
 The public SDK has no chat-room delete API: chat participants exit after their
 bounded callback contracts, and that bounded host exit is the agreed cleanup.
 Details, diagnostics, artifact handling, and the required validation checklist
