@@ -11,6 +11,8 @@
 #include <Errors.h>
 #endif
 
+#include <magic_enum/magic_enum.hpp>
+
 #include <filesystem>
 #include <memory>
 
@@ -145,7 +147,7 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_MODERN
 				real_igalaxy_instance->Init(initOptions);
 #else
-				if (initOptions.local_init) {
+				if (initOptions.local_init || config->OverrideInitKeysEnabled()) {
 					real_igalaxy_instance->InitLocal(initOptions.GetClientID(), initOptions.GetClientSecret(), initOptions.GetGalaxyPeerPath(), initOptions.throwExceptions);
 				}
 				else {
@@ -161,10 +163,10 @@ namespace universelan::client {
 			}
 		};
 
+		real_init(*init_options);
+
 		real_process_data = std::bind(&IGalaxy::ProcessData, real_igalaxy_instance);
 		real_shutdown = std::bind(&IGalaxy::Shutdown, real_igalaxy_instance);
-
-		real_init(*init_options);
 
 		auto real_notification_ptr = std::bind(&IGalaxy::GetListenerRegistrar, real_igalaxy_instance);
 		auto real_notification = real_notification_ptr();
@@ -210,6 +212,14 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 		telemetry = std::make_unique<TelemetryImpl>(std::bind(&IGalaxy::GetTelemetry, real_igalaxy_instance), real_notification);
 #endif
+
+		auto has_err = error->HasError();
+		if (has_err) {
+			auto err_msg = error->GetMsg();
+			auto err_type = error->GetType();
+
+			std::cerr << "Error: " << err_msg << "(" << magic_enum::enum_name(err_type) << ")" << std::endl;
+		}
 
 #else
 
