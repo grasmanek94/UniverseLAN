@@ -150,7 +150,6 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | The King of Fighters 98UM                 | :white_check_mark:(2)     | 1.114.9                       | Works since build 464 |
 | Craft The World                           | :white_check_mark:(2)     | 1.100.2                       | Works since build 466 |
 | Worms W.M.D                               | :white_check_mark:(2)     | 1.128.3                       | Works since build 466 |
-| Gloomhaven                                | :white_check_mark:(2)     | 1.148.3                       | Tested with build 487 |
 | Grand Ages Medieval                       | :white_check_mark:(2)     | 1.68.0                        | Must apply `set OPENSSL_ia32cap=:~0x20000000` on newer CPU's for this game to start without crashing.<br> This issue is not caused by UniverseLAN or GOG, but OpenSSL / Unity/Unreal.<br> Tested with build 487 |
 | The Original Strife - Veteran Edition     | :white_check_mark:(2)     | 1.144.1                       | Tested with build 487 |
 | Niffelheim                                | :white_check_mark:(2)     | 1.139.2                       | Works since build 623 | 
@@ -207,6 +206,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | MechWarrior 5: Mercenaries                | :x:                       | 1.139.2                       | Doesn't seem to use Galaxy for multiplayer. |
 | Mutant Football League - Dynasty Edition  | :x:                       | 1.130.0                       | Doesn't seem to use Galaxy for multiplayer. |
 | Battlestar Galactica Deadlock             | :x:                       | 1.114.9                       | Doesn't seem to use Galaxy for Multiplayer. | 
+| Gloomhaven                                | :x:                       | 1.148.3                       | Tested with build 487, "works" but not on LAN/offline. Game uses EOS, doesn't use Galaxy for multiplayer. |
 
 # Notice
 I'm not affiliated in any way with GOG or CD Projekt RED.  
