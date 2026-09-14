@@ -567,6 +567,12 @@ namespace universelan::client {
 
 	void UserImpl::SetUserDataMessageReceived(const std::shared_ptr<SetUserDataMessage>& data) {
 		GetGalaxyUserData(data->id)->stats.SetUserData(data->key, data->value);
+
+#if GALAXY_BUILD_FEATURE_HAS_SPECIFICUSERDATALISTENER
+		if (!intf->config->IsSelfUserID(data->id)) {
+			listeners->NotifyAllNow(&ISpecificUserDataListener::OnSpecificUserDataUpdated, data->id);
+		}
+#endif
 	}
 
 	GalaxyUserData::ptr_t UserImpl::GetGalaxyUserData(GalaxyID userID) {

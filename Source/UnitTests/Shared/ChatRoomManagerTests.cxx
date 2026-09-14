@@ -29,6 +29,25 @@ TEST(ChatRoomManager, AddsEachCopiedRoomOnlyOnce)
     EXPECT_EQ(manager.GetChatRoom(room.GetID())->GetID(), room.GetID());
 }
 
+TEST(ChatRoomManager, FindsOnlyExactTwoUserRooms)
+{
+    universelan::ChatRoomManager manager;
+    const galaxy::api::GalaxyID first(1);
+    const galaxy::api::GalaxyID second(2);
+    const galaxy::api::GalaxyID third(3);
+
+    const auto groupRoom = manager.CreateChatRoom();
+    groupRoom->AddMember(first);
+    groupRoom->AddMember(second);
+    groupRoom->AddMember(third);
+    const auto directRoom = manager.CreateChatRoom();
+    directRoom->AddMember(first);
+    directRoom->AddMember(second);
+
+    EXPECT_EQ(manager.GetChatRoomWithUsers(first, second), directRoom);
+    EXPECT_EQ(manager.GetChatRoomWithUsers(first, third), nullptr);
+}
+
 } // namespace
 
 #endif

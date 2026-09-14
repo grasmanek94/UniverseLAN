@@ -1,0 +1,34 @@
+{
+  "name": "apps-config-and-dlc-ownership",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 30,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 4
+    }
+  },
+  "hosts": [
+    {
+      "role": "apps-client",
+      "scenario": "apps-config-and-dlc-ownership",
+      "identity": {
+        "userId": 2601,
+        "personaName": "AppsConfigClient"
+      },
+      "apps": {
+        "language": "polish",
+        "languageCode": "pl-PL",
+        "enableAllDlc": false,
+        "saveUnknownDlcIds": false,
+        "dlc": {
+          "210001": true,
+          "210002": false
+        }
+      },
+      "waitFor": ["server-ready"],
+      "timeoutSeconds": 20
+    }
+  ]
+}

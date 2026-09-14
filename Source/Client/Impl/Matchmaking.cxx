@@ -377,7 +377,15 @@ namespace universelan::client {
 		ILobbyLeftListener* listener = nullptr;
 		listeners->PopRequestListener(data->request_id, listener);
 
-		{
+		const bool leave_requires_cache_removal =
+#if GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LEAVE_REASON
+			data->reason == ILobbyLeftListener::LOBBY_LEAVE_REASON_USER_LEFT
+			|| data->reason == ILobbyLeftListener::LOBBY_LEAVE_REASON_LOBBY_CLOSED;
+#else
+			!data->reason;
+#endif
+
+		if (leave_requires_cache_removal) {
 			lock_t lock{ mtx };
 			auto joined_lobby_it = joined_lobbies.find(data->lobby_id);
 			if (joined_lobby_it != joined_lobbies.end()) {
@@ -387,6 +395,8 @@ namespace universelan::client {
 				}
 				joined_lobbies.erase(data->lobby_id);
 			}
+			lobby_list.erase(data->lobby_id);
+			lobby_list_filtered.erase(data->lobby_id);
 		}
 
 		listeners->NotifyAllNow(

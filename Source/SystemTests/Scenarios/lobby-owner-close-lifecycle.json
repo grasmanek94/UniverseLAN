@@ -1,0 +1,40 @@
+{
+  "name": "lobby-owner-close-lifecycle",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 45,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 8
+    }
+  },
+  "hosts": [
+    {
+      "role": "owner",
+      "scenario": "lobby-owner-close-lifecycle-owner",
+      "identity": {
+        "userId": 2701,
+        "personaName": "LobbyCloseOwner"
+      },
+      "peerUserIds": [2702],
+      "waitFor": ["server-ready"],
+      "signals": ["lobby-tagged", "owner-left"],
+      "actionAfter": ["joiner-ready"],
+      "finishAfter": ["joiner-observed-close"],
+      "timeoutSeconds": 20
+    },
+    {
+      "role": "joiner",
+      "scenario": "lobby-owner-close-lifecycle-joiner",
+      "identity": {
+        "userId": 2702,
+        "personaName": "LobbyCloseJoiner"
+      },
+      "peerUserIds": [2701],
+      "waitFor": ["server-ready", "lobby-tagged"],
+      "signals": ["joiner-ready", "joiner-observed-close"],
+      "timeoutSeconds": 20
+    }
+  ]
+}

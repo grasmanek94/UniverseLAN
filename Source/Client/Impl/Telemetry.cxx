@@ -30,9 +30,12 @@ namespace universelan::client {
 		auto tm = *std::localtime(&t);
 #pragma warning( pop )
 
+		const auto telemetry_directory = std::filesystem::path(intf->config->GetGameDataPath()) / "Telemetry";
+		std::filesystem::create_directories(telemetry_directory);
+
 		std::ostringstream path;
 
-		path << (std::filesystem::path(intf->config->GetGameDataPath()) / "Telemetry" / "T")
+		path << (telemetry_directory / "T").string()
 			<< std::put_time(&tm, "%Y-%m-%d_%H-%M-%S")
 			<< "-" << std::this_thread::get_id() << ".log";
 

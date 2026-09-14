@@ -1,0 +1,40 @@
+{
+  "name": "chat-room-history-retrieval",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 45,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 8
+    }
+  },
+  "hosts": [
+    {
+      "role": "receiver",
+      "scenario": "chat-room-history-receiver",
+      "identity": {
+        "userId": 2501,
+        "personaName": "ChatHistoryReceiver"
+      },
+      "peerUserIds": [2502],
+      "waitFor": ["server-ready"],
+      "signals": ["receiver-ready", "receiver-live-context", "receiver-history-retrieved"],
+      "actionAfter": ["sender-messages-persisted", "receiver-live-context"],
+      "timeoutSeconds": 20
+    },
+    {
+      "role": "sender",
+      "scenario": "chat-room-history-sender",
+      "identity": {
+        "userId": 2502,
+        "personaName": "ChatHistorySender"
+      },
+      "peerUserIds": [2501],
+      "waitFor": ["server-ready", "receiver-ready"],
+      "signals": ["sender-messages-persisted"],
+      "finishAfter": ["receiver-history-retrieved"],
+      "timeoutSeconds": 20
+    }
+  ]
+}

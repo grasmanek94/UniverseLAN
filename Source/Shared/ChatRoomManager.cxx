@@ -7,7 +7,7 @@
 namespace universelan {
 	using namespace galaxy::api;
 
-	ChatRoomManager::ChatRoomManager() 
+	ChatRoomManager::ChatRoomManager()
 		: chatrooms{}
 	{}
 
@@ -24,6 +24,16 @@ namespace universelan {
 		}
 
 		return it->second;
+	}
+
+	ChatRoomManager::chatroom_t ChatRoomManager::GetChatRoomWithUsers(const GalaxyID& first, const GalaxyID& second)
+	{
+		for (const auto& entry : chatrooms) {
+			const chatroom_t& chatroom = entry.second;
+			if (chatroom->GetMemberCount() == 2 && chatroom->IsMember(first) && chatroom->IsMember(second)) return chatroom;
+		}
+
+		return nullptr;
 	}
 
 	bool ChatRoomManager::AddChatRoom(const ChatRoom& chat_room)

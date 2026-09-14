@@ -56,7 +56,7 @@ namespace universelan::client {
 			ProtectedChannel() : mtx{}, packets{} {}
 		};
 
-		using channels_array = std::array<ProtectedChannel, std::numeric_limits<uint8_t>::max()>;
+		using channels_array = std::array<ProtectedChannel, static_cast<std::size_t>(std::numeric_limits<uint8_t>::max()) + 1>;
 
 	private:
 		InterfaceInstances* intf;

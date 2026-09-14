@@ -1,0 +1,39 @@
+{
+  "name": "chat-room-reuse",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 30,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 8
+    }
+  },
+  "hosts": [
+    {
+      "role": "peer",
+      "scenario": "chat-room-reuse-peer",
+      "identity": {
+        "userId": 2601,
+        "personaName": "ChatReusePeer"
+      },
+      "peerUserIds": [2602],
+      "waitFor": ["server-ready"],
+      "signals": ["peer-ready"],
+      "finishAfter": ["requester-room-reused"],
+      "timeoutSeconds": 15
+    },
+    {
+      "role": "requester",
+      "scenario": "chat-room-reuse-requester",
+      "identity": {
+        "userId": 2602,
+        "personaName": "ChatReuseRequester"
+      },
+      "peerUserIds": [2601],
+      "waitFor": ["server-ready", "peer-ready"],
+      "signals": ["requester-room-reused"],
+      "timeoutSeconds": 15
+    }
+  ]
+}

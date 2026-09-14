@@ -1,0 +1,39 @@
+{
+  "name": "rich-presence-live-propagation",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 30,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 8
+    }
+  },
+  "hosts": [
+    {
+      "role": "receiver",
+      "scenario": "rich-presence-live-propagation-receiver",
+      "identity": {
+        "userId": 2701,
+        "personaName": "RichPresenceReceiver"
+      },
+      "peerUserIds": [2702],
+      "waitFor": ["server-ready"],
+      "signals": ["receiver-ready", "receiver-presence-validated"],
+      "timeoutSeconds": 15
+    },
+    {
+      "role": "writer",
+      "scenario": "rich-presence-live-propagation-writer",
+      "identity": {
+        "userId": 2702,
+        "personaName": "RichPresenceWriter"
+      },
+      "peerUserIds": [2701],
+      "waitFor": ["server-ready", "receiver-ready"],
+      "signals": ["writer-set-succeeded"],
+      "finishAfter": ["receiver-presence-validated"],
+      "timeoutSeconds": 15
+    }
+  ]
+}

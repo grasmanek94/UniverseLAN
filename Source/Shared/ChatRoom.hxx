@@ -38,7 +38,7 @@ namespace universelan {
 		uint32_t GetMemberCount() const;
 
 		const messages_t& GetMessages() const;
-		messages_t GetMessages(galaxy::api::ChatMessageID exclusive_from) const;
+		messages_t GetMessages(galaxy::api::ChatMessageID exclusive_from, uint32_t limit = 0) const;
 		const message_t& GetMessageByIndex(uint32_t index) const;
 		message_t AddMessage(galaxy::api::GalaxyID sender,
 #if GALAXY_BUILD_FEATURE_HAS_ICHAT_MESSAGETYPE

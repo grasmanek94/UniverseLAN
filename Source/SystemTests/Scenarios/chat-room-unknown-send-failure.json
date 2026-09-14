@@ -1,0 +1,25 @@
+{
+  "name": "chat-room-unknown-send-failure",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 30,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 8
+    }
+  },
+  "hosts": [
+    {
+      "role": "sender",
+      "scenario": "chat-room-unknown-send-failure",
+      "identity": {
+        "userId": 2701,
+        "personaName": "ChatUnknownSendSender"
+      },
+      "waitFor": ["server-ready"],
+      "signals": ["unknown-send-forbidden"],
+      "timeoutSeconds": 15
+    }
+  ]
+}

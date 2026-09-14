@@ -1,0 +1,40 @@
+{
+  "name": "lobby-owner-ownership-transfer",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 45,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 8
+    }
+  },
+  "hosts": [
+    {
+      "role": "owner",
+      "scenario": "lobby-owner-ownership-transfer-owner",
+      "identity": {
+        "userId": 2601,
+        "personaName": "LobbyTransferOwner"
+      },
+      "peerUserIds": [2602],
+      "waitFor": ["server-ready"],
+      "signals": ["lobby-tagged", "owner-left"],
+      "actionAfter": ["joiner-ready"],
+      "finishAfter": ["joiner-promoted-owner-data-written"],
+      "timeoutSeconds": 20
+    },
+    {
+      "role": "joiner",
+      "scenario": "lobby-owner-ownership-transfer-joiner",
+      "identity": {
+        "userId": 2602,
+        "personaName": "LobbyTransferJoiner"
+      },
+      "peerUserIds": [2601],
+      "waitFor": ["server-ready", "lobby-tagged"],
+      "signals": ["joiner-ready", "joiner-promoted-owner-data-written"],
+      "timeoutSeconds": 20
+    }
+  ]
+}

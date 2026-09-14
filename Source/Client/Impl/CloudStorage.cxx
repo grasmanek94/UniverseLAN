@@ -271,7 +271,7 @@ namespace universelan::client {
 
 		listeners->NotifyAll(
 			listener,
-			&ICloudStorageGetFileListener::OnGetFileSuccess, container, name, (uint32_t)file_entry->get_size()
+			&ICloudStorageGetFileListener::OnGetFileSuccess, container, name, 0
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
 			, savegame_type
 			, unique_savegame_id.c_str()

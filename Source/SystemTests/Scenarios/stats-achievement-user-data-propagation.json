@@ -1,0 +1,39 @@
+{
+  "name": "stats-achievement-user-data-propagation",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 30,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 8
+    }
+  },
+  "hosts": [
+    {
+      "role": "reader",
+      "scenario": "stats-achievement-user-data-propagation-reader",
+      "identity": {
+        "userId": 2801,
+        "personaName": "StatsAchievementUserDataReader"
+      },
+      "peerUserIds": [2802],
+      "waitFor": ["server-ready"],
+      "signals": ["reader-ready", "reader-values-validated"],
+      "timeoutSeconds": 15
+    },
+    {
+      "role": "writer",
+      "scenario": "stats-achievement-user-data-propagation-writer",
+      "identity": {
+        "userId": 2802,
+        "personaName": "StatsAchievementUserDataWriter"
+      },
+      "peerUserIds": [2801],
+      "waitFor": ["server-ready", "reader-ready"],
+      "signals": ["writer-store-and-barrier-sent"],
+      "finishAfter": ["reader-values-validated"],
+      "timeoutSeconds": 15
+    }
+  ]
+}

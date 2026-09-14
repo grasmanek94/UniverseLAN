@@ -1,0 +1,24 @@
+{
+  "name": "utils-overlay-disabled-invariant",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 30,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 4
+    }
+  },
+  "hosts": [
+    {
+      "role": "utils-client",
+      "scenario": "utils-overlay-disabled-invariant",
+      "identity": {
+        "userId": 2801,
+        "personaName": "UtilsOverlayClient"
+      },
+      "waitFor": ["server-ready"],
+      "timeoutSeconds": 10
+    }
+  ]
+}

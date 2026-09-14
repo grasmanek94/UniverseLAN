@@ -1,0 +1,40 @@
+{
+  "name": "online-persona-game-invitation",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 45,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 8
+    }
+  },
+  "hosts": [
+    {
+      "role": "receiver",
+      "scenario": "online-persona-game-invitation-receiver",
+      "identity": {
+        "userId": 2601,
+        "personaName": "OnlinePersonaReceiver"
+      },
+      "peerUserIds": [2602],
+      "waitFor": ["server-ready"],
+      "signals": ["receiver-ready", "receiver-observed-sender", "receiver-invitation-validated", "receiver-game-join-requested"],
+      "actionAfter": ["sender-online-peer-validated"],
+      "timeoutSeconds": 20
+    },
+    {
+      "role": "sender",
+      "scenario": "online-persona-game-invitation-sender",
+      "identity": {
+        "userId": 2602,
+        "personaName": "OnlinePersonaSender"
+      },
+      "peerUserIds": [2601],
+      "waitFor": ["server-ready", "receiver-ready"],
+      "signals": ["sender-online-peer-validated", "sender-invitation-sent"],
+      "finishAfter": ["receiver-invitation-validated", "receiver-game-join-requested"],
+      "timeoutSeconds": 20
+    }
+  ]
+}

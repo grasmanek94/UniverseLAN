@@ -1,0 +1,41 @@
+{
+  "name": "raw-p2p-channel-boundary-routing",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 45,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 8
+    }
+  },
+  "hosts": [
+    {
+      "role": "creator",
+      "scenario": "raw-p2p-channel-boundary-creator",
+      "identity": {
+        "userId": 2297,
+        "personaName": "RawP2PBoundaryCreator"
+      },
+      "peerUserIds": [2296],
+      "waitFor": ["server-ready"],
+      "signals": ["lobby-tagged", "channel-boundary-send-scheduled"],
+      "actionAfter": ["joiner-joined"],
+      "finishAfter": ["channel-boundary-received"],
+      "timeoutSeconds": 15
+    },
+    {
+      "role": "joiner",
+      "scenario": "raw-p2p-channel-boundary-joiner",
+      "identity": {
+        "userId": 2296,
+        "personaName": "RawP2PBoundaryJoiner"
+      },
+      "peerUserIds": [2297],
+      "waitFor": ["server-ready", "lobby-tagged"],
+      "signals": ["joiner-joined", "channel-boundary-received"],
+      "actionAfter": ["joiner-joined"],
+      "timeoutSeconds": 15
+    }
+  ]
+}

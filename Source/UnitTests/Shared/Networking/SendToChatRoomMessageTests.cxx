@@ -9,6 +9,7 @@ TEST(SendToChatRoomMessage, SerializesRequestAndRoomWithoutMessage)
 	EXPECT_EQ(restored.request_id, 7U);
 	EXPECT_EQ(restored.id, 42U);
 	EXPECT_EQ(restored.message, nullptr);
+	EXPECT_EQ(restored.fail_reason, galaxy::api::IChatRoomMessageSendListener::FAILURE_REASON_UNDEFINED);
 }
 
 TEST(SendToChatRoomMessage, SerializesMessagePayload)
@@ -26,5 +27,15 @@ TEST(SendToChatRoomMessage, SerializesMessagePayload)
 	EXPECT_EQ(restored.request_id, 7U);
 	EXPECT_EQ(restored.message->GetUser().ToUint64(), sender.ToUint64());
 	EXPECT_EQ(restored.message->GetContents(), "hello");
+}
+
+TEST(SendToChatRoomMessage, SerializesForbiddenFailure)
+{
+	const auto restored = universelan::test::serialize_round_trip(universelan::SendToChatRoomMessage(
+		7, 42, galaxy::api::IChatRoomMessageSendListener::FAILURE_REASON_FORBIDDEN));
+	EXPECT_EQ(restored.request_id, 7U);
+	EXPECT_EQ(restored.id, 42U);
+	EXPECT_EQ(restored.message, nullptr);
+	EXPECT_EQ(restored.fail_reason, galaxy::api::IChatRoomMessageSendListener::FAILURE_REASON_FORBIDDEN);
 }
 #endif

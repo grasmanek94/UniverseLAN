@@ -1,0 +1,38 @@
+{
+  "name": "stats-achievement-durable-persistence",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 30,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 8
+    }
+  },
+  "hosts": [
+    {
+      "role": "writer",
+      "scenario": "stats-achievement-durable-persistence-writer",
+      "identity": {
+        "userId": 2803,
+        "personaName": "StatsAchievementDurablePersistence"
+      },
+      "persistenceGroup": "stats-achievement-durable-persistence",
+      "saveAchievementsAndStats": true,
+      "waitFor": ["server-ready"],
+      "timeoutSeconds": 15
+    },
+    {
+      "role": "reader",
+      "scenario": "stats-achievement-durable-persistence-reader",
+      "identity": {
+        "userId": 2803,
+        "personaName": "StatsAchievementDurablePersistence"
+      },
+      "persistenceGroup": "stats-achievement-durable-persistence",
+      "saveAchievementsAndStats": true,
+      "waitFor": ["server-ready"],
+      "timeoutSeconds": 15
+    }
+  ]
+}

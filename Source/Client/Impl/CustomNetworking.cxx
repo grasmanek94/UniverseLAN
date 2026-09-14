@@ -70,7 +70,7 @@ namespace universelan::client {
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICUSTOMNETWORKING };
 
-		listeners->NotifyAll(&IConnectionOpenListener::OnConnectionOpenSuccess, connection_string.c_str(), (ConnectionID)this);
+		listeners->NotifyAll(listener_open, &IConnectionOpenListener::OnConnectionOpenSuccess, connection_string.c_str(), (ConnectionID)this);
 	}
 
 	void CustomNetworkingImpl::Channel::WebSocketOnMessage(const std::string& data, const bool binary)

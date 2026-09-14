@@ -8,6 +8,8 @@
 #include <PreprocessorControlIf.hxx>
 #include <SafeStringCopy.hxx>
 
+#include <algorithm>
+
 namespace universelan::client {
 	using namespace galaxy::api;
 	ChatImpl::ChatImpl(InterfaceInstances* intf)
@@ -51,7 +53,7 @@ namespace universelan::client {
 		bool success{ false };
 		{
 			lock_t lock{ mtx };
-			success = data->chat_room && chatroom_manager.AddChatRoom(*data->chat_room);
+			success = data->chat_room && (chatroom_manager.GetChatRoom(data->chat_room->GetID()) != nullptr || chatroom_manager.AddChatRoom(*data->chat_room));
 		}
 
 		if (success) {
@@ -99,7 +101,7 @@ namespace universelan::client {
 		listeners->AddRequestListener(request_id, listener);
 #endif
 
-		intf->client->GetConnection().SendAsync(RequestChatRoomMessagesMessage{ request_id, chatRoomID, referenceMessageID });
+		intf->client->GetConnection().SendAsync(RequestChatRoomMessagesMessage{ request_id, chatRoomID, limit, referenceMessageID });
 	}
 #endif
 
@@ -119,7 +121,10 @@ namespace universelan::client {
 				if (message->GetContents().length() > longest_message) {
 					longest_message = (uint32_t)message->GetContents().length();
 				}
-				chat_room->AddMessage(*message);
+				const auto duplicate = std::any_of(chat_room->GetMessages().begin(), chat_room->GetMessages().end(), [message](const ChatRoom::message_t& cached_message) {
+					return cached_message->GetID() == message->GetID();
+				});
+				if (!duplicate) chat_room->AddMessage(*message);
 			}
 
 			if (trace.has_flags(tracer::Trace::DETAILED)) {
@@ -232,7 +237,7 @@ namespace universelan::client {
 
 			listeners->NotifyAllNow(listener,
 				&IChatRoomMessageSendListener::OnChatRoomMessageSendFailure,
-				data->id, (uint32_t)data->request_id, IChatRoomMessageSendListener::FAILURE_REASON_UNDEFINED);
+				data->id, (uint32_t)data->request_id, data->fail_reason);
 		}
 	}
 

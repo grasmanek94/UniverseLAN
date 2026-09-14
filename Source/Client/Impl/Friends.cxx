@@ -402,12 +402,6 @@ namespace universelan::client {
 
 			if (data->success) {
 				listeners->NotifyAllNow(listener, &IRichPresenceChangeListener::OnRichPresenceChangeSuccess);
-#if GALAXY_BUILD_FEATURE_ADDED_RICH_PRESENCE_LISTENERS
-				if (!intf->config->IsSelfUserID(data->id))
-				{
-					listeners->NotifyAllNow(&IRichPresenceListener::OnRichPresenceUpdated, data->id);
-				}
-#endif
 			}
 			else {
 				listeners->NotifyAllNow(listener, &IRichPresenceChangeListener::OnRichPresenceChangeFailure, IRichPresenceChangeListener::FAILURE_REASON_UNDEFINED);
@@ -432,6 +426,9 @@ namespace universelan::client {
 			case RichPresenceChangeMessage::ACTION_NONE:
 				break;
 			}
+#if GALAXY_BUILD_FEATURE_ADDED_RICH_PRESENCE_LISTENERS
+			listeners->NotifyAllNow(&IRichPresenceListener::OnRichPresenceUpdated, data->id);
+#endif
 		}
 #endif
 	}

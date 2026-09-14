@@ -1,0 +1,28 @@
+{
+  "name": "custom-networking-close",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 30,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 4
+    }
+  },
+  "websocket": {
+    "enabled": true,
+    "readyEvent": "websocket-ready"
+  },
+  "hosts": [
+    {
+      "role": "close-client",
+      "scenario": "custom-networking-close",
+      "identity": {
+        "userId": 2302,
+        "personaName": "CustomNetworkingClose"
+      },
+      "waitFor": ["server-ready", "websocket-ready"],
+      "timeoutSeconds": 15
+    }
+  ]
+}

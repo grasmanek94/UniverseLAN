@@ -1,0 +1,25 @@
+{
+  "name": "raw-p2p-offline-recipient",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 30,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 8
+    }
+  },
+  "hosts": [
+    {
+      "role": "host",
+      "scenario": "raw-p2p-offline-recipient",
+      "identity": {
+        "userId": 2298,
+        "personaName": "RawP2POfflineHost"
+      },
+      "waitFor": ["server-ready"],
+      "signals": ["offline-recipient-verified"],
+      "timeoutSeconds": 10
+    }
+  ]
+}

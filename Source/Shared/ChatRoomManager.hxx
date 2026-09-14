@@ -25,9 +25,10 @@ namespace universelan {
 		chatroom_t CreateChatRoom();
 		bool RemoveChatRoom(galaxy::api::ChatRoomID id);
 		chatroom_t GetChatRoom(galaxy::api::ChatRoomID id);
+		chatroom_t GetChatRoomWithUsers(const galaxy::api::GalaxyID& first, const galaxy::api::GalaxyID& second);
 
 		// Client func
-		bool AddChatRoom(const ChatRoom& chat_room); 
+		bool AddChatRoom(const ChatRoom& chat_room);
 	};
 }
 #endif

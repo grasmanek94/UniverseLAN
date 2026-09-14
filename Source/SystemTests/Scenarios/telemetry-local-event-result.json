@@ -1,0 +1,27 @@
+{
+  "name": "telemetry-local-event-result",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 30,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 4
+    }
+  },
+  "hosts": [
+    {
+      "role": "telemetry-client",
+      "scenario": "telemetry-local-event-result",
+      "identity": {
+        "userId": 2701,
+        "personaName": "TelemetryLocalClient"
+      },
+      "telemetry": {
+        "store": true
+      },
+      "waitFor": ["server-ready"],
+      "timeoutSeconds": 10
+    }
+  ]
+}

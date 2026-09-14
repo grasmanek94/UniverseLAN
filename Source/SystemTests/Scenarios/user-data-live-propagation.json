@@ -1,0 +1,39 @@
+{
+  "name": "user-data-live-propagation",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 30,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 8
+    }
+  },
+  "hosts": [
+    {
+      "role": "receiver",
+      "scenario": "user-data-live-propagation-receiver",
+      "identity": {
+        "userId": 2901,
+        "personaName": "UserDataReceiver"
+      },
+      "peerUserIds": [2902],
+      "waitFor": ["server-ready"],
+      "signals": ["receiver-ready", "receiver-cache-validated"],
+      "timeoutSeconds": 15
+    },
+    {
+      "role": "writer",
+      "scenario": "user-data-live-propagation-writer",
+      "identity": {
+        "userId": 2902,
+        "personaName": "UserDataWriter"
+      },
+      "peerUserIds": [2901],
+      "waitFor": ["server-ready", "receiver-ready"],
+      "signals": ["writer-local-update"],
+      "finishAfter": ["receiver-cache-validated"],
+      "timeoutSeconds": 15
+    }
+  ]
+}

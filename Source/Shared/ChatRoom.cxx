@@ -3,6 +3,7 @@
 #include "ChatRoom.hxx"
 #include "GlobalUniqueID.hxx"
 
+#include <algorithm>
 #include <chrono>
 #include <memory>
 
@@ -28,23 +29,19 @@ namespace universelan {
 		return messages;
 	}
 
-	ChatRoom::messages_t ChatRoom::GetMessages(ChatMessageID exclusive_from) const
+	ChatRoom::messages_t ChatRoom::GetMessages(ChatMessageID exclusive_from, uint32_t limit) const
 	{
-		ChatRoom::messages_t container{};
-		if ((messages.size() == 0) || (messages.back()->GetID() == exclusive_from)) {
-			return container;
+		std::size_t end = messages.size();
+		if (exclusive_from != 0) {
+			const auto reference = std::find_if(messages.begin(), messages.end(), [exclusive_from](const message_t& message) {
+				return message->GetID() == exclusive_from;
+			});
+			if (reference == messages.end()) return {};
+			end = static_cast<std::size_t>(std::distance(messages.begin(), reference));
 		}
 
-		bool adding = false;
-		for (const auto& message : messages) {
-			if (adding) {
-				container.push_back(message);
-			}
-			else if (message->GetID() == exclusive_from) {
-				adding = true;
-			}
-		}
-		return container;
+		const std::size_t count = limit == 0 ? end : std::min<std::size_t>(limit, end);
+		return { messages.begin() + (end - count), messages.begin() + end };
 	}
 
 	const ChatRoom::message_t& ChatRoom::GetMessageByIndex(uint32_t index) const

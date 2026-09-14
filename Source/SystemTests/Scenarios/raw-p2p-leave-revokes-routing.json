@@ -1,0 +1,42 @@
+{
+  "name": "raw-p2p-leave-revokes-routing",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 50,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 8
+    }
+  },
+  "hosts": [
+    {
+      "role": "sender",
+      "scenario": "raw-p2p-leave-sender",
+      "identity": {
+        "userId": 2701,
+        "personaName": "RawP2PLeaveSender"
+      },
+      "peerUserIds": [2702],
+      "waitFor": ["server-ready"],
+      "signals": ["lobby-tagged", "sender-observed-receiver", "sender-observed-left", "sender-send-scheduled"],
+      "actionAfter": ["sender-observed-left"],
+      "finishAfter": ["receiver-quiet"],
+      "timeoutSeconds": 20
+    },
+    {
+      "role": "receiver",
+      "scenario": "raw-p2p-leave-receiver",
+      "identity": {
+        "userId": 2702,
+        "personaName": "RawP2PLeaveReceiver"
+      },
+      "peerUserIds": [2701],
+      "waitFor": ["server-ready", "lobby-tagged"],
+      "signals": ["receiver-joined", "receiver-left", "receiver-quiet"],
+      "actionAfter": ["sender-observed-receiver"],
+      "finishAfter": ["sender-send-scheduled"],
+      "timeoutSeconds": 20
+    }
+  ]
+}

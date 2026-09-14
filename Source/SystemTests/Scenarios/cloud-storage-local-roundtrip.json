@@ -1,0 +1,24 @@
+{
+  "name": "cloud-storage-local-roundtrip",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 30,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 4
+    }
+  },
+  "hosts": [
+    {
+      "role": "cloud-storage-client",
+      "scenario": "cloud-storage-local-roundtrip",
+      "identity": {
+        "userId": 2503,
+        "personaName": "CloudStorageClient"
+      },
+      "waitFor": ["server-ready"],
+      "timeoutSeconds": 20
+    }
+  ]
+}

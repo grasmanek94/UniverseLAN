@@ -36,9 +36,12 @@ TEST(ChatRoom, TracksMessagesAndReadState)
     EXPECT_EQ(room.GetMessageCount(), 2U);
     EXPECT_EQ(room.GetLongestMessage(), 6U);
     EXPECT_EQ(room.GetMessageByIndex(0), first);
-    const auto messages_after_first = room.GetMessages(first->GetID());
-    ASSERT_EQ(messages_after_first.size(), 1U);
-    EXPECT_EQ(messages_after_first.front(), second);
+    const auto newest_message = room.GetMessages(0, 1);
+    ASSERT_EQ(newest_message.size(), 1U);
+    EXPECT_EQ(newest_message.front(), second);
+    const auto messages_before_second = room.GetMessages(second->GetID(), 1);
+    ASSERT_EQ(messages_before_second.size(), 1U);
+    EXPECT_EQ(messages_before_second.front(), first);
     EXPECT_EQ(room.GetUnreadCount(), 2U);
     EXPECT_FALSE(room.IsRead());
 

@@ -1,0 +1,41 @@
+{
+  "name": "lobby-member-leave-lifecycle",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 45,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 8
+    }
+  },
+  "hosts": [
+    {
+      "role": "owner",
+      "scenario": "lobby-member-leave-owner",
+      "identity": {
+        "userId": 2501,
+        "personaName": "LobbyLeaveOwner"
+      },
+      "peerUserIds": [2502],
+      "waitFor": ["server-ready"],
+      "signals": ["lobby-tagged", "owner-observed-joiner", "owner-observed-left"],
+      "finishAfter": ["joiner-left", "owner-observed-left"],
+      "timeoutSeconds": 20
+    },
+    {
+      "role": "joiner",
+      "scenario": "lobby-member-leave-joiner",
+      "identity": {
+        "userId": 2502,
+        "personaName": "LobbyLeaveJoiner"
+      },
+      "peerUserIds": [2501],
+      "waitFor": ["server-ready", "lobby-tagged"],
+      "signals": ["joiner-joined", "joiner-left"],
+      "actionAfter": ["owner-observed-joiner", "joiner-joined"],
+      "finishAfter": ["joiner-left", "owner-observed-left"],
+      "timeoutSeconds": 20
+    }
+  ]
+}

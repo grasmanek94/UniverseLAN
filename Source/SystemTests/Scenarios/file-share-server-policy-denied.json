@@ -1,0 +1,25 @@
+{
+  "name": "file-share-server-policy-denied",
+  "runtimeProvider": "universelan",
+  "timeoutSeconds": 30,
+  "server": {
+    "enabled": true,
+    "readyEvent": "server-ready",
+    "configuration": {
+      "maxConnections": 4,
+      "allowFileSharingUpload": false
+    }
+  },
+  "hosts": [
+    {
+      "role": "storage-client",
+      "scenario": "file-share-server-policy-denied",
+      "identity": {
+        "userId": 2502,
+        "personaName": "FileSharePolicyClient"
+      },
+      "waitFor": ["server-ready"],
+      "timeoutSeconds": 20
+    }
+  ]
+}

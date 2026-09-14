@@ -103,21 +103,21 @@ void OnLobbyDataUpdated(const GalaxyID& lobbyID, const GalaxyID& memberID) {
 	auto matchmaking_ptr = GET_GALAXY_API(Matchmaking());
 
 	if (memberID.IsValid()) {
-		tracer::Trace::write_all(std::format(
+		tracer::Trace::write_all(
 			"OnLobbyDataUpdated LobbyID: {} memberID: {} my_runtime: {} my_galaxy_id: {}",
 			lobbyID, memberID,
 			matchmaking_ptr->GetLobbyMemberData(lobbyID, memberID, "my_runtime"),
 			matchmaking_ptr->GetLobbyMemberData(lobbyID, memberID, "my_galaxy_id")
-		));
+		);
 	}
 	else if (lobbyID.IsValid()) {
-		tracer::Trace::write_all(std::format(
+		tracer::Trace::write_all(
 			"OnLobbyDataUpdated LobbyID: {} timer: {}",
 			lobbyID, matchmaking_ptr->GetLobbyData(lobbyID, "timer")
-		));
+		);
 	}
 	else {
-		tracer::Trace::write_all(std::format("OnLobbyDataUpdated huh?"));
+		tracer::Trace::write_all("OnLobbyDataUpdated huh?");
 	}
 }
 
@@ -132,11 +132,7 @@ void OnLobbyDataRetrieveSuccess(const GalaxyID& lobbyID) {
 
 	if (result.length() > 0 && result == "uvlan-test" && !lobby_joined) {
 		lobby_joined = true;
-		tracer::Trace::write_all(
-			std::format(
-				"Join: {}",
-				lobbyID
-			));
+		tracer::Trace::write_all("Join: {}", lobbyID);
 		matchmaking_ptr->JoinLobby(lobbyID);
 	}
 }
@@ -147,10 +143,10 @@ void OnLobbyMessageReceived(const GalaxyID& lobbyID, const GalaxyID& senderID, u
 	GalaxyID senderID2;
 	uint32_t message_read_len = matchmaking_ptr->GetLobbyMessage(lobbyID, messageID, senderID2, buffer, sizeof(buffer));
 
-	tracer::Trace::write_all(std::format(
+	tracer::Trace::write_all(
 		"LobbyID: {} SenderID: {} SenderID2: {} messageID: {} messageLength: {} messageReadLen: {} contents: '{}'",
 		lobbyID, senderID, senderID2, messageID, messageLength, message_read_len, std::string(buffer, message_read_len)
-	));
+	);
 }
 
 void perform_test() {

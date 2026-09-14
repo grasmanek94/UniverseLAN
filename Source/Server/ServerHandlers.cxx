@@ -227,8 +227,13 @@ namespace universelan::server {
 			return;
 		}
 
-		response.chat_room = chat_room_manager.CreateChatRoom();
+		response.chat_room = chat_room_manager.GetChatRoomWithUsers(pd->id, target->id);
+		if (response.chat_room) {
+			connection.Send(peer, response);
+			return;
+		}
 
+		response.chat_room = chat_room_manager.CreateChatRoom();
 		for (auto& i : { pd, target }) {
 			response.chat_room->AddMember(i->id);
 			i->chat_rooms.emplace(response.chat_room->GetID(), response.chat_room);
@@ -247,9 +252,9 @@ namespace universelan::server {
 
 		ChatRoom::messages_t messages{};
 		if (chat_room && chat_room->IsMember(pd->id)) {
-			messages = chat_room->GetMessages(data->oldest_message);
+			messages = chat_room->GetMessages(data->oldest_message, data->limit);
 		}
-		RequestChatRoomMessagesMessage response{ data->request_id, data->id, data->oldest_message, messages };
+		RequestChatRoomMessagesMessage response{ data->request_id, data->id, data->limit, data->oldest_message, messages };
 
 		connection.Send(peer, response);
 	}
@@ -279,7 +284,7 @@ namespace universelan::server {
 
 			ChatRoom::messages_t messages{};
 			messages.push_back(message);
-			RequestChatRoomMessagesMessage notification{ data->request_id, data->id, oldest_message, messages };
+			RequestChatRoomMessagesMessage notification{ data->request_id, data->id, 0, oldest_message, messages };
 
 			auto& members = chat_room->GetMembers();
 			for (const auto& member : members) {
@@ -288,7 +293,7 @@ namespace universelan::server {
 			}
 		}
 		else {
-			connection.Send(peer, SendToChatRoomMessage{ data->request_id, data->id, nullptr });
+			connection.Send(peer, SendToChatRoomMessage{ data->request_id, data->id, IChatRoomMessageSendListener::FAILURE_REASON_FORBIDDEN });
 		}
 	}
 #endif
@@ -426,6 +431,21 @@ namespace universelan::server {
 			return;
 		}
 
+		bool shares_active_lobby = false;
+		for (const auto& lobby_iter : pd->lobbies) {
+			const auto& lobby = lobby_iter.second;
+			if (lobby && lobby_manager.GetLobby(lobby_iter.first) == lobby
+				&& target_pd->GetLobby(lobby_iter.first) == lobby
+				&& lobby->IsMember(pd->id) && lobby->IsMember(target_pd->id)) {
+				shares_active_lobby = true;
+				break;
+			}
+		}
+
+		if (!shares_active_lobby) {
+			return;
+		}
+
 		// send normal packet from peer to peer
 		data->id = pd->id;
 		connection.Send(target_pd->peer, *data, flag);
@@ -435,6 +455,10 @@ namespace universelan::server {
 		tracer::Trace trace{ "::FileShareMessage" };
 
 		REQUIRES_AUTHENTICATION(peer);
+		if (!config.GetAllowFileSharingUpload()) {
+			connection.Send(peer, FileShareResponseMessage{ data->request_id, 0, data->filename });
+			return;
+		}
 
 		FileShareResponseMessage fsrm{ data->request_id, ++shared_file_counter, data->filename };
 		auto var = sfu.Open(sfu.shared, shared_file_counter_file.c_str(), std::ios::out | std::ios::trunc);
@@ -455,6 +479,10 @@ namespace universelan::server {
 		tracer::Trace trace{ "::FileRequestMessage" };
 
 		REQUIRES_AUTHENTICATION(peer);
+		if (!config.GetAllowFileSharingDownload()) {
+			connection.Send(peer, data);
+			return;
+		}
 
 		bool read = false;
 		if (data->id != 0) {
@@ -863,14 +891,14 @@ namespace universelan::server {
 		auto members = lobby->GetMembers();
 		for (auto& member : members) {
 			auto member_peer = peer_mapper.Get(member);
-			if (!close && new_owner) {
-				connection.Send(member_peer->peer, owner_change_message);
-				connection.Send(member_peer->peer, leave_notification);
-			}
-			else if (close) {
+			if (close) {
 				member_peer->RemoveLobby(lobby);
 				connection.Send(member_peer->peer, leave_notification);
 				connection.Send(member_peer->peer, close_message);
+			}
+			else {
+				if (new_owner) connection.Send(member_peer->peer, owner_change_message);
+				connection.Send(member_peer->peer, leave_notification);
 			}
 		}
 

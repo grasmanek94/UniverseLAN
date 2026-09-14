@@ -139,7 +139,7 @@ namespace universelan::client {
 				tracer::Trace trace2{ "1", "[loop lambda]", tracer::Trace::LISTENERREGISTRAR };
 
 				if (trace2.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
-					trace2.write_all(std::format("code(entry): {}", (void*)entry));
+					trace2.write_all("code(entry): {}", (void*)entry);
 				}
 
 				code(entry);
@@ -229,7 +229,7 @@ namespace universelan::client {
 				tracer::Trace trace2{ "2", "[loop lambda]", tracer::Trace::LISTENERREGISTRAR};
 
 				if (trace2.has_flags(tracer::Trace::HIGH_FREQUENCY_CALLS | tracer::Trace::RETURN_VALUES)) {
-					trace2.write_all(std::format("code(entry): {}", (void*)entry));
+					trace2.write_all("code(entry): {}", (void*)entry);
 				}
 
 				code(entry);

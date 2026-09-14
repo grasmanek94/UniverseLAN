@@ -135,7 +135,7 @@ namespace universelan::client {
 	ConnectionType NetworkingImpl::GetConnectionType(GalaxyID userID) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::INETWORKING };
 
-		return CONNECTION_TYPE_DIRECT;
+		return userID == intf->user->GetGalaxyID() ? CONNECTION_TYPE_DIRECT : CONNECTION_TYPE_NONE;
 	}
 #endif
 

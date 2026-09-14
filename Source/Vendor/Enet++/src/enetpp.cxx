@@ -159,6 +159,7 @@ namespace enetpp {
 			enet_peer_disconnect_now(peer, 0);
 			enet_peer_reset(peer);
 			enet_host_destroy(member);
+			member = nullptr;
 		}
 	}
 
