@@ -1,0 +1,21 @@
+{
+  "name": "Simple/public-lobby-string-filtering",
+  "sdkVersion": "1.152.11",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 45,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": {
+      "user1": ["initialize", "sign-in-callback", "sign-in-terminal", "create-target", "create-unmatched", "configuration", "creator-cleanup-unmatched", "creator-cleanup-target", "self-state"],
+      "user2": ["initialize", "sign-in-callback", "sign-in-terminal", "list-diagnostic", "filtered-selection", "join", "joiner-two-member-snapshot", "joiner-leave", "self-state"]
+    },
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "raw Galaxy IDs, lobby IDs, public collision-marker values, filter values, candidate counts, and indexes are never recorded; compare only symbolic target appearance, predicate match, selected/joined, unmatched presence/exclusion, membership, owner, and cleanup relations",
+    "acceptedPublicLobbyStringFilterCandidateSet": {
+      "gog": "stable-target-only",
+      "universelan": "target-required-unmatched-candidate-diagnostic"
+    }
+  }
+}

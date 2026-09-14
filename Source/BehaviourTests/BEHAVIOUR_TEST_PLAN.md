@@ -418,7 +418,26 @@ data can be listed and read; they are never printed. These are public
    observer-before-update and joiner-before-cleanup causal gates across hosts.
    The coverage and difference registers record a matched live baseline; its
     retained register did not capture a run date. Callback multiplicity and
-    callback-gate discovery order remain diagnostic rather than equality facts.
+     callback-gate discovery order remain diagnostic rather than equality facts.
+
+- `Simple/public-lobby-string-filtering` creates two distinct temporary public
+  capacity-two FCM lobbies sequentially. Each stays nonjoinable while the creator
+  sets a value derived from the private runner marker under one fixed public key,
+  verifies the local copy, and only then completes and observes joinability. The
+  two values are distinct but are never retained. User2 applies one public string
+  equality filter for the target value on each bounded diagnostic request and
+  calls `GetLobbyByIndex` only in `ILobbyListListener::OnLobbyList`. It requests
+   public data for each callback-local candidate, retains symbolic target
+   appearance, predicate-match, and unmatched-candidate presence/exclusion facts
+   without a value, ID, index, or candidate count, then selects and joins only a
+   matching target and verifies public two-member/non-self-owner state. Official
+   characterization established stable target-only equality-filter evidence on
+   2026-09-14. Retry is diagnostic; both lanes strictly require target appearance,
+   predicate match, correct selected join, and lifecycle cleanup after stability.
+   Official GOG's unmatched exclusion remains strict. UniverseLAN intentionally
+   permits an unmatched public candidate as a diagnostic relaxed-filter superset;
+   that narrow policy never permits a malformed filter or an unmatched selection
+   or join.
 
 - `Simple/public-lobby-not-joinable-behavior` ran twice as an official-GOG-only
   characterization before its strict four-host baseline on 2026-09-14. Both

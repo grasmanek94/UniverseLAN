@@ -48,6 +48,7 @@ cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^gog-services-state$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^session-id-repeatability$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^public-lobby-create-list-join-leave$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
+cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^public-lobby-string-filtering$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^public-lobby-not-joinable-behavior$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^public-lobby-full-join-failure$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^public-lobby-owner-close-lifecycle$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
@@ -248,6 +249,28 @@ The similarly non-CTest lobby-data characterization mode is:
 ```powershell
 & "bin/Debug/universelan-behaviour-runner-x64-1.152.11.exe" --characterize-public-lobby-data-propagation --universelan-host "bin/Debug/universelan-behaviour-host-universelan-x64-1.152.11.exe" --gog-host "bin/Debug/universelan-behaviour-host-gog-x64-1.152.11.exe" --client-dll "bin/1.152.11/Debug/Galaxy64.dll" --server "bin/1.152.11/Debug/UniverseLANServer64.exe" --gog-runtime-dir "Source/DLLs/1.152.11/gog"
 ```
+
+Characterize public equality string filtering at least twice before changing its
+strict facts:
+
+```powershell
+& "bin/Debug/universelan-behaviour-runner-x64-1.152.11.exe" --characterize-public-lobby-string-filtering --universelan-host "bin/Debug/universelan-behaviour-host-universelan-x64-1.152.11.exe" --gog-host "bin/Debug/universelan-behaviour-host-gog-x64-1.152.11.exe" --client-dll "bin/1.152.11/Debug/Galaxy64.dll" --server "bin/1.152.11/Debug/UniverseLANServer64.exe" --gog-runtime-dir "Source/DLLs/1.152.11/gog"
+```
+
+The creator makes two public capacity-two FCM lobbies sequentially. Both remain
+nonjoinable while the fixed public filter key receives distinct opaque
+marker-derived values, then each explicitly completes `SetLobbyJoinable(true)`.
+User2 makes one equality-filtered list request per bounded diagnostic attempt;
+`GetLobbyByIndex` occurs only in `ILobbyListListener::OnLobbyList`. It privately
+classifies every callback-local candidate, selects only a candidate matching the
+requested predicate, verifies two-member/non-self-owner state, and leaves. User1
+then acknowledges terminal cleanup for both target and unmatched lobbies. Keep
+retry diagnostic and retain only symbolic target appearance, predicate match, and
+unmatched-candidate presence/exclusion. Stable official GOG requires unmatched
+exclusion. UniverseLAN intentionally permits an unmatched public candidate as a
+diagnostic superset, but a malformed filter or unmatched selection/join remains a
+failure. Never print or retain values, IDs, candidate counts, indexes, controls,
+runtime output, or artifact paths.
 
 Characterize the owner-close lifecycle against official GOG twice before
 changing its strict facts:

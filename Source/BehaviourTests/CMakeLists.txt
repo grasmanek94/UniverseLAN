@@ -135,6 +135,7 @@ if(ENABLE_UNIVERSELAN_GOG_BEHAVIOUR_TESTS AND UNIVERSELAN_BEHAVIOUR_TEST_CREDENT
   add_universelan_gog_behaviour_test("simple-session-id-repeatability" "Simple" "session-id-repeatability.json" "session-id-repeatability")
   add_universelan_gog_behaviour_test("simple-gog-services-state" "Simple" "gog-services-state.json" "gog-services-state")
   add_universelan_gog_behaviour_test("simple-public-lobby-create-list-join-leave" "Simple" "public-lobby-create-list-join-leave.json" "public-lobby-create-list-join-leave")
+  add_universelan_gog_behaviour_test("simple-public-lobby-string-filtering" "Simple" "public-lobby-string-filtering.json" "public-lobby-string-filtering")
   add_universelan_gog_behaviour_test("simple-public-lobby-not-joinable-behavior" "Simple" "public-lobby-not-joinable-behavior.json" "public-lobby-not-joinable-behavior")
   add_universelan_gog_behaviour_test("simple-public-lobby-full-join-failure" "Simple" "public-lobby-full-join-failure.json" "public-lobby-full-join-failure")
   add_universelan_gog_behaviour_test("simple-public-lobby-owner-close-lifecycle" "Simple" "public-lobby-owner-close-lifecycle.json" "public-lobby-owner-close-lifecycle")

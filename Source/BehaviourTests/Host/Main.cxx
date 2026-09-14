@@ -29,12 +29,13 @@ struct Arguments
     int timeoutSeconds = 0;
 };
 
-    enum class Scenario { initializeAndSignIn, sessionIdRepeatability, gogServicesState, gogServicesStateCharacterization, publicLobbyCreateListJoinLeave, publicLobbyNotJoinableBehaviorCharacterization, publicLobbyNotJoinableBehavior, publicLobbyFullJoinFailureCharacterization, publicLobbyFullJoinFailure, publicLobbyOwnerCloseLifecycleCharacterization, publicLobbyOwnerCloseLifecycle, publicLobbyOwnerOwnershipTransitionCharacterization, publicLobbyOwnerOwnershipTransition, publicLobbyDataPropagationCharacterization, publicLobbyDataPropagation, reliableP2PListenerPeekCharacterization, reliableP2PListenerPeek, reliableP2PAfterLobbyLeaveCharacterization, reliableP2PAfterLobbyLeave, bidirectionalReliableP2PListenerPeekCharacterization, bidirectionalReliableP2PListenerPeek, bidirectionalUnreliableP2PListenerPeekCharacterization, bidirectionalUnreliableP2PListenerPeek, bidirectionalLobbyMessageDeliveryCharacterization, bidirectionalLobbyMessageDelivery, bidirectionalLobbyMemberDataPropagationCharacterization, bidirectionalLobbyMemberDataPropagation, multipleLobbyMembershipAndMessageIsolationCharacterization, multipleLobbyMembershipAndMessageIsolation, chatRoomMessageDeliveryCharacterization, chatRoomMessageDelivery, bidirectionalChatRoomMessageDeliveryCharacterization, bidirectionalChatRoomMessageDelivery, friendsPeerInformationRetrievalCharacterization, friendsPeerInformationRetrieval };
+    enum class Scenario { initializeAndSignIn, sessionIdRepeatability, gogServicesState, gogServicesStateCharacterization, publicLobbyCreateListJoinLeave, publicLobbyStringFilteringCharacterization, publicLobbyStringFiltering, publicLobbyNotJoinableBehaviorCharacterization, publicLobbyNotJoinableBehavior, publicLobbyFullJoinFailureCharacterization, publicLobbyFullJoinFailure, publicLobbyOwnerCloseLifecycleCharacterization, publicLobbyOwnerCloseLifecycle, publicLobbyOwnerOwnershipTransitionCharacterization, publicLobbyOwnerOwnershipTransition, publicLobbyDataPropagationCharacterization, publicLobbyDataPropagation, reliableP2PListenerPeekCharacterization, reliableP2PListenerPeek, reliableP2PAfterLobbyLeaveCharacterization, reliableP2PAfterLobbyLeave, bidirectionalReliableP2PListenerPeekCharacterization, bidirectionalReliableP2PListenerPeek, bidirectionalUnreliableP2PListenerPeekCharacterization, bidirectionalUnreliableP2PListenerPeek, bidirectionalLobbyMessageDeliveryCharacterization, bidirectionalLobbyMessageDelivery, bidirectionalLobbyMemberDataPropagationCharacterization, bidirectionalLobbyMemberDataPropagation, multipleLobbyMembershipAndMessageIsolationCharacterization, multipleLobbyMembershipAndMessageIsolation, chatRoomMessageDeliveryCharacterization, chatRoomMessageDelivery, bidirectionalChatRoomMessageDeliveryCharacterization, bidirectionalChatRoomMessageDelivery, friendsPeerInformationRetrievalCharacterization, friendsPeerInformationRetrieval };
 
 bool isSupportedScenario(const std::string& scenario)
 {
     return scenario == "initialize-and-sign-in" || scenario == "session-id-repeatability" || scenario == "gog-services-state"
         || scenario == "gog-services-state-characterization" || scenario == "public-lobby-create-list-join-leave"
+        || scenario == "public-lobby-string-filtering-characterization" || scenario == "public-lobby-string-filtering"
         || scenario == "public-lobby-not-joinable-behavior-characterization"
         || scenario == "public-lobby-not-joinable-behavior"
         || scenario == "public-lobby-full-join-failure-characterization" || scenario == "public-lobby-full-join-failure"
@@ -59,6 +60,8 @@ Scenario selectedScenario(const Arguments& arguments)
     if (arguments.scenario == "gog-services-state") return Scenario::gogServicesState;
     if (arguments.scenario == "gog-services-state-characterization") return Scenario::gogServicesStateCharacterization;
     if (arguments.scenario == "public-lobby-create-list-join-leave") return Scenario::publicLobbyCreateListJoinLeave;
+    if (arguments.scenario == "public-lobby-string-filtering-characterization") return Scenario::publicLobbyStringFilteringCharacterization;
+    if (arguments.scenario == "public-lobby-string-filtering") return Scenario::publicLobbyStringFiltering;
     if (arguments.scenario == "public-lobby-not-joinable-behavior-characterization") return Scenario::publicLobbyNotJoinableBehaviorCharacterization;
     if (arguments.scenario == "public-lobby-not-joinable-behavior") return Scenario::publicLobbyNotJoinableBehavior;
     if (arguments.scenario == "public-lobby-full-join-failure-characterization") return Scenario::publicLobbyFullJoinFailureCharacterization;
@@ -112,6 +115,7 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
     }
     return isSupportedScenario(arguments.scenario) && (arguments.profile == "user1" || arguments.profile == "user2")
         && !arguments.trace.empty() && ((arguments.scenario != "public-lobby-create-list-join-leave"
+              && arguments.scenario != "public-lobby-string-filtering-characterization" && arguments.scenario != "public-lobby-string-filtering"
               && arguments.scenario != "public-lobby-not-joinable-behavior-characterization"
               && arguments.scenario != "public-lobby-not-joinable-behavior"
               && arguments.scenario != "public-lobby-full-join-failure-characterization" && arguments.scenario != "public-lobby-full-join-failure"
@@ -2485,6 +2489,172 @@ bool runBidirectionalLobbyMemberDataPropagation(const Arguments& arguments, gala
     return exchanged && left;
 }
 
+bool runPublicLobbyStringFiltering(const Arguments& arguments, galaxy::api::IUser* const user, std::vector<std::string>& records)
+{
+    galaxy::api::IMatchmaking* const matchmaking = galaxy::api::Matchmaking();
+    const std::string token = controlValue(arguments.control, "token");
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(arguments.timeoutSeconds);
+    static constexpr const char* filterKey = "universelan-behaviour-string-filter";
+    if (matchmaking == nullptr || token.empty()) { writeEvent(arguments, "cleanup-ack"); return false; }
+
+    const bool creator = arguments.profile == "user1";
+    const galaxy::api::GalaxyID self = user->GetGalaxyID();
+    std::array<galaxy::api::GalaxyID, 2> lobbies;
+    std::array<bool, 2> joined{};
+    const std::array<std::string, 2> values{token + "-target", token + "-unmatched"};
+    auto leave = [&](const int index, const char* const record)
+    {
+        if (!joined[index]) return true;
+        const bool left = leaveLobby(arguments, matchmaking, lobbies[index], records, record,
+            std::chrono::steady_clock::now() + std::chrono::seconds(5), true);
+        if (left) joined[index] = false;
+        return left;
+    };
+    auto cleanup = [&]
+    {
+        const bool unmatchedLeft = leave(1, creator ? "creator-cleanup-unmatched" : "joiner-cleanup-target");
+        const bool targetLeft = leave(0, creator ? "creator-cleanup-target" : "joiner-cleanup-target");
+        if (unmatchedLeft && targetLeft) writeEvent(arguments, "cleanup-ack");
+    };
+
+    if (creator)
+    {
+        for (int index = 0; index < 2; ++index)
+        {
+            LobbyCreatedListener created;
+            LobbyEnteredListener entered;
+            // The second lobby is not requested until the first creation has fully completed.
+            matchmaking->CreateLobby(galaxy::api::LOBBY_TYPE_PUBLIC, 2, false, galaxy::api::LOBBY_TOPOLOGY_TYPE_FCM, &created, &entered);
+            const bool callbacks = pumpUntil(arguments, deadline, [&] { return created.called && entered.called; });
+            records.push_back("{\"record\":" + common::jsonString(index == 0 ? "create-target" : "create-unmatched")
+                + ",\"result\":" + common::jsonString(callbacks ? createResult(created.result) : "timeout")
+                + ",\"lobbyValid\":" + boolean(callbacks && created.lobby.IsValid()) + ",\"lobbyType\":"
+                + common::jsonString(callbacks ? idType(created.lobby.GetIDType()) : "unavailable") + "}");
+            if (!callbacks || created.result != galaxy::api::LOBBY_CREATE_RESULT_SUCCESS
+                || entered.result != galaxy::api::LOBBY_ENTER_RESULT_SUCCESS || created.lobby != entered.lobby || !created.lobby.IsValid())
+            {
+                cleanup();
+                return false;
+            }
+            lobbies[index] = entered.lobby;
+            joined[index] = true;
+        }
+
+        std::array<LobbyDataUpdateListener, 2> capacity;
+        std::array<LobbyDataUpdateListener, 2> marker;
+        std::array<LobbyDataUpdateListener, 2> joinable;
+        bool configurationSucceeded = true;
+        bool markerVisible = true;
+        for (int index = 0; index < 2; ++index)
+        {
+            matchmaking->SetMaxNumLobbyMembers(lobbies[index], 2, &capacity[index]);
+            matchmaking->SetLobbyData(lobbies[index], filterKey, values[index].c_str(), &marker[index]);
+            const bool configured = pumpUntil(arguments, deadline, [&] { return capacity[index].called && marker[index].called; });
+            matchmaking->SetLobbyJoinable(lobbies[index], true, &joinable[index]);
+            const bool madeJoinable = pumpUntil(arguments, deadline, [&] { return joinable[index].called; });
+            std::array<char, 256> copied{};
+            matchmaking->GetLobbyDataCopy(lobbies[index], filterKey, copied.data(), static_cast<std::uint32_t>(copied.size()));
+            markerVisible = markerVisible && std::string(copied.data()) == values[index];
+            configurationSucceeded = configurationSucceeded && configured && madeJoinable && capacity[index].success && marker[index].success
+                && joinable[index].success && capacity[index].lobby == lobbies[index] && marker[index].lobby == lobbies[index]
+                && joinable[index].lobby == lobbies[index] && matchmaking->GetLobbyType(lobbies[index]) == galaxy::api::LOBBY_TYPE_PUBLIC
+                && matchmaking->GetMaxNumLobbyMembers(lobbies[index]) == 2 && matchmaking->IsLobbyJoinable(lobbies[index]);
+        }
+        records.push_back("{\"record\":\"configuration\",\"sequentialCreation\":true,\"distinctOpaqueValues\":"
+            + boolean(values[0] != values[1]) + ",\"targetConfiguredBeforeJoinable\":true,\"unmatchedConfiguredBeforeJoinable\":true"
+            + ",\"allPublicCapacityTwoJoinable\":" + boolean(configurationSucceeded) + ",\"markerValuesVisibleLocally\":"
+            + boolean(markerVisible) + "}");
+        if (!configurationSucceeded || !markerVisible) { cleanup(); return false; }
+        writeEvent(arguments, "creator-ready");
+        if (!pumpUntil(arguments, deadline, [&] { return controlIsSet(arguments, "joiner-joined"); })) { cleanup(); return false; }
+        if (!pumpUntil(arguments, deadline, [&] { return controlIsSet(arguments, "joiner-left"); })) { cleanup(); return false; }
+        const bool unmatchedLeft = leave(1, "creator-cleanup-unmatched");
+        const bool targetLeft = leave(0, "creator-cleanup-target");
+        if (unmatchedLeft && targetLeft) writeEvent(arguments, "cleanup-ack");
+        return unmatchedLeft && targetLeft;
+    }
+
+    if (!pumpUntil(arguments, deadline, [&] { return controlIsSet(arguments, "creator-ready"); })) { cleanup(); return false; }
+    LobbyListListener listed;
+    galaxy::api::GalaxyID selected;
+    bool selectedMatchesRequestedValue = false;
+    bool allCandidatesClassified = false;
+    bool targetCandidateAppeared = false;
+    bool unmatchedCandidateAppeared = false;
+    int attempts = 0;
+    while (std::chrono::steady_clock::now() < deadline && attempts < 6 && !controlIsSet(arguments, "abort"))
+    {
+        ++attempts;
+        listed = LobbyListListener{};
+        listed.matchmaking = matchmaking;
+        matchmaking->AddRequestLobbyListStringFilter(filterKey, values[0].c_str(), galaxy::api::LOBBY_COMPARISON_TYPE_EQUAL);
+        matchmaking->RequestLobbyList(false, &listed);
+        if (!pumpUntil(arguments, std::min(deadline, std::chrono::steady_clock::now() + std::chrono::seconds(3)), [&] { return listed.called; })) break;
+        if (listed.result != galaxy::api::LOBBY_LIST_RESULT_SUCCESS) { std::this_thread::sleep_for(std::chrono::milliseconds(250)); continue; }
+        bool attemptCandidatesClassified = true;
+        bool attemptTargetCandidateAppeared = false;
+        bool attemptUnmatchedCandidateAppeared = false;
+        for (const galaxy::api::GalaxyID& candidate : listed.candidates)
+        {
+            LobbyDataRetrieveListener retrieved;
+            matchmaking->RequestLobbyData(candidate, &retrieved);
+            const bool retrievedCompleted = pumpUntil(arguments, std::min(deadline, std::chrono::steady_clock::now() + std::chrono::seconds(3)), [&] { return retrieved.called; });
+            std::array<char, 256> copied{};
+            const bool candidateClassified = retrievedCompleted && retrieved.success && retrieved.lobby == candidate;
+            if (candidateClassified)
+                matchmaking->GetLobbyDataCopy(candidate, filterKey, copied.data(), static_cast<std::uint32_t>(copied.size()));
+            attemptCandidatesClassified = attemptCandidatesClassified && candidateClassified;
+            const bool candidateMatchesRequestedValue = candidateClassified && std::string(copied.data()) == values[0];
+            attemptTargetCandidateAppeared = attemptTargetCandidateAppeared || candidateMatchesRequestedValue;
+            attemptUnmatchedCandidateAppeared = attemptUnmatchedCandidateAppeared || (candidateClassified && !candidateMatchesRequestedValue);
+            if (!selected.IsValid() && candidateMatchesRequestedValue)
+            {
+                selected = candidate;
+                selectedMatchesRequestedValue = true;
+            }
+        }
+        const bool stableTargetSelection = attemptCandidatesClassified && attemptTargetCandidateAppeared && selected.IsValid()
+            && selectedMatchesRequestedValue;
+        if (stableTargetSelection)
+        {
+            allCandidatesClassified = attemptCandidatesClassified;
+            targetCandidateAppeared = attemptTargetCandidateAppeared;
+            unmatchedCandidateAppeared = attemptUnmatchedCandidateAppeared;
+            break;
+        }
+        selected = galaxy::api::GalaxyID();
+        selectedMatchesRequestedValue = false;
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    }
+    const bool stableSelection = listed.called && listed.result == galaxy::api::LOBBY_LIST_RESULT_SUCCESS && selected.IsValid()
+        && selectedMatchesRequestedValue;
+    records.push_back("{\"record\":\"list-diagnostic\",\"result\":" + common::jsonString(listed.called ? listResult(listed.result) : "timeout")
+        + ",\"retryUsed\":" + boolean(attempts > 1) + ",\"allCandidatesClassified\":" + boolean(allCandidatesClassified)
+        + ",\"targetCandidateAppeared\":" + boolean(targetCandidateAppeared) + ",\"unmatchedCandidateAppeared\":"
+        + boolean(unmatchedCandidateAppeared) + ",\"stableTargetSelection\":" + boolean(stableSelection) + "}");
+    records.push_back(std::string("{\"record\":\"filtered-selection\",\"filteredRequestOnly\":true,\"getLobbyByIndexCallbackLocalOnly\":true")
+        + ",\"targetCandidateAppeared\":" + boolean(targetCandidateAppeared) + ",\"selectedValid\":" + boolean(selected.IsValid())
+        + ",\"selectedMatchesRequestedPredicate\":" + boolean(selectedMatchesRequestedValue)
+        + ",\"unmatchedCandidateAppeared\":" + boolean(unmatchedCandidateAppeared)
+        + ",\"unmatchedCandidateSelected\":false,\"unmatchedCandidateExcluded\":" + boolean(!unmatchedCandidateAppeared)
+        + ",\"selectionStable\":" + boolean(stableSelection) + "}");
+    if (!stableSelection) { cleanup(); return false; }
+    LobbyEnteredListener entered;
+    matchmaking->JoinLobby(selected, &entered);
+    const bool enteredCompleted = pumpUntil(arguments, deadline, [&] { return entered.called; });
+    records.push_back("{\"record\":\"join\",\"result\":" + common::jsonString(enteredCompleted ? enterResult(entered.result) : "timeout")
+        + ",\"sameSelectedLobby\":" + boolean(enteredCompleted && entered.lobby == selected) + "}");
+    if (!enteredCompleted || entered.result != galaxy::api::LOBBY_ENTER_RESULT_SUCCESS || entered.lobby != selected) { cleanup(); return false; }
+    lobbies[0] = entered.lobby;
+    joined[0] = true;
+    records.push_back(snapshotRecord("joiner-two-member-snapshot", matchmaking, lobbies[0], self, 2));
+    const bool memberAndOwnerValid = matchmaking->GetNumLobbyMembers(lobbies[0]) == 2 && matchmaking->GetLobbyOwner(lobbies[0]) != self;
+    writeEvent(arguments, "joiner-joined");
+    const bool left = leave(0, "joiner-leave");
+    if (left) { writeEvent(arguments, "joiner-left"); writeEvent(arguments, "cleanup-ack"); }
+    return memberAndOwnerValid && left;
+}
+
 struct TaggedLobbyCreatedListener final : galaxy::api::ILobbyCreatedListener
 {
     const char* symbol = nullptr;
@@ -3246,6 +3416,14 @@ int run(const Arguments& arguments)
             if (scenario == Scenario::publicLobbyFullJoinFailureCharacterization || scenario == Scenario::publicLobbyFullJoinFailure)
             {
                 const bool lobbySucceeded = runPublicLobbyFullJoinFailure(arguments, user, records);
+                records.push_back(selfStateRecord(user));
+                common::writeTrace(arguments.trace, records);
+                galaxy::api::Shutdown();
+                return lobbySucceeded ? 0 : 1;
+            }
+            if (scenario == Scenario::publicLobbyStringFilteringCharacterization || scenario == Scenario::publicLobbyStringFiltering)
+            {
+                const bool lobbySucceeded = runPublicLobbyStringFiltering(arguments, user, records);
                 records.push_back(selfStateRecord(user));
                 common::writeTrace(arguments.trace, records);
                 galaxy::api::Shutdown();

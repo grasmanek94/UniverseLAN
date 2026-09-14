@@ -155,6 +155,22 @@ direct-ID fallback. It also requires no member/member-data/send access, creator
 sole ownership, terminal cleanup, and post-delete absence. It does not claim an
 unobserved join error reason, callback order, or list-exposed branch.
 
+`Simple/public-lobby-string-filtering` creates two temporary public capacity-two
+FCM lobbies sequentially. Each begins nonjoinable; user1 configures its public
+collision marker under one fixed filter key, verifies its distinct opaque
+marker-derived value locally, then explicitly completes `SetLobbyJoinable(true)`.
+User2 makes only the target equality-filtered `RequestLobbyList` request and
+uses `GetLobbyByIndex` only from its list callback. It privately classifies each
+listed candidate before selecting only one matching the equality predicate. The
+trace retains no values, IDs, indexes, or candidate counts, only symbolic target
+appearance, predicate match, unmatched-candidate presence/exclusion, selected
+join, two-member/non-self-owner, and cleanup relations. Eventual list retries
+remain diagnostics. Both lanes strictly require target appearance/match,
+correct selected join, membership, and cleanup. Stable official GOG additionally
+requires unmatched exclusion; UniverseLAN intentionally permits an unmatched
+candidate in the public result as diagnostic context only. This is not permission
+for malformed filters or wrong-target selection/join.
+
 ## How To Read A Result
 
 Each scenario runs two synchronized lanes: UniverseLAN server plus two

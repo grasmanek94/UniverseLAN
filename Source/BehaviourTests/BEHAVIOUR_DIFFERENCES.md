@@ -200,6 +200,16 @@ strict for every public fact they record.
 - Reproduction command/test name: `universelan-behaviour-simple-public-lobby-create-list-join-leave-x64-1.152.11`.
 - Follow-up: all four hosts acknowledged cleanup and the successful private root was removed. Add a candidate entry if a later live comparison mismatches; never copy the public collision-marker value or artifacts here.
 
+### `Simple/public-lobby-string-filtering` on `1.152.11/x64`
+
+- Date: 2026-09-14
+- Classification: matched live baseline with declared intentional UniverseLAN relaxed-filter policy
+- Public observation: official characterization created two temporary public capacity-two FCM lobbies sequentially while nonjoinable, configured distinct opaque marker-derived values under one fixed public key, then explicitly made both joinable. User2's equality-filtered list established symbolic target appearance, predicate match, selected target, and unmatched-candidate exclusion; user2 joined only that target, observed public two-member/non-self-owner state, then left; user1 acknowledged both cleanup leaves.
+- Official normalized result: stable official GOG requires the symbolic unmatched candidate to be absent after every candidate is privately classified. Retry remains diagnostic only, not a cross-lane equality fact.
+- UniverseLAN normalized result: this characterization also excluded the unmatched candidate, so the exact two-lobby variant did not exercise the permitted relaxed superset. The comparator nevertheless intentionally accepts that symbolic UniverseLAN-only superset while requiring target appearance, predicate match, selected join, membership, and lifecycle cleanup. It never accepts a malformed filter or an unmatched candidate being selected or joined.
+- Reproduction command/test name: `--characterize-public-lobby-string-filtering`; `universelan-behaviour-simple-public-lobby-string-filtering-x64-1.152.11`; portable `RunBehaviorCTest.cmake` with `BEHAVIOUR_TEST_LABEL="^public-lobby-string-filtering$"`.
+- Follow-up: no raw ID, lobby ID, fixed-key string, filter value, candidate count, index, timestamp, control, runtime output, or artifact path is retained. `GetLobbyByIndex` remains callback-local. The policy is narrow to this equality-filter scenario: official stable exclusion is strict, while only UniverseLAN's symbolic unmatched-candidate presence/exclusion is diagnostic.
+
 ### `Simple/public-lobby-data-propagation` on `1.152.11/x64`
 
 - Date: not recorded in the existing live-baseline register

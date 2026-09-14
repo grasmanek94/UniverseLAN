@@ -47,6 +47,7 @@ struct Arguments
     bool characterizeOfficialGogPublicLobbyOwnerOwnershipTransition = false;
     bool characterizeOfficialGogPublicLobbyNotJoinableBehavior = false;
     bool characterizeOfficialGogPublicLobbyFullJoinFailure = false;
+    bool characterizePublicLobbyStringFiltering = false;
     bool characterizePublicLobbyDataPropagation = false;
     bool characterizeMultipleLobbyMembershipAndMessageIsolation = false;
     bool characterizeChatRoomMessageDelivery = false;
@@ -70,6 +71,7 @@ struct Scenario
     bool acceptsFriendsPeerPersonaStatePair = false;
     bool acceptsReliableP2PDeliveryPair = false;
     bool acceptsBidirectionalReliableP2PDeliveryPairs = false;
+    bool acceptsRelaxedUniverseLANPublicLobbyStringFilterCandidateSet = false;
     bool characterization = false;
     std::string requiredTerminalOutcome;
 };
@@ -95,6 +97,7 @@ struct ScenarioContract
     bool observesReliableP2PAfterLobbyLeave = false;
     bool observesBidirectionalUnreliableP2PListenerPeek = false;
     bool observesBidirectionalLobbyMemberDataPropagation = false;
+    bool observesPublicLobbyStringFiltering = false;
 };
 
 constexpr std::array scenarioContracts{
@@ -109,6 +112,10 @@ constexpr std::array scenarioContracts{
     ScenarioContract{"Simple/public-lobby-create-list-join-leave", "public-lobby-create-list-join-leave",
         {"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "metadata", "list", "join",
             "creator-two-member-snapshot", "joiner-two-member-snapshot", "creator-sole-owner-snapshot", "creator-leave"}, 12, false, false, true, false, false, false},
+    ScenarioContract{"Simple/public-lobby-string-filtering characterization", "public-lobby-string-filtering-characterization",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "create-target", "create-unmatched", "configuration", "creator-cleanup-unmatched", "creator-cleanup-target", "list-diagnostic", "filtered-selection", "join", "joiner-two-member-snapshot", "joiner-leave"}, 13, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, true},
+    ScenarioContract{"Simple/public-lobby-string-filtering", "public-lobby-string-filtering",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "create-target", "create-unmatched", "configuration", "creator-cleanup-unmatched", "creator-cleanup-target", "list-diagnostic", "filtered-selection", "join", "joiner-two-member-snapshot", "joiner-leave"}, 13, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, true},
     ScenarioContract{"Simple/public-lobby-not-joinable-behavior characterization", "public-lobby-not-joinable-behavior-characterization",
         {"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "nonjoinable-configuration", "creator-sole-owner-snapshot", "creator-leave",
             "list", "join", "joiner-access", "post-delete-list", "self-state"}, 13, false, false, true, false, false, false, false, false, true},
@@ -272,6 +279,12 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
             arguments.characterizePublicLobbyDataPropagation = true;
             continue;
         }
+        if (option == "--characterize-public-lobby-string-filtering")
+        {
+            if (arguments.characterizePublicLobbyStringFiltering) return false;
+            arguments.characterizePublicLobbyStringFiltering = true;
+            continue;
+        }
         if (option == "--characterize-multiple-lobby-membership-and-message-isolation")
         {
             if (arguments.characterizeMultipleLobbyMembershipAndMessageIsolation) return false;
@@ -348,7 +361,7 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
         else if (option == "--gog-runtime-dir") arguments.gogRuntimeDirectory = value;
         else return false;
     }
-    return (static_cast<int>(arguments.characterizeGogServicesState) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyOwnerCloseLifecycle) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyOwnerOwnershipTransition) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyNotJoinableBehavior) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyFullJoinFailure) + static_cast<int>(arguments.characterizePublicLobbyDataPropagation) + static_cast<int>(arguments.characterizeMultipleLobbyMembershipAndMessageIsolation)
+    return (static_cast<int>(arguments.characterizeGogServicesState) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyOwnerCloseLifecycle) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyOwnerOwnershipTransition) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyNotJoinableBehavior) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyFullJoinFailure) + static_cast<int>(arguments.characterizePublicLobbyDataPropagation) + static_cast<int>(arguments.characterizePublicLobbyStringFiltering) + static_cast<int>(arguments.characterizeMultipleLobbyMembershipAndMessageIsolation)
                  + static_cast<int>(arguments.characterizeChatRoomMessageDelivery) + static_cast<int>(arguments.characterizeOfficialGogChatRoomMessageDelivery)
                  + static_cast<int>(arguments.characterizeOfficialGogBidirectionalChatRoomMessageDelivery)
                 + static_cast<int>(arguments.characterizeOfficialGogFriendsPeerInformationRetrieval)
@@ -403,6 +416,11 @@ bool observesPublicLobbyFullJoinFailure(const ScenarioContract& contract)
 bool observesPublicLobbyNotJoinableBehavior(const ScenarioContract& contract)
 {
     return contract.observesPublicLobbyNotJoinableBehavior;
+}
+
+bool observesPublicLobbyStringFiltering(const ScenarioContract& contract)
+{
+    return contract.observesPublicLobbyStringFiltering;
 }
 
 bool isStrictPublicLobbyNotJoinableBehavior(const ScenarioContract& contract)
@@ -467,7 +485,8 @@ bool requiresSensitiveArtifactRedaction(const ScenarioContract& contract)
           || observesPublicLobbyNotJoinableBehavior(contract) || observesReliableP2PListenerPeek(contract)
           || observesReliableP2PAfterLobbyLeave(contract)
           || observesBidirectionalP2PListenerPeek(contract)
-          || observesBidirectionalLobbyMessageDelivery(contract) || observesBidirectionalLobbyMemberDataPropagation(contract)
+           || observesBidirectionalLobbyMessageDelivery(contract) || observesBidirectionalLobbyMemberDataPropagation(contract)
+           || observesPublicLobbyStringFiltering(contract)
           || observesBidirectionalChatRoomMessageDelivery(contract);
 }
 
@@ -503,7 +522,7 @@ Scenario parseScenario(const fs::path& manifest)
     const json& profiles = required(root, "profiles");
     if (!profiles.is_array() || profiles.size() != 2 || profiles[0] != "user1" || profiles[1] != "user2") invalidManifest();
     const json& comparison = required(root, "comparison");
-    objectHasOnly(comparison, {"requiredRecords", "requiredTerminalOutcome", "unexpectedRecords", "opaqueIds", "acceptedStatePair", "acceptedPersonaStatePair", "acceptedP2PDeliveryPair", "acceptedBidirectionalP2PDeliveryPairs"});
+    objectHasOnly(comparison, {"requiredRecords", "requiredTerminalOutcome", "unexpectedRecords", "opaqueIds", "acceptedStatePair", "acceptedPersonaStatePair", "acceptedP2PDeliveryPair", "acceptedBidirectionalP2PDeliveryPairs", "acceptedPublicLobbyStringFilterCandidateSet"});
     const json& records = required(comparison, "requiredRecords");
     const bool validRecordDeclaration = observesBidirectionalP2PListenerPeek(*contract)
         ? records.is_object() && records.size() == 2
@@ -568,6 +587,12 @@ Scenario parseScenario(const fs::path& manifest)
                 "configuration", "metadata", "creator-leave", "self-state"})
             && records.value("user2", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "list", "join",
                 "joiner-two-member-snapshot", "joiner-lifecycle-listeners-armed", "post-close-list", "owner-close-lifecycle", "self-state"})
+        : observesPublicLobbyStringFiltering(*contract)
+        ? records.is_object() && records.size() == 2
+            && records.value("user1", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "create-target", "create-unmatched",
+                "configuration", "creator-cleanup-unmatched", "creator-cleanup-target", "self-state"})
+            && records.value("user2", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "list-diagnostic", "filtered-selection",
+                "join", "joiner-two-member-snapshot", "joiner-leave", "self-state"})
         : contract->observesMultipleLobbyMembership
         ? records.is_object() && records.size() == 2
             && records.value("user1", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "create-pair", "explicit-configuration",
@@ -644,6 +669,14 @@ Scenario parseScenario(const fs::path& manifest)
         }
     }
     else if (comparison.contains("acceptedBidirectionalP2PDeliveryPairs")) invalidManifest();
+    if (observesPublicLobbyStringFiltering(*contract))
+    {
+        const json& candidateSet = required(comparison, "acceptedPublicLobbyStringFilterCandidateSet");
+        if (!fieldsExactly(candidateSet, {"gog", "universelan"}) || candidateSet["gog"] != "stable-target-only"
+            || candidateSet["universelan"] != "target-required-unmatched-candidate-diagnostic") invalidManifest();
+        scenario.acceptsRelaxedUniverseLANPublicLobbyStringFilterCandidateSet = true;
+    }
+    else if (comparison.contains("acceptedPublicLobbyStringFilterCandidateSet")) invalidManifest();
     scenario.requiredTerminalOutcome = comparison.at("requiredTerminalOutcome").get<std::string>();
     return scenario;
 }
@@ -664,6 +697,16 @@ Scenario publicLobbyDataPropagationCharacterizationScenario()
     scenario.contract = findScenarioContract("Simple/public-lobby-data-propagation characterization");
     scenario.laneMode = "concurrent";
     scenario.timeoutSeconds = 30;
+    scenario.characterization = true;
+    return scenario;
+}
+
+Scenario publicLobbyStringFilteringCharacterizationScenario()
+{
+    Scenario scenario;
+    scenario.contract = findScenarioContract("Simple/public-lobby-string-filtering characterization");
+    scenario.laneMode = "concurrent";
+    scenario.timeoutSeconds = 45;
     scenario.characterization = true;
     return scenario;
 }
@@ -2501,6 +2544,70 @@ bool normalizeMultipleLobbyMembershipTrace(const fs::path& trace, const std::str
     catch (...) { return false; }
 }
 
+bool normalizePublicLobbyStringFilteringTrace(const fs::path& trace, const std::string& profile, const bool requireOfficialStableExclusion, json& normalized)
+{
+    try
+    {
+        std::vector<json> records;
+        for (const std::string& line : common::readTrace(trace)) records.push_back(json::parse(line));
+        const std::vector<std::string> expected = profile == "user1"
+            ? std::vector<std::string>{"initialize", "sign-in-callback", "sign-in-terminal", "create-target", "create-unmatched", "configuration", "creator-cleanup-unmatched", "creator-cleanup-target", "self-state"}
+            : std::vector<std::string>{"initialize", "sign-in-callback", "sign-in-terminal", "list-diagnostic", "filtered-selection", "join", "joiner-two-member-snapshot", "joiner-leave", "self-state"};
+        if (records.size() != expected.size()) return false;
+        for (std::size_t index = 0; index < expected.size(); ++index)
+            if (!records[index].is_object() || records[index].value("record", "") != expected[index]) return false;
+        const auto validSelf = [](const json& record) {
+            return fieldsExactly(record, {"record", "signedIn", "loggedOn", "idValid", "idType", "selfIdRepeatEqual", "personaAvailable"})
+                && record["signedIn"] == true && record["loggedOn"] == true && record["idValid"] == true && record["idType"] == "user"
+                && record["selfIdRepeatEqual"] == true && record["personaAvailable"].is_boolean();
+        };
+        const auto validLeave = [](const json& record) {
+            return fieldsExactly(record, {"record", "result", "reason", "sameLobby"}) && record["result"] == "callback"
+                && record["reason"] == "user-left" && record["sameLobby"] == true;
+        };
+        const auto validSnapshot = [](const json& record) {
+            return fieldsExactly(record, {"record", "lobbyValid", "public", "joinable", "capacity", "memberCount", "selfPresent", "otherPresent", "membersValid", "membersDistinct", "ownerIsSelf", "ownerValid"})
+                && record["lobbyValid"] == true && record["public"] == true && record["joinable"] == true && record["capacity"] == 2
+                && record["memberCount"] == 2 && record["selfPresent"] == true && record["otherPresent"] == true
+                && record["membersValid"] == true && record["membersDistinct"] == true && record["ownerIsSelf"] == false && record["ownerValid"] == true;
+        };
+        if (!fieldsExactly(records[0], {"record", "result"}) || records[0]["result"] != "returned"
+            || !fieldsExactly(records[1], {"record", "result"}) || records[1]["result"] != "success"
+            || !fieldsExactly(records[2], {"record", "result"}) || records[2]["result"] != "success" || !validSelf(records.back())) return false;
+        if (profile == "user1")
+        {
+            const auto validCreate = [](const json& record) {
+                return fieldsExactly(record, {"record", "result", "lobbyValid", "lobbyType"}) && record["result"] == "success"
+                    && record["lobbyValid"] == true && record["lobbyType"] == "lobby";
+            };
+            const bool validCreatorRecords = validCreate(records[3]) && validCreate(records[4])
+                && fieldsExactly(records[5], {"record", "sequentialCreation", "distinctOpaqueValues", "targetConfiguredBeforeJoinable", "unmatchedConfiguredBeforeJoinable", "allPublicCapacityTwoJoinable", "markerValuesVisibleLocally"})
+                && records[5]["sequentialCreation"] == true && records[5]["distinctOpaqueValues"] == true
+                && records[5]["targetConfiguredBeforeJoinable"] == true && records[5]["unmatchedConfiguredBeforeJoinable"] == true
+                && records[5]["allPublicCapacityTwoJoinable"] == true && records[5]["markerValuesVisibleLocally"] == true
+                && validLeave(records[6]) && validLeave(records[7]);
+            if (!validCreatorRecords) return false;
+            normalized = records;
+            return true;
+        }
+        if (!fieldsExactly(records[3], {"record", "result", "retryUsed", "allCandidatesClassified", "targetCandidateAppeared", "unmatchedCandidateAppeared", "stableTargetSelection"}) || records[3]["result"] != "success"
+            || !records[3]["retryUsed"].is_boolean() || records[3]["allCandidatesClassified"] != true
+            || records[3]["targetCandidateAppeared"] != true || !records[3]["unmatchedCandidateAppeared"].is_boolean() || records[3]["stableTargetSelection"] != true
+            || !fieldsExactly(records[4], {"record", "filteredRequestOnly", "getLobbyByIndexCallbackLocalOnly", "targetCandidateAppeared", "selectedValid", "selectedMatchesRequestedPredicate", "unmatchedCandidateAppeared", "unmatchedCandidateSelected", "unmatchedCandidateExcluded", "selectionStable"})
+            || records[4]["filteredRequestOnly"] != true || records[4]["getLobbyByIndexCallbackLocalOnly"] != true || records[4]["selectedValid"] != true
+            || records[4]["targetCandidateAppeared"] != true || records[4]["selectedMatchesRequestedPredicate"] != true
+            || records[4]["unmatchedCandidateAppeared"] != records[3]["unmatchedCandidateAppeared"]
+            || records[4]["unmatchedCandidateSelected"] != false || records[4]["unmatchedCandidateExcluded"] != !records[4]["unmatchedCandidateAppeared"].get<bool>()
+            || records[4]["selectionStable"] != true
+            || (requireOfficialStableExclusion && (records[3]["unmatchedCandidateAppeared"] != false || records[4]["unmatchedCandidateExcluded"] != true))
+            || !fieldsExactly(records[5], {"record", "result", "sameSelectedLobby"}) || records[5]["result"] != "success" || records[5]["sameSelectedLobby"] != true
+            || !validSnapshot(records[6]) || !validLeave(records[7])) return false;
+        normalized = records;
+        return true;
+    }
+    catch (...) { return false; }
+}
+
 bool normalizeTrace(const fs::path& trace, const ScenarioContract& contract, json& normalized)
 {
     try
@@ -2549,6 +2656,8 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
     report["scenario"] = contract.name;
     report["opaqueIdPolicy"] = observesPublicLobbyOwnerOwnershipTransition(contract)
         ? "raw Galaxy IDs, public collision-marker values, and promoted data are never recorded; only symbolic ownership, member, authorization, and list-absence relations are compared"
+        : observesPublicLobbyStringFiltering(contract)
+        ? "raw Galaxy IDs, lobby IDs, public collision-marker values, filter values, candidate counts, indexes, and timestamps are never recorded; both lanes require symbolic target appearance, predicate match, selected join, membership, ownership, and cleanup; official stable exclusion is strict while UniverseLAN unmatched-candidate presence/exclusion is diagnostic only"
         : isStrictPublicLobbyNotJoinableBehavior(contract)
         ? "raw Galaxy IDs, public collision-marker values, configuration values, and timestamps are never recorded; only public nonjoinable configuration, filtered-list absence, no direct join/member/send access, creator sole ownership, and delete-probe relations are compared"
         : observesPublicLobbyFullJoinFailure(contract)
@@ -2581,7 +2690,9 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
     {
         json universelan;
         json gog;
-        const bool universelanValid = isStrictPublicLobbyNotJoinableBehavior(contract)
+        const bool universelanValid = observesPublicLobbyStringFiltering(contract)
+            ? normalizePublicLobbyStringFilteringTrace(root / "universelan" / profile / "trace.jsonl", profile, false, universelan)
+            : isStrictPublicLobbyNotJoinableBehavior(contract)
             ? normalizePublicLobbyNotJoinableBehaviorTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
             : observesPublicLobbyFullJoinFailure(contract)
             ? normalizePublicLobbyFullJoinFailureTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
@@ -2613,7 +2724,9 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
             : contract.observesPublicLobby
             ? normalizePublicLobbyTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
             : normalizeTrace(root / "universelan" / profile / "trace.jsonl", contract, universelan);
-        const bool gogValid = isStrictPublicLobbyNotJoinableBehavior(contract)
+        const bool gogValid = observesPublicLobbyStringFiltering(contract)
+            ? normalizePublicLobbyStringFilteringTrace(root / "gog" / profile / "trace.jsonl", profile, true, gog)
+            : isStrictPublicLobbyNotJoinableBehavior(contract)
             ? normalizePublicLobbyNotJoinableBehaviorTrace(root / "gog" / profile / "trace.jsonl", profile, gog)
             : observesPublicLobbyFullJoinFailure(contract)
             ? normalizePublicLobbyFullJoinFailureTrace(root / "gog" / profile / "trace.jsonl", profile, gog)
@@ -2673,6 +2786,23 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
                 report["lanes"][profile]["retryConvergenceComparison"] = fasterUniverselanConvergence
                     ? "accepted-difference" : "diagnostic-context-excluded";
             }
+        }
+        bool acceptedRelaxedUniverseLANPublicLobbyStringFilterCandidateSet = false;
+        if (scenario.acceptsRelaxedUniverseLANPublicLobbyStringFilterCandidateSet && profile == std::string_view("user2")
+            && universelanValid && gogValid)
+        {
+            // Only UniverseLAN may retain an otherwise unmatched candidate from this equality-filtered request.
+            // Target appearance, predicate match, selected join, membership, and cleanup remain strict in both lanes.
+            comparableUniverselan[3].erase("unmatchedCandidateAppeared");
+            comparableUniverselan[4].erase("unmatchedCandidateAppeared");
+            comparableUniverselan[4].erase("unmatchedCandidateExcluded");
+            comparableGog[3].erase("unmatchedCandidateAppeared");
+            comparableGog[4].erase("unmatchedCandidateAppeared");
+            comparableGog[4].erase("unmatchedCandidateExcluded");
+            acceptedRelaxedUniverseLANPublicLobbyStringFilterCandidateSet = universelan[3]["unmatchedCandidateAppeared"] == true
+                && gog[3]["unmatchedCandidateAppeared"] == false && comparableUniverselan == comparableGog;
+            report["lanes"][profile]["publicLobbyStringFilterCandidateSetComparison"] =
+                "official-stable-target-only;universelan-target-required-unmatched-candidate-diagnostic";
         }
         if (observesPublicLobbyOwnerCloseLifecycle(contract) && profile == std::string_view("user2") && universelanValid && gogValid)
         {
@@ -2866,12 +2996,14 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
             report["lanes"][profile]["p2pDirection"] = profile == std::string_view("user1") ? "user2-to-user1" : "user1-to-user2";
         }
         const bool equal = universelanValid && gogValid && (comparableUniverselan == comparableGog || acceptedGogServicesStateDifference
-                || acceptedFriendsPeerPersonaStateDifference || acceptedReliableP2PDeliveryDifference || acceptedBidirectionalReliableP2PDeliveryDifference)
+                || acceptedFriendsPeerPersonaStateDifference || acceptedReliableP2PDeliveryDifference || acceptedBidirectionalReliableP2PDeliveryDifference
+                || acceptedRelaxedUniverseLANPublicLobbyStringFilterCandidateSet)
             && sessionIdRepeatabilityEqual;
         report["lanes"][profile]["equal"] = equal;
         report["lanes"][profile]["comparison"] = exactEquality ? "exact-equality"
             : ((acceptedGogServicesStateDifference || acceptedFriendsPeerPersonaStateDifference || acceptedReliableP2PDeliveryDifference || acceptedBidirectionalReliableP2PDeliveryDifference) ? "accepted-difference"
-                : (equal ? "diagnostic-context-excluded" : "mismatch"));
+                : (acceptedRelaxedUniverseLANPublicLobbyStringFilterCandidateSet ? "accepted-intentional-policy"
+                : (equal ? "diagnostic-context-excluded" : "mismatch")));
         report["lanes"][profile]["terminalSuccess"] = terminalSuccess;
         if (contract.observesSessionIdRepeatability)
             report["lanes"][profile]["sessionIdRepeatabilityEqual"] = sessionIdRepeatabilityEqual;
@@ -2947,6 +3079,42 @@ void characterizePublicLobbyDataPropagationTraces(const fs::path& root, json& re
                 }
             }
             catch (...) { laneReport["normalized"] = "unavailable"; }
+            report["lanes"][profile][lane] = laneReport;
+        }
+    }
+}
+
+void characterizePublicLobbyStringFilteringTraces(const fs::path& root, json& report)
+{
+    report = json::object();
+    report["scenario"] = "Simple/public-lobby-string-filtering";
+    report["classification"] = "characterization";
+    report["comparison"] = "none";
+    report["status"] = "characterized";
+    report["opaqueIdPolicy"] = "raw Galaxy IDs, lobby IDs, public collision-marker values, filter values, candidate counts, indexes, timestamps, controls, and runtime output are never retained";
+    report["headerFacts"] = "The creator creates two temporary public FCM lobbies sequentially while nonjoinable, configures distinct opaque marker-derived values under one fixed key, then explicitly completes joinability. The joiner issues one equality-filtered RequestLobbyList, calls GetLobbyByIndex only in its list callback, classifies each listed candidate privately, and joins only a matching selected candidate.";
+    report["candidateSetPolicy"] = "official-stable-target-only;universelan-target-required-unmatched-candidate-diagnostic;wrong-target selection, wrong-target join, malformed filter, and cleanup failure remain failures";
+    report["ordering"] = "List retries are eventual-visibility diagnostics only. Both lanes require target appearance, predicate match, selected join, two-member membership, owner, and cleanup after a stable filtered result. Official unmatched-candidate exclusion is strict; UniverseLAN unmatched-candidate presence/exclusion is diagnostic.";
+    for (const char* profile : {"user1", "user2"})
+    {
+        for (const char* lane : {"universelan", "gog"})
+        {
+            json laneReport = json::object();
+            try
+            {
+                json records = json::array();
+                for (const std::string& line : common::readTrace(root / lane / profile / "trace.jsonl")) records.push_back(json::parse(line));
+                laneReport["orderedIMatchmakingRecords"] = records;
+                if (profile == std::string_view("user2") && records.size() > 4)
+                {
+                    laneReport["stableFilteredSelection"] = records[3].value("stableTargetSelection", false);
+                    laneReport["targetCandidateAppeared"] = records[3].value("targetCandidateAppeared", false);
+                    laneReport["unmatchedCandidateAppeared"] = records[3].value("unmatchedCandidateAppeared", false);
+                    laneReport["selectedMatchesRequestedPredicate"] = records[4].value("selectedMatchesRequestedPredicate", false);
+                    laneReport["unmatchedCandidateExcluded"] = records[4].value("unmatchedCandidateExcluded", false);
+                }
+            }
+            catch (...) { laneReport["orderedIMatchmakingRecords"] = "unavailable"; }
             report["lanes"][profile][lane] = laneReport;
         }
     }
@@ -3689,6 +3857,8 @@ int run(const Arguments& arguments, const Scenario& scenario)
                 characterizePublicLobbyDataPropagationTraces(root, report);
                 report["callbackGateDiscoveryOrder"] = callbackGateDiscoveryOrder;
             }
+            else if (scenario.characterization && observesPublicLobbyStringFiltering(*scenario.contract))
+                characterizePublicLobbyStringFilteringTraces(root, report);
             else if (scenario.characterization && observesReliableP2PAfterLobbyLeave(*scenario.contract))
                 characterizeReliableP2PAfterLobbyLeaveTraces(root, report);
             else if (scenario.characterization && observesReliableP2PListenerPeek(*scenario.contract))
@@ -3737,6 +3907,8 @@ int run(const Arguments& arguments, const Scenario& scenario)
                 characterizePublicLobbyDataPropagationTraces(root, report);
                 report["callbackGateDiscoveryOrder"] = callbackGateDiscoveryOrder;
             }
+            else if (observesPublicLobbyStringFiltering(*scenario.contract))
+                characterizePublicLobbyStringFilteringTraces(root, report);
             else if (observesReliableP2PAfterLobbyLeave(*scenario.contract))
                 characterizeReliableP2PAfterLobbyLeaveTraces(root, report);
             else if (observesReliableP2PListenerPeek(*scenario.contract))
@@ -3924,6 +4096,7 @@ int main(int argc, char* argv[])
         else if (arguments.characterizeOfficialGogPublicLobbyNotJoinableBehavior) scenario = publicLobbyNotJoinableBehaviorCharacterizationScenario();
         else if (arguments.characterizeOfficialGogPublicLobbyFullJoinFailure) scenario = publicLobbyFullJoinFailureCharacterizationScenario();
         else if (arguments.characterizePublicLobbyDataPropagation) scenario = publicLobbyDataPropagationCharacterizationScenario();
+        else if (arguments.characterizePublicLobbyStringFiltering) scenario = publicLobbyStringFilteringCharacterizationScenario();
         else if (arguments.characterizeMultipleLobbyMembershipAndMessageIsolation) scenario = multipleLobbyMembershipAndMessageIsolationCharacterizationScenario();
         else if (arguments.characterizeChatRoomMessageDelivery || arguments.characterizeOfficialGogChatRoomMessageDelivery) scenario = chatRoomMessageDeliveryCharacterizationScenario();
         else if (arguments.characterizeOfficialGogBidirectionalChatRoomMessageDelivery) scenario = bidirectionalChatRoomMessageDeliveryCharacterizationScenario();
