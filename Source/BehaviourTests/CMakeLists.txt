@@ -64,6 +64,16 @@ set(UNIVERSELAN_BEHAVIOUR_TEST_GOG_DIR "${CMAKE_SOURCE_DIR}/Source/DLLs/${UNIVER
 set(UNIVERSELAN_BEHAVIOUR_TEST_GOG_LIB "${UNIVERSELAN_BEHAVIOUR_TEST_GOG_DIR}/Galaxy64.lib")
 set(UNIVERSELAN_BEHAVIOUR_TEST_GOG_DLL "${UNIVERSELAN_BEHAVIOUR_TEST_GOG_DIR}/Galaxy64.dll")
 set(UNIVERSELAN_BEHAVIOUR_TEST_GOG_PEER_DLL "${UNIVERSELAN_BEHAVIOUR_TEST_GOG_DIR}/GalaxyPeer64.dll")
+set(UNIVERSELAN_BEHAVIOUR_TEST_GOG_PEER_OVERLAY "" CACHE PATH "Optional local GalaxyPeer64.dll file or directory staged over the official peer runtime")
+if(NOT UNIVERSELAN_BEHAVIOUR_TEST_GOG_PEER_OVERLAY STREQUAL "")
+  set(UNIVERSELAN_BEHAVIOUR_TEST_GOG_PEER_OVERLAY_FILE "${UNIVERSELAN_BEHAVIOUR_TEST_GOG_PEER_OVERLAY}")
+  if(IS_DIRECTORY "${UNIVERSELAN_BEHAVIOUR_TEST_GOG_PEER_OVERLAY_FILE}")
+    set(UNIVERSELAN_BEHAVIOUR_TEST_GOG_PEER_OVERLAY_FILE "${UNIVERSELAN_BEHAVIOUR_TEST_GOG_PEER_OVERLAY_FILE}/GalaxyPeer64.dll")
+  endif()
+  if(NOT EXISTS "${UNIVERSELAN_BEHAVIOUR_TEST_GOG_PEER_OVERLAY_FILE}")
+    message(FATAL_ERROR "BehaviourTests GOG peer overlay must be a GalaxyPeer64.dll file or a directory containing it")
+  endif()
+endif()
 
 if(NOT TARGET ${UNIVERSELAN_BEHAVIOUR_TEST_CLIENT} OR NOT TARGET ${UNIVERSELAN_BEHAVIOUR_TEST_SERVER})
   message(STATUS "BehaviourTests unavailable: UniverseLAN ${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY} client/server targets were not selected")
@@ -116,14 +126,19 @@ if(UNIVERSELAN_BEHAVIOUR_TEST_GOG_ARTIFACTS_AVAILABLE)
 endif()
 
 function(add_universelan_gog_behaviour_test scenario scenario_directory manifest scenario_label)
+  set(peer_overlay_argument)
+  if(NOT UNIVERSELAN_BEHAVIOUR_TEST_GOG_PEER_OVERLAY STREQUAL "")
+    list(APPEND peer_overlay_argument --gog-peer-overlay "${UNIVERSELAN_BEHAVIOUR_TEST_GOG_PEER_OVERLAY}")
+  endif()
   add_test(NAME "universelan-behaviour-${scenario}-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY}"
     COMMAND $<TARGET_FILE:universelan-behaviour-runner-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY}>
       --manifest "${CMAKE_CURRENT_SOURCE_DIR}/Scenarios/${scenario_directory}/${manifest}"
       --universelan-host $<TARGET_FILE:universelan-behaviour-host-universelan-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY}>
       --gog-host $<TARGET_FILE:universelan-behaviour-host-gog-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY}>
-      --client-dll $<TARGET_FILE:${UNIVERSELAN_BEHAVIOUR_TEST_CLIENT}>
-      --server $<TARGET_FILE:${UNIVERSELAN_BEHAVIOUR_TEST_SERVER}>
-      --gog-runtime-dir "${UNIVERSELAN_BEHAVIOUR_TEST_GOG_DIR}")
+       --client-dll $<TARGET_FILE:${UNIVERSELAN_BEHAVIOUR_TEST_CLIENT}>
+       --server $<TARGET_FILE:${UNIVERSELAN_BEHAVIOUR_TEST_SERVER}>
+       --gog-runtime-dir "${UNIVERSELAN_BEHAVIOUR_TEST_GOG_DIR}"
+       ${peer_overlay_argument})
   set_tests_properties("universelan-behaviour-${scenario}-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY}" PROPERTIES
     TIMEOUT 60
     RUN_SERIAL TRUE
@@ -148,6 +163,7 @@ if(ENABLE_UNIVERSELAN_GOG_BEHAVIOUR_TESTS AND UNIVERSELAN_BEHAVIOUR_TEST_CREDENT
   add_universelan_gog_behaviour_test("simple-reliable-p2p-listener-peek" "Simple" "reliable-p2p-listener-peek.json" "reliable-p2p-listener-peek")
   add_universelan_gog_behaviour_test("simple-reliable-p2p-after-lobby-leave" "Simple" "reliable-p2p-after-lobby-leave.json" "reliable-p2p-after-lobby-leave")
   add_universelan_gog_behaviour_test("simple-bidirectional-reliable-p2p-listener-peek" "Simple" "bidirectional-reliable-p2p-listener-peek.json" "bidirectional-reliable-p2p-listener-peek")
+  add_universelan_gog_behaviour_test("simple-bidirectional-reliable-p2p-poll-read" "Simple" "bidirectional-reliable-p2p-poll-read.json" "bidirectional-reliable-p2p-poll-read")
   add_universelan_gog_behaviour_test("simple-bidirectional-unreliable-p2p-listener-peek" "Simple" "bidirectional-unreliable-p2p-listener-peek.json" "bidirectional-unreliable-p2p-listener-peek")
   add_universelan_gog_behaviour_test("simple-bidirectional-lobby-message-delivery" "Simple" "bidirectional-lobby-message-delivery.json" "bidirectional-lobby-message-delivery")
   add_universelan_gog_behaviour_test("simple-bidirectional-lobby-member-data-propagation" "Simple" "bidirectional-lobby-member-data-propagation.json" "bidirectional-lobby-member-data-propagation")

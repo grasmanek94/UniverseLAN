@@ -33,6 +33,14 @@ permitting friends. `IFriends` peer-information retrieval has no friendship or
 direct-message privacy precondition. These are external test-environment
 preconditions only; they are not UniverseLAN root-cause conclusions.
 
+For the exact local-only channel-8 `msvc-18` peer manifest, download, extracted
+DLL hash verification, and `UNIVERSELAN_BEHAVIOUR_TEST_GOG_PEER_OVERLAY` setup,
+follow [README.md#compatible-channel-8-peer-overlay](README.md#compatible-channel-8-peer-overlay).
+The runner also accepts `--gog-peer-overlay <directory-or-GalaxyPeer64.dll>`.
+It copies that peer over the staged default peer only; without the option,
+staging is unchanged. Listener P2P contracts require exact delivery with this
+configuration and no longer accept a no-delivery pair as product behavior.
+
 After verifying those prerequisites, configure a separate opt-in build (or
 reconfigure the framework build) explicitly:
 
@@ -59,6 +67,7 @@ cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^friends-peer-information-retrieval$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^reliable-p2p-after-lobby-leave$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^bidirectional-reliable-p2p-listener-peek$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
+cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^bidirectional-reliable-p2p-poll-read$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^bidirectional-unreliable-p2p-listener-peek$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^bidirectional-lobby-message-delivery$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^bidirectional-lobby-member-data-propagation$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
@@ -114,9 +123,11 @@ GOG only:
 ```
 
 This diagnostic creates no `INetworkingListener`. After the synchronized reliable
-send and `ProcessData` pumping, each host uses `IsP2PPacketAvailable` followed by
-one exact-size `ReadP2PPacket` only when available. It is unregistered and does
-not establish a strict or UniverseLAN comparison contract.
+send, every polling `ProcessData` iteration calls `IsP2PPacketAvailable`; each
+host makes one exact-size `ReadP2PPacket` only when available, then immediately
+checks that no expected-channel packet remains. Three clean official runs and the
+focused strict comparison on 2026-09-14 matched delivery and queue consumption.
+The opt-in strict contract is `bidirectional-reliable-p2p-poll-read`.
 
 Characterize bidirectional direct chat twice before changing its strict facts:
 
@@ -159,12 +170,11 @@ private buffers, and destroys the listener before shutdown.
 Do not add `IsP2PPacketAvailable`, `ReadP2PPacket`, `PopP2PPacket`, or a
 post-callback removal assertion. The header describes scheduled send and
 non-consuming peek semantics, not a delivery guarantee. Three clean official
-trials on 2026-09-14 produced the exact scheduled-no-delivery observation: one
-non-target callback, no expected-channel callback, and no peeks, with both
-terminal leaves acknowledged. The passing focused comparison accepts only that
-exact GOG relation versus the observed exact UniverseLAN expected-channel,
-two-peek relation. Every setup, send, cleanup, and other callback field remains
-strict.
+trials on 2026-09-14 produced one non-target callback, no expected-channel
+callback, and no peeks, with both terminal leaves acknowledged. That historical
+no-delivery trace is not accepted by the current focused comparison: it requires
+the expected-channel callback and two peeks from both runtimes. Every setup,
+send, cleanup, and other callback field remains strict.
 
 Characterize post-leave reliable listener-mode P2P twice before changing its
 strict facts:
@@ -205,9 +215,9 @@ non-consuming `PeekP2PPacket` calls and never uses `IsP2PPacketAvailable`,
 `ReadP2PPacket`, or `PopP2PPacket`. Both listeners are destroyed before shutdown.
 Three clean official `1.152.11/x64` trials scheduled both directions and observed
 one non-target callback but no expected-channel callback or peeks in either
-direction. The strict test separately accepts only that exact no-delivery relation
-against the corresponding UniverseLAN delivery/two-peek relation; it does not
-infer symmetry. Peer/lobby/channel/payload relations, scheduling, listener
+direction. That historical no-delivery trace is not accepted by the current strict
+test, which requires expected-channel delivery and two peeks in each direction
+from both runtimes. Peer/lobby/channel/payload relations, scheduling, listener
 lifecycle, and fresh-deadline cleanup stay strict. Never print or retain raw IDs,
 lobby IDs, bytes, lengths, token, or marker values.
 
@@ -228,11 +238,11 @@ it never uses `IsP2PPacketAvailable`, `ReadP2PPacket`, or `PopP2PPacket`.
 `INetworking.h` describes this send type as UDP-like and says a true send result
 means scheduled, not delivered. Three official `1.152.11/x64` trials on
 2026-09-14 each scheduled both directions, then observed one non-target callback
-but no expected-channel callback or peek in either direction. The strict test
-accepts only that independently recorded pair against UniverseLAN's exact
-expected-channel delivery/two-peek relation. It does not infer symmetry or a
-delivery guarantee; every other relation remains strict. Never retain raw IDs,
-lobby IDs, bytes, lengths, token, or marker values.
+but no expected-channel callback or peek in either direction. That historical
+no-delivery trace is not accepted by the current strict test, which requires
+expected-channel delivery and two peeks in each direction from both runtimes.
+It does not infer symmetry or a delivery guarantee; every other relation remains
+strict. Never retain raw IDs, lobby IDs, bytes, lengths, token, or marker values.
 
 Characterize bidirectional lobby messaging twice before changing its strict facts:
 

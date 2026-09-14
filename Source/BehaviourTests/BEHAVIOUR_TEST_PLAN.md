@@ -96,8 +96,14 @@ Comparison rules:
   credential profiles. Direct one-to-one chat additionally requires the
   approved profiles to be friends with direct-message privacy permitting
   friends. Peer-information retrieval has no friendship or direct-message
-  privacy precondition; these are external test-environment preconditions, not
-  product root-cause claims.
+   privacy precondition; these are external test-environment preconditions, not
+   product root-cause claims.
+- Listener P2P comparisons stage the channel-8 `msvc-18` peer only from a
+  verified local overlay, over the default staged `GalaxyPeer64.dll`; the base
+  official `Galaxy64.dll` remains under `Source/DLLs/1.152.11/gog`. Exact
+  expected-channel delivery and two callback-local peeks are required. The
+  historical no-delivery result is an unresolved runtime configuration issue,
+  not an accepted product difference.
 - Every lane gets private working/configuration directories. The official lane
   must also isolate mutable SDK data as far as official-runtime requirements
   permit.
@@ -114,7 +120,7 @@ combine already-characterized Simple contracts.
 | --- | --- | --- |
 | Initialization / `IUser` | Init outcome, sign-in terminal behavior, `SignedIn`, `IsLoggedOn`, self ID validity/type, persona availability, and consecutive `GetSessionID()` equality. | Reinitialization, sign-out, connection loss/recovery. |
 | `IMatchmaking` | Create/list/join public lobby, nonjoinable public-list behavior, full-lobby join failure, operation result, owner/member relationships, basic lobby data, owner-close lifecycle, ownership-transition characterization, and bidirectional lobby-message delivery. | Multiple concurrent memberships, lobby-message isolation, owner-close comparison, and ownership-transition comparison are implemented; other filters and failure paths remain. |
-| `INetworking` | Reliable P2P listener-mode scheduling and callback-local non-consuming peek relations. Three clean official 2026-09-14 trials established the exact accepted environmental pair for current members: scheduled send with a non-target callback and no expected-channel delivery/peek versus UniverseLAN expected-channel delivery and two peeks. A separate two-trial post-leave probe observed scheduled sends but zero callbacks/peeks for the alive former member in both official and UniverseLAN lanes. | Three-peer routing, channel behavior, unreliable packets, disconnect/NAT/server-host behavior. |
+| `INetworking` | Reliable P2P listener-mode scheduling and callback-local non-consuming peek relations. The strict listener contracts require expected-channel delivery and two peeks in both lanes, but the verified side-by-side channel-8 overlay still produced the historical official non-target callback in the 2026-09-14 18/21 suite. GOG documents that modern SDKs load the peer from installed client redistributables, so the official prerequisite remains unresolved. A separate listener-free polling contract completed three official trials and a matched strict comparison: availability after `ProcessData`, one read only when available, symbolic sender/payload relations, and empty expected-channel availability after read. A separate two-trial post-leave probe observed scheduled sends but zero callbacks/peeks for the alive former member in both official and UniverseLAN lanes. | Three-peer routing, channel behavior, unreliable packets, disconnect/NAT/server-host behavior. |
 | `IChat` | One-to-one room request, room identity reuse, message send terminal result, remote message content/sender relationship. | History/pagination, membership lifecycle, read state, denial/failure behavior. |
 | `IFriends` | Persona information retrieval, persona state, rich-presence set/get callback behavior, game invitations where official accounts permit it. | Friend relationships, invitation/acceptance flows, persistence, richer presence state. |
 | `IStats` | Retrieve/store operation outcomes, a dedicated test stat/achievement value, post-store public read. | Cross-process durability, reset/failure handling, ordering with presence/user data. |
@@ -248,12 +254,14 @@ data can be listed and read; they are never printed. These are public
   settling pumps before scheduling the reliable send. For each expected-channel
   callback, the joiner makes exactly two non-consuming `PeekP2PPacket` calls;
   listener-mode code never polls, reads, or pops packets. Three clean official
-  trials observed exactly one non-target callback and no expected-channel peek;
-  the focused comparison observed UniverseLAN expected-channel delivery and two
-  equivalent peeks. The manifest accepts only that exact pair. Both leaves use a
-  fresh bounded deadline and continue `ProcessData` pumping after the observation
-  window; a host clears joined state or acknowledges cleanup only after its own
-    matching terminal leave callback.
+  trials observed exactly one non-target callback and no expected-channel peek,
+  while UniverseLAN delivered the expected callback and two equivalent peeks.
+  The strict manifest now requires exact delivery in both lanes; the verified
+  side-by-side overlay did not establish it, so this remains an unresolved
+  official client-redist prerequisite. Both leaves use a fresh bounded deadline
+  and continue `ProcessData` pumping after the observation window; a host clears
+  joined state or acknowledges cleanup only after its own matching terminal leave
+  callback.
 - `Simple/reliable-p2p-after-lobby-leave` uses the same safe FCM setup but
   changes only the recipient relation. User2 arms `GlobalNetworkingListener`,
   confirms local `LeaveLobby`, and remains alive. User1 arms
@@ -271,19 +279,20 @@ data can be listed and read; they are never printed. These are public
   74. Each expected-channel callback makes exactly two callback-local peeks; no
   listener-mode polling, reading, or popping is permitted. Three official trials
   scheduled both sends but observed one non-target callback, no expected-channel
-  callback, and no peeks in both directions. The manifest accepts only each exact
-  direction's official no-delivery versus UniverseLAN delivery/two-peek pair. All
-   other peer/lobby/channel/payload, scheduling, destruction, and fresh-deadline
-   cleanup relations remain strict without assuming symmetry.
-- `Simple/bidirectional-reliable-p2p-poll-read-characterization` uses the same
-  temporary public FCM two-member setup but deliberately constructs no
-  `INetworkingListener`. Once both polling paths are armed, the runner releases
-  one reliable directional send per host. After `ProcessData` pumping, each host
-  calls `IsP2PPacketAvailable` on its expected channel and makes one exact-size
-  `ReadP2PPacket` only when a packet is available. Its first official-only run
-  observed availability, successful read, matching symbolic sender/payload, and
-  terminal leaves in both directions. It is unregistered, not a UniverseLAN
-  comparison, and must be repeated before any strict contract is considered.
+  callback, and no peeks in both directions. The strict manifest now requires
+  exact delivery in each direction; the verified side-by-side overlay did not
+  establish it. All other peer/lobby/channel/payload, scheduling, destruction,
+  and fresh-deadline cleanup relations remain strict without assuming symmetry.
+- `Simple/bidirectional-reliable-p2p-poll-read` uses the same temporary public
+  FCM two-member setup but deliberately constructs no `INetworkingListener`.
+  Once both polling paths are armed, the runner releases one reliable directional
+  send per host. Each polling `ProcessData` iteration calls
+  `IsP2PPacketAvailable` on its expected channel and makes one exact-size
+  `ReadP2PPacket` only when available, followed by an immediate empty-queue
+  availability check. Three official-only characterizations and the focused
+  strict comparison matched availability, read, symbolic sender/payload, queue
+  consumption, and terminal cleanup in both directions. This listener-free
+  contract does not change the listener-mode callback-local peek diagnostics.
 - `Simple/bidirectional-unreliable-p2p-listener-peek` reuses the same safe
   temporary public FCM lobby sequence with two accounts per lane. Both hosts
   construct `GlobalNetworkingListener`, query the other current member only
@@ -294,8 +303,8 @@ data can be listed and read; they are never printed. These are public
   exactly two callback-local peeks; no listener-mode polling, reading, or
   popping is permitted. Three official trials scheduled both sends but observed
   one non-target callback, no expected-channel callback, and no peeks in both
-  directions. The manifest accepts only each exact direction's official
-  no-delivery versus UniverseLAN delivery/two-peek pair. `P2P_SEND_UNRELIABLE`
+  directions. The strict manifest now requires exact delivery in each direction;
+  the verified side-by-side overlay did not establish it. `P2P_SEND_UNRELIABLE`
   is UDP-like, and scheduled does not mean delivered; all other peer/lobby,
   channel/payload, scheduling, destruction, and fresh-deadline cleanup relations
   remain strict without assuming reliable/unreliable equivalence or symmetry.
@@ -495,13 +504,15 @@ data can be listed and read; they are never printed. These are public
    listener-destruction, and terminal-cleanup checks, and does not infer directional
     symmetry from the shared exchange.
 
-- `Simple/bidirectional-reliable-p2p-poll-read-characterization` ran once as an
-  official-GOG-only diagnostic on 2026-09-14. Both hosts constructed no listener,
-  scheduled one reliable directional send after the shared polling gate, then
-  observed packet availability and one successful exact-size read with matching
-  symbolic peer/payload relations. Both terminal leaves completed. This remains
-  one empirical official observation, not an SDK delivery guarantee, a strict
-  contract, or a UniverseLAN result.
+- `Simple/bidirectional-reliable-p2p-poll-read-characterization` ran three times
+  as an official-GOG-only diagnostic on 2026-09-14 before the focused strict
+  four-host comparison. Both hosts constructed no listener, scheduled one
+  reliable directional send after the shared polling gate, observed availability
+  after polling `ProcessData`, read exactly once with matching symbolic
+  peer/payload relations, then observed no expected-channel availability after
+  read. The strict comparison matched all those facts and cleanup. This remains
+  a listener-free empirical compatibility contract, not a general scheduling or
+  delivery guarantee; listener-mode P2P keeps its callback-local peek semantics.
 
 - `Simple/bidirectional-unreliable-p2p-listener-peek` ran three times as an
   official-GOG-only diagnostic before its focused strict four-host comparison on

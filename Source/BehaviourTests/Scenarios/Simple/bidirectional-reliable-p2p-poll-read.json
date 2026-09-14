@@ -1,0 +1,17 @@
+{
+  "name": "Simple/bidirectional-reliable-p2p-poll-read",
+  "sdkVersion": "1.152.11",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 45,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": {
+      "user1": ["initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata", "p2p-poll-armed", "p2p-send", "p2p-poll-read", "creator-leave", "self-state"],
+      "user2": ["initialize", "sign-in-callback", "sign-in-terminal", "list", "join", "joiner-two-member-snapshot", "p2p-poll-armed", "p2p-send", "p2p-poll-read", "joiner-leave", "self-state"]
+    },
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "raw Galaxy IDs, lobby IDs, marker values, payload bytes and lengths, tokens, controls, timestamps, credentials, and runtime output are never retained; no INetworkingListener is constructed"
+  }
+}

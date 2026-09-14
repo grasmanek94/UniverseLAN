@@ -44,6 +44,7 @@ struct Arguments
     fs::path clientDll;
     fs::path server;
     fs::path gogRuntimeDirectory;
+    fs::path gogPeerOverlay;
     bool characterizeGogServicesState = false;
     bool characterizeOfficialGogPublicLobbyOwnerCloseLifecycle = false;
     bool characterizeOfficialGogPublicLobbyOwnerOwnershipTransition = false;
@@ -73,8 +74,6 @@ struct Scenario
     int timeoutSeconds = 0;
     bool acceptsGogServicesStatePair = false;
     bool acceptsFriendsPeerPersonaStatePair = false;
-    bool acceptsReliableP2PDeliveryPair = false;
-    bool acceptsBidirectionalReliableP2PDeliveryPairs = false;
     bool acceptsRelaxedUniverseLANPublicLobbyStringFilterCandidateSet = false;
     bool characterization = false;
     std::string requiredTerminalOutcome;
@@ -186,6 +185,9 @@ constexpr std::array scenarioContracts{
         {"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata", "p2p-listener-armed", "p2p-send", "p2p-listener-peek", "p2p-listener-destroyed", "creator-leave",
               "list", "join", "joiner-two-member-snapshot", "p2p-listener-armed", "p2p-send", "p2p-listener-peek", "p2p-listener-destroyed", "joiner-leave"}, 20, false, false, true, false, false, false, false, false, false, false, true},
     ScenarioContract{"Simple/bidirectional-reliable-p2p-poll-read characterization", "bidirectional-reliable-p2p-poll-read-characterization",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata", "p2p-poll-armed", "p2p-send", "p2p-poll-read", "creator-leave",
+            "list", "join", "joiner-two-member-snapshot", "p2p-poll-armed", "p2p-send", "p2p-poll-read", "joiner-leave"}, 18, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, true},
+    ScenarioContract{"Simple/bidirectional-reliable-p2p-poll-read", "bidirectional-reliable-p2p-poll-read",
         {"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata", "p2p-poll-armed", "p2p-send", "p2p-poll-read", "creator-leave",
             "list", "join", "joiner-two-member-snapshot", "p2p-poll-armed", "p2p-send", "p2p-poll-read", "joiner-leave"}, 18, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, true},
     ScenarioContract{"Simple/bidirectional-unreliable-p2p-listener-peek characterization", "bidirectional-unreliable-p2p-listener-peek-characterization",
@@ -384,6 +386,7 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
         else if (option == "--client-dll") arguments.clientDll = value;
         else if (option == "--server") arguments.server = value;
         else if (option == "--gog-runtime-dir") arguments.gogRuntimeDirectory = value;
+        else if (option == "--gog-peer-overlay") arguments.gogPeerOverlay = value;
         else return false;
     }
     return (static_cast<int>(arguments.characterizeGogServicesState) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyOwnerCloseLifecycle) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyOwnerOwnershipTransition) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyNotJoinableBehavior) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyFullJoinFailure) + static_cast<int>(arguments.characterizePublicLobbyDataPropagation) + static_cast<int>(arguments.characterizePublicLobbyStringFiltering) + static_cast<int>(arguments.characterizeMultipleLobbyMembershipAndMessageIsolation)
@@ -562,7 +565,7 @@ Scenario parseScenario(const fs::path& manifest)
     const json& profiles = required(root, "profiles");
     if (!profiles.is_array() || profiles.size() != 2 || profiles[0] != "user1" || profiles[1] != "user2") invalidManifest();
     const json& comparison = required(root, "comparison");
-    objectHasOnly(comparison, {"requiredRecords", "requiredTerminalOutcome", "unexpectedRecords", "opaqueIds", "acceptedStatePair", "acceptedPersonaStatePair", "acceptedP2PDeliveryPair", "acceptedBidirectionalP2PDeliveryPairs", "acceptedPublicLobbyStringFilterCandidateSet"});
+    objectHasOnly(comparison, {"requiredRecords", "requiredTerminalOutcome", "unexpectedRecords", "opaqueIds", "acceptedStatePair", "acceptedPersonaStatePair", "acceptedPublicLobbyStringFilterCandidateSet"});
     const json& records = required(comparison, "requiredRecords");
     const bool validRecordDeclaration = observesBidirectionalReliableP2PPollRead(*contract)
         ? records.is_object() && records.size() == 2
@@ -690,31 +693,6 @@ Scenario parseScenario(const fs::path& manifest)
         scenario.acceptsFriendsPeerPersonaStatePair = true;
     }
     else if (comparison.contains("acceptedPersonaStatePair")) invalidManifest();
-    if (contract->observesReliableP2PListenerPeek)
-    {
-        const json& acceptedP2PDeliveryPair = required(comparison, "acceptedP2PDeliveryPair");
-        if (!fieldsExactly(acceptedP2PDeliveryPair, {"gog", "universelan"})
-            || acceptedP2PDeliveryPair["gog"] != "scheduled-no-expected-channel-callback-or-peeks"
-            || acceptedP2PDeliveryPair["universelan"] != "scheduled-delivery-and-two-peeks") invalidManifest();
-        scenario.acceptsReliableP2PDeliveryPair = true;
-    }
-    else if (comparison.contains("acceptedP2PDeliveryPair")) invalidManifest();
-    if (observesBidirectionalP2PListenerPeek(*contract))
-    {
-        if (comparison.contains("acceptedBidirectionalP2PDeliveryPairs"))
-        {
-            const json& acceptedPairs = required(comparison, "acceptedBidirectionalP2PDeliveryPairs");
-            if (!acceptedPairs.is_object() || acceptedPairs.size() != 2) invalidManifest();
-            for (const char* direction : {"user1ToUser2", "user2ToUser1"})
-            {
-                const json& pair = required(acceptedPairs, direction);
-                if (!fieldsExactly(pair, {"gog", "universelan"}) || pair["gog"] != "scheduled-no-expected-channel-callback-or-peeks"
-                    || pair["universelan"] != "scheduled-delivery-and-two-peeks") invalidManifest();
-            }
-            scenario.acceptsBidirectionalReliableP2PDeliveryPairs = true;
-        }
-    }
-    else if (comparison.contains("acceptedBidirectionalP2PDeliveryPairs")) invalidManifest();
     if (observesPublicLobbyStringFiltering(*contract))
     {
         const json& candidateSet = required(comparison, "acceptedPublicLobbyStringFilterCandidateSet");
@@ -1129,6 +1107,13 @@ fs::path stageHost(const fs::path& source, const fs::path& directory)
     return destination;
 }
 
+fs::path gogPeerOverlayFile(const Arguments& arguments)
+{
+    if (arguments.gogPeerOverlay.empty()) return {};
+    if (fs::is_directory(arguments.gogPeerOverlay)) return arguments.gogPeerOverlay / "GalaxyPeer64.dll";
+    return arguments.gogPeerOverlay;
+}
+
 void stageUniverselanRuntime(const Arguments& arguments, const fs::path& directory)
 {
     std::error_code error;
@@ -1150,6 +1135,13 @@ void stageGogRuntime(const Arguments& arguments, const fs::path& directory)
         copied = true;
     }
     if (!copied) throw std::runtime_error("Official-GOG runtime dependencies are unavailable");
+    const fs::path peerOverlay = gogPeerOverlayFile(arguments);
+    if (!peerOverlay.empty())
+    {
+        std::error_code error;
+        fs::copy_file(peerOverlay, directory / "GalaxyPeer64.dll", fs::copy_options::overwrite_existing, error);
+        if (error) throw std::runtime_error("Unable to stage official-GOG peer overlay");
+    }
 }
 
 bool runHosts(const std::vector<HostLaunch>& launches, const ScenarioContract& contract, const int timeoutSeconds, std::vector<Child>& completed)
@@ -1822,11 +1814,82 @@ bool normalizeReliableP2PListenerPeekTrace(const fs::path& trace, const std::str
                 || !fieldsExactly(records[7], {"record", "callbackObserved", "expectedChannelCallbackObserved", "nonTargetCallbackObserved", "callbackCount", "expectedChannelCallbackCount", "nonTargetCallbackCount", "callbackContexts", "callbackSizeMatchesPrivatePayload",
                     "firstPeekSucceeded", "firstPeekSenderValidNonSelf", "firstPeekSenderMatchesCreator", "firstPeekLengthMatchesPrivatePayload", "firstPeekPayloadMatchesPrivatePayload",
                     "secondPeekSucceeded", "secondPeekSenderValidNonSelf", "secondPeekSenderMatchesCreator", "secondPeekLengthMatchesPrivatePayload", "secondPeekPayloadMatchesPrivatePayload", "peekResultsEquivalent"})
-                || !records[7]["callbackObserved"].is_boolean() || !records[7]["expectedChannelCallbackObserved"].is_boolean() || !records[7]["nonTargetCallbackObserved"].is_boolean()
-                || !records[7]["callbackCount"].is_number_integer() || records[7]["callbackCount"] < 0 || !records[7]["expectedChannelCallbackCount"].is_number_integer() || records[7]["expectedChannelCallbackCount"] < 0
-                || !records[7]["nonTargetCallbackCount"].is_number_integer() || records[7]["nonTargetCallbackCount"] < 0 || !records[7]["callbackContexts"].is_array()
+                || records[7]["callbackObserved"] != true || records[7]["expectedChannelCallbackObserved"] != true || records[7]["nonTargetCallbackObserved"] != false
+                || records[7]["callbackCount"] != 1 || records[7]["expectedChannelCallbackCount"] != 1 || records[7]["nonTargetCallbackCount"] != 0
+                || records[7]["callbackContexts"] != json::array({"expected-channel-size-matches-private-payload"}) || records[7]["callbackSizeMatchesPrivatePayload"] != true
+                || records[7]["firstPeekSucceeded"] != true || records[7]["firstPeekSenderValidNonSelf"] != true || records[7]["firstPeekSenderMatchesCreator"] != true
+                || records[7]["firstPeekLengthMatchesPrivatePayload"] != true || records[7]["firstPeekPayloadMatchesPrivatePayload"] != true
+                || records[7]["secondPeekSucceeded"] != true || records[7]["secondPeekSenderValidNonSelf"] != true || records[7]["secondPeekSenderMatchesCreator"] != true
+                || records[7]["secondPeekLengthMatchesPrivatePayload"] != true || records[7]["secondPeekPayloadMatchesPrivatePayload"] != true || records[7]["peekResultsEquivalent"] != true
                 || !fieldsExactly(records[8], {"record", "destroyedBeforeShutdown"}) || records[8]["destroyedBeforeShutdown"] != true || !validLeave(records[9])) return false;
         }
+        normalized = records;
+        return true;
+    }
+    catch (...) { return false; }
+}
+
+bool normalizeBidirectionalReliableP2PPollReadTrace(const fs::path& trace, const std::string& profile, json& normalized)
+{
+    try
+    {
+        std::vector<json> records;
+        for (const std::string& line : common::readTrace(trace)) records.push_back(json::parse(line));
+        const std::vector<std::string> expected = profile == "user1"
+            ? std::vector<std::string>{"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata", "p2p-poll-armed", "p2p-send", "p2p-poll-read", "creator-leave", "self-state"}
+            : std::vector<std::string>{"initialize", "sign-in-callback", "sign-in-terminal", "list", "join", "joiner-two-member-snapshot", "p2p-poll-armed", "p2p-send", "p2p-poll-read", "joiner-leave", "self-state"};
+        if (records.size() != expected.size()) return false;
+        for (std::size_t index = 0; index < expected.size(); ++index)
+            if (!records[index].is_object() || records[index].value("record", "") != expected[index]) return false;
+        const auto exact = [](const json& record, std::initializer_list<const char*> fields) {
+            for (const char* field : fields)
+                if (!record.contains(field) || (std::string_view(field) != "record" && record[field] != true)) return false;
+            return true;
+        };
+        const auto validSelf = [&](const json& record) {
+            return exact(record, {"record", "signedIn", "loggedOn", "idValid", "selfIdRepeatEqual"})
+                && record["idType"] == "user" && record["personaAvailable"].is_boolean()
+                && fieldsExactly(record, {"record", "signedIn", "loggedOn", "idValid", "idType", "selfIdRepeatEqual", "personaAvailable"});
+        };
+        const auto validPollArmed = [&](const json& record) {
+            return exact(record, {"record", "peerFromPublicLobbyQuery", "peerCurrentLobbyMember", "peerValidNonSelf", "expectedChannelConfigured", "directionalChannelsDistinct", "directionalPayloadsDistinct"})
+                && record["listenerConstructed"] == false && record["peerType"] == "user"
+                && fieldsExactly(record, {"record", "listenerConstructed", "peerFromPublicLobbyQuery", "peerCurrentLobbyMember", "peerValidNonSelf", "peerType", "expectedChannelConfigured", "directionalChannelsDistinct", "directionalPayloadsDistinct"});
+        };
+        const auto validSend = [&](const json& record) {
+            return exact(record, {"record", "exactlyOneSendIssued", "peerFromPublicLobbyQuery", "peerCurrentLobbyMember", "peerValidNonSelf", "directionalChannelConfigured", "directionalChannelsDistinct", "payloadNonemptyBounded", "directionalPayloadsDistinct", "scheduled"})
+                && record["peerType"] == "user" && record["sendTypeUnreliable"] == false
+                && fieldsExactly(record, {"record", "exactlyOneSendIssued", "peerFromPublicLobbyQuery", "peerCurrentLobbyMember", "peerValidNonSelf", "peerType", "directionalChannelConfigured", "directionalChannelsDistinct", "payloadNonemptyBounded", "directionalPayloadsDistinct", "sendTypeUnreliable", "scheduled"});
+        };
+        const auto validPollRead = [&](const json& record) {
+            return exact(record, {"record", "availabilityObserved", "availableSizeMatchesOpaquePayload", "pollLoopCallsAvailabilityAfterProcessData", "readIssuedOnlyWhenAvailable", "readSucceeded", "receivedSizeMatchesOpaquePayload", "receivedPayloadMatchesOpaqueRelation", "senderMatchesPeer", "postReadAvailabilityChecked", "availabilityZeroAfterRead"})
+                && record["listenerConstructed"] == false && record["readCallCount"] == 1
+                && fieldsExactly(record, {"record", "listenerConstructed", "availabilityObserved", "availableSizeMatchesOpaquePayload", "pollLoopCallsAvailabilityAfterProcessData", "readIssuedOnlyWhenAvailable", "readCallCount", "readSucceeded", "receivedSizeMatchesOpaquePayload", "receivedPayloadMatchesOpaqueRelation", "senderMatchesPeer", "postReadAvailabilityChecked", "availabilityZeroAfterRead"});
+        };
+        const auto validLeave = [](const json& record) {
+            return fieldsExactly(record, {"record", "result", "reason", "sameLobby"}) && record["result"] == "callback" && record["reason"] == "user-left" && record["sameLobby"] == true;
+        };
+        const auto validSnapshot = [](const json& record) {
+            return fieldsExactly(record, {"record", "lobbyValid", "public", "joinable", "capacity", "memberCount", "selfPresent", "otherPresent", "membersValid", "membersDistinct", "ownerIsSelf", "ownerValid"})
+                && record["lobbyValid"] == true && record["public"] == true && record["joinable"] == true && record["capacity"] == 2 && record["memberCount"] == 2
+                && record["selfPresent"] == true && record["otherPresent"] == true && record["membersValid"] == true && record["membersDistinct"] == true && record["ownerIsSelf"] == false && record["ownerValid"] == true;
+        };
+        if (!fieldsExactly(records[0], {"record", "result"}) || records[0]["result"] != "returned"
+            || !fieldsExactly(records[1], {"record", "result"}) || records[1]["result"] != "success"
+            || !fieldsExactly(records[2], {"record", "result"}) || records[2]["result"] != "success" || !validSelf(records.back())) return false;
+        if (profile == "user1")
+        {
+            if (!fieldsExactly(records[3], {"record", "result", "lobbyValid", "lobbyType"}) || records[3]["result"] != "success" || records[3]["lobbyValid"] != true || records[3]["lobbyType"] != "lobby"
+                || !fieldsExactly(records[4], {"record", "result", "sameCreatedLobby"}) || records[4]["result"] != "success" || records[4]["sameCreatedLobby"] != true
+                || !exact(records[5], {"record", "capacityUpdateSuccess", "markerUpdateSuccess", "setLobbyJoinableTrueSuccess", "publicVisible", "capacityVisible", "joinableVisible"})
+                || !fieldsExactly(records[6], {"record", "result", "sameCreatedLobby"}) || records[6]["result"] != "success" || records[6]["sameCreatedLobby"] != true
+                || !validPollArmed(records[7]) || !validSend(records[8]) || !validPollRead(records[9]) || !validLeave(records[10])) return false;
+        }
+        else if (!fieldsExactly(records[3], {"record", "result", "attempts", "retryUsed", "selectedCount", "selectedValid"}) || records[3]["result"] != "success"
+            || !records[3]["attempts"].is_number_integer() || records[3]["attempts"] < 1 || records[3]["attempts"] > 6 || !records[3]["retryUsed"].is_boolean()
+            || records[3]["selectedCount"] != 1 || records[3]["selectedValid"] != true
+            || !fieldsExactly(records[4], {"record", "result", "sameListedLobby"}) || records[4]["result"] != "success" || records[4]["sameListedLobby"] != true
+            || !validSnapshot(records[5]) || !validPollArmed(records[6]) || !validSend(records[7]) || !validPollRead(records[8]) || !validLeave(records[9])) return false;
         normalized = records;
         return true;
     }
@@ -1890,11 +1953,13 @@ bool normalizeBidirectionalReliableP2PListenerPeekTrace(const fs::path& trace, c
                 || record["callbackContexts"].size() != static_cast<std::size_t>(record["callbackCount"].get<int>())) return false;
             for (const json& context : record["callbackContexts"])
                 if (context != "non-target-channel" && context != "expected-channel-size-matches-private-payload" && context != "expected-channel-size-different") return false;
-            for (const char* name : {"expectedChannelCallbacksHaveExactlyTwoPeeks", "callbackSizeMatchesExpectedPayload", "firstPeekSucceeded", "firstPeekSenderMatchesPeer",
-                     "firstPeekLengthMatchesPayload", "firstPeekPayloadMatches", "secondPeekSucceeded", "secondPeekSenderMatchesPeer", "secondPeekLengthMatchesPayload",
-                     "secondPeekPayloadMatches", "peekResultsEquivalent", "successfulExpectedPeekPair"})
-                if (!record[name].is_boolean()) return false;
-            return true;
+            return record["callbackObserved"] == true && record["expectedChannelCallbackObserved"] == true && record["nonTargetCallbackObserved"] == false
+                && record["callbackCount"] == 1 && record["expectedChannelCallbackCount"] == 1 && record["nonTargetCallbackCount"] == 0
+                && record["callbackContexts"] == json::array({"expected-channel-size-matches-private-payload"}) && record["expectedChannelCallbacksHaveExactlyTwoPeeks"] == true
+                && record["peekCallCount"] == 2 && record["callbackSizeMatchesExpectedPayload"] == true && record["firstPeekSucceeded"] == true
+                && record["firstPeekSenderMatchesPeer"] == true && record["firstPeekLengthMatchesPayload"] == true && record["firstPeekPayloadMatches"] == true
+                && record["secondPeekSucceeded"] == true && record["secondPeekSenderMatchesPeer"] == true && record["secondPeekLengthMatchesPayload"] == true
+                && record["secondPeekPayloadMatches"] == true && record["peekResultsEquivalent"] == true && record["successfulExpectedPeekPair"] == true;
         };
         if (!fieldsExactly(records[0], {"record", "result"}) || records[0]["result"] != "returned"
             || !fieldsExactly(records[1], {"record", "result"}) || records[1]["result"] != "success"
@@ -2800,6 +2865,8 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
         ? "raw Galaxy IDs, lobby IDs, collision-marker-derived payload bytes, message lengths, and tokens are never recorded; only symbolic former-member, leave, membership, scheduling, callback, and non-consuming peek relations are compared"
         : observesReliableP2PListenerPeek(contract)
         ? "raw Galaxy IDs, lobby IDs, collision-marker-derived payload bytes, and message lengths are never recorded; only symbolic lobby membership, sender, channel, callback, and non-consuming peek relations are compared"
+        : observesBidirectionalReliableP2PPollRead(contract)
+        ? "raw Galaxy IDs, lobby IDs, collision-marker values, payload bytes, message lengths, tokens, controls, timestamps, and runtime output are never recorded; only symbolic peer, directional channel/payload, polling, read, and queue-consumption relations are compared"
         : observesBidirectionalP2PListenerPeek(contract)
         ? "raw Galaxy IDs, lobby IDs, collision-marker-derived payload bytes, message lengths, tokens, and marker values are never recorded; only symbolic per-direction peer, lobby, channel, callback, and non-consuming peek relations are compared"
         : observesBidirectionalLobbyMessageDelivery(contract)
@@ -2838,6 +2905,8 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
             ? normalizeReliableP2PAfterLobbyLeaveTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
             : observesReliableP2PListenerPeek(contract)
             ? normalizeReliableP2PListenerPeekTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
+            : observesBidirectionalReliableP2PPollRead(contract)
+            ? normalizeBidirectionalReliableP2PPollReadTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
             : observesBidirectionalP2PListenerPeek(contract)
             ? normalizeBidirectionalReliableP2PListenerPeekTrace(root / "universelan" / profile / "trace.jsonl", profile,
                 observesBidirectionalUnreliableP2PListenerPeek(contract), universelan)
@@ -2874,6 +2943,8 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
             ? normalizeReliableP2PAfterLobbyLeaveTrace(root / "gog" / profile / "trace.jsonl", profile, gog)
             : observesReliableP2PListenerPeek(contract)
             ? normalizeReliableP2PListenerPeekTrace(root / "gog" / profile / "trace.jsonl", profile, gog)
+            : observesBidirectionalReliableP2PPollRead(contract)
+            ? normalizeBidirectionalReliableP2PPollReadTrace(root / "gog" / profile / "trace.jsonl", profile, gog)
             : observesBidirectionalP2PListenerPeek(contract)
             ? normalizeBidirectionalReliableP2PListenerPeekTrace(root / "gog" / profile / "trace.jsonl", profile,
                 observesBidirectionalUnreliableP2PListenerPeek(contract), gog)
@@ -3035,101 +3106,13 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
             personaStateNeutralGog[5].erase("personaState");
             acceptedFriendsPeerPersonaStateDifference = personaStateNeutralUniverselan == personaStateNeutralGog;
         }
-        bool acceptedReliableP2PDeliveryDifference = false;
-        if (scenario.acceptsReliableP2PDeliveryPair && profile == std::string_view("user2") && universelanValid && gogValid)
-        {
-            const json& official = gog[7];
-            const json& universelanDelivery = universelan[7];
-            const bool officialNoDelivery = official["callbackObserved"] == true && official["expectedChannelCallbackObserved"] == false
-                && official["nonTargetCallbackObserved"] == true && official["callbackCount"] == 1 && official["expectedChannelCallbackCount"] == 0
-                && official["nonTargetCallbackCount"] == 1 && official["callbackContexts"] == json::array({"non-target-channel"})
-                && official["callbackSizeMatchesPrivatePayload"] == false && official["firstPeekSucceeded"] == false
-                && official["firstPeekSenderValidNonSelf"] == false && official["firstPeekSenderMatchesCreator"] == false
-                && official["firstPeekLengthMatchesPrivatePayload"] == false && official["firstPeekPayloadMatchesPrivatePayload"] == false
-                && official["secondPeekSucceeded"] == false && official["secondPeekSenderValidNonSelf"] == false
-                && official["secondPeekSenderMatchesCreator"] == false && official["secondPeekLengthMatchesPrivatePayload"] == false
-                && official["secondPeekPayloadMatchesPrivatePayload"] == false && official["peekResultsEquivalent"] == false;
-            const bool universelanDeliveryObserved = universelanDelivery["callbackObserved"] == true && universelanDelivery["expectedChannelCallbackObserved"] == true
-                && universelanDelivery["nonTargetCallbackObserved"] == false && universelanDelivery["callbackCount"] == 1
-                && universelanDelivery["expectedChannelCallbackCount"] == 1 && universelanDelivery["nonTargetCallbackCount"] == 0
-                && universelanDelivery["callbackContexts"] == json::array({"expected-channel-size-matches-private-payload"})
-                && universelanDelivery["callbackSizeMatchesPrivatePayload"] == true && universelanDelivery["firstPeekSucceeded"] == true
-                && universelanDelivery["firstPeekSenderValidNonSelf"] == true && universelanDelivery["firstPeekSenderMatchesCreator"] == true
-                && universelanDelivery["firstPeekLengthMatchesPrivatePayload"] == true && universelanDelivery["firstPeekPayloadMatchesPrivatePayload"] == true
-                && universelanDelivery["secondPeekSucceeded"] == true && universelanDelivery["secondPeekSenderValidNonSelf"] == true
-                && universelanDelivery["secondPeekSenderMatchesCreator"] == true && universelanDelivery["secondPeekLengthMatchesPrivatePayload"] == true
-                && universelanDelivery["secondPeekPayloadMatchesPrivatePayload"] == true && universelanDelivery["peekResultsEquivalent"] == true;
-            json neutralUniverselan = universelan;
-            json neutralGog = gog;
-            neutralUniverselan[7].erase("callbackObserved");
-            neutralUniverselan[7].erase("expectedChannelCallbackObserved");
-            neutralUniverselan[7].erase("nonTargetCallbackObserved");
-            neutralUniverselan[7].erase("callbackCount");
-            neutralUniverselan[7].erase("expectedChannelCallbackCount");
-            neutralUniverselan[7].erase("nonTargetCallbackCount");
-            neutralUniverselan[7].erase("callbackContexts");
-            neutralUniverselan[7].erase("callbackSizeMatchesPrivatePayload");
-            neutralUniverselan[7].erase("firstPeekSucceeded");
-            neutralUniverselan[7].erase("firstPeekSenderValidNonSelf");
-            neutralUniverselan[7].erase("firstPeekSenderMatchesCreator");
-            neutralUniverselan[7].erase("firstPeekLengthMatchesPrivatePayload");
-            neutralUniverselan[7].erase("firstPeekPayloadMatchesPrivatePayload");
-            neutralUniverselan[7].erase("secondPeekSucceeded");
-            neutralUniverselan[7].erase("secondPeekSenderValidNonSelf");
-            neutralUniverselan[7].erase("secondPeekSenderMatchesCreator");
-            neutralUniverselan[7].erase("secondPeekLengthMatchesPrivatePayload");
-            neutralUniverselan[7].erase("secondPeekPayloadMatchesPrivatePayload");
-            neutralUniverselan[7].erase("peekResultsEquivalent");
-            neutralGog[7] = neutralUniverselan[7];
-            acceptedReliableP2PDeliveryDifference = officialNoDelivery && universelanDeliveryObserved && neutralUniverselan == neutralGog;
-        }
-        bool acceptedBidirectionalReliableP2PDeliveryDifference = false;
-        if (scenario.acceptsBidirectionalReliableP2PDeliveryPairs && observesBidirectionalP2PListenerPeek(contract) && universelanValid && gogValid)
-        {
-            const std::size_t peekIndex = profile == std::string_view("user1") ? 9 : 8;
-            const json& official = gog[peekIndex];
-            const json& universelanDelivery = universelan[peekIndex];
-            const bool officialNoExpectedDelivery = official["callbackObserved"] == true && official["expectedChannelCallbackObserved"] == false
-                && official["nonTargetCallbackObserved"] == true && official["callbackCount"] == 1 && official["expectedChannelCallbackCount"] == 0
-                && official["nonTargetCallbackCount"] == 1 && official["callbackContexts"] == json::array({"non-target-channel"})
-                && official["expectedChannelCallbacksHaveExactlyTwoPeeks"] == true && official["peekCallCount"] == 0
-                && official["callbackSizeMatchesExpectedPayload"] == false && official["firstPeekSucceeded"] == false
-                && official["firstPeekSenderMatchesPeer"] == false && official["firstPeekLengthMatchesPayload"] == false
-                && official["firstPeekPayloadMatches"] == false && official["secondPeekSucceeded"] == false
-                && official["secondPeekSenderMatchesPeer"] == false && official["secondPeekLengthMatchesPayload"] == false
-                && official["secondPeekPayloadMatches"] == false && official["peekResultsEquivalent"] == false
-                && official["successfulExpectedPeekPair"] == false;
-            const bool universelanDeliveryObserved = universelanDelivery["callbackObserved"] == true && universelanDelivery["expectedChannelCallbackObserved"] == true
-                && universelanDelivery["nonTargetCallbackObserved"] == false && universelanDelivery["callbackCount"] == 1
-                && universelanDelivery["expectedChannelCallbackCount"] == 1 && universelanDelivery["nonTargetCallbackCount"] == 0
-                && universelanDelivery["callbackContexts"] == json::array({"expected-channel-size-matches-private-payload"})
-                && universelanDelivery["expectedChannelCallbacksHaveExactlyTwoPeeks"] == true && universelanDelivery["peekCallCount"] == 2
-                && universelanDelivery["callbackSizeMatchesExpectedPayload"] == true && universelanDelivery["firstPeekSucceeded"] == true
-                && universelanDelivery["firstPeekSenderMatchesPeer"] == true && universelanDelivery["firstPeekLengthMatchesPayload"] == true
-                && universelanDelivery["firstPeekPayloadMatches"] == true && universelanDelivery["secondPeekSucceeded"] == true
-                && universelanDelivery["secondPeekSenderMatchesPeer"] == true && universelanDelivery["secondPeekLengthMatchesPayload"] == true
-                && universelanDelivery["secondPeekPayloadMatches"] == true && universelanDelivery["peekResultsEquivalent"] == true
-                && universelanDelivery["successfulExpectedPeekPair"] == true;
-            json neutralUniverselan = comparableUniverselan;
-            json neutralGog = comparableGog;
-            for (const char* field : {"callbackObserved", "expectedChannelCallbackObserved", "nonTargetCallbackObserved", "callbackCount", "expectedChannelCallbackCount",
-                     "nonTargetCallbackCount", "callbackContexts", "expectedChannelCallbacksHaveExactlyTwoPeeks", "peekCallCount", "callbackSizeMatchesExpectedPayload",
-                     "firstPeekSucceeded", "firstPeekSenderMatchesPeer", "firstPeekLengthMatchesPayload", "firstPeekPayloadMatches", "secondPeekSucceeded",
-                     "secondPeekSenderMatchesPeer", "secondPeekLengthMatchesPayload", "secondPeekPayloadMatches", "peekResultsEquivalent", "successfulExpectedPeekPair"})
-            {
-                neutralUniverselan[peekIndex].erase(field);
-                neutralGog[peekIndex].erase(field);
-            }
-            acceptedBidirectionalReliableP2PDeliveryDifference = officialNoExpectedDelivery && universelanDeliveryObserved && neutralUniverselan == neutralGog;
-            report["lanes"][profile]["p2pDirection"] = profile == std::string_view("user1") ? "user2-to-user1" : "user1-to-user2";
-        }
         const bool equal = universelanValid && gogValid && (comparableUniverselan == comparableGog || acceptedGogServicesStateDifference
-                || acceptedFriendsPeerPersonaStateDifference || acceptedReliableP2PDeliveryDifference || acceptedBidirectionalReliableP2PDeliveryDifference
+                || acceptedFriendsPeerPersonaStateDifference
                 || acceptedRelaxedUniverseLANPublicLobbyStringFilterCandidateSet)
             && sessionIdRepeatabilityEqual;
         report["lanes"][profile]["equal"] = equal;
         report["lanes"][profile]["comparison"] = exactEquality ? "exact-equality"
-            : ((acceptedGogServicesStateDifference || acceptedFriendsPeerPersonaStateDifference || acceptedReliableP2PDeliveryDifference || acceptedBidirectionalReliableP2PDeliveryDifference) ? "accepted-difference"
+            : ((acceptedGogServicesStateDifference || acceptedFriendsPeerPersonaStateDifference) ? "accepted-difference"
                 : (acceptedRelaxedUniverseLANPublicLobbyStringFilterCandidateSet ? "accepted-intentional-policy"
                 : (equal ? "diagnostic-context-excluded" : "mismatch")));
         report["lanes"][profile]["terminalSuccess"] = terminalSuccess;
@@ -3822,6 +3805,7 @@ void characterizeBidirectionalReliableP2PPollReadTraces(const fs::path& root, js
                 lane["senderMatchesPeer"] = records[pollIndex].value("senderMatchesPeer", false);
                 lane["opaquePayloadRelationMatched"] = records[pollIndex].value("receivedSizeMatchesOpaquePayload", false)
                     && records[pollIndex].value("receivedPayloadMatchesOpaqueRelation", false);
+                lane["availabilityZeroAfterRead"] = records[pollIndex].value("availabilityZeroAfterRead", false);
             }
         }
         catch (...) { lane["orderedINetworkingRecords"] = "unavailable"; }
@@ -3870,6 +3854,7 @@ int run(const Arguments& arguments, const Scenario& scenario)
     const bool officialGogOnlyBidirectionalLobbyMemberDataPropagationCharacterization = arguments.characterizeOfficialGogBidirectionalLobbyMemberDataPropagation;
     const bool officialGogOnlyCustomNetworkingLoopbackRoundtripCloseCharacterization = arguments.characterizeOfficialGogCustomNetworkingLoopbackRoundtripClose;
     if (!fs::is_regular_file(arguments.gogHost) || !fs::is_directory(arguments.gogRuntimeDirectory)
+        || (!arguments.gogPeerOverlay.empty() && !fs::is_regular_file(gogPeerOverlayFile(arguments)))
         || (!(officialGogOnlyChatCharacterization || officialGogOnlyBidirectionalChatCharacterization || officialGogOnlyFriendsCharacterization || officialGogOnlyOwnerCloseCharacterization || officialGogOnlyOwnershipTransitionCharacterization || officialGogOnlyNotJoinableBehaviorCharacterization || officialGogOnlyFullJoinFailureCharacterization || officialGogOnlyReliableP2PListenerPeekCharacterization || officialGogOnlyReliableP2PAfterLobbyLeaveCharacterization || officialGogOnlyBidirectionalReliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalReliableP2PPollReadCharacterization || officialGogOnlyBidirectionalUnreliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalLobbyMessageDeliveryCharacterization || officialGogOnlyBidirectionalLobbyMemberDataPropagationCharacterization || officialGogOnlyCustomNetworkingLoopbackRoundtripCloseCharacterization) && (!fs::is_regular_file(arguments.universelanHost)
             || !fs::is_regular_file(arguments.clientDll) || !fs::is_regular_file(arguments.server)))) throw std::runtime_error("Preflight failed");
 

@@ -30,7 +30,7 @@ struct Arguments
     int timeoutSeconds = 0;
 };
 
-    enum class Scenario { initializeAndSignIn, sessionIdRepeatability, gogServicesState, gogServicesStateCharacterization, customNetworkingLoopbackRoundtripCloseCharacterization, customNetworkingLoopbackRoundtripClose, publicLobbyCreateListJoinLeave, publicLobbyStringFilteringCharacterization, publicLobbyStringFiltering, publicLobbyNotJoinableBehaviorCharacterization, publicLobbyNotJoinableBehavior, publicLobbyFullJoinFailureCharacterization, publicLobbyFullJoinFailure, publicLobbyOwnerCloseLifecycleCharacterization, publicLobbyOwnerCloseLifecycle, publicLobbyOwnerOwnershipTransitionCharacterization, publicLobbyOwnerOwnershipTransition, publicLobbyDataPropagationCharacterization, publicLobbyDataPropagation, reliableP2PListenerPeekCharacterization, reliableP2PListenerPeek, reliableP2PAfterLobbyLeaveCharacterization, reliableP2PAfterLobbyLeave, bidirectionalReliableP2PListenerPeekCharacterization, bidirectionalReliableP2PListenerPeek, bidirectionalReliableP2PPollReadCharacterization, bidirectionalUnreliableP2PListenerPeekCharacterization, bidirectionalUnreliableP2PListenerPeek, bidirectionalLobbyMessageDeliveryCharacterization, bidirectionalLobbyMessageDelivery, bidirectionalLobbyMemberDataPropagationCharacterization, bidirectionalLobbyMemberDataPropagation, multipleLobbyMembershipAndMessageIsolationCharacterization, multipleLobbyMembershipAndMessageIsolation, chatRoomMessageDeliveryCharacterization, chatRoomMessageDelivery, bidirectionalChatRoomMessageDeliveryCharacterization, bidirectionalChatRoomMessageDelivery, friendsPeerInformationRetrievalCharacterization, friendsPeerInformationRetrieval };
+    enum class Scenario { initializeAndSignIn, sessionIdRepeatability, gogServicesState, gogServicesStateCharacterization, customNetworkingLoopbackRoundtripCloseCharacterization, customNetworkingLoopbackRoundtripClose, publicLobbyCreateListJoinLeave, publicLobbyStringFilteringCharacterization, publicLobbyStringFiltering, publicLobbyNotJoinableBehaviorCharacterization, publicLobbyNotJoinableBehavior, publicLobbyFullJoinFailureCharacterization, publicLobbyFullJoinFailure, publicLobbyOwnerCloseLifecycleCharacterization, publicLobbyOwnerCloseLifecycle, publicLobbyOwnerOwnershipTransitionCharacterization, publicLobbyOwnerOwnershipTransition, publicLobbyDataPropagationCharacterization, publicLobbyDataPropagation, reliableP2PListenerPeekCharacterization, reliableP2PListenerPeek, reliableP2PAfterLobbyLeaveCharacterization, reliableP2PAfterLobbyLeave, bidirectionalReliableP2PListenerPeekCharacterization, bidirectionalReliableP2PListenerPeek, bidirectionalReliableP2PPollReadCharacterization, bidirectionalReliableP2PPollRead, bidirectionalUnreliableP2PListenerPeekCharacterization, bidirectionalUnreliableP2PListenerPeek, bidirectionalLobbyMessageDeliveryCharacterization, bidirectionalLobbyMessageDelivery, bidirectionalLobbyMemberDataPropagationCharacterization, bidirectionalLobbyMemberDataPropagation, multipleLobbyMembershipAndMessageIsolationCharacterization, multipleLobbyMembershipAndMessageIsolation, chatRoomMessageDeliveryCharacterization, chatRoomMessageDelivery, bidirectionalChatRoomMessageDeliveryCharacterization, bidirectionalChatRoomMessageDelivery, friendsPeerInformationRetrievalCharacterization, friendsPeerInformationRetrieval };
 
 bool isSupportedScenario(const std::string& scenario)
 {
@@ -47,7 +47,7 @@ bool isSupportedScenario(const std::string& scenario)
         || scenario == "reliable-p2p-listener-peek-characterization" || scenario == "reliable-p2p-listener-peek"
         || scenario == "reliable-p2p-after-lobby-leave-characterization" || scenario == "reliable-p2p-after-lobby-leave"
           || scenario == "bidirectional-reliable-p2p-listener-peek-characterization" || scenario == "bidirectional-reliable-p2p-listener-peek"
-          || scenario == "bidirectional-reliable-p2p-poll-read-characterization"
+          || scenario == "bidirectional-reliable-p2p-poll-read-characterization" || scenario == "bidirectional-reliable-p2p-poll-read"
          || scenario == "bidirectional-unreliable-p2p-listener-peek-characterization" || scenario == "bidirectional-unreliable-p2p-listener-peek"
         || scenario == "bidirectional-lobby-message-delivery-characterization" || scenario == "bidirectional-lobby-message-delivery"
         || scenario == "bidirectional-lobby-member-data-propagation-characterization" || scenario == "bidirectional-lobby-member-data-propagation"
@@ -84,6 +84,7 @@ Scenario selectedScenario(const Arguments& arguments)
     if (arguments.scenario == "bidirectional-reliable-p2p-listener-peek-characterization") return Scenario::bidirectionalReliableP2PListenerPeekCharacterization;
     if (arguments.scenario == "bidirectional-reliable-p2p-listener-peek") return Scenario::bidirectionalReliableP2PListenerPeek;
     if (arguments.scenario == "bidirectional-reliable-p2p-poll-read-characterization") return Scenario::bidirectionalReliableP2PPollReadCharacterization;
+    if (arguments.scenario == "bidirectional-reliable-p2p-poll-read") return Scenario::bidirectionalReliableP2PPollRead;
     if (arguments.scenario == "bidirectional-unreliable-p2p-listener-peek-characterization") return Scenario::bidirectionalUnreliableP2PListenerPeekCharacterization;
     if (arguments.scenario == "bidirectional-unreliable-p2p-listener-peek") return Scenario::bidirectionalUnreliableP2PListenerPeek;
     if (arguments.scenario == "bidirectional-lobby-message-delivery-characterization") return Scenario::bidirectionalLobbyMessageDeliveryCharacterization;
@@ -132,7 +133,7 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
                 && arguments.scenario != "reliable-p2p-listener-peek-characterization" && arguments.scenario != "reliable-p2p-listener-peek"
                 && arguments.scenario != "reliable-p2p-after-lobby-leave-characterization" && arguments.scenario != "reliable-p2p-after-lobby-leave"
                  && arguments.scenario != "bidirectional-reliable-p2p-listener-peek-characterization" && arguments.scenario != "bidirectional-reliable-p2p-listener-peek"
-                 && arguments.scenario != "bidirectional-reliable-p2p-poll-read-characterization"
+                  && arguments.scenario != "bidirectional-reliable-p2p-poll-read-characterization" && arguments.scenario != "bidirectional-reliable-p2p-poll-read"
                 && arguments.scenario != "bidirectional-unreliable-p2p-listener-peek-characterization" && arguments.scenario != "bidirectional-unreliable-p2p-listener-peek"
                 && arguments.scenario != "bidirectional-lobby-message-delivery-characterization" && arguments.scenario != "bidirectional-lobby-message-delivery"
                 && arguments.scenario != "bidirectional-lobby-member-data-propagation-characterization" && arguments.scenario != "bidirectional-lobby-member-data-propagation"
@@ -1908,28 +1909,45 @@ bool runBidirectionalReliableP2PListenerPeek(const Arguments& arguments, galaxy:
             if (!scheduled) return false;
 
             std::uint32_t availableSize = 0;
+            bool available = false;
+            int pollProcessDataCount = 0;
+            int availabilityCheckCount = 0;
             const auto observationDeadline = std::min(deadline, std::chrono::steady_clock::now() + std::chrono::seconds(20));
-            const bool available = pumpUntil(arguments, observationDeadline, [&] {
-                return networking->IsP2PPacketAvailable(&availableSize, expectedChannel);
-            });
+            while (std::chrono::steady_clock::now() < observationDeadline && !controlIsSet(arguments, "abort"))
+            {
+                galaxy::api::ProcessData();
+                ++pollProcessDataCount;
+                available = networking->IsP2PPacketAvailable(&availableSize, expectedChannel);
+                ++availabilityCheckCount;
+                if (available) break;
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            }
             bool readSucceeded = false;
             bool receivedSizeMatchesOpaquePayload = false;
             bool receivedPayloadMatchesOpaqueRelation = false;
             bool senderMatchesPeer = false;
+            int readCallCount = 0;
+            bool availabilityZeroAfterRead = false;
             if (available && availableSize > 0 && availableSize <= 1200)
             {
                 std::vector<std::uint8_t> received(availableSize);
                 std::uint32_t receivedSize = 0;
                 galaxy::api::GalaxyID sender;
                 readSucceeded = networking->ReadP2PPacket(received.data(), availableSize, &receivedSize, sender, expectedChannel);
+                ++readCallCount;
                 receivedSizeMatchesOpaquePayload = readSucceeded && receivedSize == expectedPayload.size();
                 receivedPayloadMatchesOpaqueRelation = receivedSizeMatchesOpaquePayload && received == expectedPayload;
                 senderMatchesPeer = readSucceeded && sender == peer;
+                std::uint32_t remainingSize = 0;
+                availabilityZeroAfterRead = !networking->IsP2PPacketAvailable(&remainingSize, expectedChannel);
             }
             records.push_back("{\"record\":\"p2p-poll-read\",\"listenerConstructed\":false,\"availabilityObserved\":" + boolean(available)
-                + ",\"availableSizeMatchesOpaquePayload\":" + boolean(available && availableSize == expectedPayload.size()) + ",\"readSucceeded\":" + boolean(readSucceeded)
+                + ",\"availableSizeMatchesOpaquePayload\":" + boolean(available && availableSize == expectedPayload.size()) + ",\"pollLoopCallsAvailabilityAfterProcessData\":"
+                + boolean(pollProcessDataCount > 0 && pollProcessDataCount == availabilityCheckCount) + ",\"readIssuedOnlyWhenAvailable\":" + boolean(readCallCount == 0 || available)
+                + ",\"readCallCount\":" + std::to_string(readCallCount) + ",\"readSucceeded\":" + boolean(readSucceeded)
                 + ",\"receivedSizeMatchesOpaquePayload\":" + boolean(receivedSizeMatchesOpaquePayload) + ",\"receivedPayloadMatchesOpaqueRelation\":"
-                + boolean(receivedPayloadMatchesOpaqueRelation) + ",\"senderMatchesPeer\":" + boolean(senderMatchesPeer) + "}");
+                + boolean(receivedPayloadMatchesOpaqueRelation) + ",\"senderMatchesPeer\":" + boolean(senderMatchesPeer) + ",\"postReadAvailabilityChecked\":"
+                + boolean(readCallCount == 1) + ",\"availabilityZeroAfterRead\":" + boolean(availabilityZeroAfterRead) + "}");
             writeEvent(arguments, "p2p-poll-observation-complete");
             return pumpUntil(arguments, deadline, [&] { return controlIsSet(arguments, "p2p-poll-peer-observation-complete"); });
         }
@@ -3751,14 +3769,14 @@ int run(const Arguments& arguments)
                 return p2pSucceeded ? 0 : 1;
             }
             if (scenario == Scenario::bidirectionalReliableP2PListenerPeekCharacterization || scenario == Scenario::bidirectionalReliableP2PListenerPeek
-                || scenario == Scenario::bidirectionalReliableP2PPollReadCharacterization
+                || scenario == Scenario::bidirectionalReliableP2PPollReadCharacterization || scenario == Scenario::bidirectionalReliableP2PPollRead
                 || scenario == Scenario::bidirectionalUnreliableP2PListenerPeekCharacterization || scenario == Scenario::bidirectionalUnreliableP2PListenerPeek)
             {
                 const bool unreliable = scenario == Scenario::bidirectionalUnreliableP2PListenerPeekCharacterization
                     || scenario == Scenario::bidirectionalUnreliableP2PListenerPeek;
                 const bool p2pSucceeded = runBidirectionalReliableP2PListenerPeek(arguments, user, records,
                     unreliable ? galaxy::api::P2P_SEND_UNRELIABLE : galaxy::api::P2P_SEND_RELIABLE,
-                    scenario == Scenario::bidirectionalReliableP2PPollReadCharacterization);
+                    scenario == Scenario::bidirectionalReliableP2PPollReadCharacterization || scenario == Scenario::bidirectionalReliableP2PPollRead);
                 records.push_back(selfStateRecord(user));
                 common::writeTrace(arguments.trace, records);
                 galaxy::api::Shutdown();

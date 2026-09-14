@@ -39,14 +39,65 @@ run the registered `behavior` label through `RunBehaviorCTest.cmake`.
 
 Never commit or print credentials. The ignored
 `Source/TestCommon/credentials.cmake` supplies two approved accounts plus the
-client credentials. Matching official `Galaxy64.lib`, `Galaxy64.dll`, and
-`GalaxyPeer64.dll`, an authenticated official environment, and network access
-are also required. Missing prerequisites leave live tests unregistered rather
+client credentials. Matching official `Galaxy64.lib`, `Galaxy64.dll`, and the
+default `GalaxyPeer64.dll` under `Source/DLLs/1.152.11/gog`, an authenticated
+official environment, and network access are also required. The base
+`Galaxy64.dll` remains in that directory; the channel-8 peer is a local-only
+staging overlay. Missing prerequisites leave live tests unregistered rather
 than making normal builds fail. Direct `IChat` additionally needs approved
 official profiles to be friends with direct-message privacy permitting friends.
 `IFriends` peer-information retrieval has no friendship or direct-message
 privacy precondition. These are external test-environment preconditions, not
 product root-cause claims.
+
+## Local Channel-8 Peer Overlay
+
+The runner can stage a verified channel-8 `msvc-18` `GalaxyPeer64.dll` over its
+side-by-side copy. Do not replace or commit the official `Galaxy64.dll` or any
+downloaded binary. Download and verify the peer in a temporary directory, using
+GOG's channel-8 manifest as the authority:
+
+```powershell
+$root = Join-Path $env:TEMP "universelan-gog-peer-8"
+New-Item -ItemType Directory -Force -Path $root | Out-Null
+$manifestUri = "https://cfg.gog.com/desktop-galaxy-peer/8/master/files-windows.json"
+$manifestPath = Join-Path $root "files-windows.json"
+curl.exe --fail --silent --show-error --location $manifestUri --output $manifestPath
+$manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
+$entry = @($manifest.files | Where-Object { $_.path -eq "peer/msvc-18/GalaxyPeer64.dll" })
+if ($entry.Count -ne 1) { throw "Channel-8 msvc-18 peer entry was not unique" }
+$archivePath = Join-Path $root "GalaxyPeer64.dll.zip"
+curl.exe --fail --silent --show-error --location "$($manifest.baseURI)/$($entry[0].resource)" --output $archivePath
+if ((Get-Item -LiteralPath $archivePath).Length -ne [Int64]$entry[0].size) { throw "Peer archive size mismatch" }
+Expand-Archive -LiteralPath $archivePath -DestinationPath (Join-Path $root "expanded") -Force
+$peerPath = Join-Path $root "expanded\GalaxyPeer64.dll"
+if ((Get-FileHash -LiteralPath $peerPath -Algorithm MD5).Hash.ToLowerInvariant() -ne $entry[0].hash) { throw "Peer MD5 mismatch" }
+if ((Get-FileHash -LiteralPath $peerPath -Algorithm SHA256).Hash.ToLowerInvariant() -ne $entry[0].sha256) { throw "Peer SHA256 mismatch" }
+```
+
+The verified manifest selects resource
+`GalaxyPeer/145625863/windows/peer/msvc-18/GalaxyPeer64.dll.zip`, archive size
+`4046641`, extracted MD5 `42003330fb3100d7597544b465211e9f`, and extracted
+SHA-256 `e3526b29caad722468081a9c2d04f918db046b155a17baf797d562b950ee3713`.
+The manifest hashes the extracted DLL, not the ZIP. Configure the local-only
+overlay directory (or pass its DLL directly with `--gog-peer-overlay`):
+
+```powershell
+cmake -S . -B cmake-behaviour-15211-x64 -G "Visual Studio 18 2026" -A x64 -D BUILD_UNIVERSELAN_BEHAVIOUR_TESTS=ON -D ENABLE_UNIVERSELAN_GOG_BEHAVIOUR_TESTS=ON -D LIMIT_VERSIONS="1.152.11" -D UNIVERSELAN_BEHAVIOUR_TEST_GOG_PEER_OVERLAY="$root\expanded"
+```
+
+The runner copies all default official DLLs, then overwrites only staged
+`GalaxyPeer64.dll`. CMake passes the option to every registered official
+scenario; with no cache entry or `--gog-peer-overlay` argument, staging is
+unchanged. Treat the temporary directory as local tooling: never attach, print,
+or commit its binaries.
+
+The verified 2026-09-14 full-suite run staged the expected peer hash in both
+official hosts, but finished 18/21: all three listener P2P contracts retained
+the historical non-target callback. GOG documents that modern SDKs load this
+component from installed GOG Galaxy client redistributables, so side-by-side
+staging alone is not evidence that the runtime selected the overlay. The strict
+listener contracts remain unresolved and are not passing UniverseLAN differences.
 
 `Simple/reliable-p2p-listener-peek` uses an authorized tagged temporary public
 FCM lobby. The public tag is a collision marker, not confidential data. The
@@ -55,13 +106,11 @@ creator creates it nonjoinable, tags/configures it, then explicitly observes
 `GlobalNetworkingListener` before the runner releases the creator. For each
 expected-channel `OnP2PPacketAvailable` callback, it performs two
 `PeekP2PPacket` calls, then destroys the listener before `Shutdown`. It never
-uses polling, read, or pop APIs in listener mode. Three clean official-only
-trials on 2026-09-14 scheduled the post-arm-settled reliable send but observed
-one non-target callback and no expected-channel callback or peeks. The focused
-four-host comparison observed the exact UniverseLAN delivery/two-peek relation.
-The manifest accepts only that `GOG no delivery` versus `UniverseLAN delivery`
-pair as a beneficial environmental difference; setup, scheduling, cleanup, and
-all other callback relations remain strict.
+uses polling, read, or pop APIs in listener mode. The strict contract requires
+exactly one expected-channel callback and two equivalent callback-local peeks in
+both lanes. The verified local overlay did not establish that result in the
+current environment, so this test remains failing rather than accepting no
+delivery; setup, scheduling, cleanup, and all callback relations remain strict.
 
 `Simple/bidirectional-reliable-p2p-listener-peek` uses the same safe public,
 capacity-two FCM lobby setup. Both members obtain the other peer only from the
@@ -71,10 +120,9 @@ synchronized exchange. Each sends one distinct opaque token-derived payload with
 `P2P_SEND_RELIABLE`: channel 73 from `user1` to `user2`, and channel 74 in the
 reverse direction. Every expected-channel callback makes exactly two
 callback-local `PeekP2PPacket` calls; listener mode never polls, reads, or pops.
-Three official-only trials on 2026-09-14 scheduled both directions but observed
-one non-target callback, no expected-channel callback, and no peeks per host.
-The strict contract accepts only that exact per-direction no-delivery relation
-against UniverseLAN's matching delivery/two-peek relation. Listener destruction,
+Each direction strictly requires one expected-channel callback and exactly two
+equivalent callback-local peeks in both lanes. The verified local overlay did
+not establish those facts in the current environment. Listener destruction,
 peer/lobby/channel/payload relations, scheduling, and fresh-deadline cleanup
 remain strict; no raw IDs, bytes, lengths, token, or marker are retained.
 
@@ -85,15 +133,26 @@ settle `GlobalNetworkingListener`, then send one distinct opaque payload with
 `P2P_SEND_UNRELIABLE` on separate non-default channels after the synchronized
 release. Each expected-channel callback makes exactly two callback-local,
 non-consuming `PeekP2PPacket` calls; listener mode never polls, reads, or pops.
-Three clean official-only runs on 2026-09-14 scheduled both directions but each
-host observed one non-target callback, no expected-channel callback, and no
-peek. The focused four-host comparison observed the exact UniverseLAN
-delivery/two-peek relation in both directions. `SendP2PPacket` returning true
-means only that its UDP-like packet was scheduled; neither this send type nor
-the observed environmental pair guarantees delivery. The manifest accepts only
-those independently exact directional pairs. Peer/lobby/channel/payload,
-scheduling, listener destruction, and cleanup remain strict; no raw IDs, bytes,
-lengths, token, or marker are retained.
+Both directions strictly require one expected-channel callback and two
+equivalent callback-local peeks in both lanes. The verified local overlay did
+not establish those facts in the current environment. `SendP2PPacket` returning
+true still means only that its UDP-like packet was scheduled. Peer/lobby/channel/
+payload, delivery, scheduling, listener destruction, and cleanup remain strict;
+no raw IDs, bytes, lengths, token, or marker are retained.
+
+`Simple/bidirectional-reliable-p2p-poll-read` is a separate listener-free
+contract. Both members use the same safe public capacity-two FCM lobby, obtain
+the other peer only from joined-lobby membership, and send one distinct reliable
+opaque payload on separate channels after the synchronized polling gate. No
+`GlobalNetworkingListener` is constructed. In each polling loop, `ProcessData`
+precedes `IsP2PPacketAvailable`; only availability permits one exact-size
+`ReadP2PPacket`. The immediately following availability check confirms that the
+read consumed the expected-channel queue entry. Three clean official-only trials
+and the focused four-host comparison on 2026-09-14 matched every symbolic
+peer/channel/payload, read, consumption, and cleanup relation. This polling-mode
+delivery result is separate from the unresolved listener-mode exact-delivery
+contracts. The header still directs listener users to callback-local
+non-consuming peeks rather than polling or reading.
 
 `Simple/reliable-p2p-after-lobby-leave` is a separate post-leave contract. It
 creates the same authorized nonjoinable-to-joinable tagged public capacity-two
@@ -198,11 +257,12 @@ still passes. A `candidate difference` remains a strict mismatch; it is not
 accepted merely because it has been characterized. Current records include the
 accepted GOG-service-state pair, accepted `IFriends` peer persona-state pair,
 accepted faster UniverseLAN lobby convergence, and matched direct-chat and
-Advanced multiple-lobby baselines. See the
+Advanced multiple-lobby baselines.
 
 Per-interface callback order is meaningful where a scenario says it is. Across
 hosts or independent interfaces, only documented causal gates are compared;
 elapsed timing and eventual-list retry counts are bounded diagnostics, not a
+comparison rule.
 
 `Simple/friends-peer-information-retrieval` uses only public `IFriends` calls.
 Both hosts install `GlobalPersonaDataChangedListener` before one-time private

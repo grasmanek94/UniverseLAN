@@ -12,10 +12,6 @@
     },
     "requiredTerminalOutcome": "success",
     "unexpectedRecords": "fail",
-    "opaqueIds": "raw Galaxy IDs, lobby IDs, collision-marker-derived payload bytes, and message lengths are never recorded; compare only symbolic membership, sender, channel, callback, and non-consuming peek relations",
-    "acceptedP2PDeliveryPair": {
-      "gog": "scheduled-no-expected-channel-callback-or-peeks",
-      "universelan": "scheduled-delivery-and-two-peeks"
-    }
+    "opaqueIds": "raw Galaxy IDs, lobby IDs, collision-marker-derived payload bytes, and message lengths are never recorded; compare only symbolic membership, sender, channel, callback, and non-consuming peek relations"
   }
 }
