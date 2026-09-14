@@ -167,6 +167,8 @@ namespace universelan::client {
 				password = config->GetOverrideSignInPassword();
 			}
 
+			trace.write_all("Override sign in enabled with ID: {}", id);
+
 			intf()->USER_SIGN_IN_CREDENTIALS(
 				id.c_str(),
 				password.c_str()
@@ -176,6 +178,8 @@ namespace universelan::client {
 			);
 		}
 		else {
+			trace.write_all("Normal sign in");
+
 			intf()->USER_SIGN_IN_GALAXY(
 #if GALAXY_BUILD_FEATURE_HAS_SIGNIN_REQUIREONLINE
 				requireOnline
