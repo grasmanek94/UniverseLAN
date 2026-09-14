@@ -29,6 +29,16 @@ The recorded accepted lobby convergence result passes because eventual-list retr
 timing is explicitly excluded from lane equality. Matched live baselines remain
 strict for every public fact they record.
 
+### `Simple/reliable-p2p-listener-peek` on `1.152.11/x64`
+
+- Date: 2026-09-14
+- Classification: accepted beneficial environmental difference
+- Public observation: three clean official-GOG-only trials created an initially nonjoinable tagged public/capacity-two FCM lobby, configured its public collision marker, explicitly observed joinable before discovery, armed `GlobalNetworkingListener`, completed the post-arm settling window, and scheduled one reliable send to the current public-query-discovered member. Every official joiner observed exactly one symbolic non-target callback, no expected-channel callback, and no peeks. Both terminal leaves and cleanup acknowledgements completed in all three trials.
+- Official normalized result: strict setup, membership, listener construction, post-arm settling, sender scheduling, listener destruction, and terminal leaves succeeded. The exact accepted delivery record is one non-target callback with no expected-channel callback and no peeks.
+- UniverseLAN normalized result: the focused four-host comparison completed the exact expected-channel callback/size relation, two equivalent successful non-consuming peeks, valid non-self creator sender and opaque payload/length relations, clean listener destruction, and matching local leaves.
+- Reproduction command/test name: `--characterize-official-gog-reliable-p2p-listener-peek`; `universelan-behaviour-simple-reliable-p2p-listener-peek-x64-1.152.11`; portable `RunBehaviorCTest.cmake` with `BEHAVIOUR_TEST_LABEL="^reliable-p2p-listener-peek$"`.
+- Follow-up: `INetworking.h` specifies that a true `SendP2PPacket` result is scheduling, not delivery, and peek is non-consuming in the listener callback. The comparator accepts only the documented exact GOG no-delivery versus UniverseLAN delivery/two-peek pair; all setup, send, cleanup, and other callback fields remain strict. The public collision marker is not confidential and is never printed. No raw IDs, lobby IDs, payload bytes, marker value, message length, control, runtime output, or run-root path is recorded.
+
 ### `Simple/public-lobby-owner-close-lifecycle` on `1.152.11/x64`
 
 - Date: 2026-09-14
@@ -109,7 +119,7 @@ strict for every public fact they record.
 - Official normalized result: matched the UniverseLAN result for `user1` and `user2`.
 - UniverseLAN normalized result: matched the official result for `user1` and `user2`.
 - Reproduction command/test name: `universelan-behaviour-simple-public-lobby-create-list-join-leave-x64-1.152.11`.
-- Follow-up: all four hosts acknowledged cleanup and the successful private root was removed. Add a candidate entry if a later live comparison mismatches; never copy the private token or artifacts here.
+- Follow-up: all four hosts acknowledged cleanup and the successful private root was removed. Add a candidate entry if a later live comparison mismatches; never copy the public collision-marker value or artifacts here.
 
 ### `Simple/public-lobby-data-propagation` on `1.152.11/x64`
 

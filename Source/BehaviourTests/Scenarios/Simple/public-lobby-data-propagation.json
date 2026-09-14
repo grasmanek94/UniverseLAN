@@ -12,6 +12,6 @@
     },
     "requiredTerminalOutcome": "success",
     "unexpectedRecords": "fail",
-    "opaqueIds": "private token-derived lobby data and raw Galaxy IDs are never recorded; compare public callback validity, copy visibility, and creator/joiner/owner/member relations only"
+    "opaqueIds": "collision-marker-derived public lobby data and raw Galaxy IDs are never recorded; compare public callback validity, copy visibility, and creator/joiner/owner/member relations only"
   }
 }

@@ -95,6 +95,31 @@ The command needs approved signed-in profiles only. It does not create
 friendships or mutate social data. It prints only symbolic
 terminal/state/persona-change facts and removes the successful private root.
 
+Characterize reliable listener-mode P2P before changing its strict facts:
+
+```powershell
+& "bin/Debug/universelan-behaviour-runner-x64-1.152.11.exe" --characterize-official-gog-reliable-p2p-listener-peek --gog-host "bin/Debug/universelan-behaviour-host-gog-x64-1.152.11.exe" --gog-runtime-dir "Source/DLLs/1.152.11/gog"
+```
+
+The authorized temporary-lobby probe creates a public, initially nonjoinable,
+capacity-two FCM lobby, sets its collision marker, then explicitly sets and
+observes joinable before discovery. The marker is not confidential because
+public lobby data can be listed and read; it is never printed. The creator finds
+the peer only from public lobby membership and schedules one reliable bounded
+opaque payload on its fixed channel after a bounded post-arm `ProcessData`
+settling window. For each expected-channel callback, the joiner performs two
+non-consuming `PeekP2PPacket` calls only in that callback, with callback-sized
+private buffers, and destroys the listener before shutdown.
+Do not add `IsP2PPacketAvailable`, `ReadP2PPacket`, `PopP2PPacket`, or a
+post-callback removal assertion. The header describes scheduled send and
+non-consuming peek semantics, not a delivery guarantee. Three clean official
+trials on 2026-09-14 produced the exact scheduled-no-delivery observation: one
+non-target callback, no expected-channel callback, and no peeks, with both
+terminal leaves acknowledged. The passing focused comparison accepts only that
+exact GOG relation versus the observed exact UniverseLAN expected-channel,
+two-peek relation. Every setup, send, cleanup, and other callback field remains
+strict.
+
 The similarly non-CTest lobby-data characterization mode is:
 
 ```powershell
@@ -174,7 +199,7 @@ hosts, and two official hosts are launched together. The manifest can select
 `Simple/public-lobby-create-list-join-leave` is concurrent only in practice: it
 starts the UniverseLAN server, both UniverseLAN hosts, and both official hosts.
 Its private run root contains a distinct control file for each host. The runner
-creates a collision-resistant token only in those files, relays symbolic
+creates a collision-resistant marker only in those files, relays symbolic
 creator-ready/joiner-joined/two-member/joiner-left gates through them, and uses
 separate event files for acknowledgements. Do not inspect or copy those files.
 They are orchestration data, never test evidence. On any host failure or timeout
@@ -210,11 +235,11 @@ adding or characterizing a scenario.
 The approved comparator host contracts are `initialize-and-sign-in`,
 `session-id-repeatability`, `gog-services-state`,
 `public-lobby-create-list-join-leave`, `public-lobby-owner-close-lifecycle`, `public-lobby-owner-ownership-transition`, `public-lobby-data-propagation`, and
-`chat-room-message-delivery`, and
+`chat-room-message-delivery`, `reliable-p2p-listener-peek`, and
 `multiple-lobby-membership-and-message-isolation`; the additional runner-selected diagnostics are
 `gog-services-state-characterization`,
 `public-lobby-owner-close-lifecycle-characterization`, `public-lobby-owner-ownership-transition-characterization`, `public-lobby-data-propagation-characterization`, and
-`chat-room-message-delivery-characterization`, and
+`chat-room-message-delivery-characterization`, `reliable-p2p-listener-peek-characterization`, and
 `multiple-lobby-membership-and-message-isolation-characterization`. Manifests and host
 arguments outside that fixed registry are rejected. The strict `gog-services-state`
 contract uses no service-state listener and makes its single public
@@ -230,9 +255,10 @@ traces and normalized report under its printed `runDirectory`; add a candidate t
 `BEHAVIOUR_DIFFERENCES.md` using only those boolean observations.
 
 The lobby contract uses only public `IMatchmaking` calls and listeners. It creates
-a public, joinable, two-member FCM lobby, sets the private token under the fixed
-metadata key, then uses an equality filter and at most six list attempts with a
-250 ms backoff. The trace records the bounded retry fact, never the token. Both
+a public, nonjoinable, two-member FCM lobby, sets the collision marker under the
+fixed metadata key, then explicitly makes it joinable and observes that state
+before using an equality filter and at most six list attempts with a
+250 ms backoff. The trace records the bounded retry fact, never the marker value. Both
 lanes must converge successfully within that bound; their successful attempt
 counts are retained for diagnosis but are not cross-lane equality because public
 listing is eventually consistent. It
@@ -244,7 +270,7 @@ add a candidate entry using only normalized symbolic facts and cleanup status.
 `Simple/public-lobby-data-propagation` reuses the temporary lobby setup but arms
 the joiner's public `GlobalLobbyDataListener` only after join completion. The
 runner then releases the creator to call `SetLobbyData` with a separate fixed key
-and a nonempty private token-derived value. The joiner uses only public
+and a nonempty collision-marker-derived value. The joiner uses only public
 `GetLobbyDataCopy` to validate it. Its control protocol carries symbolic
 observer-armed, update-complete, data-observed, leave, abort, and cleanup gates.
 It never records the token, key, value, raw IDs, personas, credentials, or
@@ -253,7 +279,7 @@ and has no creator/joiner callback-order assertion; callback count, duplicates,
 and runner callback-gate discovery order are characterization diagnostics only.
 
 `Simple/public-lobby-owner-close-lifecycle` uses the same public setup with a
-distinct private token in each lane. The runner releases the creator only after
+distinct collision marker in each lane. The runner releases the creator only after
 the joiner has armed `GlobalLobbyMemberStateListener` and
 `GlobalLobbyLeftListener`. Its only cross-host constraints are listener arming
 before creator leave and cleanup acknowledgements. The host completes post-close
@@ -335,10 +361,10 @@ relation/change pairs. No raw ID, name, avatar data, count, status text,
 `Advanced/multiple-lobby-membership-and-message-isolation` uses the same two
 profiles in one lane. Creator `CreateLobby` calls for symbolic `L0` and `L1`
 are adjacent before `ProcessData`, with separate create/enter listeners. After
-each successful automatic enter it explicitly calls `SetLobbyType(public)`,
-`SetLobbyJoinable(true)`, and `SetMaxNumLobbyMembers(2)`, waits for their public
-operation callbacks, and checks the three public queries before tagging either
-lobby. The joiner independently discovers both tags, then issues both
+each successful automatic enter it explicitly sets public/capacity, writes its
+public collision marker, then calls `SetLobbyJoinable(true)` and observes all
+three public queries before discovery. The joiner independently discovers both
+markers, then issues both
 `JoinLobby` calls adjacent before `ProcessData` with separate listeners. Both
 hosts arm public lobby-message listeners before the creator sends adjacent,
 opaque token-derived messages. Callback-local reads validate only symbolic

@@ -12,6 +12,6 @@
     },
     "requiredTerminalOutcome": "success",
     "unexpectedRecords": "fail",
-    "opaqueIds": "private tags, opaque message payloads, raw Galaxy IDs, lobby IDs, and message IDs are never recorded; only L0/L1 symbolic public relations are compared"
+    "opaqueIds": "public collision-marker values, opaque message payloads, raw Galaxy IDs, lobby IDs, and message IDs are never recorded; only L0/L1 symbolic public relations are compared"
   }
 }

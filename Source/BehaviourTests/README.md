@@ -48,12 +48,28 @@ official profiles to be friends with direct-message privacy permitting friends.
 privacy precondition. These are external test-environment preconditions, not
 product root-cause claims.
 
+`Simple/reliable-p2p-listener-peek` uses an authorized tagged temporary public
+FCM lobby. The public tag is a collision marker, not confidential data. The
+creator creates it nonjoinable, tags/configures it, then explicitly observes
+`SetLobbyJoinable(true)` before discovery. The joiner constructs
+`GlobalNetworkingListener` before the runner releases the creator. For each
+expected-channel `OnP2PPacketAvailable` callback, it performs two
+`PeekP2PPacket` calls, then destroys the listener before `Shutdown`. It never
+uses polling, read, or pop APIs in listener mode. Three clean official-only
+trials on 2026-09-14 scheduled the post-arm-settled reliable send but observed
+one non-target callback and no expected-channel callback or peeks. The focused
+four-host comparison observed the exact UniverseLAN delivery/two-peek relation.
+The manifest accepts only that `GOG no delivery` versus `UniverseLAN delivery`
+pair as a beneficial environmental difference; setup, scheduling, cleanup, and
+all other callback relations remain strict.
+
 ## How To Read A Result
 
 Each scenario runs two synchronized lanes: UniverseLAN server plus two
 UniverseLAN hosts, and two official-GOG hosts using the same profiles. Reports
-compare normalized public traces. Opaque IDs, private tokens, timestamps, and
-other server-assigned values are converted to local symbolic relationships.
+compare normalized public traces. Opaque IDs, public collision-marker values,
+timestamps, and other server-assigned values are converted to local symbolic
+relationships.
 
 `exact-equality` means the required normalized facts matched. An
 `accepted-difference` is an intentionally narrow, documented exception that
@@ -89,9 +105,11 @@ declare required/permitted/failing records and normalization rules in its
 manifest and coverage entry, then add a strict contract only for stable public
 facts. Advanced scenarios require characterized Simple prerequisites.
 
-Temporary lobby and chat scenarios have special cleanup assumptions. Lobbies
-must use a runner-generated private token, explicitly set public/joinable/capacity
-before a peer joins, and prove all cleanup acknowledgements.
+Temporary lobby and chat scenarios have special cleanup assumptions. Public
+lobbies use a runner-generated collision marker, which is not confidential
+because public lobby data can be listed and read. They are created nonjoinable,
+tagged/configured, then explicitly made joinable and observed before discovery;
+all hosts must prove cleanup acknowledgements.
 `Simple/public-lobby-owner-close-lifecycle` additionally isolates the token per
 lane, waits for the joiner's public global listeners before the creator's normal
 leave, and redacts controls, configuration, and runtime output from retained

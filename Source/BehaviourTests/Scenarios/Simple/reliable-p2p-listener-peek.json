@@ -1,0 +1,21 @@
+{
+  "name": "Simple/reliable-p2p-listener-peek",
+  "sdkVersion": "1.152.11",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 45,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": {
+      "user1": ["initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata", "p2p-send", "creator-leave", "self-state"],
+      "user2": ["initialize", "sign-in-callback", "sign-in-terminal", "list", "join", "joiner-two-member-snapshot", "p2p-listener-armed", "p2p-listener-peek", "p2p-listener-destroyed", "joiner-leave", "self-state"]
+    },
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "raw Galaxy IDs, lobby IDs, collision-marker-derived payload bytes, and message lengths are never recorded; compare only symbolic membership, sender, channel, callback, and non-consuming peek relations",
+    "acceptedP2PDeliveryPair": {
+      "gog": "scheduled-no-expected-channel-callback-or-peeks",
+      "universelan": "scheduled-delivery-and-two-peeks"
+    }
+  }
+}

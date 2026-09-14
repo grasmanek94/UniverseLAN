@@ -114,7 +114,7 @@ combine already-characterized Simple contracts.
 | --- | --- | --- |
 | Initialization / `IUser` | Init outcome, sign-in terminal behavior, `SignedIn`, `IsLoggedOn`, self ID validity/type, persona availability, and consecutive `GetSessionID()` equality. | Reinitialization, sign-out, connection loss/recovery. |
 | `IMatchmaking` | Create/list/join public lobby, operation result, owner/member relationships, basic lobby data, owner-close lifecycle, and ownership-transition characterization. | Multiple concurrent memberships, lobby-message isolation, owner-close comparison, and ownership-transition comparison are implemented; filters and other failure paths remain. |
-| `INetworking` | Reliable P2P packet scheduling, receive callback/poll state, payload/content, sender relationship. | Three-peer routing, channel behavior, unreliable packets, disconnect/NAT/server-host behavior. |
+| `INetworking` | Reliable P2P listener-mode scheduling and callback-local non-consuming peek relations. Three clean official 2026-09-14 trials established the exact accepted environmental pair: scheduled send with a non-target callback and no expected-channel delivery/peek versus UniverseLAN expected-channel delivery and two peeks. | Three-peer routing, channel behavior, unreliable packets, disconnect/NAT/server-host behavior. |
 | `IChat` | One-to-one room request, room identity reuse, message send terminal result, remote message content/sender relationship. | History/pagination, membership lifecycle, read state, denial/failure behavior. |
 | `IFriends` | Persona information retrieval, persona state, rich-presence set/get callback behavior, game invitations where official accounts permit it. | Friend relationships, invitation/acceptance flows, persistence, richer presence state. |
 | `IStats` | Retrieve/store operation outcomes, a dedicated test stat/achievement value, post-store public read. | Cross-process durability, reset/failure handling, ordering with presence/user data. |
@@ -130,9 +130,11 @@ identity and state, then a two-host simple matchmaking/P2P contract. No
 mutating GOG social, cloud, achievement, or public-lobby scenario will be
 enabled before account and application isolation rules are agreed.
 
-Every behavior lobby that a peer must join explicitly configures and observes a
-joinable public state and its intended maximum-member capacity before the join
-phase. These are public `IMatchmaking` setup conditions, not inferred defaults.
+Every behavior lobby that a peer must join is created nonjoinable, configured
+and tagged with a collision marker, then explicitly made joinable and observed
+before discovery. Public lobby markers are not confidential because public lobby
+data can be listed and read; they are never printed. These are public
+`IMatchmaking` setup conditions, not inferred defaults.
 
 ## Development Phases
 
@@ -202,10 +204,12 @@ phase. These are public `IMatchmaking` setup conditions, not inferred defaults.
   friendships or mutates social data. Successful private roots are removed;
   retained failures redact relays, controls, configuration, and runtime output.
 - `Simple/public-lobby-create-list-join-leave` uses the approved tagged temporary
-  lobby only. The runner generates its token inside the private run root and puts
-  it only in one control file per host. The token is never in a manifest, host
-  argument, trace, log, normalized report, console output, or documentation.
-  The creator writes its metadata before signalling ready. The runner relays only
+  lobby only. The runner generates its collision marker inside the private run
+  root and puts it only in one control file per host. The marker is never in a
+  manifest, host argument, trace, log, normalized report, console output, or
+  documentation. Public lobby data can expose it, so it is a collision marker,
+  not confidential data. The creator writes metadata and observes explicit
+  joinability before signalling ready. The runner relays only
    symbolic event-file gates to the joiner and requires cleanup acknowledgement
    before forcibly stopping a failed host.
 - `Simple/public-lobby-owner-ownership-transition` uses a distinct tagged public
@@ -216,7 +220,21 @@ phase. These are public `IMatchmaking` setup conditions, not inferred defaults.
   the creator's normal leave. The former owner remains alive until the joiner's
   matching terminal leave and token-filtered post-empty absence probe. Tokens,
   token-derived data, raw IDs, controls, relays, and runtime output are not
-  retained. Global listener-class ordering and list retries are diagnostics only.
+   retained. Global listener-class ordering and list retries are diagnostics only.
+
+- `Simple/reliable-p2p-listener-peek` creates the authorized public FCM lobby
+  nonjoinable, configures capacity and its public collision marker, then calls
+  and observes `SetLobbyJoinable(true)` before discovery. After the joiner arms
+  `GlobalNetworkingListener`, the creator performs ten bounded `ProcessData`
+  settling pumps before scheduling the reliable send. For each expected-channel
+  callback, the joiner makes exactly two non-consuming `PeekP2PPacket` calls;
+  listener-mode code never polls, reads, or pops packets. Three clean official
+  trials observed exactly one non-target callback and no expected-channel peek;
+  the focused comparison observed UniverseLAN expected-channel delivery and two
+  equivalent peeks. The manifest accepts only that exact pair. Both leaves use a
+  fresh bounded deadline and continue `ProcessData` pumping after the observation
+  window; a host clears joined state or acknowledges cleanup only after its own
+  matching terminal leave callback.
 
 ## Acceptance Criteria
 
@@ -310,7 +328,7 @@ phase. These are public `IMatchmaking` setup conditions, not inferred defaults.
 
 - `Simple/public-lobby-data-propagation` uses the same temporary lobby harness.
   After the joiner joins and its public `GlobalLobbyDataListener` is armed, the
-  owner sets a separate fixed key to a nonempty runner-private token-derived
+  owner sets a separate fixed key to a nonempty runner collision-marker-derived
   value. The joiner validates only through public `GetLobbyDataCopy`. Official
   `1.152.11/x64` characterization confirmed owner update success, joined-lobby
   notification availability, invalid symbolic `memberID` for lobby-level data,

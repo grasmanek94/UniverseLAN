@@ -12,6 +12,6 @@
     },
     "requiredTerminalOutcome": "success",
     "unexpectedRecords": "fail",
-    "opaqueIds": "private token and raw Galaxy IDs are never recorded; compare only public validity and creator/joiner/owner/member relations"
+    "opaqueIds": "public collision-marker values and raw Galaxy IDs are never recorded; compare only public validity and creator/joiner/owner/member relations"
   }
 }
