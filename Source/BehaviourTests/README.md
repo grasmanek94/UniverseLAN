@@ -42,10 +42,11 @@ Never commit or print credentials. The ignored
 client credentials. Matching official `Galaxy64.lib`, `Galaxy64.dll`, and
 `GalaxyPeer64.dll`, an authenticated official environment, and network access
 are also required. Missing prerequisites leave live tests unregistered rather
-than making normal builds fail. The direct `IChat` scenario additionally needs
-the approved official profiles to be friends with messaging privacy set to
-friends. This is an external test-environment precondition, not a product
-root-cause claim.
+than making normal builds fail. Direct `IChat` additionally needs approved
+official profiles to be friends with direct-message privacy permitting friends.
+`IFriends` peer-information retrieval has no friendship or direct-message
+privacy precondition. These are external test-environment preconditions, not
+product root-cause claims.
 
 ## How To Read A Result
 
@@ -58,14 +59,28 @@ other server-assigned values are converted to local symbolic relationships.
 `accepted-difference` is an intentionally narrow, documented exception that
 still passes. A `candidate difference` remains a strict mismatch; it is not
 accepted merely because it has been characterized. Current records include the
-accepted GOG-service-state pair, accepted faster UniverseLAN lobby convergence,
-and matched direct-chat and Advanced multiple-lobby baselines. See the
-difference log for the exact public facts and reproduction commands.
+accepted GOG-service-state pair, accepted `IFriends` peer persona-state pair,
+accepted faster UniverseLAN lobby convergence, and matched direct-chat and
+Advanced multiple-lobby baselines. See the
 
 Per-interface callback order is meaningful where a scenario says it is. Across
 hosts or independent interfaces, only documented causal gates are compared;
 elapsed timing and eventual-list retry counts are bounded diagnostics, not a
-global ordering contract.
+
+`Simple/friends-peer-information-retrieval` uses only public `IFriends` calls.
+Both hosts install `GlobalPersonaDataChangedListener` before one-time private
+peer-ID relays and call `RequestUserInformation(peer, AVATAR_TYPE_NONE,
+listener)`. `AVATAR_TYPE_NONE` does not assert absent avatar-related callbacks
+because default avatar criteria can still apply. It retains no raw ID, persona
+text, avatar data, count, status text, timestamp, credential, runtime output,
+or relay artifact. Successful paths remove their private run root; failures
+retain only sanitized symbolic traces and reports.
+Its sole accepted difference is the observed same-profile persona-state pair
+`GOG offline` versus `UniverseLAN online`, consistent with the documented
+service-state environment. This is an accepted beneficial environmental
+difference, not an SDK guarantee; terminal, availability, name, callback-peer,
+and all other required facts remain strict. Requested-peer listener variation
+remains diagnostic only.
 
 ## Authoring And Validation
 

@@ -11,7 +11,7 @@ namespace universelan::client {
 	using namespace galaxy::api;
 	FriendsImpl::FriendsImpl(InterfaceInstances* intf) :
 		intf{ intf }, listeners{ intf->notification.get() },
-		avatar_criteria{ 0 }, online_friends{}
+		avatar_criteria{ 0 }, reachable_peers{}
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS };
 	}
@@ -75,12 +75,19 @@ namespace universelan::client {
 
 		if (data->found) {
 			auto entry = intf->user->GetGalaxyUserData(data->id);
+			const bool first_retrieval = !entry->friend_information_retrieved;
 			entry->stats = data->asuc;
 			if (entry->nickname != data->nickname) {
 				entry->nickname = data->nickname;
 			}
+			entry->friend_information_retrieved = true;
 #if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS
 			listeners->NotifyAllNow(listener, &IUserInformationRetrieveListener::OnUserInformationRetrieveSuccess, data->id);
+#endif
+#if GALAXY_BUILD_FEATURE_IFRIENDS_ONPERSONADATACHANGED
+			if (first_retrieval)
+				listeners->NotifyAllNow(&IPersonaDataChangedListener::OnPersonaDataChanged, data->id,
+					IPersonaDataChangedListener::PERSONA_CHANGE_NAME | IPersonaDataChangedListener::PERSONA_CHANGE_AVATAR);
 #endif
 		}
 		else {
@@ -97,7 +104,7 @@ namespace universelan::client {
 	bool FriendsImpl::IsUserInformationAvailable(GalaxyID userID) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		return intf->user->IsUserDataAvailable(userID);
+		return intf->config->IsSelfUserID(userID) || intf->user->GetGalaxyUserData(userID)->friend_information_retrieved;
 	}
 #endif
 
@@ -156,8 +163,8 @@ namespace universelan::client {
 			return GetPersonaState();
 		}
 
-		lock_t lock(mtx_online_friends);
-		return (online_friends.find(userID) != online_friends.end()) ?
+		lock_t lock(mtx_reachable_peers);
+		return (reachable_peers.find(userID) != reachable_peers.end()) ?
 			PERSONA_STATE_ONLINE :
 			PERSONA_STATE_OFFLINE;
 	}
@@ -227,15 +234,15 @@ namespace universelan::client {
 	uint32_t FriendsImpl::GetFriendCount() {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		lock_t lock(mtx_online_friends);
-		return (uint32_t)online_friends.size();
+		lock_t lock(mtx_reachable_peers);
+		return (uint32_t)reachable_peers.size();
 	}
 
 	GalaxyID FriendsImpl::GetFriendByIndex(uint32_t index) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		lock_t lock(mtx_online_friends);
-		return container_get_by_index(online_friends, index, GalaxyID(0));
+		lock_t lock(mtx_reachable_peers);
+		return container_get_by_index(reachable_peers, index, GalaxyID(0));
 	}
 #endif
 
@@ -611,8 +618,8 @@ namespace universelan::client {
 
 		bool contains = false;
 		{
-			lock_t lock(mtx_online_friends);
-			contains = online_friends.contains(userID);
+			lock_t lock(mtx_reachable_peers);
+			contains = reachable_peers.contains(userID);
 		}
 
 		if (!contains) {
@@ -654,8 +661,8 @@ namespace universelan::client {
 	bool FriendsImpl::IsUserInTheSameGame(GalaxyID userID) const {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IFRIENDS | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
-		lock_t lock(mtx_online_friends);
-		return (userID == intf->user->GetGalaxyID()) || online_friends.contains(userID);
+		lock_t lock(mtx_reachable_peers);
+		return (userID == intf->user->GetGalaxyID()) || reachable_peers.contains(userID);
 	}
 #endif
 
@@ -665,8 +672,8 @@ namespace universelan::client {
 
 		if (isOnline) {
 			{
-				lock_t lock(mtx_online_friends);
-				online_friends.insert(userID);
+				lock_t lock(mtx_reachable_peers);
+				reachable_peers.insert(userID);
 			}
 #if GALAXY_BUILD_FEATURE_HAS_FRIENDADDLISTENER
 			listeners->NotifyAllNow(&IFriendAddListener::OnFriendAdded, userID, IFriendAddListener::INVITATION_DIRECTION_INCOMING);
@@ -674,8 +681,8 @@ namespace universelan::client {
 		}
 		else {
 			{
-				lock_t lock(mtx_online_friends);
-				online_friends.erase(userID);
+				lock_t lock(mtx_reachable_peers);
+				reachable_peers.erase(userID);
 			}
 #if GALAXY_BUILD_FEATURE_HAS_FRIENDADDLISTENER
 			listeners->NotifyAllNow(&IFriendDeleteListener::OnFriendDeleteSuccess, userID);

@@ -2,6 +2,6 @@
 
 namespace universelan {
 	GalaxyUserData::GalaxyUserData(galaxy::api::GalaxyID id)
-		: id{ id }, stats{}, nickname{}, online{false}
+		: id{ id }, stats{}, nickname{}, online{false}, friend_information_retrieved{false}
 	{ }
 }

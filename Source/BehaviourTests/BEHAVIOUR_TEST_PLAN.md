@@ -94,9 +94,10 @@ Comparison rules:
 - Official-GOG hosts require the matching official import library/runtime,
   authenticated GOG environment, network access, and the two ignored local
   credential profiles. Direct one-to-one chat additionally requires the
-  approved profiles to be friends with messaging privacy permitting friends;
-  this is an external test-environment precondition, not a product root-cause
-  claim.
+  approved profiles to be friends with direct-message privacy permitting
+  friends. Peer-information retrieval has no friendship or direct-message
+  privacy precondition; these are external test-environment preconditions, not
+  product root-cause claims.
 - Every lane gets private working/configuration directories. The official lane
   must also isolate mutable SDK data as far as official-runtime requirements
   permit.
@@ -115,7 +116,7 @@ combine already-characterized Simple contracts.
 | `IMatchmaking` | Create/list/join public lobby, operation result, owner/member relationships, basic lobby data. | Multiple concurrent memberships and lobby-message isolation are implemented; leave/owner migration/closure, filters, and other failure paths remain. |
 | `INetworking` | Reliable P2P packet scheduling, receive callback/poll state, payload/content, sender relationship. | Three-peer routing, channel behavior, unreliable packets, disconnect/NAT/server-host behavior. |
 | `IChat` | One-to-one room request, room identity reuse, message send terminal result, remote message content/sender relationship. | History/pagination, membership lifecycle, read state, denial/failure behavior. |
-| `IFriends` | Persona information retrieval, online state, rich-presence set/get callback behavior, game invitations where official accounts permit it. | Friend relationships, invitation/acceptance flows, persistence, richer presence state. |
+| `IFriends` | Persona information retrieval, persona state, rich-presence set/get callback behavior, game invitations where official accounts permit it. | Friend relationships, invitation/acceptance flows, persistence, richer presence state. |
 | `IStats` | Retrieve/store operation outcomes, a dedicated test stat/achievement value, post-store public read. | Cross-process durability, reset/failure handling, ordering with presence/user data. |
 | `IStorage` | Local write/read, share/download operation result, metadata/content relationships. | Policy/failure paths, timestamps, invalid IDs, multi-account sharing. |
 | `ICloudStorage` | Put/list/get/metadata callback behavior where the official SDK supports it. | Conflict, quota, synchronization, notification, deletion behavior. |
@@ -188,7 +189,18 @@ phase. These are public `IMatchmaking` setup conditions, not inferred defaults.
   consumes and deletes it, then writes each peer ID once for the other host.
   Sender and receiver consume and delete their peer/token relays. Retained chat
   failures keep only symbolic traces and reports, never runtime output, config,
-  controls, IDs, room/message IDs, or token contents.
+   controls, IDs, room/message IDs, or token contents.
+- `Simple/friends-peer-information-retrieval` uses two concurrent hosts per
+  lane. After sign-in, each installs public `GlobalPersonaDataChangedListener`
+  before writing its self ID to a one-time private relay. Only after both
+  listener-registration gates arrive does the runner consume/delete the self
+  relays and write/delete one peer relay for each host. Each host calls only
+  `IFriends::RequestUserInformation(peer, AVATAR_TYPE_NONE, listener)` and the
+  specified public availability/name-copy/persona-state queries. Its listener
+  records only the requested peer. `AVATAR_TYPE_NONE` does not assert absent
+  avatar activity because default avatar criteria can apply. It never creates
+  friendships or mutates social data. Successful private roots are removed;
+  retained failures redact relays, controls, configuration, and runtime output.
 - `Simple/public-lobby-create-list-join-leave` uses the approved tagged temporary
   lobby only. The runner generates its token inside the private run root and puts
   it only in one control file per host. The token is never in a manifest, host
@@ -295,8 +307,24 @@ phase. These are public `IMatchmaking` setup conditions, not inferred defaults.
   deliberately not asserted. The 2026-09-14 official-only characterization
   followed by the strict four-host comparison matched one successful symbolic
   room request, send, and callback-local receive path in each lane. The
-  friendship/messaging-privacy setting is an external official-environment
-  precondition, not an accepted difference or root-cause claim.
+   friendship/messaging-privacy setting is an external official-environment
+   precondition, not an accepted difference or root-cause claim.
+
+- `Simple/friends-peer-information-retrieval` is implemented as an opt-in x64
+  `1.152.11` contract. Three clean official-only runs on 2026-09-14 established
+  terminal success, requested-peer valid non-self callback identity, available
+  information, nonempty copied persona name, symbolic `offline` peer state, and
+  ordered requested-peer persona changes `name-avatar`, then `none`, for both
+  profiles. A later full run observed terminal `none` without `name-avatar` in
+  one official lane, so filtered requested-peer listener events are retained as
+  diagnostic context rather than equality-required. No cross-host total order is
+  asserted. Retrieval has no friendship or direct-message privacy precondition.
+  The focused 2026-09-14 two-lane CTest accepts only the manifest-declared
+  observed persona-state pair `GOG offline` and `UniverseLAN online`, consistent
+  with the service-state environment where official GOG has no GOG Galaxy service
+  while UniverseLAN provides its LAN service. This accepted beneficial
+  environmental difference is not an SDK guarantee; terminal success, callback
+  identity, availability, copied-name, and every other record remain strict.
 
 See [`DEVELOPER_GUIDE.md`](DEVELOPER_GUIDE.md) for opt-in prerequisites,
 security boundaries, lane operation, artifact diagnostics, and the

@@ -1,0 +1,18 @@
+{
+  "name": "Simple/friends-peer-information-retrieval",
+  "sdkVersion": "1.152.11",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 45,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": {
+      "user1": ["initialize", "sign-in-callback", "sign-in-terminal", "persona-listener-armed", "user-information-request-issued", "user-information-terminal", "global-persona-data-changed", "self-state"],
+      "user2": ["initialize", "sign-in-callback", "sign-in-terminal", "persona-listener-armed", "user-information-request-issued", "user-information-terminal", "global-persona-data-changed", "self-state"]
+    },
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "raw Galaxy IDs, persona names, avatar data, counts, status text, timestamps, credentials, and relay contents are never recorded; compare only symbolic peer relations, terminal outcome, availability, name nonemptiness, and persona state",
+    "acceptedPersonaStatePair": {"gog": "offline", "universelan": "online"}
+  }
+}

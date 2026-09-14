@@ -29,7 +29,7 @@ struct Arguments
     int timeoutSeconds = 0;
 };
 
-    enum class Scenario { initializeAndSignIn, sessionIdRepeatability, gogServicesState, gogServicesStateCharacterization, publicLobbyCreateListJoinLeave, publicLobbyDataPropagationCharacterization, publicLobbyDataPropagation, multipleLobbyMembershipAndMessageIsolationCharacterization, multipleLobbyMembershipAndMessageIsolation, chatRoomMessageDeliveryCharacterization, chatRoomMessageDelivery };
+    enum class Scenario { initializeAndSignIn, sessionIdRepeatability, gogServicesState, gogServicesStateCharacterization, publicLobbyCreateListJoinLeave, publicLobbyDataPropagationCharacterization, publicLobbyDataPropagation, multipleLobbyMembershipAndMessageIsolationCharacterization, multipleLobbyMembershipAndMessageIsolation, chatRoomMessageDeliveryCharacterization, chatRoomMessageDelivery, friendsPeerInformationRetrievalCharacterization, friendsPeerInformationRetrieval };
 
 bool isSupportedScenario(const std::string& scenario)
 {
@@ -37,7 +37,8 @@ bool isSupportedScenario(const std::string& scenario)
         || scenario == "gog-services-state-characterization" || scenario == "public-lobby-create-list-join-leave"
             || scenario == "public-lobby-data-propagation-characterization" || scenario == "public-lobby-data-propagation"
             || scenario == "multiple-lobby-membership-and-message-isolation-characterization" || scenario == "multiple-lobby-membership-and-message-isolation"
-        || scenario == "chat-room-message-delivery-characterization" || scenario == "chat-room-message-delivery";
+        || scenario == "chat-room-message-delivery-characterization" || scenario == "chat-room-message-delivery"
+        || scenario == "friends-peer-information-retrieval-characterization" || scenario == "friends-peer-information-retrieval";
 }
 
 Scenario selectedScenario(const Arguments& arguments)
@@ -52,6 +53,8 @@ Scenario selectedScenario(const Arguments& arguments)
     if (arguments.scenario == "multiple-lobby-membership-and-message-isolation") return Scenario::multipleLobbyMembershipAndMessageIsolation;
     if (arguments.scenario == "chat-room-message-delivery-characterization") return Scenario::chatRoomMessageDeliveryCharacterization;
     if (arguments.scenario == "chat-room-message-delivery") return Scenario::chatRoomMessageDelivery;
+    if (arguments.scenario == "friends-peer-information-retrieval-characterization") return Scenario::friendsPeerInformationRetrievalCharacterization;
+    if (arguments.scenario == "friends-peer-information-retrieval") return Scenario::friendsPeerInformationRetrieval;
     return Scenario::initializeAndSignIn;
 }
 
@@ -77,7 +80,8 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
         && !arguments.trace.empty() && ((arguments.scenario != "public-lobby-create-list-join-leave"
             && arguments.scenario != "public-lobby-data-propagation-characterization" && arguments.scenario != "public-lobby-data-propagation"
             && arguments.scenario != "multiple-lobby-membership-and-message-isolation-characterization" && arguments.scenario != "multiple-lobby-membership-and-message-isolation"
-            && arguments.scenario != "chat-room-message-delivery-characterization" && arguments.scenario != "chat-room-message-delivery") || !arguments.control.empty())
+             && arguments.scenario != "chat-room-message-delivery-characterization" && arguments.scenario != "chat-room-message-delivery"
+             && arguments.scenario != "friends-peer-information-retrieval-characterization" && arguments.scenario != "friends-peer-information-retrieval") || !arguments.control.empty())
         && arguments.timeoutSeconds > 0 && arguments.timeoutSeconds <= 60;
 }
 
@@ -210,33 +214,40 @@ void writeEvent(const Arguments& arguments, const char* const event)
     if (output) output << event << '\n';
 }
 
-void writeOneTimeRelay(const Arguments& arguments, const char* const name, const std::string& value)
+bool writeOneTimeRelay(const Arguments& arguments, const char* const name, const std::string& value)
 {
     const std::filesystem::path target = arguments.control.parent_path() / name;
     const std::filesystem::path temporary = target.string() + ".tmp";
     std::ofstream output(temporary, std::ios::binary | std::ios::trunc);
-    if (!output) return;
+    if (!output) return false;
     output << value;
     output.close();
+    if (!output) return false;
     std::error_code error;
     std::filesystem::rename(temporary, target, error);
     if (error)
     {
         std::filesystem::remove(target, error);
+        if (error) return false;
         std::filesystem::rename(temporary, target, error);
     }
+    return !error;
 }
 
-std::string consumeOneTimeRelay(const Arguments& arguments, const char* const name)
+bool consumeOneTimeRelay(const Arguments& arguments, const char* const name, std::string& value)
 {
     const std::filesystem::path target = arguments.control.parent_path() / name;
-    std::ifstream input(target, std::ios::binary);
-    if (!input) return {};
-    const std::string value((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
-    input.close();
     std::error_code error;
+    const bool exists = std::filesystem::exists(target, error);
+    if (error) return false;
+    if (!exists) { value.clear(); return true; }
+    std::ifstream input(target, std::ios::binary);
+    if (!input) return false;
+    value.assign(std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>());
+    if (input.bad()) return false;
+    input.close();
     std::filesystem::remove(target, error);
-    return error ? std::string{} : value;
+    return !error;
 }
 
 bool galaxyIDFromRelay(const std::string& value, galaxy::api::GalaxyID& id)
@@ -937,18 +948,20 @@ bool runChatRoomMessageDelivery(const Arguments& arguments, galaxy::api::IUser* 
     const galaxy::api::GalaxyID self = user->GetGalaxyID();
     if (chat == nullptr || !self.IsValid() || self.GetIDType() != galaxy::api::GalaxyID::ID_TYPE_USER) return false;
 
-    writeOneTimeRelay(arguments, "self-id-relay", std::to_string(self.ToUint64()));
+    if (!writeOneTimeRelay(arguments, "self-id-relay", std::to_string(self.ToUint64()))) return false;
     if (arguments.profile == "user2")
     {
         ChatMessagesListener listener;
         listener.chat = chat;
         writeEvent(arguments, "receiver-listener-registered");
+        bool relayError = false;
         const std::string peerRelay = pumpUntil(arguments, deadline, [&] {
-            const std::string candidate = consumeOneTimeRelay(arguments, "peer-id-relay");
+            std::string candidate;
+            if (!consumeOneTimeRelay(arguments, "peer-id-relay", candidate)) { relayError = true; return true; }
             if (candidate.empty()) return false;
             return galaxyIDFromRelay(candidate, listener.expectedSender);
-        }) ? "consumed" : "unavailable";
-        listener.expectedToken = consumeOneTimeRelay(arguments, "expected-token-relay");
+        }) && !relayError ? "consumed" : "unavailable";
+        if (!consumeOneTimeRelay(arguments, "expected-token-relay", listener.expectedToken)) return false;
         const bool listenerArmed = peerRelay == "consumed" && !listener.expectedToken.empty();
         records.push_back("{\"record\":\"chat-listener-armed\",\"listenerRegistered\":" + boolean(true)
             + ",\"peerRelayConsumed\":" + boolean(peerRelay == "consumed") + ",\"tokenRelayConsumed\":" + boolean(!listener.expectedToken.empty()) + "}");
@@ -965,11 +978,14 @@ bool runChatRoomMessageDelivery(const Arguments& arguments, galaxy::api::IUser* 
 
     if (!pumpUntil(arguments, deadline, [&] { return controlIsSet(arguments, "receiver-armed"); })) return false;
     galaxy::api::GalaxyID peer;
+    bool relayError = false;
     const bool peerAvailable = pumpUntil(arguments, deadline, [&] {
-        const std::string candidate = consumeOneTimeRelay(arguments, "peer-id-relay");
+        std::string candidate;
+        if (!consumeOneTimeRelay(arguments, "peer-id-relay", candidate)) { relayError = true; return true; }
         return !candidate.empty() && galaxyIDFromRelay(candidate, peer);
-    });
-    const std::string token = consumeOneTimeRelay(arguments, "expected-token-relay");
+    }) && !relayError;
+    std::string token;
+    if (!consumeOneTimeRelay(arguments, "expected-token-relay", token)) return false;
     records.push_back("{\"record\":\"chat-room-request-issued\",\"receiverArmed\":true,\"peerRelayConsumed\":"
         + boolean(peerAvailable) + ",\"tokenRelayConsumed\":" + boolean(!token.empty()) + "}");
     if (!peerAvailable || token.empty()) return false;
@@ -991,6 +1007,133 @@ bool runChatRoomMessageDelivery(const Arguments& arguments, galaxy::api::IUser* 
         + ",\"successCount\":" + std::to_string(sent.successCount) + ",\"failureCount\":" + std::to_string(sent.failureCount)
         + ",\"sameRoom\":" + boolean(sent.sameRoom) + ",\"sameSendIndex\":" + boolean(sent.sameSendIndex) + "}");
     return sendTerminal && sent.terminalCount == 1 && sent.successCount == 1 && sent.failureCount == 0 && sent.sameRoom && sent.sameSendIndex;
+}
+
+const char* personaState(const galaxy::api::PersonaState state)
+{
+    switch (state)
+    {
+    case galaxy::api::PERSONA_STATE_OFFLINE: return "offline";
+    case galaxy::api::PERSONA_STATE_ONLINE: return "online";
+    }
+    return "unknown";
+}
+
+std::string personaChange(const std::uint32_t change)
+{
+    const bool name = (change & galaxy::api::IPersonaDataChangedListener::PERSONA_CHANGE_NAME) != 0;
+    const bool avatar = (change & galaxy::api::IPersonaDataChangedListener::PERSONA_CHANGE_AVATAR) != 0;
+    const bool avatarImage = (change & galaxy::api::IPersonaDataChangedListener::PERSONA_CHANGE_AVATAR_DOWNLOADED_IMAGE_ANY) != 0;
+    if (name && avatar && avatarImage) return "name-avatar-avatar-image";
+    if (name && avatar) return "name-avatar";
+    if (name && avatarImage) return "name-avatar-image";
+    if (avatar && avatarImage) return "avatar-avatar-image";
+    if (name) return "name";
+    if (avatar) return "avatar";
+    if (avatarImage) return "avatar-image";
+    return change == galaxy::api::IPersonaDataChangedListener::PERSONA_CHANGE_NONE ? "none" : "other";
+}
+
+struct FriendPersonaDataListener final : galaxy::api::GlobalPersonaDataChangedListener
+{
+    galaxy::api::GalaxyID peer;
+    bool observing = false;
+    std::vector<std::string> events;
+
+    void OnPersonaDataChanged(const galaxy::api::GalaxyID user, const std::uint32_t change) override
+    {
+        if (!observing || user != peer) return;
+        events.push_back(std::string("{") + "\"change\":" + common::jsonString(personaChange(change)) + "}");
+    }
+};
+
+struct FriendInformationListener final : galaxy::api::IUserInformationRetrieveListener
+{
+    int terminalCount = 0;
+    bool success = false;
+    bool failure = false;
+    galaxy::api::GalaxyID expectedPeer;
+    galaxy::api::GalaxyID self;
+    bool callbackPeerEqualsRequested = false;
+    bool callbackPeerValidNonSelf = false;
+
+    void OnUserInformationRetrieveSuccess(const galaxy::api::GalaxyID user) override
+    {
+        ++terminalCount;
+        success = true;
+        callbackPeerEqualsRequested = callbackPeerEqualsRequested || user == expectedPeer;
+        callbackPeerValidNonSelf = callbackPeerValidNonSelf || (user.IsValid()
+            && user.GetIDType() == galaxy::api::GalaxyID::ID_TYPE_USER && user != self);
+    }
+    void OnUserInformationRetrieveFailure(const galaxy::api::GalaxyID user, const FailureReason) override
+    {
+        ++terminalCount;
+        failure = true;
+        callbackPeerEqualsRequested = callbackPeerEqualsRequested || user == expectedPeer;
+        callbackPeerValidNonSelf = callbackPeerValidNonSelf || (user.IsValid()
+            && user.GetIDType() == galaxy::api::GalaxyID::ID_TYPE_USER && user != self);
+    }
+};
+
+std::string orderedPersonaEvents(const std::vector<std::string>& events)
+{
+    std::string result = "[";
+    for (std::size_t index = 0; index < events.size(); ++index)
+    {
+        if (index != 0) result += ',';
+        result += events[index];
+    }
+    return result + "]";
+}
+
+bool runFriendsPeerInformationRetrieval(const Arguments& arguments, galaxy::api::IUser* const user, std::vector<std::string>& records)
+{
+    galaxy::api::IFriends* const friends = galaxy::api::Friends();
+    const galaxy::api::GalaxyID self = user->GetGalaxyID();
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(arguments.timeoutSeconds);
+    if (friends == nullptr || !self.IsValid() || self.GetIDType() != galaxy::api::GalaxyID::ID_TYPE_USER) return false;
+
+    FriendPersonaDataListener personaListener;
+    writeEvent(arguments, "persona-listener-registered");
+    if (!writeOneTimeRelay(arguments, "self-id-relay", std::to_string(self.ToUint64()))) return false;
+    galaxy::api::GalaxyID peer;
+    bool relayError = false;
+    const bool peerRelayConsumed = pumpUntil(arguments, deadline, [&] {
+        std::string candidate;
+        if (!consumeOneTimeRelay(arguments, "peer-id-relay", candidate)) { relayError = true; return true; }
+        return !candidate.empty() && galaxyIDFromRelay(candidate, peer);
+    }) && !relayError;
+    records.push_back("{\"record\":\"persona-listener-armed\",\"listenerRegistered\":true,\"peerRelayConsumed\":"
+        + boolean(peerRelayConsumed) + "}");
+    if (!peerRelayConsumed || peer == self) return false;
+
+    personaListener.peer = peer;
+    personaListener.observing = true;
+    FriendInformationListener retrieve;
+    retrieve.expectedPeer = peer;
+    retrieve.self = self;
+    friends->RequestUserInformation(peer, galaxy::api::AVATAR_TYPE_NONE, &retrieve);
+    records.push_back("{\"record\":\"user-information-request-issued\",\"avatarCriteria\":\"none\"}");
+    const bool terminal = pumpUntil(arguments, deadline, [&] { return retrieve.terminalCount > 0; });
+    std::array<char, 256> name{};
+    if (terminal) friends->GetFriendPersonaNameCopy(peer, name.data(), static_cast<std::uint32_t>(name.size()));
+    const bool available = terminal && friends->IsUserInformationAvailable(peer);
+    const char* const state = terminal ? personaState(friends->GetFriendPersonaState(peer)) : "unavailable";
+    records.push_back("{\"record\":\"user-information-terminal\",\"outcome\":"
+        + common::jsonString(!terminal ? "timeout" : (retrieve.success && !retrieve.failure ? "success" : "failure"))
+        + ",\"callbackPeerEqualsRequested\":" + boolean(retrieve.callbackPeerEqualsRequested)
+        + ",\"callbackPeerValidNonSelf\":" + boolean(retrieve.callbackPeerValidNonSelf)
+        + ",\"informationAvailableAfterTerminal\":" + boolean(available)
+        + ",\"personaNameNonempty\":" + boolean(terminal && name[0] != '\0')
+        + ",\"personaState\":" + common::jsonString(state) + "}");
+    for (int pump = 0; pump < 10 && std::chrono::steady_clock::now() < deadline && !controlIsSet(arguments, "abort"); ++pump)
+    {
+        galaxy::api::ProcessData();
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    records.push_back("{\"record\":\"global-persona-data-changed\",\"events\":" + orderedPersonaEvents(personaListener.events) + "}");
+    // Emit the complete public terminal observation in both lanes; the strict runner normalizer decides compatibility.
+    return terminal && retrieve.terminalCount == 1 && retrieve.success && !retrieve.failure;
 }
 }
 
@@ -1070,6 +1213,14 @@ int run(const Arguments& arguments)
                 common::writeTrace(arguments.trace, records);
                 galaxy::api::Shutdown();
                 return chatSucceeded ? 0 : 1;
+            }
+            if (scenario == Scenario::friendsPeerInformationRetrievalCharacterization || scenario == Scenario::friendsPeerInformationRetrieval)
+            {
+                const bool friendsSucceeded = runFriendsPeerInformationRetrieval(arguments, user, records);
+                records.push_back(selfStateRecord(user));
+                common::writeTrace(arguments.trace, records);
+                galaxy::api::Shutdown();
+                return friendsSucceeded ? 0 : 1;
             }
             if (scenario == Scenario::sessionIdRepeatability)
             {

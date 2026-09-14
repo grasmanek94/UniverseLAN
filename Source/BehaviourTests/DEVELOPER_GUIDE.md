@@ -27,10 +27,11 @@ opt-in requires ignored `Source/TestCommon/credentials.cmake`, matching
 `Galaxy64.lib`, `Galaxy64.dll`, and `GalaxyPeer64.dll` under
 `Source/DLLs/1.152.11/gog/`, an authenticated official environment, and
 network access. CMake emits an unavailable diagnostic instead of failing when
-these are absent. The direct `IChat` scenario also requires the approved
-official profiles to be friends and their messaging privacy to permit friends.
-That setting is an external test-environment precondition only; it is not a
-UniverseLAN root-cause conclusion.
+these are absent. The direct-chat scenario
+requires approved official profiles to be friends with direct-message privacy
+permitting friends. `IFriends` peer-information retrieval has no friendship or
+direct-message privacy precondition. These are external test-environment
+preconditions only; they are not UniverseLAN root-cause conclusions.
 
 After verifying those prerequisites, configure a separate opt-in build (or
 reconfigure the framework build) explicitly:
@@ -49,6 +50,7 @@ cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^public-lobby-create-list-join-leave$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^public-lobby-data-propagation$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^chat-room-message-delivery$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
+cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^friends-peer-information-retrieval$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^multiple-lobby-membership-and-message-isolation$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 ```
 
@@ -79,6 +81,17 @@ Then collect the dual-lane diagnostic when needed:
 ```powershell
 & "bin/Debug/universelan-behaviour-runner-x64-1.152.11.exe" --characterize-chat-room-message-delivery --universelan-host "bin/Debug/universelan-behaviour-host-universelan-x64-1.152.11.exe" --gog-host "bin/Debug/universelan-behaviour-host-gog-x64-1.152.11.exe" --client-dll "bin/1.152.11/Debug/Galaxy64.dll" --server "bin/1.152.11/Debug/UniverseLANServer64.exe" --gog-runtime-dir "Source/DLLs/1.152.11/gog"
 ```
+
+Characterize the non-mutating friends peer-information contract twice against
+official GOG before changing strict facts:
+
+```powershell
+& "bin/Debug/universelan-behaviour-runner-x64-1.152.11.exe" --characterize-official-gog-friends-peer-information-retrieval --gog-host "bin/Debug/universelan-behaviour-host-gog-x64-1.152.11.exe" --gog-runtime-dir "Source/DLLs/1.152.11/gog"
+```
+
+The command needs approved signed-in profiles only. It does not create
+friendships or mutate social data. It prints only symbolic
+terminal/state/persona-change facts and removes the successful private root.
 
 The similarly non-CTest lobby-data characterization mode is:
 
@@ -226,6 +239,29 @@ The 2026-09-14 official-only characterization and strict four-host comparison
 matched the stable symbolic request, send, and receive facts. Keep every one of
 those facts strict; the external messaging permission is not encoded as a
 product behavior or accepted-difference rule.
+
+`Simple/friends-peer-information-retrieval` is non-mutating and uses only
+`IFriends::RequestUserInformation(peer, AVATAR_TYPE_NONE, listener)`,
+`IsUserInformationAvailable`, `GetFriendPersonaNameCopy`, and
+`GetFriendPersonaState`, after both hosts install
+`GlobalPersonaDataChangedListener`. Each host relays its self ID once through a
+private file only after listener registration; the runner consumes/deletes it,
+then supplies one peer relay that the receiving host deletes. The terminal
+record contains only success/failure, callback peer=requested-peer and valid
+non-self relations, post-terminal availability, copied-name nonemptiness, and
+symbolic persona state. Ordered persona-change events contain only symbolic
+relation/change pairs. No raw ID, name, avatar data, count, status text,
+  timestamp, credential, runtime output, control, or relay is retained.
+  `AVATAR_TYPE_NONE` does not assert absent avatar-related callbacks because
+   default avatar criteria can apply. A later official `none`-only variation
+   leaves requested-peer-only listener events as retained diagnostic context,
+   never sorted or merged, and no cross-host total order is asserted. The
+   manifest accepts only the observed same-profile persona-state pair `GOG
+   offline` and `UniverseLAN online`, consistent with the documented
+   service-state environment where official GOG has no GOG Galaxy service while
+   UniverseLAN provides its LAN service. This accepted beneficial environmental
+   difference is not an SDK guarantee; terminal, availability, copied-name,
+   callback-peer, and all other required facts remain strict.
 
 `Advanced/multiple-lobby-membership-and-message-isolation` uses the same two
 profiles in one lane. Creator `CreateLobby` calls for symbolic `L0` and `L1`

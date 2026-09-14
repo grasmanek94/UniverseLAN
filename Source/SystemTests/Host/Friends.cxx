@@ -29,10 +29,16 @@ struct PersonaDataChangedListener final : galaxy::api::GlobalPersonaDataChangedL
     galaxy::api::GalaxyID expectedPeer;
     bool received = false;
     bool failed = false;
-    void OnPersonaDataChanged(galaxy::api::GalaxyID userId, uint32_t) override
+    void OnPersonaDataChanged(galaxy::api::GalaxyID userId, uint32_t change) override
     {
-        if (userId != expectedPeer || received) { failed = true; return; }
-        received = true;
+        if (userId != expectedPeer) return;
+        if (change == (galaxy::api::IPersonaDataChangedListener::PERSONA_CHANGE_NAME
+            | galaxy::api::IPersonaDataChangedListener::PERSONA_CHANGE_AVATAR))
+        {
+            received = true;
+            return;
+        }
+        if (change != galaxy::api::IPersonaDataChangedListener::PERSONA_CHANGE_NONE) failed = true;
     }
 };
 

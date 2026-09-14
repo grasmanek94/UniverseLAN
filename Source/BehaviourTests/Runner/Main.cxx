@@ -47,6 +47,7 @@ struct Arguments
     bool characterizeMultipleLobbyMembershipAndMessageIsolation = false;
     bool characterizeChatRoomMessageDelivery = false;
     bool characterizeOfficialGogChatRoomMessageDelivery = false;
+    bool characterizeOfficialGogFriendsPeerInformationRetrieval = false;
 };
 
 struct Scenario
@@ -55,7 +56,9 @@ struct Scenario
     std::string laneMode;
     int timeoutSeconds = 0;
     bool acceptsGogServicesStatePair = false;
+    bool acceptsFriendsPeerPersonaStatePair = false;
     bool characterization = false;
+    std::string requiredTerminalOutcome;
 };
 
 struct ScenarioContract
@@ -70,6 +73,7 @@ struct ScenarioContract
     bool observesPublicLobbyDataPropagation;
     bool observesMultipleLobbyMembership;
     bool observesChatRoomMessageDelivery;
+    bool observesFriendsPeerInformation;
 };
 
 constexpr std::array scenarioContracts{
@@ -99,7 +103,13 @@ constexpr std::array scenarioContracts{
             "chat-room-request-issued", "chat-room-retrieve", "chat-send-issued", "chat-send-terminal"}, 10, false, false, false, false, false, true},
     ScenarioContract{"Simple/chat-room-message-delivery", "chat-room-message-delivery",
         {"initialize", "sign-in-callback", "sign-in-terminal", "chat-listener-armed", "chat-message-received", "self-state",
-            "chat-room-request-issued", "chat-room-retrieve", "chat-send-issued", "chat-send-terminal"}, 10, false, false, false, false, false, true}
+            "chat-room-request-issued", "chat-room-retrieve", "chat-send-issued", "chat-send-terminal"}, 10, false, false, false, false, false, true, false},
+    ScenarioContract{"Simple/friends-peer-information-retrieval characterization", "friends-peer-information-retrieval-characterization",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "persona-listener-armed", "user-information-request-issued", "user-information-terminal",
+            "global-persona-data-changed", "self-state"}, 8, false, false, false, false, false, false, true},
+    ScenarioContract{"Simple/friends-peer-information-retrieval", "friends-peer-information-retrieval",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "persona-listener-armed", "user-information-request-issued", "user-information-terminal",
+            "global-persona-data-changed", "self-state"}, 8, false, false, false, false, false, false, true}
 };
 
 struct Child
@@ -167,6 +177,12 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
             arguments.characterizeOfficialGogChatRoomMessageDelivery = true;
             continue;
         }
+        if (option == "--characterize-official-gog-friends-peer-information-retrieval")
+        {
+            if (arguments.characterizeOfficialGogFriendsPeerInformationRetrieval) return false;
+            arguments.characterizeOfficialGogFriendsPeerInformationRetrieval = true;
+            continue;
+        }
         if (++index == argc) return false;
         const fs::path value = fs::u8path(argv[index]);
         if (option == "--manifest") arguments.manifest = value;
@@ -179,8 +195,10 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
     }
     return (static_cast<int>(arguments.characterizeGogServicesState) + static_cast<int>(arguments.characterizePublicLobbyDataPropagation) + static_cast<int>(arguments.characterizeMultipleLobbyMembershipAndMessageIsolation)
                 + static_cast<int>(arguments.characterizeChatRoomMessageDelivery) + static_cast<int>(arguments.characterizeOfficialGogChatRoomMessageDelivery)
+                + static_cast<int>(arguments.characterizeOfficialGogFriendsPeerInformationRetrieval)
             == static_cast<int>(arguments.manifest.empty())) && !arguments.gogHost.empty() && !arguments.gogRuntimeDirectory.empty()
-        && (arguments.characterizeOfficialGogChatRoomMessageDelivery || (!arguments.universelanHost.empty() && !arguments.clientDll.empty() && !arguments.server.empty()));
+        && ((arguments.characterizeOfficialGogChatRoomMessageDelivery || arguments.characterizeOfficialGogFriendsPeerInformationRetrieval)
+            || (!arguments.universelanHost.empty() && !arguments.clientDll.empty() && !arguments.server.empty()));
 }
 
 void objectHasOnly(const json& value, std::initializer_list<const char*> allowed)
@@ -231,14 +249,14 @@ Scenario parseScenario(const fs::path& manifest)
     scenario.contract = contract;
     scenario.laneMode = root.at("laneMode").get<std::string>();
     if (scenario.laneMode != "concurrent" && scenario.laneMode != "sequential") invalidManifest();
-    if ((contract->observesPublicLobby || contract->observesChatRoomMessageDelivery) && scenario.laneMode != "concurrent") invalidManifest();
+    if ((contract->observesPublicLobby || contract->observesChatRoomMessageDelivery || contract->observesFriendsPeerInformation) && scenario.laneMode != "concurrent") invalidManifest();
     if (!required(root, "timeoutSeconds").is_number_integer()) invalidManifest();
     scenario.timeoutSeconds = root.at("timeoutSeconds").get<int>();
     if (scenario.timeoutSeconds < 1 || scenario.timeoutSeconds > 60) invalidManifest();
     const json& profiles = required(root, "profiles");
     if (!profiles.is_array() || profiles.size() != 2 || profiles[0] != "user1" || profiles[1] != "user2") invalidManifest();
     const json& comparison = required(root, "comparison");
-    objectHasOnly(comparison, {"requiredRecords", "requiredTerminalOutcome", "unexpectedRecords", "opaqueIds", "acceptedStatePair"});
+    objectHasOnly(comparison, {"requiredRecords", "requiredTerminalOutcome", "unexpectedRecords", "opaqueIds", "acceptedStatePair", "acceptedPersonaStatePair"});
     const json& records = required(comparison, "requiredRecords");
     const bool validRecordDeclaration = contract->observesMultipleLobbyMembership
         ? records.is_object() && records.size() == 2
@@ -252,6 +270,12 @@ Scenario parseScenario(const fs::path& manifest)
                 "chat-room-retrieve", "chat-send-issued", "chat-send-terminal", "self-state"})
             && records.value("user2", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "chat-listener-armed",
                 "chat-message-received", "self-state"})
+        : contract->observesFriendsPeerInformation
+        ? records.is_object() && records.size() == 2
+            && records.value("user1", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "persona-listener-armed",
+                "user-information-request-issued", "user-information-terminal", "global-persona-data-changed", "self-state"})
+            && records.value("user2", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "persona-listener-armed",
+                "user-information-request-issued", "user-information-terminal", "global-persona-data-changed", "self-state"})
         : contract->observesPublicLobbyDataPropagation
         ? records.is_object() && records.size() == 2
             && records.value("user1", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter",
@@ -277,6 +301,15 @@ Scenario parseScenario(const fs::path& manifest)
         scenario.acceptsGogServicesStatePair = true;
     }
     else if (comparison.contains("acceptedStatePair")) invalidManifest();
+    if (contract->observesFriendsPeerInformation)
+    {
+        const json& acceptedPersonaStatePair = required(comparison, "acceptedPersonaStatePair");
+        if (!fieldsExactly(acceptedPersonaStatePair, {"gog", "universelan"})
+            || acceptedPersonaStatePair["gog"] != "offline" || acceptedPersonaStatePair["universelan"] != "online") invalidManifest();
+        scenario.acceptsFriendsPeerPersonaStatePair = true;
+    }
+    else if (comparison.contains("acceptedPersonaStatePair")) invalidManifest();
+    scenario.requiredTerminalOutcome = comparison.at("requiredTerminalOutcome").get<std::string>();
     return scenario;
 }
 
@@ -317,6 +350,17 @@ Scenario chatRoomMessageDeliveryCharacterizationScenario()
     scenario.laneMode = "concurrent";
     scenario.timeoutSeconds = 30;
     scenario.characterization = true;
+    return scenario;
+}
+
+Scenario friendsPeerInformationRetrievalCharacterizationScenario()
+{
+    Scenario scenario;
+    scenario.contract = &scenarioContracts[11];
+    scenario.laneMode = "concurrent";
+    scenario.timeoutSeconds = 30;
+    scenario.characterization = true;
+    scenario.requiredTerminalOutcome = "success";
     return scenario;
 }
 
@@ -370,7 +414,7 @@ bool hasEvent(const fs::path& control, const char* const expected)
     return false;
 }
 
-void writeUniverselanConfiguration(const fs::path& directory, const std::string& profile)
+void writeUniverselanConfiguration(const fs::path& directory, const std::string& profile, const std::uint16_t port)
 {
     const std::string userId = profile == "user1" ? "41001" : "41002";
     const std::string persona = profile == "user1" ? "BehaviourTestUser1" : "BehaviourTestUser2";
@@ -382,12 +426,12 @@ void writeUniverselanConfiguration(const fs::path& directory, const std::string&
         "\n[Tracing]\nCallTracing=0\nUnhandledExceptionLogging=0\nMiniDumpOnUnhandledException=0\nAlwaysFlush=0\nTraceToConsole=0\n"
         "\n[Networking]\nTimeout=1000\n");
     writeFile(data / "Config.ini",
-        "[Settings]\nEnableConsole=0\n\n[Client]\nServerAddress=127.0.0.1\nPort=37651\n"
-        "\n[User]\nPersonaNameType=@Custom\nCustomPersonaName=" + persona + "\nGalaxyIDType=@Custom\nCustomGalaxyID=" + userId
+        "[Settings]\nEnableConsole=0\n\n[Client]\nServerAddress=127.0.0.1\nPort=" + std::to_string(port) + "\n"
+        + "\n[User]\nPersonaNameType=@Custom\nCustomPersonaName=" + persona + "\nGalaxyIDType=@Custom\nCustomGalaxyID=" + userId
         + "\nGalaxyIDOffset=0\nSignedIn=1\n");
 }
 
-void writeServerConfiguration(const fs::path& directory)
+void writeServerConfiguration(const fs::path& directory, const std::uint16_t port)
 {
     fs::create_directories(directory / "UniverseLANServerData");
     writeFile(directory / "UniverseLAN.ini",
@@ -395,7 +439,7 @@ void writeServerConfiguration(const fs::path& directory)
         "\n[Authentication]\nKey=UniverseLAN-BehaviourTests-NotASecret\n"
         "\n[Tracing]\nCallTracing=0\nUnhandledExceptionLogging=0\nMiniDumpOnUnhandledException=0\nAlwaysFlush=0\nTraceToConsole=0\n");
     writeFile(directory / "UniverseLANServerData" / "Config.ini",
-        "[Server]\nBindAddress=127.0.0.1\nPort=37651\nMaxConnections=8\nMaxTickRate=200\n");
+        "[Server]\nBindAddress=127.0.0.1\nPort=" + std::to_string(port) + "\nMaxConnections=8\nMaxTickRate=200\n");
 }
 
 #ifdef _WIN32
@@ -675,15 +719,19 @@ void setChatControlFlag(const fs::path& path, const char* const name)
         + "\nabort=" + (std::string(name) == "abort" ? "1" : "0") + "\n");
 }
 
-std::string consumeOneTimeRelay(const fs::path& path)
+bool consumeOneTimeRelay(const fs::path& path, std::string& value)
 {
-    std::ifstream input(path, std::ios::binary);
-    if (!input) return {};
-    const std::string value((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
-    input.close();
     std::error_code error;
+    const bool exists = fs::exists(path, error);
+    if (error) return false;
+    if (!exists) { value.clear(); return true; }
+    std::ifstream input(path, std::ios::binary);
+    if (!input) return false;
+    value.assign(std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>());
+    if (input.bad()) return false;
+    input.close();
     fs::remove(path, error);
-    return error ? std::string{} : value;
+    return !error;
 }
 
 bool isRawGalaxyIDRelay(const std::string& value)
@@ -693,28 +741,36 @@ bool isRawGalaxyIDRelay(const std::string& value)
     });
 }
 
-void redactChatRelays(const fs::path& root)
+bool redactSensitiveFailureArtifacts(const fs::path& root)
 {
     std::error_code error;
-    for (fs::recursive_directory_iterator iterator(root, error), end; !error && iterator != end; iterator.increment(error))
+    fs::recursive_directory_iterator iterator(root, error);
+    if (error) return false;
+    const fs::recursive_directory_iterator end;
+    std::vector<fs::path> sensitive;
+    while (iterator != end)
     {
-        const std::string name = iterator->path().filename().string();
-        if (name == "self-id-relay" || name == "peer-id-relay" || name == "expected-token-relay"
-            || name == "self-id-relay.tmp" || name == "peer-id-relay.tmp" || name == "expected-token-relay.tmp")
-            fs::remove(iterator->path(), error);
+        const fs::path path = iterator->path();
+        const bool directory = iterator->is_directory(error);
+        if (error) return false;
+        if (!directory)
+        {
+            const std::string name = path.filename().string();
+            std::string extension = path.extension().string();
+            std::transform(extension.begin(), extension.end(), extension.begin(), [](const unsigned char character) { return static_cast<char>(std::tolower(character)); });
+            const bool stagedBinary = extension == ".exe" || extension == ".dll" || extension == ".pdb";
+            if (name != "trace.jsonl" && name != "normalized-comparison.json" && !stagedBinary)
+                sensitive.push_back(path);
+        }
+        iterator.increment(error);
+        if (error) return false;
     }
-}
-
-void redactChatFailureArtifacts(const fs::path& root)
-{
-    redactChatRelays(root);
-    std::error_code error;
-    for (fs::recursive_directory_iterator iterator(root, error), end; !error && iterator != end; iterator.increment(error))
+    for (const fs::path& path : sensitive)
     {
-        const std::string name = iterator->path().filename().string();
-        if (name == "stdout.log" || name == "UniverseLAN.ini" || name == "Config.ini" || name == "control" || name == "event")
-            fs::remove(iterator->path(), error);
+        fs::remove(path, error);
+        if (error) return false;
     }
+    return true;
 }
 
 bool runChatRoomMessageDeliveryHosts(const std::vector<HostLaunch>& launches, const ScenarioContract& contract, const int timeoutSeconds,
@@ -742,6 +798,7 @@ bool runChatRoomMessageDeliveryHosts(const std::vector<HostLaunch>& launches, co
 
     std::vector<std::string> identities(launches.size());
     std::vector<bool> relayed(launches.size() / 2);
+    bool relayError = false;
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(timeoutSeconds + 5);
     bool passed = false;
     while (std::chrono::steady_clock::now() < deadline)
@@ -749,9 +806,11 @@ bool runChatRoomMessageDeliveryHosts(const std::vector<HostLaunch>& launches, co
         for (std::size_t index = 0; index < launches.size(); ++index)
         {
             if (!identities[index].empty()) continue;
-            const std::string candidate = consumeOneTimeRelay(launches[index].workingDirectory / "self-id-relay");
+            std::string candidate;
+            if (!consumeOneTimeRelay(launches[index].workingDirectory / "self-id-relay", candidate)) { relayError = true; break; }
             if (!candidate.empty() && isRawGalaxyIDRelay(candidate)) identities[index] = candidate;
         }
+        if (relayError) break;
         for (std::size_t sender = 0; sender + 1 < launches.size(); sender += 2)
         {
             const std::size_t receiver = sender + 1;
@@ -786,7 +845,85 @@ bool runChatRoomMessageDeliveryHosts(const std::vector<HostLaunch>& launches, co
     for (Child& child : children) stopChild(child);
     allHostsExited = std::all_of(children.begin(), children.end(), [](const Child& child) { return child.exited; });
     completed = std::move(children);
-    return passed && receiverArmedBeforeSenderRelease && allHostsExited;
+    return passed && !relayError && receiverArmedBeforeSenderRelease && allHostsExited;
+}
+
+bool runFriendsPeerInformationRetrievalHosts(const std::vector<HostLaunch>& launches, const ScenarioContract& contract, const int timeoutSeconds,
+    std::vector<Child>& completed, bool& personaListenersReadyBeforePeerRelay, bool& allHostsExited)
+{
+    std::vector<Child> children(launches.size());
+    for (std::size_t index = 0; index < launches.size(); ++index)
+    {
+        // The Galaxy runtime can print account identifiers; friend diagnostics retain symbolic traces only.
+        children[index].log.clear();
+        children[index].lane = launches[index].lane;
+        children[index].profile = launches[index].profile;
+        if (!startChild(children[index], launches[index].executable,
+            {"--scenario", std::string(contract.hostScenario), "--profile", launches[index].profile,
+                "--trace", launches[index].trace.string(), "--control", launches[index].control.string(),
+                "--timeout-seconds", std::to_string(timeoutSeconds)}, launches[index].workingDirectory))
+        {
+            for (const HostLaunch& launch : launches) setChatControlFlag(launch.control, "abort");
+            for (Child& child : children) stopChild(child);
+            completed = std::move(children);
+            allHostsExited = std::all_of(completed.begin(), completed.end(), [](const Child& child) { return child.exited; });
+            return false;
+        }
+    }
+
+    std::vector<std::string> identities(launches.size());
+    std::vector<bool> relayed(launches.size() / 2);
+    bool relayError = false;
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(timeoutSeconds + 5);
+    bool passed = false;
+    while (std::chrono::steady_clock::now() < deadline)
+    {
+        for (std::size_t first = 0; first + 1 < launches.size(); first += 2)
+        {
+            const std::size_t second = first + 1;
+            const std::size_t lane = first / 2;
+            if (!relayed[lane] && hasEvent(launches[first].control, "persona-listener-registered")
+                && hasEvent(launches[second].control, "persona-listener-registered"))
+            {
+                personaListenersReadyBeforePeerRelay = true;
+                if (identities[first].empty())
+                {
+                    std::string candidate;
+                    if (!consumeOneTimeRelay(launches[first].workingDirectory / "self-id-relay", candidate)) { relayError = true; break; }
+                    if (!candidate.empty() && isRawGalaxyIDRelay(candidate)) identities[first] = candidate;
+                }
+                if (identities[second].empty())
+                {
+                    std::string candidate;
+                    if (!consumeOneTimeRelay(launches[second].workingDirectory / "self-id-relay", candidate)) { relayError = true; break; }
+                    if (!candidate.empty() && isRawGalaxyIDRelay(candidate)) identities[second] = candidate;
+                }
+                if (!identities[first].empty() && !identities[second].empty())
+                {
+                    writePrivateControl(launches[first].workingDirectory / "peer-id-relay", identities[second]);
+                    writePrivateControl(launches[second].workingDirectory / "peer-id-relay", identities[first]);
+                    relayed[lane] = true;
+                }
+            }
+        }
+        if (relayError) break;
+        passed = true;
+        for (Child& child : children)
+        {
+            updateChild(child);
+            passed = passed && child.exited && child.exitCode == 0;
+        }
+        if (passed) break;
+        if (std::any_of(children.begin(), children.end(), [](const Child& child) { return child.exited && child.exitCode != 0; })) break;
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    }
+    if (!passed)
+        for (const HostLaunch& launch : launches) setChatControlFlag(launch.control, "abort");
+    for (Child& child : children) stopChild(child);
+    allHostsExited = std::all_of(children.begin(), children.end(), [](const Child& child) { return child.exited; });
+    completed = std::move(children);
+    return passed && !relayError && personaListenersReadyBeforePeerRelay && allHostsExited
+        && std::all_of(relayed.begin(), relayed.end(), [](const bool value) { return value; });
 }
 
 void addProcessFailures(json& report, const std::vector<Child>& children)
@@ -972,6 +1109,44 @@ bool normalizeChatRoomMessageDeliveryTrace(const fs::path& trace, const std::str
     catch (...) { return false; }
 }
 
+bool normalizeFriendsPeerInformationRetrievalTrace(const fs::path& trace, json& normalized)
+{
+    try
+    {
+        std::vector<json> records;
+        for (const std::string& line : common::readTrace(trace)) records.push_back(json::parse(line));
+        const std::vector<std::string> expected{"initialize", "sign-in-callback", "sign-in-terminal", "persona-listener-armed",
+            "user-information-request-issued", "user-information-terminal", "global-persona-data-changed", "self-state"};
+        if (records.size() != expected.size()) return false;
+        for (std::size_t index = 0; index < expected.size(); ++index)
+            if (!records[index].is_object() || records[index].value("record", "") != expected[index]) return false;
+        if (!fieldsExactly(records[0], {"record", "result"}) || records[0]["result"] != "returned"
+            || !fieldsExactly(records[1], {"record", "result"}) || records[1]["result"] != "success"
+            || !fieldsExactly(records[2], {"record", "result"}) || records[2]["result"] != "success"
+            || !fieldsExactly(records[3], {"record", "listenerRegistered", "peerRelayConsumed"})
+            || records[3]["listenerRegistered"] != true || records[3]["peerRelayConsumed"] != true
+            || !fieldsExactly(records[4], {"record", "avatarCriteria"}) || records[4]["avatarCriteria"] != "none"
+            || !fieldsExactly(records[5], {"record", "outcome", "callbackPeerEqualsRequested", "callbackPeerValidNonSelf",
+                "informationAvailableAfterTerminal", "personaNameNonempty", "personaState"})
+            || !records[5]["outcome"].is_string() || (records[5]["outcome"] != "success" && records[5]["outcome"] != "failure" && records[5]["outcome"] != "timeout")
+            || records[5]["callbackPeerEqualsRequested"] != true || records[5]["callbackPeerValidNonSelf"] != true
+            || records[5]["informationAvailableAfterTerminal"] != true || records[5]["personaNameNonempty"] != true
+            || !records[5]["personaState"].is_string() || (records[5]["personaState"] != "online" && records[5]["personaState"] != "offline"
+                && records[5]["personaState"] != "unavailable")
+            || !fieldsExactly(records[6], {"record", "events"}) || !records[6]["events"].is_array()) return false;
+        for (const json& event : records[6]["events"])
+        {
+            if (!fieldsExactly(event, {"change"}) || !event["change"].is_string()) return false;
+        }
+        if (!fieldsExactly(records[7], {"record", "signedIn", "loggedOn", "idValid", "idType", "selfIdRepeatEqual", "personaAvailable"})
+            || records[7]["signedIn"] != true || records[7]["loggedOn"] != true || records[7]["idValid"] != true
+            || records[7]["idType"] != "user" || records[7]["selfIdRepeatEqual"] != true || !records[7]["personaAvailable"].is_boolean()) return false;
+        normalized = records;
+        return true;
+    }
+    catch (...) { return false; }
+}
+
 bool normalizeMultipleLobbyMembershipTrace(const fs::path& trace, const std::string& profile, json& normalized)
 {
     try
@@ -1079,6 +1254,8 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
         ? "raw Galaxy IDs, lobby IDs, message IDs, private tags, and message payloads are never recorded; only L0/L1-local public relations are compared"
         : contract.observesChatRoomMessageDelivery
         ? "raw Galaxy IDs, room IDs, message IDs, and private message token are never recorded; only symbolic peer, room, send-index, and payload relations are compared"
+        : contract.observesFriendsPeerInformation
+        ? "raw Galaxy IDs, persona names, avatar data, counts, status text, timestamps, and credentials are never recorded; only symbolic peer relations, terminal outcome, availability, name nonemptiness, persona state, and ordered persona-change diagnostics are retained"
         : contract.observesPublicLobby
         ? "raw Galaxy IDs and private tokens are never recorded; only validity and creator/joiner/owner/member relations are compared"
         : "raw IDs are never recorded; validity, type, and repeat-equality are lane-local observations";
@@ -1091,6 +1268,8 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
             ? normalizeMultipleLobbyMembershipTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
             : contract.observesChatRoomMessageDelivery
             ? normalizeChatRoomMessageDeliveryTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
+            : contract.observesFriendsPeerInformation
+            ? normalizeFriendsPeerInformationRetrievalTrace(root / "universelan" / profile / "trace.jsonl", universelan)
             : contract.observesPublicLobbyDataPropagation
             ? normalizePublicLobbyDataPropagationTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
             : contract.observesPublicLobby
@@ -1100,6 +1279,8 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
             ? normalizeMultipleLobbyMembershipTrace(root / "gog" / profile / "trace.jsonl", profile, gog)
             : contract.observesChatRoomMessageDelivery
             ? normalizeChatRoomMessageDeliveryTrace(root / "gog" / profile / "trace.jsonl", profile, gog)
+            : contract.observesFriendsPeerInformation
+            ? normalizeFriendsPeerInformationRetrievalTrace(root / "gog" / profile / "trace.jsonl", gog)
             : contract.observesPublicLobbyDataPropagation
             ? normalizePublicLobbyDataPropagationTrace(root / "gog" / profile / "trace.jsonl", profile, gog)
             : contract.observesPublicLobby
@@ -1107,7 +1288,9 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
             : normalizeTrace(root / "gog" / profile / "trace.jsonl", contract, gog);
         report["lanes"][profile]["universelan"] = universelanValid ? universelan : json("invalid-trace");
         report["lanes"][profile]["gog"] = gogValid ? gog : json("invalid-trace");
-        const bool terminalSuccess = universelanValid && gogValid && universelan[2]["result"] == "success" && gog[2]["result"] == "success";
+        const bool terminalSuccess = universelanValid && gogValid && universelan[2]["result"] == "success" && gog[2]["result"] == "success"
+            && (!contract.observesFriendsPeerInformation || (universelan[5]["outcome"] == scenario.requiredTerminalOutcome
+                && gog[5]["outcome"] == scenario.requiredTerminalOutcome));
         const bool sessionIdRepeatabilityEqual = !contract.observesSessionIdRepeatability
             || (terminalSuccess && universelan[3]["equal"] == gog[3]["equal"]);
         json comparableUniverselan = universelan;
@@ -1145,6 +1328,13 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
             comparableGog[6].erase("callbackOrder");
             report["lanes"][profile]["messageCallbackOrderComparison"] = "official-characterized-not-stable;diagnostic-context-excluded";
         }
+        if (contract.observesFriendsPeerInformation && universelanValid && gogValid)
+        {
+            // A later clean full comparison observed terminal none without the semantic event in one official lane.
+            comparableUniverselan[6].erase("events");
+            comparableGog[6].erase("events");
+            report["lanes"][profile]["personaDataChangedComparison"] = "requested-peer-only;official-variation-observed;diagnostic-context-excluded";
+        }
         const bool exactEquality = universelanValid && gogValid && universelan == gog && sessionIdRepeatabilityEqual;
         bool acceptedGogServicesStateDifference = false;
         if (scenario.acceptsGogServicesStatePair && universelanValid && gogValid && sessionIdRepeatabilityEqual
@@ -1156,11 +1346,22 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
             stateNeutralGog[4].erase("state");
             acceptedGogServicesStateDifference = stateNeutralUniverselan == stateNeutralGog;
         }
-        const bool equal = universelanValid && gogValid && (comparableUniverselan == comparableGog || acceptedGogServicesStateDifference)
+        bool acceptedFriendsPeerPersonaStateDifference = false;
+        if (scenario.acceptsFriendsPeerPersonaStatePair && universelanValid && gogValid
+            && gog[5]["personaState"] == "offline" && universelan[5]["personaState"] == "online")
+        {
+            json personaStateNeutralUniverselan = comparableUniverselan;
+            json personaStateNeutralGog = comparableGog;
+            personaStateNeutralUniverselan[5].erase("personaState");
+            personaStateNeutralGog[5].erase("personaState");
+            acceptedFriendsPeerPersonaStateDifference = personaStateNeutralUniverselan == personaStateNeutralGog;
+        }
+        const bool equal = universelanValid && gogValid && (comparableUniverselan == comparableGog || acceptedGogServicesStateDifference
+                || acceptedFriendsPeerPersonaStateDifference)
             && sessionIdRepeatabilityEqual;
         report["lanes"][profile]["equal"] = equal;
         report["lanes"][profile]["comparison"] = exactEquality ? "exact-equality"
-            : (acceptedGogServicesStateDifference ? "accepted-difference"
+            : ((acceptedGogServicesStateDifference || acceptedFriendsPeerPersonaStateDifference) ? "accepted-difference"
                 : (equal ? "diagnostic-context-excluded" : "mismatch"));
         report["lanes"][profile]["terminalSuccess"] = terminalSuccess;
         if (contract.observesSessionIdRepeatability)
@@ -1292,6 +1493,45 @@ void characterizeChatRoomMessageDeliveryTraces(const fs::path& root, const bool 
     }
 }
 
+void characterizeFriendsPeerInformationRetrievalTraces(const fs::path& root, json& report)
+{
+    report = json::object();
+    report["scenario"] = "Simple/friends-peer-information-retrieval";
+    report["classification"] = "official-gog-only-characterization";
+    report["comparison"] = "none";
+    report["status"] = "characterized";
+    report["opaqueIdPolicy"] = "raw Galaxy IDs, persona names, avatar data, counts, status text, timestamps, and credentials are never recorded";
+    report["globalPersonaDataChanged"] = "requested-peer symbolic callback events are retained without sorting; a later official variation keeps them diagnostic";
+    for (const char* profile : {"user1", "user2"})
+    {
+        json laneReport = json::object();
+        try
+        {
+            json records = json::array();
+            for (const std::string& line : common::readTrace(root / "gog" / profile / "trace.jsonl")) records.push_back(json::parse(line));
+            laneReport["orderedIFriendsRecords"] = records;
+        }
+        catch (...) { laneReport["orderedIFriendsRecords"] = "unavailable"; }
+        report["lanes"][profile]["gog"] = laneReport;
+    }
+}
+
+void printFriendsPeerInformationCharacterizationResult(const json& report)
+{
+    std::cout << "BEHAVIOUR_TEST CHARACTERIZATION scenario=Simple/friends-peer-information-retrieval comparison=none";
+    for (const char* profile : {"user1", "user2"})
+    {
+        const json& records = report["lanes"][profile]["gog"]["orderedIFriendsRecords"];
+        const bool terminalSuccess = records.is_array() && records.size() == 8 && records[5].value("outcome", "") == "success";
+        const std::string state = terminalSuccess ? records[5].value("personaState", "unavailable") : "unavailable";
+        const bool listenerEventObserved = records.is_array() && records.size() == 8 && records[6]["events"].is_array() && !records[6]["events"].empty();
+        std::cout << ' ' << profile << "=terminal-" << (terminalSuccess ? "success" : "not-success")
+            << ",persona-state-" << state << ",persona-event-observed-" << (listenerEventObserved ? "true" : "false")
+            << ",ordered-persona-events-" << (records.is_array() && records.size() == 8 ? records[6]["events"].dump() : "unavailable");
+    }
+    std::cout << std::endl;
+}
+
 void writeReport(const fs::path& root, const json& report)
 {
     writeFile(root / "normalized-comparison.json", report.dump(2) + "\n");
@@ -1358,8 +1598,9 @@ void printCharacterizationResult(const fs::path& root)
 int run(const Arguments& arguments, const Scenario& scenario)
 {
     const bool officialGogOnlyChatCharacterization = arguments.characterizeOfficialGogChatRoomMessageDelivery;
+    const bool officialGogOnlyFriendsCharacterization = arguments.characterizeOfficialGogFriendsPeerInformationRetrieval;
     if (!fs::is_regular_file(arguments.gogHost) || !fs::is_directory(arguments.gogRuntimeDirectory)
-        || (!officialGogOnlyChatCharacterization && (!fs::is_regular_file(arguments.universelanHost)
+        || (!(officialGogOnlyChatCharacterization || officialGogOnlyFriendsCharacterization) && (!fs::is_regular_file(arguments.universelanHost)
             || !fs::is_regular_file(arguments.clientDll) || !fs::is_regular_file(arguments.server)))) throw std::runtime_error("Preflight failed");
 
     std::mt19937_64 random(std::random_device{}());
@@ -1374,21 +1615,24 @@ int run(const Arguments& arguments, const Scenario& scenario)
     }
     if (root.empty()) throw std::runtime_error("Unable to create private run root");
     const std::string privateToken = "bt-" + std::to_string(random()) + std::to_string(random());
+    const std::uint16_t privatePort = static_cast<std::uint16_t>(38000 + random() % 2000);
     Child server;
     json report;
     bool success = false;
     bool cleanupAcknowledged = !scenario.contract->observesPublicLobby;
     bool receiverArmedBeforeSenderRelease = false;
     bool chatHostsExited = false;
+    bool personaListenersReadyBeforePeerRelay = false;
+    bool friendsHostsExited = false;
     try
     {
-        if (!officialGogOnlyChatCharacterization)
+        if (!(officialGogOnlyChatCharacterization || officialGogOnlyFriendsCharacterization))
         {
             const fs::path serverDirectory = root / "universelan" / "server";
-            writeServerConfiguration(serverDirectory);
-            if (!scenario.contract->observesChatRoomMessageDelivery) server.log = serverDirectory / "stdout.log";
+            writeServerConfiguration(serverDirectory, privatePort);
+            if (!scenario.contract->observesChatRoomMessageDelivery && !scenario.contract->observesFriendsPeerInformation) server.log = serverDirectory / "stdout.log";
             if (!startChild(server, arguments.server, {}, serverDirectory)) throw std::runtime_error("Unable to start server");
-            if (!scenario.contract->observesChatRoomMessageDelivery)
+            if (!scenario.contract->observesChatRoomMessageDelivery && !scenario.contract->observesFriendsPeerInformation)
             {
                 const auto serverDeadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
                 while (std::chrono::steady_clock::now() < serverDeadline)
@@ -1415,11 +1659,11 @@ int run(const Arguments& arguments, const Scenario& scenario)
             const fs::path gogDirectory = root / "gog" / profile;
             fs::create_directories(gogDirectory);
             const fs::path gogControl = gogDirectory / "control";
-            if (!officialGogOnlyChatCharacterization)
+            if (!(officialGogOnlyChatCharacterization || officialGogOnlyFriendsCharacterization))
             {
                 const fs::path universelanDirectory = root / "universelan" / profile;
                 fs::create_directories(universelanDirectory);
-                writeUniverselanConfiguration(universelanDirectory, profile);
+                writeUniverselanConfiguration(universelanDirectory, profile, privatePort);
                 const fs::path universelanControl = universelanDirectory / "control";
                 if (scenario.contract->observesPublicLobby)
                     writePrivateControl(universelanControl, "token=" + privateToken + "\ncreator-ready=0\njoiner-joined=0\ncreator-two-member=0\njoiner-left=0\nobserver-armed=0\ncreator-data-update-complete=0\njoiner-data-observed=0\nabort=0\n");
@@ -1428,6 +1672,8 @@ int run(const Arguments& arguments, const Scenario& scenario)
                     writePrivateControl(universelanControl, "receiver-armed=0\nabort=0\n");
                     writePrivateControl(universelanDirectory / "expected-token-relay", privateToken);
                 }
+                else if (scenario.contract->observesFriendsPeerInformation)
+                    writePrivateControl(universelanControl, "abort=0\n");
                 universelanLaunches.push_back({stageHost(arguments.universelanHost, universelanDirectory), universelanDirectory,
                     universelanDirectory / "trace.jsonl", universelanControl, "universelan", profile});
                 stageUniverselanRuntime(arguments, universelanDirectory);
@@ -1441,6 +1687,8 @@ int run(const Arguments& arguments, const Scenario& scenario)
                 writePrivateControl(gogControl, "receiver-armed=0\nabort=0\n");
                 writePrivateControl(gogDirectory / "expected-token-relay", privateToken);
             }
+            else if (scenario.contract->observesFriendsPeerInformation)
+                writePrivateControl(gogControl, "abort=0\n");
             gogLaunches.push_back({stageHost(arguments.gogHost, gogDirectory), gogDirectory, gogDirectory / "trace.jsonl", gogControl, "gog", profile});
             stageGogRuntime(arguments, gogDirectory);
         }
@@ -1464,6 +1712,15 @@ int run(const Arguments& arguments, const Scenario& scenario)
             report["exitCleanup"] = chatHostsExited ? "all-hosts-exited" : "host-exit-incomplete";
             report["causalGates"] = {{"receiverArmedBeforeSenderRelease", receiverArmedBeforeSenderRelease}};
         }
+        else if (scenario.contract->observesFriendsPeerInformation)
+        {
+            if (officialGogOnlyFriendsCharacterization) universelanLaunches = gogLaunches;
+            else universelanLaunches.insert(universelanLaunches.end(), gogLaunches.begin(), gogLaunches.end());
+            processesSucceeded = runFriendsPeerInformationRetrievalHosts(universelanLaunches, *scenario.contract, scenario.timeoutSeconds,
+                completedHosts, personaListenersReadyBeforePeerRelay, friendsHostsExited);
+            report["exitCleanup"] = friendsHostsExited ? "all-hosts-exited" : "host-exit-incomplete";
+            report["causalGates"] = {{"personaListenersReadyBeforePeerRelay", personaListenersReadyBeforePeerRelay}};
+        }
         else if (scenario.laneMode == "concurrent")
         {
             universelanLaunches.insert(universelanLaunches.end(), gogLaunches.begin(), gogLaunches.end());
@@ -1485,6 +1742,10 @@ int run(const Arguments& arguments, const Scenario& scenario)
             {
                 characterizeChatRoomMessageDeliveryTraces(root, officialGogOnlyChatCharacterization, report);
             }
+            else if (scenario.characterization && scenario.contract->observesFriendsPeerInformation)
+            {
+                characterizeFriendsPeerInformationRetrievalTraces(root, report);
+            }
             else if (scenario.characterization && scenario.contract->observesMultipleLobbyMembership)
             {
                 characterizeMultipleLobbyMembershipTraces(root, report);
@@ -1497,17 +1758,8 @@ int run(const Arguments& arguments, const Scenario& scenario)
             else if (scenario.characterization) characterizeTraces(root, report);
             else compareTraces(root, scenario, report);
             if (scenario.contract->observesPublicLobby) report["exitCleanup"] = cleanupAcknowledged ? "acknowledged" : "not-acknowledged";
-            if (scenario.contract->observesChatRoomMessageDelivery)
-            {
-                report["exitCleanup"] = chatHostsExited ? "all-hosts-exited" : "host-exit-incomplete";
-                report["causalGates"] = {{"receiverArmedBeforeSenderRelease", receiverArmedBeforeSenderRelease}};
-                redactChatFailureArtifacts(root);
-            }
             addProcessFailures(report, completedHosts);
             report["status"] = "process-failure";
-            writeReport(root, report);
-            if (scenario.characterization) printCharacterizationResult(root);
-            else printComparisonResult(report, *scenario.contract);
             throw std::runtime_error("Host process failed");
         }
         if (scenario.characterization)
@@ -1515,6 +1767,10 @@ int run(const Arguments& arguments, const Scenario& scenario)
             if (scenario.contract->observesChatRoomMessageDelivery)
             {
                 characterizeChatRoomMessageDeliveryTraces(root, officialGogOnlyChatCharacterization, report);
+            }
+            else if (scenario.contract->observesFriendsPeerInformation)
+            {
+                characterizeFriendsPeerInformationRetrievalTraces(root, report);
             }
             else if (scenario.contract->observesMultipleLobbyMembership)
             {
@@ -1527,6 +1783,16 @@ int run(const Arguments& arguments, const Scenario& scenario)
             }
             else characterizeTraces(root, report);
             success = true;
+            if (scenario.contract->observesFriendsPeerInformation)
+            {
+                for (const char* profile : {"user1", "user2"})
+                {
+                    const json& records = report["lanes"][profile]["gog"]["orderedIFriendsRecords"];
+                    success = success && records.is_array() && records.size() == 8
+                        && records[5].value("outcome", "") == scenario.requiredTerminalOutcome;
+                    if (!success) break;
+                }
+            }
         }
         else success = compareTraces(root, scenario, report);
         if (scenario.contract->observesPublicLobby) report["exitCleanup"] = cleanupAcknowledged ? "acknowledged" : "not-acknowledged";
@@ -1534,10 +1800,16 @@ int run(const Arguments& arguments, const Scenario& scenario)
         {
             report["exitCleanup"] = chatHostsExited ? "all-hosts-exited" : "host-exit-incomplete";
             report["causalGates"] = {{"receiverArmedBeforeSenderRelease", receiverArmedBeforeSenderRelease}};
-            redactChatFailureArtifacts(root);
+        }
+        if (scenario.contract->observesFriendsPeerInformation)
+        {
+            report["exitCleanup"] = friendsHostsExited ? "all-hosts-exited" : "host-exit-incomplete";
+            report["causalGates"] = {{"personaListenersReadyBeforePeerRelay", personaListenersReadyBeforePeerRelay}};
         }
         writeReport(root, report);
-        if (scenario.characterization) printCharacterizationResult(root);
+        if (scenario.characterization && scenario.contract->observesFriendsPeerInformation)
+            printFriendsPeerInformationCharacterizationResult(report);
+        else if (scenario.characterization) printCharacterizationResult(root);
         else printComparisonResult(report, *scenario.contract);
         if (!success) throw std::runtime_error("Trace mismatch");
     }
@@ -1555,7 +1827,19 @@ int run(const Arguments& arguments, const Scenario& scenario)
         {
             report["exitCleanup"] = chatHostsExited ? "all-hosts-exited" : "host-exit-incomplete";
             report["causalGates"] = {{"receiverArmedBeforeSenderRelease", receiverArmedBeforeSenderRelease}};
-            redactChatFailureArtifacts(root);
+        }
+        if (scenario.contract->observesFriendsPeerInformation)
+        {
+            report["exitCleanup"] = friendsHostsExited ? "all-hosts-exited" : "host-exit-incomplete";
+            report["causalGates"] = {{"personaListenersReadyBeforePeerRelay", personaListenersReadyBeforePeerRelay}};
+        }
+        if ((scenario.contract->observesChatRoomMessageDelivery || scenario.contract->observesFriendsPeerInformation)
+            && !redactSensitiveFailureArtifacts(root))
+        {
+            std::error_code cleanupError;
+            fs::remove_all(root, cleanupError);
+            std::cerr << "BEHAVIOUR_TEST FAIL reason=SensitiveArtifactHandlingFailure" << std::endl;
+            return 1;
         }
         report["serverExitStatus"] = server.started && server.exited ? json(server.exitCode) : json("unavailable");
         try { writeReport(root, report); }
@@ -1566,6 +1850,18 @@ int run(const Arguments& arguments, const Scenario& scenario)
     stopChild(server);
     if (scenario.characterization)
     {
+        if (scenario.contract->observesFriendsPeerInformation)
+        {
+            std::error_code cleanupError;
+            fs::remove_all(root, cleanupError);
+            if (cleanupError)
+            {
+                std::cerr << "BEHAVIOUR_TEST FAIL reason=CleanupFailure" << std::endl;
+                return 1;
+            }
+            std::cout << "BEHAVIOUR_TEST CHARACTERIZATION COMPLETE scenario=" << scenario.contract->name << " artifacts=removed" << std::endl;
+            return 0;
+        }
         std::cout << "BEHAVIOUR_TEST CHARACTERIZATION COMPLETE scenario=" << scenario.contract->name << " artifacts=retained" << std::endl;
         return 0;
     }
@@ -1594,7 +1890,9 @@ int main(int argc, char* argv[])
         : (arguments.characterizePublicLobbyDataPropagation ? publicLobbyDataPropagationCharacterizationScenario()
             : (arguments.characterizeMultipleLobbyMembershipAndMessageIsolation ? multipleLobbyMembershipAndMessageIsolationCharacterizationScenario()
                 : ((arguments.characterizeChatRoomMessageDelivery || arguments.characterizeOfficialGogChatRoomMessageDelivery)
-                    ? chatRoomMessageDeliveryCharacterizationScenario() : parseScenario(arguments.manifest))))); }
+                    ? chatRoomMessageDeliveryCharacterizationScenario()
+                    : (arguments.characterizeOfficialGogFriendsPeerInformationRetrieval
+                        ? friendsPeerInformationRetrievalCharacterizationScenario() : parseScenario(arguments.manifest)))))); }
     catch (...)
     {
         std::cerr << "BEHAVIOUR_TEST FAIL reason=ManifestOrPreflightFailure" << std::endl;

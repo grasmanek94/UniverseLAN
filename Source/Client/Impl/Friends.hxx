@@ -64,8 +64,8 @@ namespace universelan::client {
 
 		AvatarCriteriaImpl avatar_criteria;
 
-		mutable mutex_t mtx_online_friends;
-		std::set<GalaxyID> online_friends;
+		mutable mutex_t mtx_reachable_peers;
+		std::set<GalaxyID> reachable_peers;
 	public:
 
 		FriendsImpl(InterfaceInstances* intf);

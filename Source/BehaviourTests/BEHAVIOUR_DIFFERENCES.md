@@ -49,7 +49,17 @@ strict for every public fact they record.
 - Reproduction command/test name: `universelan-behaviour-simple-gog-services-state-x64-1.152.11`; use explicit runner `--characterize-gog-services-state` mode only to refresh the broader public observation.
 - Follow-up: the strict comparator accepts only the declared same-profile pair `GOG undefined` and `UniverseLAN connected`. It requires exact equality for every other record and state, and does not accept listener differences because the strict contract registers no listener. Retain local characterization reports; do not copy sensitive artifacts here.
 
-## Matched Live Baseline
+## Matched Live Baselines And Accepted Differences
+
+### `Simple/friends-peer-information-retrieval` on `1.152.11/x64`
+
+- Date: 2026-09-14
+- Classification: accepted beneficial difference
+- Public observation: three clean official-only trials matched terminal success, callback-peer=requested-peer valid non-self relation, post-terminal availability, nonempty copied persona name, symbolic `offline` peer state, and filtered requested-peer persona changes `name-avatar`, then `none`, for both profiles. A later full comparison observed only terminal `none` for one official profile.
+- Official normalized result: all required role-local `IFriends` facts matched. The requested-peer listener sequence is retained as diagnostic context after the later official variation, not strict equality.
+- UniverseLAN normalized result: both profiles reported symbolic `online` peer state while matching the required terminal success, callback-peer, availability, copied-name, and self-state facts after adding per-peer information-retrieval state and first-retrieval `name-avatar` notification.
+- Reproduction command/test name: `--characterize-official-gog-friends-peer-information-retrieval`; `universelan-behaviour-simple-friends-peer-information-retrieval-x64-1.152.11`; portable `RunBehaviorCTest.cmake` with `BEHAVIOUR_TEST_LABEL="^friends-peer-information-retrieval$"`.
+- Follow-up: the comparator accepts only the observed same-profile pair `GOG offline` and `UniverseLAN online`, consistent with the documented service-state environment where official GOG has no GOG Galaxy service while UniverseLAN provides its LAN service. This is an accepted beneficial environmental difference, not an SDK guarantee; every other required record and terminal/availability/name/callback-peer fact remains strict. Requested-peer listener events remain diagnostic after the official variation. Retrieval has no friendship or direct-message privacy precondition. `AVATAR_TYPE_NONE` does not assert absent avatar callback activity because default avatar criteria may apply. Every self/peer ID relay is one-time and removed; failure artifacts retain only symbolic traces/reports and staged binaries, never controls, configuration, relays, or runtime output.
 
 ### `Simple/chat-room-message-delivery` on `1.152.11/x64`
 

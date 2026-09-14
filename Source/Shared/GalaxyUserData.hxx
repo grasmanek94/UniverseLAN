@@ -22,5 +22,6 @@ namespace universelan {
 		AchievementsAndStatsContainer stats;
 		std::string nickname;
 		bool online;
+		bool friend_information_retrieved;
 	};
 }
