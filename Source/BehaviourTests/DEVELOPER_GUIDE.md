@@ -58,6 +58,7 @@ cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^friends-peer-information-retrieval$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^reliable-p2p-after-lobby-leave$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^bidirectional-reliable-p2p-listener-peek$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
+cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^bidirectional-unreliable-p2p-listener-peek$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^bidirectional-lobby-message-delivery$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^multiple-lobby-membership-and-message-isolation$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 ```
@@ -175,6 +176,29 @@ direction. The strict test separately accepts only that exact no-delivery relati
 against the corresponding UniverseLAN delivery/two-peek relation; it does not
 infer symmetry. Peer/lobby/channel/payload relations, scheduling, listener
 lifecycle, and fresh-deadline cleanup stay strict. Never print or retain raw IDs,
+lobby IDs, bytes, lengths, token, or marker values.
+
+Characterize bidirectional unreliable listener-mode P2P three times before
+changing its strict facts:
+
+```powershell
+& "bin/Debug/universelan-behaviour-runner-x64-1.152.11.exe" --characterize-official-gog-bidirectional-unreliable-p2p-listener-peek --gog-host "bin/Debug/universelan-behaviour-host-gog-x64-1.152.11.exe" --gog-runtime-dir "Source/DLLs/1.152.11/gog"
+```
+
+It uses the same public collision-marker, initially nonjoinable-to-joinable,
+capacity-two FCM setup, public current-member peer queries, ten post-arm pumps,
+shared release, listener destruction, and fresh leave deadlines as the reliable
+scenario. `user1` sends once with `P2P_SEND_UNRELIABLE` on channel 73 and
+`user2` sends a distinct opaque payload once on channel 74. Every expected
+callback makes exactly two callback-local non-consuming `PeekP2PPacket` calls;
+it never uses `IsP2PPacketAvailable`, `ReadP2PPacket`, or `PopP2PPacket`.
+`INetworking.h` describes this send type as UDP-like and says a true send result
+means scheduled, not delivered. Three official `1.152.11/x64` trials on
+2026-09-14 each scheduled both directions, then observed one non-target callback
+but no expected-channel callback or peek in either direction. The strict test
+accepts only that independently recorded pair against UniverseLAN's exact
+expected-channel delivery/two-peek relation. It does not infer symmetry or a
+delivery guarantee; every other relation remains strict. Never retain raw IDs,
 lobby IDs, bytes, lengths, token, or marker values.
 
 Characterize bidirectional lobby messaging twice before changing its strict facts:

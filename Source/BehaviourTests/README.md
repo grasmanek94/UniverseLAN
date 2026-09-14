@@ -78,6 +78,23 @@ against UniverseLAN's matching delivery/two-peek relation. Listener destruction,
 peer/lobby/channel/payload relations, scheduling, and fresh-deadline cleanup
 remain strict; no raw IDs, bytes, lengths, token, or marker are retained.
 
+`Simple/bidirectional-unreliable-p2p-listener-peek` reuses that public,
+initially nonjoinable, capacity-two FCM-lobby and fresh-deadline cleanup path.
+Both members derive their peer only from current public lobby membership, arm and
+settle `GlobalNetworkingListener`, then send one distinct opaque payload with
+`P2P_SEND_UNRELIABLE` on separate non-default channels after the synchronized
+release. Each expected-channel callback makes exactly two callback-local,
+non-consuming `PeekP2PPacket` calls; listener mode never polls, reads, or pops.
+Three clean official-only runs on 2026-09-14 scheduled both directions but each
+host observed one non-target callback, no expected-channel callback, and no
+peek. The focused four-host comparison observed the exact UniverseLAN
+delivery/two-peek relation in both directions. `SendP2PPacket` returning true
+means only that its UDP-like packet was scheduled; neither this send type nor
+the observed environmental pair guarantees delivery. The manifest accepts only
+those independently exact directional pairs. Peer/lobby/channel/payload,
+scheduling, listener destruction, and cleanup remain strict; no raw IDs, bytes,
+lengths, token, or marker are retained.
+
 `Simple/reliable-p2p-after-lobby-leave` is a separate post-leave contract. It
 creates the same authorized nonjoinable-to-joinable tagged public capacity-two
 FCM lobby. User2 arms `GlobalNetworkingListener`, confirms `LeaveLobby`, and

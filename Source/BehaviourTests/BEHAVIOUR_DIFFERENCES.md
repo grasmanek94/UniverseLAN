@@ -69,6 +69,16 @@ strict for every public fact they record.
 - Reproduction command/test name: `--characterize-official-gog-bidirectional-reliable-p2p-listener-peek`; `universelan-behaviour-simple-bidirectional-reliable-p2p-listener-peek-x64-1.152.11`; portable `RunBehaviorCTest.cmake` with `BEHAVIOUR_TEST_LABEL="^bidirectional-reliable-p2p-listener-peek$"`.
 - Follow-up: `P2P_SEND_RELIABLE` only reports scheduled sending, and listener-mode `PeekP2PPacket` is non-consuming. The comparator accepts only the two independently recorded official no-delivery versus matching UniverseLAN delivery/two-peek pairs. It does not assume direction symmetry; all peer/lobby/channel/payload, schedule, listener-destruction, and cleanup facts remain strict. No raw ID, lobby ID, marker, token, payload byte, length, control, runtime output, or artifact path is recorded.
 
+### `Simple/bidirectional-unreliable-p2p-listener-peek` on `1.152.11/x64`
+
+- Date: 2026-09-14
+- Classification: accepted beneficial environmental difference
+- Public observation: three clean official-GOG-only trials used the safe public, initially nonjoinable, tagged capacity-two FCM lobby, explicitly observed joinability before filtered list/join, publicly queried each current other member, armed and settled both `GlobalNetworkingListener` instances, and synchronized exactly one distinct opaque `P2P_SEND_UNRELIABLE` payload per direction. Every trial scheduled both directions, then each host observed one symbolic non-target callback with no expected-channel callback and no callback-local peeks. Both listener destructions and fresh-deadline terminal leaves completed.
+- Official normalized result: `user1` to `user2` and independently `user2` to `user1` each scheduled once and had the exact one-non-target/no-expected-callback/zero-peek result while retaining all public peer, channel, payload, listener, and cleanup facts.
+- UniverseLAN normalized result: the focused four-host comparison scheduled both matching directions, delivered one expected-channel callback, and made exactly two equivalent callback-local non-consuming peeks with symbolic expected-peer, payload, and size relations. All strict setup and cleanup facts matched.
+- Reproduction command/test name: `--characterize-official-gog-bidirectional-unreliable-p2p-listener-peek`; `universelan-behaviour-simple-bidirectional-unreliable-p2p-listener-peek-x64-1.152.11`; portable `RunBehaviorCTest.cmake` with `BEHAVIOUR_TEST_LABEL="^bidirectional-unreliable-p2p-listener-peek$"`.
+- Follow-up: `P2P_SEND_UNRELIABLE` is UDP-like, and its true return only reports scheduling rather than delivery. Listener-mode `PeekP2PPacket` is non-consuming. The comparator accepts only the two independently recorded exact official no-delivery versus UniverseLAN delivery/two-peek pairs. It does not assume reliable and unreliable outcomes match or infer direction symmetry; all peer/lobby/channel/payload, schedule, listener-destruction, and cleanup facts remain strict. No raw ID, lobby ID, marker, token, payload byte, length, control, runtime output, or artifact path is recorded.
+
 ### `Simple/public-lobby-owner-close-lifecycle` on `1.152.11/x64`
 
 - Date: 2026-09-14

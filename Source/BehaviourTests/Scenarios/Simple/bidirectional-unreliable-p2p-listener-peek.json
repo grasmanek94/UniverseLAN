@@ -1,0 +1,27 @@
+{
+  "name": "Simple/bidirectional-unreliable-p2p-listener-peek",
+  "sdkVersion": "1.152.11",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 45,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": {
+      "user1": ["initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata", "p2p-listener-armed", "p2p-send", "p2p-listener-peek", "p2p-listener-destroyed", "creator-leave", "self-state"],
+      "user2": ["initialize", "sign-in-callback", "sign-in-terminal", "list", "join", "joiner-two-member-snapshot", "p2p-listener-armed", "p2p-send", "p2p-listener-peek", "p2p-listener-destroyed", "joiner-leave", "self-state"]
+    },
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "raw Galaxy IDs, lobby IDs, collision-marker values, payload bytes, message lengths, tokens, controls, timestamps, runtime output, and artifacts are never recorded; compare only symbolic per-direction peer, lobby, channel, scheduling, callback, and callback-local non-consuming peek relations",
+    "acceptedBidirectionalP2PDeliveryPairs": {
+      "user1ToUser2": {
+        "gog": "scheduled-no-expected-channel-callback-or-peeks",
+        "universelan": "scheduled-delivery-and-two-peeks"
+      },
+      "user2ToUser1": {
+        "gog": "scheduled-no-expected-channel-callback-or-peeks",
+        "universelan": "scheduled-delivery-and-two-peeks"
+      }
+    }
+  }
+}

@@ -273,8 +273,23 @@ data can be listed and read; they are never printed. These are public
   scheduled both sends but observed one non-target callback, no expected-channel
   callback, and no peeks in both directions. The manifest accepts only each exact
   direction's official no-delivery versus UniverseLAN delivery/two-peek pair. All
-  other peer/lobby/channel/payload, scheduling, destruction, and fresh-deadline
-  cleanup relations remain strict without assuming symmetry.
+   other peer/lobby/channel/payload, scheduling, destruction, and fresh-deadline
+   cleanup relations remain strict without assuming symmetry.
+- `Simple/bidirectional-unreliable-p2p-listener-peek` reuses the same safe
+  temporary public FCM lobby sequence with two accounts per lane. Both hosts
+  construct `GlobalNetworkingListener`, query the other current member only
+  through public lobby membership, and complete ten bounded settling pumps before
+  the runner releases one synchronized exchange. `user1` sends exactly one
+  distinct opaque token-derived `P2P_SEND_UNRELIABLE` payload on channel 73 and
+  `user2` does the same on channel 74. Each expected-channel callback makes
+  exactly two callback-local peeks; no listener-mode polling, reading, or
+  popping is permitted. Three official trials scheduled both sends but observed
+  one non-target callback, no expected-channel callback, and no peeks in both
+  directions. The manifest accepts only each exact direction's official
+  no-delivery versus UniverseLAN delivery/two-peek pair. `P2P_SEND_UNRELIABLE`
+  is UDP-like, and scheduled does not mean delivered; all other peer/lobby,
+  channel/payload, scheduling, destruction, and fresh-deadline cleanup relations
+  remain strict without assuming reliable/unreliable equivalence or symmetry.
 - `Simple/bidirectional-lobby-message-delivery` creates one authorized public
   FCM lobby initially nonjoinable, writes its public collision marker and
   capacity-two setting, then explicitly completes and observes
@@ -420,8 +435,18 @@ data can be listed and read; they are never printed. These are public
   no expected-channel callback or callback-local peeks. The strict comparator has
   a separate narrow accepted no-delivery versus delivery/two-peek pair for each
   direction. It preserves all other setup, current-public-peer, channel/payload,
-  listener-destruction, and terminal-cleanup checks, and does not infer directional
-  symmetry from the shared exchange.
+   listener-destruction, and terminal-cleanup checks, and does not infer directional
+   symmetry from the shared exchange.
+
+- `Simple/bidirectional-unreliable-p2p-listener-peek` ran three times as an
+  official-GOG-only diagnostic before its focused strict four-host comparison on
+  2026-09-14. Every direction in every official trial scheduled once after both
+  listener instances settled, then received one symbolic non-target callback and
+  no expected-channel callback or callback-local peeks. The strict comparator has
+  a separate narrow accepted no-delivery versus delivery/two-peek pair for each
+  direction. It preserves all other setup, current-public-peer, channel/payload,
+  listener-destruction, and terminal-cleanup checks, and does not infer reliable
+  equivalence or directional symmetry from the shared exchange.
 
 - `Advanced/multiple-lobby-membership-and-message-isolation` is the first
   Advanced contract. Its official-GOG-only 2026-09-14 characterization observed
