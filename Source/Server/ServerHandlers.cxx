@@ -237,8 +237,9 @@ namespace universelan::server {
 		for (auto& i : { pd, target }) {
 			response.chat_room->AddMember(i->id);
 			i->chat_rooms.emplace(response.chat_room->GetID(), response.chat_room);
-			connection.Send(i->peer, response);
 		}
+		// Publish only the completed one-to-one membership relation to either participant.
+		for (auto& i : { pd, target }) connection.Send(i->peer, response);
 	}
 
 	void Server::Handle(ENetPeer* peer, const std::shared_ptr<RequestChatRoomMessagesMessage>& data) {

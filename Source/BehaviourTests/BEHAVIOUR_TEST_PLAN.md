@@ -113,7 +113,7 @@ combine already-characterized Simple contracts.
 | Interface | Simple behavior index | Advanced follow-up |
 | --- | --- | --- |
 | Initialization / `IUser` | Init outcome, sign-in terminal behavior, `SignedIn`, `IsLoggedOn`, self ID validity/type, persona availability, and consecutive `GetSessionID()` equality. | Reinitialization, sign-out, connection loss/recovery. |
-| `IMatchmaking` | Create/list/join public lobby, nonjoinable public-list behavior, full-lobby join failure, operation result, owner/member relationships, basic lobby data, owner-close lifecycle, and ownership-transition characterization. | Multiple concurrent memberships, lobby-message isolation, owner-close comparison, and ownership-transition comparison are implemented; other filters and failure paths remain. |
+| `IMatchmaking` | Create/list/join public lobby, nonjoinable public-list behavior, full-lobby join failure, operation result, owner/member relationships, basic lobby data, owner-close lifecycle, ownership-transition characterization, and bidirectional lobby-message delivery. | Multiple concurrent memberships, lobby-message isolation, owner-close comparison, and ownership-transition comparison are implemented; other filters and failure paths remain. |
 | `INetworking` | Reliable P2P listener-mode scheduling and callback-local non-consuming peek relations. Three clean official 2026-09-14 trials established the exact accepted environmental pair: scheduled send with a non-target callback and no expected-channel delivery/peek versus UniverseLAN expected-channel delivery and two peeks. | Three-peer routing, channel behavior, unreliable packets, disconnect/NAT/server-host behavior. |
 | `IChat` | One-to-one room request, room identity reuse, message send terminal result, remote message content/sender relationship. | History/pagination, membership lifecycle, read state, denial/failure behavior. |
 | `IFriends` | Persona information retrieval, persona state, rich-presence set/get callback behavior, game invitations where official accounts permit it. | Friend relationships, invitation/acceptance flows, persistence, richer presence state. |
@@ -253,7 +253,32 @@ data can be listed and read; they are never printed. These are public
   equivalent peeks. The manifest accepts only that exact pair. Both leaves use a
   fresh bounded deadline and continue `ProcessData` pumping after the observation
   window; a host clears joined state or acknowledges cleanup only after its own
-  matching terminal leave callback.
+   matching terminal leave callback.
+- `Simple/bidirectional-reliable-p2p-listener-peek` uses the same safe temporary
+  public FCM lobby sequence with two accounts per lane. Both hosts construct
+  `GlobalNetworkingListener`, query the other current member only through public
+  lobby membership, and complete ten bounded settling pumps before the runner
+  releases one synchronized exchange. `user1` sends exactly one distinct opaque
+  token-derived reliable payload on channel 73 and `user2` does the same on channel
+  74. Each expected-channel callback makes exactly two callback-local peeks; no
+  listener-mode polling, reading, or popping is permitted. Three official trials
+  scheduled both sends but observed one non-target callback, no expected-channel
+  callback, and no peeks in both directions. The manifest accepts only each exact
+  direction's official no-delivery versus UniverseLAN delivery/two-peek pair. All
+  other peer/lobby/channel/payload, scheduling, destruction, and fresh-deadline
+  cleanup relations remain strict without assuming symmetry.
+- `Simple/bidirectional-lobby-message-delivery` creates one authorized public
+  FCM lobby initially nonjoinable, writes its public collision marker and
+  capacity-two setting, then explicitly completes and observes
+  `SetLobbyJoinable(true)` before discovery. Both members arm public global
+  lobby-message listeners before a shared exchange gate. Each schedules exactly
+  one distinct opaque token-derived binary payload and calls `GetLobbyMessage`
+  only from that callback. Two official `1.152.11/x64` trials observed exactly
+  two callback-local messages per host, one self and one other, with valid
+  shared-lobby/sender/payload/size relations and `self, other` local order. The
+  strict comparison requires all cardinality and directional relationships but
+  retains independent-sender callback order diagnostically: the focused
+  UniverseLAN joiner observed `other, self` while matching every strict fact.
 
 ## Acceptance Criteria
 
@@ -368,7 +393,27 @@ data can be listed and read; they are never printed. These are public
   terminal leave preceded a successful post-delete absence probe. UniverseLAN
   initially exposed the lobby, so normal client list filtering now excludes
   nonjoinable lobbies. The strict contract promotes no broader behavior: no
-  direct-ID join, error reason, callback order, or list-exposed branch is assumed.
+   direct-ID join, error reason, callback order, or list-exposed branch is assumed.
+
+- `Simple/bidirectional-lobby-message-delivery` ran twice as an official-GOG-only
+  diagnostic and then as a focused strict four-host comparison on 2026-09-14.
+  Official GOG scheduled one send per host and delivered one callback-local
+  symbolic self message and one other message to each host, with all shared-lobby,
+  sender, payload, size, and cleanup relations valid. Both official trials had
+  local `self, other` callback order. UniverseLAN matched all strict facts; its
+  joiner retained `other, self`. That order is visible diagnostic context, not a
+  mismatch, because the independent sends have no cross-host or sender-global
+   ordering guarantee.
+
+- `Simple/bidirectional-reliable-p2p-listener-peek` ran three times as an
+  official-GOG-only diagnostic before its focused strict four-host comparison on
+  2026-09-14. Every direction in every official trial scheduled once after both
+  listener instances settled, then received one symbolic non-target callback and
+  no expected-channel callback or callback-local peeks. The strict comparator has
+  a separate narrow accepted no-delivery versus delivery/two-peek pair for each
+  direction. It preserves all other setup, current-public-peer, channel/payload,
+  listener-destruction, and terminal-cleanup checks, and does not infer directional
+  symmetry from the shared exchange.
 
 - `Advanced/multiple-lobby-membership-and-message-isolation` is the first
   Advanced contract. Its official-GOG-only 2026-09-14 characterization observed
@@ -396,6 +441,24 @@ data can be listed and read; they are never printed. These are public
   room request, send, and callback-local receive path in each lane. The
    friendship/messaging-privacy setting is an external official-environment
    precondition, not an accepted difference or root-cause claim.
+
+- `Simple/bidirectional-chat-room-message-delivery` is implemented as an opt-in
+  x64 `1.152.11` public `IChat` contract, independent of all lobby interfaces.
+  Both hosts construct `GlobalChatRoomMessagesListener` before readiness and
+  exchange only private one-time self-ID peer relays. User1 requests the
+  one-to-one room; only after that symbolic room/peer relation succeeds does
+  user2 resolve and validate the same public two-member relation. The runner
+  then releases exactly one distinct token-derived chat payload per direction.
+  Reads occur only inside matching callbacks and retain symbolic shared-room,
+  self/other sender, chat-type, token equality, and size-equality relations.
+  Two clean official-only trials on 2026-09-14 found self echoes, but callback
+  batching/cardinality and self/other local order varied. Token-mismatched
+  messages from an already existing one-to-one room are callback-local prior
+  message diagnostics and never satisfy the fresh directional relation. Those
+  facts remain same-host diagnostics and no cross-host/global order is imposed.
+  The focused strict comparison and full portable suite passed after UniverseLAN
+  began publishing a new room only after both members were added. Host exit is the agreed cleanup;
+  the public SDK has no delete-room API and no deletion claim is made.
 
 - `Simple/friends-peer-information-retrieval` is implemented as an opt-in x64
   `1.152.11` contract. Three clean official-only runs on 2026-09-14 established

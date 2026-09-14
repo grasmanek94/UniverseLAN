@@ -63,6 +63,48 @@ The manifest accepts only that `GOG no delivery` versus `UniverseLAN delivery`
 pair as a beneficial environmental difference; setup, scheduling, cleanup, and
 all other callback relations remain strict.
 
+`Simple/bidirectional-reliable-p2p-listener-peek` uses the same safe public,
+capacity-two FCM lobby setup. Both members obtain the other peer only from the
+joined lobby's public member queries, construct `GlobalNetworkingListener`, and
+complete the bounded post-arm settling window before the runner releases their
+synchronized exchange. Each sends one distinct opaque token-derived payload with
+`P2P_SEND_RELIABLE`: channel 73 from `user1` to `user2`, and channel 74 in the
+reverse direction. Every expected-channel callback makes exactly two
+callback-local `PeekP2PPacket` calls; listener mode never polls, reads, or pops.
+Three official-only trials on 2026-09-14 scheduled both directions but observed
+one non-target callback, no expected-channel callback, and no peeks per host.
+The strict contract accepts only that exact per-direction no-delivery relation
+against UniverseLAN's matching delivery/two-peek relation. Listener destruction,
+peer/lobby/channel/payload relations, scheduling, and fresh-deadline cleanup
+remain strict; no raw IDs, bytes, lengths, token, or marker are retained.
+
+`Simple/bidirectional-lobby-message-delivery` uses one tagged temporary public,
+capacity-two FCM lobby per lane. The creator creates it nonjoinable, writes the
+public collision marker and capacity, then explicitly completes and observes
+`SetLobbyJoinable(true)` before discovery. Both members arm
+`GlobalLobbyMessageListener` before the shared exchange release and each
+schedules exactly one distinct opaque binary payload. Each callback reads only
+with callback-local `GetLobbyMessage`, retaining symbolic shared-lobby,
+self/other-sender, payload, and size relations. Two official-only trials
+observed two callbacks in local `self, other` order for both hosts. The focused
+ comparison matched every strict relation; the UniverseLAN joiner reported
+ `other, self`, which remains an explicit independent-sender order diagnostic,
+ not a cross-host or global-order contract. All cleanup acknowledgements passed.
+
+`Simple/bidirectional-chat-room-message-delivery` uses public `IChat` only and
+is separate from lobby behavior. Both official profiles must be friends with
+messages privacy permitting friends. Both public chat listeners register before
+readiness; user1 initiates and user2 resolves the shared one-to-one room before
+the runner permits one opaque token-derived send in each direction. Callback
+reads are callback-local and retain only symbolic room, sender, type, payload,
+and size relations. Two clean official trials on 2026-09-14 observed self echoes
+but variable callback batching/cardinality and self/other order, so those are
+diagnostic rather than strict or cross-host rules. The focused four-host strict
+comparison and full behavior suite passed. Token-mismatched prior-room messages
+are callback-local diagnostics only and never satisfy a fresh directional
+relation. Participant exit is agreed cleanup because public `IChat`
+has no room-delete API; all relays and sensitive artifacts are removed.
+
 `Simple/public-lobby-not-joinable-behavior` uses an authorized tagged public,
 capacity-two FCM lobby. The creator explicitly completes and verifies
 `SetLobbyJoinable(false)` before the joiner makes one marker-filtered ordinary

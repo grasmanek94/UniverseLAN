@@ -1,0 +1,17 @@
+{
+  "name": "Simple/bidirectional-chat-room-message-delivery",
+  "sdkVersion": "1.152.11",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 45,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": {
+      "user1": ["initialize", "sign-in-callback", "sign-in-terminal", "chat-listener-armed", "chat-room-request-issued", "chat-room-retrieve", "chat-room-membership", "chat-send-issued", "chat-send-terminal", "chat-message-observation", "self-state"],
+      "user2": ["initialize", "sign-in-callback", "sign-in-terminal", "chat-listener-armed", "chat-room-request-issued", "chat-room-retrieve", "chat-room-membership", "chat-send-issued", "chat-send-terminal", "chat-message-observation", "self-state"]
+    },
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "raw Galaxy IDs, room IDs, message IDs, runner-private tokens, payloads, lengths, and timestamps are never recorded; compare only symbolic peer, shared-room, directional send, callback-local type, and payload relations"
+  }
+}

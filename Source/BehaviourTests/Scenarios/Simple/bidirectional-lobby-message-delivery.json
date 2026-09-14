@@ -1,0 +1,17 @@
+{
+  "name": "Simple/bidirectional-lobby-message-delivery",
+  "sdkVersion": "1.152.11",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 45,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": {
+      "user1": ["initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "creator-listener-armed", "creator-send", "creator-message-observation", "creator-leave", "self-state"],
+      "user2": ["initialize", "sign-in-callback", "sign-in-terminal", "list", "join", "joiner-two-member-snapshot", "joiner-listener-armed", "joiner-send", "joiner-message-observation", "joiner-leave", "self-state"]
+    },
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "raw Galaxy IDs, lobby/message IDs, public collision-marker values, payload bytes, message lengths, timestamps, controls, runtime output, and artifacts are never recorded; compare only symbolic self/other sender, shared-lobby, callback-local payload/size, cardinality/order, and scheduling relations"
+  }
+}

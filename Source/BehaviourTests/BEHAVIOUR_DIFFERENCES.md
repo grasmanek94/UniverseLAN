@@ -29,6 +29,16 @@ The recorded accepted lobby convergence result passes because eventual-list retr
 timing is explicitly excluded from lane equality. Matched live baselines remain
 strict for every public fact they record.
 
+### `Simple/bidirectional-lobby-message-delivery` on `1.152.11/x64`
+
+- Date: 2026-09-14
+- Classification: matched live baseline
+- Public observation: two clean official-GOG-only trials created an initially nonjoinable tagged public/capacity-two FCM lobby, wrote the public collision marker, explicitly observed joinability before discovery, armed both public `GlobalLobbyMessageListener` instances before the exchange release, and scheduled one distinct opaque binary lobby message from each member. Both roles observed exactly one symbolic self sender and one other sender with callback-local shared-lobby, read-sender, directional-payload, and message-size relations. Both official trials retained local `self, other` callback order and terminal cleanup acknowledgements.
+- Official normalized result: the focused official lane again completed both scheduled sends, two callback-local self/other relations per host, all strict payload/size/symbolic-lobby facts, and terminal leaves. Its creator and joiner callback orders were `self, other`.
+- UniverseLAN normalized result: matched every strict setup, scheduling, cardinality, symbolic-lobby, self/other sender, callback-local payload/size, and cleanup fact. Creator order was `self, other`; joiner order was `other, self`.
+- Reproduction command/test name: `--characterize-official-gog-bidirectional-lobby-message-delivery`; `universelan-behaviour-simple-bidirectional-lobby-message-delivery-x64-1.152.11`; portable `RunBehaviorCTest.cmake` with `BEHAVIOUR_TEST_LABEL="^bidirectional-lobby-message-delivery$"`.
+- Follow-up: the joiner ordering variation is retained in the normalized report as independent-sender diagnostic context. It is not hidden and does not fail the contract because the two sends are independent after the shared gate; no cross-host or sender-global order is an SDK promise. The contract remains strict for exactly one scheduled send per host, exactly two callback-local messages per host, and each symbolic lobby/sender/payload/size relation. No raw ID, lobby/message ID, marker, payload bytes, length, timestamp, control, runtime log, or artifact path is recorded.
+
 ### `Simple/reliable-p2p-listener-peek` on `1.152.11/x64`
 
 - Date: 2026-09-14
@@ -38,6 +48,16 @@ strict for every public fact they record.
 - UniverseLAN normalized result: the focused four-host comparison completed the exact expected-channel callback/size relation, two equivalent successful non-consuming peeks, valid non-self creator sender and opaque payload/length relations, clean listener destruction, and matching local leaves.
 - Reproduction command/test name: `--characterize-official-gog-reliable-p2p-listener-peek`; `universelan-behaviour-simple-reliable-p2p-listener-peek-x64-1.152.11`; portable `RunBehaviorCTest.cmake` with `BEHAVIOUR_TEST_LABEL="^reliable-p2p-listener-peek$"`.
 - Follow-up: `INetworking.h` specifies that a true `SendP2PPacket` result is scheduling, not delivery, and peek is non-consuming in the listener callback. The comparator accepts only the documented exact GOG no-delivery versus UniverseLAN delivery/two-peek pair; all setup, send, cleanup, and other callback fields remain strict. The public collision marker is not confidential and is never printed. No raw IDs, lobby IDs, payload bytes, marker value, message length, control, runtime output, or run-root path is recorded.
+
+### `Simple/bidirectional-reliable-p2p-listener-peek` on `1.152.11/x64`
+
+- Date: 2026-09-14
+- Classification: accepted beneficial environmental difference
+- Public observation: three clean official-GOG-only trials used a public, initially nonjoinable, tagged capacity-two FCM lobby, explicitly observed joinability before filtered list/join, publicly queried each current other member, armed and settled both `GlobalNetworkingListener` instances, and synchronized exactly one reliable opaque payload per direction. Every trial scheduled both directions, then each host observed one symbolic non-target callback with no expected-channel callback and no callback-local peeks. Both listener destructions and fresh-deadline terminal leaves completed.
+- Official normalized result: `user1` to `user2` and independently `user2` to `user1` scheduled once, had the exact no-expected-channel-callback-or-peek result, retained the symbolic non-target callback, and completed all strict setup, public-peer, channel/payload, listener, and cleanup facts.
+- UniverseLAN normalized result: both matching directions scheduled once, delivered one expected-channel callback, and made exactly two equivalent callback-local non-consuming peeks with symbolic expected-peer, payload, and size relations. All strict setup and cleanup facts matched.
+- Reproduction command/test name: `--characterize-official-gog-bidirectional-reliable-p2p-listener-peek`; `universelan-behaviour-simple-bidirectional-reliable-p2p-listener-peek-x64-1.152.11`; portable `RunBehaviorCTest.cmake` with `BEHAVIOUR_TEST_LABEL="^bidirectional-reliable-p2p-listener-peek$"`.
+- Follow-up: `P2P_SEND_RELIABLE` only reports scheduled sending, and listener-mode `PeekP2PPacket` is non-consuming. The comparator accepts only the two independently recorded official no-delivery versus matching UniverseLAN delivery/two-peek pairs. It does not assume direction symmetry; all peer/lobby/channel/payload, schedule, listener-destruction, and cleanup facts remain strict. No raw ID, lobby ID, marker, token, payload byte, length, control, runtime output, or artifact path is recorded.
 
 ### `Simple/public-lobby-owner-close-lifecycle` on `1.152.11/x64`
 
@@ -119,6 +139,16 @@ strict for every public fact they record.
 - UniverseLAN normalized result: matched the official sender room/send and receiver callback-local symbolic relations.
 - Reproduction command/test name: `--characterize-official-gog-chat-room-message-delivery`; `universelan-behaviour-simple-chat-room-message-delivery-x64-1.152.11`; portable `RunBehaviorCTest.cmake` with `BEHAVIOUR_TEST_LABEL="^chat-room-message-delivery$"`.
 - Follow-up: the approved official profiles being friends with messaging privacy permitting friends is an external test-environment precondition, not a product root-cause claim or comparison exception. All official-only and four-host chat hosts exited; one-time relays, controls, runtime output, and token-bearing artifacts were redacted. No raw ID, room ID, message ID, token, or run-root path is recorded here.
+
+### `Simple/bidirectional-chat-room-message-delivery` on `1.152.11/x64`
+
+- Date: 2026-09-14
+- Classification: matched live baseline
+- Public observation: two clean official-only trials completed public listener arming, user1 initiation followed by user2 one-to-one room resolution, two-member self/peer room validation, one send terminal per direction, and one matching callback-local self and other chat-message relation per host. The first trial included batching/cardinality variation and the self/other local order differed again in the second trial.
+- Official normalized result: symbolic room, peer, directional send, callback-local chat type, and token-derived payload/size relations succeeded. Self echoes were present, while callback cardinality/batching and local self/other order were not stable.
+- UniverseLAN normalized result: the focused four-host contract matched every strict symbolic relation after the server stopped publishing a newly created room before both members were added.
+- Reproduction command/test name: `--characterize-official-gog-bidirectional-chat-room-message-delivery`; `universelan-behaviour-simple-bidirectional-chat-room-message-delivery-x64-1.152.11`; portable `RunBehaviorCTest.cmake` with `BEHAVIOUR_TEST_LABEL="^bidirectional-chat-room-message-delivery$"`.
+- Follow-up: callback cardinality, self-echo presence, batching, self/other order, and token-mismatched prior-room messages remain sanitized same-host diagnostics only. Prior messages are read only in their callback and never satisfy the fresh directional token relation. The focused strict test and full 16-test portable behavior suite passed. No cross-host/global send/receive order, raw room deletion, raw ID, room ID, message ID, token, payload, length, timestamp, control, relay, runtime output, or artifact path is recorded.
 
 ### `Advanced/multiple-lobby-membership-and-message-isolation` on `1.152.11/x64`
 

@@ -54,7 +54,10 @@ cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^public-lobby-owner-ownership-transition$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^public-lobby-data-propagation$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^chat-room-message-delivery$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
+cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^bidirectional-chat-room-message-delivery$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^friends-peer-information-retrieval$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
+cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^bidirectional-reliable-p2p-listener-peek$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
+cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^bidirectional-lobby-message-delivery$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^multiple-lobby-membership-and-message-isolation$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 ```
 
@@ -78,6 +81,12 @@ public facts:
 
 ```powershell
 & "bin/Debug/universelan-behaviour-runner-x64-1.152.11.exe" --characterize-official-gog-chat-room-message-delivery --gog-host "bin/Debug/universelan-behaviour-host-gog-x64-1.152.11.exe" --gog-runtime-dir "Source/DLLs/1.152.11/gog"
+```
+
+Characterize bidirectional direct chat twice before changing its strict facts:
+
+```powershell
+& "bin/Debug/universelan-behaviour-runner-x64-1.152.11.exe" --characterize-official-gog-bidirectional-chat-room-message-delivery --gog-host "bin/Debug/universelan-behaviour-host-gog-x64-1.152.11.exe" --gog-runtime-dir "Source/DLLs/1.152.11/gog"
 ```
 
 Then collect the dual-lane diagnostic when needed:
@@ -121,6 +130,52 @@ terminal leaves acknowledged. The passing focused comparison accepts only that
 exact GOG relation versus the observed exact UniverseLAN expected-channel,
 two-peek relation. Every setup, send, cleanup, and other callback field remains
 strict.
+
+Characterize bidirectional reliable listener-mode P2P three times before changing
+its strict facts:
+
+```powershell
+& "bin/Debug/universelan-behaviour-runner-x64-1.152.11.exe" --characterize-official-gog-bidirectional-reliable-p2p-listener-peek --gog-host "bin/Debug/universelan-behaviour-host-gog-x64-1.152.11.exe" --gog-runtime-dir "Source/DLLs/1.152.11/gog"
+```
+
+The public temporary FCM lobby is nonjoinable while the creator writes its
+collision marker and capacity-two configuration, then explicitly observes
+`SetLobbyJoinable(true)` before filtered discovery/join. Both hosts construct
+`GlobalNetworkingListener`, obtain the other user only through joined-lobby
+member queries, and complete ten bounded post-arm `ProcessData` pumps before the
+runner releases the shared exchange. `user1` sends one opaque token-derived
+payload with `P2P_SEND_RELIABLE` on channel 73; `user2` sends a distinct payload
+on channel 74. Each expected-channel callback performs exactly two callback-local
+non-consuming `PeekP2PPacket` calls and never uses `IsP2PPacketAvailable`,
+`ReadP2PPacket`, or `PopP2PPacket`. Both listeners are destroyed before shutdown.
+Three clean official `1.152.11/x64` trials scheduled both directions and observed
+one non-target callback but no expected-channel callback or peeks in either
+direction. The strict test separately accepts only that exact no-delivery relation
+against the corresponding UniverseLAN delivery/two-peek relation; it does not
+infer symmetry. Peer/lobby/channel/payload relations, scheduling, listener
+lifecycle, and fresh-deadline cleanup stay strict. Never print or retain raw IDs,
+lobby IDs, bytes, lengths, token, or marker values.
+
+Characterize bidirectional lobby messaging twice before changing its strict facts:
+
+```powershell
+& "bin/Debug/universelan-behaviour-runner-x64-1.152.11.exe" --characterize-official-gog-bidirectional-lobby-message-delivery --gog-host "bin/Debug/universelan-behaviour-host-gog-x64-1.152.11.exe" --gog-runtime-dir "Source/DLLs/1.152.11/gog"
+```
+
+The authorized temporary lobby is public, capacity two, and initially
+nonjoinable. The creator writes its public collision marker and capacity, then
+explicitly completes and observes `SetLobbyJoinable(true)` before the joiner
+discovers it. Both members construct `GlobalLobbyMessageListener` before the
+runner releases the shared exchange. Each schedules exactly one distinct opaque
+token-derived binary payload with `SendLobbyMessage`; the listener calls
+`GetLobbyMessage` only in that callback. Two official `1.152.11/x64` trials
+observed two callbacks per host, symbolic `self` then `other`, valid shared
+lobby/read-sender/payload/size relations, and terminal leaves. The strict test
+requires those cardinality and directional relations, but retains callback order
+as diagnostic context because the two sends are independent and has no cross-host
+or sender-global order rule. The focused live comparison matched all strict facts;
+UniverseLAN's joiner retained `other, self` order. Do not print or retain raw IDs,
+marker values, payload bytes, lengths, timestamps, controls, logs, or artifacts.
 
 The similarly non-CTest lobby-data characterization mode is:
 
@@ -270,11 +325,11 @@ The approved comparator host contracts are `initialize-and-sign-in`,
 `session-id-repeatability`, `gog-services-state`,
 `public-lobby-create-list-join-leave`, `public-lobby-not-joinable-behavior`, `public-lobby-owner-close-lifecycle`, `public-lobby-owner-ownership-transition`, `public-lobby-data-propagation`, and
 `public-lobby-full-join-failure`, `chat-room-message-delivery`, `reliable-p2p-listener-peek`, and
-`multiple-lobby-membership-and-message-isolation`; the additional runner-selected diagnostics are
+`bidirectional-reliable-p2p-listener-peek`, `bidirectional-lobby-message-delivery`, and `multiple-lobby-membership-and-message-isolation`; the additional runner-selected diagnostics are
 `gog-services-state-characterization`,
 `public-lobby-not-joinable-behavior-characterization`, `public-lobby-owner-close-lifecycle-characterization`, `public-lobby-owner-ownership-transition-characterization`, `public-lobby-full-join-failure-characterization`, `public-lobby-data-propagation-characterization`, and
 `chat-room-message-delivery-characterization`, `reliable-p2p-listener-peek-characterization`, and
-`multiple-lobby-membership-and-message-isolation-characterization`. Manifests and host
+`bidirectional-reliable-p2p-listener-peek-characterization`, `bidirectional-lobby-message-delivery-characterization`, and `multiple-lobby-membership-and-message-isolation-characterization`. Manifests and host
 arguments outside that fixed registry are rejected. The strict `gog-services-state`
 contract uses no service-state listener and makes its single public
 `IUtils::GetGogServicesConnectionState()` query after auth success and before
@@ -368,6 +423,49 @@ The 2026-09-14 official-only characterization and strict four-host comparison
 matched the stable symbolic request, send, and receive facts. Keep every one of
 those facts strict; the external messaging permission is not encoded as a
 product behavior or accepted-difference rule.
+
+`Simple/bidirectional-chat-room-message-delivery` is a separate public `IChat`
+contract, never a lobby scenario. Both signed-in hosts construct
+`GlobalChatRoomMessagesListener` before their readiness event and exchange only
+one-time private self-ID peer relays. User1 initiates `RequestChatRoomWithUser`;
+after its symbolic room/peer relation is established, user2 resolves the same
+one-to-one relation and validates its own symbolic room membership. Only then
+does the runner release one token-derived opaque chat send from each host. Each
+callback reads only through callback-local `GetChatRoomMessageByIndex` and
+checks the symbolic shared room, self/other sender, chat type, and matching
+private payload/size relation. Raw IDs, rooms, message IDs, tokens, payloads,
+lengths, timestamps, relays, controls, and runtime output are removed or
+redacted. The public SDK exposes no room-delete API, so bounded host exit is the
+agreed cleanup, not a deletion claim. Official characterization retains only
+same-host callback cardinality, self-echo presence, batching, and self/other
+order diagnostics; no cross-host/global send/receive order is asserted.
+Token-mismatched messages from an already existing one-to-one room are read only
+inside their callback and retained as symbolic prior-message diagnostics; they
+never satisfy the fresh directional token relation.
+
+`Simple/bidirectional-lobby-message-delivery` is narrower than the Advanced
+multiple-lobby contract: both profiles share exactly one temporary public FCM
+lobby and each sends exactly once after both global lobby-message listeners are
+armed. The listener uses `GetLobbyMessage` only while processing its public
+callback and records only symbolic shared-lobby, self/other sender,
+directional-payload, and size relations. Official characterization is run twice
+before updating strict facts. Callback cardinality remains strict after that
+baseline; per-host order remains retained diagnostic context because the sends
+are independent, and no cross-host/global sender ordering assertion is allowed.
+
+`Simple/bidirectional-reliable-p2p-listener-peek` uses the same safe temporary
+lobby sequence with two independent directional P2P transfers. Both public
+listeners settle before the runner releases either send. The sender identifies its
+peer only through current public lobby membership, schedules exactly one reliable
+opaque payload on its fixed non-default direction channel, and retains no opaque
+input. Expected-channel callbacks make exactly two callback-local peeks with
+callback-sized private buffers; no listener-mode poll, read, or pop call is
+allowed. The runner holds both members through their observation windows, then
+releases fresh-deadline terminal leaves. Three official characterizations stably
+had a scheduled send, one non-target callback, no expected-channel callback, and
+no peeks in each direction. The comparator encodes two narrow independent
+accepted pairs, not a symmetric assumption; every setup, scheduling, peer/lobby,
+channel/payload, listener-destruction, and cleanup fact remains strict.
 
 `Simple/friends-peer-information-retrieval` is non-mutating and uses only
 `IFriends::RequestUserInformation(peer, AVATAR_TYPE_NONE, listener)`,
