@@ -275,6 +275,15 @@ data can be listed and read; they are never printed. These are public
   direction's official no-delivery versus UniverseLAN delivery/two-peek pair. All
    other peer/lobby/channel/payload, scheduling, destruction, and fresh-deadline
    cleanup relations remain strict without assuming symmetry.
+- `Simple/bidirectional-reliable-p2p-poll-read-characterization` uses the same
+  temporary public FCM two-member setup but deliberately constructs no
+  `INetworkingListener`. Once both polling paths are armed, the runner releases
+  one reliable directional send per host. After `ProcessData` pumping, each host
+  calls `IsP2PPacketAvailable` on its expected channel and makes one exact-size
+  `ReadP2PPacket` only when a packet is available. Its first official-only run
+  observed availability, successful read, matching symbolic sender/payload, and
+  terminal leaves in both directions. It is unregistered, not a UniverseLAN
+  comparison, and must be repeated before any strict contract is considered.
 - `Simple/bidirectional-unreliable-p2p-listener-peek` reuses the same safe
   temporary public FCM lobby sequence with two accounts per lane. Both hosts
   construct `GlobalNetworkingListener`, query the other current member only
@@ -444,13 +453,16 @@ data can be listed and read; they are never printed. These are public
   endpoint that returns opaque binary frames unchanged; it is transport setup,
   never behavior evidence. A successful host path would open one connection,
   send one private NUL-containing payload, validate callback-local availability,
-  two non-consuming peeks and one read, then close. Two official-only
-  `1.152.11/x64` trials on 2026-09-14 signed both profiles in but observed open
-  failure for both profiles, leaving send/data/close uncharacterized. No strict
-  UniverseLAN CTest is registered and no product cause or comparison rule is
-  inferred until successful official observations are stable. Connection IDs,
-  endpoint URL/port, bytes/lengths, credentials, timestamps, controls, and
-  runtime output are not retained.
+  two non-consuming peeks and one read, then close. Two earlier official-only
+  `1.152.11/x64` trials signed both profiles in but observed open failure. A later
+  URL-form characterization observed the numeric-loopback and localhost WebSocket
+  forms fail asynchronously with the public `connection-failure` category and no
+  synchronous error; the explicitly diagnostic omitted-scheme form set synchronous
+  `invalid-argument` and had no bounded terminal callback. Send/data/close remain
+  uncharacterized. No strict UniverseLAN CTest is registered and no product cause
+  or comparison rule is inferred until successful official observations are stable.
+  Connection IDs, endpoint URL/port, bytes/lengths, credentials, timestamps,
+  controls, and runtime output are not retained.
 
 - `Simple/public-lobby-not-joinable-behavior` ran twice as an official-GOG-only
   characterization before its strict four-host baseline on 2026-09-14. Both
@@ -481,7 +493,15 @@ data can be listed and read; they are never printed. These are public
   a separate narrow accepted no-delivery versus delivery/two-peek pair for each
   direction. It preserves all other setup, current-public-peer, channel/payload,
    listener-destruction, and terminal-cleanup checks, and does not infer directional
-   symmetry from the shared exchange.
+    symmetry from the shared exchange.
+
+- `Simple/bidirectional-reliable-p2p-poll-read-characterization` ran once as an
+  official-GOG-only diagnostic on 2026-09-14. Both hosts constructed no listener,
+  scheduled one reliable directional send after the shared polling gate, then
+  observed packet availability and one successful exact-size read with matching
+  symbolic peer/payload relations. Both terminal leaves completed. This remains
+  one empirical official observation, not an SDK delivery guarantee, a strict
+  contract, or a UniverseLAN result.
 
 - `Simple/bidirectional-unreliable-p2p-listener-peek` ran three times as an
   official-GOG-only diagnostic before its focused strict four-host comparison on

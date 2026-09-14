@@ -30,7 +30,7 @@ struct Arguments
     int timeoutSeconds = 0;
 };
 
-    enum class Scenario { initializeAndSignIn, sessionIdRepeatability, gogServicesState, gogServicesStateCharacterization, customNetworkingLoopbackRoundtripCloseCharacterization, customNetworkingLoopbackRoundtripClose, publicLobbyCreateListJoinLeave, publicLobbyStringFilteringCharacterization, publicLobbyStringFiltering, publicLobbyNotJoinableBehaviorCharacterization, publicLobbyNotJoinableBehavior, publicLobbyFullJoinFailureCharacterization, publicLobbyFullJoinFailure, publicLobbyOwnerCloseLifecycleCharacterization, publicLobbyOwnerCloseLifecycle, publicLobbyOwnerOwnershipTransitionCharacterization, publicLobbyOwnerOwnershipTransition, publicLobbyDataPropagationCharacterization, publicLobbyDataPropagation, reliableP2PListenerPeekCharacterization, reliableP2PListenerPeek, reliableP2PAfterLobbyLeaveCharacterization, reliableP2PAfterLobbyLeave, bidirectionalReliableP2PListenerPeekCharacterization, bidirectionalReliableP2PListenerPeek, bidirectionalUnreliableP2PListenerPeekCharacterization, bidirectionalUnreliableP2PListenerPeek, bidirectionalLobbyMessageDeliveryCharacterization, bidirectionalLobbyMessageDelivery, bidirectionalLobbyMemberDataPropagationCharacterization, bidirectionalLobbyMemberDataPropagation, multipleLobbyMembershipAndMessageIsolationCharacterization, multipleLobbyMembershipAndMessageIsolation, chatRoomMessageDeliveryCharacterization, chatRoomMessageDelivery, bidirectionalChatRoomMessageDeliveryCharacterization, bidirectionalChatRoomMessageDelivery, friendsPeerInformationRetrievalCharacterization, friendsPeerInformationRetrieval };
+    enum class Scenario { initializeAndSignIn, sessionIdRepeatability, gogServicesState, gogServicesStateCharacterization, customNetworkingLoopbackRoundtripCloseCharacterization, customNetworkingLoopbackRoundtripClose, publicLobbyCreateListJoinLeave, publicLobbyStringFilteringCharacterization, publicLobbyStringFiltering, publicLobbyNotJoinableBehaviorCharacterization, publicLobbyNotJoinableBehavior, publicLobbyFullJoinFailureCharacterization, publicLobbyFullJoinFailure, publicLobbyOwnerCloseLifecycleCharacterization, publicLobbyOwnerCloseLifecycle, publicLobbyOwnerOwnershipTransitionCharacterization, publicLobbyOwnerOwnershipTransition, publicLobbyDataPropagationCharacterization, publicLobbyDataPropagation, reliableP2PListenerPeekCharacterization, reliableP2PListenerPeek, reliableP2PAfterLobbyLeaveCharacterization, reliableP2PAfterLobbyLeave, bidirectionalReliableP2PListenerPeekCharacterization, bidirectionalReliableP2PListenerPeek, bidirectionalReliableP2PPollReadCharacterization, bidirectionalUnreliableP2PListenerPeekCharacterization, bidirectionalUnreliableP2PListenerPeek, bidirectionalLobbyMessageDeliveryCharacterization, bidirectionalLobbyMessageDelivery, bidirectionalLobbyMemberDataPropagationCharacterization, bidirectionalLobbyMemberDataPropagation, multipleLobbyMembershipAndMessageIsolationCharacterization, multipleLobbyMembershipAndMessageIsolation, chatRoomMessageDeliveryCharacterization, chatRoomMessageDelivery, bidirectionalChatRoomMessageDeliveryCharacterization, bidirectionalChatRoomMessageDelivery, friendsPeerInformationRetrievalCharacterization, friendsPeerInformationRetrieval };
 
 bool isSupportedScenario(const std::string& scenario)
 {
@@ -46,7 +46,8 @@ bool isSupportedScenario(const std::string& scenario)
         || scenario == "public-lobby-data-propagation-characterization" || scenario == "public-lobby-data-propagation"
         || scenario == "reliable-p2p-listener-peek-characterization" || scenario == "reliable-p2p-listener-peek"
         || scenario == "reliable-p2p-after-lobby-leave-characterization" || scenario == "reliable-p2p-after-lobby-leave"
-         || scenario == "bidirectional-reliable-p2p-listener-peek-characterization" || scenario == "bidirectional-reliable-p2p-listener-peek"
+          || scenario == "bidirectional-reliable-p2p-listener-peek-characterization" || scenario == "bidirectional-reliable-p2p-listener-peek"
+          || scenario == "bidirectional-reliable-p2p-poll-read-characterization"
          || scenario == "bidirectional-unreliable-p2p-listener-peek-characterization" || scenario == "bidirectional-unreliable-p2p-listener-peek"
         || scenario == "bidirectional-lobby-message-delivery-characterization" || scenario == "bidirectional-lobby-message-delivery"
         || scenario == "bidirectional-lobby-member-data-propagation-characterization" || scenario == "bidirectional-lobby-member-data-propagation"
@@ -82,6 +83,7 @@ Scenario selectedScenario(const Arguments& arguments)
     if (arguments.scenario == "reliable-p2p-after-lobby-leave") return Scenario::reliableP2PAfterLobbyLeave;
     if (arguments.scenario == "bidirectional-reliable-p2p-listener-peek-characterization") return Scenario::bidirectionalReliableP2PListenerPeekCharacterization;
     if (arguments.scenario == "bidirectional-reliable-p2p-listener-peek") return Scenario::bidirectionalReliableP2PListenerPeek;
+    if (arguments.scenario == "bidirectional-reliable-p2p-poll-read-characterization") return Scenario::bidirectionalReliableP2PPollReadCharacterization;
     if (arguments.scenario == "bidirectional-unreliable-p2p-listener-peek-characterization") return Scenario::bidirectionalUnreliableP2PListenerPeekCharacterization;
     if (arguments.scenario == "bidirectional-unreliable-p2p-listener-peek") return Scenario::bidirectionalUnreliableP2PListenerPeek;
     if (arguments.scenario == "bidirectional-lobby-message-delivery-characterization") return Scenario::bidirectionalLobbyMessageDeliveryCharacterization;
@@ -129,7 +131,8 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
                && arguments.scenario != "public-lobby-data-propagation-characterization" && arguments.scenario != "public-lobby-data-propagation"
                 && arguments.scenario != "reliable-p2p-listener-peek-characterization" && arguments.scenario != "reliable-p2p-listener-peek"
                 && arguments.scenario != "reliable-p2p-after-lobby-leave-characterization" && arguments.scenario != "reliable-p2p-after-lobby-leave"
-                && arguments.scenario != "bidirectional-reliable-p2p-listener-peek-characterization" && arguments.scenario != "bidirectional-reliable-p2p-listener-peek"
+                 && arguments.scenario != "bidirectional-reliable-p2p-listener-peek-characterization" && arguments.scenario != "bidirectional-reliable-p2p-listener-peek"
+                 && arguments.scenario != "bidirectional-reliable-p2p-poll-read-characterization"
                 && arguments.scenario != "bidirectional-unreliable-p2p-listener-peek-characterization" && arguments.scenario != "bidirectional-unreliable-p2p-listener-peek"
                 && arguments.scenario != "bidirectional-lobby-message-delivery-characterization" && arguments.scenario != "bidirectional-lobby-message-delivery"
                 && arguments.scenario != "bidirectional-lobby-member-data-propagation-characterization" && arguments.scenario != "bidirectional-lobby-member-data-propagation"
@@ -1840,7 +1843,7 @@ struct BidirectionalReliableP2PListenerPeekListener final : galaxy::api::GlobalN
 };
 
 bool runBidirectionalReliableP2PListenerPeek(const Arguments& arguments, galaxy::api::IUser* const user, std::vector<std::string>& records,
-    const galaxy::api::P2PSendType sendType)
+    const galaxy::api::P2PSendType sendType, const bool pollingOnly = false)
 {
     galaxy::api::IMatchmaking* const matchmaking = galaxy::api::Matchmaking();
     galaxy::api::INetworking* const networking = galaxy::api::Networking();
@@ -1870,6 +1873,66 @@ bool runBidirectionalReliableP2PListenerPeek(const Arguments& arguments, galaxy:
     };
     auto exchange = [&]()
     {
+        if (pollingOnly)
+        {
+            galaxy::api::GalaxyID peer;
+            const bool currentMembership = pumpUntil(arguments, deadline, [&]
+            {
+                if (matchmaking->GetNumLobbyMembers(lobby) != 2) return false;
+                peer = galaxy::api::GalaxyID();
+                for (std::uint32_t index = 0; index < 2; ++index)
+                {
+                    const galaxy::api::GalaxyID member = matchmaking->GetLobbyMemberByIndex(lobby, index);
+                    if (member != self) peer = member;
+                }
+                return peer.IsValid() && peer.GetIDType() == galaxy::api::GalaxyID::ID_TYPE_USER && peer != self;
+            });
+            const std::uint8_t expectedChannel = creator ? bidirectionalReliableP2PChannels[1] : bidirectionalReliableP2PChannels[0];
+            const std::vector<std::uint8_t>& expectedPayload = creator ? joinerPayload : creatorPayload;
+            records.push_back("{\"record\":\"p2p-poll-armed\",\"listenerConstructed\":false,\"peerFromPublicLobbyQuery\":" + boolean(currentMembership)
+                + ",\"peerCurrentLobbyMember\":" + boolean(currentMembership) + ",\"peerValidNonSelf\":" + boolean(peer.IsValid() && peer != self)
+                + ",\"peerType\":" + common::jsonString(peer.IsValid() ? idType(peer.GetIDType()) : "unavailable") + ",\"expectedChannelConfigured\":"
+                + boolean(ownChannel != expectedChannel) + ",\"directionalChannelsDistinct\":" + boolean(bidirectionalReliableP2PChannels[0] != bidirectionalReliableP2PChannels[1])
+                + ",\"directionalPayloadsDistinct\":" + boolean(creatorPayload != joinerPayload) + "}");
+            if (!currentMembership) return false;
+            writeEvent(arguments, "p2p-poll-armed");
+            if (!pumpUntil(arguments, deadline, [&] { return controlIsSet(arguments, "p2p-poll-exchange-released"); })) return false;
+            const bool scheduled = networking->SendP2PPacket(peer, ownPayload.data(), static_cast<std::uint32_t>(ownPayload.size()), sendType, ownChannel);
+            records.push_back("{\"record\":\"p2p-send\",\"exactlyOneSendIssued\":true,\"peerFromPublicLobbyQuery\":" + boolean(currentMembership)
+                + ",\"peerCurrentLobbyMember\":" + boolean(currentMembership) + ",\"peerValidNonSelf\":" + boolean(peer.IsValid() && peer != self)
+                + ",\"peerType\":" + common::jsonString(peer.IsValid() ? idType(peer.GetIDType()) : "unavailable") + ",\"directionalChannelConfigured\":"
+                + boolean((creator && ownChannel == bidirectionalReliableP2PChannels[0]) || (!creator && ownChannel == bidirectionalReliableP2PChannels[1]))
+                + ",\"directionalChannelsDistinct\":" + boolean(bidirectionalReliableP2PChannels[0] != bidirectionalReliableP2PChannels[1])
+                + ",\"payloadNonemptyBounded\":" + boolean(!ownPayload.empty() && ownPayload.size() <= 1200) + ",\"directionalPayloadsDistinct\":"
+                + boolean(creatorPayload != joinerPayload) + ",\"sendTypeUnreliable\":false,\"scheduled\":" + boolean(scheduled) + "}");
+            if (!scheduled) return false;
+
+            std::uint32_t availableSize = 0;
+            const auto observationDeadline = std::min(deadline, std::chrono::steady_clock::now() + std::chrono::seconds(20));
+            const bool available = pumpUntil(arguments, observationDeadline, [&] {
+                return networking->IsP2PPacketAvailable(&availableSize, expectedChannel);
+            });
+            bool readSucceeded = false;
+            bool receivedSizeMatchesOpaquePayload = false;
+            bool receivedPayloadMatchesOpaqueRelation = false;
+            bool senderMatchesPeer = false;
+            if (available && availableSize > 0 && availableSize <= 1200)
+            {
+                std::vector<std::uint8_t> received(availableSize);
+                std::uint32_t receivedSize = 0;
+                galaxy::api::GalaxyID sender;
+                readSucceeded = networking->ReadP2PPacket(received.data(), availableSize, &receivedSize, sender, expectedChannel);
+                receivedSizeMatchesOpaquePayload = readSucceeded && receivedSize == expectedPayload.size();
+                receivedPayloadMatchesOpaqueRelation = receivedSizeMatchesOpaquePayload && received == expectedPayload;
+                senderMatchesPeer = readSucceeded && sender == peer;
+            }
+            records.push_back("{\"record\":\"p2p-poll-read\",\"listenerConstructed\":false,\"availabilityObserved\":" + boolean(available)
+                + ",\"availableSizeMatchesOpaquePayload\":" + boolean(available && availableSize == expectedPayload.size()) + ",\"readSucceeded\":" + boolean(readSucceeded)
+                + ",\"receivedSizeMatchesOpaquePayload\":" + boolean(receivedSizeMatchesOpaquePayload) + ",\"receivedPayloadMatchesOpaqueRelation\":"
+                + boolean(receivedPayloadMatchesOpaqueRelation) + ",\"senderMatchesPeer\":" + boolean(senderMatchesPeer) + "}");
+            writeEvent(arguments, "p2p-poll-observation-complete");
+            return pumpUntil(arguments, deadline, [&] { return controlIsSet(arguments, "p2p-poll-peer-observation-complete"); });
+        }
         bool scheduled = false;
         bool observationComplete = false;
         {
@@ -3394,6 +3457,15 @@ struct CustomNetworkingOpenListener final : galaxy::api::IConnectionOpenListener
     void OnConnectionOpenFailure(const char*, const FailureReason reason) override { ++failures; failureReason = reason; }
 };
 
+struct CustomNetworkingOpenOutcome
+{
+    bool terminal = false;
+    bool succeeded = false;
+    galaxy::api::ConnectionID connection = 0;
+    const char* failureReason = "unavailable";
+    const char* synchronousApiErrorCategory = "unavailable";
+};
+
 struct CustomNetworkingCloseListener final : galaxy::api::IConnectionCloseListener
 {
     int callbacks = 0;
@@ -3447,6 +3519,38 @@ struct CustomNetworkingDataListener final : galaxy::api::GlobalConnectionDataLis
     }
 };
 
+CustomNetworkingOpenOutcome openCustomNetworkingConnection(const Arguments& arguments, galaxy::api::ICustomNetworking* const networking,
+    const std::string& connectionString, const std::chrono::steady_clock::time_point deadline)
+{
+    CustomNetworkingOpenListener listener;
+    networking->OpenConnection(connectionString.c_str(), &listener);
+    CustomNetworkingOpenOutcome result;
+    // GetError is local-thread and reset by the next API call; retain only its public category.
+    result.synchronousApiErrorCategory = apiErrorCategory(galaxy::api::GetError());
+    result.terminal = pumpUntil(arguments, deadline, [&] { return listener.successes + listener.failures > 0; });
+    result.succeeded = result.terminal && listener.successes == 1 && listener.failures == 0 && listener.connection != 0;
+    result.connection = listener.connection;
+    result.failureReason = listener.failures == 1 ? customNetworkingOpenFailureReason(listener.failureReason) : "unavailable";
+    return result;
+}
+
+std::string customNetworkingUrlFormOutcome(const char* const form, const CustomNetworkingOpenOutcome& outcome)
+{
+    return "{\"form\":" + common::jsonString(form) + ",\"asynchronousTerminal\":"
+        + common::jsonString(!outcome.terminal ? "timeout" : (outcome.succeeded ? "success" : "failure"))
+        + ",\"asynchronousFailureReason\":" + common::jsonString(outcome.failureReason)
+        + ",\"synchronousApiErrorCategory\":" + common::jsonString(outcome.synchronousApiErrorCategory) + "}";
+}
+
+void closeCustomNetworkingConnection(const Arguments& arguments, galaxy::api::ICustomNetworking* const networking,
+    const galaxy::api::ConnectionID connection, const std::chrono::steady_clock::time_point deadline)
+{
+    if (connection == 0) return;
+    CustomNetworkingCloseListener listener;
+    networking->CloseConnection(connection, &listener);
+    pumpUntil(arguments, deadline, [&] { return listener.callbacks > 0; });
+}
+
 bool runCustomNetworkingLoopbackRoundtripClose(const Arguments& arguments, std::vector<std::string>& records)
 {
     const std::vector<std::uint8_t> payload = arguments.profile == "user1"
@@ -3461,24 +3565,41 @@ bool runCustomNetworkingLoopbackRoundtripClose(const Arguments& arguments, std::
             return false;
         }
         const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(arguments.timeoutSeconds);
-        CustomNetworkingOpenListener open;
-        networking->OpenConnection(arguments.webSocketUrl.c_str(), &open);
-        // GetError is local-thread and reset by the next API call; retain only its public category.
-        const char* const synchronousApiErrorCategory = apiErrorCategory(galaxy::api::GetError());
-        const bool openTerminal = pumpUntil(arguments, deadline, [&] { return open.successes + open.failures > 0; });
-        const bool openSucceeded = openTerminal && open.successes == 1 && open.failures == 0 && open.connection != 0;
-        records.push_back("{\"record\":\"custom-networking-open\",\"terminal\":" + common::jsonString(openSucceeded ? "success" : "failure")
-            + ",\"exactlyOneSuccess\":" + boolean(open.successes == 1) + ",\"noFailure\":" + boolean(open.failures == 0)
-            + ",\"connectionValid\":" + boolean(open.connection != 0) + ",\"openFailureReason\":"
-            + common::jsonString(open.failures == 1 ? customNetworkingOpenFailureReason(open.failureReason) : "unavailable")
-            + ",\"synchronousApiErrorCategory\":" + common::jsonString(synchronousApiErrorCategory) + "}");
+        const bool characterizeUrlForms = arguments.scenario == "custom-networking-loopback-roundtrip-close-characterization";
+        const auto urlFormDeadline = [&] { return std::min(deadline, std::chrono::steady_clock::now() + std::chrono::seconds(5)); };
+        const CustomNetworkingOpenOutcome numericLoopback = openCustomNetworkingConnection(arguments, networking, arguments.webSocketUrl, urlFormDeadline());
+        if (characterizeUrlForms)
+        {
+            std::string localhostLoopbackUrl = arguments.webSocketUrl;
+            constexpr const char numericLoopbackPrefix[] = "ws://127.0.0.1:";
+            constexpr const char localhostPrefix[] = "ws://localhost:";
+            if (localhostLoopbackUrl.rfind(numericLoopbackPrefix, 0) == 0)
+                localhostLoopbackUrl.replace(0, sizeof(numericLoopbackPrefix) - 1, localhostPrefix);
+            const CustomNetworkingOpenOutcome localhostLoopback = openCustomNetworkingConnection(arguments, networking, localhostLoopbackUrl, urlFormDeadline());
+            const CustomNetworkingOpenOutcome omittedScheme = openCustomNetworkingConnection(arguments, networking,
+                arguments.webSocketUrl.substr(sizeof("ws://") - 1), urlFormDeadline());
+            records.push_back("{\"record\":\"custom-networking-open\",\"variants\":["
+                + customNetworkingUrlFormOutcome("numeric-loopback-websocket-url", numericLoopback) + ","
+                + customNetworkingUrlFormOutcome("localhost-loopback-websocket-url", localhostLoopback) + ","
+                + customNetworkingUrlFormOutcome("scheme-omitted-diagnostic", omittedScheme) + "]}");
+            if (localhostLoopback.succeeded) closeCustomNetworkingConnection(arguments, networking, localhostLoopback.connection, deadline);
+            if (omittedScheme.succeeded) closeCustomNetworkingConnection(arguments, networking, omittedScheme.connection, deadline);
+        }
+        else
+        {
+            records.push_back("{\"record\":\"custom-networking-open\",\"terminal\":"
+                + common::jsonString(numericLoopback.terminal ? (numericLoopback.succeeded ? "success" : "failure") : "timeout")
+                + ",\"exactlyOneSuccess\":" + boolean(numericLoopback.succeeded) + ",\"noFailure\":"
+                + boolean(numericLoopback.terminal && numericLoopback.succeeded) + ",\"connectionValid\":" + boolean(numericLoopback.connection != 0) + "}");
+        }
+        const bool openSucceeded = numericLoopback.succeeded;
         if (openSucceeded)
         {
             CustomNetworkingDataListener data;
             data.networking = networking;
-            data.expectedConnection = open.connection;
+            data.expectedConnection = numericLoopback.connection;
             data.payload = &payload;
-            networking->SendData(open.connection, payload.data(), static_cast<std::uint32_t>(payload.size()));
+            networking->SendData(numericLoopback.connection, payload.data(), static_cast<std::uint32_t>(payload.size()));
             records.push_back("{\"record\":\"custom-networking-send\",\"issuedAfterOpen\":true,\"boundedBinaryWithNul\":true,\"privatePayloadDistinctPerProfile\":true}");
             const bool dataDelivered = pumpUntil(arguments, deadline, [&] { return data.callbacks > 0; });
             records.push_back("{\"record\":\"custom-networking-data\",\"callbackObserved\":" + boolean(dataDelivered)
@@ -3488,22 +3609,22 @@ bool runCustomNetworkingLoopbackRoundtripClose(const Arguments& arguments, std::
                 + ",\"secondPeekMatchesFirst\":" + boolean(data.secondPeekMatchesFirst) + ",\"availabilityUnchangedAfterSecondPeek\":" + boolean(data.availabilityUnchangedAfterSecondPeek)
                 + ",\"readMatchesPeekRelation\":" + boolean(data.readMatchesFirstPeek) + ",\"availabilityZeroAfterRead\":" + boolean(data.availabilityZeroAfterRead) + "}");
             CustomNetworkingCloseListener close;
-            networking->CloseConnection(open.connection, &close);
+            networking->CloseConnection(numericLoopback.connection, &close);
             const bool closeDelivered = pumpUntil(arguments, deadline, [&] { return close.callbacks > 0; });
             records.push_back("{\"record\":\"custom-networking-close\",\"terminal\":" + common::jsonString(closeDelivered ? "callback" : "timeout")
-                + ",\"exactlyOneCallback\":" + boolean(close.callbacks == 1) + ",\"connectionMatchesOpen\":" + boolean(close.connection == open.connection)
+                + ",\"exactlyOneCallback\":" + boolean(close.callbacks == 1) + ",\"connectionMatchesOpen\":" + boolean(close.connection == numericLoopback.connection)
                 + ",\"reasonUndefined\":" + boolean(close.reason == galaxy::api::IConnectionCloseListener::CLOSE_REASON_UNDEFINED) + "}");
             for (int pump = 0; pump < 10 && std::chrono::steady_clock::now() < deadline; ++pump)
             {
                 galaxy::api::ProcessData();
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
             }
-            records.push_back("{\"record\":\"custom-networking-settle\",\"noLateOpenTerminal\":" + boolean(open.successes == 1 && open.failures == 0)
+            records.push_back("{\"record\":\"custom-networking-settle\",\"noLateOpenTerminal\":" + boolean(numericLoopback.succeeded)
                 + ",\"noLateDataCallback\":" + boolean(data.callbacks == 1) + ",\"noLateCloseCallback\":" + boolean(close.callbacks == 1) + "}");
             completed = dataDelivered && data.callbacks == 1 && data.connectionMatchesOpen && data.availabilityPositive
                 && data.availabilityMatchesNotification && data.firstPeekMatchesPayload && data.availabilityUnchangedAfterFirstPeek
                 && data.secondPeekMatchesFirst && data.availabilityUnchangedAfterSecondPeek && data.readMatchesFirstPeek && data.availabilityZeroAfterRead
-                && closeDelivered && close.callbacks == 1 && close.connection == open.connection
+                && closeDelivered && close.callbacks == 1 && close.connection == numericLoopback.connection
                 && close.reason == galaxy::api::IConnectionCloseListener::CLOSE_REASON_UNDEFINED;
         }
         else
@@ -3630,12 +3751,14 @@ int run(const Arguments& arguments)
                 return p2pSucceeded ? 0 : 1;
             }
             if (scenario == Scenario::bidirectionalReliableP2PListenerPeekCharacterization || scenario == Scenario::bidirectionalReliableP2PListenerPeek
+                || scenario == Scenario::bidirectionalReliableP2PPollReadCharacterization
                 || scenario == Scenario::bidirectionalUnreliableP2PListenerPeekCharacterization || scenario == Scenario::bidirectionalUnreliableP2PListenerPeek)
             {
                 const bool unreliable = scenario == Scenario::bidirectionalUnreliableP2PListenerPeekCharacterization
                     || scenario == Scenario::bidirectionalUnreliableP2PListenerPeek;
                 const bool p2pSucceeded = runBidirectionalReliableP2PListenerPeek(arguments, user, records,
-                    unreliable ? galaxy::api::P2P_SEND_UNRELIABLE : galaxy::api::P2P_SEND_RELIABLE);
+                    unreliable ? galaxy::api::P2P_SEND_UNRELIABLE : galaxy::api::P2P_SEND_RELIABLE,
+                    scenario == Scenario::bidirectionalReliableP2PPollReadCharacterization);
                 records.push_back(selfStateRecord(user));
                 common::writeTrace(arguments.trace, records);
                 galaxy::api::Shutdown();

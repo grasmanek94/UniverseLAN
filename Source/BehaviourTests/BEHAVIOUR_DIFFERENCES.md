@@ -33,8 +33,8 @@ strict for every public fact they record.
 
 - Date: 2026-09-14
 - Classification: unresolved
-- Public observation: two official-GOG-only trials signed in both approved profiles, then each independently issued public `ICustomNetworking::OpenConnection` to a runner-owned ephemeral loopback binary echo endpoint. Each host received an open failure terminal; no send, data, peek, read, or close operation was issued.
-- Official normalized result: both profiles had successful initialization/sign-in/self-state records, `openTerminal=failure`, `dataRoundtripRelationsComplete=false`, and `closeTerminal=not-issued` in both trials.
+- Public observation: two official-GOG-only trials signed in both approved profiles, then each independently issued public `ICustomNetworking::OpenConnection` to a runner-owned ephemeral loopback binary echo endpoint. Each host received an open failure terminal; no send, data, peek, read, or close operation was issued. A later symbolic URL-form diagnostic observed both valid WebSocket forms reach asynchronous `connection-failure` with no synchronous API error, while the omitted-scheme diagnostic set synchronous `invalid-argument` and produced no bounded terminal callback.
+- Official normalized result: both profiles had successful initialization/sign-in/self-state records. The initial trials had `openTerminal=failure`, `dataRoundtripRelationsComplete=false`, and `closeTerminal=not-issued`; the URL-form run retained only form labels and public terminal/failure/API-error categories.
 - UniverseLAN normalized result: not run; a strict comparison is not justified without successful repeatable official open/roundtrip/close evidence.
 - Reproduction command/test name: `--characterize-official-gog-custom-networking-loopback-roundtrip-close`; no CTest is registered.
 - Follow-up: retain the sanitized local characterization report only. The runner endpoint returns opaque binary frames unchanged and is not behavior evidence. Do not infer an SDK cause from the open failure or promote any send/peek/read/close relation before a successful official baseline. No connection ID, endpoint URL/port, payload bytes/lengths, credential, timestamp, control, runtime output, or artifact path is recorded.
@@ -88,6 +88,16 @@ strict for every public fact they record.
 - UniverseLAN normalized result: both matching directions scheduled once, delivered one expected-channel callback, and made exactly two equivalent callback-local non-consuming peeks with symbolic expected-peer, payload, and size relations. All strict setup and cleanup facts matched.
 - Reproduction command/test name: `--characterize-official-gog-bidirectional-reliable-p2p-listener-peek`; `universelan-behaviour-simple-bidirectional-reliable-p2p-listener-peek-x64-1.152.11`; portable `RunBehaviorCTest.cmake` with `BEHAVIOUR_TEST_LABEL="^bidirectional-reliable-p2p-listener-peek$"`.
 - Follow-up: `P2P_SEND_RELIABLE` only reports scheduled sending, and listener-mode `PeekP2PPacket` is non-consuming. The comparator accepts only the two independently recorded official no-delivery versus matching UniverseLAN delivery/two-peek pairs. It does not assume direction symmetry; all peer/lobby/channel/payload, schedule, listener-destruction, and cleanup facts remain strict. No raw ID, lobby ID, marker, token, payload byte, length, control, runtime output, or artifact path is recorded.
+
+### `Simple/bidirectional-reliable-p2p-poll-read` on `1.152.11/x64`
+
+- Date: 2026-09-14
+- Classification: unresolved
+- Public observation: one official-GOG-only run created a temporary public capacity-two FCM lobby, synchronized both listener-free polling paths, and scheduled one reliable directional send per host. Both directions observed availability followed by one successful exact-size `ReadP2PPacket`, with symbolic sender and opaque-payload relations matching. No `INetworkingListener` was constructed; both terminal leaves completed.
+- Official normalized result: both profiles signed in, established valid public two-member state, scheduled one reliable send, retained `listenerConstructed=false`, and observed availability/read/symbolic-peer/symbolic-payload relations as true.
+- UniverseLAN normalized result: not run; this diagnostic does not establish a comparison contract.
+- Reproduction command/test name: `--characterize-official-gog-bidirectional-reliable-p2p-poll-read`; no CTest is registered.
+- Follow-up: repeat the official-only diagnostic before relying on any observed delivery relation. `SendP2PPacket` scheduling and this single polling observation are not general SDK guarantees. No raw ID, lobby ID, marker, token, payload byte, length, timestamp, control, runtime output, or artifact path is recorded.
 
 ### `Simple/bidirectional-unreliable-p2p-listener-peek` on `1.152.11/x64`
 

@@ -101,6 +101,22 @@ close. The endpoint is opaque transport, not behavior evidence. Two official
 trials on 2026-09-14 produced open failures for both signed-in profiles, so no
 strict CTest is registered. Do not infer a failure cause or add a comparison
 until successful official open/roundtrip/close observations are repeatable.
+The URL-form diagnostic records only public categories: the numeric-loopback and
+localhost WebSocket forms currently reach `connection-failure` terminals without
+a synchronous error, while the omitted-scheme diagnostic reports `invalid-argument`
+without a bounded terminal callback.
+
+Characterize listener-free bidirectional reliable P2P polling against official
+GOG only:
+
+```powershell
+& "bin/Debug/universelan-behaviour-runner-x64-1.152.11.exe" --characterize-official-gog-bidirectional-reliable-p2p-poll-read --gog-host "bin/Debug/universelan-behaviour-host-gog-x64-1.152.11.exe" --gog-runtime-dir "Source/DLLs/1.152.11/gog"
+```
+
+This diagnostic creates no `INetworkingListener`. After the synchronized reliable
+send and `ProcessData` pumping, each host uses `IsP2PPacketAvailable` followed by
+one exact-size `ReadP2PPacket` only when available. It is unregistered and does
+not establish a strict or UniverseLAN comparison contract.
 
 Characterize bidirectional direct chat twice before changing its strict facts:
 

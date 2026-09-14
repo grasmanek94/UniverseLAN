@@ -59,6 +59,7 @@ struct Arguments
     bool characterizeOfficialGogReliableP2PListenerPeek = false;
     bool characterizeOfficialGogReliableP2PAfterLobbyLeave = false;
     bool characterizeOfficialGogBidirectionalReliableP2PListenerPeek = false;
+    bool characterizeOfficialGogBidirectionalReliableP2PPollRead = false;
     bool characterizeOfficialGogBidirectionalUnreliableP2PListenerPeek = false;
     bool characterizeOfficialGogBidirectionalLobbyMessageDelivery = false;
     bool characterizeOfficialGogBidirectionalLobbyMemberDataPropagation = false;
@@ -101,6 +102,7 @@ struct ScenarioContract
     bool observesBidirectionalUnreliableP2PListenerPeek = false;
     bool observesBidirectionalLobbyMemberDataPropagation = false;
     bool observesPublicLobbyStringFiltering = false;
+    bool observesBidirectionalReliableP2PPollRead = false;
 };
 
 constexpr std::array scenarioContracts{
@@ -182,7 +184,10 @@ constexpr std::array scenarioContracts{
             "list", "join", "joiner-two-member-snapshot", "p2p-listener-armed", "p2p-send", "p2p-listener-peek", "p2p-listener-destroyed", "joiner-leave"}, 20, false, false, true, false, false, false, false, false, false, false, true},
     ScenarioContract{"Simple/bidirectional-reliable-p2p-listener-peek", "bidirectional-reliable-p2p-listener-peek",
         {"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata", "p2p-listener-armed", "p2p-send", "p2p-listener-peek", "p2p-listener-destroyed", "creator-leave",
-             "list", "join", "joiner-two-member-snapshot", "p2p-listener-armed", "p2p-send", "p2p-listener-peek", "p2p-listener-destroyed", "joiner-leave"}, 20, false, false, true, false, false, false, false, false, false, false, true},
+              "list", "join", "joiner-two-member-snapshot", "p2p-listener-armed", "p2p-send", "p2p-listener-peek", "p2p-listener-destroyed", "joiner-leave"}, 20, false, false, true, false, false, false, false, false, false, false, true},
+    ScenarioContract{"Simple/bidirectional-reliable-p2p-poll-read characterization", "bidirectional-reliable-p2p-poll-read-characterization",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata", "p2p-poll-armed", "p2p-send", "p2p-poll-read", "creator-leave",
+            "list", "join", "joiner-two-member-snapshot", "p2p-poll-armed", "p2p-send", "p2p-poll-read", "joiner-leave"}, 18, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, true},
     ScenarioContract{"Simple/bidirectional-unreliable-p2p-listener-peek characterization", "bidirectional-unreliable-p2p-listener-peek-characterization",
         {"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata", "p2p-listener-armed", "p2p-send", "p2p-listener-peek", "p2p-listener-destroyed", "creator-leave",
              "list", "join", "joiner-two-member-snapshot", "p2p-listener-armed", "p2p-send", "p2p-listener-peek", "p2p-listener-destroyed", "joiner-leave"}, 20, false, false, true, false, false, false, false, false, false, false, false, false, false, true},
@@ -341,6 +346,12 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
             arguments.characterizeOfficialGogBidirectionalReliableP2PListenerPeek = true;
             continue;
         }
+        if (option == "--characterize-official-gog-bidirectional-reliable-p2p-poll-read")
+        {
+            if (arguments.characterizeOfficialGogBidirectionalReliableP2PPollRead) return false;
+            arguments.characterizeOfficialGogBidirectionalReliableP2PPollRead = true;
+            continue;
+        }
         if (option == "--characterize-official-gog-bidirectional-unreliable-p2p-listener-peek")
         {
             if (arguments.characterizeOfficialGogBidirectionalUnreliableP2PListenerPeek) return false;
@@ -381,13 +392,14 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
                 + static_cast<int>(arguments.characterizeOfficialGogFriendsPeerInformationRetrieval)
                  + static_cast<int>(arguments.characterizeOfficialGogReliableP2PListenerPeek)
                  + static_cast<int>(arguments.characterizeOfficialGogReliableP2PAfterLobbyLeave)
-                 + static_cast<int>(arguments.characterizeOfficialGogBidirectionalReliableP2PListenerPeek)
+                  + static_cast<int>(arguments.characterizeOfficialGogBidirectionalReliableP2PListenerPeek)
+                  + static_cast<int>(arguments.characterizeOfficialGogBidirectionalReliableP2PPollRead)
                   + static_cast<int>(arguments.characterizeOfficialGogBidirectionalUnreliableP2PListenerPeek)
                   + static_cast<int>(arguments.characterizeOfficialGogBidirectionalLobbyMessageDelivery)
                   + static_cast<int>(arguments.characterizeOfficialGogBidirectionalLobbyMemberDataPropagation)
                   + static_cast<int>(arguments.characterizeOfficialGogCustomNetworkingLoopbackRoundtripClose)
             == static_cast<int>(arguments.manifest.empty())) && !arguments.gogHost.empty() && !arguments.gogRuntimeDirectory.empty()
-        && ((arguments.characterizeOfficialGogChatRoomMessageDelivery || arguments.characterizeOfficialGogBidirectionalChatRoomMessageDelivery || arguments.characterizeOfficialGogFriendsPeerInformationRetrieval || arguments.characterizeOfficialGogPublicLobbyOwnerCloseLifecycle || arguments.characterizeOfficialGogPublicLobbyOwnerOwnershipTransition || arguments.characterizeOfficialGogPublicLobbyNotJoinableBehavior || arguments.characterizeOfficialGogPublicLobbyFullJoinFailure || arguments.characterizeOfficialGogReliableP2PListenerPeek || arguments.characterizeOfficialGogReliableP2PAfterLobbyLeave || arguments.characterizeOfficialGogBidirectionalReliableP2PListenerPeek || arguments.characterizeOfficialGogBidirectionalLobbyMessageDelivery)
+        && ((arguments.characterizeOfficialGogChatRoomMessageDelivery || arguments.characterizeOfficialGogBidirectionalChatRoomMessageDelivery || arguments.characterizeOfficialGogFriendsPeerInformationRetrieval || arguments.characterizeOfficialGogPublicLobbyOwnerCloseLifecycle || arguments.characterizeOfficialGogPublicLobbyOwnerOwnershipTransition || arguments.characterizeOfficialGogPublicLobbyNotJoinableBehavior || arguments.characterizeOfficialGogPublicLobbyFullJoinFailure || arguments.characterizeOfficialGogReliableP2PListenerPeek || arguments.characterizeOfficialGogReliableP2PAfterLobbyLeave || arguments.characterizeOfficialGogBidirectionalReliableP2PListenerPeek || arguments.characterizeOfficialGogBidirectionalReliableP2PPollRead || arguments.characterizeOfficialGogBidirectionalLobbyMessageDelivery)
             || arguments.characterizeOfficialGogBidirectionalUnreliableP2PListenerPeek || arguments.characterizeOfficialGogBidirectionalLobbyMemberDataPropagation
             || arguments.characterizeOfficialGogCustomNetworkingLoopbackRoundtripClose
             || (!arguments.universelanHost.empty() && !arguments.clientDll.empty() && !arguments.server.empty()));
@@ -476,6 +488,11 @@ bool observesBidirectionalReliableP2PListenerPeek(const ScenarioContract& contra
     return contract.observesBidirectionalReliableP2PListenerPeek;
 }
 
+bool observesBidirectionalReliableP2PPollRead(const ScenarioContract& contract)
+{
+    return contract.observesBidirectionalReliableP2PPollRead;
+}
+
 bool observesBidirectionalUnreliableP2PListenerPeek(const ScenarioContract& contract)
 {
     return contract.observesBidirectionalUnreliableP2PListenerPeek;
@@ -504,9 +521,10 @@ bool observesBidirectionalChatRoomMessageDelivery(const ScenarioContract& contra
 bool requiresSensitiveArtifactRedaction(const ScenarioContract& contract)
 {
     return observesSensitivePublicLobbyLifecycle(contract) || observesPublicLobbyFullJoinFailure(contract)
-          || observesPublicLobbyNotJoinableBehavior(contract) || observesReliableP2PListenerPeek(contract)
-          || observesReliableP2PAfterLobbyLeave(contract)
-          || observesBidirectionalP2PListenerPeek(contract)
+        || observesPublicLobbyNotJoinableBehavior(contract) || observesReliableP2PListenerPeek(contract)
+        || observesReliableP2PAfterLobbyLeave(contract)
+        || observesBidirectionalReliableP2PPollRead(contract)
+        || observesBidirectionalP2PListenerPeek(contract)
            || observesBidirectionalLobbyMessageDelivery(contract) || observesBidirectionalLobbyMemberDataPropagation(contract)
            || observesPublicLobbyStringFiltering(contract)
            || observesBidirectionalChatRoomMessageDelivery(contract) || observesCustomNetworkingLoopbackRoundtripClose(contract);
@@ -546,7 +564,13 @@ Scenario parseScenario(const fs::path& manifest)
     const json& comparison = required(root, "comparison");
     objectHasOnly(comparison, {"requiredRecords", "requiredTerminalOutcome", "unexpectedRecords", "opaqueIds", "acceptedStatePair", "acceptedPersonaStatePair", "acceptedP2PDeliveryPair", "acceptedBidirectionalP2PDeliveryPairs", "acceptedPublicLobbyStringFilterCandidateSet"});
     const json& records = required(comparison, "requiredRecords");
-    const bool validRecordDeclaration = observesBidirectionalP2PListenerPeek(*contract)
+    const bool validRecordDeclaration = observesBidirectionalReliableP2PPollRead(*contract)
+        ? records.is_object() && records.size() == 2
+            && records.value("user1", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter",
+                "configuration", "metadata", "p2p-poll-armed", "p2p-send", "p2p-poll-read", "creator-leave", "self-state"})
+            && records.value("user2", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "list", "join",
+                "joiner-two-member-snapshot", "p2p-poll-armed", "p2p-send", "p2p-poll-read", "joiner-leave", "self-state"})
+        : observesBidirectionalP2PListenerPeek(*contract)
         ? records.is_object() && records.size() == 2
             && records.value("user1", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter",
                 "configuration", "metadata", "p2p-listener-armed", "p2p-send", "p2p-listener-peek", "p2p-listener-destroyed", "creator-leave", "self-state"})
@@ -854,6 +878,16 @@ Scenario bidirectionalReliableP2PListenerPeekCharacterizationScenario()
     return scenario;
 }
 
+Scenario bidirectionalReliableP2PPollReadCharacterizationScenario()
+{
+    Scenario scenario;
+    scenario.contract = findScenarioContract("Simple/bidirectional-reliable-p2p-poll-read characterization");
+    scenario.laneMode = "concurrent";
+    scenario.timeoutSeconds = 45;
+    scenario.characterization = true;
+    return scenario;
+}
+
 Scenario bidirectionalUnreliableP2PListenerPeekCharacterizationScenario()
 {
     Scenario scenario;
@@ -918,11 +952,12 @@ std::string readControlValue(const fs::path& path, const char* const name)
 void setControlFlag(const fs::path& path, const char* const name)
 {
     const std::string token = readControlValue(path, "token");
-    const std::array<const char*, 32> flags{"creator-ready", "joiner-joined", "creator-two-member", "joiner-left",
+    const std::array<const char*, 36> flags{"creator-ready", "joiner-joined", "creator-two-member", "joiner-left",
         "joiner-lifecycle-armed", "creator-left", "post-empty-list-absent", "observer-armed", "creator-data-update-complete", "joiner-data-observed",
         "p2p-listener-armed", "p2p-sender-scheduled", "p2p-peek-complete", "creator-lobby-listener-armed", "former-member-left", "post-leave-settled", "p2p-observation-complete", "creator-message-listener-armed", "joiner-message-listener-armed",
         "message-exchange-released", "creator-member-data-listener-armed", "joiner-member-data-listener-armed", "member-data-exchange-released",
-        "member-data-observation-complete", "member-data-peer-observation-complete", "p2p-exchange-released", "p2p-peer-observation-complete", "joiner-failure-observed",
+        "member-data-observation-complete", "member-data-peer-observation-complete", "p2p-exchange-released", "p2p-peer-observation-complete", "p2p-poll-armed",
+        "p2p-poll-exchange-released", "p2p-poll-observation-complete", "p2p-poll-peer-observation-complete", "joiner-failure-observed",
         "joiner-nonmember-complete", "joiner-list-complete", "post-delete-list-complete", "abort"};
     std::string contents = "token=" + token;
     for (const char* const flag : flags)
@@ -1203,6 +1238,19 @@ bool runPublicLobbyHosts(const std::vector<HostLaunch>& launches, const Scenario
                 if (hasEvent(launches[joiner].control, "joiner-failure-observed")) setControlFlag(launches[creator].control, "joiner-failure-observed");
                 if (hasEvent(launches[creator].control, "creator-left")) setControlFlag(launches[joiner].control, "creator-left");
                 if (hasEvent(launches[joiner].control, "post-empty-list-absent")) setControlFlag(launches[creator].control, "post-empty-list-absent");
+            }
+            else if (observesBidirectionalReliableP2PPollRead(contract))
+            {
+                if (hasEvent(launches[creator].control, "p2p-poll-armed") && hasEvent(launches[joiner].control, "p2p-poll-armed"))
+                {
+                    setControlFlag(launches[creator].control, "p2p-poll-exchange-released");
+                    setControlFlag(launches[joiner].control, "p2p-poll-exchange-released");
+                }
+                if (hasEvent(launches[creator].control, "p2p-poll-observation-complete") && hasEvent(launches[joiner].control, "p2p-poll-observation-complete"))
+                {
+                    setControlFlag(launches[creator].control, "p2p-poll-peer-observation-complete");
+                    setControlFlag(launches[joiner].control, "p2p-poll-peer-observation-complete");
+                }
             }
             else if (observesBidirectionalP2PListenerPeek(contract))
             {
@@ -3733,7 +3781,7 @@ void characterizeCustomNetworkingLoopbackRoundtripCloseTraces(const fs::path& ro
             lane["orderedICustomNetworkingRecords"] = records;
             if (records.size() > 7)
             {
-                lane["openTerminal"] = records[3].value("terminal", "unavailable");
+                lane["urlFormOutcomes"] = records[3].value("variants", json::array());
                 lane["dataRoundtripRelationsComplete"] = records[5].value("firstPeekMatchesOpaqueRelation", false)
                     && records[5].value("secondPeekMatchesFirst", false) && records[5].value("readMatchesPeekRelation", false)
                     && records[5].value("availabilityZeroAfterRead", false);
@@ -3743,6 +3791,40 @@ void characterizeCustomNetworkingLoopbackRoundtripCloseTraces(const fs::path& ro
             }
         }
         catch (...) { lane["orderedICustomNetworkingRecords"] = "unavailable"; }
+        report["lanes"][profile]["gog"] = lane;
+    }
+}
+
+void characterizeBidirectionalReliableP2PPollReadTraces(const fs::path& root, json& report)
+{
+    report = json::object();
+    report["scenario"] = "Simple/bidirectional-reliable-p2p-poll-read";
+    report["classification"] = "official-gog-only-characterization";
+    report["comparison"] = "none";
+    report["status"] = "characterized";
+    report["opaqueIdPolicy"] = "raw Galaxy IDs, lobby IDs, collision-marker values, payload bytes, message lengths, tokens, controls, timestamps, and runtime output are never retained";
+    report["headerFacts"] = "INetworking provides GlobalNetworkingListener but no per-send P2P listener. IsP2PPacketAvailable and ReadP2PPacket are the documented listener-free polling path; this diagnostic constructs no INetworkingListener.";
+    report["pollingSequence"] = "after each ProcessData pump following the synchronized reliable send, each host calls IsP2PPacketAvailable on its expected channel and, only when available, ReadP2PPacket with an exact-size private buffer";
+    for (const char* profile : {"user1", "user2"})
+    {
+        json lane = json::object();
+        try
+        {
+            json records = json::array();
+            for (const std::string& line : common::readTrace(root / "gog" / profile / "trace.jsonl")) records.push_back(json::parse(line));
+            lane["orderedINetworkingRecords"] = records;
+            const std::size_t pollIndex = profile == std::string_view("user1") ? 9 : 8;
+            if (records.size() > pollIndex)
+            {
+                lane["listenerConstructed"] = records[pollIndex].value("listenerConstructed", true);
+                lane["availabilityObserved"] = records[pollIndex].value("availabilityObserved", false);
+                lane["readSucceeded"] = records[pollIndex].value("readSucceeded", false);
+                lane["senderMatchesPeer"] = records[pollIndex].value("senderMatchesPeer", false);
+                lane["opaquePayloadRelationMatched"] = records[pollIndex].value("receivedSizeMatchesOpaquePayload", false)
+                    && records[pollIndex].value("receivedPayloadMatchesOpaqueRelation", false);
+            }
+        }
+        catch (...) { lane["orderedINetworkingRecords"] = "unavailable"; }
         report["lanes"][profile]["gog"] = lane;
     }
 }
@@ -3782,12 +3864,13 @@ int run(const Arguments& arguments, const Scenario& scenario)
     const bool officialGogOnlyReliableP2PListenerPeekCharacterization = arguments.characterizeOfficialGogReliableP2PListenerPeek;
     const bool officialGogOnlyReliableP2PAfterLobbyLeaveCharacterization = arguments.characterizeOfficialGogReliableP2PAfterLobbyLeave;
     const bool officialGogOnlyBidirectionalReliableP2PListenerPeekCharacterization = arguments.characterizeOfficialGogBidirectionalReliableP2PListenerPeek;
+    const bool officialGogOnlyBidirectionalReliableP2PPollReadCharacterization = arguments.characterizeOfficialGogBidirectionalReliableP2PPollRead;
     const bool officialGogOnlyBidirectionalUnreliableP2PListenerPeekCharacterization = arguments.characterizeOfficialGogBidirectionalUnreliableP2PListenerPeek;
     const bool officialGogOnlyBidirectionalLobbyMessageDeliveryCharacterization = arguments.characterizeOfficialGogBidirectionalLobbyMessageDelivery;
     const bool officialGogOnlyBidirectionalLobbyMemberDataPropagationCharacterization = arguments.characterizeOfficialGogBidirectionalLobbyMemberDataPropagation;
     const bool officialGogOnlyCustomNetworkingLoopbackRoundtripCloseCharacterization = arguments.characterizeOfficialGogCustomNetworkingLoopbackRoundtripClose;
     if (!fs::is_regular_file(arguments.gogHost) || !fs::is_directory(arguments.gogRuntimeDirectory)
-        || (!(officialGogOnlyChatCharacterization || officialGogOnlyBidirectionalChatCharacterization || officialGogOnlyFriendsCharacterization || officialGogOnlyOwnerCloseCharacterization || officialGogOnlyOwnershipTransitionCharacterization || officialGogOnlyNotJoinableBehaviorCharacterization || officialGogOnlyFullJoinFailureCharacterization || officialGogOnlyReliableP2PListenerPeekCharacterization || officialGogOnlyReliableP2PAfterLobbyLeaveCharacterization || officialGogOnlyBidirectionalReliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalUnreliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalLobbyMessageDeliveryCharacterization || officialGogOnlyBidirectionalLobbyMemberDataPropagationCharacterization || officialGogOnlyCustomNetworkingLoopbackRoundtripCloseCharacterization) && (!fs::is_regular_file(arguments.universelanHost)
+        || (!(officialGogOnlyChatCharacterization || officialGogOnlyBidirectionalChatCharacterization || officialGogOnlyFriendsCharacterization || officialGogOnlyOwnerCloseCharacterization || officialGogOnlyOwnershipTransitionCharacterization || officialGogOnlyNotJoinableBehaviorCharacterization || officialGogOnlyFullJoinFailureCharacterization || officialGogOnlyReliableP2PListenerPeekCharacterization || officialGogOnlyReliableP2PAfterLobbyLeaveCharacterization || officialGogOnlyBidirectionalReliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalReliableP2PPollReadCharacterization || officialGogOnlyBidirectionalUnreliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalLobbyMessageDeliveryCharacterization || officialGogOnlyBidirectionalLobbyMemberDataPropagationCharacterization || officialGogOnlyCustomNetworkingLoopbackRoundtripCloseCharacterization) && (!fs::is_regular_file(arguments.universelanHost)
             || !fs::is_regular_file(arguments.clientDll) || !fs::is_regular_file(arguments.server)))) throw std::runtime_error("Preflight failed");
 
     std::mt19937_64 random(std::random_device{}());
@@ -3833,7 +3916,7 @@ int run(const Arguments& arguments, const Scenario& scenario)
             webSocket->start();
             webSocketUrl = "ws://127.0.0.1:" + std::to_string(webSocket->getPort()) + "/echo";
         }
-        if (!(officialGogOnlyChatCharacterization || officialGogOnlyBidirectionalChatCharacterization || officialGogOnlyFriendsCharacterization || officialGogOnlyOwnerCloseCharacterization || officialGogOnlyOwnershipTransitionCharacterization || officialGogOnlyNotJoinableBehaviorCharacterization || officialGogOnlyFullJoinFailureCharacterization || officialGogOnlyReliableP2PListenerPeekCharacterization || officialGogOnlyReliableP2PAfterLobbyLeaveCharacterization || officialGogOnlyBidirectionalReliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalUnreliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalLobbyMessageDeliveryCharacterization || officialGogOnlyBidirectionalLobbyMemberDataPropagationCharacterization || officialGogOnlyCustomNetworkingLoopbackRoundtripCloseCharacterization))
+        if (!(officialGogOnlyChatCharacterization || officialGogOnlyBidirectionalChatCharacterization || officialGogOnlyFriendsCharacterization || officialGogOnlyOwnerCloseCharacterization || officialGogOnlyOwnershipTransitionCharacterization || officialGogOnlyNotJoinableBehaviorCharacterization || officialGogOnlyFullJoinFailureCharacterization || officialGogOnlyReliableP2PListenerPeekCharacterization || officialGogOnlyReliableP2PAfterLobbyLeaveCharacterization || officialGogOnlyBidirectionalReliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalReliableP2PPollReadCharacterization || officialGogOnlyBidirectionalUnreliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalLobbyMessageDeliveryCharacterization || officialGogOnlyBidirectionalLobbyMemberDataPropagationCharacterization || officialGogOnlyCustomNetworkingLoopbackRoundtripCloseCharacterization))
         {
             const fs::path serverDirectory = root / "universelan" / "server";
             writeServerConfiguration(serverDirectory, privatePort);
@@ -3860,7 +3943,7 @@ int run(const Arguments& arguments, const Scenario& scenario)
 
         const bool officialGogOnlyCharacterization = (scenario.characterization && scenario.contract->observesMultipleLobbyMembership)
             || officialGogOnlyBidirectionalChatCharacterization
-            || officialGogOnlyOwnerCloseCharacterization || officialGogOnlyOwnershipTransitionCharacterization || officialGogOnlyNotJoinableBehaviorCharacterization || officialGogOnlyFullJoinFailureCharacterization || officialGogOnlyReliableP2PListenerPeekCharacterization || officialGogOnlyReliableP2PAfterLobbyLeaveCharacterization || officialGogOnlyBidirectionalReliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalUnreliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalLobbyMessageDeliveryCharacterization || officialGogOnlyBidirectionalLobbyMemberDataPropagationCharacterization || officialGogOnlyCustomNetworkingLoopbackRoundtripCloseCharacterization;
+            || officialGogOnlyOwnerCloseCharacterization || officialGogOnlyOwnershipTransitionCharacterization || officialGogOnlyNotJoinableBehaviorCharacterization || officialGogOnlyFullJoinFailureCharacterization || officialGogOnlyReliableP2PListenerPeekCharacterization || officialGogOnlyReliableP2PAfterLobbyLeaveCharacterization || officialGogOnlyBidirectionalReliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalReliableP2PPollReadCharacterization || officialGogOnlyBidirectionalUnreliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalLobbyMessageDeliveryCharacterization || officialGogOnlyBidirectionalLobbyMemberDataPropagationCharacterization || officialGogOnlyCustomNetworkingLoopbackRoundtripCloseCharacterization;
         std::vector<HostLaunch> universelanLaunches;
         std::vector<HostLaunch> gogLaunches;
         for (const char* profile : {"user1", "user2"})
@@ -3868,14 +3951,14 @@ int run(const Arguments& arguments, const Scenario& scenario)
             const fs::path gogDirectory = root / "gog" / profile;
             fs::create_directories(gogDirectory);
             const fs::path gogControl = gogDirectory / "control";
-            if (!(officialGogOnlyChatCharacterization || officialGogOnlyBidirectionalChatCharacterization || officialGogOnlyFriendsCharacterization || officialGogOnlyOwnerCloseCharacterization || officialGogOnlyOwnershipTransitionCharacterization || officialGogOnlyNotJoinableBehaviorCharacterization || officialGogOnlyFullJoinFailureCharacterization || officialGogOnlyReliableP2PListenerPeekCharacterization || officialGogOnlyReliableP2PAfterLobbyLeaveCharacterization || officialGogOnlyBidirectionalReliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalUnreliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalLobbyMessageDeliveryCharacterization || officialGogOnlyBidirectionalLobbyMemberDataPropagationCharacterization || officialGogOnlyCustomNetworkingLoopbackRoundtripCloseCharacterization))
+            if (!(officialGogOnlyChatCharacterization || officialGogOnlyBidirectionalChatCharacterization || officialGogOnlyFriendsCharacterization || officialGogOnlyOwnerCloseCharacterization || officialGogOnlyOwnershipTransitionCharacterization || officialGogOnlyNotJoinableBehaviorCharacterization || officialGogOnlyFullJoinFailureCharacterization || officialGogOnlyReliableP2PListenerPeekCharacterization || officialGogOnlyReliableP2PAfterLobbyLeaveCharacterization || officialGogOnlyBidirectionalReliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalReliableP2PPollReadCharacterization || officialGogOnlyBidirectionalUnreliableP2PListenerPeekCharacterization || officialGogOnlyBidirectionalLobbyMessageDeliveryCharacterization || officialGogOnlyBidirectionalLobbyMemberDataPropagationCharacterization || officialGogOnlyCustomNetworkingLoopbackRoundtripCloseCharacterization))
             {
                 const fs::path universelanDirectory = root / "universelan" / profile;
                 fs::create_directories(universelanDirectory);
                 writeUniverselanConfiguration(universelanDirectory, profile, privatePort);
                 const fs::path universelanControl = universelanDirectory / "control";
                 if (scenario.contract->observesPublicLobby)
-                    writePrivateControl(universelanControl, "token=" + privateToken + "-universelan\ncreator-ready=0\njoiner-joined=0\ncreator-two-member=0\njoiner-left=0\njoiner-lifecycle-armed=0\ncreator-left=0\npost-empty-list-absent=0\nobserver-armed=0\ncreator-data-update-complete=0\njoiner-data-observed=0\np2p-listener-armed=0\np2p-sender-scheduled=0\np2p-peek-complete=0\np2p-exchange-released=0\np2p-observation-complete=0\np2p-peer-observation-complete=0\ncreator-message-listener-armed=0\njoiner-message-listener-armed=0\nmessage-exchange-released=0\ncreator-member-data-listener-armed=0\njoiner-member-data-listener-armed=0\nmember-data-exchange-released=0\nmember-data-observation-complete=0\nmember-data-peer-observation-complete=0\njoiner-failure-observed=0\njoiner-nonmember-complete=0\nabort=0\n");
+                    writePrivateControl(universelanControl, "token=" + privateToken + "-universelan\ncreator-ready=0\njoiner-joined=0\ncreator-two-member=0\njoiner-left=0\njoiner-lifecycle-armed=0\ncreator-left=0\npost-empty-list-absent=0\nobserver-armed=0\ncreator-data-update-complete=0\njoiner-data-observed=0\np2p-listener-armed=0\np2p-sender-scheduled=0\np2p-peek-complete=0\np2p-exchange-released=0\np2p-observation-complete=0\np2p-peer-observation-complete=0\np2p-poll-armed=0\np2p-poll-exchange-released=0\np2p-poll-observation-complete=0\np2p-poll-peer-observation-complete=0\ncreator-message-listener-armed=0\njoiner-message-listener-armed=0\nmessage-exchange-released=0\ncreator-member-data-listener-armed=0\njoiner-member-data-listener-armed=0\nmember-data-exchange-released=0\nmember-data-observation-complete=0\nmember-data-peer-observation-complete=0\njoiner-failure-observed=0\njoiner-nonmember-complete=0\nabort=0\n");
                 else if (observesBidirectionalChatRoomMessageDelivery(*scenario.contract))
                 {
                     writePrivateControl(universelanControl, "chat-listeners-armed=0\ninitiator-room-established=0\nchat-exchange-released=0\nabort=0\n");
@@ -3895,7 +3978,7 @@ int run(const Arguments& arguments, const Scenario& scenario)
             }
             if (scenario.contract->observesPublicLobby)
             {
-                writePrivateControl(gogControl, "token=" + privateToken + "-gog\ncreator-ready=0\njoiner-joined=0\ncreator-two-member=0\njoiner-left=0\njoiner-lifecycle-armed=0\ncreator-left=0\npost-empty-list-absent=0\nobserver-armed=0\ncreator-data-update-complete=0\njoiner-data-observed=0\np2p-listener-armed=0\np2p-sender-scheduled=0\np2p-peek-complete=0\np2p-exchange-released=0\np2p-observation-complete=0\np2p-peer-observation-complete=0\ncreator-message-listener-armed=0\njoiner-message-listener-armed=0\nmessage-exchange-released=0\ncreator-member-data-listener-armed=0\njoiner-member-data-listener-armed=0\nmember-data-exchange-released=0\nmember-data-observation-complete=0\nmember-data-peer-observation-complete=0\njoiner-failure-observed=0\njoiner-nonmember-complete=0\nabort=0\n");
+                writePrivateControl(gogControl, "token=" + privateToken + "-gog\ncreator-ready=0\njoiner-joined=0\ncreator-two-member=0\njoiner-left=0\njoiner-lifecycle-armed=0\ncreator-left=0\npost-empty-list-absent=0\nobserver-armed=0\ncreator-data-update-complete=0\njoiner-data-observed=0\np2p-listener-armed=0\np2p-sender-scheduled=0\np2p-peek-complete=0\np2p-exchange-released=0\np2p-observation-complete=0\np2p-peer-observation-complete=0\np2p-poll-armed=0\np2p-poll-exchange-released=0\np2p-poll-observation-complete=0\np2p-poll-peer-observation-complete=0\ncreator-message-listener-armed=0\njoiner-message-listener-armed=0\nmessage-exchange-released=0\ncreator-member-data-listener-armed=0\njoiner-member-data-listener-armed=0\nmember-data-exchange-released=0\nmember-data-observation-complete=0\nmember-data-peer-observation-complete=0\njoiner-failure-observed=0\njoiner-nonmember-complete=0\nabort=0\n");
             }
             else if (observesBidirectionalChatRoomMessageDelivery(*scenario.contract))
             {
@@ -3998,6 +4081,8 @@ int run(const Arguments& arguments, const Scenario& scenario)
                 characterizeReliableP2PAfterLobbyLeaveTraces(root, report);
             else if (scenario.characterization && observesReliableP2PListenerPeek(*scenario.contract))
                 characterizeReliableP2PListenerPeekTraces(root, report);
+            else if (scenario.characterization && observesBidirectionalReliableP2PPollRead(*scenario.contract))
+                characterizeBidirectionalReliableP2PPollReadTraces(root, report);
             else if (scenario.characterization && observesBidirectionalP2PListenerPeek(*scenario.contract))
                 characterizeBidirectionalReliableP2PListenerPeekTraces(root, report, observesBidirectionalUnreliableP2PListenerPeek(*scenario.contract));
             else if (scenario.characterization && observesBidirectionalLobbyMessageDelivery(*scenario.contract))
@@ -4050,6 +4135,8 @@ int run(const Arguments& arguments, const Scenario& scenario)
                 characterizeReliableP2PAfterLobbyLeaveTraces(root, report);
             else if (observesReliableP2PListenerPeek(*scenario.contract))
                 characterizeReliableP2PListenerPeekTraces(root, report);
+            else if (observesBidirectionalReliableP2PPollRead(*scenario.contract))
+                characterizeBidirectionalReliableP2PPollReadTraces(root, report);
             else if (observesBidirectionalP2PListenerPeek(*scenario.contract))
                 characterizeBidirectionalReliableP2PListenerPeekTraces(root, report, observesBidirectionalUnreliableP2PListenerPeek(*scenario.contract));
             else if (observesBidirectionalLobbyMessageDelivery(*scenario.contract))
@@ -4248,6 +4335,7 @@ int main(int argc, char* argv[])
         else if (arguments.characterizeOfficialGogReliableP2PListenerPeek) scenario = reliableP2PListenerPeekCharacterizationScenario();
         else if (arguments.characterizeOfficialGogReliableP2PAfterLobbyLeave) scenario = reliableP2PAfterLobbyLeaveCharacterizationScenario();
         else if (arguments.characterizeOfficialGogBidirectionalReliableP2PListenerPeek) scenario = bidirectionalReliableP2PListenerPeekCharacterizationScenario();
+        else if (arguments.characterizeOfficialGogBidirectionalReliableP2PPollRead) scenario = bidirectionalReliableP2PPollReadCharacterizationScenario();
         else if (arguments.characterizeOfficialGogBidirectionalUnreliableP2PListenerPeek) scenario = bidirectionalUnreliableP2PListenerPeekCharacterizationScenario();
         else if (arguments.characterizeOfficialGogBidirectionalLobbyMessageDelivery) scenario = bidirectionalLobbyMessageDeliveryCharacterizationScenario();
         else if (arguments.characterizeOfficialGogBidirectionalLobbyMemberDataPropagation) scenario = bidirectionalLobbyMemberDataPropagationCharacterizationScenario();
