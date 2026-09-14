@@ -113,7 +113,7 @@ combine already-characterized Simple contracts.
 | Interface | Simple behavior index | Advanced follow-up |
 | --- | --- | --- |
 | Initialization / `IUser` | Init outcome, sign-in terminal behavior, `SignedIn`, `IsLoggedOn`, self ID validity/type, persona availability, and consecutive `GetSessionID()` equality. | Reinitialization, sign-out, connection loss/recovery. |
-| `IMatchmaking` | Create/list/join public lobby, operation result, owner/member relationships, basic lobby data, owner-close lifecycle, and ownership-transition characterization. | Multiple concurrent memberships, lobby-message isolation, owner-close comparison, and ownership-transition comparison are implemented; filters and other failure paths remain. |
+| `IMatchmaking` | Create/list/join public lobby, full-lobby join failure, operation result, owner/member relationships, basic lobby data, owner-close lifecycle, and ownership-transition characterization. | Multiple concurrent memberships, lobby-message isolation, owner-close comparison, and ownership-transition comparison are implemented; other filters and failure paths remain. |
 | `INetworking` | Reliable P2P listener-mode scheduling and callback-local non-consuming peek relations. Three clean official 2026-09-14 trials established the exact accepted environmental pair: scheduled send with a non-target callback and no expected-channel delivery/peek versus UniverseLAN expected-channel delivery and two peeks. | Three-peer routing, channel behavior, unreliable packets, disconnect/NAT/server-host behavior. |
 | `IChat` | One-to-one room request, room identity reuse, message send terminal result, remote message content/sender relationship. | History/pagination, membership lifecycle, read state, denial/failure behavior. |
 | `IFriends` | Persona information retrieval, persona state, rich-presence set/get callback behavior, game invitations where official accounts permit it. | Friend relationships, invitation/acceptance flows, persistence, richer presence state. |
@@ -211,7 +211,16 @@ data can be listed and read; they are never printed. These are public
   not confidential data. The creator writes metadata and observes explicit
   joinability before signalling ready. The runner relays only
    symbolic event-file gates to the joiner and requires cleanup acknowledgement
-   before forcibly stopping a failed host.
+    before forcibly stopping a failed host.
+- `Simple/public-lobby-full-join-failure` uses the same authorized temporary
+  public FCM setup with an explicit single-member limit and no inferred defaults.
+  The joiner requests full lobbies through a marker filter, retrieves only public
+  lobby data/state, and makes exactly one asynchronous join attempt. Official
+  characterization must establish its terminal enum before the strict contract.
+  The rejected joiner never calls member-data, member-enumeration, or lobby-message
+  APIs. The creator verifies sole ownership/membership after the terminal failure,
+  leaves with a fresh cleanup deadline, and acknowledges only its terminal local
+  leave; the joiner completes after the post-empty filtered-list absence probe.
 - `Simple/public-lobby-owner-ownership-transition` uses a distinct tagged public
   `LOBBY_TOPOLOGY_TYPE_FCM_OWNERSHIP_TRANSITION` lobby in each lane. It explicitly
   sets and observes joinable true and capacity two before the filtered joiner is

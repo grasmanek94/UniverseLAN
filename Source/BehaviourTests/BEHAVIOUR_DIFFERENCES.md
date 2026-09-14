@@ -81,6 +81,15 @@ strict for every public fact they record.
 
 ## Matched Live Baselines And Accepted Differences
 
+### `Simple/public-lobby-full-join-failure` on `1.152.11/x64`
+
+- Classification: matched live baseline
+- Public observation: two official-only characterizations and the focused strict comparison observed one filtered full-lobby candidate, one asynchronous terminal `full` join result, no entry, creator sole owner/member state after that failure, terminal creator cleanup, and post-empty tagged-list absence.
+- Official normalized result: matched every required public setup, full-list, public-state, terminal, non-entry, creator-state, and cleanup relation.
+- UniverseLAN normalized result: matched the official symbolic terminal and all required state and cleanup relations.
+- Reproduction command/test name: `--characterize-official-gog-public-lobby-full-join-failure`; `universelan-behaviour-simple-public-lobby-full-join-failure-x64-1.152.11`; portable `RunBehaviorCTest.cmake` with `BEHAVIOUR_TEST_LABEL="^public-lobby-full-join-failure$"`.
+- Follow-up: member-data, member enumeration, and lobby-message APIs remain structurally absent from the rejected joiner. The creator uses a fresh cleanup deadline and acknowledges only a matching terminal leave; the nonmember joiner records completion only after the post-empty absence probe. No raw ID, marker, configuration value, timestamp, control, runtime output, or artifact path is recorded.
+
 ### `Simple/friends-peer-information-retrieval` on `1.152.11/x64`
 
 - Date: 2026-09-14

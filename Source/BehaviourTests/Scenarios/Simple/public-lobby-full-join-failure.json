@@ -1,0 +1,17 @@
+{
+  "name": "Simple/public-lobby-full-join-failure",
+  "sdkVersion": "1.152.11",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 45,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": {
+      "user1": ["initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata", "creator-sole-owner-snapshot", "creator-leave", "self-state"],
+      "user2": ["initialize", "sign-in-callback", "sign-in-terminal", "list", "public-state", "join", "joiner-failure-state", "post-empty-list", "self-state"]
+    },
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "raw Galaxy IDs, collision-marker values, configuration values, and timestamps are never recorded; compare only public terminal result, non-entry, owner/sole-member, and list-absence relations"
+  }
+}

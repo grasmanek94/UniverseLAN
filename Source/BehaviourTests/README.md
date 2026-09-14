@@ -134,6 +134,16 @@ callback order and list retry count are retained only as diagnostics. Both
 cleanup acknowledgements require confirmed terminal leaves.
 The public SDK has no chat-room delete API: chat participants exit after their
 bounded callback contracts, and that bounded host exit is the agreed cleanup.
+`Simple/public-lobby-full-join-failure` uses an authorized temporary public FCM
+lobby with an explicit single-member limit. The creator makes it joinable only
+after writing its public collision marker and observing the explicit public
+state. The joiner performs one filtered full-lobby list request and exactly one
+`JoinLobby` call. Two official-only trials observed terminal `full` with no
+entry. Its joiner uses only list, lobby-data retrieval, and public state calls;
+it never sends a lobby message or uses member/member-data APIs. Creator cleanup
+requires a terminal local leave; the nonmember joiner finishes after a stable
+post-empty tagged-list absence probe.
+
 Details, diagnostics, artifact handling, and the required validation checklist
 are in [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) and
 [TODO_PROGRESS.md](TODO_PROGRESS.md).
