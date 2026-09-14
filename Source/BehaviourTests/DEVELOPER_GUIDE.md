@@ -60,6 +60,7 @@ cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^bidirectional-reliable-p2p-listener-peek$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^bidirectional-unreliable-p2p-listener-peek$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^bidirectional-lobby-message-delivery$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
+cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^bidirectional-lobby-member-data-propagation$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^multiple-lobby-membership-and-message-isolation$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 ```
 
@@ -221,6 +222,26 @@ as diagnostic context because the two sends are independent and has no cross-hos
 or sender-global order rule. The focused live comparison matched all strict facts;
 UniverseLAN's joiner retained `other, self` order. Do not print or retain raw IDs,
 marker values, payload bytes, lengths, timestamps, controls, logs, or artifacts.
+
+Characterize bidirectional lobby-member data twice before changing its strict facts:
+
+```powershell
+& "bin/Debug/universelan-behaviour-runner-x64-1.152.11.exe" --characterize-official-gog-bidirectional-lobby-member-data-propagation --gog-host "bin/Debug/universelan-behaviour-host-gog-x64-1.152.11.exe" --gog-runtime-dir "Source/DLLs/1.152.11/gog"
+```
+
+It uses the same public initially nonjoinable-to-joinable tagged capacity-two
+FCM lobby. Once both hosts establish public two-member state, each constructs a
+`GlobalLobbyDataListener` before the runner releases one simultaneous exchange.
+Each member calls public `SetLobbyMemberData` once under its distinct fixed key
+with a distinct opaque token-derived value. In `1.152.11`, that call is void;
+its `ILobbyMemberDataUpdateListener` terminal callback is the public operation
+result. Listener reads use `GetLobbyMemberDataCopy` only for the matching
+callback, followed by bounded settled self/other copies. Two official runs
+observed successful self-targeted terminals, valid symbolic self/other callback
+targets, visible/equal callback copies, and nonempty equal settled copies. Keep
+callback count and target order as host-local diagnostics: the updates are
+independent after the shared gate. Never print or retain IDs, keys, marker,
+token, values, timestamps, controls, logs, or artifacts.
 
 The similarly non-CTest lobby-data characterization mode is:
 

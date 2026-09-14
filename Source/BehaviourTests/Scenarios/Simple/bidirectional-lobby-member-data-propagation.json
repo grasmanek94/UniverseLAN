@@ -1,0 +1,17 @@
+{
+  "name": "Simple/bidirectional-lobby-member-data-propagation",
+  "sdkVersion": "1.152.11",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 45,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": {
+      "user1": ["initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "creator-two-member-snapshot", "creator-member-data-listener-armed", "creator-member-data-set", "creator-member-data-observation", "creator-leave", "self-state"],
+      "user2": ["initialize", "sign-in-callback", "sign-in-terminal", "list", "join", "joiner-two-member-snapshot", "joiner-member-data-listener-armed", "joiner-member-data-set", "joiner-member-data-observation", "joiner-leave", "self-state"]
+    },
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "raw Galaxy IDs, public collision-marker values, fixed public member-data keys, token-derived member-data values, timestamps, controls, and runtime output are never recorded; compare only symbolic operation terminal, callback lobby/member self/other, callback-local changed-data visibility, private equality/nonempty, and settled copy relations"
+  }
+}

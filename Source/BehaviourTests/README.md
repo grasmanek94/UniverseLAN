@@ -116,8 +116,21 @@ with callback-local `GetLobbyMessage`, retaining symbolic shared-lobby,
 self/other-sender, payload, and size relations. Two official-only trials
 observed two callbacks in local `self, other` order for both hosts. The focused
  comparison matched every strict relation; the UniverseLAN joiner reported
- `other, self`, which remains an explicit independent-sender order diagnostic,
- not a cross-host or global-order contract. All cleanup acknowledgements passed.
+`other, self`, which remains an explicit independent-sender order diagnostic,
+not a cross-host or global-order contract. All cleanup acknowledgements passed.
+
+`Simple/bidirectional-lobby-member-data-propagation` uses the same initially
+nonjoinable, tagged public capacity-two FCM lobby setup. Both hosts establish
+public two-member state and arm `GlobalLobbyDataListener` before the shared
+release. Each sets one distinct opaque token-derived member-data value under its
+own fixed public key with `SetLobbyMemberData`. In this selected header the call
+is void, so the operation listener supplies its terminal public result. Each
+callback makes only its matching callback-local `GetLobbyMemberDataCopy` read,
+then both self and other copies are read after bounded pumping. Two official
+trials observed successful terminals, symbolic self/other callback targets,
+visible/equal private copies, and eventual self/other copies. Callback order and
+count remain host-local diagnostics because both updates begin after the shared
+gate; the focused strict comparison matched all required facts and cleanup.
 
 `Simple/bidirectional-chat-room-message-delivery` uses public `IChat` only and
 is separate from lobby behavior. Both official profiles must be friends with

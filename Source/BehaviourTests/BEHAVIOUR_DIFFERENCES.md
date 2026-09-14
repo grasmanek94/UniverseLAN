@@ -29,6 +29,16 @@ The recorded accepted lobby convergence result passes because eventual-list retr
 timing is explicitly excluded from lane equality. Matched live baselines remain
 strict for every public fact they record.
 
+### `Simple/bidirectional-lobby-member-data-propagation` on `1.152.11/x64`
+
+- Date: 2026-09-14
+- Classification: matched live baseline
+- Public observation: two clean official-GOG-only trials created the safe initially nonjoinable tagged public capacity-two FCM lobby, explicitly observed joinability, established public two-member state, armed both `GlobalLobbyDataListener` instances, and released one member-data update per host. The selected header's void setter completed through a successful member-data operation callback. Both hosts observed symbolic self and other callback targets with callback-local visible/equal copies and nonempty equal settled self/other copies.
+- Official normalized result: both profiles completed successful self-targeted operation terminals, valid shared-lobby self/other callback relations, callback-local private equality/visibility, settled self/other copies, and terminal leaves. Both trials retained local `self, other` callback target order with two callbacks per host.
+- UniverseLAN normalized result: the focused four-host comparison matched every strict setup, terminal, target, callback-local copy, settled-copy, and cleanup fact. It retained creator `self, other` and joiner `other, self` local target orders while matching all strict relations.
+- Reproduction command/test name: `--characterize-official-gog-bidirectional-lobby-member-data-propagation`; `universelan-behaviour-simple-bidirectional-lobby-member-data-propagation-x64-1.152.11`; portable `RunBehaviorCTest.cmake` with `BEHAVIOUR_TEST_LABEL="^bidirectional-lobby-member-data-propagation$"`.
+- Follow-up: callback count and local target order are visible per-host diagnostic context only because both member updates start after the shared gate. The contract remains strict for operation terminal, callback lobby/member self/other, changed-data visibility, private equality/nonempty, settled copies, and cleanup. No raw ID, lobby ID, key, marker, token, value, timestamp, control, runtime output, or artifact path is recorded.
+
 ### `Simple/reliable-p2p-after-lobby-leave` on `1.152.11/x64`
 
 - Date: 2026-09-14

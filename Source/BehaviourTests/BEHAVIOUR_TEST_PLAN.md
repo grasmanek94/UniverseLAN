@@ -299,9 +299,22 @@ data can be listed and read; they are never printed. These are public
   only from that callback. Two official `1.152.11/x64` trials observed exactly
   two callback-local messages per host, one self and one other, with valid
   shared-lobby/sender/payload/size relations and `self, other` local order. The
-  strict comparison requires all cardinality and directional relationships but
-  retains independent-sender callback order diagnostically: the focused
-  UniverseLAN joiner observed `other, self` while matching every strict fact.
+   strict comparison requires all cardinality and directional relationships but
+   retains independent-sender callback order diagnostically: the focused
+   UniverseLAN joiner observed `other, self` while matching every strict fact.
+- `Simple/bidirectional-lobby-member-data-propagation` uses the same safe public
+  FCM setup and public collision marker, with explicit observed joinability
+  before discovery. After both joined-lobby two-member states are established,
+  both hosts arm `GlobalLobbyDataListener` before the runner releases the
+  exchange. Each member makes one `SetLobbyMemberData` call on its own fixed
+  public key with a distinct opaque token-derived value. The selected header
+  makes this setter void, so `ILobbyMemberDataUpdateListener` is the public
+  terminal result. Listener callbacks make only matching callback-local
+  `GetLobbyMemberDataCopy` reads; each host then performs bounded settled self
+  and other copies. Two official trials established successful terminals,
+  symbolic self/other callback targets, changed-data visibility/private equality,
+  and settled copies. Callback count and local target order remain diagnostics,
+  not cross-host or sender-order rules.
 
 ## Acceptance Criteria
 
