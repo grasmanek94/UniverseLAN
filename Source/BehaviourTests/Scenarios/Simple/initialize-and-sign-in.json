@@ -1,0 +1,14 @@
+{
+  "name": "Simple/initialize-and-sign-in",
+  "sdkVersion": "1.152.11",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 20,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": ["initialize", "sign-in-callback", "sign-in-terminal", "self-state"],
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "lane-local symbols only; compare validity, type, and equality relationships"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Advanced/multiple-lobby-membership-and-message-isolation",
+  "sdkVersion": "1.152.11",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 45,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": {
+      "user1": ["initialize", "sign-in-callback", "sign-in-terminal", "create-pair", "explicit-configuration", "private-tags", "creator-messages", "creator-leave-L1", "creator-leave-L0", "self-state"],
+      "user2": ["initialize", "sign-in-callback", "sign-in-terminal", "discover-pair", "join-pair", "joiner-configuration", "joiner-messages", "joiner-leave-L1", "joiner-leave-L0", "self-state"]
+    },
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "private tags, opaque message payloads, raw Galaxy IDs, lobby IDs, and message IDs are never recorded; only L0/L1 symbolic public relations are compared"
+  }
+}

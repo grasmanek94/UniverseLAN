@@ -1,0 +1,17 @@
+{
+  "name": "Simple/public-lobby-create-list-join-leave",
+  "sdkVersion": "1.152.11",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 45,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": {
+      "user1": ["initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata", "creator-two-member-snapshot", "creator-sole-owner-snapshot", "creator-leave", "self-state"],
+      "user2": ["initialize", "sign-in-callback", "sign-in-terminal", "list", "join", "joiner-two-member-snapshot", "joiner-leave", "self-state"]
+    },
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "private token and raw Galaxy IDs are never recorded; compare only public validity and creator/joiner/owner/member relations"
+  }
+}

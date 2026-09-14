@@ -25,6 +25,10 @@ if(BUILD_UNIVERSELAN_SYSTEM_TESTS)
   add_subdirectory(SystemTests)
 endif()
 
+if(BUILD_UNIVERSELAN_BEHAVIOUR_TESTS)
+  add_subdirectory(BehaviourTests)
+endif()
+
 if(BUILD_UNIVERSELAN_UNIT_TESTS)
   add_subdirectory(UnitTests)
 endif()

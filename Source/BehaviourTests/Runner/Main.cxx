@@ -1,0 +1,1603 @@
+#include "Common/Trace.hxx"
+
+#include <nlohmann/json.hpp>
+
+#include <chrono>
+#include <algorithm>
+#include <array>
+#include <cctype>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <iterator>
+#include <random>
+#include <set>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <thread>
+#include <vector>
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <fcntl.h>
+#include <signal.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#endif
+
+namespace universelan::behaviour::runner
+{
+namespace fs = std::filesystem;
+using json = nlohmann::json;
+
+namespace
+{
+struct Arguments
+{
+    fs::path manifest;
+    fs::path universelanHost;
+    fs::path gogHost;
+    fs::path clientDll;
+    fs::path server;
+    fs::path gogRuntimeDirectory;
+    bool characterizeGogServicesState = false;
+    bool characterizePublicLobbyDataPropagation = false;
+    bool characterizeMultipleLobbyMembershipAndMessageIsolation = false;
+    bool characterizeChatRoomMessageDelivery = false;
+    bool characterizeOfficialGogChatRoomMessageDelivery = false;
+};
+
+struct Scenario
+{
+    const struct ScenarioContract* contract = nullptr;
+    std::string laneMode;
+    int timeoutSeconds = 0;
+    bool acceptsGogServicesStatePair = false;
+    bool characterization = false;
+};
+
+struct ScenarioContract
+{
+    std::string_view name;
+    std::string_view hostScenario;
+    std::array<std::string_view, 12> records;
+    std::size_t recordCount;
+    bool observesGogServicesState;
+    bool observesSessionIdRepeatability;
+    bool observesPublicLobby;
+    bool observesPublicLobbyDataPropagation;
+    bool observesMultipleLobbyMembership;
+    bool observesChatRoomMessageDelivery;
+};
+
+constexpr std::array scenarioContracts{
+    ScenarioContract{"Simple/initialize-and-sign-in", "initialize-and-sign-in",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "self-state"}, 4, false, false, false, false, false, false},
+    ScenarioContract{"Simple/session-id-repeatability", "session-id-repeatability",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "session-id-repeatability", "self-state"}, 5, false, true, false, false, false, false},
+    ScenarioContract{"Simple/gog-services-state", "gog-services-state",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "self-state", "gog-services-state"}, 5, true, false, false, false, false, false},
+    ScenarioContract{"Simple/gog-services-state characterization", "gog-services-state-characterization",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "self-state", "gog-services-state-characterization"}, 5, true, false, false, false, false, false},
+    ScenarioContract{"Simple/public-lobby-create-list-join-leave", "public-lobby-create-list-join-leave",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "metadata", "list", "join",
+            "creator-two-member-snapshot", "joiner-two-member-snapshot", "creator-sole-owner-snapshot", "creator-leave"}, 12, false, false, true, false, false, false},
+    ScenarioContract{"Simple/public-lobby-data-propagation characterization", "public-lobby-data-propagation-characterization",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "metadata", "owner-data-update", "list", "join",
+            "joiner-two-member-snapshot", "joiner-lobby-data", "creator-sole-owner-snapshot"}, 12, false, false, true, true, false, false},
+    ScenarioContract{"Simple/public-lobby-data-propagation", "public-lobby-data-propagation",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "metadata", "owner-data-update", "list", "join",
+            "joiner-two-member-snapshot", "joiner-lobby-data", "creator-sole-owner-snapshot"}, 12, false, false, true, true, false, false},
+    ScenarioContract{"Advanced/multiple-lobby-membership-and-message-isolation characterization", "multiple-lobby-membership-and-message-isolation-characterization",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "create-pair", "explicit-configuration", "private-tags", "creator-messages", "discover-pair", "join-pair", "joiner-configuration", "joiner-messages", "self-state"}, 12, false, false, true, false, true, false},
+    ScenarioContract{"Advanced/multiple-lobby-membership-and-message-isolation", "multiple-lobby-membership-and-message-isolation",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "create-pair", "explicit-configuration", "private-tags", "creator-messages", "discover-pair", "join-pair", "joiner-configuration", "joiner-messages", "self-state"}, 12, false, false, true, false, true, false},
+    ScenarioContract{"Simple/chat-room-message-delivery characterization", "chat-room-message-delivery-characterization",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "chat-listener-armed", "chat-message-received", "self-state",
+            "chat-room-request-issued", "chat-room-retrieve", "chat-send-issued", "chat-send-terminal"}, 10, false, false, false, false, false, true},
+    ScenarioContract{"Simple/chat-room-message-delivery", "chat-room-message-delivery",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "chat-listener-armed", "chat-message-received", "self-state",
+            "chat-room-request-issued", "chat-room-retrieve", "chat-send-issued", "chat-send-terminal"}, 10, false, false, false, false, false, true}
+};
+
+struct Child
+{
+    fs::path log;
+    std::string lane;
+    std::string profile;
+    bool started = false;
+    bool exited = false;
+    bool terminationRequested = false;
+    int exitCode = -1;
+#ifdef _WIN32
+    HANDLE process = nullptr;
+#else
+    pid_t process = -1;
+#endif
+};
+
+struct HostLaunch
+{
+    fs::path executable;
+    fs::path workingDirectory;
+    fs::path trace;
+    fs::path control;
+    std::string lane;
+    std::string profile;
+};
+
+[[noreturn]] void invalidManifest() { throw std::runtime_error("Manifest validation failed"); }
+
+bool fieldsExactly(const json& record, std::initializer_list<const char*> expected);
+
+bool readArguments(const int argc, char* argv[], Arguments& arguments)
+{
+    for (int index = 1; index < argc; ++index)
+    {
+        const std::string option = argv[index];
+        if (option == "--characterize-gog-services-state")
+        {
+            if (arguments.characterizeGogServicesState) return false;
+            arguments.characterizeGogServicesState = true;
+            continue;
+        }
+        if (option == "--characterize-public-lobby-data-propagation")
+        {
+            if (arguments.characterizePublicLobbyDataPropagation) return false;
+            arguments.characterizePublicLobbyDataPropagation = true;
+            continue;
+        }
+        if (option == "--characterize-multiple-lobby-membership-and-message-isolation")
+        {
+            if (arguments.characterizeMultipleLobbyMembershipAndMessageIsolation) return false;
+            arguments.characterizeMultipleLobbyMembershipAndMessageIsolation = true;
+            continue;
+        }
+        if (option == "--characterize-chat-room-message-delivery")
+        {
+            if (arguments.characterizeChatRoomMessageDelivery) return false;
+            arguments.characterizeChatRoomMessageDelivery = true;
+            continue;
+        }
+        if (option == "--characterize-official-gog-chat-room-message-delivery")
+        {
+            if (arguments.characterizeOfficialGogChatRoomMessageDelivery) return false;
+            arguments.characterizeOfficialGogChatRoomMessageDelivery = true;
+            continue;
+        }
+        if (++index == argc) return false;
+        const fs::path value = fs::u8path(argv[index]);
+        if (option == "--manifest") arguments.manifest = value;
+        else if (option == "--universelan-host") arguments.universelanHost = value;
+        else if (option == "--gog-host") arguments.gogHost = value;
+        else if (option == "--client-dll") arguments.clientDll = value;
+        else if (option == "--server") arguments.server = value;
+        else if (option == "--gog-runtime-dir") arguments.gogRuntimeDirectory = value;
+        else return false;
+    }
+    return (static_cast<int>(arguments.characterizeGogServicesState) + static_cast<int>(arguments.characterizePublicLobbyDataPropagation) + static_cast<int>(arguments.characterizeMultipleLobbyMembershipAndMessageIsolation)
+                + static_cast<int>(arguments.characterizeChatRoomMessageDelivery) + static_cast<int>(arguments.characterizeOfficialGogChatRoomMessageDelivery)
+            == static_cast<int>(arguments.manifest.empty())) && !arguments.gogHost.empty() && !arguments.gogRuntimeDirectory.empty()
+        && (arguments.characterizeOfficialGogChatRoomMessageDelivery || (!arguments.universelanHost.empty() && !arguments.clientDll.empty() && !arguments.server.empty()));
+}
+
+void objectHasOnly(const json& value, std::initializer_list<const char*> allowed)
+{
+    if (!value.is_object()) invalidManifest();
+    for (const auto& [key, ignored] : value.items())
+    {
+        bool known = false;
+        for (const char* allowedKey : allowed) known = known || key == allowedKey;
+        if (!known) invalidManifest();
+    }
+}
+
+const json& required(const json& object, const char* name)
+{
+    if (!object.contains(name)) invalidManifest();
+    return object.at(name);
+}
+
+const ScenarioContract* findScenarioContract(const std::string_view name)
+{
+    for (const ScenarioContract& contract : scenarioContracts)
+        if (contract.name == name) return &contract;
+    return nullptr;
+}
+
+json requiredRecords(const ScenarioContract& contract)
+{
+    json records = json::array();
+    for (std::size_t index = 0; index < contract.recordCount; ++index) records.push_back(contract.records[index]);
+    return records;
+}
+
+Scenario parseScenario(const fs::path& manifest)
+{
+    std::ifstream input(manifest);
+    json root;
+    try { input >> root; }
+    catch (...) { invalidManifest(); }
+    objectHasOnly(root, {"name", "sdkVersion", "architecture", "laneMode", "timeoutSeconds", "profiles", "comparison"});
+    if (!required(root, "name").is_string()) invalidManifest();
+    const ScenarioContract* contract = findScenarioContract(root.at("name").get<std::string>());
+    if (contract == nullptr) invalidManifest();
+    if (!required(root, "sdkVersion").is_string() || root.at("sdkVersion") != UNIVERSELAN_BEHAVIOUR_TEST_VERSION) invalidManifest();
+    if (!required(root, "architecture").is_string() || root.at("architecture") != UNIVERSELAN_BEHAVIOUR_TEST_ARCH) invalidManifest();
+    if (!required(root, "laneMode").is_string()) invalidManifest();
+    Scenario scenario;
+    scenario.contract = contract;
+    scenario.laneMode = root.at("laneMode").get<std::string>();
+    if (scenario.laneMode != "concurrent" && scenario.laneMode != "sequential") invalidManifest();
+    if ((contract->observesPublicLobby || contract->observesChatRoomMessageDelivery) && scenario.laneMode != "concurrent") invalidManifest();
+    if (!required(root, "timeoutSeconds").is_number_integer()) invalidManifest();
+    scenario.timeoutSeconds = root.at("timeoutSeconds").get<int>();
+    if (scenario.timeoutSeconds < 1 || scenario.timeoutSeconds > 60) invalidManifest();
+    const json& profiles = required(root, "profiles");
+    if (!profiles.is_array() || profiles.size() != 2 || profiles[0] != "user1" || profiles[1] != "user2") invalidManifest();
+    const json& comparison = required(root, "comparison");
+    objectHasOnly(comparison, {"requiredRecords", "requiredTerminalOutcome", "unexpectedRecords", "opaqueIds", "acceptedStatePair"});
+    const json& records = required(comparison, "requiredRecords");
+    const bool validRecordDeclaration = contract->observesMultipleLobbyMembership
+        ? records.is_object() && records.size() == 2
+            && records.value("user1", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "create-pair", "explicit-configuration",
+                "private-tags", "creator-messages", "creator-leave-L1", "creator-leave-L0", "self-state"})
+            && records.value("user2", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "discover-pair", "join-pair",
+                "joiner-configuration", "joiner-messages", "joiner-leave-L1", "joiner-leave-L0", "self-state"})
+        : contract->observesChatRoomMessageDelivery
+        ? records.is_object() && records.size() == 2
+            && records.value("user1", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "chat-room-request-issued",
+                "chat-room-retrieve", "chat-send-issued", "chat-send-terminal", "self-state"})
+            && records.value("user2", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "chat-listener-armed",
+                "chat-message-received", "self-state"})
+        : contract->observesPublicLobbyDataPropagation
+        ? records.is_object() && records.size() == 2
+            && records.value("user1", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter",
+                "configuration", "metadata", "owner-data-update", "creator-sole-owner-snapshot", "creator-leave", "self-state"})
+            && records.value("user2", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "list", "join",
+                "joiner-two-member-snapshot", "joiner-lobby-data", "joiner-leave", "self-state"})
+        : contract->observesPublicLobby
+        ? records.is_object() && records.size() == 2
+            && records.value("user1", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter",
+                "configuration", "metadata", "creator-two-member-snapshot", "creator-sole-owner-snapshot", "creator-leave", "self-state"})
+            && records.value("user2", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "list", "join",
+                "joiner-two-member-snapshot", "joiner-leave", "self-state"})
+        : records.is_array() && records == requiredRecords(*contract);
+    if (!validRecordDeclaration
+        || required(comparison, "requiredTerminalOutcome") != "success"
+        || required(comparison, "unexpectedRecords") != "fail"
+        || !required(comparison, "opaqueIds").is_string()) invalidManifest();
+    if (contract->observesGogServicesState)
+    {
+        const json& acceptedStatePair = required(comparison, "acceptedStatePair");
+        if (!fieldsExactly(acceptedStatePair, {"gog", "universelan"})
+            || acceptedStatePair["gog"] != "undefined" || acceptedStatePair["universelan"] != "connected") invalidManifest();
+        scenario.acceptsGogServicesStatePair = true;
+    }
+    else if (comparison.contains("acceptedStatePair")) invalidManifest();
+    return scenario;
+}
+
+Scenario characterizationScenario()
+{
+    Scenario scenario;
+    scenario.contract = &scenarioContracts[3];
+    scenario.laneMode = "concurrent";
+    scenario.timeoutSeconds = 20;
+    scenario.characterization = true;
+    return scenario;
+}
+
+Scenario publicLobbyDataPropagationCharacterizationScenario()
+{
+    Scenario scenario;
+    scenario.contract = &scenarioContracts[5];
+    scenario.laneMode = "concurrent";
+    scenario.timeoutSeconds = 30;
+    scenario.characterization = true;
+    return scenario;
+}
+
+Scenario multipleLobbyMembershipAndMessageIsolationCharacterizationScenario()
+{
+    Scenario scenario;
+    scenario.contract = &scenarioContracts[7];
+    scenario.laneMode = "concurrent";
+    scenario.timeoutSeconds = 45;
+    scenario.characterization = true;
+    return scenario;
+}
+
+Scenario chatRoomMessageDeliveryCharacterizationScenario()
+{
+    Scenario scenario;
+    scenario.contract = &scenarioContracts[9];
+    scenario.laneMode = "concurrent";
+    scenario.timeoutSeconds = 30;
+    scenario.characterization = true;
+    return scenario;
+}
+
+void writeFile(const fs::path& path, const std::string& contents)
+{
+    fs::create_directories(path.parent_path());
+    std::ofstream output(path, std::ios::binary | std::ios::trunc);
+    if (!output) throw std::runtime_error("Unable to create isolated configuration");
+    output << contents;
+}
+
+void writePrivateControl(const fs::path& path, const std::string& contents)
+{
+    const fs::path temporary = path.string() + ".tmp";
+    writeFile(temporary, contents);
+    std::error_code error;
+    fs::rename(temporary, path, error);
+    if (error)
+    {
+        fs::remove(path, error);
+        fs::rename(temporary, path, error);
+    }
+    if (error) throw std::runtime_error("Unable to update private control");
+}
+
+std::string readControlValue(const fs::path& path, const char* const name)
+{
+    std::ifstream input(path, std::ios::binary);
+    const std::string prefix = std::string(name) + "=";
+    std::string line;
+    while (std::getline(input, line)) if (line.rfind(prefix, 0) == 0) return line.substr(prefix.size());
+    return {};
+}
+
+void setControlFlag(const fs::path& path, const char* const name)
+{
+    const std::string token = readControlValue(path, "token");
+    const std::array<const char*, 8> flags{"creator-ready", "joiner-joined", "creator-two-member", "joiner-left",
+        "observer-armed", "creator-data-update-complete", "joiner-data-observed", "abort"};
+    std::string contents = "token=" + token;
+    for (const char* const flag : flags)
+        contents += "\n" + std::string(flag) + "=" + (std::string(name) == flag || readControlValue(path, flag) == "1" ? "1" : "0");
+    writePrivateControl(path, contents + "\n");
+}
+
+bool hasEvent(const fs::path& control, const char* const expected)
+{
+    std::ifstream input(control.parent_path() / "event", std::ios::binary);
+    std::string event;
+    while (std::getline(input, event)) if (event == expected) return true;
+    return false;
+}
+
+void writeUniverselanConfiguration(const fs::path& directory, const std::string& profile)
+{
+    const std::string userId = profile == "user1" ? "41001" : "41002";
+    const std::string persona = profile == "user1" ? "BehaviourTestUser1" : "BehaviourTestUser2";
+    const fs::path data = directory / "UniverseLANData";
+    fs::create_directories(data);
+    writeFile(directory / "UniverseLAN.ini",
+        "[Storage]\nGameDataPath=" + data.string() + "\nServerDataPath=UniverseLANServerData\n"
+        "\n[Authentication]\nKey=UniverseLAN-BehaviourTests-NotASecret\n"
+        "\n[Tracing]\nCallTracing=0\nUnhandledExceptionLogging=0\nMiniDumpOnUnhandledException=0\nAlwaysFlush=0\nTraceToConsole=0\n"
+        "\n[Networking]\nTimeout=1000\n");
+    writeFile(data / "Config.ini",
+        "[Settings]\nEnableConsole=0\n\n[Client]\nServerAddress=127.0.0.1\nPort=37651\n"
+        "\n[User]\nPersonaNameType=@Custom\nCustomPersonaName=" + persona + "\nGalaxyIDType=@Custom\nCustomGalaxyID=" + userId
+        + "\nGalaxyIDOffset=0\nSignedIn=1\n");
+}
+
+void writeServerConfiguration(const fs::path& directory)
+{
+    fs::create_directories(directory / "UniverseLANServerData");
+    writeFile(directory / "UniverseLAN.ini",
+        "[Storage]\nGameDataPath=" + (directory / "UniverseLANData").string() + "\nServerDataPath=UniverseLANServerData\n"
+        "\n[Authentication]\nKey=UniverseLAN-BehaviourTests-NotASecret\n"
+        "\n[Tracing]\nCallTracing=0\nUnhandledExceptionLogging=0\nMiniDumpOnUnhandledException=0\nAlwaysFlush=0\nTraceToConsole=0\n");
+    writeFile(directory / "UniverseLANServerData" / "Config.ini",
+        "[Server]\nBindAddress=127.0.0.1\nPort=37651\nMaxConnections=8\nMaxTickRate=200\n");
+}
+
+#ifdef _WIN32
+std::string quoteWindows(const std::string& value)
+{
+    std::string result = "\"";
+    for (const char character : value) result += character == '\"' ? "\\\"" : std::string(1, character);
+    return result + "\"";
+}
+#endif
+
+bool startChild(Child& child, const fs::path& executable, const std::vector<std::string>& arguments, const fs::path& workingDirectory)
+{
+#ifdef _WIN32
+    const fs::path output = child.log.empty() ? fs::path("NUL") : child.log;
+    HANDLE log = CreateFileW(output.c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (log == INVALID_HANDLE_VALUE) return false;
+    if (!SetHandleInformation(log, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT)) { CloseHandle(log); return false; }
+    std::string command = quoteWindows(executable.string());
+    for (const std::string& argument : arguments) command += " " + quoteWindows(argument);
+    const std::wstring commandLine = fs::u8path(command).wstring();
+    std::vector<wchar_t> writable(commandLine.begin(), commandLine.end());
+    writable.push_back(L'\0');
+    STARTUPINFOW startup{};
+    startup.cb = sizeof(startup);
+    startup.dwFlags = STARTF_USESTDHANDLES;
+    startup.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+    startup.hStdOutput = log;
+    startup.hStdError = log;
+    PROCESS_INFORMATION information{};
+    const BOOL started = CreateProcessW(executable.c_str(), writable.data(), nullptr, nullptr, TRUE, CREATE_NO_WINDOW, nullptr, workingDirectory.c_str(), &startup, &information);
+    CloseHandle(log);
+    if (!started) return false;
+    CloseHandle(information.hThread);
+    child.process = information.hProcess;
+    child.started = true;
+    return true;
+#else
+    const int log = open((child.log.empty() ? "/dev/null" : child.log.string()).c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0600);
+    if (log < 0) return false;
+    child.process = fork();
+    if (child.process == 0)
+    {
+        dup2(log, STDOUT_FILENO);
+        dup2(log, STDERR_FILENO);
+        close(log);
+        if (chdir(workingDirectory.c_str()) != 0) _exit(127);
+        std::vector<char*> command{const_cast<char*>(executable.c_str())};
+        for (const std::string& argument : arguments) command.push_back(const_cast<char*>(argument.c_str()));
+        command.push_back(nullptr);
+        execv(executable.c_str(), command.data());
+        _exit(127);
+    }
+    close(log);
+    child.started = child.process > 0;
+    return child.started;
+#endif
+}
+
+void updateChild(Child& child)
+{
+    if (child.exited) return;
+#ifdef _WIN32
+    DWORD status = STILL_ACTIVE;
+    if (GetExitCodeProcess(child.process, &status) && status != STILL_ACTIVE)
+    {
+        child.exited = true;
+        child.exitCode = static_cast<int>(status);
+    }
+#else
+    int status = 0;
+    if (waitpid(child.process, &status, WNOHANG) == child.process)
+    {
+        child.exited = true;
+        child.exitCode = WIFEXITED(status) ? WEXITSTATUS(status) : 1;
+    }
+#endif
+}
+
+void stopChild(Child& child)
+{
+#ifdef _WIN32
+    if (child.process == nullptr) return;
+#else
+    if (child.process == -1) return;
+#endif
+    updateChild(child);
+    if (!child.exited)
+    {
+        child.terminationRequested = true;
+#ifdef _WIN32
+        TerminateProcess(child.process, 1);
+        WaitForSingleObject(child.process, 5000);
+#else
+        kill(child.process, SIGTERM);
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+        while (std::chrono::steady_clock::now() < deadline)
+        {
+            updateChild(child);
+            if (child.exited) break;
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        }
+        if (!child.exited) kill(child.process, SIGKILL);
+#endif
+        updateChild(child);
+    }
+#ifdef _WIN32
+    CloseHandle(child.process);
+    child.process = nullptr;
+#else
+    child.process = -1;
+#endif
+}
+
+bool logContains(const fs::path& path, const std::string& needle)
+{
+    std::ifstream input(path, std::ios::binary);
+    std::string contents((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+    return contents.find(needle) != std::string::npos;
+}
+
+fs::path stageHost(const fs::path& source, const fs::path& directory)
+{
+    const fs::path destination = directory / source.filename();
+    std::error_code error;
+    fs::copy_file(source, destination, fs::copy_options::overwrite_existing, error);
+    if (error) throw std::runtime_error("Unable to stage host executable");
+    return destination;
+}
+
+void stageUniverselanRuntime(const Arguments& arguments, const fs::path& directory)
+{
+    std::error_code error;
+    fs::copy_file(arguments.clientDll, directory / arguments.clientDll.filename(), fs::copy_options::overwrite_existing, error);
+    if (error) throw std::runtime_error("Unable to stage UniverseLAN runtime");
+}
+
+void stageGogRuntime(const Arguments& arguments, const fs::path& directory)
+{
+    bool copied = false;
+    for (const fs::directory_entry& entry : fs::directory_iterator(arguments.gogRuntimeDirectory))
+    {
+        std::string extension = entry.path().extension().string();
+        for (char& character : extension) character = static_cast<char>(std::tolower(static_cast<unsigned char>(character)));
+        if (!entry.is_regular_file() || extension != ".dll") continue;
+        std::error_code error;
+        fs::copy_file(entry.path(), directory / entry.path().filename(), fs::copy_options::overwrite_existing, error);
+        if (error) throw std::runtime_error("Unable to stage official-GOG runtime dependency");
+        copied = true;
+    }
+    if (!copied) throw std::runtime_error("Official-GOG runtime dependencies are unavailable");
+}
+
+bool runHosts(const std::vector<HostLaunch>& launches, const ScenarioContract& contract, const int timeoutSeconds, std::vector<Child>& completed)
+{
+    std::vector<Child> children(launches.size());
+    for (std::size_t index = 0; index < launches.size(); ++index)
+    {
+        children[index].log = launches[index].workingDirectory / "stdout.log";
+        children[index].lane = launches[index].lane;
+        children[index].profile = launches[index].profile;
+        if (!startChild(children[index], launches[index].executable,
+            {"--scenario", std::string(contract.hostScenario), "--profile", launches[index].profile,
+                "--trace", launches[index].trace.string(), "--timeout-seconds", std::to_string(timeoutSeconds)},
+            launches[index].workingDirectory))
+        {
+            for (Child& child : children) stopChild(child);
+            completed = std::move(children);
+            return false;
+        }
+    }
+
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(timeoutSeconds + 5);
+    bool passed = false;
+    while (std::chrono::steady_clock::now() < deadline)
+    {
+        passed = true;
+        for (Child& child : children)
+        {
+            updateChild(child);
+            if (!child.exited) passed = false;
+            else if (child.exitCode != 0) passed = false;
+        }
+        if (passed) break;
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    }
+    for (Child& child : children) stopChild(child);
+    completed = std::move(children);
+    return passed;
+}
+
+bool runPublicLobbyHosts(const std::vector<HostLaunch>& launches, const ScenarioContract& contract, const int timeoutSeconds,
+    std::vector<Child>& completed, bool& cleanupAcknowledged, std::vector<std::string>& callbackGateDiscoveryOrder)
+{
+    std::vector<Child> children(launches.size());
+    for (std::size_t index = 0; index < launches.size(); ++index)
+    {
+        children[index].log = launches[index].workingDirectory / "stdout.log";
+        children[index].lane = launches[index].lane;
+        children[index].profile = launches[index].profile;
+        if (!startChild(children[index], launches[index].executable,
+            {"--scenario", std::string(contract.hostScenario), "--profile", launches[index].profile,
+                "--trace", launches[index].trace.string(), "--control", launches[index].control.string(),
+                "--timeout-seconds", std::to_string(timeoutSeconds)}, launches[index].workingDirectory))
+        {
+            for (const HostLaunch& launch : launches) setControlFlag(launch.control, "abort");
+            for (Child& child : children) stopChild(child);
+            completed = std::move(children);
+            cleanupAcknowledged = false;
+            return false;
+        }
+    }
+
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(timeoutSeconds + 5);
+    std::vector<bool> creatorCallbackObserved(launches.size());
+    std::vector<bool> joinerCallbackObserved(launches.size());
+    bool passed = false;
+    while (std::chrono::steady_clock::now() < deadline)
+    {
+        for (std::size_t creator = 0; creator + 1 < launches.size(); creator += 2)
+        {
+            const std::size_t joiner = creator + 1;
+            if (hasEvent(launches[creator].control, "creator-ready")) setControlFlag(launches[joiner].control, "creator-ready");
+            if (hasEvent(launches[joiner].control, "joiner-joined")) setControlFlag(launches[creator].control, "joiner-joined");
+            if (contract.observesPublicLobbyDataPropagation || contract.observesMultipleLobbyMembership)
+            {
+                if (contract.observesPublicLobbyDataPropagation && !creatorCallbackObserved[creator] && hasEvent(launches[creator].control, "creator-data-update-callback"))
+                {
+                    creatorCallbackObserved[creator] = true;
+                    callbackGateDiscoveryOrder.push_back(launches[creator].lane + ":creator-update-callback");
+                }
+                if (contract.observesPublicLobbyDataPropagation && !joinerCallbackObserved[joiner] && hasEvent(launches[joiner].control, "joiner-lobby-data-callback"))
+                {
+                    joinerCallbackObserved[joiner] = true;
+                    callbackGateDiscoveryOrder.push_back(launches[joiner].lane + ":joiner-data-callback");
+                }
+                if (hasEvent(launches[joiner].control, "observer-armed")) setControlFlag(launches[creator].control, "observer-armed");
+                if (hasEvent(launches[creator].control, "creator-data-update-complete")) setControlFlag(launches[joiner].control, "creator-data-update-complete");
+                if (hasEvent(launches[joiner].control, "joiner-data-observed")) setControlFlag(launches[creator].control, "joiner-data-observed");
+            }
+            else if (hasEvent(launches[creator].control, "creator-two-member")) setControlFlag(launches[joiner].control, "creator-two-member");
+            if (hasEvent(launches[joiner].control, "joiner-left")) setControlFlag(launches[creator].control, "joiner-left");
+        }
+
+        passed = true;
+        for (Child& child : children)
+        {
+            updateChild(child);
+            passed = passed && child.exited && child.exitCode == 0;
+        }
+        cleanupAcknowledged = true;
+        for (const HostLaunch& launch : launches) cleanupAcknowledged = cleanupAcknowledged && hasEvent(launch.control, "cleanup-ack");
+        if (passed && cleanupAcknowledged) break;
+        if (std::any_of(children.begin(), children.end(), [](const Child& child) { return child.exited && child.exitCode != 0; })) break;
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    }
+    if (!(passed && cleanupAcknowledged))
+    {
+        for (const HostLaunch& launch : launches) setControlFlag(launch.control, "abort");
+        const auto cleanupDeadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+        while (std::chrono::steady_clock::now() < cleanupDeadline)
+        {
+            cleanupAcknowledged = true;
+            for (const HostLaunch& launch : launches) cleanupAcknowledged = cleanupAcknowledged && hasEvent(launch.control, "cleanup-ack");
+            if (cleanupAcknowledged) break;
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        }
+    }
+    for (Child& child : children) stopChild(child);
+    completed = std::move(children);
+    return passed && cleanupAcknowledged;
+}
+
+void setChatControlFlag(const fs::path& path, const char* const name)
+{
+    writePrivateControl(path, std::string("receiver-armed=") + (std::string(name) == "receiver-armed" ? "1" : "0")
+        + "\nabort=" + (std::string(name) == "abort" ? "1" : "0") + "\n");
+}
+
+std::string consumeOneTimeRelay(const fs::path& path)
+{
+    std::ifstream input(path, std::ios::binary);
+    if (!input) return {};
+    const std::string value((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+    input.close();
+    std::error_code error;
+    fs::remove(path, error);
+    return error ? std::string{} : value;
+}
+
+bool isRawGalaxyIDRelay(const std::string& value)
+{
+    return !value.empty() && value.size() <= 20 && std::all_of(value.begin(), value.end(), [](const char character) {
+        return character >= '0' && character <= '9';
+    });
+}
+
+void redactChatRelays(const fs::path& root)
+{
+    std::error_code error;
+    for (fs::recursive_directory_iterator iterator(root, error), end; !error && iterator != end; iterator.increment(error))
+    {
+        const std::string name = iterator->path().filename().string();
+        if (name == "self-id-relay" || name == "peer-id-relay" || name == "expected-token-relay"
+            || name == "self-id-relay.tmp" || name == "peer-id-relay.tmp" || name == "expected-token-relay.tmp")
+            fs::remove(iterator->path(), error);
+    }
+}
+
+void redactChatFailureArtifacts(const fs::path& root)
+{
+    redactChatRelays(root);
+    std::error_code error;
+    for (fs::recursive_directory_iterator iterator(root, error), end; !error && iterator != end; iterator.increment(error))
+    {
+        const std::string name = iterator->path().filename().string();
+        if (name == "stdout.log" || name == "UniverseLAN.ini" || name == "Config.ini" || name == "control" || name == "event")
+            fs::remove(iterator->path(), error);
+    }
+}
+
+bool runChatRoomMessageDeliveryHosts(const std::vector<HostLaunch>& launches, const ScenarioContract& contract, const int timeoutSeconds,
+    std::vector<Child>& completed, bool& receiverArmedBeforeSenderRelease, bool& allHostsExited)
+{
+    std::vector<Child> children(launches.size());
+    for (std::size_t index = 0; index < launches.size(); ++index)
+    {
+        // The Galaxy runtime can print raw account IDs; chat diagnostics retain only symbolic traces.
+        children[index].log.clear();
+        children[index].lane = launches[index].lane;
+        children[index].profile = launches[index].profile;
+        if (!startChild(children[index], launches[index].executable,
+            {"--scenario", std::string(contract.hostScenario), "--profile", launches[index].profile,
+                "--trace", launches[index].trace.string(), "--control", launches[index].control.string(),
+                "--timeout-seconds", std::to_string(timeoutSeconds)}, launches[index].workingDirectory))
+        {
+            for (const HostLaunch& launch : launches) setChatControlFlag(launch.control, "abort");
+            for (Child& child : children) stopChild(child);
+            completed = std::move(children);
+            allHostsExited = std::all_of(completed.begin(), completed.end(), [](const Child& child) { return child.exited; });
+            return false;
+        }
+    }
+
+    std::vector<std::string> identities(launches.size());
+    std::vector<bool> relayed(launches.size() / 2);
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(timeoutSeconds + 5);
+    bool passed = false;
+    while (std::chrono::steady_clock::now() < deadline)
+    {
+        for (std::size_t index = 0; index < launches.size(); ++index)
+        {
+            if (!identities[index].empty()) continue;
+            const std::string candidate = consumeOneTimeRelay(launches[index].workingDirectory / "self-id-relay");
+            if (!candidate.empty() && isRawGalaxyIDRelay(candidate)) identities[index] = candidate;
+        }
+        for (std::size_t sender = 0; sender + 1 < launches.size(); sender += 2)
+        {
+            const std::size_t receiver = sender + 1;
+            const std::size_t lane = sender / 2;
+            if (!relayed[lane] && !identities[sender].empty() && !identities[receiver].empty()
+                && hasEvent(launches[receiver].control, "receiver-listener-registered"))
+            {
+                writePrivateControl(launches[sender].workingDirectory / "peer-id-relay", identities[receiver]);
+                writePrivateControl(launches[receiver].workingDirectory / "peer-id-relay", identities[sender]);
+                relayed[lane] = true;
+            }
+            if (relayed[lane] && hasEvent(launches[receiver].control, "receiver-armed"))
+            {
+                receiverArmedBeforeSenderRelease = true;
+                setChatControlFlag(launches[sender].control, "receiver-armed");
+            }
+        }
+        passed = true;
+        for (Child& child : children)
+        {
+            updateChild(child);
+            passed = passed && child.exited && child.exitCode == 0;
+        }
+        if (passed) break;
+        if (std::any_of(children.begin(), children.end(), [](const Child& child) { return child.exited && child.exitCode != 0; })) break;
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    }
+    if (!passed)
+    {
+        for (const HostLaunch& launch : launches) setChatControlFlag(launch.control, "abort");
+    }
+    for (Child& child : children) stopChild(child);
+    allHostsExited = std::all_of(children.begin(), children.end(), [](const Child& child) { return child.exited; });
+    completed = std::move(children);
+    return passed && receiverArmedBeforeSenderRelease && allHostsExited;
+}
+
+void addProcessFailures(json& report, const std::vector<Child>& children)
+{
+    for (const Child& child : children)
+    {
+        if (child.started && child.exited && child.exitCode == 0) continue;
+        report["processFailures"].push_back({
+            {"lane", child.lane},
+            {"profile", child.profile},
+            {"exitStatus", child.exited ? json(child.exitCode) : json("unavailable")},
+            {"logPath", child.log.string()},
+            {"terminationRequested", child.terminationRequested}
+        });
+    }
+}
+
+bool fieldsExactly(const json& record, std::initializer_list<const char*> expected)
+{
+    if (!record.is_object() || record.size() != expected.size()) return false;
+    for (const char* key : expected) if (!record.contains(key)) return false;
+    return true;
+}
+
+bool normalizePublicLobbyTrace(const fs::path& trace, const std::string& profile, json& normalized)
+{
+    try
+    {
+        const std::vector<std::string> raw = common::readTrace(trace);
+        std::vector<json> records;
+        for (const std::string& line : raw) records.push_back(json::parse(line));
+        const std::vector<std::string> expected = profile == "user1"
+            ? std::vector<std::string>{"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata",
+                "creator-two-member-snapshot", "creator-sole-owner-snapshot", "creator-leave", "self-state"}
+            : std::vector<std::string>{"initialize", "sign-in-callback", "sign-in-terminal", "list", "join", "joiner-two-member-snapshot", "joiner-leave", "self-state"};
+        if (records.size() != expected.size()) return false;
+        for (std::size_t index = 0; index < expected.size(); ++index)
+            if (!records[index].is_object() || records[index].value("record", "") != expected[index]) return false;
+        if (!fieldsExactly(records[0], {"record", "result"}) || records[0]["result"] != "returned"
+            || !fieldsExactly(records[1], {"record", "result"}) || records[1]["result"] != "success"
+            || !fieldsExactly(records[2], {"record", "result"}) || records[2]["result"] != "success") return false;
+        const auto validSnapshot = [](const json& record, const int members, const bool other, const bool owner) {
+            return fieldsExactly(record, {"record", "lobbyValid", "public", "joinable", "capacity", "memberCount", "selfPresent",
+                    "otherPresent", "membersValid", "membersDistinct", "ownerIsSelf", "ownerValid"})
+                && record["lobbyValid"] == true && record["public"] == true && record["joinable"] == true && record["capacity"] == 2
+                && record["memberCount"] == members && record["selfPresent"] == true && record["otherPresent"] == other
+                && record["membersValid"] == true && record["membersDistinct"] == true && record["ownerIsSelf"] == owner && record["ownerValid"] == true;
+        };
+        const auto validLeave = [](const json& record) {
+            return fieldsExactly(record, {"record", "result", "reason", "sameLobby"}) && record["result"] == "callback"
+                && record["reason"] == "user-left" && record["sameLobby"] == true;
+        };
+        if (profile == "user1")
+        {
+            if (!fieldsExactly(records[3], {"record", "result", "lobbyValid", "lobbyType"}) || records[3]["result"] != "success"
+                || records[3]["lobbyValid"] != true || records[3]["lobbyType"] != "lobby"
+                || !fieldsExactly(records[4], {"record", "result", "sameCreatedLobby"}) || records[4]["result"] != "success"
+                || records[4]["sameCreatedLobby"] != true || !fieldsExactly(records[5], {"record", "joinableUpdateSuccess", "capacityUpdateSuccess", "joinableVisible", "capacityVisible"})
+                || records[5]["joinableUpdateSuccess"] != true || records[5]["capacityUpdateSuccess"] != true || records[5]["joinableVisible"] != true || records[5]["capacityVisible"] != true
+                || !fieldsExactly(records[6], {"record", "result", "sameCreatedLobby"}) || records[6]["result"] != "success" || records[6]["sameCreatedLobby"] != true
+                || !validSnapshot(records[7], 2, true, true) || !validSnapshot(records[8], 1, false, true) || !validLeave(records[9])) return false;
+        }
+        else
+        {
+            if (!fieldsExactly(records[3], {"record", "result", "attempts", "retryUsed", "selectedCount", "selectedValid"})
+                || records[3]["result"] != "success" || !records[3]["attempts"].is_number_integer() || records[3]["attempts"] < 1
+                || records[3]["attempts"] > 6 || !records[3]["retryUsed"].is_boolean() || records[3]["selectedCount"] != 1
+                || records[3]["selectedValid"] != true || !fieldsExactly(records[4], {"record", "result", "sameListedLobby"})
+                || records[4]["result"] != "success" || records[4]["sameListedLobby"] != true
+                || !validSnapshot(records[5], 2, true, false) || !validLeave(records[6])) return false;
+        }
+        if (!fieldsExactly(records.back(), {"record", "signedIn", "loggedOn", "idValid", "idType", "selfIdRepeatEqual", "personaAvailable"})
+            || records.back()["signedIn"] != true || records.back()["loggedOn"] != true || records.back()["idValid"] != true
+            || records.back()["idType"] != "user" || records.back()["selfIdRepeatEqual"] != true || !records.back()["personaAvailable"].is_boolean()) return false;
+        normalized = records;
+        return true;
+    }
+    catch (...) { return false; }
+}
+
+bool normalizePublicLobbyDataPropagationTrace(const fs::path& trace, const std::string& profile, json& normalized)
+{
+    try
+    {
+        const std::vector<std::string> raw = common::readTrace(trace);
+        std::vector<json> records;
+        for (const std::string& line : raw) records.push_back(json::parse(line));
+        const std::vector<std::string> expected = profile == "user1"
+            ? std::vector<std::string>{"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata",
+                "owner-data-update", "creator-sole-owner-snapshot", "creator-leave", "self-state"}
+            : std::vector<std::string>{"initialize", "sign-in-callback", "sign-in-terminal", "list", "join", "joiner-two-member-snapshot",
+                "joiner-lobby-data", "joiner-leave", "self-state"};
+        if (records.size() != expected.size()) return false;
+        for (std::size_t index = 0; index < expected.size(); ++index)
+            if (!records[index].is_object() || records[index].value("record", "") != expected[index]) return false;
+        if (!fieldsExactly(records[0], {"record", "result"}) || records[0]["result"] != "returned"
+            || !fieldsExactly(records[1], {"record", "result"}) || records[1]["result"] != "success"
+            || !fieldsExactly(records[2], {"record", "result"}) || records[2]["result"] != "success") return false;
+        const auto validSnapshot = [](const json& record, const int members, const bool other, const bool owner) {
+            return fieldsExactly(record, {"record", "lobbyValid", "public", "joinable", "capacity", "memberCount", "selfPresent",
+                    "otherPresent", "membersValid", "membersDistinct", "ownerIsSelf", "ownerValid"})
+                && record["lobbyValid"] == true && record["public"] == true && record["joinable"] == true && record["capacity"] == 2
+                && record["memberCount"] == members && record["selfPresent"] == true && record["otherPresent"] == other
+                && record["membersValid"] == true && record["membersDistinct"] == true && record["ownerIsSelf"] == owner && record["ownerValid"] == true;
+        };
+        const auto validLeave = [](const json& record) {
+            return fieldsExactly(record, {"record", "result", "reason", "sameLobby"}) && record["result"] == "callback"
+                && record["reason"] == "user-left" && record["sameLobby"] == true;
+        };
+        if (profile == "user1")
+        {
+            if (!fieldsExactly(records[3], {"record", "result", "lobbyValid", "lobbyType"}) || records[3]["result"] != "success"
+                || records[3]["lobbyValid"] != true || records[3]["lobbyType"] != "lobby"
+                || !fieldsExactly(records[4], {"record", "result", "sameCreatedLobby"}) || records[4]["result"] != "success"
+                || records[4]["sameCreatedLobby"] != true || !fieldsExactly(records[5], {"record", "joinableUpdateSuccess", "capacityUpdateSuccess", "joinableVisible", "capacityVisible"})
+                || records[5]["joinableUpdateSuccess"] != true || records[5]["capacityUpdateSuccess"] != true || records[5]["joinableVisible"] != true || records[5]["capacityVisible"] != true
+                || !fieldsExactly(records[6], {"record", "result", "sameCreatedLobby"}) || records[6]["result"] != "success" || records[6]["sameCreatedLobby"] != true
+                || !fieldsExactly(records[7], {"record", "result", "sameCreatedLobby"}) || records[7]["result"] != "success"
+                || records[7]["sameCreatedLobby"] != true || !validSnapshot(records[8], 1, false, true) || !validLeave(records[9])) return false;
+        }
+        else
+        {
+            if (!fieldsExactly(records[3], {"record", "result", "attempts", "retryUsed", "selectedCount", "selectedValid"})
+                || records[3]["result"] != "success" || !records[3]["attempts"].is_number_integer() || records[3]["attempts"] < 1
+                || records[3]["attempts"] > 6 || !records[3]["retryUsed"].is_boolean() || records[3]["selectedCount"] != 1
+                || records[3]["selectedValid"] != true || !fieldsExactly(records[4], {"record", "result", "sameListedLobby"})
+                || records[4]["result"] != "success" || records[4]["sameListedLobby"] != true || !validSnapshot(records[5], 2, true, false)
+                || !fieldsExactly(records[6], {"record", "callbackAvailable", "callbackCount", "duplicateNotifications", "memberIdValid",
+                    "sameCallbackCopyVisible", "eventualCopyVisible"}) || records[6]["callbackAvailable"] != true
+                || !records[6]["callbackCount"].is_number_integer() || records[6]["callbackCount"] < 1
+                || !records[6]["duplicateNotifications"].is_boolean() || records[6]["memberIdValid"] != false
+                || records[6]["sameCallbackCopyVisible"] != true || records[6]["eventualCopyVisible"] != true || !validLeave(records[7])) return false;
+        }
+        if (!fieldsExactly(records.back(), {"record", "signedIn", "loggedOn", "idValid", "idType", "selfIdRepeatEqual", "personaAvailable"})
+            || records.back()["signedIn"] != true || records.back()["loggedOn"] != true || records.back()["idValid"] != true
+            || records.back()["idType"] != "user" || records.back()["selfIdRepeatEqual"] != true || !records.back()["personaAvailable"].is_boolean()) return false;
+        normalized = records;
+        return true;
+    }
+    catch (...) { return false; }
+}
+
+bool normalizeChatRoomMessageDeliveryTrace(const fs::path& trace, const std::string& profile, json& normalized)
+{
+    try
+    {
+        std::vector<json> records;
+        for (const std::string& line : common::readTrace(trace)) records.push_back(json::parse(line));
+        const std::vector<std::string> expected = profile == "user1"
+            ? std::vector<std::string>{"initialize", "sign-in-callback", "sign-in-terminal", "chat-room-request-issued", "chat-room-retrieve",
+                "chat-send-issued", "chat-send-terminal", "self-state"}
+            : std::vector<std::string>{"initialize", "sign-in-callback", "sign-in-terminal", "chat-listener-armed", "chat-message-received", "self-state"};
+        if (records.size() != expected.size()) return false;
+        for (std::size_t index = 0; index < expected.size(); ++index)
+            if (!records[index].is_object() || records[index].value("record", "") != expected[index]) return false;
+        if (!fieldsExactly(records[0], {"record", "result"}) || records[0]["result"] != "returned"
+            || !fieldsExactly(records[1], {"record", "result"}) || records[1]["result"] != "success"
+            || !fieldsExactly(records[2], {"record", "result"}) || records[2]["result"] != "success") return false;
+        if (profile == "user1")
+        {
+            if (!fieldsExactly(records[3], {"record", "receiverArmed", "peerRelayConsumed", "tokenRelayConsumed"})
+                || records[3]["receiverArmed"] != true || records[3]["peerRelayConsumed"] != true || records[3]["tokenRelayConsumed"] != true
+                || !fieldsExactly(records[4], {"record", "terminalCount", "successCount", "failureCount", "callbackPeerMatchesRequested", "roomValid"})
+                || records[4]["terminalCount"] != 1 || records[4]["successCount"] != 1 || records[4]["failureCount"] != 0
+                || records[4]["callbackPeerMatchesRequested"] != true || records[4]["roomValid"] != true
+                || !fieldsExactly(records[5], {"record", "sendIndexReturned"}) || records[5]["sendIndexReturned"] != true
+                || !fieldsExactly(records[6], {"record", "terminalCount", "successCount", "failureCount", "sameRoom", "sameSendIndex"})
+                || records[6]["terminalCount"] != 1 || records[6]["successCount"] != 1 || records[6]["failureCount"] != 0
+                || records[6]["sameRoom"] != true || records[6]["sameSendIndex"] != true) return false;
+        }
+        else if (!fieldsExactly(records[3], {"record", "listenerRegistered", "peerRelayConsumed", "tokenRelayConsumed"})
+            || records[3]["listenerRegistered"] != true || records[3]["peerRelayConsumed"] != true || records[3]["tokenRelayConsumed"] != true
+            || !fieldsExactly(records[4], {"record", "callbackCount", "messageCountOne", "readInsideCallback", "callbackRoomValid", "senderMatchesExpectedPeer", "messageTypeChat", "payloadMatchesExpectedToken"})
+            || records[4]["callbackCount"] != 1 || records[4]["messageCountOne"] != true || records[4]["readInsideCallback"] != true
+            || records[4]["callbackRoomValid"] != true || records[4]["senderMatchesExpectedPeer"] != true || records[4]["messageTypeChat"] != true
+            || records[4]["payloadMatchesExpectedToken"] != true) return false;
+        if (!fieldsExactly(records.back(), {"record", "signedIn", "loggedOn", "idValid", "idType", "selfIdRepeatEqual", "personaAvailable"})
+            || records.back()["signedIn"] != true || records.back()["loggedOn"] != true || records.back()["idValid"] != true
+            || records.back()["idType"] != "user" || records.back()["selfIdRepeatEqual"] != true || !records.back()["personaAvailable"].is_boolean()) return false;
+        normalized = records;
+        return true;
+    }
+    catch (...) { return false; }
+}
+
+bool normalizeMultipleLobbyMembershipTrace(const fs::path& trace, const std::string& profile, json& normalized)
+{
+    try
+    {
+        std::vector<json> records;
+        for (const std::string& line : common::readTrace(trace)) records.push_back(json::parse(line));
+        const std::vector<std::string> expected = profile == "user1"
+            ? std::vector<std::string>{"initialize", "sign-in-callback", "sign-in-terminal", "create-pair", "explicit-configuration", "private-tags",
+                "creator-messages", "creator-leave-L1", "creator-leave-L0", "self-state"}
+            : std::vector<std::string>{"initialize", "sign-in-callback", "sign-in-terminal", "discover-pair", "join-pair", "joiner-configuration",
+                "joiner-messages", "joiner-leave-L1", "joiner-leave-L0", "self-state"};
+        if (records.size() != expected.size()) return false;
+        for (std::size_t index = 0; index < expected.size(); ++index)
+            if (!records[index].is_object() || records[index].value("record", "") != expected[index]) return false;
+        if (!fieldsExactly(records[0], {"record", "result"}) || records[0]["result"] != "returned"
+            || !fieldsExactly(records[1], {"record", "result"}) || records[1]["result"] != "success"
+            || !fieldsExactly(records[2], {"record", "result"}) || records[2]["result"] != "success") return false;
+        const auto validLeave = [](const json& record) {
+            return fieldsExactly(record, {"record", "result", "reason", "sameLobby"}) && record["result"] == "callback"
+                && record["reason"] == "user-left" && record["sameLobby"] == true;
+        };
+        const auto validMessages = [](const json& record, const bool armed) {
+            return fieldsExactly(record, armed
+                    ? std::initializer_list<const char*>{"record", "listenerArmedBeforeSends", "callbackOrder", "L0Delivered", "L1Delivered", "senderMatches", "payloadMatches", "onlyKnownLobbies", "publicMessageTypeAvailable"}
+                    : std::initializer_list<const char*>{"record", "issuedBackToBack", "L0Scheduled", "L1Scheduled", "callbackOrder", "L0Delivered", "L1Delivered", "senderMatches", "payloadMatches", "onlyKnownLobbies", "publicMessageTypeAvailable"})
+                && (!armed || record["listenerArmedBeforeSends"] == true) && (!armed || !record["callbackOrder"].empty())
+                && (armed || (record["issuedBackToBack"] == true && record["L0Scheduled"] == true && record["L1Scheduled"] == true))
+                && record["L0Delivered"] == true && record["L1Delivered"] == true && record["senderMatches"] == true
+                && record["payloadMatches"] == true && record["onlyKnownLobbies"] == true && record["publicMessageTypeAvailable"] == false
+                && record["callbackOrder"].is_array() && record["callbackOrder"].size() == 2;
+        };
+        if (profile == "user1")
+        {
+            if (!fieldsExactly(records[3], {"record", "issuedBackToBack", "createdCallbackOrder", "enteredCallbackOrder", "L0Success", "L1Success", "createdEnteredIdentity", "distinctLobbies"})
+                || records[3]["issuedBackToBack"] != true || records[3]["L0Success"] != true || records[3]["L1Success"] != true || records[3]["createdEnteredIdentity"] != true || records[3]["distinctLobbies"] != true
+                || !records[3]["createdCallbackOrder"].is_array() || !records[3]["enteredCallbackOrder"].is_array() || records[3]["createdCallbackOrder"].size() != 2 || records[3]["enteredCallbackOrder"].size() != 2
+                || !fieldsExactly(records[4], {"record", "callbackOrder", "allSetOperationsSucceeded", "publicVisible", "joinableVisible", "capacityVisible"})
+                || records[4]["allSetOperationsSucceeded"] != true || records[4]["publicVisible"] != true || records[4]["joinableVisible"] != true || records[4]["capacityVisible"] != true
+                || !records[4]["callbackOrder"].is_array() || records[4]["callbackOrder"].size() != 6
+                || !fieldsExactly(records[5], {"record", "L0Success", "L1Success"}) || records[5]["L0Success"] != true || records[5]["L1Success"] != true
+                || !validMessages(records[6], false) || !validLeave(records[7]) || !validLeave(records[8])) return false;
+        }
+        else if (!fieldsExactly(records[3], {"record", "L0Found", "L1Found", "distinctLobbies", "L0AttemptsBounded", "L1AttemptsBounded"})
+            || records[3]["L0Found"] != true || records[3]["L1Found"] != true || records[3]["distinctLobbies"] != true || records[3]["L0AttemptsBounded"] != true || records[3]["L1AttemptsBounded"] != true
+            || !fieldsExactly(records[4], {"record", "issuedBackToBack", "enteredCallbackOrder", "L0Success", "L1Success"}) || records[4]["issuedBackToBack"] != true || records[4]["L0Success"] != true || records[4]["L1Success"] != true
+            || !records[4]["enteredCallbackOrder"].is_array() || records[4]["enteredCallbackOrder"].size() != 2
+            || !fieldsExactly(records[5], {"record", "publicJoinableCapacityVisible"}) || records[5]["publicJoinableCapacityVisible"] != true
+            || !validMessages(records[6], true) || !validLeave(records[7]) || !validLeave(records[8])) return false;
+        if (!fieldsExactly(records.back(), {"record", "signedIn", "loggedOn", "idValid", "idType", "selfIdRepeatEqual", "personaAvailable"})
+            || records.back()["signedIn"] != true || records.back()["loggedOn"] != true || records.back()["idValid"] != true
+            || records.back()["idType"] != "user" || records.back()["selfIdRepeatEqual"] != true || !records.back()["personaAvailable"].is_boolean()) return false;
+        normalized = records;
+        return true;
+    }
+    catch (...) { return false; }
+}
+
+bool normalizeTrace(const fs::path& trace, const ScenarioContract& contract, json& normalized)
+{
+    try
+    {
+        const std::vector<std::string> raw = common::readTrace(trace);
+        if (raw.size() != contract.recordCount) return false;
+        std::vector<json> records;
+        for (const std::string& line : raw) records.push_back(json::parse(line));
+        if (!fieldsExactly(records[0], {"record", "result"}) || records[0]["record"] != "initialize" || records[0]["result"] != "returned") return false;
+        if (!records[1].contains("record") || !records[1].contains("result") || records[1]["record"] != "sign-in-callback") return false;
+        const std::string callback = records[1]["result"].is_string() ? records[1]["result"].get<std::string>() : "";
+        if (callback == "success")
+        {
+            if (!fieldsExactly(records[1], {"record", "result"})) return false;
+        }
+        else if (callback == "failure")
+        {
+            if (!fieldsExactly(records[1], {"record", "result", "reason"}) || !records[1]["reason"].is_number_integer()) return false;
+        }
+        else return false;
+        if (!fieldsExactly(records[2], {"record", "result"}) || records[2]["record"] != "sign-in-terminal"
+            || !records[2]["result"].is_string() || records[2]["result"] != callback) return false;
+        const std::size_t selfStateIndex = contract.observesSessionIdRepeatability ? 4 : 3;
+        if (contract.observesSessionIdRepeatability
+            && (!fieldsExactly(records[3], {"record", "equal"}) || records[3]["record"] != "session-id-repeatability"
+                || !records[3]["equal"].is_boolean())) return false;
+        if (!fieldsExactly(records[selfStateIndex], {"record", "signedIn", "loggedOn", "idValid", "idType", "selfIdRepeatEqual", "personaAvailable"})
+            || records[selfStateIndex]["record"] != "self-state" || !records[selfStateIndex]["signedIn"].is_boolean() || !records[selfStateIndex]["loggedOn"].is_boolean()
+            || !records[selfStateIndex]["idValid"].is_boolean() || !records[selfStateIndex]["idType"].is_string() || !records[selfStateIndex]["selfIdRepeatEqual"].is_boolean()
+            || !records[selfStateIndex]["personaAvailable"].is_boolean()) return false;
+        if (contract.observesGogServicesState
+            && (!fieldsExactly(records[4], {"record", "state"}) || records[4]["record"] != "gog-services-state"
+                || !records[4]["state"].is_string()
+                || (records[4]["state"] != "undefined" && records[4]["state"] != "connected"
+                    && records[4]["state"] != "disconnected" && records[4]["state"] != "auth-lost"))) return false;
+        normalized = records;
+        return true;
+    }
+    catch (...) { return false; }
+}
+
+bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
+{
+    const ScenarioContract& contract = *scenario.contract;
+    report = json::object();
+    report["scenario"] = contract.name;
+    report["opaqueIdPolicy"] = contract.observesMultipleLobbyMembership
+        ? "raw Galaxy IDs, lobby IDs, message IDs, private tags, and message payloads are never recorded; only L0/L1-local public relations are compared"
+        : contract.observesChatRoomMessageDelivery
+        ? "raw Galaxy IDs, room IDs, message IDs, and private message token are never recorded; only symbolic peer, room, send-index, and payload relations are compared"
+        : contract.observesPublicLobby
+        ? "raw Galaxy IDs and private tokens are never recorded; only validity and creator/joiner/owner/member relations are compared"
+        : "raw IDs are never recorded; validity, type, and repeat-equality are lane-local observations";
+    bool valid = true;
+    for (const char* profile : {"user1", "user2"})
+    {
+        json universelan;
+        json gog;
+        const bool universelanValid = contract.observesMultipleLobbyMembership
+            ? normalizeMultipleLobbyMembershipTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
+            : contract.observesChatRoomMessageDelivery
+            ? normalizeChatRoomMessageDeliveryTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
+            : contract.observesPublicLobbyDataPropagation
+            ? normalizePublicLobbyDataPropagationTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
+            : contract.observesPublicLobby
+            ? normalizePublicLobbyTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
+            : normalizeTrace(root / "universelan" / profile / "trace.jsonl", contract, universelan);
+        const bool gogValid = contract.observesMultipleLobbyMembership
+            ? normalizeMultipleLobbyMembershipTrace(root / "gog" / profile / "trace.jsonl", profile, gog)
+            : contract.observesChatRoomMessageDelivery
+            ? normalizeChatRoomMessageDeliveryTrace(root / "gog" / profile / "trace.jsonl", profile, gog)
+            : contract.observesPublicLobbyDataPropagation
+            ? normalizePublicLobbyDataPropagationTrace(root / "gog" / profile / "trace.jsonl", profile, gog)
+            : contract.observesPublicLobby
+            ? normalizePublicLobbyTrace(root / "gog" / profile / "trace.jsonl", profile, gog)
+            : normalizeTrace(root / "gog" / profile / "trace.jsonl", contract, gog);
+        report["lanes"][profile]["universelan"] = universelanValid ? universelan : json("invalid-trace");
+        report["lanes"][profile]["gog"] = gogValid ? gog : json("invalid-trace");
+        const bool terminalSuccess = universelanValid && gogValid && universelan[2]["result"] == "success" && gog[2]["result"] == "success";
+        const bool sessionIdRepeatabilityEqual = !contract.observesSessionIdRepeatability
+            || (terminalSuccess && universelan[3]["equal"] == gog[3]["equal"]);
+        json comparableUniverselan = universelan;
+        json comparableGog = gog;
+        if (contract.observesPublicLobby && profile == std::string_view("user2") && universelanValid && gogValid)
+        {
+            // Public-list indexing is eventually consistent; both lanes must satisfy the bounded retry contract,
+            // but their successful attempt number is not an identity or callback-behavior relation.
+            comparableUniverselan[3].erase("attempts");
+            comparableUniverselan[3].erase("retryUsed");
+            comparableGog[3].erase("attempts");
+            comparableGog[3].erase("retryUsed");
+            report["lanes"][profile]["retryConvergenceEquivalent"] = true;
+            if (universelan[3]["attempts"] != gog[3]["attempts"] || universelan[3]["retryUsed"] != gog[3]["retryUsed"])
+            {
+                const bool fasterUniverselanConvergence = universelan[3]["attempts"] < gog[3]["attempts"];
+                report["lanes"][profile]["retryConvergenceComparison"] = fasterUniverselanConvergence
+                    ? "accepted-difference" : "diagnostic-context-excluded";
+            }
+        }
+        if (contract.observesPublicLobbyDataPropagation && profile == std::string_view("user2") && universelanValid && gogValid)
+        {
+            // The SDK requires notification delivery, not a duplicate-count or cross-host timing contract.
+            comparableUniverselan[6].erase("callbackCount");
+            comparableUniverselan[6].erase("duplicateNotifications");
+            comparableGog[6].erase("callbackCount");
+            comparableGog[6].erase("duplicateNotifications");
+            report["lanes"][profile]["callbackMultiplicityComparison"] = "diagnostic-context-excluded";
+        }
+        if (contract.observesMultipleLobbyMembership && profile == std::string_view("user2") && universelanValid && gogValid)
+        {
+            // Official characterization observed both L0,L1 and L1,L0 delivery across independent lobbies.
+            // Retain the callback order in the lane traces, but do not turn an unstable cross-lobby order into a compatibility requirement.
+            comparableUniverselan[6].erase("callbackOrder");
+            comparableGog[6].erase("callbackOrder");
+            report["lanes"][profile]["messageCallbackOrderComparison"] = "official-characterized-not-stable;diagnostic-context-excluded";
+        }
+        const bool exactEquality = universelanValid && gogValid && universelan == gog && sessionIdRepeatabilityEqual;
+        bool acceptedGogServicesStateDifference = false;
+        if (scenario.acceptsGogServicesStatePair && universelanValid && gogValid && sessionIdRepeatabilityEqual
+            && gog[4]["state"] == "undefined" && universelan[4]["state"] == "connected")
+        {
+            json stateNeutralUniverselan = universelan;
+            json stateNeutralGog = gog;
+            stateNeutralUniverselan[4].erase("state");
+            stateNeutralGog[4].erase("state");
+            acceptedGogServicesStateDifference = stateNeutralUniverselan == stateNeutralGog;
+        }
+        const bool equal = universelanValid && gogValid && (comparableUniverselan == comparableGog || acceptedGogServicesStateDifference)
+            && sessionIdRepeatabilityEqual;
+        report["lanes"][profile]["equal"] = equal;
+        report["lanes"][profile]["comparison"] = exactEquality ? "exact-equality"
+            : (acceptedGogServicesStateDifference ? "accepted-difference"
+                : (equal ? "diagnostic-context-excluded" : "mismatch"));
+        report["lanes"][profile]["terminalSuccess"] = terminalSuccess;
+        if (contract.observesSessionIdRepeatability)
+            report["lanes"][profile]["sessionIdRepeatabilityEqual"] = sessionIdRepeatabilityEqual;
+        valid = valid && terminalSuccess && equal;
+    }
+    report["status"] = valid ? "match" : "mismatch";
+    report["comparisonResult"] = valid ? "matched" : "mismatched";
+    return valid;
+}
+
+void characterizeTraces(const fs::path& root, json& report)
+{
+    report = json::object();
+    report["scenario"] = "Simple/gog-services-state";
+    report["classification"] = "characterization";
+    report["comparison"] = "none";
+    report["status"] = "characterized";
+    report["opaqueIdPolicy"] = "raw IDs and credentials are never recorded; traces contain public symbolic observations only";
+    for (const char* profile : {"user1", "user2"})
+    {
+        for (const char* lane : {"universelan", "gog"})
+        {
+            const fs::path trace = root / lane / profile / "trace.jsonl";
+            json laneReport = json::object();
+            try
+            {
+                const std::vector<std::string> raw = common::readTrace(trace);
+                laneReport["raw"] = raw;
+                json normalized = json::array();
+                for (const std::string& record : raw) normalized.push_back(json::parse(record));
+                laneReport["normalized"] = normalized;
+            }
+            catch (...)
+            {
+                laneReport["normalized"] = "unavailable";
+            }
+            report["lanes"][profile][lane] = laneReport;
+        }
+    }
+}
+
+void characterizePublicLobbyDataPropagationTraces(const fs::path& root, json& report)
+{
+    report = json::object();
+    report["scenario"] = "Simple/public-lobby-data-propagation";
+    report["classification"] = "characterization";
+    report["comparison"] = "none";
+    report["status"] = "characterized";
+    report["opaqueIdPolicy"] = "raw Galaxy IDs, private token, private key, and private value are never recorded";
+    report["crossHostCallbackOrder"] = "not a contract; only observer-armed-before-owner-update and joiner-observed-before-cleanup causal gates are retained";
+    for (const char* profile : {"user1", "user2"})
+    {
+        for (const char* lane : {"universelan", "gog"})
+        {
+            json laneReport = json::object();
+            try
+            {
+                json records = json::array();
+                for (const std::string& line : common::readTrace(root / lane / profile / "trace.jsonl")) records.push_back(json::parse(line));
+                laneReport["normalized"] = records;
+                if (profile == std::string_view("user2"))
+                {
+                    for (const json& record : records)
+                    {
+                        if (record.value("record", "") != "joiner-lobby-data") continue;
+                        laneReport["callbackAvailability"] = record.value("callbackAvailable", false);
+                        laneReport["memberIdValid"] = record.value("memberIdValid", true);
+                        laneReport["sameCallbackCopyVisible"] = record.value("sameCallbackCopyVisible", false);
+                        laneReport["eventualCopyVisible"] = record.value("eventualCopyVisible", false);
+                        laneReport["duplicateNotifications"] = record.value("duplicateNotifications", false);
+                        break;
+                    }
+                }
+            }
+            catch (...) { laneReport["normalized"] = "unavailable"; }
+            report["lanes"][profile][lane] = laneReport;
+        }
+    }
+}
+
+void characterizeMultipleLobbyMembershipTraces(const fs::path& root, json& report)
+{
+    report = json::object();
+    report["scenario"] = "Advanced/multiple-lobby-membership-and-message-isolation";
+    report["classification"] = "official-gog-only-characterization";
+    report["comparison"] = "none";
+    report["status"] = "characterized";
+    report["opaqueIdPolicy"] = "raw Galaxy IDs, lobby IDs, message IDs, private tags, and message payloads are never recorded";
+    report["publicMessageType"] = "unavailable: ILobbyMessageListener and IMatchmaking::GetLobbyMessage expose no message-type field";
+    for (const char* profile : {"user1", "user2"})
+    {
+        json laneReport = json::object();
+        try
+        {
+            json records = json::array();
+            for (const std::string& line : common::readTrace(root / "gog" / profile / "trace.jsonl")) records.push_back(json::parse(line));
+            laneReport["orderedIMatchmakingRecords"] = records;
+        }
+        catch (...) { laneReport["orderedIMatchmakingRecords"] = "unavailable"; }
+        report["lanes"][profile]["gog"] = laneReport;
+    }
+}
+
+void characterizeChatRoomMessageDeliveryTraces(const fs::path& root, const bool officialGogOnly, json& report)
+{
+    report = json::object();
+    report["scenario"] = "Simple/chat-room-message-delivery";
+    report["classification"] = officialGogOnly ? "official-gog-only-characterization" : "characterization";
+    report["comparison"] = "none";
+    report["status"] = "characterized";
+    report["opaqueIdPolicy"] = "raw Galaxy IDs, room IDs, message IDs, and private message token are never recorded";
+    report["crossHostCallbackOrder"] = "not a contract; receiver arming precedes sender release, while sender terminal and receiver message callbacks have no required cross-host order";
+    for (const char* profile : {"user1", "user2"})
+    {
+        const std::vector<const char*> lanes = officialGogOnly ? std::vector<const char*>{"gog"} : std::vector<const char*>{"universelan", "gog"};
+        for (const char* lane : lanes)
+        {
+            json laneReport = json::object();
+            try
+            {
+                json records = json::array();
+                for (const std::string& line : common::readTrace(root / lane / profile / "trace.jsonl")) records.push_back(json::parse(line));
+                laneReport["orderedIChatRecords"] = records;
+            }
+            catch (...) { laneReport["orderedIChatRecords"] = "unavailable"; }
+            report["lanes"][profile][lane] = laneReport;
+        }
+    }
+}
+
+void writeReport(const fs::path& root, const json& report)
+{
+    writeFile(root / "normalized-comparison.json", report.dump(2) + "\n");
+}
+
+void printComparisonResult(const json& report, const ScenarioContract& contract)
+{
+    std::cout << "BEHAVIOUR_TEST RESULT scenario=" << contract.name
+        << " comparison=" << report.value("comparisonResult", "mismatched");
+    if (contract.observesPublicLobby || contract.observesChatRoomMessageDelivery)
+        std::cout << " exitCleanup=" << report.value("exitCleanup", "unavailable");
+    if (contract.observesGogServicesState)
+    {
+        std::cout << " officialGogServicesState=";
+        for (const char* profile : {"user1", "user2"})
+        {
+            if (profile != std::string_view("user1")) std::cout << ',';
+            const json& lane = report["lanes"][profile]["gog"];
+            const std::string state = lane.is_array() && lane.size() == contract.recordCount
+                && lane[4].is_object() && lane[4].contains("state") && lane[4]["state"].is_string()
+                ? lane[4]["state"].get<std::string>() : "unavailable";
+            std::cout << profile << ':' << state;
+        }
+        std::cout << " universelanGogServicesState=";
+        for (const char* profile : {"user1", "user2"})
+        {
+            if (profile != std::string_view("user1")) std::cout << ',';
+            const json& lane = report["lanes"][profile]["universelan"];
+            const std::string state = lane.is_array() && lane.size() == contract.recordCount
+                && lane[4].is_object() && lane[4].contains("state") && lane[4]["state"].is_string()
+                ? lane[4]["state"].get<std::string>() : "unavailable";
+            std::cout << profile << ':' << state;
+        }
+        std::cout << " stateComparison=";
+        for (const char* profile : {"user1", "user2"})
+        {
+            if (profile != std::string_view("user1")) std::cout << ',';
+            std::cout << profile << ':' << report["lanes"][profile].value("comparison", "mismatch");
+        }
+    }
+    if (contract.observesSessionIdRepeatability)
+    {
+        std::cout << " officialSessionIdRepeatEqual=";
+        for (const char* profile : {"user1", "user2"})
+        {
+            if (profile != std::string_view("user1")) std::cout << ',';
+            const json& lane = report["lanes"][profile]["gog"];
+            const std::string equal = lane.is_array() && lane.size() == contract.recordCount
+                && lane[3].is_object() && lane[3].contains("equal") && lane[3]["equal"].is_boolean()
+                ? (lane[3]["equal"].get<bool>() ? "true" : "false") : "unavailable";
+            std::cout << profile << ':' << equal;
+        }
+    }
+    std::cout << std::endl;
+}
+
+void printCharacterizationResult(const fs::path& root)
+{
+    std::cout << "BEHAVIOUR_TEST CHARACTERIZATION comparison=none runDirectory="
+        << root.string() << std::endl;
+}
+}
+
+int run(const Arguments& arguments, const Scenario& scenario)
+{
+    const bool officialGogOnlyChatCharacterization = arguments.characterizeOfficialGogChatRoomMessageDelivery;
+    if (!fs::is_regular_file(arguments.gogHost) || !fs::is_directory(arguments.gogRuntimeDirectory)
+        || (!officialGogOnlyChatCharacterization && (!fs::is_regular_file(arguments.universelanHost)
+            || !fs::is_regular_file(arguments.clientDll) || !fs::is_regular_file(arguments.server)))) throw std::runtime_error("Preflight failed");
+
+    std::mt19937_64 random(std::random_device{}());
+    fs::path root;
+    for (int attempt = 0; attempt < 16; ++attempt)
+    {
+        root = fs::temp_directory_path() / "universelan-behaviour-tests"
+            / (std::string(scenario.contract->hostScenario) + "-" + std::to_string(random()));
+        std::error_code rootError;
+        if (fs::create_directories(root, rootError) && !rootError) break;
+        root.clear();
+    }
+    if (root.empty()) throw std::runtime_error("Unable to create private run root");
+    const std::string privateToken = "bt-" + std::to_string(random()) + std::to_string(random());
+    Child server;
+    json report;
+    bool success = false;
+    bool cleanupAcknowledged = !scenario.contract->observesPublicLobby;
+    bool receiverArmedBeforeSenderRelease = false;
+    bool chatHostsExited = false;
+    try
+    {
+        if (!officialGogOnlyChatCharacterization)
+        {
+            const fs::path serverDirectory = root / "universelan" / "server";
+            writeServerConfiguration(serverDirectory);
+            if (!scenario.contract->observesChatRoomMessageDelivery) server.log = serverDirectory / "stdout.log";
+            if (!startChild(server, arguments.server, {}, serverDirectory)) throw std::runtime_error("Unable to start server");
+            if (!scenario.contract->observesChatRoomMessageDelivery)
+            {
+                const auto serverDeadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
+                while (std::chrono::steady_clock::now() < serverDeadline)
+                {
+                    updateChild(server);
+                    if (server.exited) throw std::runtime_error("Server exited");
+                    if (logContains(server.log, "Listening...")) break;
+                    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+                }
+                if (!logContains(server.log, "Listening...")) throw std::runtime_error("Server readiness timeout");
+            }
+            else
+            {
+                updateChild(server);
+                if (server.exited) throw std::runtime_error("Server exited");
+            }
+        }
+
+        const bool officialGogOnlyCharacterization = scenario.characterization && scenario.contract->observesMultipleLobbyMembership;
+        std::vector<HostLaunch> universelanLaunches;
+        std::vector<HostLaunch> gogLaunches;
+        for (const char* profile : {"user1", "user2"})
+        {
+            const fs::path gogDirectory = root / "gog" / profile;
+            fs::create_directories(gogDirectory);
+            const fs::path gogControl = gogDirectory / "control";
+            if (!officialGogOnlyChatCharacterization)
+            {
+                const fs::path universelanDirectory = root / "universelan" / profile;
+                fs::create_directories(universelanDirectory);
+                writeUniverselanConfiguration(universelanDirectory, profile);
+                const fs::path universelanControl = universelanDirectory / "control";
+                if (scenario.contract->observesPublicLobby)
+                    writePrivateControl(universelanControl, "token=" + privateToken + "\ncreator-ready=0\njoiner-joined=0\ncreator-two-member=0\njoiner-left=0\nobserver-armed=0\ncreator-data-update-complete=0\njoiner-data-observed=0\nabort=0\n");
+                else if (scenario.contract->observesChatRoomMessageDelivery)
+                {
+                    writePrivateControl(universelanControl, "receiver-armed=0\nabort=0\n");
+                    writePrivateControl(universelanDirectory / "expected-token-relay", privateToken);
+                }
+                universelanLaunches.push_back({stageHost(arguments.universelanHost, universelanDirectory), universelanDirectory,
+                    universelanDirectory / "trace.jsonl", universelanControl, "universelan", profile});
+                stageUniverselanRuntime(arguments, universelanDirectory);
+            }
+            if (scenario.contract->observesPublicLobby)
+            {
+                writePrivateControl(gogControl, "token=" + privateToken + "\ncreator-ready=0\njoiner-joined=0\ncreator-two-member=0\njoiner-left=0\nobserver-armed=0\ncreator-data-update-complete=0\njoiner-data-observed=0\nabort=0\n");
+            }
+            else if (scenario.contract->observesChatRoomMessageDelivery)
+            {
+                writePrivateControl(gogControl, "receiver-armed=0\nabort=0\n");
+                writePrivateControl(gogDirectory / "expected-token-relay", privateToken);
+            }
+            gogLaunches.push_back({stageHost(arguments.gogHost, gogDirectory), gogDirectory, gogDirectory / "trace.jsonl", gogControl, "gog", profile});
+            stageGogRuntime(arguments, gogDirectory);
+        }
+
+        bool processesSucceeded = false;
+        std::vector<Child> completedHosts;
+        std::vector<std::string> callbackGateDiscoveryOrder;
+        if (scenario.contract->observesPublicLobby)
+        {
+            if (officialGogOnlyCharacterization) universelanLaunches = gogLaunches;
+            else universelanLaunches.insert(universelanLaunches.end(), gogLaunches.begin(), gogLaunches.end());
+            processesSucceeded = runPublicLobbyHosts(universelanLaunches, *scenario.contract, scenario.timeoutSeconds, completedHosts, cleanupAcknowledged, callbackGateDiscoveryOrder);
+            report["exitCleanup"] = cleanupAcknowledged ? "acknowledged" : "not-acknowledged";
+        }
+        else if (scenario.contract->observesChatRoomMessageDelivery)
+        {
+            if (officialGogOnlyChatCharacterization) universelanLaunches = gogLaunches;
+            else universelanLaunches.insert(universelanLaunches.end(), gogLaunches.begin(), gogLaunches.end());
+            processesSucceeded = runChatRoomMessageDeliveryHosts(universelanLaunches, *scenario.contract, scenario.timeoutSeconds, completedHosts,
+                receiverArmedBeforeSenderRelease, chatHostsExited);
+            report["exitCleanup"] = chatHostsExited ? "all-hosts-exited" : "host-exit-incomplete";
+            report["causalGates"] = {{"receiverArmedBeforeSenderRelease", receiverArmedBeforeSenderRelease}};
+        }
+        else if (scenario.laneMode == "concurrent")
+        {
+            universelanLaunches.insert(universelanLaunches.end(), gogLaunches.begin(), gogLaunches.end());
+            processesSucceeded = runHosts(universelanLaunches, *scenario.contract, scenario.timeoutSeconds, completedHosts);
+        }
+        else
+        {
+            processesSucceeded = runHosts(universelanLaunches, *scenario.contract, scenario.timeoutSeconds, completedHosts);
+            if (processesSucceeded)
+            {
+                std::vector<Child> completedGogHosts;
+                processesSucceeded = runHosts(gogLaunches, *scenario.contract, scenario.timeoutSeconds, completedGogHosts);
+                completedHosts.insert(completedHosts.end(), std::make_move_iterator(completedGogHosts.begin()), std::make_move_iterator(completedGogHosts.end()));
+            }
+        }
+        if (!processesSucceeded)
+        {
+            if (scenario.characterization && scenario.contract->observesChatRoomMessageDelivery)
+            {
+                characterizeChatRoomMessageDeliveryTraces(root, officialGogOnlyChatCharacterization, report);
+            }
+            else if (scenario.characterization && scenario.contract->observesMultipleLobbyMembership)
+            {
+                characterizeMultipleLobbyMembershipTraces(root, report);
+            }
+            else if (scenario.characterization && scenario.contract->observesPublicLobbyDataPropagation)
+            {
+                characterizePublicLobbyDataPropagationTraces(root, report);
+                report["callbackGateDiscoveryOrder"] = callbackGateDiscoveryOrder;
+            }
+            else if (scenario.characterization) characterizeTraces(root, report);
+            else compareTraces(root, scenario, report);
+            if (scenario.contract->observesPublicLobby) report["exitCleanup"] = cleanupAcknowledged ? "acknowledged" : "not-acknowledged";
+            if (scenario.contract->observesChatRoomMessageDelivery)
+            {
+                report["exitCleanup"] = chatHostsExited ? "all-hosts-exited" : "host-exit-incomplete";
+                report["causalGates"] = {{"receiverArmedBeforeSenderRelease", receiverArmedBeforeSenderRelease}};
+                redactChatFailureArtifacts(root);
+            }
+            addProcessFailures(report, completedHosts);
+            report["status"] = "process-failure";
+            writeReport(root, report);
+            if (scenario.characterization) printCharacterizationResult(root);
+            else printComparisonResult(report, *scenario.contract);
+            throw std::runtime_error("Host process failed");
+        }
+        if (scenario.characterization)
+        {
+            if (scenario.contract->observesChatRoomMessageDelivery)
+            {
+                characterizeChatRoomMessageDeliveryTraces(root, officialGogOnlyChatCharacterization, report);
+            }
+            else if (scenario.contract->observesMultipleLobbyMembership)
+            {
+                characterizeMultipleLobbyMembershipTraces(root, report);
+            }
+            else if (scenario.contract->observesPublicLobbyDataPropagation)
+            {
+                characterizePublicLobbyDataPropagationTraces(root, report);
+                report["callbackGateDiscoveryOrder"] = callbackGateDiscoveryOrder;
+            }
+            else characterizeTraces(root, report);
+            success = true;
+        }
+        else success = compareTraces(root, scenario, report);
+        if (scenario.contract->observesPublicLobby) report["exitCleanup"] = cleanupAcknowledged ? "acknowledged" : "not-acknowledged";
+        if (scenario.contract->observesChatRoomMessageDelivery)
+        {
+            report["exitCleanup"] = chatHostsExited ? "all-hosts-exited" : "host-exit-incomplete";
+            report["causalGates"] = {{"receiverArmedBeforeSenderRelease", receiverArmedBeforeSenderRelease}};
+            redactChatFailureArtifacts(root);
+        }
+        writeReport(root, report);
+        if (scenario.characterization) printCharacterizationResult(root);
+        else printComparisonResult(report, *scenario.contract);
+        if (!success) throw std::runtime_error("Trace mismatch");
+    }
+    catch (...)
+    {
+        stopChild(server);
+        if (report.empty())
+        {
+            report["scenario"] = scenario.contract->name;
+            report["status"] = "process-failure";
+        }
+        if (scenario.contract->observesPublicLobby)
+            report["exitCleanup"] = cleanupAcknowledged ? "acknowledged" : "not-acknowledged";
+        if (scenario.contract->observesChatRoomMessageDelivery)
+        {
+            report["exitCleanup"] = chatHostsExited ? "all-hosts-exited" : "host-exit-incomplete";
+            report["causalGates"] = {{"receiverArmedBeforeSenderRelease", receiverArmedBeforeSenderRelease}};
+            redactChatFailureArtifacts(root);
+        }
+        report["serverExitStatus"] = server.started && server.exited ? json(server.exitCode) : json("unavailable");
+        try { writeReport(root, report); }
+        catch (...) {}
+        std::cerr << "BEHAVIOUR_TEST FAIL reason=ComparisonOrProcessFailure runDirectory=" << root.string() << std::endl;
+        return 1;
+    }
+    stopChild(server);
+    if (scenario.characterization)
+    {
+        std::cout << "BEHAVIOUR_TEST CHARACTERIZATION COMPLETE scenario=" << scenario.contract->name << " artifacts=retained" << std::endl;
+        return 0;
+    }
+    std::error_code cleanupError;
+    fs::remove_all(root, cleanupError);
+    if (cleanupError)
+    {
+        std::cerr << "BEHAVIOUR_TEST FAIL reason=CleanupFailure runDirectory=" << root.string() << std::endl;
+        return 1;
+    }
+    std::cout << "BEHAVIOUR_TEST PASS scenario=" << scenario.contract->name << std::endl;
+    return 0;
+}
+}
+
+int main(int argc, char* argv[])
+{
+    using namespace universelan::behaviour::runner;
+    Arguments arguments;
+    if (!readArguments(argc, argv, arguments))
+    {
+        std::cerr << "BEHAVIOUR_TEST FAIL reason=InvalidArguments" << std::endl;
+        return 2;
+    }
+    try { return run(arguments, arguments.characterizeGogServicesState ? characterizationScenario()
+        : (arguments.characterizePublicLobbyDataPropagation ? publicLobbyDataPropagationCharacterizationScenario()
+            : (arguments.characterizeMultipleLobbyMembershipAndMessageIsolation ? multipleLobbyMembershipAndMessageIsolationCharacterizationScenario()
+                : ((arguments.characterizeChatRoomMessageDelivery || arguments.characterizeOfficialGogChatRoomMessageDelivery)
+                    ? chatRoomMessageDeliveryCharacterizationScenario() : parseScenario(arguments.manifest))))); }
+    catch (...)
+    {
+        std::cerr << "BEHAVIOUR_TEST FAIL reason=ManifestOrPreflightFailure" << std::endl;
+        return 1;
+    }
+}

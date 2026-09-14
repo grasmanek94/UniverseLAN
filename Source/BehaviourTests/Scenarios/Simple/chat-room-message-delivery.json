@@ -1,0 +1,17 @@
+{
+  "name": "Simple/chat-room-message-delivery",
+  "sdkVersion": "1.152.11",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 45,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": {
+      "user1": ["initialize", "sign-in-callback", "sign-in-terminal", "chat-room-request-issued", "chat-room-retrieve", "chat-send-issued", "chat-send-terminal", "self-state"],
+      "user2": ["initialize", "sign-in-callback", "sign-in-terminal", "chat-listener-armed", "chat-message-received", "self-state"]
+    },
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "raw Galaxy IDs, room IDs, message IDs, and the runner-private message token are never recorded; compare only symbolic peer, room, send-index, and payload relations"
+  }
+}

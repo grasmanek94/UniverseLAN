@@ -1,0 +1,14 @@
+{
+  "name": "Simple/session-id-repeatability",
+  "sdkVersion": "1.152.11",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 20,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": ["initialize", "sign-in-callback", "sign-in-terminal", "session-id-repeatability", "self-state"],
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "raw session IDs are never recorded; compare only the same-profile consecutive-call equality relation"
+  }
+}
