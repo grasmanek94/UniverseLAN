@@ -1,0 +1,38 @@
+Works:
+Grand Ages - Medieval
+Stronghold Crusader 2
+The Witcher Adventure Game
+Shadow Warrior 2
+Craft The World
+Metal Slug
+Metal Slug X
+Shock Troopers
+Shock Troopers - 2nd Squad
+The Last Blade
+Twinkle Star Sprites
+Gauntlet
+River City Ransom - Underground
+Oriental Empires
+GAROU MARK OF THE WOLVES
+The King of Fighters 98UM
+Forsaken
+Worms W.M.D.
+Door Kickers - Action Squad
+Driftland - The Magic Revival
+Blood - Fresh Supply
+Knights and Bikes
+Heroes of Hammerwatch
+Niffelheim
+Warhammer - Chaosbane (but requires a static build because the game distributes outdated msvcrt runtime with bugs)
+Stronghold Warlords
+The Original Strife - Veteran Edition
+Streets of Rage 4
+Warhammer 40K - Dakka Squadron Flyboyz Edition
+Serious Sam 4
+Barely Racing
+Core Keeper
+
+Not works (but also didn't work "before" but did work at some point in UniverseLAN development):
+Vikings - Wolves of Midgard ( but has LAN..), did work on tag 440 , then at builds ~600 I noticed it didn't work: 'failed to join game'. Not your changes but can you check what could've caused this?
+The King of Fighters XIII (worked in build 464 - when joining room there's a problem with the network connection, and then it won't see the room anymore)
+
