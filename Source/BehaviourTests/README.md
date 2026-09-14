@@ -78,6 +78,17 @@ against UniverseLAN's matching delivery/two-peek relation. Listener destruction,
 peer/lobby/channel/payload relations, scheduling, and fresh-deadline cleanup
 remain strict; no raw IDs, bytes, lengths, token, or marker are retained.
 
+`Simple/reliable-p2p-after-lobby-leave` is a separate post-leave contract. It
+creates the same authorized nonjoinable-to-joinable tagged public capacity-two
+FCM lobby. User2 arms `GlobalNetworkingListener`, confirms `LeaveLobby`, and
+remains alive. User1 arms `GlobalLobbyMemberStateListener`, observes the former
+member `left`, settles public one-member/self-owner state, then calls one
+reliable `SendP2PPacket` to the saved former valid user ID. Two official
+`1.152.11/x64` trials and the focused four-host comparison observed scheduling
+but no former-member networking callback or peek. This matched baseline claims
+no LAN benefit and does not generalize scheduling into delivery. Listener mode
+uses only callback-local non-consuming peeks and never polls, reads, or pops.
+
 `Simple/bidirectional-lobby-message-delivery` uses one tagged temporary public,
 capacity-two FCM lobby per lane. The creator creates it nonjoinable, writes the
 public collision marker and capacity, then explicitly completes and observes

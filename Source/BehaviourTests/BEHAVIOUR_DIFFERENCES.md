@@ -29,6 +29,16 @@ The recorded accepted lobby convergence result passes because eventual-list retr
 timing is explicitly excluded from lane equality. Matched live baselines remain
 strict for every public fact they record.
 
+### `Simple/reliable-p2p-after-lobby-leave` on `1.152.11/x64`
+
+- Date: 2026-09-14
+- Classification: matched live baseline
+- Public observation: two official-only trials used a temporary tagged public capacity-two FCM lobby. User2 armed a public networking listener, confirmed local `user-left`, and remained alive. User1 observed the targeted member `left`, settled as the sole member/owner, then scheduled one reliable opaque send to the former valid user ID. The former member received no networking callback and made no peek in either trial.
+- Official normalized result: confirmed leave/member/sole-owner relations, scheduled `true`, zero callback/expected-channel/non-target callback counts, zero peeks, listener destruction, and terminal creator leave.
+- UniverseLAN normalized result: matched every required relation directly, including zero post-leave networking callback and peek observations.
+- Reproduction command/test name: `--characterize-official-gog-reliable-p2p-after-lobby-leave`; `universelan-behaviour-simple-reliable-p2p-after-lobby-leave-x64-1.152.11`; portable `RunBehaviorCTest.cmake` with `BEHAVIOUR_TEST_LABEL="^reliable-p2p-after-lobby-leave$"`.
+- Follow-up: no accepted LAN benefit is claimed. `SendP2PPacket` reports scheduling rather than delivery, and this narrow post-leave absence is empirical rather than a general SDK guarantee. No raw ID, lobby ID, marker, token, payload byte, length, timestamp, control, runtime output, or artifact path is recorded.
+
 ### `Simple/bidirectional-lobby-message-delivery` on `1.152.11/x64`
 
 - Date: 2026-09-14

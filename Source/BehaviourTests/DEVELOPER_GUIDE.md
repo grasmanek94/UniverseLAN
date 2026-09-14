@@ -56,6 +56,7 @@ cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^chat-room-message-delivery$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^bidirectional-chat-room-message-delivery$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^friends-peer-information-retrieval$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
+cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^reliable-p2p-after-lobby-leave$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^bidirectional-reliable-p2p-listener-peek$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^bidirectional-lobby-message-delivery$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
 cmake -D BEHAVIOUR_TEST_BUILD_DIR="cmake-behaviour-15211-x64" -D BEHAVIOUR_TEST_CONFIGURATION="Debug" -D BEHAVIOUR_TEST_LABEL="^multiple-lobby-membership-and-message-isolation$" -P Source/BehaviourTests/RunBehaviorCTest.cmake
@@ -130,6 +131,26 @@ terminal leaves acknowledged. The passing focused comparison accepts only that
 exact GOG relation versus the observed exact UniverseLAN expected-channel,
 two-peek relation. Every setup, send, cleanup, and other callback field remains
 strict.
+
+Characterize post-leave reliable listener-mode P2P twice before changing its
+strict facts:
+
+```powershell
+& "bin/Debug/universelan-behaviour-runner-x64-1.152.11.exe" --characterize-official-gog-reliable-p2p-after-lobby-leave --gog-host "bin/Debug/universelan-behaviour-host-gog-x64-1.152.11.exe" --gog-runtime-dir "Source/DLLs/1.152.11/gog"
+```
+
+The creator uses the same safe lobby setup. The joiner constructs
+`GlobalNetworkingListener`, confirms local `LeaveLobby`, then stays alive. The
+creator has an armed `GlobalLobbyMemberStateListener`, requires the former
+member's public `left` relation and settled one-member/self-owner state, then
+schedules one opaque reliable payload to the saved former valid user ID. The
+former member performs callback-local non-consuming peeks only if an expected
+callback occurs; it never polls, reads, or pops. Two official trials on
+2026-09-14 and the focused comparison observed scheduled sends with zero former
+member callbacks and peeks. This is a strict matched baseline, not a delivery
+guarantee or accepted LAN benefit. Fresh leave deadlines and cleanup
+acknowledgements are required; raw IDs, marker, token, payload bytes, and
+lengths are never retained.
 
 Characterize bidirectional reliable listener-mode P2P three times before changing
 its strict facts:
@@ -329,6 +350,7 @@ The approved comparator host contracts are `initialize-and-sign-in`,
 `gog-services-state-characterization`,
 `public-lobby-not-joinable-behavior-characterization`, `public-lobby-owner-close-lifecycle-characterization`, `public-lobby-owner-ownership-transition-characterization`, `public-lobby-full-join-failure-characterization`, `public-lobby-data-propagation-characterization`, and
 `chat-room-message-delivery-characterization`, `reliable-p2p-listener-peek-characterization`, and
+`reliable-p2p-after-lobby-leave-characterization`,
 `bidirectional-reliable-p2p-listener-peek-characterization`, `bidirectional-lobby-message-delivery-characterization`, and `multiple-lobby-membership-and-message-isolation-characterization`. Manifests and host
 arguments outside that fixed registry are rejected. The strict `gog-services-state`
 contract uses no service-state listener and makes its single public

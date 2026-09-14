@@ -144,6 +144,7 @@ if(ENABLE_UNIVERSELAN_GOG_BEHAVIOUR_TESTS AND UNIVERSELAN_BEHAVIOUR_TEST_CREDENT
   add_universelan_gog_behaviour_test("simple-bidirectional-chat-room-message-delivery" "Simple" "bidirectional-chat-room-message-delivery.json" "bidirectional-chat-room-message-delivery")
   add_universelan_gog_behaviour_test("simple-friends-peer-information-retrieval" "Simple" "friends-peer-information-retrieval.json" "friends-peer-information-retrieval")
   add_universelan_gog_behaviour_test("simple-reliable-p2p-listener-peek" "Simple" "reliable-p2p-listener-peek.json" "reliable-p2p-listener-peek")
+  add_universelan_gog_behaviour_test("simple-reliable-p2p-after-lobby-leave" "Simple" "reliable-p2p-after-lobby-leave.json" "reliable-p2p-after-lobby-leave")
   add_universelan_gog_behaviour_test("simple-bidirectional-reliable-p2p-listener-peek" "Simple" "bidirectional-reliable-p2p-listener-peek.json" "bidirectional-reliable-p2p-listener-peek")
   add_universelan_gog_behaviour_test("simple-bidirectional-lobby-message-delivery" "Simple" "bidirectional-lobby-message-delivery.json" "bidirectional-lobby-message-delivery")
   add_universelan_gog_behaviour_test("advanced-multiple-lobby-membership-and-message-isolation" "Advanced" "multiple-lobby-membership-and-message-isolation.json" "multiple-lobby-membership-and-message-isolation")

@@ -114,7 +114,7 @@ combine already-characterized Simple contracts.
 | --- | --- | --- |
 | Initialization / `IUser` | Init outcome, sign-in terminal behavior, `SignedIn`, `IsLoggedOn`, self ID validity/type, persona availability, and consecutive `GetSessionID()` equality. | Reinitialization, sign-out, connection loss/recovery. |
 | `IMatchmaking` | Create/list/join public lobby, nonjoinable public-list behavior, full-lobby join failure, operation result, owner/member relationships, basic lobby data, owner-close lifecycle, ownership-transition characterization, and bidirectional lobby-message delivery. | Multiple concurrent memberships, lobby-message isolation, owner-close comparison, and ownership-transition comparison are implemented; other filters and failure paths remain. |
-| `INetworking` | Reliable P2P listener-mode scheduling and callback-local non-consuming peek relations. Three clean official 2026-09-14 trials established the exact accepted environmental pair: scheduled send with a non-target callback and no expected-channel delivery/peek versus UniverseLAN expected-channel delivery and two peeks. | Three-peer routing, channel behavior, unreliable packets, disconnect/NAT/server-host behavior. |
+| `INetworking` | Reliable P2P listener-mode scheduling and callback-local non-consuming peek relations. Three clean official 2026-09-14 trials established the exact accepted environmental pair for current members: scheduled send with a non-target callback and no expected-channel delivery/peek versus UniverseLAN expected-channel delivery and two peeks. A separate two-trial post-leave probe observed scheduled sends but zero callbacks/peeks for the alive former member in both official and UniverseLAN lanes. | Three-peer routing, channel behavior, unreliable packets, disconnect/NAT/server-host behavior. |
 | `IChat` | One-to-one room request, room identity reuse, message send terminal result, remote message content/sender relationship. | History/pagination, membership lifecycle, read state, denial/failure behavior. |
 | `IFriends` | Persona information retrieval, persona state, rich-presence set/get callback behavior, game invitations where official accounts permit it. | Friend relationships, invitation/acceptance flows, persistence, richer presence state. |
 | `IStats` | Retrieve/store operation outcomes, a dedicated test stat/achievement value, post-store public read. | Cross-process durability, reset/failure handling, ordering with presence/user data. |
@@ -253,7 +253,15 @@ data can be listed and read; they are never printed. These are public
   equivalent peeks. The manifest accepts only that exact pair. Both leaves use a
   fresh bounded deadline and continue `ProcessData` pumping after the observation
   window; a host clears joined state or acknowledges cleanup only after its own
-   matching terminal leave callback.
+    matching terminal leave callback.
+- `Simple/reliable-p2p-after-lobby-leave` uses the same safe FCM setup but
+  changes only the recipient relation. User2 arms `GlobalNetworkingListener`,
+  confirms local `LeaveLobby`, and remains alive. User1 arms
+  `GlobalLobbyMemberStateListener`, records the former member's `left`, settles
+  public sole-owner membership, then schedules one reliable payload to the saved
+  former valid ID. Two official characterizations and the focused comparison
+  observed scheduling with no callback or peek at the former member. This is an
+  exact matched baseline, not a delivery guarantee or an accepted LAN benefit.
 - `Simple/bidirectional-reliable-p2p-listener-peek` uses the same safe temporary
   public FCM lobby sequence with two accounts per lane. Both hosts construct
   `GlobalNetworkingListener`, query the other current member only through public

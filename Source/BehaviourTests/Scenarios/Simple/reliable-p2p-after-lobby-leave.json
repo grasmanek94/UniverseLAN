@@ -1,0 +1,17 @@
+{
+  "name": "Simple/reliable-p2p-after-lobby-leave",
+  "sdkVersion": "1.152.11",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 45,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": {
+      "user1": ["initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata", "creator-two-member-snapshot", "post-leave-lobby-listener-armed", "post-leave-membership", "p2p-send", "creator-leave", "self-state"],
+      "user2": ["initialize", "sign-in-callback", "sign-in-terminal", "list", "join", "joiner-two-member-snapshot", "p2p-listener-armed", "joiner-leave", "p2p-listener-peek", "p2p-listener-destroyed", "self-state"]
+    },
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "raw Galaxy IDs, lobby IDs, collision-marker-derived payload bytes, message lengths, and tokens are never recorded; compare only symbolic former-member, leave, membership, scheduling, callback, and non-consuming peek relations"
+  }
+}
