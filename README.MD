@@ -114,7 +114,6 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Warhammer 40,000: Rogue Trader            | :white_check_mark:(2)     | 1.150.0                       | Tested with build 487 |
 | Sniper Elite V2 Remaster                  | :white_check_mark:(2)     | 1.133.6                       | Tested with build 487 |
 | ENDLESS™ Space 2                          | :white_check_mark:(2)     | 1.152.8                       | Tested with build 487 |
-| Vikings - Wolves of Midgard               | :white_check_mark:(2)     | 1.100.2                       | Must apply `set OPENSSL_ia32cap=:~0x20000000` on newer CPU's for this game to start without crashing.<br> This issue is not caused by UniverseLAN or GOG, but OpenSSL / Unity/Unreal.<br> Tested with build 440 |
 | Phantom Doctrine                          | :white_check_mark:(2)     | 1.124.0                       | Must apply `set OPENSSL_ia32cap=:~0x20000000` on newer CPU's for this game to start without crashing.<br> This issue is not caused by UniverseLAN or GOG, but OpenSSL / Unity.<br> Tested with build 301 |
 | SYNTHETIK: Legion Rising                  | :white_check_mark:(2)     | 1.113.3                       | Works since build 301, "seems" to work I think this doesn't use GOG Galaxy for multiplayer. |
 | Aragami 1                                 | :white_check_mark:(2)     | 1.121.2                       | |
@@ -155,6 +154,7 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Grand Ages Medieval                       | :white_check_mark:(2)     | 1.68.0                        | Must apply `set OPENSSL_ia32cap=:~0x20000000` on newer CPU's for this game to start without crashing.<br> This issue is not caused by UniverseLAN or GOG, but OpenSSL / Unity/Unreal.<br> Tested with build 487 |
 | The Original Strife - Veteran Edition     | :white_check_mark:(2)     | 1.144.1                       | Tested with build 487 |
 | Niffelheim                                | :white_check_mark:(2)     | 1.139.2                       | Works since build 623 | 
+| Vikings - Wolves of Midgard               | :left_right_arrow:        | 1.100.2                       | Has Native LAN. Did work with UniverseLAN but stopped at some point. Regression? Must apply `set OPENSSL_ia32cap=:~0x20000000` on newer CPU's for this game to start without crashing.<br> This issue is not caused by UniverseLAN or GOG, but OpenSSL / Unity/Unreal.<br> Tested with build 440 |
 | Rise of the Triad (2013)                  | :left_right_arrow:        |                               | Native LAN available | 
 | Rage of Mages II: Necromancer             | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
 | Neverwinter Nights 2 Complete             | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
