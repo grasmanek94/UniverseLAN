@@ -1,0 +1,48 @@
+Ok we're going to deep dive into behaviour tests.
+First, here's a list of all previous, and current headers for GOG Galaxy:
+
+Errors.h
+GalaxyAllocator.h
+GalaxyApi.h
+GalaxyExceptionHelper.h
+GalaxyExport.h
+GalaxyFactory.h
+GalaxyGameServerApi.h
+GalaxyID.h
+GalaxyThread.h
+IApps.h
+IChat.h
+ICloudStorage.h
+ICustomNetworking.h
+IFriends.h
+IGalaxy.h
+IListenerRegistrar.h
+ILogger.h
+IMatchmaking.h
+INetworking.h
+IStats.h
+IStorage.h
+ITelemetry.h
+IUser.h
+IUtils.h
+InitOptions.h
+ShutdownOptions.h
+
+These headers are located throughout Source\DLLs\<version>\galaxy\
+
+Not all versions will have all of them, maybe even no version has all of them at the same time.
+That being said, you can find at D:\Downloads\GOG_SDK\repo\ the condensed "git" history of all SDK commits (public interface) with commits, or D:\Downloads\GOG_SDK\repo_includes_only_no_comments without commits in the Include\galaxy subfolder.
+
+Create a new InterfaceBehaviourTestPlans folder inside the BehaviourTests folder.
+For each of the files create a separate test plan folder inside InterfaceBehaviourTestPlans.
+Then, for each function, and change in function (gated by the #if GALAXY_BUILD_... macros as defined in galaxy_sdk_features.cmake):
+create in the corresponding folder of the interface a test plan .MD per function.
+This test plan must include an advanced plan on how to test the observable behaviour of the functionality, with expected behaviour tests for each function, and placeholders for universelan (server+2 clients) and official gog (2 clients) results.
+Also a verdict, pass or fail, and next steps to minimize the differences. Assume the least possible/feasible.
+
+Use information gathered from the repository.
+
+Do not miss any functions or interfaces, create a complete test plan as a professional tester would.
+
+Inspire yourself by C:\Development\AI\SKILLS\UnitTester.MD
+
