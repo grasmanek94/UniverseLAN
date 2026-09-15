@@ -353,8 +353,8 @@ namespace universelan::server {
 				else if (lobby->IsMember(data->id)) {
 					peer::ptr target_pd = peer_mapper.Get(data->id);
 					if (target_pd != nullptr) {
-						// Direct game-server replies identify the owning host, not the lobby.
-						data_to_send.id = pd->id;
+						// send "as lobby" (modify id to lobby)
+						data_to_send.id = lobby->GetID();
 						connection.Send(target_pd->peer, data_to_send, flag);
 					}
 					else if (trace.has_flags(tracer::Trace::DETAILED)) {
