@@ -39,6 +39,10 @@ namespace universelan {
 		messages{ chat_room.messages } {}
 
 	const char* Lobby::GetData(const data_t& data, const char* key) {
+		if (key == nullptr) {
+			return nullptr;
+		}
+
 		auto entry = data.find(key);
 		if (entry == data.end()) {
 			return "";
@@ -48,10 +52,19 @@ namespace universelan {
 	}
 
 	Lobby::data_by_index_t Lobby::GetDataByIndex(const data_t& data, size_t index) {
-		return container_get_by_index(data, index, data_by_index_t{ {},{} });
+		const auto it = container_iterator_get_by_index(data, index);
+		if (it == data.end()) {
+			return nullptr;
+		}
+
+		return std::addressof(*it);
 	}
 
 	void Lobby::SetData(data_t& data, const char* key, const char* value) {
+		if ((key == nullptr) || (value == nullptr)) {
+			return;
+		}
+
 		auto entry = data.find(key);
 		if (entry == data.end()) {
 			data.emplace(key, value);
@@ -202,7 +215,7 @@ namespace universelan {
 	Lobby::data_by_index_t Lobby::GetMemberDataByIndex(GalaxyID id, size_t index) const {
 		auto user = user_data.find(id);
 		if (user == user_data.end()) {
-			return data_by_index_t{ {},{} };
+			return nullptr;
 		}
 
 		return GetDataByIndex(user->second, index);

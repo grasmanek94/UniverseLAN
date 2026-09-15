@@ -505,12 +505,8 @@ namespace universelan::client {
 				return GetRichPresenceReturnT::value_false();
 			}
 
-			if (key != nullptr) {
-				universelan::util::safe_copy_str_n(ref->first, key, keyLength);
-			}
-			if (value != nullptr) {
-				universelan::util::safe_copy_str_n(ref->second, value, valueLength);
-			}
+			universelan::util::safe_copy_str_n(ref->first, key, keyLength);
+			universelan::util::safe_copy_str_n(ref->second, value, valueLength);
 
 			return GetRichPresenceReturnT::value_true();
 			});

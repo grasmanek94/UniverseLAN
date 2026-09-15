@@ -35,7 +35,7 @@ namespace universelan {
 			0ULL
 		>;
 
-		using data_by_index_t = std::pair<std::string, std::string>;
+		using data_by_index_t = const data_t::value_type*;
 
 	private:
 		galaxy::api::GalaxyID id;

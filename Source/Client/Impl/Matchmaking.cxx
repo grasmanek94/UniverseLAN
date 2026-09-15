@@ -861,12 +861,12 @@ namespace universelan::client {
 		}
 
 		auto data = lobby->second->GetDataByIndex(index);
-		if ((data.first.size() == 0) && (data.second.size() == 0)) {
+		if (data == nullptr) {
 			return false;
 		}
 
-		universelan::util::safe_copy_str_n(data.first, key, keyLength);
-		universelan::util::safe_copy_str_n(data.second, value, valueLength);
+		universelan::util::safe_copy_str_n(data->first, key, keyLength);
+		universelan::util::safe_copy_str_n(data->second, value, valueLength);
 
 		return true;
 	}
@@ -1005,12 +1005,12 @@ namespace universelan::client {
 		}
 
 		auto data = lobby->second->GetMemberDataByIndex(memberID, index);
-		if ((data.first.size() == 0) && (data.second.size() == 0)) {
+		if (data == nullptr) {
 			return false;
 		}
 
-		universelan::util::safe_copy_str_n(data.first, key, keyLength);
-		universelan::util::safe_copy_str_n(data.second, value, valueLength);
+		universelan::util::safe_copy_str_n(data->first, key, keyLength);
+		universelan::util::safe_copy_str_n(data->second, value, valueLength);
 
 		return true;
 	}
