@@ -580,22 +580,13 @@ namespace universelan::server {
 			return;
 		}
 
-		auto members = lobby->GetMembers();
-
-		// Hydrate an existing listed lobby before its join-success callback. Some
-		// games inspect the owner/member list immediately from OnLobbyEntered.
-		for (auto& member : members) {
-			if (member != pd->id) {
-				connection.Send(peer, LobbyMemberStateChangeMessage{ lobby->GetID(), member, LOBBY_MEMBER_STATE_CHANGED_ENTERED });
-			}
-		}
-
 		data->result = LOBBY_ENTER_RESULT_SUCCESS;
 		connection.Send(peer, data);
 
 		LobbyMemberStateChangeMessage enter_notification{ lobby->GetID(), pd->id, LOBBY_MEMBER_STATE_CHANGED_ENTERED };
 
 		// hmm should we include the user itself?
+		auto members = lobby->GetMembers();
 		for (auto& member : members) {
 			if (member != pd->id) {
 				auto member_peer = peer_mapper.Get(member);
