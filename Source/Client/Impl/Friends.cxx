@@ -499,9 +499,9 @@ namespace universelan::client {
 
 		auto entry = intf->user->GetGalaxyUserData(userID);
 		return entry->stats.run_locked_richpresence<GetRichPresenceReturnT::type>([&](auto& map) -> GetRichPresenceReturnT::type {
-			auto ref = container_get_by_index(map, index);
+			const auto ref = container_iterator_get_by_index(map, index);
 
-			if (!ref) {
+			if (ref == map.end()) {
 				return GetRichPresenceReturnT::value_false();
 			}
 
@@ -564,9 +564,9 @@ namespace universelan::client {
 
 		auto entry = intf->user->GetGalaxyUserData(userID);
 		return entry->stats.run_locked_richpresence<const char*>([&](auto& map) -> const char* {
-			auto ref = container_get_by_index(map, index);
+			const auto ref = container_iterator_get_by_index(map, index);
 
-			if (!ref) {
+			if (ref == map.end()) {
 				return "";
 			}
 
@@ -589,8 +589,8 @@ namespace universelan::client {
 
 		auto entry = intf->user->GetGalaxyUserData(userID);
 		entry->stats.run_locked_richpresence<void>([&](auto& map) -> void {
-			auto ref = container_get_by_index(map, index);
-			if (ref && buffer != nullptr) {
+			const auto ref = container_iterator_get_by_index(map, index);
+			if ((ref != map.end()) && (buffer != nullptr)) {
 				universelan::util::safe_copy_str_n(ref->first, buffer, bufferLength);
 			}
 			});

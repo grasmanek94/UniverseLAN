@@ -301,8 +301,8 @@ namespace universelan::client {
 
 		lock_t lock{ mtx };
 
-		auto ref = container_get_by_index(lobby_list_filtered, index);
-		if (!ref) {
+		const auto ref = container_iterator_get_by_index(lobby_list_filtered, index);
+		if (ref == lobby_list_filtered.end()) {
 			return 0;
 		}
 
@@ -513,12 +513,19 @@ namespace universelan::client {
 
 		lock_t lock{ mtx };
 
-		auto lobby = lobby_list.find(lobbyID);
+		const auto lobby = lobby_list.find(lobbyID);
 		if (lobby == lobby_list.end()) {
 			return 0;
 		}
 
-		return lobby->second->GetMemberByIndex(index);
+		const auto& members = lobby->second;
+		const GalaxyID self = intf->config->GetApiGalaxyID();
+
+		if (!members->IsMember(self)) {
+			return members->GetMemberByIndex(index);
+		}
+
+		return members->GetMemberByIndexWithForcedZero(index, self);
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES

@@ -480,8 +480,8 @@ namespace universelan::client {
 
 	const char* StatsImpl::GetAchievementName(uint32_t index) {
 		return intf->user->GetGalaxyUserData(0)->stats.run_locked_achievements<const char*>([&](auto& Achievements) -> const char* {
-			auto entry = container_get_by_index(Achievements, index);
-			if (!entry) {
+			const auto entry = container_iterator_get_by_index(Achievements, index);
+			if (entry == Achievements.end()) {
 				return "";
 			}
 
@@ -491,8 +491,8 @@ namespace universelan::client {
 
 	void StatsImpl::GetAchievementNameCopy(uint32_t index, char* buffer, uint32_t bufferLength) {
 		intf->user->GetGalaxyUserData(0)->stats.run_locked_achievements<void>([&](AchievementsAndStatsContainer::achievements_t& Achievements) -> void {
-			auto entry = container_get_by_index(Achievements, index);
-			if (!entry) {
+			const auto entry = container_iterator_get_by_index(Achievements, index);
+			if (entry == Achievements.end()) {
 				universelan::util::safe_copy_str_n("", buffer, bufferLength);
 				return;
 			}

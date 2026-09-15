@@ -411,13 +411,18 @@ namespace universelan::client {
 
 		auto entry = GetGalaxyUserData(userID);
 		return entry->stats.run_locked_userdata<bool>([&](auto& map) -> bool {
-			auto ref = container_get_by_index(map, index);
-			if (!ref) {
+			const auto ref = container_iterator_get_by_index(map, index);
+			if (ref == map.end()) {
 				return false;
 			}
 
-			universelan::util::safe_copy_str_n(ref->first, key, keyLength);
-			universelan::util::safe_copy_str_n(ref->second, value, valueLength);
+			if (key != nullptr) {
+				universelan::util::safe_copy_str_n(ref->first, key, keyLength);
+			}
+
+			if (value != nullptr) {
+				universelan::util::safe_copy_str_n(ref->second, value, valueLength);
+			}
 
 			return true;
 			});
