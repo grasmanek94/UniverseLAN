@@ -88,6 +88,7 @@ namespace universelan {
 		uint32_t GetMemberCount() const;
 		bool IsFull() const;
 		galaxy::api::GalaxyID GetMemberByIndex(size_t index) const;
+		galaxy::api::GalaxyID GetMemberByIndexWithForcedZero(size_t index, galaxy::api::GalaxyID forced_zero) const;
 
 		void SetType(galaxy::api::LobbyType value);
 		galaxy::api::LobbyType GetType() const;

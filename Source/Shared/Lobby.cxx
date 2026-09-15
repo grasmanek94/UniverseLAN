@@ -118,8 +118,17 @@ namespace universelan {
 	}
 
 	GalaxyID Lobby::GetMemberByIndex(size_t index) const {
-		auto ref = container_get_by_index(user_data, index);
-		if (!ref) {
+		auto ref = container_iterator_get_by_index(user_data, index);
+		if (ref == user_data.end()) {
+			return 0;
+		}
+
+		return ref->first;
+	}
+
+	GalaxyID Lobby::GetMemberByIndexWithForcedZero(size_t index, galaxy::api::GalaxyID forced_zero) const {
+		auto ref = map_iterator_get_by_index_with_forced_zero_key(user_data, index, forced_zero);
+		if (ref == user_data.end()) {
 			return 0;
 		}
 
