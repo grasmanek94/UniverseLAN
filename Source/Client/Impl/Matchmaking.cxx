@@ -518,7 +518,27 @@ namespace universelan::client {
 			return 0;
 		}
 
-		return lobby->second->GetMemberByIndex(index);
+		auto& members = lobby->second;
+		const GalaxyID self = intf->config->GetApiGalaxyID();
+		if (!members->IsMember(self)) {
+			return members->GetMemberByIndex(index);
+		}
+
+		// Experimental compatibility ordering: Galaxy returns the joining local
+		// member first even when the lobby owner joined earlier.
+		if (index == 0) {
+			return self;
+		}
+
+		uint32_t non_self_index = 0;
+		for (uint32_t member_index = 0; member_index < members->GetMemberCount(); ++member_index) {
+			const GalaxyID member = members->GetMemberByIndex(member_index);
+			if (member != self && non_self_index++ == index - 1) {
+				return member;
+			}
+		}
+
+		return 0;
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
