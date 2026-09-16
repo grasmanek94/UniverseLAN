@@ -396,8 +396,7 @@ namespace universelan::client {
 				}
 				joined_lobbies.erase(data->lobby_id);
 			}
-			lobby_list.erase(data->lobby_id);
-			lobby_list_filtered.erase(data->lobby_id);
+			// Keep discovered member metadata available to clients that immediately rejoin.
 		}
 
 		listeners->NotifyAllNow(
