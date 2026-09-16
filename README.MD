@@ -174,8 +174,8 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Turok 2 - Seeds of Evil                   | :left_right_arrow:        | 1.130.0                       | Has Native LAN / DirectIP |
 | Monster Roadtrip                          | :left_right_arrow:        | 1.131.3                       | Has free online multiplayer, but does not use Galaxy Multiplayer which means that this game is internet-only. UniverseLAN can't make it LAN-able. |
 | SOS OPS!                                  | :left_right_arrow:        | 1.152.9                       | Has Native LAN, doesn't use Galaxy for multiplayer, but online multiplayer. |
-| Serious Sams Bogus Detour                 | :construction:            | 1.100.2                       | Can join lobby since build 360 and start game, but both players stuck on black "Loading..." screen |
-| Homeworld: Deserts of Kharak              | :construction:            | 1.101                         | Tested with 1.100.2. After build 362 lobbies can now be created, but connecting doesn't work. Seems like host game is stuck in SetLobbyJoinable loop? | 
+| Serious Sams Bogus Detour                 | :left_right_arrow:        | 1.100.2                       | Works since build 806. |
+| Homeworld: Deserts of Kharak              | :left_right_arrow:        | 1.100.2                       | Works since build 806. | 
 | Ancestors Legacy                          | :construction:            | 1.133.6                       | Requires Leaderboards features to be implemented | 
 | Alien vs Predator 2000                    | :question:                |                               | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176? |
 | Double Dragon Trilogy                     | :question:                |                               | Unknown version, Galaxy.dll SHA1: `789f3b02ced8dbac2e5f8c2c98448569f70960cc` |
