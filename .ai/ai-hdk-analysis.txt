@@ -1,0 +1,107 @@
+Allright I have a different game (HDK) now that doesn't work with universelan but works via GOG. 
+
+(subagent/subtask 1)
+I've launched it in both scenario's and created logs. They're quite big so maybe you want to perform a minimization pass and collapse repeating patterns/logs first,
+for example:
+
++universelan::client::NetworkingImpl::IsP2PPacketAvailable[C]@7ffbf43f5cc0
+ outMsgSize(addr): 0x52ddf37c
+ channel: 0
+ result: false
+ outMsgSize: 0
+-universelan::client::NetworkingImpl::IsP2PPacketAvailable[C]@7ffbf43f5cc0
++universelan::client::NetworkingImpl::IsP2PPacketAvailable[C]@7ffbf43f5cc0
+ outMsgSize(addr): 0x52ddf37c
+ channel: 0
+ result: false
+ outMsgSize: 0
+-universelan::client::NetworkingImpl::IsP2PPacketAvailable[C]@7ffbf43f5cc0
+ to 
+
++universelan::client::NetworkingImpl::IsP2PPacketAvailable[C]@7ffbf43f5cc0
+ outMsgSize(addr): 0x52ddf37c
+ channel: 0
+ result: false
+ outMsgSize: 0
+-universelan::client::NetworkingImpl::IsP2PPacketAvailable[C]@7ffbf43f5cc0
+#(repeat 2 times)
+
+(subagent/subtask 2)
+when you do that for all logs, then the logs will be easier to analyze.
+The logs must be Analyzed. The GOG Galaxy version is 1.100.2 x64.
+The interceptor has been used with tracing capability with all traces enabled to log the behaviour.
+The game is an RTS called Homeworld - Deserts of Kharak.
+
+On UniverseLAN the lobby is visible, the player name loads in the list of players when clicking the lobby, but joining doesn't work.
+
+On GOG everything works as expected.
+
+The logs are located in:
+
+C:\Users\Rafal\Desktop\HDK\UniverseLANData\Interceptor\
+
+There are four folders, two folders (one for client, one for host) for real GOG:
+
+HDK_GOG_Working_Client
+HDK_GOG_Working_Host
+
+And two folders for UniverseLAN:
+
+HDK_UniverseLAN_NotWorking_Client
+HDK_UniverseLAN_NotWorking_Host
+
+each folder contain two .trace file, one .trace file corresponds to one thread of the process.
+
+Full list of files to be analyzed:
+
+HDK_GOG_Working_Client\0000a668.trace
+HDK_GOG_Working_Client\00014fe8.trace
+HDK_GOG_Working_Host\00012328.trace
+HDK_GOG_Working_Host\00015ce0.trace
+HDK_UniverseLAN_NotWorking_Client\0000e170.trace
+HDK_UniverseLAN_NotWorking_Client\00011d6c.trace
+HDK_UniverseLAN_NotWorking_Host\00008b48.trace
+HDK_UniverseLAN_NotWorking_Host\00016930.trace
+
+(final task)
+After analysis is complete of real GOG vs UniverseLAN, 
+find the defect and suggest fixes. 
+
+Create a separate branch based on feature/ixwebsocket-tests (your current branch) and build for me 1.100.2 x64 to test with any fixes you suggest.
+
+You should rename the Galaxy64.dll you produce, after compiling, to ulan-RealGalaxy64.dll
+
+Logs are structured, + opens new scope, - closes last scope, contents within a "single" + and - scope (like C { and }) could repeat:
++
+ something
+-
++
+ something
+-
++
+ different
+-
++
+ something
+-
++
+ something
+-
+
+so you would collapse all similar entries to:
+
++
+ something
+-
+# repeat 2
++
+ different
+-
++
+ something
+-
+# repeat 2
+
+..
+
+Scopes can be nested within other scopes.
