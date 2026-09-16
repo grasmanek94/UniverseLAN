@@ -57,6 +57,9 @@ if(NOT GALAXY_ARCH STREQUAL UNIVERSELAN_BEHAVIOUR_TEST_ARCH)
   return()
 endif()
 
+add_library(universelan-behaviour-test-common STATIC Common/Trace.cxx)
+target_include_directories(universelan-behaviour-test-common PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+
 set(UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY "${UNIVERSELAN_BEHAVIOUR_TEST_ARCH}-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION}")
 set(UNIVERSELAN_BEHAVIOUR_TEST_CLIENT "universelan-client-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY}")
 set(UNIVERSELAN_BEHAVIOUR_TEST_SERVER "universelan-server-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY}")
@@ -74,6 +77,68 @@ if(NOT UNIVERSELAN_BEHAVIOUR_TEST_GOG_PEER_OVERLAY STREQUAL "")
     message(FATAL_ERROR "BehaviourTests GOG peer overlay must be a GalaxyPeer64.dll file or a directory containing it")
   endif()
 endif()
+
+# This intentionally separate host uses only the common 1.100.2/1.152.11 public
+# surface, so the modern general-purpose host remains unchanged for its scenarios.
+foreach(lobby_persona_version IN ITEMS 1.100.2 1.152.11)
+  set(lobby_persona_key "${UNIVERSELAN_BEHAVIOUR_TEST_ARCH}-${lobby_persona_version}")
+  set(lobby_persona_client "universelan-client-${lobby_persona_key}")
+  set(lobby_persona_server "universelan-server-${lobby_persona_key}")
+  set(lobby_persona_gog_dir "${CMAKE_SOURCE_DIR}/Source/DLLs/${lobby_persona_version}/gog")
+  set(lobby_persona_gog_lib "${lobby_persona_gog_dir}/Galaxy64.lib")
+  set(lobby_persona_gog_dll "${lobby_persona_gog_dir}/Galaxy64.dll")
+  set(lobby_persona_gog_peer_dll "${lobby_persona_gog_dir}/GalaxyPeer64.dll")
+  if(TARGET ${lobby_persona_client} AND TARGET ${lobby_persona_server})
+    function(add_universelan_lobby_persona_host target version)
+      add_executable(${target} Host/LobbyMemberPersonaMain.cxx)
+      target_include_directories(${target} PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}"
+        "${CMAKE_CURRENT_BINARY_DIR}"
+        "${CMAKE_SOURCE_DIR}/Source/DLLs/${version}")
+      target_link_libraries(${target} PRIVATE universelan-behaviour-test-common ${ARGN})
+      set(GALAXY_VERSION "${UNIVERSELAN_BEHAVIOUR_TEST_ARCH}-${version}")
+      add_version_definitions_to(${target})
+      target_compile_definitions(${target} PRIVATE NOMINMAX
+        "UNIVERSELAN_BEHAVIOUR_TEST_VERSION=\"${version}\""
+        "UNIVERSELAN_BEHAVIOUR_TEST_ARCH=\"${UNIVERSELAN_BEHAVIOUR_TEST_ARCH}\"")
+    endfunction()
+
+    add_universelan_lobby_persona_host(universelan-behaviour-lobby-persona-host-universelan-${lobby_persona_key} ${lobby_persona_version}
+      ${lobby_persona_client})
+    add_executable(universelan-behaviour-lobby-persona-runner-${lobby_persona_key} Runner/Main.cxx)
+    target_include_directories(universelan-behaviour-lobby-persona-runner-${lobby_persona_key} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    target_link_libraries(universelan-behaviour-lobby-persona-runner-${lobby_persona_key} PRIVATE universelan-behaviour-test-common json ixwebsocket)
+    target_compile_definitions(universelan-behaviour-lobby-persona-runner-${lobby_persona_key} PRIVATE
+      "UNIVERSELAN_BEHAVIOUR_TEST_VERSION=\"${lobby_persona_version}\""
+      "UNIVERSELAN_BEHAVIOUR_TEST_ARCH=\"${UNIVERSELAN_BEHAVIOUR_TEST_ARCH}\"")
+    add_dependencies(universelan-behaviour-lobby-persona-runner-${lobby_persona_key}
+      universelan-behaviour-lobby-persona-host-universelan-${lobby_persona_key} ${lobby_persona_server})
+
+    if(EXISTS "${lobby_persona_gog_lib}" AND EXISTS "${lobby_persona_gog_dll}" AND EXISTS "${lobby_persona_gog_peer_dll}")
+      add_universelan_lobby_persona_host(universelan-behaviour-lobby-persona-host-gog-${lobby_persona_key} ${lobby_persona_version}
+        "${lobby_persona_gog_lib}")
+      add_dependencies(universelan-behaviour-lobby-persona-runner-${lobby_persona_key}
+        universelan-behaviour-lobby-persona-host-gog-${lobby_persona_key})
+      if(ENABLE_UNIVERSELAN_GOG_BEHAVIOUR_TESTS AND UNIVERSELAN_BEHAVIOUR_TEST_CREDENTIALS_AVAILABLE)
+        add_test(NAME "universelan-behaviour-automatic-lobby-member-persona-${lobby_persona_key}"
+          COMMAND $<TARGET_FILE:universelan-behaviour-lobby-persona-runner-${lobby_persona_key}>
+            --manifest "${CMAKE_CURRENT_SOURCE_DIR}/Scenarios/Simple/automatic-lobby-member-persona-${lobby_persona_version}.json"
+            --universelan-host $<TARGET_FILE:universelan-behaviour-lobby-persona-host-universelan-${lobby_persona_key}>
+            --gog-host $<TARGET_FILE:universelan-behaviour-lobby-persona-host-gog-${lobby_persona_key}>
+            --client-dll $<TARGET_FILE:${lobby_persona_client}>
+            --server $<TARGET_FILE:${lobby_persona_server}>
+            --gog-runtime-dir "${lobby_persona_gog_dir}")
+        set_tests_properties("universelan-behaviour-automatic-lobby-member-persona-${lobby_persona_key}" PROPERTIES
+          TIMEOUT 60 RUN_SERIAL TRUE RESOURCE_LOCK "universelan-behaviour-gog-accounts;universelan-system-network"
+          LABELS "behavior;gog;Simple;automatic-lobby-member-persona;${lobby_persona_version}")
+      endif()
+    else()
+      message(STATUS "BehaviourTests automatic lobby-member persona GOG host unavailable for ${lobby_persona_key}: matching official runtime artifacts are missing")
+    endif()
+  else()
+    message(STATUS "BehaviourTests automatic lobby-member persona unavailable: UniverseLAN ${lobby_persona_key} client/server targets were not selected")
+  endif()
+endforeach()
 
 if(NOT TARGET ${UNIVERSELAN_BEHAVIOUR_TEST_CLIENT} OR NOT TARGET ${UNIVERSELAN_BEHAVIOUR_TEST_SERVER})
   message(STATUS "BehaviourTests unavailable: UniverseLAN ${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY} client/server targets were not selected")
@@ -105,9 +170,6 @@ if(EXISTS "${UNIVERSELAN_BEHAVIOUR_TEST_FACTORY_HEADER}" AND EXISTS "${UNIVERSEL
       RUN_SERIAL TRUE)
   endif()
 endif()
-
-add_library(universelan-behaviour-test-common STATIC Common/Trace.cxx)
-target_include_directories(universelan-behaviour-test-common PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
 function(add_universelan_behaviour_host target)
   add_executable(${target} Host/Main.cxx)
