@@ -46,8 +46,11 @@ run the registered `behavior` label through `RunBehaviorCTest.cmake`.
 Never commit or print credentials. The ignored
 `Source/TestCommon/credentials.cmake` supplies two approved accounts plus the
 client credentials. Matching official `Galaxy64.lib`, `Galaxy64.dll`, and the
-default `GalaxyPeer64.dll` under `Source/DLLs/1.152.11/gog`, an authenticated
-official environment, and network access are also required. The base
+default `GalaxyPeer64.dll` under each selected SDK's `Source/DLLs/<version>/gog`
+directory, an authenticated official environment, and network access are also
+required. CMake generates a per-selected-version manifest in the build tree,
+replacing only its `sdkVersion` field so the runner's exact SDK check remains
+strict. The base
 `Galaxy64.dll` remains in that directory; the channel-8 peer is a local-only
 staging overlay. Missing prerequisites leave live tests unregistered rather
 than making normal builds fail. Direct `IChat` additionally needs approved

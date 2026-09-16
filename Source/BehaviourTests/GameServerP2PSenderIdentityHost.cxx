@@ -12,6 +12,7 @@
 #include <string>
 #include <thread>
 
+#if GALAXY_BUILD_FEATURE_HAS_IGALAXY && GALAXY_BUILD_FEATURE_HAS_ISERVERNETWORKING && GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES
 namespace universelan::behaviour::game_server_p2p
 {
 namespace
@@ -173,7 +174,11 @@ int runServerHost(const Arguments& arguments, galaxy::api::IGalaxy* const galaxy
     LobbyEnteredListener entered;
     if (matchmaking == nullptr || serverNetworking == nullptr || token.empty()) return 1;
 
+#if GALAXY_BUILD_FEATURE_HAS_LOBBYTOPOLOGYTYPE_ENUM
     matchmaking->CreateLobby(galaxy::api::LOBBY_TYPE_PUBLIC, 2, false, galaxy::api::LOBBY_TOPOLOGY_TYPE_FCM);
+#else
+    matchmaking->CreateLobby(galaxy::api::LOBBY_TYPE_PUBLIC, 2);
+#endif
     if (!pumpUntil(galaxy, deadline, [&] { return created.completed && entered.completed; }) || !created.success || !entered.success
         || !created.lobby.IsValid() || created.lobby != entered.lobby) return 1;
 
@@ -214,7 +219,11 @@ int runClient(const Arguments& arguments, galaxy::api::IGalaxy* const galaxy, co
     LobbyListListener listed;
     listed.matchmaking = matchmaking;
     matchmaking->AddRequestLobbyListStringFilter("universelan-behaviour-token", token.c_str(), galaxy::api::LOBBY_COMPARISON_TYPE_EQUAL);
+#if GALAXY_BUILD_FEATURE_HAS_REQUESTLOBBYLIST_ARGS_ALLOWFULL
     matchmaking->RequestLobbyList(false);
+#else
+    matchmaking->RequestLobbyList();
+#endif
     if (!pumpUntil(galaxy, deadline, [&] { return listed.completed; }) || listed.ioFailure || !listed.selected.IsValid()) return 1;
 
     LobbyEnteredListener entered;
@@ -296,3 +305,9 @@ int main(int argc, char* argv[])
     return universelan::behaviour::game_server_p2p::readArguments(argc, argv, arguments)
         ? universelan::behaviour::game_server_p2p::run(arguments) : 2;
 }
+#else
+int main()
+{
+    return 0;
+}
+#endif

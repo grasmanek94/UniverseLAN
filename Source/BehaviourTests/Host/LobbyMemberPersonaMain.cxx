@@ -251,7 +251,7 @@ bool run(const Arguments& arguments)
         AuthListener auth;
         const char* const login = arguments.profile == "user1" ? credentials::user1Name : credentials::user2Name;
         const char* const password = arguments.profile == "user1" ? credentials::user1Password : credentials::user2Password;
-#if GALAXY_BUILD_FEATURE_USER_SIGNIN_LISTENERS
+#if GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINCREDENTIALS
         user->SignInCredentials(login, password, &auth);
 #else
         user->SignIn(login, password);
