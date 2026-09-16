@@ -112,6 +112,7 @@ struct ScenarioContract
     bool observesBidirectionalReliableP2PPollRead = false;
     bool observesStatsRetrieveSelfCallback = false;
     bool observesStorageDownloadedSharedFileCount = false;
+    bool observesAutomaticLobbyMemberPersona = false;
 };
 
 constexpr std::array scenarioContracts{
@@ -256,7 +257,11 @@ constexpr std::array scenarioContracts{
             "joiner-lifecycle-listeners-armed", "owner-ownership-transition", "promoted-owner-data", "joiner-leave", "post-empty-list", "self-state"}, 14, false, false, true, false, false, false},
     ScenarioContract{"Simple/public-lobby-owner-ownership-transition", "public-lobby-owner-ownership-transition",
         {"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata", "creator-leave",
-            "joiner-lifecycle-listeners-armed", "owner-ownership-transition", "promoted-owner-data", "joiner-leave", "post-empty-list", "self-state"}, 14, false, false, true, false, false, false}
+            "joiner-lifecycle-listeners-armed", "owner-ownership-transition", "promoted-owner-data", "joiner-leave", "post-empty-list", "self-state"}, 14, false, false, true, false, false, false},
+    ScenarioContract{"Simple/automatic-lobby-member-persona", "automatic-lobby-member-persona",
+        {"initialize", "sign-in", "listeners-armed", "create", "configuration", "remote-persona-observation", "creator-leave",
+            "list", "join", "joined-persona-observation", "joiner-leave"}, 11,
+        false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true}
 };
 
 struct Child
@@ -560,6 +565,11 @@ bool observesStorageDownloadedSharedFileCount(const ScenarioContract& contract)
     return contract.observesStorageDownloadedSharedFileCount;
 }
 
+bool observesAutomaticLobbyMemberPersona(const ScenarioContract& contract)
+{
+    return contract.observesAutomaticLobbyMemberPersona;
+}
+
 bool observesCurrentGameLanguage(const ScenarioContract& contract)
 {
     return contract.hostScenario == "current-game-language-characterization" || contract.hostScenario == "current-game-language";
@@ -670,7 +680,8 @@ bool requiresSensitiveArtifactRedaction(const ScenarioContract& contract)
         || observesBidirectionalP2PListenerPeek(contract)
            || observesBidirectionalLobbyMessageDelivery(contract) || observesBidirectionalLobbyMemberDataPropagation(contract)
             || observesPublicLobbyStringFiltering(contract) || observesPublicLobbyNumericalFiltering(contract)
-           || observesBidirectionalChatRoomMessageDelivery(contract) || observesCustomNetworkingLoopbackRoundtripClose(contract);
+            || observesBidirectionalChatRoomMessageDelivery(contract) || observesCustomNetworkingLoopbackRoundtripClose(contract)
+            || observesAutomaticLobbyMemberPersona(contract);
 }
 
 json requiredRecords(const ScenarioContract& contract)
@@ -690,7 +701,9 @@ Scenario parseScenario(const fs::path& manifest)
     if (!required(root, "name").is_string()) invalidManifest();
     const ScenarioContract* contract = findScenarioContract(root.at("name").get<std::string>());
     if (contract == nullptr) invalidManifest();
-    if (!required(root, "sdkVersion").is_string() || root.at("sdkVersion") != UNIVERSELAN_BEHAVIOUR_TEST_VERSION) invalidManifest();
+    if (!required(root, "sdkVersion").is_string()
+        || (root.at("sdkVersion") != UNIVERSELAN_BEHAVIOUR_TEST_VERSION
+            && !(observesAutomaticLobbyMemberPersona(*contract) && root.at("sdkVersion") == "*"))) invalidManifest();
     if (!required(root, "architecture").is_string() || root.at("architecture") != UNIVERSELAN_BEHAVIOUR_TEST_ARCH) invalidManifest();
     if (!required(root, "laneMode").is_string()) invalidManifest();
     Scenario scenario;
@@ -707,7 +720,11 @@ Scenario parseScenario(const fs::path& manifest)
     const json& comparison = required(root, "comparison");
     objectHasOnly(comparison, {"requiredRecords", "requiredTerminalOutcome", "unexpectedRecords", "opaqueIds", "acceptedStatePair", "acceptedPersonaStatePair", "acceptedPublicLobbyStringFilterCandidateSet"});
     const json& records = required(comparison, "requiredRecords");
-    const bool validRecordDeclaration = observesBidirectionalReliableP2PPollRead(*contract)
+    const bool validRecordDeclaration = observesAutomaticLobbyMemberPersona(*contract)
+        ? records.is_object() && records.size() == 2
+            && records.value("user1", json()) == json::array({"initialize", "sign-in", "listeners-armed", "create", "configuration", "remote-persona-observation", "creator-leave"})
+            && records.value("user2", json()) == json::array({"initialize", "sign-in", "listeners-armed", "list", "join", "joined-persona-observation", "joiner-leave"})
+        : observesBidirectionalReliableP2PPollRead(*contract)
         ? records.is_object() && records.size() == 2
             && records.value("user1", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter",
                 "configuration", "metadata", "p2p-poll-armed", "p2p-send", "p2p-poll-read", "creator-leave", "self-state"})
@@ -3137,6 +3154,46 @@ bool normalizeStorageDownloadedSharedFileCountTrace(const fs::path& trace, json&
     catch (...) { return false; }
 }
 
+bool normalizeAutomaticLobbyMemberPersonaTrace(const fs::path& trace, const std::string& profile, json& normalized)
+{
+    try
+    {
+        std::vector<json> records;
+        for (const std::string& line : common::readTrace(trace)) records.push_back(json::parse(line));
+        const std::vector<std::string> expected = profile == "user1"
+            ? std::vector<std::string>{"initialize", "sign-in", "listeners-armed", "create", "configuration", "remote-persona-observation", "creator-leave"}
+            : std::vector<std::string>{"initialize", "sign-in", "listeners-armed", "list", "join", "joined-persona-observation", "joiner-leave"};
+        if (records.size() != expected.size()) return false;
+        for (std::size_t index = 0; index < expected.size(); ++index)
+            if (!records[index].is_object() || records[index].value("record", "") != expected[index]) return false;
+        const auto allTrue = [](const json& record, std::initializer_list<const char*> fields) {
+            if (!record.is_object()) return false;
+            for (const char* field : fields) if (!record.contains(field) || record[field] != true) return false;
+            return true;
+        };
+        if (!fieldsExactly(records[0], {"record", "result"}) || records[0]["result"] != "returned"
+            || !fieldsExactly(records[1], {"record", "result"}) || records[1]["result"] != "success"
+            || !fieldsExactly(records[2], {"record", "memberListenerRegistered", "personaListenerRegistered", "selfValid"})
+            || !allTrue(records[2], {"memberListenerRegistered", "personaListenerRegistered", "selfValid"})) return false;
+        if (profile == "user1")
+        {
+            if (!fieldsExactly(records[3], {"record", "createdAndEntered", "publicLobbyValid"}) || !allTrue(records[3], {"createdAndEntered", "publicLobbyValid"})
+                || !fieldsExactly(records[4], {"record", "tokenNonempty", "markerScheduled", "joinableScheduled", "joinableVisible"})
+                || !allTrue(records[4], {"tokenNonempty", "markerScheduled", "joinableScheduled", "joinableVisible"})
+                || !fieldsExactly(records[5], {"record", "remoteEnteredObserved", "enteredRemoteValidNonSelf", "matchingPersonaCallbackObserved", "personaNameNonempty"})
+                || !allTrue(records[5], {"remoteEnteredObserved", "enteredRemoteValidNonSelf", "matchingPersonaCallbackObserved", "personaNameNonempty"})
+                || !fieldsExactly(records[6], {"record", "completed"}) || records[6]["completed"] != true) return false;
+        }
+        else if (!fieldsExactly(records[3], {"record", "selectedOnePublicLobby"}) || records[3]["selectedOnePublicLobby"] != true
+            || !fieldsExactly(records[4], {"record", "enteredSelectedLobby"}) || records[4]["enteredSelectedLobby"] != true
+            || !fieldsExactly(records[5], {"record", "ownerValidNonSelf"}) || records[5]["ownerValidNonSelf"] != true
+            || !fieldsExactly(records[6], {"record", "completed"}) || records[6]["completed"] != true) return false;
+        normalized = records;
+        return true;
+    }
+    catch (...) { return false; }
+}
+
 bool normalizeTrace(const fs::path& trace, const ScenarioContract& contract, json& normalized)
 {
     try
@@ -3223,7 +3280,9 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
     const ScenarioContract& contract = *scenario.contract;
     report = json::object();
     report["scenario"] = contract.name;
-    report["opaqueIdPolicy"] = isStrictCurrentGameLanguage(contract)
+    report["opaqueIdPolicy"] = observesAutomaticLobbyMemberPersona(contract)
+        ? "raw Galaxy and lobby IDs, persona names, public marker values, controls, timestamps, credentials, and runtime output are never recorded; only symbolic remote-entry, matching persona-callback, nonempty copied-name, and cleanup relations are compared"
+        : isStrictCurrentGameLanguage(contract)
         ? "raw language strings, pointers, Galaxy IDs, credentials, and runtime data are never recorded; only IApps availability, a non-null language pointer, and the documented lowercase property are compared"
         : observesStorageDownloadedSharedFileCount(contract)
         ? "raw Galaxy IDs, shared-file names, file data, credentials, and runtime data are never recorded; only storage availability and the initial open downloaded-shared-file count relation are compared"
@@ -3271,7 +3330,9 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
     {
         json universelan;
         json gog;
-        const bool universelanValid = observesStorageDownloadedSharedFileCount(contract)
+        const bool universelanValid = observesAutomaticLobbyMemberPersona(contract)
+            ? normalizeAutomaticLobbyMemberPersonaTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
+            : observesStorageDownloadedSharedFileCount(contract)
             ? normalizeStorageDownloadedSharedFileCountTrace(root / "universelan" / profile / "trace.jsonl", universelan)
             : observesStatsRetrieveSelfCallback(contract)
             ? normalizeStatsRetrieveSelfCallbackTrace(root / "universelan" / profile / "trace.jsonl", universelan)
@@ -3315,7 +3376,9 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
             : contract.observesPublicLobby
             ? normalizePublicLobbyTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
             : normalizeTrace(root / "universelan" / profile / "trace.jsonl", contract, universelan);
-        const bool gogValid = observesStorageDownloadedSharedFileCount(contract)
+        const bool gogValid = observesAutomaticLobbyMemberPersona(contract)
+            ? normalizeAutomaticLobbyMemberPersonaTrace(root / "gog" / profile / "trace.jsonl", profile, gog)
+            : observesStorageDownloadedSharedFileCount(contract)
             ? normalizeStorageDownloadedSharedFileCountTrace(root / "gog" / profile / "trace.jsonl", gog)
             : observesStatsRetrieveSelfCallback(contract)
             ? normalizeStatsRetrieveSelfCallbackTrace(root / "gog" / profile / "trace.jsonl", gog)
@@ -3365,7 +3428,10 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
             || (gogValid && gog[8]["priorOwnerMemberCallbackObserved"] == false && gog[8]["priorOwnerLeftObserved"] == false
                 && gog[8]["globalLobbyLeftCallbackObserved"] == true && gog[8]["globalLobbyClosedObserved"] == true
                 && gog[8]["unexpectedGlobalLobbyLeaveReasonObserved"] == false && gog[7]["targetAbsent"] == true);
-        const bool terminalSuccess = universelanValid && gogValid && officialOwnerCloseFacts && universelan[2]["result"] == "success" && gog[2]["result"] == "success"
+        const bool terminalSuccess = universelanValid && gogValid && officialOwnerCloseFacts
+            && (observesAutomaticLobbyMemberPersona(contract)
+                ? universelan[1]["result"] == "success" && gog[1]["result"] == "success"
+                : universelan[2]["result"] == "success" && gog[2]["result"] == "success")
             && (!contract.observesFriendsPeerInformation || (universelan[5]["outcome"] == scenario.requiredTerminalOutcome
                 && gog[5]["outcome"] == scenario.requiredTerminalOutcome));
         const bool sessionIdRepeatabilityEqual = !contract.observesSessionIdRepeatability

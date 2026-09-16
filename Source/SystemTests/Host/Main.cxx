@@ -150,7 +150,7 @@ SignInResult initializeAndSignIn(Api& api, const Arguments& arguments)
     }
 
 #if GALAXY_BUILD_FEATURE_HAS_IGALAXY
-    api.galaxy = galaxy::api::GalaxyFactory::CreateInstance();
+    api.galaxy = galaxy::api::GalaxyFactory::GetInstance();
     if (api.galaxy == nullptr) return SignInResult::Failed;
 #if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
     api.galaxy->Init(galaxy::api::InitOptions{clientId, clientSecret, "."});

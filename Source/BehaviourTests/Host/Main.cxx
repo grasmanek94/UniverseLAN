@@ -17,6 +17,35 @@
 #include <thread>
 #include <vector>
 
+#if GALAXY_BUILD_FEATURE_HAS_1_73_LOBBY_FEATURES && GALAXY_BUILD_FEATURE_HAS_LOBBYTOPOLOGYTYPE_ENUM \
+    && GALAXY_BUILD_FEATURE_HAS_ILOBBYDATARETRIEVELISTENER && GALAXY_BUILD_FEATURE_LOBBY_LISTENERS \
+    && GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LIST_RESULT && GALAXY_BUILD_FEATURE_HAS_IMATCHMAKING_LOBBY_LEAVE_REASON \
+    && GALAXY_BUILD_FEATURE_GALAXYID_HAS_IDTYPE
+#define UNIVERSELAN_BEHAVIOUR_HAS_LOBBY_SCENARIOS 1
+#else
+#define UNIVERSELAN_BEHAVIOUR_HAS_LOBBY_SCENARIOS 0
+#endif
+
+#if UNIVERSELAN_BEHAVIOUR_HAS_LOBBY_SCENARIOS && GALAXY_BUILD_FEATURE_HAS_CONNECTION_TYPE
+#define UNIVERSELAN_BEHAVIOUR_HAS_P2P_SCENARIOS 1
+#else
+#define UNIVERSELAN_BEHAVIOUR_HAS_P2P_SCENARIOS 0
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_ICHAT && GALAXY_BUILD_FEATURE_HAS_ICHAT_ROOMLISTENERS \
+    && GALAXY_BUILD_FEATURE_HAS_ICHAT_MESSAGETYPE && GALAXY_BUILD_FEATURE_GALAXYID_HAS_IDTYPE
+#define UNIVERSELAN_BEHAVIOUR_HAS_CHAT_SCENARIOS 1
+#else
+#define UNIVERSELAN_BEHAVIOUR_HAS_CHAT_SCENARIOS 0
+#endif
+
+#if GALAXY_BUILD_FEATURE_IFRIENDS_INFORMATIONLISTENERS && GALAXY_BUILD_FEATURE_IFRIENDS_ONPERSONADATACHANGED \
+    && GALAXY_BUILD_FEATURE_HAS_PERSONASTATE_ENUM && GALAXY_BUILD_FEATURE_GALAXYID_HAS_IDTYPE
+#define UNIVERSELAN_BEHAVIOUR_HAS_FRIENDS_SCENARIOS 1
+#else
+#define UNIVERSELAN_BEHAVIOUR_HAS_FRIENDS_SCENARIOS 0
+#endif
+
 namespace universelan::behaviour::host
 {
 namespace
@@ -151,6 +180,7 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
         && arguments.timeoutSeconds > 0 && arguments.timeoutSeconds <= 60;
 }
 
+#if GALAXY_BUILD_FEATURE_GALAXYID_HAS_IDTYPE
 const char* idType(const galaxy::api::GalaxyID::IDType type)
 {
     switch (type)
@@ -161,7 +191,9 @@ const char* idType(const galaxy::api::GalaxyID::IDType type)
     }
     return "unknown";
 }
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_CONNECTION_TYPE
 const char* connectionType(const galaxy::api::ConnectionType type)
 {
     switch (type)
@@ -172,8 +204,15 @@ const char* connectionType(const galaxy::api::ConnectionType type)
     }
     return "unknown";
 }
+#endif
 
-struct AuthListener final : galaxy::api::IAuthListener
+#if GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINCREDENTIALS
+using AuthListenerBase = galaxy::api::IAuthListener;
+#else
+using AuthListenerBase = galaxy::api::GlobalAuthListener;
+#endif
+
+struct AuthListener final : AuthListenerBase
 {
     enum class Outcome { pending, success, failure };
 
@@ -189,7 +228,13 @@ struct AuthListener final : galaxy::api::IAuthListener
     void OnAuthLost() override {}
 };
 
-struct UserStatsAndAchievementsRetrieveListener final : galaxy::api::IUserStatsAndAchievementsRetrieveListener
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
+using UserStatsAndAchievementsRetrieveListenerBase = galaxy::api::IUserStatsAndAchievementsRetrieveListener;
+#else
+using UserStatsAndAchievementsRetrieveListenerBase = galaxy::api::GlobalUserStatsAndAchievementsRetrieveListener;
+#endif
+
+struct UserStatsAndAchievementsRetrieveListener final : UserStatsAndAchievementsRetrieveListenerBase
 {
     enum class Outcome { pending, success, failure };
 
@@ -209,13 +254,14 @@ struct UserStatsAndAchievementsRetrieveListener final : galaxy::api::IUserStatsA
     }
 };
 
+std::string boolean(const bool value) { return value ? "true" : "false"; }
+
+#if GALAXY_BUILD_FEATURE_HAS_GOGSERVICECONNECTIONSTATELISTENER
 struct GogServicesStateEvent
 {
     const char* phase;
     const char* state;
 };
-
-std::string boolean(const bool value) { return value ? "true" : "false"; }
 
 const char* gogServicesState(const galaxy::api::GogServicesConnectionState state)
 {
@@ -229,6 +275,9 @@ const char* gogServicesState(const galaxy::api::GogServicesConnectionState state
     return "invalid";
 }
 
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_IUTILS && GALAXY_BUILD_FEATURE_OVERLAYSTATE_ENUM
 const char* overlayState(const galaxy::api::OverlayState state)
 {
     switch (state)
@@ -241,7 +290,9 @@ const char* overlayState(const galaxy::api::OverlayState state)
     }
     return "invalid";
 }
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_GOGSERVICECONNECTIONSTATELISTENER
 struct GogServicesStateListener final : galaxy::api::GlobalGogServicesConnectionStateListener
 {
     const AuthListener& auth;
@@ -256,6 +307,7 @@ struct GogServicesStateListener final : galaxy::api::GlobalGogServicesConnection
         events.push_back({phase, gogServicesState(state)});
     }
 };
+#endif
 
 const char* elapsedBucket(const std::chrono::milliseconds elapsed)
 {
@@ -264,6 +316,7 @@ const char* elapsedBucket(const std::chrono::milliseconds elapsed)
     return "250ms-or-more";
 }
 
+#if GALAXY_BUILD_FEATURE_HAS_GOGSERVICECONNECTIONSTATELISTENER
 std::string gogServicesStateEvents(const std::vector<GogServicesStateEvent>& events)
 {
     std::string result = "[";
@@ -275,11 +328,15 @@ std::string gogServicesStateEvents(const std::vector<GogServicesStateEvent>& eve
     }
     return result + "]";
 }
+#endif
 
 std::string selfStateRecord(galaxy::api::IUser* const user)
 {
     const bool signedIn = user != nullptr && user->SignedIn();
-    const bool loggedOn = user != nullptr && user->IsLoggedOn();
+    bool loggedOn = false;
+#if GALAXY_BUILD_FEATURE_IUSER_HAS_ISLOGGEDON
+    loggedOn = user != nullptr && user->IsLoggedOn();
+#endif
     galaxy::api::GalaxyID first;
     galaxy::api::GalaxyID second;
     if (user != nullptr)
@@ -292,13 +349,19 @@ std::string selfStateRecord(galaxy::api::IUser* const user)
     bool personaAvailable = false;
     if (signedIn && galaxy::api::Friends() != nullptr)
     {
+#if GALAXY_BUILD_FEATURE_IFRIENDS_GET_FRIEND_PERSONA_AVATAR_COPY
         galaxy::api::Friends()->GetPersonaNameCopy(persona.data(), static_cast<std::uint32_t>(persona.size()));
         personaAvailable = persona[0] != '\0';
+#endif
     }
+    std::string type = "unavailable";
+#if GALAXY_BUILD_FEATURE_GALAXYID_HAS_IDTYPE
+    type = idType(first.GetIDType());
+#endif
     return "{\"record\":\"self-state\",\"signedIn\":" + boolean(signedIn)
         + ",\"loggedOn\":" + boolean(loggedOn)
         + ",\"idValid\":" + boolean(first.IsValid())
-        + ",\"idType\":" + common::jsonString(idType(first.GetIDType()))
+        + ",\"idType\":" + common::jsonString(type)
         + ",\"selfIdRepeatEqual\":" + boolean(first == second)
         + ",\"personaAvailable\":" + boolean(personaAvailable) + "}";
 }
@@ -372,7 +435,11 @@ bool galaxyIDFromRelay(const std::string& value, galaxy::api::GalaxyID& id)
         raw = raw * 10 + digit;
     }
     id = galaxy::api::GalaxyID(raw);
+#if GALAXY_BUILD_FEATURE_GALAXYID_HAS_IDTYPE
     return id.IsValid() && id.GetIDType() == galaxy::api::GalaxyID::ID_TYPE_USER;
+#else
+    return id.IsValid();
+#endif
 }
 
 template <typename Predicate>
@@ -400,6 +467,7 @@ bool pumpCleanupUntil(const std::chrono::steady_clock::time_point deadline, Pred
     return predicate();
 }
 
+#if UNIVERSELAN_BEHAVIOUR_HAS_LOBBY_SCENARIOS
 const char* createResult(const galaxy::api::LobbyCreateResult result)
 {
     switch (result)
@@ -1438,6 +1506,7 @@ bool runPublicLobbyFullJoinFailure(const Arguments& arguments, galaxy::api::IUse
     return characterization ? terminal && targetAbsent : failedWithoutEntry && targetAbsent;
 }
 
+#if UNIVERSELAN_BEHAVIOUR_HAS_P2P_SCENARIOS
 constexpr std::uint8_t reliableP2PListenerPeekChannel = 73;
 
 std::vector<std::uint8_t> reliableP2PListenerPeekPayload(const std::string& token)
@@ -2245,6 +2314,8 @@ bool runBidirectionalReliableP2PListenerPeek(const Arguments& arguments, galaxy:
     if (left) writeEvent(arguments, "cleanup-ack");
     return exchanged && left;
 }
+
+#endif
 
 std::vector<std::uint8_t> bidirectionalLobbyMessagePayload(const std::string& token, const std::uint8_t direction)
 {
@@ -3349,6 +3420,9 @@ bool runMultipleLobbyMembershipAndMessageIsolation(const Arguments& arguments, g
     return left;
 }
 
+#endif
+
+#if UNIVERSELAN_BEHAVIOUR_HAS_CHAT_SCENARIOS
 struct ChatRoomRetrieveListener final : galaxy::api::IChatRoomWithUserRetrieveListener
 {
     int terminalCount = 0;
@@ -3662,6 +3736,9 @@ bool runBidirectionalChatRoomMessageDelivery(const Arguments& arguments, galaxy:
         && messages.callbackLocalReadOccurred && messages.sharedRoomOnly && messages.selfMessageRelationsValid && messages.peerMessageRelationsValid;
 }
 
+#endif
+
+#if UNIVERSELAN_BEHAVIOUR_HAS_FRIENDS_SCENARIOS
 const char* personaState(const galaxy::api::PersonaState state)
 {
     switch (state)
@@ -3789,6 +3866,8 @@ bool runFriendsPeerInformationRetrieval(const Arguments& arguments, galaxy::api:
     return terminal && retrieve.terminalCount == 1 && retrieve.success && !retrieve.failure;
 }
 
+#endif
+
 const char* apiErrorCategory(const galaxy::api::IError* const error)
 {
     if (error == nullptr) return "none";
@@ -3802,6 +3881,7 @@ const char* apiErrorCategory(const galaxy::api::IError* const error)
     return "unknown";
 }
 
+#if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING && GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS
 const char* customNetworkingOpenFailureReason(const galaxy::api::IConnectionOpenListener::FailureReason reason)
 {
     switch (reason)
@@ -3916,6 +3996,7 @@ void closeCustomNetworkingConnection(const Arguments& arguments, galaxy::api::IC
     networking->CloseConnection(connection, &listener);
     pumpUntil(arguments, deadline, [&] { return listener.callbacks > 0; });
 }
+#endif
 
 bool runStatsRetrieveAchievementsNumberCharacterization(const Arguments& arguments, galaxy::api::IUser* const user,
     std::vector<std::string>& records, const bool queryAchievementCount)
@@ -3929,13 +4010,19 @@ bool runStatsRetrieveAchievementsNumberCharacterization(const Arguments& argumen
     }
 
     UserStatsAndAchievementsRetrieveListener listener;
+#if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
     stats->RequestUserStatsAndAchievements(galaxy::api::GalaxyID(), &listener);
+#else
+    stats->RequestUserStatsAndAchievements(galaxy::api::GalaxyID());
+#endif
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(arguments.timeoutSeconds);
     const bool terminal = pumpUntil(arguments, deadline, [&] { return listener.outcome != UserStatsAndAchievementsRetrieveListener::Outcome::pending; });
     const bool success = terminal && listener.outcome == UserStatsAndAchievementsRetrieveListener::Outcome::success;
     const bool callbackUserIsSelf = terminal && listener.user == user->GetGalaxyID();
     const bool achievementNumberQueryCompleted = queryAchievementCount && success;
+#if GALAXY_BUILD_FEATURE_HAS_ISTATS_ACHIEVEMENTSNUMBER
     if (achievementNumberQueryCompleted) static_cast<void>(stats->GetAchievementsNumber());
+#endif
     records.push_back(std::string("{\"record\":\"stats-retrieve\",\"terminal\":")
         + common::jsonString(!terminal ? "timeout" : (success ? "success" : "failure"))
         + ",\"callbackUserIsSelf\":" + boolean(callbackUserIsSelf)
@@ -3943,6 +4030,7 @@ bool runStatsRetrieveAchievementsNumberCharacterization(const Arguments& argumen
     return true;
 }
 
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
 bool runStorageDownloadedSharedFileCount(std::vector<std::string>& records)
 {
     galaxy::api::IStorage* const storage = galaxy::api::Storage();
@@ -3952,7 +4040,9 @@ bool runStorageDownloadedSharedFileCount(std::vector<std::string>& records)
         + ",\"initialDownloadedSharedFileCountZero\":" + boolean(initialDownloadedSharedFileCountZero) + "}");
     return storageAvailable && initialDownloadedSharedFileCountZero;
 }
+#endif
 
+#if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING && GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS
 bool runCustomNetworkingLoopbackRoundtripClose(const Arguments& arguments, std::vector<std::string>& records)
 {
     const std::vector<std::uint8_t> payload = arguments.profile == "user1"
@@ -4039,6 +4129,7 @@ bool runCustomNetworkingLoopbackRoundtripClose(const Arguments& arguments, std::
     }
     return completed;
 }
+#endif
 }
 
 int run(const Arguments& arguments)
@@ -4062,7 +4153,11 @@ int run(const Arguments& arguments)
     bool initialized = false;
     try
     {
+#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
         galaxy::api::Init(galaxy::api::InitOptions{credentials::clientId, credentials::clientSecret, "."});
+#else
+        galaxy::api::Init(credentials::clientId, credentials::clientSecret);
+#endif
         initialized = true;
         records.push_back("{\"record\":\"initialize\",\"result\":\"returned\"}");
         galaxy::api::IUser* const user = galaxy::api::User();
@@ -4077,10 +4172,16 @@ int run(const Arguments& arguments)
         }
 
         AuthListener listener;
+#if GALAXY_BUILD_FEATURE_HAS_GOGSERVICECONNECTIONSTATELISTENER
         std::unique_ptr<GogServicesStateListener> servicesStateListener;
         if (scenario == Scenario::gogServicesStateCharacterization)
             servicesStateListener = std::make_unique<GogServicesStateListener>(listener);
+#endif
+#if GALAXY_BUILD_FEATURE_SIGNIN_RENAMED_TO_SIGNINCREDENTIALS
         user->SignInCredentials(login, password, &listener);
+#else
+        user->SignIn(login, password);
+#endif
         const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(arguments.timeoutSeconds);
         while (listener.outcome == AuthListener::Outcome::pending && std::chrono::steady_clock::now() < deadline)
         {
@@ -4090,32 +4191,53 @@ int run(const Arguments& arguments)
         std::string servicesState;
         if (listener.outcome == AuthListener::Outcome::success)
         {
+            const auto finishFeatureUnavailable = [&]()
+            {
+                records.push_back("{\"record\":\"feature-unavailable\"}");
+                if (!arguments.control.empty()) writeEvent(arguments, "cleanup-ack");
+                records.push_back(selfStateRecord(user));
+                common::writeTrace(arguments.trace, records);
+                galaxy::api::Shutdown();
+                return 0;
+            };
             records.push_back("{\"record\":\"sign-in-callback\",\"result\":\"success\"}");
             records.push_back("{\"record\":\"sign-in-terminal\",\"result\":\"success\"}");
             if (scenario == Scenario::publicLobbyNotJoinableBehaviorCharacterization || scenario == Scenario::publicLobbyNotJoinableBehavior)
             {
+#if UNIVERSELAN_BEHAVIOUR_HAS_LOBBY_SCENARIOS
                 const bool lobbySucceeded = runPublicLobbyNotJoinableBehaviorCharacterization(arguments, user, records);
                 records.push_back(selfStateRecord(user));
                 common::writeTrace(arguments.trace, records);
                 galaxy::api::Shutdown();
                 return lobbySucceeded ? 0 : 1;
+#else
+                return finishFeatureUnavailable();
+#endif
             }
             if (scenario == Scenario::customNetworkingLoopbackRoundtripCloseCharacterization
                 || scenario == Scenario::customNetworkingLoopbackRoundtripClose)
             {
+#if GALAXY_BUILD_FEATURE_HAS_ICUSTOMNETWORKING && GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS
                 const bool networkingSucceeded = runCustomNetworkingLoopbackRoundtripClose(arguments, records);
                 records.push_back(selfStateRecord(user));
                 common::writeTrace(arguments.trace, records);
                 galaxy::api::Shutdown();
                 return networkingSucceeded || scenario == Scenario::customNetworkingLoopbackRoundtripCloseCharacterization ? 0 : 1;
+#else
+                return finishFeatureUnavailable();
+#endif
             }
             if (scenario == Scenario::statsRetrieveAchievementsNumberCharacterization)
             {
+#if GALAXY_BUILD_FEATURE_HAS_ISTATS_ACHIEVEMENTSNUMBER
                 runStatsRetrieveAchievementsNumberCharacterization(arguments, user, records, true);
                 records.push_back(selfStateRecord(user));
                 common::writeTrace(arguments.trace, records);
                 galaxy::api::Shutdown();
                 return 0;
+#else
+                return finishFeatureUnavailable();
+#endif
             }
             if (scenario == Scenario::statsRetrieveSelfCallback)
             {
@@ -4127,14 +4249,19 @@ int run(const Arguments& arguments)
             }
             if (scenario == Scenario::storageDownloadedSharedFileCount)
             {
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
                 const bool storageSucceeded = runStorageDownloadedSharedFileCount(records);
                 records.push_back(selfStateRecord(user));
                 common::writeTrace(arguments.trace, records);
                 galaxy::api::Shutdown();
                 return storageSucceeded ? 0 : 1;
+#else
+                return finishFeatureUnavailable();
+#endif
             }
             if (arguments.scenario == "current-game-language-characterization" || arguments.scenario == "current-game-language")
             {
+#if GALAXY_BUILD_FEATURE_HAS_IAPPS && GALAXY_BUILD_FEATURE_HAS_GETCURRENTGAMELANGUAGE
                 galaxy::api::IApps* const apps = galaxy::api::Apps();
                 const char* const language = apps == nullptr ? nullptr : apps->GetCurrentGameLanguage();
                 const bool languagePointerAvailable = language != nullptr;
@@ -4147,9 +4274,13 @@ int run(const Arguments& arguments)
                 common::writeTrace(arguments.trace, records);
                 galaxy::api::Shutdown();
                 return 0;
+#else
+                return finishFeatureUnavailable();
+#endif
             }
             if (arguments.scenario == "current-game-language-copy-characterization")
             {
+#if GALAXY_BUILD_FEATURE_HAS_IAPPS && GALAXY_BUILD_FEATURE_HAS_GETCURRENTGAMELANGUAGE
                 galaxy::api::IApps* const apps = galaxy::api::Apps();
                 std::array<char, 1> oneByte;
                 std::array<char, 256> bounded;
@@ -4182,9 +4313,13 @@ int run(const Arguments& arguments)
                 common::writeTrace(arguments.trace, records);
                 galaxy::api::Shutdown();
                 return 0;
+#else
+                return finishFeatureUnavailable();
+#endif
             }
             if (arguments.scenario == "current-game-language-code-characterization")
             {
+#if GALAXY_BUILD_FEATURE_HAS_IAPPS && GALAXY_BUILD_FEATURE_HAS_IAPPS_LANGUAGECODE
                 galaxy::api::IApps* const apps = galaxy::api::Apps();
                 const char* const code = apps == nullptr ? nullptr : apps->GetCurrentGameLanguageCode();
                 const bool codePointerAvailable = code != nullptr;
@@ -4199,9 +4334,13 @@ int run(const Arguments& arguments)
                 common::writeTrace(arguments.trace, records);
                 galaxy::api::Shutdown();
                 return 0;
+#else
+                return finishFeatureUnavailable();
+#endif
             }
             if (arguments.scenario == "current-game-language-code-copy-characterization")
             {
+#if GALAXY_BUILD_FEATURE_HAS_IAPPS && GALAXY_BUILD_FEATURE_HAS_IAPPS_LANGUAGECODE
                 galaxy::api::IApps* const apps = galaxy::api::Apps();
                 std::array<char, 1> singleByte;
                 std::array<char, 256> bounded;
@@ -4229,9 +4368,13 @@ int run(const Arguments& arguments)
                 common::writeTrace(arguments.trace, records);
                 galaxy::api::Shutdown();
                 return 0;
+#else
+                return finishFeatureUnavailable();
+#endif
             }
             if (arguments.scenario == "overlay-state-characterization")
             {
+#if GALAXY_BUILD_FEATURE_HAS_IUTILS && GALAXY_BUILD_FEATURE_OVERLAYSTATE_ENUM
                 galaxy::api::IUtils* const utils = galaxy::api::Utils();
                 const char* const state = utils == nullptr ? "unavailable" : overlayState(utils->GetOverlayState());
                 const char* const error = utils == nullptr ? "unavailable" : apiErrorCategory(galaxy::api::GetError());
@@ -4241,9 +4384,13 @@ int run(const Arguments& arguments)
                 common::writeTrace(arguments.trace, records);
                 galaxy::api::Shutdown();
                 return 0;
+#else
+                return finishFeatureUnavailable();
+#endif
             }
             if (arguments.scenario == "storage-file-count-characterization")
             {
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
                 galaxy::api::IStorage* const storage = galaxy::api::Storage();
                 const uint32_t fileCount = storage == nullptr ? 0 : storage->GetFileCount();
                 const char* const error = storage == nullptr ? "unavailable" : apiErrorCategory(galaxy::api::GetError());
@@ -4253,9 +4400,13 @@ int run(const Arguments& arguments)
                 common::writeTrace(arguments.trace, records);
                 galaxy::api::Shutdown();
                 return 0;
+#else
+                return finishFeatureUnavailable();
+#endif
             }
             if (arguments.scenario == "storage-file-exists-characterization")
             {
+#if GALAXY_BUILD_FEATURE_HAS_ISTORAGE
                 galaxy::api::IStorage* const storage = galaxy::api::Storage();
                 const std::string path = "universelan-behaviour/file-exists/" + std::to_string(std::hash<std::string>{}(arguments.trace.string()))
                     + "-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count());
@@ -4267,7 +4418,11 @@ int run(const Arguments& arguments)
                 common::writeTrace(arguments.trace, records);
                 galaxy::api::Shutdown();
                 return 0;
+#else
+                return finishFeatureUnavailable();
+#endif
             }
+#if UNIVERSELAN_BEHAVIOUR_HAS_LOBBY_SCENARIOS
             if (scenario == Scenario::publicLobbyFullJoinFailureCharacterization || scenario == Scenario::publicLobbyFullJoinFailure)
             {
                 const bool lobbySucceeded = runPublicLobbyFullJoinFailure(arguments, user, records);
@@ -4303,6 +4458,7 @@ int run(const Arguments& arguments)
                 galaxy::api::Shutdown();
                 return lobbySucceeded ? 0 : 1;
             }
+#if UNIVERSELAN_BEHAVIOUR_HAS_P2P_SCENARIOS
             if (scenario == Scenario::reliableP2PListenerPeekCharacterization || scenario == Scenario::reliableP2PListenerPeek)
             {
                 const bool p2pSucceeded = runReliableP2PListenerPeek(arguments, user, records);
@@ -4333,6 +4489,14 @@ int run(const Arguments& arguments)
                 galaxy::api::Shutdown();
                 return p2pSucceeded ? 0 : 1;
             }
+#else
+            if (scenario == Scenario::reliableP2PListenerPeekCharacterization || scenario == Scenario::reliableP2PListenerPeek
+                || scenario == Scenario::reliableP2PAfterLobbyLeaveCharacterization || scenario == Scenario::reliableP2PAfterLobbyLeave
+                || scenario == Scenario::bidirectionalReliableP2PListenerPeekCharacterization || scenario == Scenario::bidirectionalReliableP2PListenerPeek
+                || scenario == Scenario::bidirectionalReliableP2PPollReadCharacterization || scenario == Scenario::bidirectionalReliableP2PPollRead
+                || scenario == Scenario::bidirectionalUnreliableP2PListenerPeekCharacterization || scenario == Scenario::bidirectionalUnreliableP2PListenerPeek)
+                return finishFeatureUnavailable();
+#endif
             if (scenario == Scenario::bidirectionalLobbyMessageDeliveryCharacterization || scenario == Scenario::bidirectionalLobbyMessageDelivery)
             {
                 const bool lobbySucceeded = runBidirectionalLobbyMessageDelivery(arguments, user, records);
@@ -4358,6 +4522,25 @@ int run(const Arguments& arguments)
                 galaxy::api::Shutdown();
                 return lobbySucceeded ? 0 : 1;
             }
+#else
+            if (scenario == Scenario::publicLobbyCreateListJoinLeave || scenario == Scenario::publicLobbyStringFilteringCharacterization
+                || scenario == Scenario::publicLobbyStringFiltering || scenario == Scenario::publicLobbyNumericalFiltering
+                || scenario == Scenario::publicLobbyNotJoinableBehaviorCharacterization || scenario == Scenario::publicLobbyNotJoinableBehavior
+                || scenario == Scenario::publicLobbyFullJoinFailureCharacterization || scenario == Scenario::publicLobbyFullJoinFailure
+                || scenario == Scenario::publicLobbyOwnerCloseLifecycleCharacterization || scenario == Scenario::publicLobbyOwnerCloseLifecycle
+                || scenario == Scenario::publicLobbyOwnerOwnershipTransitionCharacterization || scenario == Scenario::publicLobbyOwnerOwnershipTransition
+                || scenario == Scenario::publicLobbyDataPropagationCharacterization || scenario == Scenario::publicLobbyDataPropagation
+                || scenario == Scenario::bidirectionalLobbyMessageDeliveryCharacterization || scenario == Scenario::bidirectionalLobbyMessageDelivery
+                || scenario == Scenario::bidirectionalLobbyMemberDataPropagationCharacterization || scenario == Scenario::bidirectionalLobbyMemberDataPropagation
+                || scenario == Scenario::multipleLobbyMembershipAndMessageIsolationCharacterization || scenario == Scenario::multipleLobbyMembershipAndMessageIsolation
+                || scenario == Scenario::reliableP2PListenerPeekCharacterization || scenario == Scenario::reliableP2PListenerPeek
+                || scenario == Scenario::reliableP2PAfterLobbyLeaveCharacterization || scenario == Scenario::reliableP2PAfterLobbyLeave
+                || scenario == Scenario::bidirectionalReliableP2PListenerPeekCharacterization || scenario == Scenario::bidirectionalReliableP2PListenerPeek
+                || scenario == Scenario::bidirectionalReliableP2PPollReadCharacterization || scenario == Scenario::bidirectionalReliableP2PPollRead
+                || scenario == Scenario::bidirectionalUnreliableP2PListenerPeekCharacterization || scenario == Scenario::bidirectionalUnreliableP2PListenerPeek)
+                return finishFeatureUnavailable();
+#endif
+#if UNIVERSELAN_BEHAVIOUR_HAS_CHAT_SCENARIOS
             if (scenario == Scenario::chatRoomMessageDeliveryCharacterization || scenario == Scenario::chatRoomMessageDelivery)
             {
                 const bool chatSucceeded = runChatRoomMessageDelivery(arguments, user, records);
@@ -4374,6 +4557,12 @@ int run(const Arguments& arguments)
                 galaxy::api::Shutdown();
                 return chatSucceeded ? 0 : 1;
             }
+#else
+            if (scenario == Scenario::chatRoomMessageDeliveryCharacterization || scenario == Scenario::chatRoomMessageDelivery
+                || scenario == Scenario::bidirectionalChatRoomMessageDeliveryCharacterization || scenario == Scenario::bidirectionalChatRoomMessageDelivery)
+                return finishFeatureUnavailable();
+#endif
+#if UNIVERSELAN_BEHAVIOUR_HAS_FRIENDS_SCENARIOS
             if (scenario == Scenario::friendsPeerInformationRetrievalCharacterization || scenario == Scenario::friendsPeerInformationRetrieval)
             {
                 const bool friendsSucceeded = runFriendsPeerInformationRetrieval(arguments, user, records);
@@ -4382,13 +4571,22 @@ int run(const Arguments& arguments)
                 galaxy::api::Shutdown();
                 return friendsSucceeded ? 0 : 1;
             }
+#else
+            if (scenario == Scenario::friendsPeerInformationRetrievalCharacterization || scenario == Scenario::friendsPeerInformationRetrieval)
+                return finishFeatureUnavailable();
+#endif
             if (scenario == Scenario::sessionIdRepeatability)
             {
+#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
                 // Keep the public session-ID calls adjacent and retain only their equality relation.
                 const galaxy::api::SessionID first = user->GetSessionID();
                 const galaxy::api::SessionID second = user->GetSessionID();
                 records.push_back("{\"record\":\"session-id-repeatability\",\"equal\":" + boolean(first == second) + "}");
+#else
+                return finishFeatureUnavailable();
+#endif
             }
+#if GALAXY_BUILD_FEATURE_HAS_GOGSERVICECONNECTIONSTATELISTENER
             // This public query is intentionally made before any further ProcessData call.
             if (scenario == Scenario::gogServicesState)
                 servicesState = gogServicesState(galaxy::api::Utils()->GetGogServicesConnectionState());
@@ -4414,6 +4612,10 @@ int run(const Arguments& arguments)
                     + std::to_string(settledPumpCount) + ",\"settledElapsedBucket\":" + common::jsonString(elapsedBucket(elapsed))
                     + ",\"events\":" + gogServicesStateEvents(servicesStateListener->events) + "}";
             }
+#else
+            if (scenario == Scenario::gogServicesState || scenario == Scenario::gogServicesStateCharacterization)
+                return finishFeatureUnavailable();
+#endif
         }
         else if (listener.outcome == AuthListener::Outcome::failure)
         {
@@ -4426,13 +4628,17 @@ int run(const Arguments& arguments)
             records.push_back("{\"record\":\"sign-in-terminal\",\"result\":\"timeout\"}");
         }
         records.push_back(selfStateRecord(user));
+#if GALAXY_BUILD_FEATURE_HAS_GOGSERVICECONNECTIONSTATELISTENER
         if (scenario == Scenario::gogServicesState && listener.outcome == AuthListener::Outcome::success)
             records.push_back("{\"record\":\"gog-services-state\",\"state\":" + common::jsonString(servicesState) + "}");
         else if (scenario == Scenario::gogServicesStateCharacterization && listener.outcome == AuthListener::Outcome::success)
             records.push_back(servicesState);
+#endif
         common::writeTrace(arguments.trace, records);
         const bool successful = listener.outcome == AuthListener::Outcome::success;
+#if GALAXY_BUILD_FEATURE_HAS_GOGSERVICECONNECTIONSTATELISTENER
         servicesStateListener.reset();
+#endif
         galaxy::api::Shutdown();
         return successful ? 0 : 1;
     }

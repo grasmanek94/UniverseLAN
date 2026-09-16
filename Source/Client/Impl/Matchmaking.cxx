@@ -1102,6 +1102,11 @@ namespace universelan::client {
 				switch (data->state) {
 				case LOBBY_MEMBER_STATE_CHANGED_ENTERED:
 					lobby->AddMember(data->member_id);
+#if GALAXY_BUILD_FEATURE_IFRIENDS_ONPERSONADATACHANGED
+					if (data->member_id != intf->user->GetGalaxyID()) {
+						intf->friends->RequestUserInformation(data->member_id);
+					}
+#endif
 					break;
 
 				case LOBBY_MEMBER_STATE_CHANGED_DISCONNECTED:
@@ -1113,7 +1118,6 @@ namespace universelan::client {
 				}
 			}
 		}
-
 		listeners->NotifyAll(&ILobbyMemberStateListener::OnLobbyMemberStateChanged, data->lobby_id, data->member_id, data->state);
 	}
 

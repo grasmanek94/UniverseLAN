@@ -24,12 +24,18 @@ processes only; they are never behavior evidence.
 
 ## Quick Start
 
-The current framework supports x64 SDK `1.152.11` only. Build the framework
-without registering live official-GOG tests:
+The automatic lobby-member persona contract builds for every selected x64 SDK
+with persona-change callback support. Build without registering live
+official-GOG tests:
 
 ```powershell
 cmake -S . -B cmake-behaviour-15211-x64 -G "Visual Studio 18 2026" -A x64 -D BUILD_UNIVERSELAN_BEHAVIOUR_TESTS=ON -D LIMIT_VERSIONS="1.152.11"
 cmake --build cmake-behaviour-15211-x64 --config Debug
+```
+
+```powershell
+cmake -S . -B cmake-behaviour-lobby-persona-x64 -G "Visual Studio 18 2026" -A x64 -D BUILD_UNIVERSELAN_BEHAVIOUR_TESTS=ON
+cmake --build cmake-behaviour-lobby-persona-x64 --config Debug
 ```
 
 Live comparisons are deliberately opt-in. After the local preflight described
@@ -40,8 +46,11 @@ run the registered `behavior` label through `RunBehaviorCTest.cmake`.
 Never commit or print credentials. The ignored
 `Source/TestCommon/credentials.cmake` supplies two approved accounts plus the
 client credentials. Matching official `Galaxy64.lib`, `Galaxy64.dll`, and the
-default `GalaxyPeer64.dll` under `Source/DLLs/1.152.11/gog`, an authenticated
-official environment, and network access are also required. The base
+default `GalaxyPeer64.dll` under each selected SDK's `Source/DLLs/<version>/gog`
+directory, an authenticated official environment, and network access are also
+required. CMake generates a per-selected-version manifest in the build tree,
+replacing only its `sdkVersion` field so the runner's exact SDK check remains
+strict. The base
 `Galaxy64.dll` remains in that directory; the channel-8 peer is a local-only
 staging overlay. Missing prerequisites leave live tests unregistered rather
 than making normal builds fail. Direct `IChat` additionally needs approved
@@ -49,6 +58,14 @@ official profiles to be friends with direct-message privacy permitting friends.
 `IFriends` peer-information retrieval has no friendship or direct-message
 privacy precondition. These are external test-environment preconditions, not
 product root-cause claims.
+
+`Simple/automatic-lobby-member-persona` creates a fresh public capacity-two
+FCM lobby, arms global lobby-member and persona listeners before the peer is
+released, and never calls `RequestUserInformation`. It requires a remote
+`ENTERED` relation and a matching remote persona callback with a nonempty
+copied name, then leaves the lobby. Raw IDs, names, marker values, and controls
+are not retained. Feature macros select global callbacks, validity-only IDs,
+and legacy operation forms where required.
 
 ## Local Channel-8 Peer Overlay
 

@@ -1,0 +1,17 @@
+{
+  "name": "Simple/automatic-lobby-member-persona",
+  "sdkVersion": "*",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 45,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": {
+      "user1": ["initialize", "sign-in", "listeners-armed", "create", "configuration", "remote-persona-observation", "creator-leave"],
+      "user2": ["initialize", "sign-in", "listeners-armed", "list", "join", "joined-persona-observation", "joiner-leave"]
+    },
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "raw Galaxy IDs, lobby IDs, persona names, marker values, controls, credentials, timestamps, and runtime output are never recorded; compare only symbolic remote-entry, matching persona callback, nonempty copied-name, and cleanup relations"
+  }
+}
