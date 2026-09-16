@@ -153,6 +153,8 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Grand Ages Medieval                       | :white_check_mark:(2)     | 1.68.0                        | Must apply `set OPENSSL_ia32cap=:~0x20000000` on newer CPU's for this game to start without crashing.<br> This issue is not caused by UniverseLAN or GOG, but OpenSSL / Unity/Unreal.<br> Tested with build 487 |
 | The Original Strife - Veteran Edition     | :white_check_mark:(2)     | 1.144.1                       | Tested with build 487 |
 | Niffelheim                                | :white_check_mark:(2)     | 1.139.2                       | Works since build 623 | 
+| Serious Sams Bogus Detour                 | :white_check_mark:(2)     | 1.100.2                       | Works since build 806. |
+| Homeworld: Deserts of Kharak              | :white_check_mark:(2)     | 1.100.2                       | Works since build 806. | 
 | Vikings - Wolves of Midgard               | :left_right_arrow:        | 1.100.2                       | Has Native LAN. Did work with UniverseLAN but stopped at some point. Regression? Must apply `set OPENSSL_ia32cap=:~0x20000000` on newer CPU's for this game to start without crashing.<br> This issue is not caused by UniverseLAN or GOG, but OpenSSL / Unity/Unreal.<br> Tested with build 440 |
 | Rise of the Triad (2013)                  | :left_right_arrow:        |                               | Native LAN available | 
 | Rage of Mages II: Necromancer             | :left_right_arrow:        |                               | Native LAN or Free Multiplayer available | 
@@ -174,8 +176,6 @@ Another option would be to gift the game to people working on UniverseLAN projec
 | Turok 2 - Seeds of Evil                   | :left_right_arrow:        | 1.130.0                       | Has Native LAN / DirectIP |
 | Monster Roadtrip                          | :left_right_arrow:        | 1.131.3                       | Has free online multiplayer, but does not use Galaxy Multiplayer which means that this game is internet-only. UniverseLAN can't make it LAN-able. |
 | SOS OPS!                                  | :left_right_arrow:        | 1.152.9                       | Has Native LAN, doesn't use Galaxy for multiplayer, but online multiplayer. |
-| Serious Sams Bogus Detour                 | :left_right_arrow:        | 1.100.2                       | Works since build 806. |
-| Homeworld: Deserts of Kharak              | :left_right_arrow:        | 1.100.2                       | Works since build 806. | 
 | Ancestors Legacy                          | :construction:            | 1.133.6                       | Requires Leaderboards features to be implemented | 
 | Alien vs Predator 2000                    | :question:                |                               | It's some waay earlier version than 1.67 (smallest size around 3.5MB). <br> The AvP2K Galaxy.dll is around 1.9MB. Version is maybe 0.176? |
 | Double Dragon Trilogy                     | :question:                |                               | Unknown version, Galaxy.dll SHA1: `789f3b02ced8dbac2e5f8c2c98448569f70960cc` |
