@@ -1092,6 +1092,9 @@ namespace universelan::client {
 	void MatchmakingImpl::LobbyMemberStateChange(const std::shared_ptr<LobbyMemberStateChangeMessage>& data) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::IMATCHMAKING };
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_ONPERSONADATACHANGED
+		bool request_member_information = false;
+#endif
 		{
 			lock_t lock{ mtx };
 
@@ -1102,6 +1105,11 @@ namespace universelan::client {
 				switch (data->state) {
 				case LOBBY_MEMBER_STATE_CHANGED_ENTERED:
 					lobby->AddMember(data->member_id);
+#if GALAXY_BUILD_FEATURE_IFRIENDS_ONPERSONADATACHANGED
+					request_member_information =
+						joined_lobbies.contains(data->lobby_id) &&
+						data->member_id != intf->user->GetGalaxyID();
+#endif
 					break;
 
 				case LOBBY_MEMBER_STATE_CHANGED_DISCONNECTED:
@@ -1113,6 +1121,13 @@ namespace universelan::client {
 				}
 			}
 		}
+
+		// Galaxy automatically retrieves persona data for fellow members of joined lobbies.
+#if GALAXY_BUILD_FEATURE_IFRIENDS_ONPERSONADATACHANGED
+		if (request_member_information) {
+			intf->friends->RequestUserInformation(data->member_id);
+		}
+#endif
 
 		listeners->NotifyAll(&ILobbyMemberStateListener::OnLobbyMemberStateChanged, data->lobby_id, data->member_id, data->state);
 	}
