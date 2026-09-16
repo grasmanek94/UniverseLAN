@@ -701,7 +701,9 @@ Scenario parseScenario(const fs::path& manifest)
     if (!required(root, "name").is_string()) invalidManifest();
     const ScenarioContract* contract = findScenarioContract(root.at("name").get<std::string>());
     if (contract == nullptr) invalidManifest();
-    if (!required(root, "sdkVersion").is_string() || root.at("sdkVersion") != UNIVERSELAN_BEHAVIOUR_TEST_VERSION) invalidManifest();
+    if (!required(root, "sdkVersion").is_string()
+        || (root.at("sdkVersion") != UNIVERSELAN_BEHAVIOUR_TEST_VERSION
+            && !(observesAutomaticLobbyMemberPersona(*contract) && root.at("sdkVersion") == "*"))) invalidManifest();
     if (!required(root, "architecture").is_string() || root.at("architecture") != UNIVERSELAN_BEHAVIOUR_TEST_ARCH) invalidManifest();
     if (!required(root, "laneMode").is_string()) invalidManifest();
     Scenario scenario;

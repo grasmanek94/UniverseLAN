@@ -12,6 +12,7 @@
 #include <thread>
 #include <vector>
 
+#if GALAXY_BUILD_FEATURE_IFRIENDS_ONPERSONADATACHANGED
 namespace universelan::behaviour::lobby_member_persona
 {
 namespace
@@ -378,3 +379,9 @@ int main(int argc, char* argv[])
     Arguments arguments;
     return readArguments(argc, argv, arguments) && run(arguments) ? 0 : 1;
 }
+#else
+int main()
+{
+    return 0;
+}
+#endif

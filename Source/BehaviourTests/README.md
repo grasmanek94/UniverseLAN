@@ -24,10 +24,9 @@ processes only; they are never behavior evidence.
 
 ## Quick Start
 
-The established scenario suite supports x64 SDK `1.152.11`. The automatic
-lobby-member persona contract additionally builds for x64 `1.100.2` and
-`1.152.11`; select both versions when validating it. Build without registering
-live official-GOG tests:
+The automatic lobby-member persona contract builds for every selected x64 SDK
+with persona-change callback support. Build without registering live
+official-GOG tests:
 
 ```powershell
 cmake -S . -B cmake-behaviour-15211-x64 -G "Visual Studio 18 2026" -A x64 -D BUILD_UNIVERSELAN_BEHAVIOUR_TESTS=ON -D LIMIT_VERSIONS="1.152.11"
@@ -35,8 +34,8 @@ cmake --build cmake-behaviour-15211-x64 --config Debug
 ```
 
 ```powershell
-cmake -S . -B cmake-behaviour-lobby-persona-x64 -G "Visual Studio 18 2026" -A x64 -D BUILD_UNIVERSELAN_BEHAVIOUR_TESTS=ON -D LIMIT_VERSIONS="1.100.2,1.152.11"
-cmake --build cmake-behaviour-lobby-persona-x64 --config Debug --target universelan-behaviour-lobby-persona-runner-x64-1.100.2 universelan-behaviour-lobby-persona-runner-x64-1.152.11
+cmake -S . -B cmake-behaviour-lobby-persona-x64 -G "Visual Studio 18 2026" -A x64 -D BUILD_UNIVERSELAN_BEHAVIOUR_TESTS=ON
+cmake --build cmake-behaviour-lobby-persona-x64 --config Debug
 ```
 
 Live comparisons are deliberately opt-in. After the local preflight described
@@ -62,9 +61,8 @@ FCM lobby, arms global lobby-member and persona listeners before the peer is
 released, and never calls `RequestUserInformation`. It requires a remote
 `ENTERED` relation and a matching remote persona callback with a nonempty
 copied name, then leaves the lobby. Raw IDs, names, marker values, and controls
-are not retained. The `1.100.2` host uses global callbacks, validity-only IDs,
-and legacy operation forms; the `1.152.11` host can use the same controlled
-contract without changing the existing modern scenarios.
+are not retained. Feature macros select global callbacks, validity-only IDs,
+and legacy operation forms where required.
 
 ## Local Channel-8 Peer Overlay
 

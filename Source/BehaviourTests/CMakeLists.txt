@@ -78,9 +78,23 @@ if(NOT UNIVERSELAN_BEHAVIOUR_TEST_GOG_PEER_OVERLAY STREQUAL "")
   endif()
 endif()
 
-# This intentionally separate host uses only the common 1.100.2/1.152.11 public
-# surface, so the modern general-purpose host remains unchanged for its scenarios.
-foreach(lobby_persona_version IN ITEMS 1.100.2 1.152.11)
+# This intentionally separate host keeps the modern general-purpose host unchanged.
+function(add_universelan_lobby_persona_host target version)
+  add_executable(${target} Host/LobbyMemberPersonaMain.cxx)
+  target_include_directories(${target} PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_BINARY_DIR}"
+    "${CMAKE_SOURCE_DIR}/Source/DLLs/${version}")
+  target_link_libraries(${target} PRIVATE universelan-behaviour-test-common ${ARGN})
+  set(GALAXY_VERSION "${UNIVERSELAN_BEHAVIOUR_TEST_ARCH}-${version}")
+  add_version_definitions_to(${target})
+  target_compile_definitions(${target} PRIVATE NOMINMAX
+    "UNIVERSELAN_BEHAVIOUR_TEST_VERSION=\"${version}\""
+    "UNIVERSELAN_BEHAVIOUR_TEST_ARCH=\"${UNIVERSELAN_BEHAVIOUR_TEST_ARCH}\"")
+endfunction()
+
+get_property(UNIVERSELAN_BEHAVIOUR_TEST_VERSIONS GLOBAL PROPERTY PROJECT_GALAXY_VERSION_NUMBER_LIST)
+foreach(lobby_persona_version IN LISTS UNIVERSELAN_BEHAVIOUR_TEST_VERSIONS)
   set(lobby_persona_key "${UNIVERSELAN_BEHAVIOUR_TEST_ARCH}-${lobby_persona_version}")
   set(lobby_persona_client "universelan-client-${lobby_persona_key}")
   set(lobby_persona_server "universelan-server-${lobby_persona_key}")
@@ -88,20 +102,8 @@ foreach(lobby_persona_version IN ITEMS 1.100.2 1.152.11)
   set(lobby_persona_gog_lib "${lobby_persona_gog_dir}/Galaxy64.lib")
   set(lobby_persona_gog_dll "${lobby_persona_gog_dir}/Galaxy64.dll")
   set(lobby_persona_gog_peer_dll "${lobby_persona_gog_dir}/GalaxyPeer64.dll")
-  if(TARGET ${lobby_persona_client} AND TARGET ${lobby_persona_server})
-    function(add_universelan_lobby_persona_host target version)
-      add_executable(${target} Host/LobbyMemberPersonaMain.cxx)
-      target_include_directories(${target} PRIVATE
-        "${CMAKE_CURRENT_SOURCE_DIR}"
-        "${CMAKE_CURRENT_BINARY_DIR}"
-        "${CMAKE_SOURCE_DIR}/Source/DLLs/${version}")
-      target_link_libraries(${target} PRIVATE universelan-behaviour-test-common ${ARGN})
-      set(GALAXY_VERSION "${UNIVERSELAN_BEHAVIOUR_TEST_ARCH}-${version}")
-      add_version_definitions_to(${target})
-      target_compile_definitions(${target} PRIVATE NOMINMAX
-        "UNIVERSELAN_BEHAVIOUR_TEST_VERSION=\"${version}\""
-        "UNIVERSELAN_BEHAVIOUR_TEST_ARCH=\"${UNIVERSELAN_BEHAVIOUR_TEST_ARCH}\"")
-    endfunction()
+  get_property(lobby_persona_supported GLOBAL PROPERTY "GALAXY_${lobby_persona_version}_BUILD_FEATURE_IFRIENDS_ONPERSONADATACHANGED")
+  if(TARGET ${lobby_persona_client} AND TARGET ${lobby_persona_server} AND lobby_persona_supported)
 
     add_universelan_lobby_persona_host(universelan-behaviour-lobby-persona-host-universelan-${lobby_persona_key} ${lobby_persona_version}
       ${lobby_persona_client})
@@ -122,7 +124,7 @@ foreach(lobby_persona_version IN ITEMS 1.100.2 1.152.11)
       if(ENABLE_UNIVERSELAN_GOG_BEHAVIOUR_TESTS AND UNIVERSELAN_BEHAVIOUR_TEST_CREDENTIALS_AVAILABLE)
         add_test(NAME "universelan-behaviour-automatic-lobby-member-persona-${lobby_persona_key}"
           COMMAND $<TARGET_FILE:universelan-behaviour-lobby-persona-runner-${lobby_persona_key}>
-            --manifest "${CMAKE_CURRENT_SOURCE_DIR}/Scenarios/Simple/automatic-lobby-member-persona-${lobby_persona_version}.json"
+            --manifest "${CMAKE_CURRENT_SOURCE_DIR}/Scenarios/Simple/automatic-lobby-member-persona.json"
             --universelan-host $<TARGET_FILE:universelan-behaviour-lobby-persona-host-universelan-${lobby_persona_key}>
             --gog-host $<TARGET_FILE:universelan-behaviour-lobby-persona-host-gog-${lobby_persona_key}>
             --client-dll $<TARGET_FILE:${lobby_persona_client}>
@@ -136,7 +138,7 @@ foreach(lobby_persona_version IN ITEMS 1.100.2 1.152.11)
       message(STATUS "BehaviourTests automatic lobby-member persona GOG host unavailable for ${lobby_persona_key}: matching official runtime artifacts are missing")
     endif()
   else()
-    message(STATUS "BehaviourTests automatic lobby-member persona unavailable: UniverseLAN ${lobby_persona_key} client/server targets were not selected")
+    message(STATUS "BehaviourTests automatic lobby-member persona unavailable for ${lobby_persona_key}: matching targets or persona callback support are unavailable")
   endif()
 endforeach()
 
