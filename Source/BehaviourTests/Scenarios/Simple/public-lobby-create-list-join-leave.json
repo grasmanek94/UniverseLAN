@@ -7,11 +7,11 @@
   "profiles": ["user1", "user2"],
   "comparison": {
     "requiredRecords": {
-      "user1": ["initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata", "creator-two-member-snapshot", "creator-sole-owner-snapshot", "creator-leave", "self-state"],
-      "user2": ["initialize", "sign-in-callback", "sign-in-terminal", "list", "join", "joiner-two-member-snapshot", "joiner-leave", "self-state"]
+      "user1": ["initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata", "index-accessor-setup", "creator-two-member-snapshot", "creator-index-accessors", "creator-sole-owner-snapshot", "creator-leave", "self-state"],
+      "user2": ["initialize", "sign-in-callback", "sign-in-terminal", "list", "join", "joiner-two-member-snapshot", "joiner-index-accessors", "joiner-leave", "self-state"]
     },
     "requiredTerminalOutcome": "success",
     "unexpectedRecords": "fail",
-    "opaqueIds": "public collision-marker values and raw Galaxy IDs are never recorded; compare only public validity and creator/joiner/owner/member relations"
+    "opaqueIds": "public collision-marker values, member-data values, raw Galaxy IDs, indexes, and property keys are never recorded; compare only public validity and symbolic creator/joiner/owner/member/index-accessor relations"
   }
 }

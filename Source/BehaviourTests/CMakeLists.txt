@@ -52,54 +52,6 @@ else()
 endif()
 configure_file(Host/Credentials.hxx.in "${CMAKE_CURRENT_BINARY_DIR}/BehaviourTestCredentials.hxx" @ONLY)
 
-# SDK 1.100.2 is investigated separately from the 1.152.11 host framework.
-# Its preflight is intentionally available even when the newer host targets are not.
-if(GALAXY_ARCH STREQUAL "x64")
-  add_test(NAME "universelan-behaviour-official-gog-first-server-p2p-sender-identity-preflight-x64-1.100.2"
-    COMMAND "${CMAKE_COMMAND}"
-      "-D BEHAVIOUR_TEST_SOURCE_DIR=${CMAKE_SOURCE_DIR}"
-      "-D BEHAVIOUR_TEST_CREDENTIALS_AVAILABLE=${UNIVERSELAN_BEHAVIOUR_TEST_CREDENTIALS_AVAILABLE}"
-      -P "${CMAKE_CURRENT_SOURCE_DIR}/GameServerP2PSenderIdentity1002Preflight.cmake")
-  set_tests_properties("universelan-behaviour-official-gog-first-server-p2p-sender-identity-preflight-x64-1.100.2" PROPERTIES
-    LABELS "behavior;gog;preflight;sdk-1.100.2;game-server-p2p"
-    TIMEOUT 15
-    RUN_SERIAL TRUE)
-endif()
-
-set(UNIVERSELAN_BEHAVIOUR_TEST_1002_SDK_IMPORT_LIB "${CMAKE_SOURCE_DIR}/Source/DLLs/1.100.2/gog/Galaxy64.lib")
-set(UNIVERSELAN_BEHAVIOUR_TEST_1002_CLIENT_DLL "${CMAKE_SOURCE_DIR}/bin/1.100.2/Debug/Galaxy64.dll")
-set(UNIVERSELAN_BEHAVIOUR_TEST_1002_SERVER "${CMAKE_SOURCE_DIR}/bin/1.100.2/Debug/UniverseLANServer64.exe")
-if(GALAXY_ARCH STREQUAL "x64" AND EXISTS "${UNIVERSELAN_BEHAVIOUR_TEST_1002_SDK_IMPORT_LIB}")
-  set(UNIVERSELAN_BEHAVIOUR_TEST_1002_RUNTIME_DIR "${CMAKE_BINARY_DIR}/bt1002")
-  file(MAKE_DIRECTORY "${UNIVERSELAN_BEHAVIOUR_TEST_1002_RUNTIME_DIR}/Debug")
-  add_executable(bt1002_host
-    GameServerP2PSenderIdentity1002Host.cxx)
-  target_include_directories(bt1002_host PRIVATE
-    "${CMAKE_CURRENT_BINARY_DIR}"
-    "${CMAKE_SOURCE_DIR}/Source/DLLs/1.100.2")
-  target_link_libraries(bt1002_host PRIVATE
-    "${UNIVERSELAN_BEHAVIOUR_TEST_1002_SDK_IMPORT_LIB}")
-  set_target_properties(bt1002_host PROPERTIES
-    OUTPUT_NAME "bt1002-host"
-    RUNTIME_OUTPUT_DIRECTORY "${UNIVERSELAN_BEHAVIOUR_TEST_1002_RUNTIME_DIR}")
-
-  add_executable(bt1002_runner
-    GameServerP2PSenderIdentity1002Runner.cxx)
-  set_target_properties(bt1002_runner PROPERTIES
-    OUTPUT_NAME "bt1002-runner"
-    RUNTIME_OUTPUT_DIRECTORY "${UNIVERSELAN_BEHAVIOUR_TEST_1002_RUNTIME_DIR}")
-  add_dependencies(bt1002_runner bt1002_host)
-  add_test(NAME "universelan-behaviour-game-server-p2p-sender-identity-x64-1.100.2"
-    COMMAND $<TARGET_FILE:bt1002_runner>
-      --host $<TARGET_FILE:bt1002_host>
-      --client-dll "${UNIVERSELAN_BEHAVIOUR_TEST_1002_CLIENT_DLL}"
-      --server "${UNIVERSELAN_BEHAVIOUR_TEST_1002_SERVER}")
-  set_tests_properties("universelan-behaviour-game-server-p2p-sender-identity-x64-1.100.2" PROPERTIES
-    LABELS "behavior;universelan;characterization;sdk-1.100.2;game-server-p2p"
-    TIMEOUT 60
-    RUN_SERIAL TRUE)
-endif()
-
 if(NOT GALAXY_ARCH STREQUAL UNIVERSELAN_BEHAVIOUR_TEST_ARCH)
   message(STATUS "BehaviourTests support ${UNIVERSELAN_BEHAVIOUR_TEST_ARCH} only; framework targets are unavailable for ${GALAXY_ARCH}")
   return()
@@ -126,6 +78,32 @@ endif()
 if(NOT TARGET ${UNIVERSELAN_BEHAVIOUR_TEST_CLIENT} OR NOT TARGET ${UNIVERSELAN_BEHAVIOUR_TEST_SERVER})
   message(STATUS "BehaviourTests unavailable: UniverseLAN ${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY} client/server targets were not selected")
   return()
+endif()
+
+set(UNIVERSELAN_BEHAVIOUR_TEST_FACTORY_HEADER "${CMAKE_SOURCE_DIR}/Source/DLLs/${UNIVERSELAN_BEHAVIOUR_TEST_VERSION}/galaxy/IGalaxy.h")
+set(UNIVERSELAN_BEHAVIOUR_TEST_GAME_SERVER_IMPORT_LIB "${UNIVERSELAN_BEHAVIOUR_TEST_GOG_DIR}/Galaxy64.lib")
+if(EXISTS "${UNIVERSELAN_BEHAVIOUR_TEST_FACTORY_HEADER}" AND EXISTS "${UNIVERSELAN_BEHAVIOUR_TEST_GAME_SERVER_IMPORT_LIB}")
+  file(READ "${UNIVERSELAN_BEHAVIOUR_TEST_FACTORY_HEADER}" UNIVERSELAN_BEHAVIOUR_TEST_FACTORY_HEADER_CONTENT)
+  if(UNIVERSELAN_BEHAVIOUR_TEST_FACTORY_HEADER_CONTENT MATCHES "GetServerNetworking" AND UNIVERSELAN_BEHAVIOUR_TEST_FACTORY_HEADER_CONTENT MATCHES "InitLocal")
+    add_executable(universelan-behaviour-game-server-p2p-host-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY} GameServerP2PSenderIdentityHost.cxx)
+    target_include_directories(universelan-behaviour-game-server-p2p-host-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY} PRIVATE
+      "${CMAKE_CURRENT_BINARY_DIR}"
+      "${CMAKE_SOURCE_DIR}/Source/DLLs/${UNIVERSELAN_BEHAVIOUR_TEST_VERSION}")
+    target_link_libraries(universelan-behaviour-game-server-p2p-host-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY} PRIVATE
+      "${UNIVERSELAN_BEHAVIOUR_TEST_GAME_SERVER_IMPORT_LIB}")
+    add_executable(universelan-behaviour-game-server-p2p-runner-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY} GameServerP2PSenderIdentityRunner.cxx)
+    add_dependencies(universelan-behaviour-game-server-p2p-runner-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY}
+      universelan-behaviour-game-server-p2p-host-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY})
+    add_test(NAME "universelan-behaviour-game-server-p2p-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY}"
+      COMMAND $<TARGET_FILE:universelan-behaviour-game-server-p2p-runner-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY}>
+        --host $<TARGET_FILE:universelan-behaviour-game-server-p2p-host-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY}>
+        --client-dll $<TARGET_FILE:${UNIVERSELAN_BEHAVIOUR_TEST_CLIENT}>
+        --server $<TARGET_FILE:${UNIVERSELAN_BEHAVIOUR_TEST_SERVER}>)
+    set_tests_properties("universelan-behaviour-game-server-p2p-${UNIVERSELAN_BEHAVIOUR_TEST_VERSION_KEY}" PROPERTIES
+      LABELS "behavior;universelan;characterization;game-server-p2p"
+      TIMEOUT 60
+      RUN_SERIAL TRUE)
+  endif()
 endif()
 
 add_library(universelan-behaviour-test-common STATIC Common/Trace.cxx)
@@ -198,8 +176,12 @@ if(ENABLE_UNIVERSELAN_GOG_BEHAVIOUR_TESTS AND UNIVERSELAN_BEHAVIOUR_TEST_CREDENT
   add_universelan_gog_behaviour_test("simple-initialize-and-sign-in" "Simple" "initialize-and-sign-in.json" "initialize-and-sign-in")
   add_universelan_gog_behaviour_test("simple-session-id-repeatability" "Simple" "session-id-repeatability.json" "session-id-repeatability")
   add_universelan_gog_behaviour_test("simple-gog-services-state" "Simple" "gog-services-state.json" "gog-services-state")
+  add_universelan_gog_behaviour_test("simple-stats-retrieve-self-callback" "Simple" "stats-retrieve-self-callback.json" "stats-retrieve-self-callback")
+  add_universelan_gog_behaviour_test("simple-storage-downloaded-shared-file-count" "Simple" "storage-downloaded-shared-file-count.json" "storage-downloaded-shared-file-count")
+  add_universelan_gog_behaviour_test("simple-current-game-language" "Simple" "current-game-language.json" "current-game-language")
   add_universelan_gog_behaviour_test("simple-public-lobby-create-list-join-leave" "Simple" "public-lobby-create-list-join-leave.json" "public-lobby-create-list-join-leave")
   add_universelan_gog_behaviour_test("simple-public-lobby-string-filtering" "Simple" "public-lobby-string-filtering.json" "public-lobby-string-filtering")
+  add_universelan_gog_behaviour_test("simple-public-lobby-numerical-filtering" "Simple" "public-lobby-numerical-filtering.json" "public-lobby-numerical-filtering")
   add_universelan_gog_behaviour_test("simple-public-lobby-not-joinable-behavior" "Simple" "public-lobby-not-joinable-behavior.json" "public-lobby-not-joinable-behavior")
   add_universelan_gog_behaviour_test("simple-public-lobby-full-join-failure" "Simple" "public-lobby-full-join-failure.json" "public-lobby-full-join-failure")
   add_universelan_gog_behaviour_test("simple-public-lobby-owner-close-lifecycle" "Simple" "public-lobby-owner-close-lifecycle.json" "public-lobby-owner-close-lifecycle")

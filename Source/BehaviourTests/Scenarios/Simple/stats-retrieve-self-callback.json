@@ -1,0 +1,14 @@
+{
+  "name": "Simple/stats-retrieve-self-callback",
+  "sdkVersion": "1.152.11",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 30,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": ["initialize", "sign-in-callback", "sign-in-terminal", "stats-retrieve", "self-state"],
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "raw Galaxy IDs, achievement names, stat values, credentials, and runtime data are never recorded; compare only successful default-self retrieval and callback-user-equals-self"
+  }
+}

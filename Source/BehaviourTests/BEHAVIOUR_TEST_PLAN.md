@@ -111,48 +111,6 @@ Comparison rules:
   lobby state require a cleanup contract and must be opt-in until confirmed safe
   for the supplied accounts/application.
 
-## SDK 1.100.2 Server P2P Sender Identity Investigation
-
-`game-server-p2p-sender-identity` is a two-lane SDK `1.100.2` x64
-investigation relevant to the historical Vikings - Wolves of Midgard
-game-server report. The UniverseLAN lane is a local characterization and the
-official lane is a public-capability preflight until official dedicated-server
-artifacts exist. Neither is a passing compatibility result.
-
-The public-only UniverseLAN probe is:
-
-1. An authenticated server-host role creates an initially nonjoinable public
-   FCM lobby, tags it privately for discovery, then makes it joinable.
-2. An authenticated client role finds and joins that lobby.
-3. The server-host obtains the member only from public lobby membership and
-   calls its public server networking interface to schedule one bounded direct
-   reliable reply on a fixed channel.
-4. The client uses listener-free `ProcessData`/availability/one-read polling and
-    retains only delivery, private payload-marker equality, symbolic
-    sender-to-public-lobby-owner and sender-to-self relations, and
-    `unclassified-by-sdk-1.100.2`. It retains no raw ID, payload, payload length,
-    marker, credential, control, timestamp, or runtime output.
-5. The UniverseLAN lane requires existing local `1.100.2` client/server runtime
-    artifacts and fails with an explicit artifact block if they are absent. No
-    production code is an assertion.
-
-The selected `1.100.2` public headers block the matching official characterization:
-`IGalaxy::GetServerNetworking()` exists for a lobby host, but no
-`GalaxyGameServerApi.h`/dedicated `InitGameServer` API is supplied, and
-`GalaxyID` exposes neither an ID-type enum nor an ID-type accessor. Equality
-relations such as `sender == GetLobbyOwner(lobby)` can be observed, but labeling
-the sender as user, lobby, or server would require a raw-ID convention or
-implementation detail. Both are prohibited. The preflight reports this block
-without loading either runtime, signing in, creating a lobby, or inventing a
-result.
-
-The investigation is linked only as a black-box target to the current
-`P2PServerNetworkPacketMessage` route: that route is the existing
-server-networking envelope used when the server-host interface schedules a
-direct recipient reply. The probe must not inspect that message, routing code,
-or server state. Its only future evidence is the SDK-visible client sender
-relation described above.
-
 ## Behavior Index
 
 Simple scenarios test one narrow public contract at a time. Advanced scenarios
@@ -161,20 +119,20 @@ combine already-characterized Simple contracts.
 | Interface | Simple behavior index | Advanced follow-up |
 | --- | --- | --- |
 | Initialization / `IUser` | Init outcome, sign-in terminal behavior, `SignedIn`, `IsLoggedOn`, self ID validity/type, persona availability, and consecutive `GetSessionID()` equality. | Reinitialization, sign-out, connection loss/recovery. |
-| `IMatchmaking` | Create/list/join public lobby, nonjoinable public-list behavior, full-lobby join failure, operation result, owner/member relationships, basic lobby data, owner-close lifecycle, ownership-transition characterization, and bidirectional lobby-message delivery. | Multiple concurrent memberships, lobby-message isolation, owner-close comparison, and ownership-transition comparison are implemented; other filters and failure paths remain. |
-| `INetworking` | Reliable P2P listener-mode scheduling and callback-local non-consuming peek relations. The strict listener contracts require expected-channel delivery and two peeks in both lanes, but the verified side-by-side channel-8 overlay still produced the historical official non-target callback in the 2026-09-14 18/21 suite. GOG documents that modern SDKs load the peer from installed client redistributables, so the official prerequisite remains unresolved. A separate listener-free polling contract completed three official trials and a matched strict comparison: availability after `ProcessData`, one read only when available, symbolic sender/payload relations, and empty expected-channel availability after read. A separate two-trial post-leave probe observed scheduled sends but zero callbacks/peeks for the alive former member in both official and UniverseLAN lanes. | Three-peer routing, channel behavior, unreliable packets, disconnect/NAT/server-host behavior. |
+| `IMatchmaking` | Create/list/join public lobby, string and numerical equality-filtered public lobby discovery, nonjoinable public-list behavior, full-lobby join failure, operation result, owner/member relationships, basic lobby data, owner-close lifecycle, ownership-transition characterization, and bidirectional lobby-message delivery. | Multiple concurrent memberships, lobby-message isolation, owner-close comparison, ownership-transition comparison, and numerical-filter comparison implementation are complete; the numerical live baseline awaits execution. |
+| `INetworking` | Reliable P2P listener-mode scheduling and callback-local non-consuming peek relations. The strict listener contracts require expected-channel delivery and two peeks in both lanes, but the verified side-by-side channel-8 overlay still produced the historical official non-target callback in the 2026-09-14 18/21 suite. GOG documents that modern SDKs load the peer from installed client redistributables, so the official prerequisite remains unresolved. A separate listener-free polling contract completed three official trials and a matched strict comparison: availability after `ProcessData`, one read only when available, symbolic sender/payload relations, and empty expected-channel availability after read. Its `GetConnectionType(self) == CONNECTION_TYPE_DIRECT` extension matched in the focused four-host run on 2026-09-16; current-peer routing remains diagnostic. A separate two-trial post-leave probe observed scheduled sends but zero callbacks/peeks for the alive former member in both official and UniverseLAN lanes. | Three-peer routing, channel behavior, unreliable packets, disconnect/NAT/server-host behavior. |
 | `IChat` | One-to-one room request, room identity reuse, message send terminal result, remote message content/sender relationship. | History/pagination, membership lifecycle, read state, denial/failure behavior. |
 | `IFriends` | Persona information retrieval, persona state, rich-presence set/get callback behavior, game invitations where official accounts permit it. | Friend relationships, invitation/acceptance flows, persistence, richer presence state. |
 | `IStats` | Retrieve/store operation outcomes, a dedicated test stat/achievement value, post-store public read. | Cross-process durability, reset/failure handling, ordering with presence/user data. |
 | `IStorage` | Local write/read, share/download operation result, metadata/content relationships. | Policy/failure paths, timestamps, invalid IDs, multi-account sharing. |
 | `ICloudStorage` | Put/list/get/metadata callback behavior where the official SDK supports it. | Conflict, quota, synchronization, notification, deletion behavior. |
 | `ICustomNetworking` | Official-only loopback open/roundtrip/close characterization is implemented. Two 2026-09-14 official trials signed in but observed open failure for both profiles, so no send/receive/close contract is enabled. | Successful endpoint characterization, connection failure, concurrency, close/error races. |
-| `IApps` | DLC installed/owned result and language API behavior for the configured application. | DLC state changes and failure paths. |
+| `IApps` | `GetCurrentGameLanguage()` default-base-game availability, non-null result, and documented lowercase-property characterization/strict comparison are complete; language text remains excluded as title/environment configuration. | DLC installed/owned result, language-copy/code behavior, DLC state changes, and failure paths. |
 | `ITelemetry` | Public send result/callback behavior only if the official environment accepts deterministic telemetry testing. | Parameter, sampling, visit ID, failure behavior. |
 | `IUtils` | Overlay and post-auth service connection state observable behavior. | Notifications, images/avatars, auth-loss/reconnect behavior. |
 
-The initial implementation targets `1.152.11`: initialization/sign-in, self
-identity and state, then a two-host simple matchmaking/P2P contract. No
+The initial implementation covers initialization/sign-in, self identity and
+state, then a two-host simple matchmaking/P2P contract. No
 mutating GOG social, cloud, achievement, or public-lobby scenario will be
 enabled before account and application isolation rules are agreed.
 
@@ -183,6 +141,48 @@ and tagged with a collision marker, then explicitly made joinable and observed
 before discovery. Public lobby markers are not confidential because public lobby
 data can be listed and read; they are never printed. These are public
 `IMatchmaking` setup conditions, not inferred defaults.
+
+## Current Increment: Indexed Matchmaking Accessors
+
+`IMatchmaking` exposes `GetLobbyMemberByIndex`; there is no public
+`GetLobbyMemberIdByIndex` method. This increment expands
+`Simple/public-lobby-create-list-join-leave` because it already provides a
+safe, temporary, two-member public lobby and a callback-local filtered list.
+
+1. Confirm callback-local `GetLobbyByIndex` returns only valid symbolic lobby
+   candidates during `ILobbyListListener::OnLobbyList`.
+2. Enumerate `GetLobbyMemberByIndex` only over
+   `[0, GetNumLobbyMembers(lobby))` while locally joined. Record symbolic
+   validity, membership coverage, uniqueness, owner presence, and whether the
+   caller is at index zero. Never probe an out-of-range member index.
+3. Have the creator set one temporary self member-data value, then enumerate
+   `GetLobbyDataByIndex` and `GetLobbyMemberDataByIndex` only over their
+   corresponding reported counts. Record only whether all reads succeed and
+   whether the expected opaque marker-derived value was observed.
+4. Compare the normalized boolean relations across UniverseLAN and official
+   GOG. Traces must not retain raw IDs, indexes, keys, marker values, or
+   credentials. The existing temporary-lobby leave protocol remains the
+   cleanup mechanism.
+
+The official runtime has previously shown local-member-at-index-zero behavior
+in the investigated game trace. This scenario captures that observable
+compatibility relation directly while retaining the full member enumeration
+and data-index results for diagnosis.
+
+The expanded focused four-host comparison passed on 2026-09-16. A second
+official characterization remains required before treating the local-member
+index observation as stable across SDK versions.
+
+## Feature-Gated Game-Server P2P
+
+`game-server-p2p-sender-identity` is a generic public-SDK characterization for
+every selected build that exposes the factory `InitLocal` lifecycle,
+`GetServerNetworking`, and listener-free P2P polling. The server-host creates a
+temporary public lobby, sends one bounded reliable packet through its public
+server-networking interface, and the client retains only delivery, payload,
+sender-equals-owner, and sender-equals-self relations. It never labels a sender
+ID using raw representation or implementation details. Builds without this
+public feature set do not register the scenario.
 
 ## Development Phases
 
@@ -206,8 +206,9 @@ data can be listed and read; they are never printed. These are public
 
 ## Confirmed Decisions
 
-- The first implementation targets SDK `1.152.11`; expand the version matrix
-  only after the first official comparison is stable.
+- Behavior contracts are version-neutral unless repeatable public evidence
+  proves a version-specific difference. Build selection is a compatibility
+  matrix, not a behavior claim.
 - Existing ignored local configuration supplies the approved GOG application and
   two credential profiles.
 - UniverseLAN and official-GOG lanes run concurrently by default. A sequential
@@ -497,7 +498,23 @@ data can be listed and read; they are never printed. These are public
    Official GOG's unmatched exclusion remains strict. UniverseLAN intentionally
    permits an unmatched public candidate as a diagnostic relaxed-filter superset;
    that narrow policy never permits a malformed filter or an unmatched selection
-    or join.
+     or join.
+
+- `Simple/public-lobby-numerical-filtering` is a separate strict x64 `1.152.11`
+  public-API contract. Its first live two-lane run passed on 2026-09-16 in 9.76
+  seconds with no product difference observed. It reuses the
+   safe sequential two-lobby FCM lifecycle: user1 sets fixed distinct numerical
+   lobby properties and one shared token-derived run marker while both lobbies
+   are nonjoinable, then explicitly makes each joinable. User2 combines
+   `AddRequestLobbyListNumericalFilter(..., LOBBY_COMPARISON_TYPE_EQUAL)` with
+   the run-marker string filter, retrieves and classifies candidates only
+   callback-locally, and joins only the target that satisfies both relations.
+   Both lanes require target appearance, numerical predicate match, absence of a
+   run-owned numerical nonmatch, target-only join, public two-member/non-self-owner
+   state, and terminal cleanup. Retry and the retained unmatched boolean are
+   excluded from cross-lane equality; no product difference is accepted. Numeric
+   values, markers, IDs, counts, indexes, timestamps, and runtime data are never
+  retained.
 
 - `Simple/custom-networking-loopback-roundtrip-close` uses public
   `ICustomNetworking` only. The runner owns an ephemeral loopback WebSocket

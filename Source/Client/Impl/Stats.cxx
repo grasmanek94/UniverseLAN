@@ -30,7 +30,7 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_ISTATS_UPDATE_1_125
 				listener,
 #endif
-				& IUserStatsAndAchievementsRetrieveListener::OnUserStatsAndAchievementsRetrieveSuccess, userID);
+				& IUserStatsAndAchievementsRetrieveListener::OnUserStatsAndAchievementsRetrieveSuccess, intf->config->GetApiGalaxyID());
 		}
 		else {
 			uint64_t request_id = MessageUniqueID::get();

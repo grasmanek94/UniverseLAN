@@ -34,3 +34,20 @@
 | Component | Production headers | Planned focus |
 | --- | --- | --- |
 | Shared custom console | `CustomConsole.hxx` | Windows console allocation has process-global side effects |
+
+## Current Increment: Indexed Accessors
+
+1. Extend `Shared_NoVer/ContainerGetByIndexTests.cxx` with direct iterator
+   tests for `container_iterator_get_by_index` and
+   `map_iterator_get_by_index_with_forced_zero_key`. Cover valid sequential
+   lookup, empty/out-of-range end iterators, forced-key-first ordering, and a
+   forced key absent from the map.
+2. Extend `Shared/LobbyTests.cxx` with
+   `Lobby::GetMemberByIndexWithForcedZero` coverage. Verify that a current
+   member is returned at index zero, remaining members retain their relative
+   container order, and an absent forced member/out-of-range index returns an
+   invalid ID.
+3. Build and run the affected no-version and versioned shared unit targets.
+
+The iterator helpers are deterministic in-memory utilities. These tests require
+no runtime, server, credential, filesystem, or network dependency.

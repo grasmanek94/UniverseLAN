@@ -1,0 +1,14 @@
+{
+  "name": "Simple/current-game-language",
+  "sdkVersion": "1.152.11",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 20,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": ["initialize", "sign-in-callback", "sign-in-terminal", "current-game-language", "self-state"],
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "raw language strings, pointers, Galaxy IDs, credentials, and runtime data are never recorded; compare only IApps availability, a non-null language pointer, and the documented lowercase property"
+  }
+}

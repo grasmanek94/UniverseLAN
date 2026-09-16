@@ -46,6 +46,14 @@ struct Arguments
     fs::path gogRuntimeDirectory;
     fs::path gogPeerOverlay;
     bool characterizeGogServicesState = false;
+    bool characterizeStatsRetrieveAchievementsNumber = false;
+    bool characterizeCurrentGameLanguage = false;
+    bool characterizeCurrentGameLanguageCopy = false;
+    bool characterizeCurrentGameLanguageCode = false;
+    bool characterizeCurrentGameLanguageCodeCopy = false;
+    bool characterizeOverlayState = false;
+    bool characterizeStorageFileCount = false;
+    bool characterizeStorageFileExists = false;
     bool characterizeOfficialGogPublicLobbyOwnerCloseLifecycle = false;
     bool characterizeOfficialGogPublicLobbyOwnerOwnershipTransition = false;
     bool characterizeOfficialGogPublicLobbyNotJoinableBehavior = false;
@@ -102,6 +110,8 @@ struct ScenarioContract
     bool observesBidirectionalLobbyMemberDataPropagation = false;
     bool observesPublicLobbyStringFiltering = false;
     bool observesBidirectionalReliableP2PPollRead = false;
+    bool observesStatsRetrieveSelfCallback = false;
+    bool observesStorageDownloadedSharedFileCount = false;
 };
 
 constexpr std::array scenarioContracts{
@@ -113,17 +123,44 @@ constexpr std::array scenarioContracts{
         {"initialize", "sign-in-callback", "sign-in-terminal", "self-state", "gog-services-state"}, 5, true, false, false, false, false, false},
     ScenarioContract{"Simple/gog-services-state characterization", "gog-services-state-characterization",
         {"initialize", "sign-in-callback", "sign-in-terminal", "self-state", "gog-services-state-characterization"}, 5, true, false, false, false, false, false},
+    ScenarioContract{"Simple/stats-retrieve-achievements-number characterization", "stats-retrieve-achievements-number-characterization",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "stats-retrieve", "self-state"}, 5, false, false, false, false, false, false},
+    ScenarioContract{"Simple/stats-retrieve-self-callback", "stats-retrieve-self-callback",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "stats-retrieve", "self-state"}, 5,
+        false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true},
+    ScenarioContract{"Simple/storage-downloaded-shared-file-count", "storage-downloaded-shared-file-count",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "storage-downloaded-shared-files", "self-state"}, 5,
+        false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true},
+    ScenarioContract{"Simple/current-game-language characterization", "current-game-language-characterization",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "current-game-language", "self-state"}, 5, false, false, false, false, false, false},
+    ScenarioContract{"Simple/current-game-language", "current-game-language",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "current-game-language", "self-state"}, 5, false, false, false, false, false, false},
+    ScenarioContract{"Simple/current-game-language-copy characterization", "current-game-language-copy-characterization",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "current-game-language-copy", "self-state"}, 5, false, false, false, false, false, false},
+    ScenarioContract{"Simple/current-game-language-code characterization", "current-game-language-code-characterization",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "current-game-language-code", "self-state"}, 5, false, false, false, false, false, false},
+    ScenarioContract{"Simple/current-game-language-code-copy characterization", "current-game-language-code-copy-characterization",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "current-game-language-code-copy", "self-state"}, 5, false, false, false, false, false, false},
+    ScenarioContract{"Simple/overlay-state characterization", "overlay-state-characterization",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "overlay-state", "self-state"}, 5, false, false, false, false, false, false},
+    ScenarioContract{"Simple/storage-file-count characterization", "storage-file-count-characterization",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "storage-file-count", "self-state"}, 5, false, false, false, false, false, false},
+    ScenarioContract{"Simple/storage-file-exists characterization", "storage-file-exists-characterization",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "storage-file-exists", "self-state"}, 5, false, false, false, false, false, false},
     ScenarioContract{"Simple/custom-networking-loopback-roundtrip-close characterization", "custom-networking-loopback-roundtrip-close-characterization",
         {"initialize", "sign-in-callback", "sign-in-terminal", "custom-networking-open", "custom-networking-send", "custom-networking-data", "custom-networking-close", "custom-networking-settle", "self-state"}, 9, false, false, false, false, false, false},
     ScenarioContract{"Simple/custom-networking-loopback-roundtrip-close", "custom-networking-loopback-roundtrip-close",
         {"initialize", "sign-in-callback", "sign-in-terminal", "custom-networking-open", "custom-networking-send", "custom-networking-data", "custom-networking-close", "custom-networking-settle", "self-state"}, 9, false, false, false, false, false, false},
     ScenarioContract{"Simple/public-lobby-create-list-join-leave", "public-lobby-create-list-join-leave",
         {"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "metadata", "list", "join",
-            "creator-two-member-snapshot", "joiner-two-member-snapshot", "creator-sole-owner-snapshot", "creator-leave"}, 12, false, false, true, false, false, false},
+            "index-accessor-setup", "creator-two-member-snapshot", "creator-index-accessors", "joiner-two-member-snapshot",
+            "joiner-index-accessors", "creator-sole-owner-snapshot", "creator-leave"}, 15, false, false, true, false, false, false},
     ScenarioContract{"Simple/public-lobby-string-filtering characterization", "public-lobby-string-filtering-characterization",
         {"initialize", "sign-in-callback", "sign-in-terminal", "create-target", "create-unmatched", "configuration", "creator-cleanup-unmatched", "creator-cleanup-target", "list-diagnostic", "filtered-selection", "join", "joiner-two-member-snapshot", "joiner-leave"}, 13, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, true},
     ScenarioContract{"Simple/public-lobby-string-filtering", "public-lobby-string-filtering",
         {"initialize", "sign-in-callback", "sign-in-terminal", "create-target", "create-unmatched", "configuration", "creator-cleanup-unmatched", "creator-cleanup-target", "list-diagnostic", "filtered-selection", "join", "joiner-two-member-snapshot", "joiner-leave"}, 13, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, true},
+    ScenarioContract{"Simple/public-lobby-numerical-filtering", "public-lobby-numerical-filtering",
+        {"initialize", "sign-in-callback", "sign-in-terminal", "create-target", "create-unmatched", "configuration", "creator-cleanup-unmatched", "creator-cleanup-target", "list-diagnostic", "filtered-selection", "join", "joiner-two-member-snapshot", "joiner-leave"}, 13, false, false, true, false, false, false},
     ScenarioContract{"Simple/public-lobby-not-joinable-behavior characterization", "public-lobby-not-joinable-behavior-characterization",
         {"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "nonjoinable-configuration", "creator-sole-owner-snapshot", "creator-leave",
             "list", "join", "joiner-access", "post-delete-list", "self-state"}, 13, false, false, true, false, false, false, false, false, true},
@@ -264,6 +301,54 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
             arguments.characterizeGogServicesState = true;
             continue;
         }
+        if (option == "--characterize-stats-retrieve-achievements-number")
+        {
+            if (arguments.characterizeStatsRetrieveAchievementsNumber) return false;
+            arguments.characterizeStatsRetrieveAchievementsNumber = true;
+            continue;
+        }
+        if (option == "--characterize-current-game-language")
+        {
+            if (arguments.characterizeCurrentGameLanguage) return false;
+            arguments.characterizeCurrentGameLanguage = true;
+            continue;
+        }
+        if (option == "--characterize-current-game-language-copy")
+        {
+            if (arguments.characterizeCurrentGameLanguageCopy) return false;
+            arguments.characterizeCurrentGameLanguageCopy = true;
+            continue;
+        }
+        if (option == "--characterize-current-game-language-code")
+        {
+            if (arguments.characterizeCurrentGameLanguageCode) return false;
+            arguments.characterizeCurrentGameLanguageCode = true;
+            continue;
+        }
+        if (option == "--characterize-current-game-language-code-copy")
+        {
+            if (arguments.characterizeCurrentGameLanguageCodeCopy) return false;
+            arguments.characterizeCurrentGameLanguageCodeCopy = true;
+            continue;
+        }
+        if (option == "--characterize-overlay-state")
+        {
+            if (arguments.characterizeOverlayState) return false;
+            arguments.characterizeOverlayState = true;
+            continue;
+        }
+        if (option == "--characterize-storage-file-count")
+        {
+            if (arguments.characterizeStorageFileCount) return false;
+            arguments.characterizeStorageFileCount = true;
+            continue;
+        }
+        if (option == "--characterize-storage-file-exists")
+        {
+            if (arguments.characterizeStorageFileExists) return false;
+            arguments.characterizeStorageFileExists = true;
+            continue;
+        }
         if (option == "--characterize-official-gog-public-lobby-owner-close-lifecycle")
         {
             if (arguments.characterizeOfficialGogPublicLobbyOwnerCloseLifecycle) return false;
@@ -389,7 +474,7 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
         else if (option == "--gog-peer-overlay") arguments.gogPeerOverlay = value;
         else return false;
     }
-    return (static_cast<int>(arguments.characterizeGogServicesState) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyOwnerCloseLifecycle) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyOwnerOwnershipTransition) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyNotJoinableBehavior) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyFullJoinFailure) + static_cast<int>(arguments.characterizePublicLobbyDataPropagation) + static_cast<int>(arguments.characterizePublicLobbyStringFiltering) + static_cast<int>(arguments.characterizeMultipleLobbyMembershipAndMessageIsolation)
+    return (static_cast<int>(arguments.characterizeGogServicesState) + static_cast<int>(arguments.characterizeStatsRetrieveAchievementsNumber) + static_cast<int>(arguments.characterizeCurrentGameLanguage) + static_cast<int>(arguments.characterizeCurrentGameLanguageCopy) + static_cast<int>(arguments.characterizeCurrentGameLanguageCode) + static_cast<int>(arguments.characterizeCurrentGameLanguageCodeCopy) + static_cast<int>(arguments.characterizeOverlayState) + static_cast<int>(arguments.characterizeStorageFileCount) + static_cast<int>(arguments.characterizeStorageFileExists) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyOwnerCloseLifecycle) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyOwnerOwnershipTransition) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyNotJoinableBehavior) + static_cast<int>(arguments.characterizeOfficialGogPublicLobbyFullJoinFailure) + static_cast<int>(arguments.characterizePublicLobbyDataPropagation) + static_cast<int>(arguments.characterizePublicLobbyStringFiltering) + static_cast<int>(arguments.characterizeMultipleLobbyMembershipAndMessageIsolation)
                  + static_cast<int>(arguments.characterizeChatRoomMessageDelivery) + static_cast<int>(arguments.characterizeOfficialGogChatRoomMessageDelivery)
                  + static_cast<int>(arguments.characterizeOfficialGogBidirectionalChatRoomMessageDelivery)
                 + static_cast<int>(arguments.characterizeOfficialGogFriendsPeerInformationRetrieval)
@@ -454,10 +539,65 @@ bool observesPublicLobbyStringFiltering(const ScenarioContract& contract)
     return contract.observesPublicLobbyStringFiltering;
 }
 
+bool observesPublicLobbyNumericalFiltering(const ScenarioContract& contract)
+{
+    return contract.hostScenario == "public-lobby-numerical-filtering";
+}
+
 bool observesCustomNetworkingLoopbackRoundtripClose(const ScenarioContract& contract)
 {
     return contract.hostScenario == "custom-networking-loopback-roundtrip-close"
         || contract.hostScenario == "custom-networking-loopback-roundtrip-close-characterization";
+}
+
+bool observesStatsRetrieveSelfCallback(const ScenarioContract& contract)
+{
+    return contract.observesStatsRetrieveSelfCallback;
+}
+
+bool observesStorageDownloadedSharedFileCount(const ScenarioContract& contract)
+{
+    return contract.observesStorageDownloadedSharedFileCount;
+}
+
+bool observesCurrentGameLanguage(const ScenarioContract& contract)
+{
+    return contract.hostScenario == "current-game-language-characterization" || contract.hostScenario == "current-game-language";
+}
+
+bool observesCurrentGameLanguageCopy(const ScenarioContract& contract)
+{
+    return contract.hostScenario == "current-game-language-copy-characterization";
+}
+
+bool observesCurrentGameLanguageCode(const ScenarioContract& contract)
+{
+    return contract.hostScenario == "current-game-language-code-characterization";
+}
+
+bool observesCurrentGameLanguageCodeCopy(const ScenarioContract& contract)
+{
+    return contract.hostScenario == "current-game-language-code-copy-characterization";
+}
+
+bool observesOverlayState(const ScenarioContract& contract)
+{
+    return contract.hostScenario == "overlay-state-characterization";
+}
+
+bool observesStorageFileCount(const ScenarioContract& contract)
+{
+    return contract.hostScenario == "storage-file-count-characterization";
+}
+
+bool observesStorageFileExists(const ScenarioContract& contract)
+{
+    return contract.hostScenario == "storage-file-exists-characterization";
+}
+
+bool isStrictCurrentGameLanguage(const ScenarioContract& contract)
+{
+    return contract.hostScenario == "current-game-language";
 }
 
 bool isStrictPublicLobbyNotJoinableBehavior(const ScenarioContract& contract)
@@ -529,7 +669,7 @@ bool requiresSensitiveArtifactRedaction(const ScenarioContract& contract)
         || observesBidirectionalReliableP2PPollRead(contract)
         || observesBidirectionalP2PListenerPeek(contract)
            || observesBidirectionalLobbyMessageDelivery(contract) || observesBidirectionalLobbyMemberDataPropagation(contract)
-           || observesPublicLobbyStringFiltering(contract)
+            || observesPublicLobbyStringFiltering(contract) || observesPublicLobbyNumericalFiltering(contract)
            || observesBidirectionalChatRoomMessageDelivery(contract) || observesCustomNetworkingLoopbackRoundtripClose(contract);
 }
 
@@ -636,7 +776,7 @@ Scenario parseScenario(const fs::path& manifest)
                 "configuration", "metadata", "creator-leave", "self-state"})
             && records.value("user2", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "list", "join",
                 "joiner-two-member-snapshot", "joiner-lifecycle-listeners-armed", "post-close-list", "owner-close-lifecycle", "self-state"})
-        : observesPublicLobbyStringFiltering(*contract)
+        : observesPublicLobbyNumericalFiltering(*contract) || observesPublicLobbyStringFiltering(*contract)
         ? records.is_object() && records.size() == 2
             && records.value("user1", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "create-target", "create-unmatched",
                 "configuration", "creator-cleanup-unmatched", "creator-cleanup-target", "self-state"})
@@ -669,9 +809,10 @@ Scenario parseScenario(const fs::path& manifest)
         : contract->observesPublicLobby
         ? records.is_object() && records.size() == 2
             && records.value("user1", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter",
-                "configuration", "metadata", "creator-two-member-snapshot", "creator-sole-owner-snapshot", "creator-leave", "self-state"})
+                "configuration", "metadata", "index-accessor-setup", "creator-two-member-snapshot", "creator-index-accessors",
+                "creator-sole-owner-snapshot", "creator-leave", "self-state"})
             && records.value("user2", json()) == json::array({"initialize", "sign-in-callback", "sign-in-terminal", "list", "join",
-                "joiner-two-member-snapshot", "joiner-leave", "self-state"})
+                "joiner-two-member-snapshot", "joiner-index-accessors", "joiner-leave", "self-state"})
         : records.is_array() && records == requiredRecords(*contract);
     if (!validRecordDeclaration
         || required(comparison, "requiredTerminalOutcome") != "success"
@@ -709,6 +850,86 @@ Scenario characterizationScenario()
 {
     Scenario scenario;
     scenario.contract = &scenarioContracts[3];
+    scenario.laneMode = "concurrent";
+    scenario.timeoutSeconds = 20;
+    scenario.characterization = true;
+    return scenario;
+}
+
+Scenario statsRetrieveAchievementsNumberCharacterizationScenario()
+{
+    Scenario scenario;
+    scenario.contract = findScenarioContract("Simple/stats-retrieve-achievements-number characterization");
+    scenario.laneMode = "concurrent";
+    scenario.timeoutSeconds = 30;
+    scenario.characterization = true;
+    return scenario;
+}
+
+Scenario currentGameLanguageCharacterizationScenario()
+{
+    Scenario scenario;
+    scenario.contract = findScenarioContract("Simple/current-game-language characterization");
+    scenario.laneMode = "concurrent";
+    scenario.timeoutSeconds = 20;
+    scenario.characterization = true;
+    return scenario;
+}
+
+Scenario currentGameLanguageCopyCharacterizationScenario()
+{
+    Scenario scenario;
+    scenario.contract = findScenarioContract("Simple/current-game-language-copy characterization");
+    scenario.laneMode = "concurrent";
+    scenario.timeoutSeconds = 20;
+    scenario.characterization = true;
+    return scenario;
+}
+
+Scenario currentGameLanguageCodeCharacterizationScenario()
+{
+    Scenario scenario;
+    scenario.contract = findScenarioContract("Simple/current-game-language-code characterization");
+    scenario.laneMode = "concurrent";
+    scenario.timeoutSeconds = 20;
+    scenario.characterization = true;
+    return scenario;
+}
+
+Scenario currentGameLanguageCodeCopyCharacterizationScenario()
+{
+    Scenario scenario;
+    scenario.contract = findScenarioContract("Simple/current-game-language-code-copy characterization");
+    scenario.laneMode = "concurrent";
+    scenario.timeoutSeconds = 20;
+    scenario.characterization = true;
+    return scenario;
+}
+
+Scenario overlayStateCharacterizationScenario()
+{
+    Scenario scenario;
+    scenario.contract = findScenarioContract("Simple/overlay-state characterization");
+    scenario.laneMode = "concurrent";
+    scenario.timeoutSeconds = 20;
+    scenario.characterization = true;
+    return scenario;
+}
+
+Scenario storageFileCountCharacterizationScenario()
+{
+    Scenario scenario;
+    scenario.contract = findScenarioContract("Simple/storage-file-count characterization");
+    scenario.laneMode = "concurrent";
+    scenario.timeoutSeconds = 20;
+    scenario.characterization = true;
+    return scenario;
+}
+
+Scenario storageFileExistsCharacterizationScenario()
+{
+    Scenario scenario;
+    scenario.contract = findScenarioContract("Simple/storage-file-exists characterization");
     scenario.laneMode = "concurrent";
     scenario.timeoutSeconds = 20;
     scenario.characterization = true;
@@ -1853,8 +2074,9 @@ bool normalizeBidirectionalReliableP2PPollReadTrace(const fs::path& trace, const
         };
         const auto validPollArmed = [&](const json& record) {
             return exact(record, {"record", "peerFromPublicLobbyQuery", "peerCurrentLobbyMember", "peerValidNonSelf", "expectedChannelConfigured", "directionalChannelsDistinct", "directionalPayloadsDistinct"})
-                && record["listenerConstructed"] == false && record["peerType"] == "user"
-                && fieldsExactly(record, {"record", "listenerConstructed", "peerFromPublicLobbyQuery", "peerCurrentLobbyMember", "peerValidNonSelf", "peerType", "expectedChannelConfigured", "directionalChannelsDistinct", "directionalPayloadsDistinct"});
+                && record["listenerConstructed"] == false && record["peerType"] == "user" && record["selfConnectionTypeDirect"] == true
+                && (record["peerConnectionType"] == "none" || record["peerConnectionType"] == "direct" || record["peerConnectionType"] == "proxy")
+                && fieldsExactly(record, {"record", "listenerConstructed", "peerFromPublicLobbyQuery", "peerCurrentLobbyMember", "peerValidNonSelf", "peerType", "expectedChannelConfigured", "directionalChannelsDistinct", "directionalPayloadsDistinct", "selfConnectionTypeDirect", "peerConnectionType"});
         };
         const auto validSend = [&](const json& record) {
             return exact(record, {"record", "exactlyOneSendIssued", "peerFromPublicLobbyQuery", "peerCurrentLobbyMember", "peerValidNonSelf", "directionalChannelConfigured", "directionalChannelsDistinct", "payloadNonemptyBounded", "directionalPayloadsDistinct", "scheduled"})
@@ -2163,8 +2385,9 @@ bool normalizePublicLobbyTrace(const fs::path& trace, const std::string& profile
         for (const std::string& line : raw) records.push_back(json::parse(line));
         const std::vector<std::string> expected = profile == "user1"
             ? std::vector<std::string>{"initialize", "sign-in-callback", "sign-in-terminal", "create", "creator-enter", "configuration", "metadata",
-                "creator-two-member-snapshot", "creator-sole-owner-snapshot", "creator-leave", "self-state"}
-            : std::vector<std::string>{"initialize", "sign-in-callback", "sign-in-terminal", "list", "join", "joiner-two-member-snapshot", "joiner-leave", "self-state"};
+                "index-accessor-setup", "creator-two-member-snapshot", "creator-index-accessors", "creator-sole-owner-snapshot", "creator-leave", "self-state"}
+            : std::vector<std::string>{"initialize", "sign-in-callback", "sign-in-terminal", "list", "join", "joiner-two-member-snapshot",
+                "joiner-index-accessors", "joiner-leave", "self-state"};
         if (records.size() != expected.size()) return false;
         for (std::size_t index = 0; index < expected.size(); ++index)
             if (!records[index].is_object() || records[index].value("record", "") != expected[index]) return false;
@@ -2182,6 +2405,15 @@ bool normalizePublicLobbyTrace(const fs::path& trace, const std::string& profile
             return fieldsExactly(record, {"record", "result", "reason", "sameLobby"}) && record["result"] == "callback"
                 && record["reason"] == "user-left" && record["sameLobby"] == true;
         };
+        const auto validIndexAccessors = [](const json& record) {
+            return fieldsExactly(record, {"record", "membersValid", "membersDistinct", "selfPresent", "ownerPresent", "indexZeroIsSelf",
+                    "repeatReadsStable", "lobbyDataHasEntries", "lobbyDataAllReadsSucceeded", "lobbyDataExpectedValueFound",
+                    "memberDataHasEntries", "memberDataAllReadsSucceeded", "memberDataExpectedValueFound"})
+                && record["membersValid"] == true && record["membersDistinct"] == true && record["selfPresent"] == true
+                && record["ownerPresent"] == true && record["indexZeroIsSelf"] == true && record["repeatReadsStable"] == true
+                && record["lobbyDataHasEntries"] == true && record["lobbyDataAllReadsSucceeded"] == true && record["lobbyDataExpectedValueFound"] == true
+                && record["memberDataHasEntries"] == true && record["memberDataAllReadsSucceeded"] == true && record["memberDataExpectedValueFound"] == true;
+        };
         if (profile == "user1")
         {
             if (!fieldsExactly(records[3], {"record", "result", "lobbyValid", "lobbyType"}) || records[3]["result"] != "success"
@@ -2190,16 +2422,18 @@ bool normalizePublicLobbyTrace(const fs::path& trace, const std::string& profile
                 || records[4]["sameCreatedLobby"] != true || !fieldsExactly(records[5], {"record", "joinableUpdateSuccess", "capacityUpdateSuccess", "joinableVisible", "capacityVisible"})
                 || records[5]["joinableUpdateSuccess"] != true || records[5]["capacityUpdateSuccess"] != true || records[5]["joinableVisible"] != true || records[5]["capacityVisible"] != true
                 || !fieldsExactly(records[6], {"record", "result", "sameCreatedLobby"}) || records[6]["result"] != "success" || records[6]["sameCreatedLobby"] != true
-                || !validSnapshot(records[7], 2, true, true) || !validSnapshot(records[8], 1, false, true) || !validLeave(records[9])) return false;
+                || !fieldsExactly(records[7], {"record", "memberDataUpdateSuccess"}) || records[7]["memberDataUpdateSuccess"] != true
+                || !validSnapshot(records[8], 2, true, true) || !validIndexAccessors(records[9]) || !validSnapshot(records[10], 1, false, true)
+                || !validLeave(records[11])) return false;
         }
         else
         {
-            if (!fieldsExactly(records[3], {"record", "result", "attempts", "retryUsed", "selectedCount", "selectedValid"})
+            if (!fieldsExactly(records[3], {"record", "result", "attempts", "retryUsed", "selectedCount", "selectedValid", "callbackIndexCandidatesValid"})
                 || records[3]["result"] != "success" || !records[3]["attempts"].is_number_integer() || records[3]["attempts"] < 1
                 || records[3]["attempts"] > 6 || !records[3]["retryUsed"].is_boolean() || records[3]["selectedCount"] != 1
-                || records[3]["selectedValid"] != true || !fieldsExactly(records[4], {"record", "result", "sameListedLobby"})
+                || records[3]["selectedValid"] != true || records[3]["callbackIndexCandidatesValid"] != true || !fieldsExactly(records[4], {"record", "result", "sameListedLobby"})
                 || records[4]["result"] != "success" || records[4]["sameListedLobby"] != true
-                || !validSnapshot(records[5], 2, true, false) || !validLeave(records[6])) return false;
+                || !validSnapshot(records[5], 2, true, false) || !validIndexAccessors(records[6]) || !validLeave(records[7])) return false;
         }
         if (!fieldsExactly(records.back(), {"record", "signedIn", "loggedOn", "idValid", "idType", "selfIdRepeatEqual", "personaAvailable"})
             || records.back()["signedIn"] != true || records.back()["loggedOn"] != true || records.back()["idValid"] != true
@@ -2757,6 +2991,67 @@ bool normalizePublicLobbyStringFilteringTrace(const fs::path& trace, const std::
     catch (...) { return false; }
 }
 
+bool normalizePublicLobbyNumericalFilteringTrace(const fs::path& trace, const std::string& profile, json& normalized)
+{
+    try
+    {
+        std::vector<json> records;
+        for (const std::string& line : common::readTrace(trace)) records.push_back(json::parse(line));
+        const std::vector<std::string> expected = profile == "user1"
+            ? std::vector<std::string>{"initialize", "sign-in-callback", "sign-in-terminal", "create-target", "create-unmatched", "configuration", "creator-cleanup-unmatched", "creator-cleanup-target", "self-state"}
+            : std::vector<std::string>{"initialize", "sign-in-callback", "sign-in-terminal", "list-diagnostic", "filtered-selection", "join", "joiner-two-member-snapshot", "joiner-leave", "self-state"};
+        if (records.size() != expected.size()) return false;
+        for (std::size_t index = 0; index < expected.size(); ++index)
+            if (!records[index].is_object() || records[index].value("record", "") != expected[index]) return false;
+        const auto validSelf = [](const json& record) {
+            return fieldsExactly(record, {"record", "signedIn", "loggedOn", "idValid", "idType", "selfIdRepeatEqual", "personaAvailable"})
+                && record["signedIn"] == true && record["loggedOn"] == true && record["idValid"] == true && record["idType"] == "user"
+                && record["selfIdRepeatEqual"] == true && record["personaAvailable"].is_boolean();
+        };
+        const auto validLeave = [](const json& record) {
+            return fieldsExactly(record, {"record", "result", "reason", "sameLobby"}) && record["result"] == "callback"
+                && record["reason"] == "user-left" && record["sameLobby"] == true;
+        };
+        const auto validCreate = [](const json& record) {
+            return fieldsExactly(record, {"record", "result", "lobbyValid", "lobbyType"}) && record["result"] == "success"
+                && record["lobbyValid"] == true && record["lobbyType"] == "lobby";
+        };
+        if (!fieldsExactly(records[0], {"record", "result"}) || records[0]["result"] != "returned"
+            || !fieldsExactly(records[1], {"record", "result"}) || records[1]["result"] != "success"
+            || !fieldsExactly(records[2], {"record", "result"}) || records[2]["result"] != "success" || !validSelf(records.back())) return false;
+        if (profile == "user1")
+        {
+            if (!validCreate(records[3]) || !validCreate(records[4])
+                || !fieldsExactly(records[5], {"record", "sequentialCreation", "fixedNumericalPropertiesConfigured", "distinctFixedNumericalProperties", "sharedRunMarkerConfigured", "targetConfiguredBeforeJoinable", "unmatchedConfiguredBeforeJoinable", "allPublicCapacityTwoJoinable", "numericalPropertiesVisibleLocally", "markerValuesVisibleLocally"})
+                || records[5]["sequentialCreation"] != true || records[5]["fixedNumericalPropertiesConfigured"] != true
+                || records[5]["distinctFixedNumericalProperties"] != true || records[5]["sharedRunMarkerConfigured"] != true || records[5]["targetConfiguredBeforeJoinable"] != true
+                || records[5]["unmatchedConfiguredBeforeJoinable"] != true || records[5]["allPublicCapacityTwoJoinable"] != true
+                || records[5]["numericalPropertiesVisibleLocally"] != true || records[5]["markerValuesVisibleLocally"] != true
+                || !validLeave(records[6]) || !validLeave(records[7])) return false;
+            normalized = records;
+            return true;
+        }
+        if (!fieldsExactly(records[3], {"record", "result", "retryUsed", "allCandidatesClassified", "targetCandidateAppeared", "runOwnedUnmatchedCandidateAppeared", "stableTargetSelection"})
+            || records[3]["result"] != "success" || !records[3]["retryUsed"].is_boolean() || records[3]["allCandidatesClassified"] != true
+            || records[3]["targetCandidateAppeared"] != true || records[3]["runOwnedUnmatchedCandidateAppeared"] != false
+            || records[3]["stableTargetSelection"] != true
+            || !fieldsExactly(records[4], {"record", "numericalEqualityFilterApplied", "sharedRunMarkerFilterApplied", "getLobbyByIndexCallbackLocalOnly", "targetCandidateAppeared", "selectedValid", "selectedMatchesNumericalPredicate", "selectedMatchesRunMarker", "runOwnedUnmatchedCandidateAppeared", "runOwnedUnmatchedCandidateSelected", "selectionStable"})
+            || records[4]["numericalEqualityFilterApplied"] != true || records[4]["sharedRunMarkerFilterApplied"] != true
+            || records[4]["getLobbyByIndexCallbackLocalOnly"] != true || records[4]["targetCandidateAppeared"] != true
+            || records[4]["selectedValid"] != true || records[4]["selectedMatchesNumericalPredicate"] != true
+            || records[4]["selectedMatchesRunMarker"] != true
+            || records[4]["runOwnedUnmatchedCandidateAppeared"] != records[3]["runOwnedUnmatchedCandidateAppeared"]
+            || records[4]["runOwnedUnmatchedCandidateSelected"] != false || records[4]["selectionStable"] != true
+            || !fieldsExactly(records[5], {"record", "result", "sameSelectedLobby"}) || records[5]["result"] != "success" || records[5]["sameSelectedLobby"] != true
+            || !fieldsExactly(records[6], {"record", "public", "joinable", "capacityIsTwo", "exactlyTwoMembers", "ownerValidNonSelf"})
+            || records[6]["public"] != true || records[6]["joinable"] != true || records[6]["capacityIsTwo"] != true
+            || records[6]["exactlyTwoMembers"] != true || records[6]["ownerValidNonSelf"] != true || !validLeave(records[7])) return false;
+        normalized = records;
+        return true;
+    }
+    catch (...) { return false; }
+}
+
 bool normalizeCustomNetworkingLoopbackRoundtripCloseTrace(const fs::path& trace, json& normalized)
 {
     try
@@ -2795,6 +3090,53 @@ bool normalizeCustomNetworkingLoopbackRoundtripCloseTrace(const fs::path& trace,
     catch (...) { return false; }
 }
 
+bool normalizeStatsRetrieveSelfCallbackTrace(const fs::path& trace, json& normalized)
+{
+    try
+    {
+        const std::vector<std::string> raw = common::readTrace(trace);
+        if (raw.size() != 5) return false;
+        json records = json::array();
+        for (const std::string& line : raw) records.push_back(json::parse(line));
+        if (!fieldsExactly(records[0], {"record", "result"}) || records[0]["record"] != "initialize" || records[0]["result"] != "returned"
+            || !fieldsExactly(records[1], {"record", "result"}) || records[1]["record"] != "sign-in-callback" || records[1]["result"] != "success"
+            || !fieldsExactly(records[2], {"record", "result"}) || records[2]["record"] != "sign-in-terminal" || records[2]["result"] != "success"
+            || !fieldsExactly(records[3], {"record", "terminal", "callbackUserIsSelf"}) || records[3]["record"] != "stats-retrieve"
+            || records[3]["terminal"] != "success" || records[3]["callbackUserIsSelf"] != true
+            || !fieldsExactly(records[4], {"record", "signedIn", "loggedOn", "idValid", "idType", "selfIdRepeatEqual", "personaAvailable"})
+            || records[4]["record"] != "self-state" || records[4]["signedIn"] != true || records[4]["loggedOn"] != true
+            || records[4]["idValid"] != true || records[4]["idType"] != "user" || records[4]["selfIdRepeatEqual"] != true
+            || !records[4]["personaAvailable"].is_boolean()) return false;
+        normalized = records;
+        return true;
+    }
+    catch (...) { return false; }
+}
+
+bool normalizeStorageDownloadedSharedFileCountTrace(const fs::path& trace, json& normalized)
+{
+    try
+    {
+        const std::vector<std::string> raw = common::readTrace(trace);
+        if (raw.size() != 5) return false;
+        json records = json::array();
+        for (const std::string& line : raw) records.push_back(json::parse(line));
+        if (!fieldsExactly(records[0], {"record", "result"}) || records[0]["record"] != "initialize" || records[0]["result"] != "returned"
+            || !fieldsExactly(records[1], {"record", "result"}) || records[1]["record"] != "sign-in-callback" || records[1]["result"] != "success"
+            || !fieldsExactly(records[2], {"record", "result"}) || records[2]["record"] != "sign-in-terminal" || records[2]["result"] != "success"
+            || !fieldsExactly(records[3], {"record", "storageAvailable", "initialDownloadedSharedFileCountZero"})
+            || records[3]["record"] != "storage-downloaded-shared-files" || records[3]["storageAvailable"] != true
+            || records[3]["initialDownloadedSharedFileCountZero"] != true
+            || !fieldsExactly(records[4], {"record", "signedIn", "loggedOn", "idValid", "idType", "selfIdRepeatEqual", "personaAvailable"})
+            || records[4]["record"] != "self-state" || records[4]["signedIn"] != true || records[4]["loggedOn"] != true
+            || records[4]["idValid"] != true || records[4]["idType"] != "user" || records[4]["selfIdRepeatEqual"] != true
+            || !records[4]["personaAvailable"].is_boolean()) return false;
+        normalized = records;
+        return true;
+    }
+    catch (...) { return false; }
+}
+
 bool normalizeTrace(const fs::path& trace, const ScenarioContract& contract, json& normalized)
 {
     try
@@ -2817,10 +3159,50 @@ bool normalizeTrace(const fs::path& trace, const ScenarioContract& contract, jso
         else return false;
         if (!fieldsExactly(records[2], {"record", "result"}) || records[2]["record"] != "sign-in-terminal"
             || !records[2]["result"].is_string() || records[2]["result"] != callback) return false;
-        const std::size_t selfStateIndex = contract.observesSessionIdRepeatability ? 4 : 3;
+        const std::size_t selfStateIndex = (contract.observesSessionIdRepeatability || observesStatsRetrieveSelfCallback(contract)
+            || observesCurrentGameLanguage(contract) || observesCurrentGameLanguageCopy(contract) || observesCurrentGameLanguageCode(contract) || observesCurrentGameLanguageCodeCopy(contract) || observesOverlayState(contract) || observesStorageFileCount(contract) || observesStorageFileExists(contract)) ? 4 : 3;
         if (contract.observesSessionIdRepeatability
             && (!fieldsExactly(records[3], {"record", "equal"}) || records[3]["record"] != "session-id-repeatability"
                 || !records[3]["equal"].is_boolean())) return false;
+        if (observesStatsRetrieveSelfCallback(contract)
+            && (!fieldsExactly(records[3], {"record", "terminal", "callbackUserIsSelf"}) || records[3]["record"] != "stats-retrieve"
+                || records[3]["terminal"] != "success" || records[3]["callbackUserIsSelf"] != true)) return false;
+        if (observesCurrentGameLanguage(contract)
+            && (!fieldsExactly(records[3], {"record", "appsAvailable", "languagePointerAvailable", "containsNoAsciiUppercase"})
+                || records[3]["record"] != "current-game-language" || !records[3]["appsAvailable"].is_boolean()
+                || !records[3]["languagePointerAvailable"].is_boolean() || !records[3]["containsNoAsciiUppercase"].is_boolean()
+                || (isStrictCurrentGameLanguage(contract) && (!records[3]["appsAvailable"] || !records[3]["languagePointerAvailable"]
+                    || !records[3]["containsNoAsciiUppercase"])))) return false;
+        if (observesCurrentGameLanguageCopy(contract)
+            && (!fieldsExactly(records[3], {"record", "appsAvailable", "oneByteChanged", "oneByteTerminated", "oneByteError", "boundedChanged", "boundedTerminated", "boundedNoAsciiUppercase", "boundedError"})
+                || records[3]["record"] != "current-game-language-copy" || !records[3]["appsAvailable"].is_boolean()
+                || !records[3]["oneByteChanged"].is_boolean() || !records[3]["oneByteTerminated"].is_boolean()
+                || !records[3]["oneByteError"].is_string() || !records[3]["boundedChanged"].is_boolean()
+                || !records[3]["boundedTerminated"].is_boolean() || !records[3]["boundedNoAsciiUppercase"].is_boolean()
+                || !records[3]["boundedError"].is_string())) return false;
+        if (observesCurrentGameLanguageCode(contract)
+            && (!fieldsExactly(records[3], {"record", "appsAvailable", "codePointerAvailable", "matchesDocumentedIsoCodeShape", "error"})
+                || records[3]["record"] != "current-game-language-code" || !records[3]["appsAvailable"].is_boolean()
+                || !records[3]["codePointerAvailable"].is_boolean() || !records[3]["matchesDocumentedIsoCodeShape"].is_boolean()
+                || !records[3]["error"].is_string())) return false;
+        if (observesCurrentGameLanguageCodeCopy(contract)
+            && (!fieldsExactly(records[3], {"record", "appsAvailable", "singleByteChanged", "singleByteTerminated", "singleByteError", "boundedChanged", "boundedTerminated", "boundedMatchesDocumentedIsoCodeShape", "boundedError"})
+                || records[3]["record"] != "current-game-language-code-copy" || !records[3]["appsAvailable"].is_boolean()
+                || !records[3]["singleByteChanged"].is_boolean() || !records[3]["singleByteTerminated"].is_boolean() || !records[3]["singleByteError"].is_string()
+                || !records[3]["boundedChanged"].is_boolean() || !records[3]["boundedTerminated"].is_boolean()
+                || !records[3]["boundedMatchesDocumentedIsoCodeShape"].is_boolean() || !records[3]["boundedError"].is_string())) return false;
+        if (observesOverlayState(contract)
+            && (!fieldsExactly(records[3], {"record", "utilsAvailable", "state", "error"})
+                || records[3]["record"] != "overlay-state" || !records[3]["utilsAvailable"].is_boolean()
+                || !records[3]["state"].is_string() || !records[3]["error"].is_string())) return false;
+        if (observesStorageFileCount(contract)
+            && (!fieldsExactly(records[3], {"record", "storageAvailable", "fileCountZero", "error"})
+                || records[3]["record"] != "storage-file-count" || !records[3]["storageAvailable"].is_boolean()
+                || !records[3]["fileCountZero"].is_boolean() || !records[3]["error"].is_string())) return false;
+        if (observesStorageFileExists(contract)
+            && (!fieldsExactly(records[3], {"record", "storageAvailable", "exists", "error"})
+                || records[3]["record"] != "storage-file-exists" || !records[3]["storageAvailable"].is_boolean()
+                || !records[3]["exists"].is_boolean() || !records[3]["error"].is_string())) return false;
         if (!fieldsExactly(records[selfStateIndex], {"record", "signedIn", "loggedOn", "idValid", "idType", "selfIdRepeatEqual", "personaAvailable"})
             || records[selfStateIndex]["record"] != "self-state" || !records[selfStateIndex]["signedIn"].is_boolean() || !records[selfStateIndex]["loggedOn"].is_boolean()
             || !records[selfStateIndex]["idValid"].is_boolean() || !records[selfStateIndex]["idType"].is_string() || !records[selfStateIndex]["selfIdRepeatEqual"].is_boolean()
@@ -2841,12 +3223,20 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
     const ScenarioContract& contract = *scenario.contract;
     report = json::object();
     report["scenario"] = contract.name;
-    report["opaqueIdPolicy"] = observesPublicLobbyOwnerOwnershipTransition(contract)
+    report["opaqueIdPolicy"] = isStrictCurrentGameLanguage(contract)
+        ? "raw language strings, pointers, Galaxy IDs, credentials, and runtime data are never recorded; only IApps availability, a non-null language pointer, and the documented lowercase property are compared"
+        : observesStorageDownloadedSharedFileCount(contract)
+        ? "raw Galaxy IDs, shared-file names, file data, credentials, and runtime data are never recorded; only storage availability and the initial open downloaded-shared-file count relation are compared"
+        : observesStatsRetrieveSelfCallback(contract)
+        ? "raw Galaxy IDs, achievement names, stat values, credentials, and runtime data are never recorded; only successful default-self retrieval and callback-user-equals-self are compared"
+        : observesPublicLobbyOwnerOwnershipTransition(contract)
         ? "raw Galaxy IDs, public collision-marker values, and promoted data are never recorded; only symbolic ownership, member, authorization, and list-absence relations are compared"
         : observesCustomNetworkingLoopbackRoundtripClose(contract)
         ? "connection IDs, endpoint URL and port, private payload bytes and lengths, credentials, timestamps, controls, and runtime output are never recorded; only symbolic open/data/peek/read/close relations are compared"
         : observesPublicLobbyStringFiltering(contract)
         ? "raw Galaxy IDs, lobby IDs, public collision-marker values, filter values, candidate counts, indexes, and timestamps are never recorded; both lanes require symbolic target appearance, predicate match, selected join, membership, ownership, and cleanup; official stable exclusion is strict while UniverseLAN unmatched-candidate presence/exclusion is diagnostic only"
+        : observesPublicLobbyNumericalFiltering(contract)
+        ? "raw Galaxy IDs, lobby IDs, numeric-property values, public collision-marker values, candidate counts, indexes, timestamps, and runtime data are never recorded; both lanes require target appearance, numerical-predicate match, target-only selected join, two-member non-self-owner state, and cleanup; run-owned unmatched-candidate presence is diagnostic only"
         : isStrictPublicLobbyNotJoinableBehavior(contract)
         ? "raw Galaxy IDs, public collision-marker values, configuration values, and timestamps are never recorded; only public nonjoinable configuration, filtered-list absence, no direct join/member/send access, creator sole ownership, and delete-probe relations are compared"
         : observesPublicLobbyFullJoinFailure(contract)
@@ -2881,8 +3271,14 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
     {
         json universelan;
         json gog;
-        const bool universelanValid = observesCustomNetworkingLoopbackRoundtripClose(contract)
+        const bool universelanValid = observesStorageDownloadedSharedFileCount(contract)
+            ? normalizeStorageDownloadedSharedFileCountTrace(root / "universelan" / profile / "trace.jsonl", universelan)
+            : observesStatsRetrieveSelfCallback(contract)
+            ? normalizeStatsRetrieveSelfCallbackTrace(root / "universelan" / profile / "trace.jsonl", universelan)
+            : observesCustomNetworkingLoopbackRoundtripClose(contract)
             ? normalizeCustomNetworkingLoopbackRoundtripCloseTrace(root / "universelan" / profile / "trace.jsonl", universelan)
+            : observesPublicLobbyNumericalFiltering(contract)
+            ? normalizePublicLobbyNumericalFilteringTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
             : observesPublicLobbyStringFiltering(contract)
             ? normalizePublicLobbyStringFilteringTrace(root / "universelan" / profile / "trace.jsonl", profile, false, universelan)
             : isStrictPublicLobbyNotJoinableBehavior(contract)
@@ -2919,8 +3315,14 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
             : contract.observesPublicLobby
             ? normalizePublicLobbyTrace(root / "universelan" / profile / "trace.jsonl", profile, universelan)
             : normalizeTrace(root / "universelan" / profile / "trace.jsonl", contract, universelan);
-        const bool gogValid = observesCustomNetworkingLoopbackRoundtripClose(contract)
+        const bool gogValid = observesStorageDownloadedSharedFileCount(contract)
+            ? normalizeStorageDownloadedSharedFileCountTrace(root / "gog" / profile / "trace.jsonl", gog)
+            : observesStatsRetrieveSelfCallback(contract)
+            ? normalizeStatsRetrieveSelfCallbackTrace(root / "gog" / profile / "trace.jsonl", gog)
+            : observesCustomNetworkingLoopbackRoundtripClose(contract)
             ? normalizeCustomNetworkingLoopbackRoundtripCloseTrace(root / "gog" / profile / "trace.jsonl", gog)
+            : observesPublicLobbyNumericalFiltering(contract)
+            ? normalizePublicLobbyNumericalFilteringTrace(root / "gog" / profile / "trace.jsonl", profile, gog)
             : observesPublicLobbyStringFiltering(contract)
             ? normalizePublicLobbyStringFilteringTrace(root / "gog" / profile / "trace.jsonl", profile, true, gog)
             : isStrictPublicLobbyNotJoinableBehavior(contract)
@@ -2970,7 +3372,8 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
             || (terminalSuccess && universelan[3]["equal"] == gog[3]["equal"]);
         json comparableUniverselan = universelan;
         json comparableGog = gog;
-        if (contract.observesPublicLobby && !observesPublicLobbyFullJoinFailure(contract) && profile == std::string_view("user2") && universelanValid && gogValid)
+        if (contract.observesPublicLobby && !observesPublicLobbyFullJoinFailure(contract) && !observesPublicLobbyNumericalFiltering(contract)
+            && profile == std::string_view("user2") && universelanValid && gogValid)
         {
             // Public-list indexing is eventually consistent; both lanes must satisfy the bounded retry contract,
             // but their successful attempt number is not an identity or callback-behavior relation.
@@ -3002,6 +3405,18 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
                 && gog[3]["unmatchedCandidateAppeared"] == false && comparableUniverselan == comparableGog;
             report["lanes"][profile]["publicLobbyStringFilterCandidateSetComparison"] =
                 "official-stable-target-only;universelan-target-required-unmatched-candidate-diagnostic";
+        }
+        if (observesPublicLobbyNumericalFiltering(contract) && profile == std::string_view("user2") && universelanValid && gogValid)
+        {
+            // A run-owned unmatched candidate is retained for diagnostics, never accepted as a product difference.
+            comparableUniverselan[3].erase("retryUsed");
+            comparableGog[3].erase("retryUsed");
+            comparableUniverselan[3].erase("runOwnedUnmatchedCandidateAppeared");
+            comparableUniverselan[4].erase("runOwnedUnmatchedCandidateAppeared");
+            comparableGog[3].erase("runOwnedUnmatchedCandidateAppeared");
+            comparableGog[4].erase("runOwnedUnmatchedCandidateAppeared");
+            report["lanes"][profile]["retryConvergenceComparison"] = "diagnostic-context-excluded";
+            report["lanes"][profile]["runOwnedUnmatchedCandidateComparison"] = "diagnostic-context-excluded";
         }
         if (observesPublicLobbyOwnerCloseLifecycle(contract) && profile == std::string_view("user2") && universelanValid && gogValid)
         {
@@ -3064,6 +3479,14 @@ bool compareTraces(const fs::path& root, const Scenario& scenario, json& report)
             comparableGog[observationIndex].erase("callbackCount");
             comparableGog[observationIndex].erase("callbackTargetOrder");
             report["lanes"][profile]["memberDataCallbackOrderComparison"] = "independent-member-update-order;diagnostic-context-excluded";
+        }
+        if (observesBidirectionalReliableP2PPollRead(contract) && universelanValid && gogValid)
+        {
+            // Only the documented self-direct relation is strict; peer routing is public diagnostic context.
+            const std::size_t pollArmedIndex = profile == std::string_view("user1") ? 7 : 6;
+            comparableUniverselan[pollArmedIndex].erase("peerConnectionType");
+            comparableGog[pollArmedIndex].erase("peerConnectionType");
+            report["lanes"][profile]["peerConnectionTypeComparison"] = "public-peer-routing-characterization;diagnostic-context-excluded";
         }
         if (observesBidirectionalChatRoomMessageDelivery(contract) && universelanValid && gogValid)
         {
@@ -3151,6 +3574,233 @@ void characterizeTraces(const fs::path& root, json& report)
             {
                 laneReport["normalized"] = "unavailable";
             }
+            report["lanes"][profile][lane] = laneReport;
+        }
+    }
+}
+
+void characterizeStatsRetrieveAchievementsNumberTraces(const fs::path& root, json& report)
+{
+    report = json::object();
+    report["scenario"] = "Simple/stats-retrieve-achievements-number";
+    report["classification"] = "characterization";
+    report["comparison"] = "none";
+    report["status"] = "characterized";
+    report["opaqueIdPolicy"] = "raw Galaxy IDs, achievement catalog contents, unlock state, stat values, credentials, and runtime data are never recorded";
+    for (const char* profile : {"user1", "user2"})
+    {
+        for (const char* lane : {"universelan", "gog"})
+        {
+            json laneReport = json::object();
+            try
+            {
+                json records = json::array();
+                for (const std::string& line : common::readTrace(root / lane / profile / "trace.jsonl")) records.push_back(json::parse(line));
+                laneReport["normalized"] = records;
+                if (records.size() == 5 && records[3].value("record", "") == "stats-retrieve")
+                {
+                    laneReport["terminal"] = records[3].value("terminal", "unavailable");
+                    laneReport["callbackUserIsSelf"] = records[3].value("callbackUserIsSelf", false);
+                    laneReport["achievementNumberQueryCompleted"] = records[3].value("achievementNumberQueryCompleted", false);
+                }
+            }
+            catch (...) { laneReport["normalized"] = "unavailable"; }
+            report["lanes"][profile][lane] = laneReport;
+        }
+    }
+}
+
+void characterizeCurrentGameLanguageTraces(const fs::path& root, json& report)
+{
+    report = json::object();
+    report["scenario"] = "Simple/current-game-language";
+    report["classification"] = "characterization";
+    report["comparison"] = "none";
+    report["status"] = "characterized";
+    report["opaqueIdPolicy"] = "raw language strings, pointers, Galaxy IDs, credentials, and runtime data are never recorded";
+    for (const char* profile : {"user1", "user2"})
+    {
+        for (const char* lane : {"universelan", "gog"})
+        {
+            json laneReport = json::object();
+            try
+            {
+                json records = json::array();
+                for (const std::string& line : common::readTrace(root / lane / profile / "trace.jsonl")) records.push_back(json::parse(line));
+                laneReport["normalized"] = records;
+                if (records.size() == 5 && records[3].value("record", "") == "current-game-language")
+                {
+                    laneReport["appsAvailable"] = records[3].value("appsAvailable", false);
+                    laneReport["languagePointerAvailable"] = records[3].value("languagePointerAvailable", false);
+                    laneReport["containsNoAsciiUppercase"] = records[3].value("containsNoAsciiUppercase", false);
+                }
+            }
+            catch (...) { laneReport["normalized"] = "unavailable"; }
+            report["lanes"][profile][lane] = laneReport;
+        }
+    }
+}
+
+void characterizeCurrentGameLanguageCopyTraces(const fs::path& root, json& report)
+{
+    report = json::object();
+    report["scenario"] = "Simple/current-game-language-copy";
+    report["classification"] = "characterization";
+    report["comparison"] = "none";
+    report["status"] = "characterized";
+    report["opaqueIdPolicy"] = "raw language bytes, buffers, Galaxy IDs, credentials, and runtime data are never recorded";
+    for (const char* profile : {"user1", "user2"})
+    {
+        for (const char* lane : {"universelan", "gog"})
+        {
+            json laneReport = json::object();
+            try
+            {
+                json records = json::array();
+                for (const std::string& line : common::readTrace(root / lane / profile / "trace.jsonl")) records.push_back(json::parse(line));
+                laneReport["normalized"] = records;
+                if (records.size() == 5 && records[3].value("record", "") == "current-game-language-copy")
+                    for (const char* field : {"appsAvailable", "oneByteChanged", "oneByteTerminated", "oneByteError", "boundedChanged", "boundedTerminated", "boundedNoAsciiUppercase", "boundedError"})
+                        laneReport[field] = records[3].value(field, json());
+            }
+            catch (...) { laneReport["normalized"] = "unavailable"; }
+            report["lanes"][profile][lane] = laneReport;
+        }
+    }
+}
+
+void characterizeCurrentGameLanguageCodeTraces(const fs::path& root, json& report)
+{
+    report = json::object();
+    report["scenario"] = "Simple/current-game-language-code";
+    report["classification"] = "characterization";
+    report["comparison"] = "none";
+    report["status"] = "characterized";
+    report["opaqueIdPolicy"] = "raw language-code text, pointers, Galaxy IDs, credentials, and runtime data are never recorded";
+    for (const char* profile : {"user1", "user2"})
+    {
+        for (const char* lane : {"universelan", "gog"})
+        {
+            json laneReport = json::object();
+            try
+            {
+                json records = json::array();
+                for (const std::string& line : common::readTrace(root / lane / profile / "trace.jsonl")) records.push_back(json::parse(line));
+                laneReport["normalized"] = records;
+                if (records.size() == 5 && records[3].value("record", "") == "current-game-language-code")
+                    for (const char* field : {"appsAvailable", "codePointerAvailable", "matchesDocumentedIsoCodeShape", "error"})
+                        laneReport[field] = records[3].value(field, json());
+            }
+            catch (...) { laneReport["normalized"] = "unavailable"; }
+            report["lanes"][profile][lane] = laneReport;
+        }
+    }
+}
+
+void characterizeCurrentGameLanguageCodeCopyTraces(const fs::path& root, json& report)
+{
+    report = json::object();
+    report["scenario"] = "Simple/current-game-language-code-copy";
+    report["classification"] = "characterization";
+    report["comparison"] = "none";
+    report["status"] = "characterized";
+    report["opaqueIdPolicy"] = "raw language-code text, pointers, Galaxy IDs, credentials, and runtime data are never recorded";
+    for (const char* profile : {"user1", "user2"})
+    {
+        for (const char* lane : {"universelan", "gog"})
+        {
+            json laneReport = json::object();
+            try
+            {
+                json records = json::array();
+                for (const std::string& line : common::readTrace(root / lane / profile / "trace.jsonl")) records.push_back(json::parse(line));
+                laneReport["normalized"] = records;
+                if (records.size() == 5 && records[3].value("record", "") == "current-game-language-code-copy")
+                    for (const char* field : {"appsAvailable", "singleByteChanged", "singleByteTerminated", "singleByteError", "boundedChanged", "boundedTerminated", "boundedMatchesDocumentedIsoCodeShape", "boundedError"})
+                        laneReport[field] = records[3].value(field, json());
+            }
+            catch (...) { laneReport["normalized"] = "unavailable"; }
+            report["lanes"][profile][lane] = laneReport;
+        }
+    }
+}
+
+void characterizeOverlayStateTraces(const fs::path& root, json& report)
+{
+    report = json::object();
+    report["scenario"] = "Simple/overlay-state";
+    report["classification"] = "characterization";
+    report["comparison"] = "none";
+    report["status"] = "characterized";
+    report["opaqueIdPolicy"] = "Galaxy IDs, credentials, runtime data, and overlay controls are never recorded or invoked";
+    for (const char* profile : {"user1", "user2"})
+    {
+        for (const char* lane : {"universelan", "gog"})
+        {
+            json laneReport = json::object();
+            try
+            {
+                json records = json::array();
+                for (const std::string& line : common::readTrace(root / lane / profile / "trace.jsonl")) records.push_back(json::parse(line));
+                laneReport["normalized"] = records;
+                if (records.size() == 5 && records[3].value("record", "") == "overlay-state")
+                    for (const char* field : {"utilsAvailable", "state", "error"}) laneReport[field] = records[3].value(field, json());
+            }
+            catch (...) { laneReport["normalized"] = "unavailable"; }
+            report["lanes"][profile][lane] = laneReport;
+        }
+    }
+}
+
+void characterizeStorageFileCountTraces(const fs::path& root, json& report)
+{
+    report = json::object();
+    report["scenario"] = "Simple/storage-file-count";
+    report["classification"] = "characterization";
+    report["comparison"] = "none";
+    report["status"] = "characterized";
+    report["opaqueIdPolicy"] = "raw file counts, filenames, paths, content, Galaxy IDs, credentials, and runtime data are never recorded";
+    for (const char* profile : {"user1", "user2"})
+    {
+        for (const char* lane : {"universelan", "gog"})
+        {
+            json laneReport = json::object();
+            try
+            {
+                json records = json::array();
+                for (const std::string& line : common::readTrace(root / lane / profile / "trace.jsonl")) records.push_back(json::parse(line));
+                laneReport["normalized"] = records;
+                if (records.size() == 5 && records[3].value("record", "") == "storage-file-count")
+                    for (const char* field : {"storageAvailable", "fileCountZero", "error"}) laneReport[field] = records[3].value(field, json());
+            }
+            catch (...) { laneReport["normalized"] = "unavailable"; }
+            report["lanes"][profile][lane] = laneReport;
+        }
+    }
+}
+
+void characterizeStorageFileExistsTraces(const fs::path& root, json& report)
+{
+    report = json::object();
+    report["scenario"] = "Simple/storage-file-exists";
+    report["classification"] = "characterization";
+    report["comparison"] = "none";
+    report["status"] = "characterized";
+    report["opaqueIdPolicy"] = "raw file paths, names, content, Galaxy IDs, credentials, and runtime data are never recorded";
+    for (const char* profile : {"user1", "user2"})
+    {
+        for (const char* lane : {"universelan", "gog"})
+        {
+            json laneReport = json::object();
+            try
+            {
+                json records = json::array();
+                for (const std::string& line : common::readTrace(root / lane / profile / "trace.jsonl")) records.push_back(json::parse(line));
+                laneReport["normalized"] = records;
+                if (records.size() == 5 && records[3].value("record", "") == "storage-file-exists")
+                    for (const char* field : {"storageAvailable", "exists", "error"}) laneReport[field] = records[3].value(field, json());
+            }
+            catch (...) { laneReport["normalized"] = "unavailable"; }
             report["lanes"][profile][lane] = laneReport;
         }
     }
@@ -4082,6 +4732,22 @@ int run(const Arguments& arguments, const Scenario& scenario)
                 characterizePublicLobbyOwnerCloseLifecycleTraces(root, report);
             else if (scenario.characterization && observesPublicLobbyOwnerOwnershipTransition(*scenario.contract))
                 characterizePublicLobbyOwnerOwnershipTransitionTraces(root, report);
+            else if (scenario.characterization && scenario.contract->hostScenario == "stats-retrieve-achievements-number-characterization")
+                characterizeStatsRetrieveAchievementsNumberTraces(root, report);
+            else if (scenario.characterization && observesCurrentGameLanguage(*scenario.contract))
+                characterizeCurrentGameLanguageTraces(root, report);
+            else if (scenario.characterization && observesCurrentGameLanguageCopy(*scenario.contract))
+                characterizeCurrentGameLanguageCopyTraces(root, report);
+            else if (scenario.characterization && observesCurrentGameLanguageCode(*scenario.contract))
+                characterizeCurrentGameLanguageCodeTraces(root, report);
+            else if (scenario.characterization && observesCurrentGameLanguageCodeCopy(*scenario.contract))
+                characterizeCurrentGameLanguageCodeCopyTraces(root, report);
+            else if (scenario.characterization && observesOverlayState(*scenario.contract))
+                characterizeOverlayStateTraces(root, report);
+            else if (scenario.characterization && observesStorageFileCount(*scenario.contract))
+                characterizeStorageFileCountTraces(root, report);
+            else if (scenario.characterization && observesStorageFileExists(*scenario.contract))
+                characterizeStorageFileExistsTraces(root, report);
             else if (scenario.characterization) characterizeTraces(root, report);
             else compareTraces(root, scenario, report);
             if (scenario.contract->observesPublicLobby) report["exitCleanup"] = cleanupAcknowledged ? "acknowledged" : "not-acknowledged";
@@ -4136,6 +4802,22 @@ int run(const Arguments& arguments, const Scenario& scenario)
                 characterizePublicLobbyOwnerCloseLifecycleTraces(root, report);
             else if (observesPublicLobbyOwnerOwnershipTransition(*scenario.contract))
                 characterizePublicLobbyOwnerOwnershipTransitionTraces(root, report);
+            else if (scenario.contract->hostScenario == "stats-retrieve-achievements-number-characterization")
+                characterizeStatsRetrieveAchievementsNumberTraces(root, report);
+            else if (observesCurrentGameLanguage(*scenario.contract))
+                characterizeCurrentGameLanguageTraces(root, report);
+            else if (observesCurrentGameLanguageCopy(*scenario.contract))
+                characterizeCurrentGameLanguageCopyTraces(root, report);
+            else if (observesCurrentGameLanguageCode(*scenario.contract))
+                characterizeCurrentGameLanguageCodeTraces(root, report);
+            else if (observesCurrentGameLanguageCodeCopy(*scenario.contract))
+                characterizeCurrentGameLanguageCodeCopyTraces(root, report);
+            else if (observesOverlayState(*scenario.contract))
+                characterizeOverlayStateTraces(root, report);
+            else if (observesStorageFileCount(*scenario.contract))
+                characterizeStorageFileCountTraces(root, report);
+            else if (observesStorageFileExists(*scenario.contract))
+                characterizeStorageFileExistsTraces(root, report);
             else characterizeTraces(root, report);
             success = true;
             if (scenario.contract->observesFriendsPeerInformation)
@@ -4306,6 +4988,14 @@ int main(int argc, char* argv[])
     {
         Scenario scenario;
         if (arguments.characterizeGogServicesState) scenario = characterizationScenario();
+        else if (arguments.characterizeStatsRetrieveAchievementsNumber) scenario = statsRetrieveAchievementsNumberCharacterizationScenario();
+        else if (arguments.characterizeCurrentGameLanguage) scenario = currentGameLanguageCharacterizationScenario();
+        else if (arguments.characterizeCurrentGameLanguageCopy) scenario = currentGameLanguageCopyCharacterizationScenario();
+        else if (arguments.characterizeCurrentGameLanguageCode) scenario = currentGameLanguageCodeCharacterizationScenario();
+        else if (arguments.characterizeCurrentGameLanguageCodeCopy) scenario = currentGameLanguageCodeCopyCharacterizationScenario();
+        else if (arguments.characterizeOverlayState) scenario = overlayStateCharacterizationScenario();
+        else if (arguments.characterizeStorageFileCount) scenario = storageFileCountCharacterizationScenario();
+        else if (arguments.characterizeStorageFileExists) scenario = storageFileExistsCharacterizationScenario();
         else if (arguments.characterizeOfficialGogCustomNetworkingLoopbackRoundtripClose) scenario = customNetworkingLoopbackRoundtripCloseCharacterizationScenario();
         else if (arguments.characterizeOfficialGogPublicLobbyOwnerCloseLifecycle) scenario = publicLobbyOwnerCloseLifecycleCharacterizationScenario();
         else if (arguments.characterizeOfficialGogPublicLobbyOwnerOwnershipTransition) scenario = publicLobbyOwnerOwnershipTransitionCharacterizationScenario();

@@ -11,7 +11,7 @@
 | SDKs with `HAS_ICHAT` | `Shared/ChatMessage.hxx` | `Shared/ChatMessageTests.cxx` | Constructor and default state; uses `HAS_ICHAT_MESSAGETYPE` for the signature and type API change |
 | SDKs with `HAS_ICHAT` | `Shared/ChatRoom.hxx` | `Shared/ChatRoomTests.cxx` | Member uniqueness, messages, longest-message tracking, and read state; uses `HAS_ICHAT_MESSAGETYPE` for message construction |
 | SDKs with `HAS_ICHAT` | `Shared/ChatRoomManager.hxx` | `Shared/ChatRoomManagerTests.cxx` | Create, lookup, remove, and duplicate copied-room handling |
-| All configured SDK versions | `Shared/Lobby.hxx` | `Shared/LobbyTests.cxx` | Membership, capacity boundaries, lobby/member data, and bounded member-message retrieval |
+| All configured SDK versions | `Shared/Lobby.hxx` | `Shared/LobbyTests.cxx` | Membership, capacity boundaries, lobby/member data, bounded member-message retrieval, and forced-local-member index ordering |
 | All configured SDK versions | `Shared/LobbyManager.hxx` | `Shared/LobbyManagerTests.cxx` | Creation, configured state, lookup, and removal |
 | All configured SDK versions | `Shared/SharedFileUtils.hxx` | `Shared/SharedFileUtilsTests.cxx` | File I/O by name and shared ID, bounded reads, cleanup, and invalid input handling |
 | All configured SDK versions | `Shared/Networking/Messages/*.hxx` except marker messages | `Shared/Networking/*Tests.cxx` | Binary serialization round trips for all 30 substantive networking messages, including populated lobby, lobby-list, user-data, user-hello, and chat response graphs; feature-gated chat coverage follows `HAS_ICHAT` |

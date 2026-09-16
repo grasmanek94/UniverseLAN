@@ -6,4 +6,6 @@ The matrix is dynamic: choose a historical SDK snapshot, compile using the match
 
 No plan may retain raw identifiers, credentials, secrets, tokens, payloads, URLs, traces, timestamps, or runtime logs. Normalize only to local opaque relationships. Use deterministic barriers, causal readiness gates, bounded deadlines, and per-interface ordering; do not infer total order across independent callbacks or hosts.
 
-Each plan separates documented facts from characterization. `Pass` is available only after both result placeholders contain evidence from the stated lanes. `Fail` is a measured mismatch. `Not-run` is the initial and only current verdict. The least-feasible next step is deliberately the smallest safe experiment that can reduce an unexplained difference.
+Each plan separates documented facts from characterization. `Pass` is available only after both result placeholders contain evidence from the stated lanes. `Fail` is a measured mismatch. `Not-run` is the initial default verdict. The least-feasible next step is deliberately the smallest safe experiment that can reduce an unexplained difference.
+
+Implementation, result recording, and maintenance conventions are in [IMPLEMENTATION.md](IMPLEMENTATION.md).

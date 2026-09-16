@@ -30,6 +30,43 @@ TEST(Lobby, ManagesMembersAndCapacity)
     EXPECT_FALSE(lobby.IsMember(first_member));
 }
 
+TEST(Lobby, ReturnsForcedMemberFirstWithoutDuplicatingOtherMembers)
+{
+    universelan::Lobby lobby;
+    const galaxy::api::GalaxyID first_member(1);
+    const galaxy::api::GalaxyID forced_member(2);
+    const galaxy::api::GalaxyID last_member(3);
+
+    ASSERT_TRUE(lobby.AddMember(first_member));
+    ASSERT_TRUE(lobby.AddMember(forced_member));
+    ASSERT_TRUE(lobby.AddMember(last_member));
+
+    std::array<galaxy::api::GalaxyID, 2> expected_other_members{};
+    std::size_t expected_other_count = 0;
+    for (std::size_t index = 0; index < lobby.GetMemberCount(); ++index)
+    {
+        const galaxy::api::GalaxyID member = lobby.GetMemberByIndex(index);
+        if (member != forced_member) expected_other_members.at(expected_other_count++) = member;
+    }
+
+    EXPECT_EQ(lobby.GetMemberByIndexWithForcedZero(0, forced_member), forced_member);
+    ASSERT_EQ(expected_other_count, 2U);
+    EXPECT_EQ(lobby.GetMemberByIndexWithForcedZero(1, forced_member), expected_other_members[0]);
+    EXPECT_EQ(lobby.GetMemberByIndexWithForcedZero(2, forced_member), expected_other_members[1]);
+}
+
+TEST(Lobby, ReturnsInvalidMemberWhenForcedMemberIsAbsentOrIndexIsOutOfRange)
+{
+    universelan::Lobby lobby;
+    const galaxy::api::GalaxyID member(1);
+    const galaxy::api::GalaxyID absent_member(2);
+
+    ASSERT_TRUE(lobby.AddMember(member));
+
+    EXPECT_FALSE(lobby.GetMemberByIndexWithForcedZero(0, absent_member).IsValid());
+    EXPECT_FALSE(lobby.GetMemberByIndexWithForcedZero(lobby.GetMemberCount(), member).IsValid());
+}
+
 TEST(Lobby, StoresLobbyAndMemberDataAndRejectsUnknownMembers)
 {
     universelan::Lobby lobby;

@@ -230,6 +230,18 @@ requires unmatched exclusion; UniverseLAN intentionally permits an unmatched
 candidate in the public result as diagnostic context only. This is not permission
 for malformed filters or wrong-target selection/join.
 
+`Simple/public-lobby-numerical-filtering` passed its first x64 `1.152.11`
+two-lane comparison on 2026-09-16 in 9.76 seconds. It uses the same safe sequential
+nonjoinable-to-joinable public FCM lifecycle, with fixed distinct numeric lobby
+properties and one shared token-derived run marker. User2 combines
+`AddRequestLobbyListNumericalFilter(..., LOBBY_COMPARISON_TYPE_EQUAL)` with the
+run-marker filter, classifies only callback-local candidates, and requires the
+run-owned numerical nonmatch to be absent before target-only selection/join plus
+public two-member/non-self-owner and cleanup relations. Retry and the retained
+unmatched boolean are excluded from cross-lane equality, but each lane must prove
+the absence relation. Numeric values, markers, IDs, counts, indexes, timestamps,
+and runtime data are never retained.
+
 `Simple/custom-networking-loopback-roundtrip-close` is currently an official-only
 characterization probe, not a registered strict comparison. It uses public
 `ICustomNetworking` against a runner-owned ephemeral loopback WebSocket endpoint

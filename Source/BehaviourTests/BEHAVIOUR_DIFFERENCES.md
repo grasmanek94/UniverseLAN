@@ -29,6 +29,96 @@ The recorded accepted lobby convergence result passes because eventual-list retr
 timing is explicitly excluded from lane equality. Matched live baselines remain
 strict for every public fact they record.
 
+### `Simple/stats-retrieve-self-callback` on `1.152.11/x64`
+
+- Date: 2026-09-16
+- Classification: matched live baseline
+- Public observation: after sign-in, both profiles requested default-self statistics and achievements. Each lane reported one successful terminal callback whose user equals the public self ID.
+- Official normalized result: both profiles completed successful default-self retrieval with callback-user-is-self `true`.
+- UniverseLAN normalized result: matched both successful default-self retrieval and callback-user-is-self `true` after canonicalizing the self callback ID.
+- Reproduction command/test name: `universelan-behaviour-simple-stats-retrieve-self-callback-x64-1.152.11`; portable `RunBehaviorCTest.cmake` with `BEHAVIOUR_TEST_LABEL="stats-retrieve-self-callback"`.
+- Follow-up: achievement catalog content is intentionally absent from this contract because it is title configuration. A later title-fixture probe may compare only symbolic unlocked-state relations. No raw user ID, achievement name, stat value, credential, timestamp, or artifact path is recorded.
+
+### `Simple/storage-downloaded-shared-file-count` on `1.152.11/x64`
+
+- Date: 2026-09-16
+- Classification: matched live baseline
+- Public observation: after sign-in and before any shared-file operation, both profiles queried public `IStorage::GetDownloadedSharedFileCount` once.
+- Official normalized result: storage was available and no downloaded shared file was open for either isolated host.
+- UniverseLAN normalized result: matched storage availability and the zero-open-shared-file relation for both isolated hosts.
+- Reproduction command/test name: `universelan-behaviour-simple-storage-downloaded-shared-file-count-x64-1.152.11`; portable `RunBehaviorCTest.cmake` with `BEHAVIOUR_TEST_LABEL="storage-downloaded-shared-file-count"`.
+- Follow-up: do not infer persistent-file enumeration, shared-file metadata, or download semantics from the initial state. No shared-file ID, name, content, count, credential, timestamp, or artifact path is recorded.
+
+### `Simple/current-game-language` on `1.152.11/x64`
+
+- Date: 2026-09-16
+- Classification: matched live baseline
+- Public observation: after sign-in, both profiles called public `IApps::GetCurrentGameLanguage()` once using the default base-game product ID.
+- Official normalized result: `IApps` was available, the result was non-null, and it contained no ASCII uppercase character for both profiles in two characterizations and the focused comparison.
+- UniverseLAN normalized result: matched those three sanitized relations for both profiles.
+- Reproduction command/test name: `--characterize-current-game-language`; `universelan-behaviour-simple-current-game-language-x64-1.152.11`; portable `RunBehaviorCTest.cmake` with `BEHAVIOUR_TEST_LABEL="current-game-language"`.
+- Follow-up: the selected header documents a lowercase language name and default product ID `0` for the base game. The language text and pointer are title/environment configuration, not lane-comparison evidence; no raw language, pointer, ID, credential, timestamp, or artifact path is recorded.
+
+### `Simple/current-game-language-copy` on `1.152.11/x64`
+
+- Date: 2026-09-16
+- Classification: candidate difference
+- Public observation: after sign-in, each profile called `IApps::GetCurrentGameLanguageCopy()` with default base-game ID into transient sentinel-filled one-byte and 256-byte non-null buffers, checking public `GetError()` immediately after each call.
+- Official normalized result: both forms returned `runtime-error` and left the sentinel buffers unchanged for both profiles in two runs.
+- UniverseLAN normalized result: both forms returned no error and changed/terminated the transient buffers for both profiles in two runs; the 256-byte form also had no ASCII uppercase character before its terminator.
+- Reproduction command/test name: `--characterize-current-game-language-copy`; no CTest is registered.
+- Follow-up: the header does not document termination, truncation, a maximum language length, or behavior for these buffer capacities. This is narrow repeatable evidence, not an implementation defect or general API guarantee. Do not retain language bytes, use null/zero-buffer forms, or change UniverseLAN code; characterize one additional independently justified non-null form first.
+
+### `Simple/current-game-language-code` on `1.152.11/x64`
+
+- Date: 2026-09-16
+- Classification: candidate difference
+- Public observation: after sign-in, each profile called `IApps::GetCurrentGameLanguageCode()` with default base-game ID and immediately inspected the pointer only for non-nullability and the header-documented ISO-code shape, then checked public `GetError()`.
+- Official normalized result: both profiles in two runs returned a non-null documented-shape result with `runtime-error`.
+- UniverseLAN normalized result: both profiles in two runs returned a non-null documented-shape result with no error.
+- Reproduction command/test name: `--characterize-current-game-language-code`; no CTest is registered.
+- Follow-up: pointer lifetime and code text are not documented for comparison. This immediate-error candidate requires an independent public lifecycle form before classification; raw code text, pointers, IDs, credentials, timestamps, and runtime data are never retained.
+
+### `Simple/current-game-language-code-copy` on `1.152.11/x64`
+
+- Date: 2026-09-16
+- Classification: candidate difference
+- Public observation: after sign-in, each profile called `IApps::GetCurrentGameLanguageCodeCopy()` with default base-game ID into transient sentinel-filled one-byte and 256-byte non-null buffers, checking public `GetError()` immediately after each call.
+- Official normalized result: both forms returned `runtime-error` and left the sentinel buffers unchanged for both profiles in two runs.
+- UniverseLAN normalized result: both forms returned no error and changed/terminated the transient buffers for both profiles in two runs; the 256-byte form had the documented ISO-code shape before it was cleared.
+- Reproduction command/test name: `--characterize-current-game-language-code-copy`; no CTest is registered.
+- Follow-up: the header does not document termination, truncation, a maximum code length, or behavior for these capacities. This is narrow repeatable evidence, not an implementation defect or general API guarantee. Do not retain code bytes, use null/zero-buffer forms, or change UniverseLAN code; characterize one additional independently justified non-null form first.
+
+### `Simple/overlay-state` on `1.152.11/x64`
+
+- Date: 2026-09-16
+- Classification: environment-dependent candidate difference
+- Public observation: after sign-in, each profile called public `IUtils::GetOverlayState()` once, normalized it only to a documented enum category, and immediately checked public `GetError()`.
+- Official normalized result: both profiles reported available `IUtils`, `undefined` overlay state, and no error in two runs.
+- UniverseLAN normalized result: both profiles reported available `IUtils`, `disabled` overlay state, and no error in two runs.
+- Reproduction command/test name: `--characterize-overlay-state`; no CTest is registered.
+- Follow-up: the header states overlay state depends on user enablement, support, and successful injection. This is not a compatibility contract or implementation defect. Do not call `IsOverlayVisible`, display, or popup-control APIs while their initialization precondition is not established; no overlay action, IDs, credentials, timestamps, or runtime data are retained.
+
+### `Simple/storage-file-count` on `1.152.11/x64`
+
+- Date: 2026-09-16
+- Classification: storage-state candidate difference
+- Public observation: after sign-in and before any storage operation, each profile called public `IStorage::GetFileCount()` once and immediately checked public `GetError()`. The returned count was retained only as a zero/nonzero relation.
+- Official normalized result: both profiles reported available storage, a nonzero-file relation, and no error in two runs.
+- UniverseLAN normalized result: both profiles reported available storage, an empty-file relation, and no error in two runs.
+- Reproduction command/test name: `--characterize-storage-file-count`; no CTest is registered.
+- Follow-up: storage contents are title and environment state, not general compatibility evidence. This is not an implementation defect or equality contract. Do not enumerate, read, write, delete, share, synchronize, or retain file counts, names, paths, content, IDs, credentials, timestamps, or runtime data.
+
+### `Simple/storage-file-exists` on `1.152.11/x64`
+
+- Date: 2026-09-16
+- Classification: matched fresh-path characterization
+- Public observation: after sign-in, each profile called `IStorage::FileExists()` once for a new portable relative path generated only in memory, then immediately checked public `GetError()`. The path was never created or retained.
+- Official normalized result: both profiles reported available storage, absent path, and no error in two runs.
+- UniverseLAN normalized result: matched those relations for both profiles in two runs.
+- Reproduction command/test name: `--characterize-storage-file-exists`; no CTest is registered.
+- Follow-up: this does not establish existing-file, enumeration, read, write, delete, share, synchronization, callback, or cleanup semantics. Those require a scenario-owned isolated storage fixture; no raw paths, names, counts, content, IDs, credentials, timestamps, or runtime data are retained.
+
 ### Listener P2P Configuration Correction
 
 The three historical listener P2P no-delivery entries below are superseded as

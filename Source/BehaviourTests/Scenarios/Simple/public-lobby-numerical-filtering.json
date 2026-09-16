@@ -1,0 +1,17 @@
+{
+  "name": "Simple/public-lobby-numerical-filtering",
+  "sdkVersion": "1.152.11",
+  "architecture": "x64",
+  "laneMode": "concurrent",
+  "timeoutSeconds": 45,
+  "profiles": ["user1", "user2"],
+  "comparison": {
+    "requiredRecords": {
+      "user1": ["initialize", "sign-in-callback", "sign-in-terminal", "create-target", "create-unmatched", "configuration", "creator-cleanup-unmatched", "creator-cleanup-target", "self-state"],
+      "user2": ["initialize", "sign-in-callback", "sign-in-terminal", "list-diagnostic", "filtered-selection", "join", "joiner-two-member-snapshot", "joiner-leave", "self-state"]
+    },
+    "requiredTerminalOutcome": "success",
+    "unexpectedRecords": "fail",
+    "opaqueIds": "raw Galaxy IDs, lobby IDs, numeric-property values, token-derived run-marker values, candidate counts, indexes, timestamps, and runtime data are never recorded; compare only target appearance, numerical-predicate match, absence of a run-owned numerical nonmatch, target-only selection/join, public two-member non-self-owner state, and cleanup"
+  }
+}

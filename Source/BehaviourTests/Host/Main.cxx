@@ -8,6 +8,7 @@
 #include <chrono>
 #include <cstdint>
 #include <filesystem>
+#include <functional>
 #include <fstream>
 #include <iostream>
 #include <iterator>
@@ -30,14 +31,14 @@ struct Arguments
     int timeoutSeconds = 0;
 };
 
-    enum class Scenario { initializeAndSignIn, sessionIdRepeatability, gogServicesState, gogServicesStateCharacterization, customNetworkingLoopbackRoundtripCloseCharacterization, customNetworkingLoopbackRoundtripClose, publicLobbyCreateListJoinLeave, publicLobbyStringFilteringCharacterization, publicLobbyStringFiltering, publicLobbyNotJoinableBehaviorCharacterization, publicLobbyNotJoinableBehavior, publicLobbyFullJoinFailureCharacterization, publicLobbyFullJoinFailure, publicLobbyOwnerCloseLifecycleCharacterization, publicLobbyOwnerCloseLifecycle, publicLobbyOwnerOwnershipTransitionCharacterization, publicLobbyOwnerOwnershipTransition, publicLobbyDataPropagationCharacterization, publicLobbyDataPropagation, reliableP2PListenerPeekCharacterization, reliableP2PListenerPeek, reliableP2PAfterLobbyLeaveCharacterization, reliableP2PAfterLobbyLeave, bidirectionalReliableP2PListenerPeekCharacterization, bidirectionalReliableP2PListenerPeek, bidirectionalReliableP2PPollReadCharacterization, bidirectionalReliableP2PPollRead, bidirectionalUnreliableP2PListenerPeekCharacterization, bidirectionalUnreliableP2PListenerPeek, bidirectionalLobbyMessageDeliveryCharacterization, bidirectionalLobbyMessageDelivery, bidirectionalLobbyMemberDataPropagationCharacterization, bidirectionalLobbyMemberDataPropagation, multipleLobbyMembershipAndMessageIsolationCharacterization, multipleLobbyMembershipAndMessageIsolation, chatRoomMessageDeliveryCharacterization, chatRoomMessageDelivery, bidirectionalChatRoomMessageDeliveryCharacterization, bidirectionalChatRoomMessageDelivery, friendsPeerInformationRetrievalCharacterization, friendsPeerInformationRetrieval };
+    enum class Scenario { initializeAndSignIn, sessionIdRepeatability, gogServicesState, gogServicesStateCharacterization, statsRetrieveAchievementsNumberCharacterization, statsRetrieveSelfCallback, storageDownloadedSharedFileCount, customNetworkingLoopbackRoundtripCloseCharacterization, customNetworkingLoopbackRoundtripClose, publicLobbyCreateListJoinLeave, publicLobbyStringFilteringCharacterization, publicLobbyStringFiltering, publicLobbyNumericalFiltering, publicLobbyNotJoinableBehaviorCharacterization, publicLobbyNotJoinableBehavior, publicLobbyFullJoinFailureCharacterization, publicLobbyFullJoinFailure, publicLobbyOwnerCloseLifecycleCharacterization, publicLobbyOwnerCloseLifecycle, publicLobbyOwnerOwnershipTransitionCharacterization, publicLobbyOwnerOwnershipTransition, publicLobbyDataPropagationCharacterization, publicLobbyDataPropagation, reliableP2PListenerPeekCharacterization, reliableP2PListenerPeek, reliableP2PAfterLobbyLeaveCharacterization, reliableP2PAfterLobbyLeave, bidirectionalReliableP2PListenerPeekCharacterization, bidirectionalReliableP2PListenerPeek, bidirectionalReliableP2PPollReadCharacterization, bidirectionalReliableP2PPollRead, bidirectionalUnreliableP2PListenerPeekCharacterization, bidirectionalUnreliableP2PListenerPeek, bidirectionalLobbyMessageDeliveryCharacterization, bidirectionalLobbyMessageDelivery, bidirectionalLobbyMemberDataPropagationCharacterization, bidirectionalLobbyMemberDataPropagation, multipleLobbyMembershipAndMessageIsolationCharacterization, multipleLobbyMembershipAndMessageIsolation, chatRoomMessageDeliveryCharacterization, chatRoomMessageDelivery, bidirectionalChatRoomMessageDeliveryCharacterization, bidirectionalChatRoomMessageDelivery, friendsPeerInformationRetrievalCharacterization, friendsPeerInformationRetrieval };
 
 bool isSupportedScenario(const std::string& scenario)
 {
     return scenario == "initialize-and-sign-in" || scenario == "session-id-repeatability" || scenario == "gog-services-state"
-        || scenario == "gog-services-state-characterization" || scenario == "custom-networking-loopback-roundtrip-close-characterization"
+        || scenario == "gog-services-state-characterization" || scenario == "stats-retrieve-achievements-number-characterization" || scenario == "stats-retrieve-self-callback" || scenario == "storage-downloaded-shared-file-count" || scenario == "storage-file-count-characterization" || scenario == "storage-file-exists-characterization" || scenario == "current-game-language-characterization" || scenario == "current-game-language" || scenario == "current-game-language-copy-characterization" || scenario == "current-game-language-code-characterization" || scenario == "current-game-language-code-copy-characterization" || scenario == "overlay-state-characterization" || scenario == "custom-networking-loopback-roundtrip-close-characterization"
         || scenario == "custom-networking-loopback-roundtrip-close" || scenario == "public-lobby-create-list-join-leave"
-        || scenario == "public-lobby-string-filtering-characterization" || scenario == "public-lobby-string-filtering"
+         || scenario == "public-lobby-string-filtering-characterization" || scenario == "public-lobby-string-filtering" || scenario == "public-lobby-numerical-filtering"
         || scenario == "public-lobby-not-joinable-behavior-characterization"
         || scenario == "public-lobby-not-joinable-behavior"
         || scenario == "public-lobby-full-join-failure-characterization" || scenario == "public-lobby-full-join-failure"
@@ -62,11 +63,15 @@ Scenario selectedScenario(const Arguments& arguments)
     if (arguments.scenario == "session-id-repeatability") return Scenario::sessionIdRepeatability;
     if (arguments.scenario == "gog-services-state") return Scenario::gogServicesState;
     if (arguments.scenario == "gog-services-state-characterization") return Scenario::gogServicesStateCharacterization;
+    if (arguments.scenario == "stats-retrieve-achievements-number-characterization") return Scenario::statsRetrieveAchievementsNumberCharacterization;
+    if (arguments.scenario == "stats-retrieve-self-callback") return Scenario::statsRetrieveSelfCallback;
+    if (arguments.scenario == "storage-downloaded-shared-file-count") return Scenario::storageDownloadedSharedFileCount;
     if (arguments.scenario == "custom-networking-loopback-roundtrip-close-characterization") return Scenario::customNetworkingLoopbackRoundtripCloseCharacterization;
     if (arguments.scenario == "custom-networking-loopback-roundtrip-close") return Scenario::customNetworkingLoopbackRoundtripClose;
     if (arguments.scenario == "public-lobby-create-list-join-leave") return Scenario::publicLobbyCreateListJoinLeave;
     if (arguments.scenario == "public-lobby-string-filtering-characterization") return Scenario::publicLobbyStringFilteringCharacterization;
     if (arguments.scenario == "public-lobby-string-filtering") return Scenario::publicLobbyStringFiltering;
+    if (arguments.scenario == "public-lobby-numerical-filtering") return Scenario::publicLobbyNumericalFiltering;
     if (arguments.scenario == "public-lobby-not-joinable-behavior-characterization") return Scenario::publicLobbyNotJoinableBehaviorCharacterization;
     if (arguments.scenario == "public-lobby-not-joinable-behavior") return Scenario::publicLobbyNotJoinableBehavior;
     if (arguments.scenario == "public-lobby-full-join-failure-characterization") return Scenario::publicLobbyFullJoinFailureCharacterization;
@@ -123,7 +128,7 @@ bool readArguments(const int argc, char* argv[], Arguments& arguments)
     }
     return isSupportedScenario(arguments.scenario) && (arguments.profile == "user1" || arguments.profile == "user2")
         && !arguments.trace.empty() && ((arguments.scenario != "public-lobby-create-list-join-leave"
-              && arguments.scenario != "public-lobby-string-filtering-characterization" && arguments.scenario != "public-lobby-string-filtering"
+               && arguments.scenario != "public-lobby-string-filtering-characterization" && arguments.scenario != "public-lobby-string-filtering" && arguments.scenario != "public-lobby-numerical-filtering"
               && arguments.scenario != "public-lobby-not-joinable-behavior-characterization"
               && arguments.scenario != "public-lobby-not-joinable-behavior"
               && arguments.scenario != "public-lobby-full-join-failure-characterization" && arguments.scenario != "public-lobby-full-join-failure"
@@ -157,6 +162,17 @@ const char* idType(const galaxy::api::GalaxyID::IDType type)
     return "unknown";
 }
 
+const char* connectionType(const galaxy::api::ConnectionType type)
+{
+    switch (type)
+    {
+    case galaxy::api::CONNECTION_TYPE_NONE: return "none";
+    case galaxy::api::CONNECTION_TYPE_DIRECT: return "direct";
+    case galaxy::api::CONNECTION_TYPE_PROXY: return "proxy";
+    }
+    return "unknown";
+}
+
 struct AuthListener final : galaxy::api::IAuthListener
 {
     enum class Outcome { pending, success, failure };
@@ -171,6 +187,26 @@ struct AuthListener final : galaxy::api::IAuthListener
         failureReason = static_cast<int>(reason);
     }
     void OnAuthLost() override {}
+};
+
+struct UserStatsAndAchievementsRetrieveListener final : galaxy::api::IUserStatsAndAchievementsRetrieveListener
+{
+    enum class Outcome { pending, success, failure };
+
+    Outcome outcome = Outcome::pending;
+    galaxy::api::GalaxyID user;
+
+    void OnUserStatsAndAchievementsRetrieveSuccess(const galaxy::api::GalaxyID userID) override
+    {
+        outcome = Outcome::success;
+        user = userID;
+    }
+
+    void OnUserStatsAndAchievementsRetrieveFailure(const galaxy::api::GalaxyID userID, const FailureReason) override
+    {
+        outcome = Outcome::failure;
+        user = userID;
+    }
 };
 
 struct GogServicesStateEvent
@@ -189,6 +225,19 @@ const char* gogServicesState(const galaxy::api::GogServicesConnectionState state
     case galaxy::api::GOG_SERVICES_CONNECTION_STATE_CONNECTED: return "connected";
     case galaxy::api::GOG_SERVICES_CONNECTION_STATE_DISCONNECTED: return "disconnected";
     case galaxy::api::GOG_SERVICES_CONNECTION_STATE_AUTH_LOST: return "auth-lost";
+    }
+    return "invalid";
+}
+
+const char* overlayState(const galaxy::api::OverlayState state)
+{
+    switch (state)
+    {
+    case galaxy::api::OVERLAY_STATE_UNDEFINED: return "undefined";
+    case galaxy::api::OVERLAY_STATE_NOT_SUPPORTED: return "not-supported";
+    case galaxy::api::OVERLAY_STATE_DISABLED: return "disabled";
+    case galaxy::api::OVERLAY_STATE_FAILED_TO_INITIALIZE: return "failed-to-initialize";
+    case galaxy::api::OVERLAY_STATE_INITIALIZED: return "initialized";
     }
     return "invalid";
 }
@@ -588,6 +637,7 @@ struct LobbyListListener final : galaxy::api::ILobbyListListener
 {
     galaxy::api::IMatchmaking* matchmaking = nullptr;
     bool called = false;
+    bool indexedCandidatesValid = true;
     std::uint32_t count = 0;
     galaxy::api::LobbyListResult result = galaxy::api::LOBBY_LIST_RESULT_ERROR;
     std::vector<galaxy::api::GalaxyID> candidates;
@@ -595,7 +645,13 @@ struct LobbyListListener final : galaxy::api::ILobbyListListener
     {
         called = true; count = lobbyCount; result = callbackResult;
         if (callbackResult == galaxy::api::LOBBY_LIST_RESULT_SUCCESS)
-            for (std::uint32_t index = 0; index < lobbyCount; ++index) candidates.push_back(matchmaking->GetLobbyByIndex(index));
+            for (std::uint32_t index = 0; index < lobbyCount; ++index)
+            {
+                const galaxy::api::GalaxyID candidate = matchmaking->GetLobbyByIndex(index);
+                indexedCandidatesValid = indexedCandidatesValid && candidate.IsValid()
+                    && candidate.GetIDType() == galaxy::api::GalaxyID::ID_TYPE_LOBBY;
+                candidates.push_back(candidate);
+            }
     }
 };
 
@@ -625,6 +681,80 @@ std::string snapshotRecord(const char* const record, galaxy::api::IMatchmaking* 
         + ",\"otherPresent\":" + boolean(otherPresent) + ",\"membersValid\":" + boolean(membersValid)
         + ",\"membersDistinct\":" + boolean(distinctMembers) + ",\"ownerIsSelf\":" + boolean(owner == self)
         + ",\"ownerValid\":" + boolean(owner.IsValid() && owner.GetIDType() == galaxy::api::GalaxyID::ID_TYPE_USER) + "}";
+}
+
+struct IndexedDataObservation
+{
+    bool hasEntries = false;
+    bool allReadsSucceeded = true;
+    bool expectedValueFound = false;
+};
+
+IndexedDataObservation indexedLobbyDataObservation(galaxy::api::IMatchmaking* const matchmaking, const galaxy::api::GalaxyID& lobby,
+    const char* const expectedKey, const std::string& expectedValue)
+{
+    IndexedDataObservation observation;
+    const std::uint32_t count = matchmaking->GetLobbyDataCount(lobby);
+    observation.hasEntries = count > 0;
+    for (std::uint32_t index = 0; index < count; ++index)
+    {
+        std::array<char, 1024> key{};
+        std::array<char, 4096> value{};
+        const bool read = matchmaking->GetLobbyDataByIndex(lobby, index, key.data(), static_cast<std::uint32_t>(key.size()), value.data(), static_cast<std::uint32_t>(value.size()));
+        observation.allReadsSucceeded = observation.allReadsSucceeded && read;
+        observation.expectedValueFound = observation.expectedValueFound || (read && std::string(key.data()) == expectedKey && std::string(value.data()) == expectedValue);
+    }
+    return observation;
+}
+
+IndexedDataObservation indexedLobbyMemberDataObservation(galaxy::api::IMatchmaking* const matchmaking, const galaxy::api::GalaxyID& lobby,
+    const galaxy::api::GalaxyID& member, const char* const expectedKey, const std::string& expectedValue)
+{
+    IndexedDataObservation observation;
+    const std::uint32_t count = matchmaking->GetLobbyMemberDataCount(lobby, member);
+    observation.hasEntries = count > 0;
+    for (std::uint32_t index = 0; index < count; ++index)
+    {
+        std::array<char, 1024> key{};
+        std::array<char, 4096> value{};
+        const bool read = matchmaking->GetLobbyMemberDataByIndex(lobby, member, index, key.data(), static_cast<std::uint32_t>(key.size()), value.data(), static_cast<std::uint32_t>(value.size()));
+        observation.allReadsSucceeded = observation.allReadsSucceeded && read;
+        observation.expectedValueFound = observation.expectedValueFound || (read && std::string(key.data()) == expectedKey && std::string(value.data()) == expectedValue);
+    }
+    return observation;
+}
+
+std::string indexAccessorRecord(const char* const record, galaxy::api::IMatchmaking* const matchmaking, const galaxy::api::GalaxyID& lobby,
+    const galaxy::api::GalaxyID& self, const galaxy::api::GalaxyID& owner, const galaxy::api::GalaxyID& memberWithExpectedData,
+    const std::string& token, const std::string& memberDataValue)
+{
+    const std::uint32_t memberCount = matchmaking->GetNumLobbyMembers(lobby);
+    bool membersValid = true;
+    bool membersDistinct = true;
+    bool selfPresent = false;
+    bool ownerPresent = false;
+    bool repeatReadsStable = true;
+    const galaxy::api::GalaxyID firstMember = memberCount == 0 ? galaxy::api::GalaxyID() : matchmaking->GetLobbyMemberByIndex(lobby, 0);
+    for (std::uint32_t index = 0; index < memberCount; ++index)
+    {
+        const galaxy::api::GalaxyID member = matchmaking->GetLobbyMemberByIndex(lobby, index);
+        membersValid = membersValid && member.IsValid() && member.GetIDType() == galaxy::api::GalaxyID::ID_TYPE_USER;
+        repeatReadsStable = repeatReadsStable && member == matchmaking->GetLobbyMemberByIndex(lobby, index);
+        selfPresent = selfPresent || member == self;
+        ownerPresent = ownerPresent || member == owner;
+        for (std::uint32_t previous = 0; previous < index; ++previous)
+            membersDistinct = membersDistinct && member != matchmaking->GetLobbyMemberByIndex(lobby, previous);
+    }
+    const IndexedDataObservation lobbyData = indexedLobbyDataObservation(matchmaking, lobby, "universelan-behaviour-token", token);
+    const IndexedDataObservation memberData = indexedLobbyMemberDataObservation(matchmaking, lobby, memberWithExpectedData,
+        "universelan-behaviour-member-index", memberDataValue);
+    return "{\"record\":" + common::jsonString(record) + ",\"membersValid\":" + boolean(membersValid)
+        + ",\"membersDistinct\":" + boolean(membersDistinct) + ",\"selfPresent\":" + boolean(selfPresent)
+        + ",\"ownerPresent\":" + boolean(ownerPresent) + ",\"indexZeroIsSelf\":" + boolean(firstMember == self)
+        + ",\"repeatReadsStable\":" + boolean(repeatReadsStable) + ",\"lobbyDataHasEntries\":" + boolean(lobbyData.hasEntries)
+        + ",\"lobbyDataAllReadsSucceeded\":" + boolean(lobbyData.allReadsSucceeded) + ",\"lobbyDataExpectedValueFound\":" + boolean(lobbyData.expectedValueFound)
+        + ",\"memberDataHasEntries\":" + boolean(memberData.hasEntries) + ",\"memberDataAllReadsSucceeded\":" + boolean(memberData.allReadsSucceeded)
+        + ",\"memberDataExpectedValueFound\":" + boolean(memberData.expectedValueFound) + "}";
 }
 
 bool leaveLobby(const Arguments& arguments, galaxy::api::IMatchmaking* const matchmaking, const galaxy::api::GalaxyID& lobby,
@@ -670,10 +800,13 @@ bool runPublicLobby(const Arguments& arguments, galaxy::api::IUser* const user, 
         || scenario == Scenario::publicLobbyOwnerOwnershipTransition;
     const bool ownershipTransitionCharacterization = scenario == Scenario::publicLobbyOwnerOwnershipTransitionCharacterization;
     const bool dataPropagation = scenario == Scenario::publicLobbyDataPropagationCharacterization || scenario == Scenario::publicLobbyDataPropagation;
+    const bool indexAccessors = scenario == Scenario::publicLobbyCreateListJoinLeave;
     static constexpr const char* propagationKey = "universelan-behaviour-data-propagation";
     static constexpr const char* ownershipTransitionKey = "universelan-behaviour-ownership-transition";
+    static constexpr const char* memberIndexKey = "universelan-behaviour-member-index";
     const std::string propagationValue = token + "-data";
     const std::string ownershipTransitionValue = token + "-ownership-transition";
+    const std::string memberIndexValue = token + "-member-index";
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(arguments.timeoutSeconds);
     if (matchmaking == nullptr || token.empty()) { writeEvent(arguments, "cleanup-ack"); return false; }
     const galaxy::api::GalaxyID self = user->GetGalaxyID();
@@ -720,6 +853,15 @@ bool runPublicLobby(const Arguments& arguments, galaxy::api::IUser* const user, 
         records.push_back("{\"record\":\"metadata\",\"result\":" + common::jsonString(metadataCompleted && metadata.success ? "success" : "failure")
             + ",\"sameCreatedLobby\":" + boolean(metadataCompleted && metadata.lobby == lobby) + "}");
         if (!joinableCompleted || !joinable.success || joinable.lobby != lobby || !metadataCompleted || !metadata.success || metadata.lobby != lobby || !configurationVisible) { cleanup(); return false; }
+        if (indexAccessors)
+        {
+            LobbyMemberDataUpdateListener memberData;
+            matchmaking->SetLobbyMemberData(lobby, memberIndexKey, memberIndexValue.c_str(), &memberData);
+            const bool memberDataCompleted = pumpUntil(arguments, deadline, [&] { return memberData.called; });
+            records.push_back("{\"record\":\"index-accessor-setup\",\"memberDataUpdateSuccess\":"
+                + boolean(memberDataCompleted && memberData.success && memberData.lobby == lobby && memberData.member == self) + "}");
+            if (!memberDataCompleted || !memberData.success || memberData.lobby != lobby || memberData.member != self) { cleanup(); return false; }
+        }
         writeEvent(arguments, "creator-ready");
         if (!pumpUntil(arguments, deadline, [&] { return controlIsSet(arguments, "joiner-joined"); })) { cleanup(); return false; }
         if (ownerClose)
@@ -791,6 +933,8 @@ bool runPublicLobby(const Arguments& arguments, galaxy::api::IUser* const user, 
         }
         records.push_back(snapshotRecord("creator-two-member-snapshot", matchmaking, lobby, self, 2));
         if (matchmaking->GetNumLobbyMembers(lobby) != 2) { cleanup(); return false; }
+        if (indexAccessors)
+            records.push_back(indexAccessorRecord("creator-index-accessors", matchmaking, lobby, self, matchmaking->GetLobbyOwner(lobby), self, token, memberIndexValue));
         writeEvent(arguments, "creator-two-member");
         if (!pumpUntil(arguments, deadline, [&] { return controlIsSet(arguments, "joiner-left"); })) { cleanup(); return false; }
         records.push_back(snapshotRecord("creator-sole-owner-snapshot", matchmaking, lobby, self, 1));
@@ -818,7 +962,8 @@ bool runPublicLobby(const Arguments& arguments, galaxy::api::IUser* const user, 
         }
         records.push_back("{\"record\":\"list\",\"result\":" + common::jsonString(listed.called ? listResult(listed.result) : "timeout")
             + ",\"attempts\":" + std::to_string(attempts) + ",\"retryUsed\":" + boolean(attempts > 1)
-            + ",\"selectedCount\":" + std::to_string(listed.candidates.size()) + ",\"selectedValid\":" + boolean(selected.IsValid()) + "}");
+            + ",\"selectedCount\":" + std::to_string(listed.candidates.size()) + ",\"selectedValid\":" + boolean(selected.IsValid())
+            + (indexAccessors ? ",\"callbackIndexCandidatesValid\":" + boolean(listed.indexedCandidatesValid) : "") + "}");
         if (!selected.IsValid() || listed.candidates.size() != 1) { cleanup(); return false; }
         LobbyEnteredListener entered;
         matchmaking->JoinLobby(selected, &entered);
@@ -828,6 +973,9 @@ bool runPublicLobby(const Arguments& arguments, galaxy::api::IUser* const user, 
         if (!enterCompleted || entered.result != galaxy::api::LOBBY_ENTER_RESULT_SUCCESS || entered.lobby != selected) { cleanup(); return false; }
         lobby = entered.lobby; joined = true;
         records.push_back(snapshotRecord("joiner-two-member-snapshot", matchmaking, lobby, self, 2));
+        if (indexAccessors)
+            records.push_back(indexAccessorRecord("joiner-index-accessors", matchmaking, lobby, self, matchmaking->GetLobbyOwner(lobby),
+                matchmaking->GetLobbyOwner(lobby), token, memberIndexValue));
         writeEvent(arguments, "joiner-joined");
         if (ownerClose)
         {
@@ -1890,11 +2038,14 @@ bool runBidirectionalReliableP2PListenerPeek(const Arguments& arguments, galaxy:
             });
             const std::uint8_t expectedChannel = creator ? bidirectionalReliableP2PChannels[1] : bidirectionalReliableP2PChannels[0];
             const std::vector<std::uint8_t>& expectedPayload = creator ? joinerPayload : creatorPayload;
+            const bool selfConnectionTypeDirect = networking->GetConnectionType(self) == galaxy::api::CONNECTION_TYPE_DIRECT;
+            const char* const peerConnectionType = currentMembership ? connectionType(networking->GetConnectionType(peer)) : "unavailable";
             records.push_back("{\"record\":\"p2p-poll-armed\",\"listenerConstructed\":false,\"peerFromPublicLobbyQuery\":" + boolean(currentMembership)
                 + ",\"peerCurrentLobbyMember\":" + boolean(currentMembership) + ",\"peerValidNonSelf\":" + boolean(peer.IsValid() && peer != self)
                 + ",\"peerType\":" + common::jsonString(peer.IsValid() ? idType(peer.GetIDType()) : "unavailable") + ",\"expectedChannelConfigured\":"
                 + boolean(ownChannel != expectedChannel) + ",\"directionalChannelsDistinct\":" + boolean(bidirectionalReliableP2PChannels[0] != bidirectionalReliableP2PChannels[1])
-                + ",\"directionalPayloadsDistinct\":" + boolean(creatorPayload != joinerPayload) + "}");
+                + ",\"directionalPayloadsDistinct\":" + boolean(creatorPayload != joinerPayload) + ",\"selfConnectionTypeDirect\":"
+                + boolean(selfConnectionTypeDirect) + ",\"peerConnectionType\":" + common::jsonString(peerConnectionType) + "}");
             if (!currentMembership) return false;
             writeEvent(arguments, "p2p-poll-armed");
             if (!pumpUntil(arguments, deadline, [&] { return controlIsSet(arguments, "p2p-poll-exchange-released"); })) return false;
@@ -2743,6 +2894,203 @@ bool runPublicLobbyStringFiltering(const Arguments& arguments, galaxy::api::IUse
     return memberAndOwnerValid && left;
 }
 
+bool runPublicLobbyNumericalFiltering(const Arguments& arguments, galaxy::api::IUser* const user, std::vector<std::string>& records)
+{
+    galaxy::api::IMatchmaking* const matchmaking = galaxy::api::Matchmaking();
+    const std::string token = controlValue(arguments.control, "token");
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(arguments.timeoutSeconds);
+    static constexpr const char* numericalKey = "universelan-behaviour-numerical-filter";
+    static constexpr const char* markerKey = "universelan-behaviour-numerical-filter-marker";
+    static constexpr std::array<std::int32_t, 2> numericalValues{314159, 271828};
+    if (matchmaking == nullptr || token.empty()) { writeEvent(arguments, "cleanup-ack"); return false; }
+
+    const bool creator = arguments.profile == "user1";
+    const galaxy::api::GalaxyID self = user->GetGalaxyID();
+    std::array<galaxy::api::GalaxyID, 2> lobbies;
+    std::array<bool, 2> joined{};
+    const std::array<std::string, 2> numericProperties{std::to_string(numericalValues[0]), std::to_string(numericalValues[1])};
+    // The shared marker scopes the list to this run; only the numerical filter distinguishes the lobbies.
+    const std::array<std::string, 2> markerValues{token, token};
+    auto leave = [&](const int index, const char* const record)
+    {
+        if (!joined[index]) return true;
+        const bool left = leaveLobby(arguments, matchmaking, lobbies[index], records, record,
+            std::chrono::steady_clock::now() + std::chrono::seconds(5), true);
+        if (left) joined[index] = false;
+        return left;
+    };
+    auto cleanup = [&]
+    {
+        const bool unmatchedLeft = leave(1, creator ? "creator-cleanup-unmatched" : "joiner-cleanup-target");
+        const bool targetLeft = leave(0, creator ? "creator-cleanup-target" : "joiner-cleanup-target");
+        if (unmatchedLeft && targetLeft) writeEvent(arguments, "cleanup-ack");
+    };
+
+    if (creator)
+    {
+        for (int index = 0; index < 2; ++index)
+        {
+            LobbyCreatedListener created;
+            LobbyEnteredListener entered;
+            // The second lobby is not requested until the first creation has fully completed.
+            matchmaking->CreateLobby(galaxy::api::LOBBY_TYPE_PUBLIC, 2, false, galaxy::api::LOBBY_TOPOLOGY_TYPE_FCM, &created, &entered);
+            const bool callbacks = pumpUntil(arguments, deadline, [&] { return created.called && entered.called; });
+            records.push_back("{\"record\":" + common::jsonString(index == 0 ? "create-target" : "create-unmatched")
+                + ",\"result\":" + common::jsonString(callbacks ? createResult(created.result) : "timeout")
+                + ",\"lobbyValid\":" + boolean(callbacks && created.lobby.IsValid()) + ",\"lobbyType\":"
+                + common::jsonString(callbacks ? idType(created.lobby.GetIDType()) : "unavailable") + "}");
+            if (!callbacks || created.result != galaxy::api::LOBBY_CREATE_RESULT_SUCCESS
+                || entered.result != galaxy::api::LOBBY_ENTER_RESULT_SUCCESS || created.lobby != entered.lobby || !created.lobby.IsValid())
+            {
+                cleanup();
+                return false;
+            }
+            lobbies[index] = entered.lobby;
+            joined[index] = true;
+        }
+
+        std::array<LobbyDataUpdateListener, 2> capacity;
+        std::array<LobbyDataUpdateListener, 2> numerical;
+        std::array<LobbyDataUpdateListener, 2> marker;
+        std::array<LobbyDataUpdateListener, 2> joinable;
+        bool configurationSucceeded = true;
+        bool numericalPropertiesVisible = true;
+        bool markerValuesVisible = true;
+        for (int index = 0; index < 2; ++index)
+        {
+            matchmaking->SetMaxNumLobbyMembers(lobbies[index], 2, &capacity[index]);
+            matchmaking->SetLobbyData(lobbies[index], numericalKey, numericProperties[index].c_str(), &numerical[index]);
+            matchmaking->SetLobbyData(lobbies[index], markerKey, markerValues[index].c_str(), &marker[index]);
+            const bool configured = pumpUntil(arguments, deadline, [&] { return capacity[index].called && numerical[index].called && marker[index].called; });
+            matchmaking->SetLobbyJoinable(lobbies[index], true, &joinable[index]);
+            const bool madeJoinable = pumpUntil(arguments, deadline, [&] { return joinable[index].called; });
+            std::array<char, 256> copiedNumeric{};
+            std::array<char, 256> copiedMarker{};
+            matchmaking->GetLobbyDataCopy(lobbies[index], numericalKey, copiedNumeric.data(), static_cast<std::uint32_t>(copiedNumeric.size()));
+            matchmaking->GetLobbyDataCopy(lobbies[index], markerKey, copiedMarker.data(), static_cast<std::uint32_t>(copiedMarker.size()));
+            numericalPropertiesVisible = numericalPropertiesVisible && std::string(copiedNumeric.data()) == numericProperties[index];
+            markerValuesVisible = markerValuesVisible && std::string(copiedMarker.data()) == markerValues[index];
+            configurationSucceeded = configurationSucceeded && configured && madeJoinable && capacity[index].success && numerical[index].success
+                && marker[index].success && joinable[index].success && capacity[index].lobby == lobbies[index]
+                && numerical[index].lobby == lobbies[index] && marker[index].lobby == lobbies[index] && joinable[index].lobby == lobbies[index]
+                && matchmaking->GetLobbyType(lobbies[index]) == galaxy::api::LOBBY_TYPE_PUBLIC && matchmaking->GetMaxNumLobbyMembers(lobbies[index]) == 2
+                && matchmaking->IsLobbyJoinable(lobbies[index]);
+        }
+        records.push_back(std::string("{\"record\":\"configuration\",\"sequentialCreation\":true,\"fixedNumericalPropertiesConfigured\":true")
+            + ",\"distinctFixedNumericalProperties\":" + boolean(numericalValues[0] != numericalValues[1])
+            + ",\"sharedRunMarkerConfigured\":" + boolean(markerValues[0] == markerValues[1])
+            + ",\"targetConfiguredBeforeJoinable\":true,\"unmatchedConfiguredBeforeJoinable\":true"
+            + ",\"allPublicCapacityTwoJoinable\":" + boolean(configurationSucceeded)
+            + ",\"numericalPropertiesVisibleLocally\":" + boolean(numericalPropertiesVisible)
+            + ",\"markerValuesVisibleLocally\":" + boolean(markerValuesVisible) + "}");
+        if (!configurationSucceeded || !numericalPropertiesVisible || !markerValuesVisible) { cleanup(); return false; }
+        writeEvent(arguments, "creator-ready");
+        if (!pumpUntil(arguments, deadline, [&] { return controlIsSet(arguments, "joiner-joined"); })) { cleanup(); return false; }
+        if (!pumpUntil(arguments, deadline, [&] { return controlIsSet(arguments, "joiner-left"); })) { cleanup(); return false; }
+        const bool unmatchedLeft = leave(1, "creator-cleanup-unmatched");
+        const bool targetLeft = leave(0, "creator-cleanup-target");
+        if (unmatchedLeft && targetLeft) writeEvent(arguments, "cleanup-ack");
+        return unmatchedLeft && targetLeft;
+    }
+
+    if (!pumpUntil(arguments, deadline, [&] { return controlIsSet(arguments, "creator-ready"); })) { cleanup(); return false; }
+    LobbyListListener listed;
+    galaxy::api::GalaxyID selected;
+    bool selectedMatchesNumericalPredicate = false;
+    bool selectedMatchesRunMarker = false;
+    bool allCandidatesClassified = false;
+    bool targetCandidateAppeared = false;
+    bool runOwnedUnmatchedCandidateAppeared = false;
+    int attempts = 0;
+    while (std::chrono::steady_clock::now() < deadline && attempts < 6 && !controlIsSet(arguments, "abort"))
+    {
+        ++attempts;
+        listed = LobbyListListener{};
+        listed.matchmaking = matchmaking;
+        matchmaking->AddRequestLobbyListNumericalFilter(numericalKey, numericalValues[0], galaxy::api::LOBBY_COMPARISON_TYPE_EQUAL);
+        matchmaking->AddRequestLobbyListStringFilter(markerKey, markerValues[0].c_str(), galaxy::api::LOBBY_COMPARISON_TYPE_EQUAL);
+        matchmaking->RequestLobbyList(false, &listed);
+        if (!pumpUntil(arguments, std::min(deadline, std::chrono::steady_clock::now() + std::chrono::seconds(3)), [&] { return listed.called; })) break;
+        if (listed.result != galaxy::api::LOBBY_LIST_RESULT_SUCCESS) { std::this_thread::sleep_for(std::chrono::milliseconds(250)); continue; }
+        bool attemptCandidatesClassified = true;
+        bool attemptTargetCandidateAppeared = false;
+        bool attemptRunOwnedUnmatchedCandidateAppeared = false;
+        for (const galaxy::api::GalaxyID& candidate : listed.candidates)
+        {
+            LobbyDataRetrieveListener retrieved;
+            matchmaking->RequestLobbyData(candidate, &retrieved);
+            const bool retrievedCompleted = pumpUntil(arguments, std::min(deadline, std::chrono::steady_clock::now() + std::chrono::seconds(3)), [&] { return retrieved.called; });
+            std::array<char, 256> copiedNumeric{};
+            std::array<char, 256> copiedMarker{};
+            const bool candidateClassified = retrievedCompleted && retrieved.success && retrieved.lobby == candidate;
+            if (candidateClassified)
+            {
+                matchmaking->GetLobbyDataCopy(candidate, numericalKey, copiedNumeric.data(), static_cast<std::uint32_t>(copiedNumeric.size()));
+                matchmaking->GetLobbyDataCopy(candidate, markerKey, copiedMarker.data(), static_cast<std::uint32_t>(copiedMarker.size()));
+            }
+            attemptCandidatesClassified = attemptCandidatesClassified && candidateClassified;
+            const bool numericalPredicateMatches = candidateClassified && std::string(copiedNumeric.data()) == numericProperties[0];
+            const bool targetMarkerMatches = candidateClassified && std::string(copiedMarker.data()) == markerValues[0];
+            const bool targetCandidate = numericalPredicateMatches && targetMarkerMatches;
+            attemptTargetCandidateAppeared = attemptTargetCandidateAppeared || targetCandidate;
+            attemptRunOwnedUnmatchedCandidateAppeared = attemptRunOwnedUnmatchedCandidateAppeared
+                || (targetMarkerMatches && !numericalPredicateMatches);
+            if (!selected.IsValid() && targetCandidate)
+            {
+                selected = candidate;
+                selectedMatchesNumericalPredicate = true;
+                selectedMatchesRunMarker = true;
+            }
+        }
+        const bool stableTargetSelection = attemptCandidatesClassified && attemptTargetCandidateAppeared && selected.IsValid()
+            && selectedMatchesNumericalPredicate && selectedMatchesRunMarker;
+        if (stableTargetSelection)
+        {
+            allCandidatesClassified = attemptCandidatesClassified;
+            targetCandidateAppeared = attemptTargetCandidateAppeared;
+            runOwnedUnmatchedCandidateAppeared = attemptRunOwnedUnmatchedCandidateAppeared;
+            break;
+        }
+        selected = galaxy::api::GalaxyID();
+        selectedMatchesNumericalPredicate = false;
+        selectedMatchesRunMarker = false;
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    }
+    const bool stableSelection = listed.called && listed.result == galaxy::api::LOBBY_LIST_RESULT_SUCCESS && selected.IsValid()
+        && selectedMatchesNumericalPredicate && selectedMatchesRunMarker;
+    records.push_back("{\"record\":\"list-diagnostic\",\"result\":" + common::jsonString(listed.called ? listResult(listed.result) : "timeout")
+        + ",\"retryUsed\":" + boolean(attempts > 1) + ",\"allCandidatesClassified\":" + boolean(allCandidatesClassified)
+        + ",\"targetCandidateAppeared\":" + boolean(targetCandidateAppeared) + ",\"runOwnedUnmatchedCandidateAppeared\":"
+        + boolean(runOwnedUnmatchedCandidateAppeared) + ",\"stableTargetSelection\":" + boolean(stableSelection) + "}");
+    records.push_back(std::string("{\"record\":\"filtered-selection\",\"numericalEqualityFilterApplied\":true,\"sharedRunMarkerFilterApplied\":true")
+        + ",\"getLobbyByIndexCallbackLocalOnly\":true,\"targetCandidateAppeared\":" + boolean(targetCandidateAppeared)
+        + ",\"selectedValid\":" + boolean(selected.IsValid()) + ",\"selectedMatchesNumericalPredicate\":" + boolean(selectedMatchesNumericalPredicate)
+        + ",\"selectedMatchesRunMarker\":" + boolean(selectedMatchesRunMarker)
+        + ",\"runOwnedUnmatchedCandidateAppeared\":" + boolean(runOwnedUnmatchedCandidateAppeared)
+        + ",\"runOwnedUnmatchedCandidateSelected\":false,\"selectionStable\":" + boolean(stableSelection) + "}");
+    if (!stableSelection) { cleanup(); return false; }
+    LobbyEnteredListener entered;
+    matchmaking->JoinLobby(selected, &entered);
+    const bool enteredCompleted = pumpUntil(arguments, deadline, [&] { return entered.called; });
+    records.push_back("{\"record\":\"join\",\"result\":" + common::jsonString(enteredCompleted ? enterResult(entered.result) : "timeout")
+        + ",\"sameSelectedLobby\":" + boolean(enteredCompleted && entered.lobby == selected) + "}");
+    if (!enteredCompleted || entered.result != galaxy::api::LOBBY_ENTER_RESULT_SUCCESS || entered.lobby != selected) { cleanup(); return false; }
+    lobbies[0] = entered.lobby;
+    joined[0] = true;
+    const galaxy::api::GalaxyID owner = matchmaking->GetLobbyOwner(lobbies[0]);
+    const bool publicTwoMemberNonSelfOwnerState = matchmaking->GetLobbyType(lobbies[0]) == galaxy::api::LOBBY_TYPE_PUBLIC
+        && matchmaking->IsLobbyJoinable(lobbies[0]) && matchmaking->GetMaxNumLobbyMembers(lobbies[0]) == 2
+        && matchmaking->GetNumLobbyMembers(lobbies[0]) == 2 && owner.IsValid() && owner != self;
+    records.push_back("{\"record\":\"joiner-two-member-snapshot\",\"public\":" + boolean(matchmaking->GetLobbyType(lobbies[0]) == galaxy::api::LOBBY_TYPE_PUBLIC)
+        + ",\"joinable\":" + boolean(matchmaking->IsLobbyJoinable(lobbies[0])) + ",\"capacityIsTwo\":"
+        + boolean(matchmaking->GetMaxNumLobbyMembers(lobbies[0]) == 2) + ",\"exactlyTwoMembers\":"
+        + boolean(matchmaking->GetNumLobbyMembers(lobbies[0]) == 2) + ",\"ownerValidNonSelf\":" + boolean(owner.IsValid() && owner != self) + "}");
+    writeEvent(arguments, "joiner-joined");
+    const bool left = leave(0, "joiner-leave");
+    if (left) { writeEvent(arguments, "joiner-left"); writeEvent(arguments, "cleanup-ack"); }
+    return publicTwoMemberNonSelfOwnerState && left;
+}
+
 struct TaggedLobbyCreatedListener final : galaxy::api::ILobbyCreatedListener
 {
     const char* symbol = nullptr;
@@ -3569,6 +3917,42 @@ void closeCustomNetworkingConnection(const Arguments& arguments, galaxy::api::IC
     pumpUntil(arguments, deadline, [&] { return listener.callbacks > 0; });
 }
 
+bool runStatsRetrieveAchievementsNumberCharacterization(const Arguments& arguments, galaxy::api::IUser* const user,
+    std::vector<std::string>& records, const bool queryAchievementCount)
+{
+    galaxy::api::IStats* const stats = galaxy::api::Stats();
+    if (stats == nullptr)
+    {
+        records.push_back(std::string("{\"record\":\"stats-retrieve\",\"terminal\":\"unavailable\",\"callbackUserIsSelf\":false")
+            + (queryAchievementCount ? ",\"achievementNumberQueryCompleted\":false" : "") + "}");
+        return true;
+    }
+
+    UserStatsAndAchievementsRetrieveListener listener;
+    stats->RequestUserStatsAndAchievements(galaxy::api::GalaxyID(), &listener);
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(arguments.timeoutSeconds);
+    const bool terminal = pumpUntil(arguments, deadline, [&] { return listener.outcome != UserStatsAndAchievementsRetrieveListener::Outcome::pending; });
+    const bool success = terminal && listener.outcome == UserStatsAndAchievementsRetrieveListener::Outcome::success;
+    const bool callbackUserIsSelf = terminal && listener.user == user->GetGalaxyID();
+    const bool achievementNumberQueryCompleted = queryAchievementCount && success;
+    if (achievementNumberQueryCompleted) static_cast<void>(stats->GetAchievementsNumber());
+    records.push_back(std::string("{\"record\":\"stats-retrieve\",\"terminal\":")
+        + common::jsonString(!terminal ? "timeout" : (success ? "success" : "failure"))
+        + ",\"callbackUserIsSelf\":" + boolean(callbackUserIsSelf)
+        + (queryAchievementCount ? ",\"achievementNumberQueryCompleted\":" + boolean(achievementNumberQueryCompleted) : "") + "}");
+    return true;
+}
+
+bool runStorageDownloadedSharedFileCount(std::vector<std::string>& records)
+{
+    galaxy::api::IStorage* const storage = galaxy::api::Storage();
+    const bool storageAvailable = storage != nullptr;
+    const bool initialDownloadedSharedFileCountZero = storageAvailable && storage->GetDownloadedSharedFileCount() == 0;
+    records.push_back("{\"record\":\"storage-downloaded-shared-files\",\"storageAvailable\":" + boolean(storageAvailable)
+        + ",\"initialDownloadedSharedFileCountZero\":" + boolean(initialDownloadedSharedFileCountZero) + "}");
+    return storageAvailable && initialDownloadedSharedFileCountZero;
+}
+
 bool runCustomNetworkingLoopbackRoundtripClose(const Arguments& arguments, std::vector<std::string>& records)
 {
     const std::vector<std::uint8_t> payload = arguments.profile == "user1"
@@ -3725,6 +4109,165 @@ int run(const Arguments& arguments)
                 galaxy::api::Shutdown();
                 return networkingSucceeded || scenario == Scenario::customNetworkingLoopbackRoundtripCloseCharacterization ? 0 : 1;
             }
+            if (scenario == Scenario::statsRetrieveAchievementsNumberCharacterization)
+            {
+                runStatsRetrieveAchievementsNumberCharacterization(arguments, user, records, true);
+                records.push_back(selfStateRecord(user));
+                common::writeTrace(arguments.trace, records);
+                galaxy::api::Shutdown();
+                return 0;
+            }
+            if (scenario == Scenario::statsRetrieveSelfCallback)
+            {
+                const bool statsSucceeded = runStatsRetrieveAchievementsNumberCharacterization(arguments, user, records, false);
+                records.push_back(selfStateRecord(user));
+                common::writeTrace(arguments.trace, records);
+                galaxy::api::Shutdown();
+                return statsSucceeded ? 0 : 1;
+            }
+            if (scenario == Scenario::storageDownloadedSharedFileCount)
+            {
+                const bool storageSucceeded = runStorageDownloadedSharedFileCount(records);
+                records.push_back(selfStateRecord(user));
+                common::writeTrace(arguments.trace, records);
+                galaxy::api::Shutdown();
+                return storageSucceeded ? 0 : 1;
+            }
+            if (arguments.scenario == "current-game-language-characterization" || arguments.scenario == "current-game-language")
+            {
+                galaxy::api::IApps* const apps = galaxy::api::Apps();
+                const char* const language = apps == nullptr ? nullptr : apps->GetCurrentGameLanguage();
+                const bool languagePointerAvailable = language != nullptr;
+                const bool containsNoAsciiUppercase = languagePointerAvailable && std::none_of(language,
+                    language + std::char_traits<char>::length(language), [](const char character) { return character >= 'A' && character <= 'Z'; });
+                records.push_back("{\"record\":\"current-game-language\",\"appsAvailable\":" + boolean(apps != nullptr)
+                    + ",\"languagePointerAvailable\":" + boolean(languagePointerAvailable)
+                    + ",\"containsNoAsciiUppercase\":" + boolean(containsNoAsciiUppercase) + "}");
+                records.push_back(selfStateRecord(user));
+                common::writeTrace(arguments.trace, records);
+                galaxy::api::Shutdown();
+                return 0;
+            }
+            if (arguments.scenario == "current-game-language-copy-characterization")
+            {
+                galaxy::api::IApps* const apps = galaxy::api::Apps();
+                std::array<char, 1> oneByte;
+                std::array<char, 256> bounded;
+                oneByte.fill('~');
+                bounded.fill('~');
+                const char* oneByteError = "unavailable";
+                const char* boundedError = "unavailable";
+                if (apps != nullptr)
+                {
+                    apps->GetCurrentGameLanguageCopy(oneByte.data(), static_cast<std::uint32_t>(oneByte.size()));
+                    oneByteError = apiErrorCategory(galaxy::api::GetError());
+                    apps->GetCurrentGameLanguageCopy(bounded.data(), static_cast<std::uint32_t>(bounded.size()));
+                    boundedError = apiErrorCategory(galaxy::api::GetError());
+                }
+                const bool oneByteChanged = oneByte[0] != '~';
+                const bool oneByteTerminated = oneByte[0] == '\0';
+                const bool boundedChanged = std::any_of(bounded.begin(), bounded.end(), [](const char character) { return character != '~'; });
+                const auto boundedTerminator = std::find(bounded.begin(), bounded.end(), '\0');
+                const bool boundedTerminated = boundedTerminator != bounded.end();
+                const bool boundedNoAsciiUppercase = boundedTerminated && std::none_of(bounded.begin(), boundedTerminator,
+                    [](const char character) { return character >= 'A' && character <= 'Z'; });
+                oneByte.fill('\0');
+                bounded.fill('\0');
+                records.push_back("{\"record\":\"current-game-language-copy\",\"appsAvailable\":" + boolean(apps != nullptr)
+                    + ",\"oneByteChanged\":" + boolean(oneByteChanged) + ",\"oneByteTerminated\":" + boolean(oneByteTerminated)
+                    + ",\"oneByteError\":" + common::jsonString(oneByteError) + ",\"boundedChanged\":" + boolean(boundedChanged)
+                    + ",\"boundedTerminated\":" + boolean(boundedTerminated) + ",\"boundedNoAsciiUppercase\":" + boolean(boundedNoAsciiUppercase)
+                    + ",\"boundedError\":" + common::jsonString(boundedError) + "}");
+                records.push_back(selfStateRecord(user));
+                common::writeTrace(arguments.trace, records);
+                galaxy::api::Shutdown();
+                return 0;
+            }
+            if (arguments.scenario == "current-game-language-code-characterization")
+            {
+                galaxy::api::IApps* const apps = galaxy::api::Apps();
+                const char* const code = apps == nullptr ? nullptr : apps->GetCurrentGameLanguageCode();
+                const bool codePointerAvailable = code != nullptr;
+                const bool matchesDocumentedIsoCodeShape = codePointerAvailable
+                    && std::isalpha(static_cast<unsigned char>(code[0])) && std::isalpha(static_cast<unsigned char>(code[1]))
+                    && code[2] == '-' && std::isalpha(static_cast<unsigned char>(code[3])) && std::isalpha(static_cast<unsigned char>(code[4]));
+                const char* const error = apps == nullptr ? "unavailable" : apiErrorCategory(galaxy::api::GetError());
+                records.push_back("{\"record\":\"current-game-language-code\",\"appsAvailable\":" + boolean(apps != nullptr)
+                    + ",\"codePointerAvailable\":" + boolean(codePointerAvailable) + ",\"matchesDocumentedIsoCodeShape\":" + boolean(matchesDocumentedIsoCodeShape)
+                    + ",\"error\":" + common::jsonString(error) + "}");
+                records.push_back(selfStateRecord(user));
+                common::writeTrace(arguments.trace, records);
+                galaxy::api::Shutdown();
+                return 0;
+            }
+            if (arguments.scenario == "current-game-language-code-copy-characterization")
+            {
+                galaxy::api::IApps* const apps = galaxy::api::Apps();
+                std::array<char, 1> singleByte;
+                std::array<char, 256> bounded;
+                singleByte.fill(static_cast<char>(0x5A));
+                bounded.fill(static_cast<char>(0x5A));
+                if (apps != nullptr) apps->GetCurrentGameLanguageCodeCopy(singleByte.data(), static_cast<uint32_t>(singleByte.size()));
+                const char* const singleByteError = apps == nullptr ? "unavailable" : apiErrorCategory(galaxy::api::GetError());
+                if (apps != nullptr) apps->GetCurrentGameLanguageCodeCopy(bounded.data(), static_cast<uint32_t>(bounded.size()));
+                const char* const boundedError = apps == nullptr ? "unavailable" : apiErrorCategory(galaxy::api::GetError());
+                const bool singleByteChanged = singleByte[0] != static_cast<char>(0x5A);
+                const bool singleByteTerminated = singleByte[0] == '\0';
+                const bool boundedChanged = std::any_of(bounded.cbegin(), bounded.cend(), [](char value) { return value != static_cast<char>(0x5A); });
+                const bool boundedTerminated = std::find(bounded.cbegin(), bounded.cend(), '\0') != bounded.cend();
+                const bool boundedMatchesDocumentedIsoCodeShape = bounded.size() >= 5
+                    && std::isalpha(static_cast<unsigned char>(bounded[0])) && std::isalpha(static_cast<unsigned char>(bounded[1]))
+                    && bounded[2] == '-' && std::isalpha(static_cast<unsigned char>(bounded[3])) && std::isalpha(static_cast<unsigned char>(bounded[4]));
+                singleByte.fill('\0');
+                bounded.fill('\0');
+                records.push_back("{\"record\":\"current-game-language-code-copy\",\"appsAvailable\":" + boolean(apps != nullptr)
+                    + ",\"singleByteChanged\":" + boolean(singleByteChanged) + ",\"singleByteTerminated\":" + boolean(singleByteTerminated)
+                    + ",\"singleByteError\":" + common::jsonString(singleByteError) + ",\"boundedChanged\":" + boolean(boundedChanged)
+                    + ",\"boundedTerminated\":" + boolean(boundedTerminated) + ",\"boundedMatchesDocumentedIsoCodeShape\":" + boolean(boundedMatchesDocumentedIsoCodeShape)
+                    + ",\"boundedError\":" + common::jsonString(boundedError) + "}");
+                records.push_back(selfStateRecord(user));
+                common::writeTrace(arguments.trace, records);
+                galaxy::api::Shutdown();
+                return 0;
+            }
+            if (arguments.scenario == "overlay-state-characterization")
+            {
+                galaxy::api::IUtils* const utils = galaxy::api::Utils();
+                const char* const state = utils == nullptr ? "unavailable" : overlayState(utils->GetOverlayState());
+                const char* const error = utils == nullptr ? "unavailable" : apiErrorCategory(galaxy::api::GetError());
+                records.push_back("{\"record\":\"overlay-state\",\"utilsAvailable\":" + boolean(utils != nullptr)
+                    + ",\"state\":" + common::jsonString(state) + ",\"error\":" + common::jsonString(error) + "}");
+                records.push_back(selfStateRecord(user));
+                common::writeTrace(arguments.trace, records);
+                galaxy::api::Shutdown();
+                return 0;
+            }
+            if (arguments.scenario == "storage-file-count-characterization")
+            {
+                galaxy::api::IStorage* const storage = galaxy::api::Storage();
+                const uint32_t fileCount = storage == nullptr ? 0 : storage->GetFileCount();
+                const char* const error = storage == nullptr ? "unavailable" : apiErrorCategory(galaxy::api::GetError());
+                records.push_back("{\"record\":\"storage-file-count\",\"storageAvailable\":" + boolean(storage != nullptr)
+                    + ",\"fileCountZero\":" + boolean(fileCount == 0) + ",\"error\":" + common::jsonString(error) + "}");
+                records.push_back(selfStateRecord(user));
+                common::writeTrace(arguments.trace, records);
+                galaxy::api::Shutdown();
+                return 0;
+            }
+            if (arguments.scenario == "storage-file-exists-characterization")
+            {
+                galaxy::api::IStorage* const storage = galaxy::api::Storage();
+                const std::string path = "universelan-behaviour/file-exists/" + std::to_string(std::hash<std::string>{}(arguments.trace.string()))
+                    + "-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count());
+                const bool exists = storage != nullptr && storage->FileExists(path.c_str());
+                const char* const error = storage == nullptr ? "unavailable" : apiErrorCategory(galaxy::api::GetError());
+                records.push_back("{\"record\":\"storage-file-exists\",\"storageAvailable\":" + boolean(storage != nullptr)
+                    + ",\"exists\":" + boolean(exists) + ",\"error\":" + common::jsonString(error) + "}");
+                records.push_back(selfStateRecord(user));
+                common::writeTrace(arguments.trace, records);
+                galaxy::api::Shutdown();
+                return 0;
+            }
             if (scenario == Scenario::publicLobbyFullJoinFailureCharacterization || scenario == Scenario::publicLobbyFullJoinFailure)
             {
                 const bool lobbySucceeded = runPublicLobbyFullJoinFailure(arguments, user, records);
@@ -3736,6 +4279,14 @@ int run(const Arguments& arguments)
             if (scenario == Scenario::publicLobbyStringFilteringCharacterization || scenario == Scenario::publicLobbyStringFiltering)
             {
                 const bool lobbySucceeded = runPublicLobbyStringFiltering(arguments, user, records);
+                records.push_back(selfStateRecord(user));
+                common::writeTrace(arguments.trace, records);
+                galaxy::api::Shutdown();
+                return lobbySucceeded ? 0 : 1;
+            }
+            if (scenario == Scenario::publicLobbyNumericalFiltering)
+            {
+                const bool lobbySucceeded = runPublicLobbyNumericalFiltering(arguments, user, records);
                 records.push_back(selfStateRecord(user));
                 common::writeTrace(arguments.trace, records);
                 galaxy::api::Shutdown();
