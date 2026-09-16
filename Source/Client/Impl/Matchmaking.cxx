@@ -341,14 +341,22 @@ namespace universelan::client {
 
 			// Aragami2 fix?
 			//assert(lobby_entry != lobby_list.end());
-			if (lobby_entry == lobby_list.end()) {
-				trace.write_all("LOBBY_NOT_FOUND_CREATED_DEFAULT_ENTRY");
-
-				lobby_list.emplace(data->lobby_id, std::make_shared<Lobby>(data->lobby_id));
-				lobby_entry = lobby_list.find(data->lobby_id);
+			auto new_lobby = data->lobby;
+			if (new_lobby == nullptr) {
+				new_lobby = std::make_shared<Lobby>(data->lobby_id);
 			}
 
-			joined_lobbies.emplace(lobby_entry->first, lobby_entry->second);
+			if (lobby_entry == lobby_list.end()) {
+				trace.write_all("LOBBY_NOT_FOUND_CREATED_SERVER_SNAPSHOT_ENTRY");
+
+				lobby_list.emplace(data->lobby_id, new_lobby);
+				lobby_entry = lobby_list.find(data->lobby_id);
+			}
+			else {
+				lobby_list.insert_or_assign(data->lobby_id, new_lobby);
+			}
+
+			joined_lobbies.insert_or_assign(lobby_entry->first, lobby_entry->second);
 			lobby_entry->second->AddMember(intf->config->GetApiGalaxyID());
 		}
 
@@ -396,7 +404,9 @@ namespace universelan::client {
 				}
 				joined_lobbies.erase(data->lobby_id);
 			}
-			// Keep discovered member metadata available to clients that immediately rejoin.
+
+			lobby_list.erase(data->lobby_id);
+			lobby_list_filtered.erase(data->lobby_id);
 		}
 
 		listeners->NotifyAllNow(

@@ -581,6 +581,8 @@ namespace universelan::server {
 		}
 
 		data->result = LOBBY_ENTER_RESULT_SUCCESS;
+		data->lobby = std::make_shared<Lobby>(*lobby);
+
 		connection.Send(peer, data);
 
 		LobbyMemberStateChangeMessage enter_notification{ lobby->GetID(), pd->id, LOBBY_MEMBER_STATE_CHANGED_ENTERED };

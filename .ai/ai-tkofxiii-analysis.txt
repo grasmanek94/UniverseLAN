@@ -1,0 +1,103 @@
+Allright I have a different game (TKoFXIII) now that doesn't work with universelan but works via GOG. 
+
+(subagent/subtask 1)
+I've launched it in both scenario's and created logs. They're quite big so maybe you want to perform a minimization pass and collapse repeating patterns/logs first,
+for example:
+
++universelan::client::NetworkingImpl::IsP2PPacketAvailable[C]@7ffbf43f5cc0
+ outMsgSize(addr): 0x52ddf37c
+ channel: 0
+ result: false
+ outMsgSize: 0
+-universelan::client::NetworkingImpl::IsP2PPacketAvailable[C]@7ffbf43f5cc0
++universelan::client::NetworkingImpl::IsP2PPacketAvailable[C]@7ffbf43f5cc0
+ outMsgSize(addr): 0x52ddf37c
+ channel: 0
+ result: false
+ outMsgSize: 0
+-universelan::client::NetworkingImpl::IsP2PPacketAvailable[C]@7ffbf43f5cc0
+ to 
+
++universelan::client::NetworkingImpl::IsP2PPacketAvailable[C]@7ffbf43f5cc0
+ outMsgSize(addr): 0x52ddf37c
+ channel: 0
+ result: false
+ outMsgSize: 0
+-universelan::client::NetworkingImpl::IsP2PPacketAvailable[C]@7ffbf43f5cc0
+#(repeat 2 times)
+
+Logs are structured, + opens new scope, - closes last scope, contents within a "single" + and - scope (like C { and }) could repeat:
++
+ something
+-
++
+ something
+-
++
+ different
+-
++
+ something
+-
++
+ something
+-
+
+so you would collapse all similar entries to:
+
++
+ something
+-
+# repeat 2
++
+ different
+-
++
+ something
+-
+# repeat 2
+
+..
+
+Scopes can be nested within other scopes.
+
+(subagent/subtask 2)
+when you do that for all logs, then the logs will be easier to analyze.
+The logs must be Analyzed. The GOG Galaxy version is 1.114.9 x86.
+The interceptor has been used with tracing capability with all traces enabled to log the behaviour.
+The game is The King of Fighters XIII.
+
+On UniverseLAN newest (feature/ixwebsocket-tests) the lobby is visible, the player name loads in the list of players when clicking the lobby, but joining doesn't work ("a network error occured").
+
+On UniverseLAN tag 465 everything works as expected. Although I think I have to click create game twice in the host, but it works.
+
+The logs are located in:
+
+E:\GOGProjectsDevWorking\1.114.9\The King of Fighters XIII\UniverseLANData\Interceptor\Tracing\
+
+There are four folders, two folders (one for client, one for host) for tag 465 (ulan-works-) and two for the newest branch.
+
+each folder contain two .trace file, one .trace file corresponds to one thread of the process.
+
+Full list of files to be analyzed:
+
+ulan-not-working-client\00003fc0.trace
+ulan-not-working-client\0000c618.trace
+ulan-not-working-client\000145ac.trace
+ulan-not-working-host\00009e38.trace
+ulan-not-working-host\0000cb34.trace
+ulan-not-working-host\0000ecb4.trace
+ulan-works-client\0000e648.trace
+ulan-works-client\0000fb34.trace
+ulan-works-client\00010e50.trace
+ulan-works-host\00001818.trace
+ulan-works-host\00012be8.trace
+ulan-works-host\00013ed0.trace
+
+(final task)
+After analysis is complete of real GOG vs UniverseLAN, 
+find the defect and suggest fixes. 
+
+Create a separate branch based on feature/ixwebsocket-tests (your current branch) and build for me 1.114.9 x86 to test with any fixes you suggest.
+
+You should rename the Galaxy.dll you produce, after compiling, to ulan-RealGalaxy.dll
