@@ -84,12 +84,14 @@ namespace universelan::client {
 		void SetGalaxyPeerPath(const char* galaxy_peer_path);
 		void SetHost(const char* host_addr);
 
-		const char* GetClientID();
-		const char* GetClientSecret();
-		const char* GetConfigFilePath();
-		const char* GetStoragePath();
-		const char* GetGalaxyPeerPath();
-		const char* GetHost();
+		const char* GetClientID() const;
+		const char* GetClientSecret() const;
+		const char* GetConfigFilePath() const;
+		const char* GetStoragePath() const;
+		const char* GetGalaxyPeerPath() const;
+		const char* GetHost() const;
+
+		const InitOptionsImpl GetInitOptionsImpl() const;
 	};
 
 	/** @} */

@@ -32,6 +32,10 @@ namespace universelan::client {
 		throwExceptions = initOptions.throwExceptions;
 #endif
 
+#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_GAMESERVICEPLATFORM
+		// TODO
+#endif
+
 #if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_STORAGEPATH
 		SetStoragePath(initOptions.storagePath != nullptr ? initOptions.storagePath : "");
 #endif
@@ -117,27 +121,68 @@ namespace universelan::client {
 		}
 	}
 
-	const char* InitOptionsModern::GetClientID() {
+	const char* InitOptionsModern::GetClientID() const {
 		return clientID.has_value() ? clientID->c_str() : nullptr;
 	}
 
-	const char* InitOptionsModern::GetClientSecret() {
+	const char* InitOptionsModern::GetClientSecret() const {
 		return clientSecret.has_value() ? clientSecret->c_str() : nullptr;
 	}
 
-	const char* InitOptionsModern::GetConfigFilePath() {
+	const char* InitOptionsModern::GetConfigFilePath() const {
 		return configFilePath.has_value() ? configFilePath->c_str() : nullptr;
 	}
 
-	const char* InitOptionsModern::GetStoragePath() {
+	const char* InitOptionsModern::GetStoragePath() const {
 		return storagePath.has_value() ? storagePath->c_str() : nullptr;
 	}
 
-	const char* InitOptionsModern::GetGalaxyPeerPath() {
+	const char* InitOptionsModern::GetGalaxyPeerPath() const {
 		return galaxyPeerPath.has_value() ? galaxyPeerPath->c_str() : nullptr;
 	}
 
-	const char* InitOptionsModern::GetHost() {
+	const char* InitOptionsModern::GetHost() const {
 		return host.has_value() ? host->c_str() : nullptr;
+	}
+
+	const InitOptionsImpl InitOptionsModern::GetInitOptionsImpl() const
+	{
+		InitOptionsImpl options{
+			GetClientID(),
+			GetClientSecret()
+		};
+
+#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_GALAXYPEERPATH
+		options.galaxyPeerPath = GetGalaxyPeerPath();
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_STORAGEPATH
+		options.storagePath = GetStoragePath();
+#endif
+
+		options.configFilePath = GetConfigFilePath();
+
+#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_HOST_PORT
+		options.host = GetHost();
+		options.port = port;
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_GAMESERVICEPLATFORM
+		// TODO
+#endif
+
+#if !GALAXY_BUILD_FEATURE_HAS_INITOPTIONS
+		options.throwExceptions = throwExceptions;
+#endif
+
+#if GALAXY_BUILD_FEATURE_ALLOCATOR
+		options.galaxyAllocator = galaxyAllocator;
+#endif
+
+#if GALAXY_BUILD_FEATURE_HAS_IGALAXYTHREADFACTORY
+		options.galaxyThreadFactory = galaxyThreadFactory;
+#endif
+
+		return options;
 	}
 }
