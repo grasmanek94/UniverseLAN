@@ -43,7 +43,7 @@ namespace universelan::client {
 #else
 			std::cout << "Exception occurred during init: " << ex.what() << std::endl;
 #endif
-
+			std::rethrow_exception(std::current_exception());
 		}
 
 		tracer::Trace::SetLogToCout(intf_inst.config->ShouldTraceToConsole());
