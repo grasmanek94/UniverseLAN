@@ -64,6 +64,7 @@ $output_folder = "release-packages"
 $prefix = "UniverseLAN"
 
 $packageCount = 0
+$packages = @()
 
 foreach ($version in $subdirs)
 {
@@ -119,6 +120,12 @@ foreach ($version in $subdirs)
         throw "No expected binaries found in $version_release_dir"
     }
 
+    $packages += [PSCustomObject]@{
+        Version = $version.Name
+        ReleaseDirectory = $version_release_dir
+        Extension = $ext
+    }
+
     $packageCount++
 }
 
@@ -127,7 +134,7 @@ if ($packageCount -eq 0)
     throw "No release packages will be produced."
 }
 
-foreach ($version in $subdirs)
+foreach ($package in $packages)
 {
     if (-not (Test-Path ".\$output_folder"))
     {
@@ -135,11 +142,11 @@ foreach ($version in $subdirs)
         New-Item -Path ".\$output_folder" -ItemType Directory -Force | Out-Null
     }
 
-    $resulting_filename = "$prefix-$($version.Name)-Build-$build_number-$ext.zip"
-    $sourcePath = "$version_release_dir\*"
+    $resulting_filename = "$prefix-$($package.Version)-Build-$build_number-$($package.Extension).zip"
+    $sourcePath = "$($package.ReleaseDirectory)\*"
     $destinationPath = ".\$output_folder\$resulting_filename"
 
-    Write-Host "Archiving '$version_release_dir\' into '$destinationPath'"
+    Write-Host "Archiving '$($package.ReleaseDirectory)\' into '$destinationPath'"
 
     & "7z.exe" a -tzip "$destinationPath" "$sourcePath" -mx=9 -y
 
