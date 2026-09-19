@@ -1,0 +1,66 @@
+Project / working dir:
+
+- C:\Development\AI\UL\ (ROOT)
+- ROOT\Source will be called SRC
+- THESE INSTRUCTIONS are also present in ROOT\.ai\ai-instructions-review.txt
+- Branch you will branch from/base your review on: master
+- Create a branch feature/ai-review for your work
+- Main task: Review all UniverseLAN relevant code for defects, errors (logic, faults, C++ errors, wrong behaviour, etc)
+- Skill you must use: ROOT\.ai\SKILLS\CppReviewer.MD
+- In case of conflicting instructions, any instructions below override above skill
+- You are working in a sandboxie sandbox, you can do anything you want (just don't turn off the machine or hack the machine)
+- You are NOT to PUSH anything to the git remote, ever, unless instructed to do so by me personally
+- Important directories/files to execute task successfully:
+-- ROOT\CMakeLists.txt
+-- SRC\**
+-- ROOT\bin\
+-- SRC\Vendor\*.cmake
+-- SRC\Vendor\*.txt
+-- SRC\InterceptionLogger\** (shallow review only for serious C++ defects)
+- Excluded directories/files from this task(for reviewing of code, but you can use it to complement your information, types, etc):
+-- SRC\EnetTest\**
+-- SRC\BehaviourTests\**
+-- SRC\TestCases\**
+-- SRC\TestCommon\**
+-- SRC\UnitTests\**
+-- SRC\Vendor\** (except when explicitly asked to)
+-- ROOT: .git .github cmake-x64 cmake-x86 docs release-packages UniverseLanLogAnalyzer UniverseLanWizard Util ZipFileHasher LICENSE .gitattributes
+- You can use, for extra inspiration and/or analysis and credential files: ROOT\Source\TestCases\credentials.cmake
+- This credential file is in .gitignore and shall never be added to git or leaked in any way
+- Don't reuse the current / old TestCases, only use as inspiration
+- Focus on Windows development only, no linux, but don't write code that will not compile on linux (or ifdef it), do not ever break compilation on linux based systems. Do not build on linux, just ensure that non-portable code gets only compiled inside platform specific ifdefs.
+- The project C++ source and header extensions are: .cxx .hxx
+
+Detailed information needed for task:
+UniverseLAN is a GOG Galaxy wrapper DLL and server backend which re-implements the same public interface that GOG Galaxy library exposes. GOG Galaxy is used in games and UniverseLAN is a drop-in replacement so it can take over GOG Galaxy functionality, such as multiplayer and lobbies.
+The same functions that perform "something" on the internet/GOG backend, are in UniverseLAN performed against its' own server software (SRC: Server, Shared\, Shared\Networtking, Shared\Networking\Messages).
+
+All GOG Galaxy versions are implemented, these are split into a common codebase and version specific projects defined in CMake.
+Output by default go to ROOT\bin\<version>\ or ROOT\bin\tests\<version>\
+Outputs are: Galaxy64.dll Galaxy.dll (dll are sometimes prefixed with RED), UniverseLANServer.exe UniverseLANServer64.exe
+The project uses CMake.
+ROOT\Source\DLLs\<version>\ contains:
+- galaxy: the public SDK headers from GOG itself
+- gog: the official .dll and .lib files from GOG itself
+- x64 and x86: .rc files for the projects dll files and .def files
+- Empty .cxx file that indicates if this is a Galaxy Factory enabled build or not
+
+The UniverseLAN implementation is located inside SRC directory inside these directories:
+- Client (has feature ifdefs) and Client_NoVer (generic library for all versions)
+- Shared (has feature ifdefs) and Shared_NoVer (generic) are libraries for both server and client
+- Server has version specific server projects
+- Features are defined through CMake, inside SRC\galaxy_sdk_features.cmake, this cmake file makes sure that each version has the correct #define GALAXY_BUILD_FEATURE_<feature name> = 0/1
+- When generating/configuring the project(s) with cmake, if it's not necessary to create all version variants, limit the versions with, for example "-D LIMIT_VERSIONS="1.139.2"", speeds up complete project build times dramatically.
+- when a more comprehensive compilation is needed, use -D LIMIT_VERSIONS="1.57.0,1.124.0,1.148.3,1.139.2,1.152.11" (but at this moment in time not all old test cases compile)
+- changes to cmake files logic or creating new cmake loginc is required, but it's prohibited, never allowed, to define version specific configuration in cmake. Cmake must always configure for all requested versions, so no adding hardcoded targets for for example 1.139.2, always use the same mechanism just like definition of client dlls, server targets, etc.
+- The UniverseLAN libraries/server pull config files first from working directory and then other directories like appdata, the config files are located inside the repository in ROOT\Config ROOT\ConfigDebug
+
+Detailed task description:
+- Review all UniverseLAN (client, server, shared) code and architecture
+- Do not stop until all files have been reviewed
+- Review format: per reviewed file create a <filename>.review.MD file and put your findings there, one header/section per defect. Per defect the description and location of the defect, impact of the defect, possible solutions, recommended resolution
+
+Do not stop for minor ambiguities. Follow existing repository conventions and record reasonable assumptions.
+
+The task is complete when:
+- All .cmake .txt .cxx .hxx files and the architecture has been reviewed. If needed create a review plan and execute in subagents.

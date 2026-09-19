@@ -102,7 +102,7 @@ namespace universelan::client {
 		}
 	}
 
-	void InterfaceInstances::init(const InitOptionsModern& initOptions, bool gameserver) {
+	void InterfaceInstances::init(const InitOptionsModern& initOptions, bool gameserver) {	
 		if (config == nullptr) {
 			config = std::make_unique<ClientIniData>();
 		}
@@ -142,7 +142,7 @@ namespace universelan::client {
 		real_ierror_manager = real_factory_get_error_manager();
 #endif
 
-		real_init = [this](InitOptionsModern initOptions) -> void {
+		std::function<void GALAXY_CALLTYPE(InitOptionsModern const& initOptions)> interceptor_init = [this](InitOptionsModern initOptions) -> void {
 			try {
 #if GALAXY_BUILD_FEATURE_HAS_INITOPTIONS_MODERN
 				real_igalaxy_instance->Init(initOptions);
@@ -163,7 +163,7 @@ namespace universelan::client {
 			}
 		};
 
-		real_init(*init_options);
+		interceptor_init(*init_options);
 
 		real_process_data = std::bind(&IGalaxy::ProcessData, real_igalaxy_instance);
 		real_shutdown = std::bind(&IGalaxy::Shutdown, real_igalaxy_instance);
@@ -223,11 +223,14 @@ namespace universelan::client {
 
 #else
 
+		std::function<void GALAXY_CALLTYPE(InitOptionsImpl const& initOptions)> real_init = nullptr;
+
 		assign_func(real_init, (gameserver ? "?InitGameServer@api@galaxy@" : "?Init@api@galaxy@"));
 		assign_func(real_process_data, (gameserver ? "?ProcessGameServerData" : "?ProcessData@api@galaxy@"));
 		assign_func(real_shutdown, (gameserver ? "?ShutdownGameServer@api@galaxy@" : "?Shutdown@api@galaxy@"));
 
-		real_init(*init_options);
+		auto init_options_classic = init_options->GetInitOptionsImpl();
+		real_init(init_options_classic);
 
 		auto real_notification_ptr = interceptor_make_unique(notification, (gameserver ? "?GameServerListenerRegistrar@api@galaxy@" : "?ListenerRegistrar@api@galaxy@"));
 		auto real_notification = real_notification_ptr();
@@ -295,7 +298,6 @@ namespace universelan::client {
 			config->GetCallTracingFlags()
 		);
 
-		real_init = nullptr;
 		real_process_data = nullptr;
 		real_shutdown = nullptr;
 
