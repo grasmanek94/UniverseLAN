@@ -6,21 +6,64 @@
 
 #include <SafeStringCopy.hxx>
 
+#include <algorithm>
+#include <exception>
 #include <string>
+#include <thread>
 #include <utility>
 
 namespace universelan::client {
 	using namespace galaxy::api;
 
+	void StorageImpl::cleanup_file_upload_workers(worker_t&& new_worker)
+	{
+		worker_container_t completed_workers{};
+
+		{
+			lock_t lock{ mtx_file_upload_workers };
+
+			file_upload_workers.push_back(std::move(new_worker));
+
+			for (std::size_t i = 0; i < file_upload_workers.size();)
+			{
+				if (file_upload_workers[i].finished->load(
+					std::memory_order_relaxed))
+				{
+					completed_workers.push_back(
+						std::move(file_upload_workers[i]));
+
+					if (i != file_upload_workers.size() - 1)
+					{
+						file_upload_workers[i] =
+							std::move(file_upload_workers.back());
+					}
+
+					file_upload_workers.pop_back();
+				}
+				else
+				{
+					++i;
+				}
+			}
+
+		}
+
+		// completed_workers is destroyed here, outside the mutex.
+		// Its jthreads are joined during destruction.
+	}
+
 	StorageImpl::StorageImpl(InterfaceInstances* intf) :
 		intf{ intf }, listeners{ intf->notification.get() },
-		sfu(intf->sfu.get())
+		sfu{ intf->sfu.get() }, file_upload_workers{}
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
 	}
 
 	StorageImpl::~StorageImpl() {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ISTORAGE };
+
+		lock_t lock{ mtx_file_upload_workers };
+		file_upload_workers.clear();
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_SYNCHRONIZE
@@ -125,15 +168,32 @@ namespace universelan::client {
 			return;
 		}
 
-		// !!! LEAK !!! (albeit temporary when thread exits)
-		std::thread([=, this] {
-			uint64_t request_id = MessageUniqueID::get();
+		auto finished = std::make_shared<std::atomic_bool>( false );
+		worker_t worker = worker_t{};
+		worker.finished = finished;
+		worker.thread = std::jthread([=, this] {
+			try
+			{
+				uint64_t request_id = MessageUniqueID::get();
 
 #if GALAXY_BUILD_FEATURE_HAS_ISTORAGE_FILESHARELISTENERS
-			listeners->AddRequestListener(request_id, listener);
+				listeners->AddRequestListener(request_id, listener);
 #endif
-			intf->client->GetConnection().SendAsync(FileShareMessage{ request_id, str_file_name, sfu->Read(sfu->storage, str_file_name.c_str()) });
-			}).detach(); // due to this detach
+				intf->client->GetConnection().SendAsync(FileShareMessage{ request_id, str_file_name, sfu->Read(sfu->storage, str_file_name.c_str()) });
+			}
+			catch (const std::exception& ex) {
+				std::cerr << "File Share exception: " << ex.what() << '\n';
+			}
+			catch (...)
+			{
+				std::cerr
+					<< "File Share exception: unknown exception\n";
+			}
+
+			finished->store(true, std::memory_order_relaxed);
+		});
+
+		cleanup_file_upload_workers(std::move(worker));
 	}
 
 	void StorageImpl::DownloadSharedFile(SharedFileID sharedFileID

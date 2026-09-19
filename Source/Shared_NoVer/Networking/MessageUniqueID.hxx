@@ -23,6 +23,6 @@ namespace universelan {
 		MessageUniqueID(uint64_t id);
 
 		/* Thread safe */
-		static uint64_t get();
+		static uint64_t get() noexcept;
 	};
 }
