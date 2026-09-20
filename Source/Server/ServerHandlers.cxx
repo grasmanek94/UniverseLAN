@@ -547,14 +547,7 @@ namespace universelan::server {
 
 		peer::ptr pd = peer_mapper.Get(peer);
 
-		// !Apparently it's OK to be in multiple lobbies
-		//if (pd->lobby) {
-		//	// already in a lobby
-		//	data->result = LOBBY_ENTER_RESULT_ERROR;
-		//	connection.Send(peer, data);
-		//	return;
-		//}
-
+		/* It's OK to be in multiple lobbies! */
 		auto lobby = lobby_manager.GetLobby(data->lobby_id);
 		if (!lobby) {
 			data->result = LOBBY_ENTER_RESULT_LOBBY_DOES_NOT_EXIST;
@@ -562,7 +555,8 @@ namespace universelan::server {
 			return;
 		}
 
-		if (lobby->IsFull()) {
+		// TODO: Should test this "fix" before pushing it to master
+		if (lobby->IsFull() /* || !lobby->IsJoinable()*/) {
 			data->result = LOBBY_ENTER_RESULT_LOBBY_IS_FULL;
 			connection.Send(peer, data);
 			return;
