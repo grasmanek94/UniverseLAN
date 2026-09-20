@@ -246,6 +246,7 @@ namespace universelan::client {
 			return 0;
 		}
 
+		lock_t guard{ channel->buffer_mtx };
 		return (uint32_t)channel->buffer.size();
 	}
 
