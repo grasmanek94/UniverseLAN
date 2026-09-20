@@ -32,8 +32,7 @@ namespace universelan::client {
 
 	CloudStorageImpl::CloudStorageImpl(InterfaceInstances* intf) :
 		intf{ intf }, listeners{ intf->notification.get() },
-		sfu{ intf->sfu.get() }, last_container{ "" },
-		last_subcontainer_ref{ nullptr }, container_file_list{},
+		sfu{ intf->sfu.get() }, mtx_container_file_list{}, container_file_list{},
 		mtx_last_metadata_request{}, last_metadata_request{},
 		unique_savegame_id_progress{ true },
 		unique_savegame_id_counter{ filesystem_container::file_time_now_since_epoch() }
@@ -48,9 +47,9 @@ namespace universelan::client {
 	void CloudStorageImpl::GetFileList(const char* container, ICloudStorageGetFileListListener* listener) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
-		last_container = util::safe_fix_null_char_ptr_ret(container);
+		auto last_subcontainer_ref = sfu->cloud->get_subcontainer(container);
 
-		last_subcontainer_ref = sfu->cloud->get_subcontainer(container);
+		lock_t lock_container_file_list{ mtx_container_file_list };
 		container_file_list = last_subcontainer_ref->get_file_list();
 
 		listeners->NotifyAll(
@@ -63,6 +62,8 @@ namespace universelan::client {
 
 	const char* CloudStorageImpl::GetFileNameByIndex(uint32_t index) const {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+
+		lock_t lock_container_file_list{ mtx_container_file_list };
 
 		if (index >= container_file_list.size()) {
 			return nullptr;
@@ -79,6 +80,8 @@ namespace universelan::client {
 	uint32_t CloudStorageImpl::GetFileSizeByIndex(uint32_t index) const {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
+		lock_t lock_container_file_list{ mtx_container_file_list };
+
 		if (index >= container_file_list.size()) {
 			return 0;
 		}
@@ -88,6 +91,8 @@ namespace universelan::client {
 
 	uint32_t CloudStorageImpl::GetFileTimestampByIndex(uint32_t index) const {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+
+		lock_t lock_container_file_list{ mtx_container_file_list };
 
 		if (index >= container_file_list.size()) {
 			return 0;
@@ -103,6 +108,8 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_GETFILEHASHBYINDEX
 	const char* CloudStorageImpl::GetFileHashByIndex(uint32_t index) const
 	{
+		lock_t lock_container_file_list{ mtx_container_file_list };
+
 		if (index >= container_file_list.size()) {
 			return "";
 		}
