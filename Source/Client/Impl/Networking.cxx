@@ -108,7 +108,9 @@ namespace universelan::client {
 		auto channel_var = &buffer[channel];
 
 		lock_t lock{ channel_var->mtx };
-		channel_var->packets.pop();
+		if (!channel_var->packets.empty()) {
+			channel_var->packets.pop();
+		}
 	}
 
 	int NetworkingImpl::GetPingWith(GalaxyID galaxyID) {
