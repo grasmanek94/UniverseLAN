@@ -601,7 +601,7 @@ namespace universelan::client {
 	void CloudStorageImpl::CalculateHash(void* userParam, ReadFunc readFunc, RewindFunc rewindFunc, char* hashBuffer, uint32_t hashBufferSize) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
-		if (!hashBuffer || !readFunc || hashBufferSize < MIN_HASH_BUFFER_SIZE) {
+		if ((hashBuffer == nullptr) || (readFunc == nullptr) || (hashBufferSize < MIN_HASH_BUFFER_SIZE)) {
 			return;
 		}
 
@@ -609,7 +609,7 @@ namespace universelan::client {
 		static thread_local char buffer[buffer_size];
 		int read_size = 0;
 
-		if (rewindFunc) {
+		if (rewindFunc != nullptr) {
 			rewindFunc(userParam, ReadPhase::CHECKSUM_CALCULATING);
 		}
 
@@ -618,7 +618,7 @@ namespace universelan::client {
 		do {
 			read_size = readFunc(userParam, buffer, (int)buffer_size);
 			if (read_size > 0) {
-				start_hash = const_hash64_data_loop(buffer, buffer_size, start_hash);
+				start_hash = const_hash64_data_loop(buffer, std::min(buffer_size, read_size), start_hash);
 			}
 		} while (read_size > 0);
 
@@ -634,7 +634,7 @@ namespace universelan::client {
 	void CloudStorageImpl::CalculateHash(const void* buffer, uint32_t bufferLength, char* hashBuffer, uint32_t hashBufferSize) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
-		if (!buffer || !hashBuffer || hashBufferSize < MIN_HASH_BUFFER_SIZE) {
+		if ((buffer == nullptr) || (hashBuffer == nullptr) || (hashBufferSize < MIN_HASH_BUFFER_SIZE)) {
 			return;
 		}
 
