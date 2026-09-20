@@ -230,16 +230,27 @@ namespace universelan::client {
 
 		LobbyManager::lobbies_t filtered_list_of_lobbies{};
 		for (auto& entry : data->lobby_list) {
+			bool skip_max_size_reached = (filter != nullptr) && (filtered_list_of_lobbies.size() >= filter->max_entries);
+			if (skip_max_size_reached) {
+				break;
+			}
+
 			auto lobby = entry.second;
+
+			if (lobby == nullptr) {
+				continue;
+			}
+
+			bool skip_full_lobby = (filter != nullptr) && (!filter->allow_full && lobby->IsFull());
+			bool skip_filtered_lobby = (filter != nullptr) && ShouldFilterOut(lobby, filter->filters);
+
 			// Explicit nonjoinability also removes a public lobby from discoverable results.
-			bool skip{ !lobby->IsJoinable() || (!filter->allow_full && lobby->IsFull()) };
+			bool skip_not_joinable = !lobby->IsJoinable();
 
-			if (!skip && !ShouldFilterOut(lobby, filter->filters)) {
+			bool skip{ skip_full_lobby || skip_filtered_lobby || skip_not_joinable };
+
+			if (!skip) {
 				filtered_list_of_lobbies.emplace(entry.first, entry.second);
-
-				if (filtered_list_of_lobbies.size() >= filter->max_entries) {
-					break;
-				}
 			}
 		}
 
