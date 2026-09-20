@@ -30,7 +30,7 @@ namespace filesystem_container {
 		for (auto& file : files) {
 			auto decoded_filename = filename_decode(file);
 			auto full_file_path = get_path(decoded_filename);
-			if (std::filesystem::is_regular_file(full_file_path)) {
+			if (std::filesystem::is_regular_file(full_file_path, ec)) {
 				auto entry_ptr = std::make_shared<filesystem_entry>(this, decoded_filename);
 
 				filename_to_entry.emplace(entry_ptr->get_path(), entry_ptr);
