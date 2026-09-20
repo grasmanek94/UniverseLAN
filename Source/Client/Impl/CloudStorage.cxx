@@ -606,7 +606,7 @@ namespace universelan::client {
 		}
 
 		static const int buffer_size = 2048;
-		static thread_local char buffer[buffer_size];
+		std::array<char, buffer_size> buffer{};
 		int read_size = 0;
 
 		if (rewindFunc != nullptr) {
@@ -616,9 +616,9 @@ namespace universelan::client {
 		auto start_hash = const_hash64_data_loop(nullptr, 0);
 
 		do {
-			read_size = readFunc(userParam, buffer, (int)buffer_size);
+			read_size = readFunc(userParam, buffer.data(), (int)buffer.size());
 			if (read_size > 0) {
-				start_hash = const_hash64_data_loop(buffer, std::min(buffer_size, read_size), start_hash);
+				start_hash = const_hash64_data_loop(buffer.data(), std::min((int)buffer.size(), read_size), start_hash);
 			}
 		} while (read_size > 0);
 
