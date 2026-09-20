@@ -2,6 +2,7 @@
 
 #include "AchievementData.hxx"
 
+#include <atomic>
 #include <chrono>
 #include <functional>
 #include <mutex>
@@ -42,7 +43,7 @@ namespace universelan {
 		stats_t Stats;
 		user_data_t UserData;
 		time_point BootTime;
-		uint32_t PlayTime;
+		std::atomic_uint32_t PlayTime;
 		user_data_t RichPresence;
 
 	public:
@@ -50,7 +51,7 @@ namespace universelan {
 		template<class Archive>
 		void serialize(Archive& ar)
 		{
-			ar(Achievements, Stats, UserData, BootTime, PlayTime, RichPresence);
+			ar(Achievements, Stats, UserData, BootTime, PlayTime.load(), RichPresence);
 		}
 
 		AchievementsAndStatsContainer();

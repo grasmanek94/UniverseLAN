@@ -14,7 +14,7 @@ namespace universelan {
 	AchievementsAndStatsContainer::AchievementsAndStatsContainer(const AchievementsAndStatsContainer& other)
 		: mtx_achievements{}, mtx_stats{}, mtx_userdata{}, mtx_richpresence{},
 		Achievements{ other.Achievements }, Stats{ other.Stats }, UserData{ other.UserData },
-		BootTime{ other.BootTime }, PlayTime{ other.PlayTime },
+		BootTime{ other.BootTime }, PlayTime{ other.PlayTime.load() },
 		RichPresence{ other.RichPresence }
 	{}
 
@@ -32,11 +32,23 @@ namespace universelan {
 
 	AchievementsAndStatsContainer& AchievementsAndStatsContainer::operator=(const AchievementsAndStatsContainer& other)
 	{
+		std::unique_lock<mutex_t> lk1(this->mtx_achievements, std::defer_lock);
+		std::unique_lock<mutex_t> lk2(this->mtx_stats, std::defer_lock);
+		std::unique_lock<mutex_t> lk3(this->mtx_userdata, std::defer_lock);
+		std::unique_lock<mutex_t> lk4(this->mtx_richpresence, std::defer_lock);
+
+		std::unique_lock<mutex_t> lk5(other.mtx_achievements, std::defer_lock);
+		std::unique_lock<mutex_t> lk6(other.mtx_stats, std::defer_lock);
+		std::unique_lock<mutex_t> lk7(other.mtx_userdata, std::defer_lock);
+		std::unique_lock<mutex_t> lk8(other.mtx_richpresence, std::defer_lock);
+
+		std::lock(lk1, lk2, lk3, lk4, lk5, lk6, lk7, lk8);
+
 		this->Achievements = other.Achievements;
 		this->Stats = other.Stats;
 		this->UserData = other.UserData;
 		this->BootTime = other.BootTime;
-		this->PlayTime = other.PlayTime;
+		this->PlayTime.store(other.PlayTime.load());
 		this->RichPresence = other.RichPresence;
 
 		return *this;
