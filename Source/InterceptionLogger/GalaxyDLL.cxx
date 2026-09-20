@@ -27,8 +27,8 @@ namespace universelan::client {
 
 #ifdef _WIN32
 		{
-			TCHAR szFileName[MAX_PATH];
-			if (GetModuleFileName(NULL, szFileName, MAX_PATH) == ERROR_SUCCESS) {
+			TCHAR szFileName[MAX_PATH] = {};
+			if (GetModuleFileName(NULL, szFileName, MAX_PATH) > 0) {
 				std::cout << "Process: " << szFileName << std::endl;
 			}
 		}
@@ -72,12 +72,16 @@ namespace universelan::client {
 	void Shutdown() {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
 
+		universe_client_api.real_shutdown();
+
 		universe_client_api.reset();
 	}
 
 #if GALAXY_BUILD_FEATURE_HAS_SHUTDOWNOPTIONS
 	void ShutdownEx(const ShutdownOptions& shutdownOptions) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL };
+
+		universe_client_api.real_shutdown_ex(shutdownOptions);
 
 		universe_client_api.reset();
 	}

@@ -49,6 +49,11 @@ namespace universelan::client {
 
 		std::function<void GALAXY_CALLTYPE(void)> real_process_data = nullptr;
 		std::function<void GALAXY_CALLTYPE(void)> real_shutdown = nullptr;
+
+#if GALAXY_BUILD_FEATURE_HAS_SHUTDOWNOPTIONS
+		std::function<void GALAXY_CALLTYPE(const ShutdownOptions& shutdownOptions)> real_shutdown_ex = nullptr;
+#endif
+
 		std::function<uint32_t (void)> real_load = nullptr;
 
 		std::unique_ptr<ClientIniData>			config = nullptr;

@@ -213,12 +213,16 @@ namespace universelan::client {
 		telemetry = std::make_unique<TelemetryImpl>(std::bind(&IGalaxy::GetTelemetry, real_igalaxy_instance), real_notification);
 #endif
 
-		auto has_err = error->HasError();
-		if (has_err) {
-			auto err_msg = error->GetMsg();
-			auto err_type = error->GetType();
+		if (error != nullptr) {
+			auto has_err = error->HasError();
+			if (has_err) {
+				auto err_msg = error->GetMsg();
+				auto err_type = error->GetType();
 
-			std::cerr << "Error: " << err_msg << "(" << magic_enum::enum_name(err_type) << ")" << std::endl;
+				if (err_msg != nullptr) {
+					std::cerr << "Error: " << err_msg << "(" << magic_enum::enum_name(err_type) << ")" << std::endl;
+				}
+			}
 		}
 
 #else
@@ -228,6 +232,10 @@ namespace universelan::client {
 		assign_func(real_init, (gameserver ? "?InitGameServer@api@galaxy@" : "?Init@api@galaxy@"));
 		assign_func(real_process_data, (gameserver ? "?ProcessGameServerData" : "?ProcessData@api@galaxy@"));
 		assign_func(real_shutdown, (gameserver ? "?ShutdownGameServer@api@galaxy@" : "?Shutdown@api@galaxy@"));
+
+#if GALAXY_BUILD_FEATURE_HAS_SHUTDOWNOPTIONS
+		assign_func(real_shutdown_ex, (gameserver ? "?ShutdownGameServerEx@api@galaxy@" : "?ShutdownEx@api@galaxy@"));
+#endif
 
 		auto init_options_classic = init_options->GetInitOptionsImpl();
 		real_init(init_options_classic);
@@ -300,6 +308,10 @@ namespace universelan::client {
 
 		real_process_data = nullptr;
 		real_shutdown = nullptr;
+
+#if GALAXY_BUILD_FEATURE_HAS_SHUTDOWNOPTIONS
+		real_shutdown_ex = nullptr;
+#endif
 
 #if GALAXY_BUILD_FEATURE_HAS_ITELEMETRY
 		telemetry = nullptr;
