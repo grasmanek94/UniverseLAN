@@ -572,6 +572,7 @@ namespace universelan::client {
 			return;
 		}
 
+		// TODO: Calculate hash and unlink when expected matches.
 		file_entry->unlink();
 
 		listeners->NotifyAll(
