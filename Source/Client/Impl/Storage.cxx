@@ -284,6 +284,7 @@ namespace universelan::client {
 		listeners->PopRequestListener(data->request_id, listener);
 #endif
 
+		// TODO: Can this be handles better? Need to make a behaviour test against real galaxy.
 		if (data->data.size() > 0) {
 			auto entry = sfu->shared->create_shared(data->filename, data->id);
 			if (entry && entry->write(data->data)) {
