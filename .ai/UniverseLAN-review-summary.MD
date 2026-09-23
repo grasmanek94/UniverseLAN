@@ -103,6 +103,8 @@ Each reviewed file has a new sibling `<filename>.review.MD`. The previous report
 
 ## 6. Testing, build, security, performance and portability
 
+**Follow-up coverage assessment:** [TEST-COVERAGE-GAPS.MD](review-baseline/TEST-COVERAGE-GAPS.MD) maps all 27 fix-branch commits to existing tests and missing regressions. It also corrects an earlier coverage statement: two existing message-serialization tests already assert nonzero play-time preservation; running/enforcing those tests is the immediate gap.
+
 - **Build:** The five-version x64 Debug matrix passed for all three production components; this provides evidence of current source compatibility, not binary or behavioral equivalence with GOG. No hardcoded version-specific CMake logic was added.
 - **Tests:** Three review-only probes reproduced concrete baseline failures using real built code. They are bug reproductions, not passing fixed-behavior tests. Existing excluded test cases were not reused. Additional cancellation, peer reuse, denied/full-volume writes and multi-pending-callback regressions are proposed locally beside findings.
 - **Security:** Authentication checks occur after archive decoding; application exceptions need containment; broadcasts/logs must respect authentication and credential boundaries. No real credentials were read or emitted. Intentional shared-key LAN defaults were assessed in their context rather than treated alone as a universal compromise finding.
