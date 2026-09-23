@@ -91,8 +91,6 @@ namespace universelan::client {
 	void InterfaceInstances::reset() {
 		internal_reset();
 
-		delay_runner = nullptr;
-
 		if (client) {
 			client->Stop();
 		}
@@ -131,5 +129,7 @@ namespace universelan::client {
 		init_options = nullptr;
 		client = nullptr;
 		notification = nullptr;
+
+		delay_runner = nullptr;
 	}
 }

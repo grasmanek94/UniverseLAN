@@ -40,12 +40,12 @@ namespace universelan::client {
 			trace.write_all("listener: {}", (void*)listener);
 		}
 
-		auto ptr = ProxifySyncHandler::pop(listener);
-		if (ptr) {
-			intf()->Unregister(listenerType, ptr);
+		auto proxies = ProxifySyncHandler::pop_proxies_from_real(listener);
+		if (proxies.size()) {
+			for (auto& proxy : proxies) {
+				intf()->Unregister(listenerType, proxy);
 
-			if (!ProxifySyncHandler::is_delete_protection_enabled(ptr)) {
-				delete ptr;
+				(void)ProxifySyncHandler::delete_if_not_protected(proxy);
 			}
 		}
 

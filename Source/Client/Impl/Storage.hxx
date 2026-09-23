@@ -18,6 +18,12 @@
 #include <GalaxyID.h>
 #include <IListenerRegistrar.h>
 
+#include <atomic>
+#include <memory>
+#include <mutex>
+#include <thread>
+#include <vector>
+
 namespace universelan::client {
 	using namespace galaxy::api;
 	struct InterfaceInstances;
@@ -33,10 +39,27 @@ namespace universelan::client {
 	class StorageImpl : public IStorage
 	{
 	private:
+		struct Worker
+		{
+			std::jthread thread;
+			std::shared_ptr<std::atomic<bool>> finished;
+		};
+
+		using mutex_t = std::mutex;
+		using lock_t = std::scoped_lock<mutex_t>;
+		using worker_t = Worker;
+		using worker_container_t = std::vector<worker_t>;
+
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
 
 		SharedFileUtils* sfu;
+
+		/* Keep track of file upload worker threads and clean them up when not needed anymore */
+		mutable mutex_t mtx_file_upload_workers;
+		worker_container_t file_upload_workers;
+
+		void cleanup_file_upload_workers(worker_t&& new_worker);
 
 	public:
 		StorageImpl(InterfaceInstances* intf);

@@ -309,7 +309,11 @@ namespace universelan::client {
 #endif	
 		}
 
-		intf()->DeleteFile(container, name, CloudStorageDeleteFileListener::encapsulate(listener));
+		intf()->DeleteFile(container, name, CloudStorageDeleteFileListener::encapsulate(listener)
+#if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_HASHING
+			, expectedHash
+#endif	
+		);
 	}
 #pragma pop_macro ("DeleteFile")
 

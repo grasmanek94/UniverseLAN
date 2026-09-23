@@ -38,12 +38,12 @@ namespace universelan {
 			for (;; ++left) {
 				if (left == in.end())
 					return std::string_view();
-				if (!isspace(*left))
+				if (!isspace((unsigned char)*left))
 					break;
 			}
 
 			auto right = in.end() - 1;
-			for (; right > left && isspace(*right); --right);
+			for (; right > left && isspace((unsigned char)*right); --right);
 
 			return std::string_view(left, right + 1);
 		}

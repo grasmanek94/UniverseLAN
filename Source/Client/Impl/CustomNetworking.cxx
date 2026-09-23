@@ -180,13 +180,13 @@ namespace universelan::client {
 	{
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICUSTOMNETWORKING };
 
-		lock_t lock(mtx);
+		lock_t lock{ mtx };
 		channels.clear();
 	}
 
 	std::shared_ptr<CustomNetworkingImpl::Channel> CustomNetworkingImpl::GetChannel(const ConnectionID connectionID) const
 	{
-		lock_t lock(mtx);
+		lock_t lock{ mtx };
 		auto entry = channels.find(connectionID);
 		if (entry == channels.end()) {
 			return nullptr;
@@ -208,7 +208,7 @@ namespace universelan::client {
 			UNIVERSELAN_PP_IF(GALAXY_BUILD_FEATURE_HAS_ICONNECTIONLISTENERS, listener, nullptr)
 		))
 		{
-			lock_t lock(mtx);
+			lock_t lock{ mtx };
 
 			PerformCleanup();
 
@@ -224,7 +224,7 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICUSTOMNETWORKING };
 
 		std::shared_ptr<Channel> channel{ GetChannel(connectionID) };
-		if (!channel) {
+		if (channel == nullptr) {
 			return;
 		}
 
@@ -236,22 +236,31 @@ namespace universelan::client {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICUSTOMNETWORKING | tracer::Trace::HIGH_FREQUENCY_CALLS };
 
 		std::shared_ptr<Channel> channel{ GetChannel(connectionID) };
+		if (channel == nullptr) {
+			return;
+		}
+
+		if (data == nullptr) {
+			channel->client.send("", true);
+			return;
+		}
 
 		channel->client.send(std::string((const char*)data, dataSize), true);
 	}
 
 	uint32_t CustomNetworkingImpl::GetAvailableDataSize(const ConnectionID connectionID) {
 		std::shared_ptr<Channel> channel{ GetChannel(connectionID) };
-		if (!channel) {
+		if (channel == nullptr) {
 			return 0;
 		}
 
+		lock_t guard{ channel->buffer_mtx };
 		return (uint32_t)channel->buffer.size();
 	}
 
 	void CustomNetworkingImpl::PeekData(const ConnectionID connectionID, void* const dest, const uint32_t dataSize) {
 		std::shared_ptr<Channel> channel{ GetChannel(connectionID) };
-		if (!channel) {
+		if ((channel == nullptr) || (dest == nullptr)) {
 			return;
 		}
 
@@ -261,11 +270,11 @@ namespace universelan::client {
 
 	void CustomNetworkingImpl::ReadData(const ConnectionID connectionID, void* const dest, uint32_t const dataSize) {
 		std::shared_ptr<Channel> channel{ GetChannel(connectionID) };
-		if (!channel) {
+		if ((channel == nullptr) || (dest == nullptr)) {
 			return;
 		}
 
-		lock_t guard(channel->buffer_mtx);
+		lock_t guard{ channel->buffer_mtx };
 		size_t size = std::min(dataSize, (uint32_t)channel->buffer.size());
 		std::copy_n(channel->buffer.begin(), size, (char*)dest);
 		channel->buffer.erase(channel->buffer.begin(), channel->buffer.begin() + size);
@@ -273,11 +282,11 @@ namespace universelan::client {
 
 	void CustomNetworkingImpl::PopData(const ConnectionID connectionID, const uint32_t dataSize) {
 		std::shared_ptr<Channel> channel{ GetChannel(connectionID) };
-		if (!channel) {
+		if (channel == nullptr) {
 			return;
 		}
 
-		lock_t guard(channel->buffer_mtx);
+		lock_t guard{ channel->buffer_mtx };
 		size_t size = std::min(dataSize, (uint32_t)channel->buffer.size());
 		channel->buffer.erase(channel->buffer.begin(), channel->buffer.begin() + size);
 	}

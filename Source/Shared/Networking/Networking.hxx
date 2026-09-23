@@ -124,8 +124,8 @@ namespace universelan {
 		mutable Concurrency::concurrent_queue<ENetPacket*> delayed_packets_to_send;
 		mutable Concurrency::concurrent_queue<ENetEvent> received_events_to_process;
 
-		bool is_connected;
-		bool is_timeout;
+		std::atomic_bool is_connected;
+		std::atomic_bool is_timeout;
 
 		timepoint_t last_network_activity;
 		timepoint_t next_ping_time;

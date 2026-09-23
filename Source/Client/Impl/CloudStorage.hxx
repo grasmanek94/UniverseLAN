@@ -19,6 +19,8 @@
 #include <GalaxyID.h>
 #include <IListenerRegistrar.h>
 
+#include <atomic>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -36,19 +38,24 @@ namespace universelan::client {
 	  */
 	class CloudStorageImpl : public ICloudStorage
 	{
+	public:
+		using mutex_t = std::recursive_mutex;
+		using lock_t = std::scoped_lock<mutex_t>;
+
 	private:
 		InterfaceInstances* intf;
 		ListenerRegistrarImpl* listeners;
 
 		SharedFileUtils* sfu;
-		std::string last_container;
-		filesystem_container::fs_container_ptr last_subcontainer_ref;
 
+		mutable mutex_t mtx_container_file_list;
 		filesystem_container::fs_filelist_contrainer_t container_file_list;
+
+		mutable mutex_t mtx_last_metadata_request;
 		filesystem_container::file_entry_metadata_vector_t last_metadata_request;
 
 		bool unique_savegame_id_progress;
-		uint64_t unique_savegame_id_counter;
+		std::atomic_uint64_t unique_savegame_id_counter;
 
 		std::string GenerateUniqueSavegameID();
 

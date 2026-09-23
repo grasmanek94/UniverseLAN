@@ -35,13 +35,24 @@ namespace universelan::client {
 		std::cout << "Galaxy Version: " << GALAXY_VERSION_MAJOR << "." << GALAXY_VERSION_MINOR << "." << GALAXY_VERSION_PATCH << "-x" << GALAXY_VERSION_PLATFORM << std::endl;
 		std::cout << "Build: " << Version_Number << std::endl;
 	}
+
 	void UniverseGameServer::ShutdownGameServer() {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL_GAMESERVERAPI };
 
-		gameserver_intf_inst.reset();
-
 		gameserver_intf_inst.real_shutdown();
+
+		gameserver_intf_inst.reset();
 	}
+
+#if GALAXY_BUILD_FEATURE_HAS_SHUTDOWNOPTIONS
+	void UniverseGameServer::ShutdownGameServerEx(const ShutdownOptions& shutdownOptions) {
+		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL_GAMESERVERAPI };
+
+		gameserver_intf_inst.real_shutdown_ex(shutdownOptions);
+
+		gameserver_intf_inst.reset();
+	}
+#endif
 
 	IUser* UniverseGameServer::GameServerUser() {
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL_GAMESERVERAPI };

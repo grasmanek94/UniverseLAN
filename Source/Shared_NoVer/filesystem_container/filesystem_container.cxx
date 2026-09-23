@@ -30,7 +30,7 @@ namespace filesystem_container {
 		for (auto& file : files) {
 			auto decoded_filename = filename_decode(file);
 			auto full_file_path = get_path(decoded_filename);
-			if (std::filesystem::is_regular_file(full_file_path)) {
+			if (std::filesystem::is_regular_file(full_file_path, ec)) {
 				auto entry_ptr = std::make_shared<filesystem_entry>(this, decoded_filename);
 
 				filename_to_entry.emplace(entry_ptr->get_path(), entry_ptr);
@@ -260,13 +260,6 @@ namespace filesystem_container {
 			return;
 		}
 
-		{
-			lock_t lock{ mtx_filename_to_entry };
-			if (filename_to_entry.find(entry->get_path()) != filename_to_entry.end()) {
-				return;
-			}
-		}
-
 		std::unique_lock<mutex_t> lk1(mtx_fs_entry_index, std::defer_lock);
 		std::unique_lock<mutex_t> lk2(mtx_filename_to_entry, std::defer_lock);
 		std::unique_lock<mutex_t> lk3(mtx_shareid_to_entry, std::defer_lock);
@@ -276,6 +269,10 @@ namespace filesystem_container {
 		}
 		else {
 			std::lock(lk1, lk2);
+		}
+
+		if (filename_to_entry.find(entry->get_path()) != filename_to_entry.end()) {
+			return;
 		}
 
 		filename_to_entry.emplace(entry->get_path(), entry);

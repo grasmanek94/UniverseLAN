@@ -7,6 +7,7 @@
 
 #include <GalaxyApi.h>
 
+#include <exception>
 #include <iostream>
 
 namespace universelan::client {
@@ -22,7 +23,19 @@ namespace universelan::client {
 	}
 
 	void UniverseGameServer::InitGameServer(const InitOptions& initOptions) {
-		gameserver_intf_inst.init(initOptions);
+		try
+		{
+			gameserver_intf_inst.init(initOptions);
+		}
+		catch (std::exception& ex) {
+
+#ifdef _WIN32
+			MessageBox(NULL, ex.what(), "UniverseLAN - Error", 0);
+#else
+			std::cout << "Exception occurred during init: " << ex.what() << std::endl;
+#endif
+			std::rethrow_exception(std::current_exception());
+		}
 
 		tracer::Trace trace { nullptr, __FUNCTION__, tracer::Trace::GALAXYDLL_GAMESERVERAPI };
 
@@ -34,7 +47,7 @@ namespace universelan::client {
 		std::cout << "Galaxy Version: " << GALAXY_VERSION_MAJOR << "." << GALAXY_VERSION_MINOR << "." << GALAXY_VERSION_PATCH << "-x" << GALAXY_VERSION_PLATFORM << std::endl;
 		std::cout << "Build: " << Version_Number << std::endl;
 		std::cout << "Using username: " << gameserver_intf_inst.config->GetCustomPersonaName() << std::endl;
-		std::cout << "Using key: " << const_hash64(intf_inst.config->GetAuthenticationKey()) << std::endl;
+		std::cout << "Using key: " << const_hash64(gameserver_intf_inst.config->GetAuthenticationKey()) << std::endl;
 		std::cout << "Using GalaxyID: " << gameserver_intf_inst.config->GetCustomGalaxyID() << " (" << gameserver_intf_inst.config->GetApiGalaxyID().ToUint64() << ")" << std::endl;
 
 		gameserver_intf_inst.client->Start();

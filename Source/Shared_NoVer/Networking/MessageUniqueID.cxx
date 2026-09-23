@@ -17,7 +17,7 @@ namespace universelan {
 		id{ id }
 	{ }
 
-	uint64_t MessageUniqueID::get() {
+	uint64_t MessageUniqueID::get() noexcept {
 		return unique_message_counter.fetch_add(1);
 	}
 }

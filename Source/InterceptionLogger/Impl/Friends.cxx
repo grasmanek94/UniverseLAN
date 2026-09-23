@@ -745,7 +745,7 @@ namespace universelan::client {
 			trace.write_all("userID: {}", userID);
 		}
 
-		intf()->GetPersonaNameCopy(buffer, bufferLength);
+		intf()->GetRichPresenceKeyByIndexCopy(index, buffer, bufferLength, userID);
 
 		if (trace.has_flags(tracer::Trace::RETURN_VALUES)) {
 			trace.write_all("buffer: {}", util::safe_fix_null_char_ptr_annotate(buffer, bufferLength));

@@ -2,6 +2,9 @@
 
 #include "UniverseLAN.hxx"
 
+#include <algorithm>
+#include <limits>
+
 namespace universelan::client {
 	using namespace galaxy::api;
 	NetworkingImpl::NetworkingImpl(InterfaceInstances* intf, NetworkingImplType net_packet_type) :
@@ -78,8 +81,14 @@ namespace universelan::client {
 		assert(packet != nullptr);
 
 		outGalaxyID = packet->id;
-		*outMsgSize = std::min((uint32_t)packet->data.size(), destSize);
-		std::copy_n(packet->data.begin(), *outMsgSize, (char*)dest);
+		if (outMsgSize != nullptr) {
+			*outMsgSize = std::min((uint32_t)packet->data.size(), std::numeric_limits<uint32_t>::max());
+		}
+
+		if (dest != nullptr) {
+			const size_t max_size = std::min((uint32_t)packet->data.size(), destSize);
+			std::copy_n(packet->data.begin(), max_size, (char*)dest);
+		}
 
 		return true;
 	}
@@ -108,7 +117,9 @@ namespace universelan::client {
 		auto channel_var = &buffer[channel];
 
 		lock_t lock{ channel_var->mtx };
-		channel_var->packets.pop();
+		if (!channel_var->packets.empty()) {
+			channel_var->packets.pop();
+		}
 	}
 
 	int NetworkingImpl::GetPingWith(GalaxyID galaxyID) {

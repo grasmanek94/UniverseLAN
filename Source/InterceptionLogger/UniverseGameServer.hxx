@@ -15,6 +15,11 @@ namespace universelan::client {
 
 		void InitGameServer(const InitOptions& initOptions);
 		void ShutdownGameServer();
+
+#if GALAXY_BUILD_FEATURE_HAS_SHUTDOWNOPTIONS
+		void ShutdownGameServerEx(const ShutdownOptions& shutdownOptions);
+#endif
+
 		IUser* GameServerUser();
 		IMatchmaking* GameServerMatchmaking();
 

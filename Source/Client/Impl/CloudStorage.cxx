@@ -24,17 +24,16 @@ namespace universelan::client {
 	std::string CloudStorageImpl::GenerateUniqueSavegameID()
 	{
 		if (unique_savegame_id_progress) {
-			return std::to_string(unique_savegame_id_counter++);
+			return std::to_string(unique_savegame_id_counter.fetch_add(1));
 		}
 
-		return std::to_string(unique_savegame_id_counter);
+		return std::to_string(unique_savegame_id_counter.load());
 	}
 
 	CloudStorageImpl::CloudStorageImpl(InterfaceInstances* intf) :
 		intf{ intf }, listeners{ intf->notification.get() },
-		sfu{ intf->sfu.get() }, last_container{ "" },
-		last_subcontainer_ref{ nullptr }, container_file_list{},
-		last_metadata_request{},
+		sfu{ intf->sfu.get() }, mtx_container_file_list{}, container_file_list{},
+		mtx_last_metadata_request{}, last_metadata_request{},
 		unique_savegame_id_progress{ true },
 		unique_savegame_id_counter{ filesystem_container::file_time_now_since_epoch() }
 	{
@@ -48,9 +47,9 @@ namespace universelan::client {
 	void CloudStorageImpl::GetFileList(const char* container, ICloudStorageGetFileListListener* listener) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
-		last_container = util::safe_fix_null_char_ptr_ret(container);
+		auto last_subcontainer_ref = sfu->cloud->get_subcontainer(container);
 
-		last_subcontainer_ref = sfu->cloud->get_subcontainer(container);
+		lock_t lock_container_file_list{ mtx_container_file_list };
 		container_file_list = last_subcontainer_ref->get_file_list();
 
 		listeners->NotifyAll(
@@ -63,6 +62,8 @@ namespace universelan::client {
 
 	const char* CloudStorageImpl::GetFileNameByIndex(uint32_t index) const {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+
+		lock_t lock_container_file_list{ mtx_container_file_list };
 
 		if (index >= container_file_list.size()) {
 			return nullptr;
@@ -79,6 +80,8 @@ namespace universelan::client {
 	uint32_t CloudStorageImpl::GetFileSizeByIndex(uint32_t index) const {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
+		lock_t lock_container_file_list{ mtx_container_file_list };
+
 		if (index >= container_file_list.size()) {
 			return 0;
 		}
@@ -88,6 +91,8 @@ namespace universelan::client {
 
 	uint32_t CloudStorageImpl::GetFileTimestampByIndex(uint32_t index) const {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+
+		lock_t lock_container_file_list{ mtx_container_file_list };
 
 		if (index >= container_file_list.size()) {
 			return 0;
@@ -103,6 +108,8 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_GETFILEHASHBYINDEX
 	const char* CloudStorageImpl::GetFileHashByIndex(uint32_t index) const
 	{
+		lock_t lock_container_file_list{ mtx_container_file_list };
+
 		if (index >= container_file_list.size()) {
 			return "";
 		}
@@ -160,25 +167,40 @@ namespace universelan::client {
 
 				return;
 			}
+	
+			{
+				size_t last_metadata_request_size = 0;
 
-			last_metadata_request = file_entry->get_metadata_vector();
+				{
+					lock_t lock_last_metadata_request{ mtx_last_metadata_request };
+					last_metadata_request = file_entry->get_metadata_vector();
+					last_metadata_request_size = last_metadata_request.size();
+				}
 
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
-			SavegameType savegame_type = (SavegameType)std::stol(file_entry->get_metadata(SaveGameTypeKey));
-			std::string unique_savegame_id = file_entry->get_metadata(SaveGameUniqueIDKey);
+				SavegameType savegame_type{ SAVEGAME_TYPE_UNDEFINED };
+				
+				try {
+					savegame_type = (SavegameType)std::stol(file_entry->get_metadata(SaveGameTypeKey, "0"));
+				}
+				catch (const std::exception&) {}
+
+				std::string unique_savegame_id = file_entry->get_metadata(SaveGameUniqueIDKey);
 #endif
 
-			this->listeners->NotifyAllNow(
-				listener,
-				&ICloudStorageGetFileListener::OnGetFileSuccess, container_str.c_str(), file_name.c_str(), (uint32_t)data.size()
+				this->listeners->NotifyAllNow(
+					listener,
+					&ICloudStorageGetFileListener::OnGetFileSuccess, container_str.c_str(), file_name.c_str(), (uint32_t)data.size()
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
-				, savegame_type
-				, unique_savegame_id.c_str()
+					, savegame_type
+					, unique_savegame_id.c_str()
 #else
-				, (uint32_t)last_metadata_request.size()
+					, (uint32_t)last_metadata_request_size
 #endif
-			);
-			});
+				);
+			}
+		});
+			
 	}
 
 	void CloudStorageImpl::GetFile(const char* container, const char* name, void* buffer, uint32_t bufferLength, ICloudStorageGetFileListener* listener) {
@@ -211,17 +233,22 @@ namespace universelan::client {
 			return;
 		}
 
-		size_t written = file_entry->read((char*)buffer, bufferLength);
-		if (written != bufferLength) {
+		if (file_entry->get_size() > bufferLength) {
 			listeners->NotifyAll(
 				listener,
 				&ICloudStorageGetFileListener::OnGetFileFailure, container, name, ICloudStorageGetFileListener::FAILURE_REASON_BUFFER_TOO_SMALL);
 
 			return;
 		}
+		
+		size_t written = file_entry->read((char*)buffer, bufferLength);
+		size_t last_metadata_request_size = 0;
 
-
-		last_metadata_request = file_entry->get_metadata_vector();
+		{
+			lock_t lock_last_metadata_request{ mtx_last_metadata_request };
+			last_metadata_request = file_entry->get_metadata_vector();
+			last_metadata_request_size = last_metadata_request.size();
+		}
 
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
 		SavegameType savegame_type = (SavegameType)std::stol(file_entry->get_metadata(SaveGameTypeKey));
@@ -235,7 +262,7 @@ namespace universelan::client {
 			, savegame_type
 			, unique_savegame_id.c_str()
 #else
-			, (uint32_t)last_metadata_request.size()
+			, (uint32_t)last_metadata_request_size
 #endif
 		);
 	}
@@ -262,7 +289,14 @@ namespace universelan::client {
 			return;
 		}
 
-		last_metadata_request = file_entry->get_metadata_vector();
+
+		size_t last_metadata_request_size = 0;
+
+		{
+			lock_t lock_last_metadata_request{ mtx_last_metadata_request };
+			last_metadata_request = file_entry->get_metadata_vector();
+			last_metadata_request_size = last_metadata_request.size();
+		}
 
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_SAVEGAME
 		SavegameType savegame_type = (SavegameType)std::stol(file_entry->get_metadata(SaveGameTypeKey));
@@ -276,7 +310,7 @@ namespace universelan::client {
 			, savegame_type
 			, unique_savegame_id.c_str()
 #else
-			, (uint32_t)last_metadata_request.size()
+			, (uint32_t)last_metadata_request_size
 #endif
 		);
 	}
@@ -284,6 +318,8 @@ namespace universelan::client {
 #if GALAXY_BUILD_FEATURE_HAS_ICLOUDSTORAGE_METADATAIDX_FUNCS
 	const char* CloudStorageImpl::GetFileMetadataKeyByIndex(uint32_t index) const {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+
+		lock_t lock_last_metadata_request{ mtx_last_metadata_request };
 
 		if (index >= last_metadata_request.size()) {
 			return nullptr;
@@ -294,6 +330,8 @@ namespace universelan::client {
 
 	const char* CloudStorageImpl::GetFileMetadataValueByIndex(uint32_t index) const {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
+
+		lock_t lock_last_metadata_request{ mtx_last_metadata_request };
 
 		if (index >= last_metadata_request.size()) {
 			return nullptr;
@@ -534,6 +572,7 @@ namespace universelan::client {
 			return;
 		}
 
+		// TODO: Calculate hash and unlink when expected matches.
 		file_entry->unlink();
 
 		listeners->NotifyAll(
@@ -563,24 +602,24 @@ namespace universelan::client {
 	void CloudStorageImpl::CalculateHash(void* userParam, ReadFunc readFunc, RewindFunc rewindFunc, char* hashBuffer, uint32_t hashBufferSize) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
-		if (!hashBuffer || !readFunc || hashBufferSize < MIN_HASH_BUFFER_SIZE) {
+		if ((hashBuffer == nullptr) || (readFunc == nullptr) || (hashBufferSize < MIN_HASH_BUFFER_SIZE)) {
 			return;
 		}
 
 		static const int buffer_size = 2048;
-		static thread_local char buffer[buffer_size];
+		std::array<char, buffer_size> buffer{};
 		int read_size = 0;
 
-		if (rewindFunc) {
+		if (rewindFunc != nullptr) {
 			rewindFunc(userParam, ReadPhase::CHECKSUM_CALCULATING);
 		}
 
 		auto start_hash = const_hash64_data_loop(nullptr, 0);
 
 		do {
-			read_size = readFunc(userParam, buffer, (int)buffer_size);
+			read_size = readFunc(userParam, buffer.data(), (int)buffer.size());
 			if (read_size > 0) {
-				start_hash = const_hash64_data_loop(buffer, buffer_size, start_hash);
+				start_hash = const_hash64_data_loop(buffer.data(), std::min((int)buffer.size(), read_size), start_hash);
 			}
 		} while (read_size > 0);
 
@@ -596,7 +635,7 @@ namespace universelan::client {
 	void CloudStorageImpl::CalculateHash(const void* buffer, uint32_t bufferLength, char* hashBuffer, uint32_t hashBufferSize) {
 		tracer::Trace trace{ nullptr, __FUNCTION__, tracer::Trace::ICLOUDSTORAGE };
 
-		if (!buffer || !hashBuffer || hashBufferSize < MIN_HASH_BUFFER_SIZE) {
+		if ((buffer == nullptr) || (hashBuffer == nullptr) || (hashBufferSize < MIN_HASH_BUFFER_SIZE)) {
 			return;
 		}
 
