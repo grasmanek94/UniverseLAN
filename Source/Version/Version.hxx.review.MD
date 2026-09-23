@@ -1,5 +1,10 @@
-# Review: `Source/Version/Version.hxx`
+# Fresh review — Version.hxx
 
-## Review Status
+Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Read completely: lines 1–7. Static review.
 
-No confirmed defect was assigned directly to this file during the static review. Cross-component findings and review limitations are recorded in .ai/UniverseLAN-review-summary.MD.
+## Inspection notes
+- Header is self-contained through cstddef, guarded by pragma once, and declares the single externally defined build-number constant.
+- Checked declaration/definition namespace and type consistency with Version.cxx and server usage. It is linked within matching architecture targets, not serialized as an architecture-independent wire value.
+
+## Result
+No confirmed defect. No broader ABI compatibility or build success is claimed by this small declaration review.

@@ -1,372 +1,132 @@
-# UniverseLAN Review Summary
+# UniverseLAN — fresh full baseline review
 
-## Scope And Method
+## 1. Executive summary
 
-Static review covered 529 in-scope `.cxx`, `.hxx`, `.cmake`, and `.txt` files: the first-party Client, Shared, Server, SystemTests, Tracer, Version, DLL wrapper/build matrix, InterceptionLogger, root CMake files, and root Vendor CMake manifests. SDK headers/binaries, nested vendor source, and the explicitly excluded test trees were not reviewed. Every reviewed file has a sibling `<filename>.review.MD` status report. No build, test, sanitizer, or static analyzer was run.
+**Reviewed baseline:** `feature/fix-issues` at **`b30e83872c0006e8240c8b4f565da5351bf10080`**. Review destination: `feature/ai-review`. This assessment replaces the previous review; its findings were established afresh from the current implementation and SDK/dependency contracts.
 
-## Architecture
+**Coverage: 529/529 in-scope files, with 529 new per-file reports and an architecture assessment.** The inventory includes Client, Client_NoVer, Shared, Shared_NoVer, Server, SystemTests, Tracer, Version, root/Source CMake, all DLL version dispatchers/markers/manifests, and the eleven direct Vendor build manifests. InterceptionLogger received the requested shallow scan for serious defects. Every distinct implementation was read; repetitive empty wrappers and identical dispatchers were verified by Git blob identity with individual coverage records.
 
-UniverseLAN has a clear primary split: version-independent utilities in `Shared_NoVer`, Galaxy-version-gated protocol/models in `Shared`, server-side ENet dispatch/state in `Server`, and SDK facades in `Client`. The version matrix is generated consistently from `Source/DLLs` and `galaxy_sdk_features.cmake`. The main systemic risks are that network payloads are trusted before bounded decoding, asynchronous client work has no unified shutdown ownership, and the interception facade has incomplete forwarding and proxy lifetime management.
+**Result after reconciliation: 103 actionable finding groups — 21 High, 70 Medium, 12 Low — plus two informational investigations.** There are 108 confirmed per-subsystem finding records; five whole-record aliases are counted once in the consolidated result. Partial overlaps retain their separately actionable mechanisms. These are review findings, not 103 runtime reproductions or a claim that every possible defect has been found.
 
-## Findings
+The principal risks are listener cancellation/teardown, unsafely shared cache values, loss or false acknowledgment of saved data, pre-authentication deserialization, and incomplete ENet peer retirement. The interceptor adds proxy ownership, callback-versioning and trace-buffer issues. These warrant targeted fixes before a reliability sign-off, particularly for irreplaceable saves or peers outside a trusted private LAN.
 
-44 confirmed defects were recorded: 21 High, 20 Medium, and 3 Low.
+**Execution evidence:** all **15 Windows x64 Debug client/server/interceptor targets** built across SDK **1.57.0, 1.124.0, 1.139.2, 1.148.3 and 1.152.11**. Three independent runtime probes against the built code reproduced lost serialized play time, the Windows timestamp epoch error and failed-delete/index divergence. Other findings remain code/contract conclusions with proposed verification.
 
-### [CLIENT-001] Initialization failure is caught and then dereferenced
+## 2. Scope, environment and limitations
 
-- **Severity:** High
-- **Location:** `Source/Client/GalaxyDLL.cxx:35-69`, `Init`
-- **Description:** Construction failures are caught, then `intf_inst.client->Start()` is called despite a null client.
-- **Impact:** An unavailable server or invalid setup crashes the host instead of returning initialization failure.
-- **Resolution:** Return after cleanup and preserve the SDK initialization error; test with an unreachable endpoint.
+- Mandatory method: `.ai/SKILLS/CppReviewer.md`; exclusions and Windows focus from `.ai/ai-instructions-review.txt`, with the user's latest branch/replacement/publication instructions taking precedence.
+- Pulled the source branch and incorporated it in merge `40265aed370464569e873692ef5d53fbdb12679b`. `git diff` verifies that every reviewed source/build input matches `b30e8387` exactly. No production implementation was changed for this review.
+- Compiler environment: CMake 4.2.1, Visual Studio 18 2026, MSVC 19.51.36252.0, Windows SDK 10.0.26100.0. Exact commands/results: [VERIFICATION.MD](review-baseline/VERIFICATION.MD).
+- Excluded implementation trees: EnetTest, BehaviourTests, TestCases, TestCommon, UnitTests, nested Vendor source and the named excluded root directories/tools. Selected SDK/vendor/test declarations were consulted only as contract/dependency context where necessary.
+- Credential files were not accessed, copied or committed. Real proprietary GOG DLLs were not required for compilation and were not executed. No Linux, x86, Release, all-69-version, sanitizer, fuzzing or game-runtime test was performed.
+- Existing CI workflows are explicitly out of scope. There is no CI certification. Local passing compilation does not resolve callback timing, proprietary allocation lifetime, output truncation behavior or dynamically resolved export names.
+- Unsupported hosted-service features (for example successful leaderboard operations) and deliberate LAN configuration were not automatically classified as defects or vulnerabilities.
 
-### [CLIENT-002] Standalone game-server initialization uses client-global state
+## 3. Codebase map and architecture assessment
 
-- **Severity:** High
-- **Location:** `Source/Client/UniverseGameServer.cxx:24-40`, `InitGameServer`
-- **Description:** It initializes `gameserver_intf_inst` but accesses `intf_inst.config`.
-- **Impact:** The documented standalone server API can dereference null before startup.
-- **Resolution:** Use the game-server instance consistently and initialize it as a game server.
+### Build-time structure
 
-### [CLIENT-003] Detached file-share work outlives storage
+The feature matrix selects declarations for each Galaxy SDK. Per-version Client/Shared/Server/Interception targets link version-independent utilities rather than duplicating them. DLL marker files and identical x86/x64 dispatchers instantiate that common graph. Dependency sources are vendored; the MbedTLS/TF-PSA-Crypto and zlib bridges resolve actual build targets. ROOT/bin deployment and generated resources in the source tree are intentional conventions, with limitations for read-only/concurrent builds.
 
-- **Severity:** High
-- **Location:** `Source/Client/Impl/Storage.cxx:128-136`, `StorageImpl::FileShare`
-- **Description:** A detached worker captures `this` and other shutdown-owned objects.
-- **Impact:** Shutdown concurrent with file I/O causes use-after-free.
-- **Resolution:** Own/cancel/join file-share tasks before destroying storage and listeners.
+### Runtime flows and current weaknesses
 
-### [CLIENT-004] Callback queue is destroyed before its producers stop
+1. **Initialization and exported API:** SDK exports create facade interfaces around configuration, shared user data, local filesystem containers and a transport client. Error reporting and partial-initialization cleanup do not consistently follow the SDK contract. The game-server packet role also differs across API generations.
+2. **Network processing:** ENet service and application dispatch are separate stages. Framed Cereal messages become typed handler calls; authentication is checked inside handlers, after collection decoding. The fork's timeout event is not handled as a retirement event. Peer-slot pointers need application generation/lifetime ownership, not just ENet address identity.
+3. **Callbacks:** Requests use specific-listener maps, global listener snapshots, direct deferred lambdas, WebSocket-held pointers and private auth collections. There is no single cancellable operation lifetime across all those routes. Shutdown during a callback can destroy the active pump; a queue mutex alone cannot repair that ownership problem.
+4. **State and cache coherence:** The server is authoritative for lobby/user state, while clients hold derived search/member/session caches. Rejection, refresh and disconnect must reconcile those caches. Server events and request replies also need recipient-local correlation instead of reusing another process's sequence number.
+5. **Persistence:** File bytes, metadata and indexes are independent mutable artifacts. Status is lost at multiple layers; replace/delete/copy can partially commit. A reliable solution must combine staged replacement, checked close/save results and publication/rollback, then propagate outcomes to SDK callbacks.
+6. **Interception:** A versioned facade dynamically resolves the native DLL and owns observers/proxies. Proxy bookkeeping is process-wide while native registrars are session-specific. Cancellation and completion need a single retirement owner; internal observers must detach before native shutdown. Trace lengths must use readable capacity, not the native API's reported total object size.
 
-- **Severity:** High
-- **Location:** `Source/Client/UniverseLAN.cxx:91-99`, `InterfaceInstances::reset`
-- **Description:** `delay_runner` is destroyed before the client/WebSocket producers are stopped.
-- **Impact:** A late producer writes through a dangling callback queue pointer.
-- **Resolution:** Stop and join all producers, then destroy the registrar and queue under a shutdown state.
+These are observable lifecycle, correctness and reliability problems, not style objections to facades, raw pointers, singleton configuration or static libraries.
 
-### [CLIENT-005] Unregister leaves queued single-shot callbacks live
+## 4. Findings summary
 
-- **Severity:** High
-- **Location:** `Source/Client/Impl/ListenerRegistrar.hxx:319-321`, `NotifyAll`
-- **Description:** Queued callables capture raw specific-listener pointers; unregister cannot retract them.
-- **Impact:** Destroying a listener after unregister can produce a callback use-after-free.
-- **Resolution:** Queue a registration token/shared dispatch state and validate registration at delivery.
+### Prioritized High groups
 
-### [CLIENT-006] Galaxy thread destructor can terminate the process
+| IDs | Principal failure | Detailed evidence |
+|---|---|---|
+| BASE-CORE-001, 002, 003 | Queued/snapshotted callbacks survive cancellation; callback-time shutdown destroys an active dispatcher | [CORE](review-baseline/CORE.MD) |
+| BASE-API-002; BASE-UTIL-002 | Supported Copy/scalar APIs and snapshots race mutable nickname/stat/user-data storage | [API](review-baseline/API.MD), [UTIL](review-baseline/UTIL.MD) |
+| BASE-API-015; BASE-STORAGE-009, 013, 017 | WebSocket, direct cloud, late worker registration and private auth listeners remain callable after cancellation | [API](review-baseline/API.MD), [STORAGE](review-baseline/STORAGE.MD) |
+| BASE-STORAGE-001, 002, 005 | Cloud saves can be destructively replaced, failed I/O acknowledged, and guarded deletion performed without checking the expected hash | [STORAGE](review-baseline/STORAGE.MD) |
+| BASE-NET-001, 002, 003 | Untrusted archive lengths allocate before validation/auth; handler exceptions escape; omitted timeout retirement enables stale peer-ID resolution | [NET](review-baseline/NET.MD), [SERVER](review-baseline/SERVER.MD) |
+| BASE-INTERCEPT-002, 003 | Proxy completion/cancellation competing ownership and cancellation through the wrong native session | [INTERCEPT](review-baseline/INTERCEPT.MD) |
+| BASE-INTERCEPT-004, 005, 006, 007 | Lost auth/version-specific callbacks, trace-buffer overreads, and resolving exports absent from the selected SDK | [INTERCEPT](review-baseline/INTERCEPT.MD) |
 
-- **Severity:** High
-- **Location:** `Source/Client/Impl/GalaxyThread.cxx:49-58`, `GalaxyThreadImpl::~GalaxyThreadImpl`
-- **Description:** It unconditionally calls `std::thread::detach()`, which throws for an already non-joinable thread.
-- **Impact:** A normal Join/Destroy lifecycle invokes `std::terminate`.
-- **Resolution:** Check `joinable()` and establish explicit ownership/join behavior.
+### Medium and Low areas
 
-### [CLIENT-007] WebSocket receive buffer has a data race
+The complete indexes in the notebooks cover lobby filters/refresh/rollback/joinability/P2P authorization; recipient-local chat correlation; file-share IDs/owner/empty-file semantics; cloud callback snapshots/savegroup IDs/hash production; stat averages/save retry; auth state/deadlines; filesystem case/link identity, timestamps and error paths; startup/diagnostics; and SystemTests process/path/version-boundary behavior. Each locally owned substantive finding has location, evidence, mechanism, impact, possible solutions, recommended resolution and verification in its adjacent source report.
 
-- **Severity:** High
-- **Location:** `Source/Client/Impl/CustomNetworking.cxx:76-88,243-250`
-- **Description:** The callback locks the deque for inserts but `GetAvailableDataSize()` reads it unlocked.
-- **Impact:** Concurrent network/game threads have undefined behavior and can corrupt the deque.
-- **Resolution:** Lock every buffer access; validate with TSan.
+Canonical primary-category counts (mixed labels normalized to their primary category):
 
-### [CLIENT-008] Unknown lobby-list response dereferences null request state
+| Category | Groups |
+|---|---:|
+| Correctness | 58 |
+| API/ABI | 14 |
+| Memory Safety | 11 |
+| Concurrency | 8 |
+| Security | 5 |
+| Performance | 2 |
+| Portability | 2 |
+| Testing | 2 |
+| Build | 1 |
+| **Total** | **103** |
 
-- **Severity:** Medium
-- **Location:** `Source/Client/Impl/Matchmaking.cxx:210-245`, `RequestLobbyListProcessed`
-- **Description:** An unmatched response ID produces null state then dereferences it.
-- **Impact:** A stale or malformed server response crashes the client.
-- **Resolution:** Reject unmatched IDs before use and log the protocol violation.
+### Reconciliation rules
 
-### [CLIENT-009] Invalid custom-network connection IDs crash SendData
+[RECONCILIATION.MD](review-baseline/RECONCILIATION.MD) contains code evidence for the following exact aliases:
 
-- **Severity:** Medium
-- **Location:** `Source/Client/Impl/CustomNetworking.cxx:235-241`, `SendData`
-- **Description:** A nullable channel result is dereferenced.
-- **Impact:** Invalid or closed public connection IDs crash the host.
-- **Resolution:** Return the SDK invalid-state/argument error when no channel exists.
+- BASE-SERVER-002 → BASE-NET-003 (omitted timeout event; integrated severity High).
+- BASE-API-010 → BASE-SERVER-005 (rejected lobby-setting rollback).
+- BASE-NET-008 → BASE-STORAGE-011 (failed achievement persistence/retry).
+- BASE-STORAGE-012 and BASE-STORAGE-022 → BASE-UTIL-002 (shared lock-escape root).
 
-### [CLIENT-010] Closed custom-network channels are retained indefinitely
+Other partial overlaps are explicitly preserved: nickname writes outside the stats container; unsolicited chat completions beyond ID collisions; direct cloud captures and pre-event WebSocket listener retention beyond the generic queue. Their fixes are coordinated without claiming one small change closes all paths.
 
-- **Severity:** Medium
-- **Location:** `Source/Client/Impl/CustomNetworking.cxx:149-164,211-215`
-- **Description:** Cleanup runs only while opening another connection.
-- **Impact:** Open/close cycles grow retained channel state until shutdown.
-- **Resolution:** Run synchronized cleanup after close or during normal processing.
+**Two informational records are excluded from actionable totals:** BASE-API-018 depends on unestablished nested-pump guarantees; BASE-UTIL-015 is latent RED-prefix integration debt with no current SDK directory activating it. BASE-INTERCEPT-001 is Medium for a proven teardown-contract violation; native registrar destruction/use-after-free remains conditional, not a proven High crash.
 
-### [CLIENT-011] Empty P2P queue pop is undefined behavior
+## 5. Detailed reports and complete coverage
 
-- **Severity:** Medium
-- **Location:** `Source/Client/Impl/Networking.cxx:107-112`, `PopP2PPacket`
-- **Description:** `std::queue::pop()` is called without checking `empty()`.
-- **Impact:** Empty public API calls can corrupt/crash.
-- **Resolution:** Make empty pop a locked no-op.
+Each reviewed file has a new sibling `<filename>.review.MD`. The previous reports' assertions were not reused as findings. A file with no confirmed local defect has concrete inspection notes and relevant cross-component dependencies; it is not a certificate of correctness.
 
-### [CLIENT-012] Cloud buffer download reverses capacity behavior
+| Workstream | Inputs | Notebook |
+|---|---:|---|
+| Client facade/lifecycle and Client_NoVer | 30 | [CORE.MD](review-baseline/CORE.MD) |
+| Multiplayer/client API | 10 | [API.MD](review-baseline/API.MD) |
+| Storage/stats/user/other client API | 14 | [STORAGE.MD](review-baseline/STORAGE.MD) |
+| Shared models/config/transport/messages | 59 | [NET.MD](review-baseline/NET.MD) |
+| Shared_NoVer utilities/persistence | 40 | [UTIL.MD](review-baseline/UTIL.MD) |
+| Server/SystemTests/Tracer/Version | 43 | [SERVER.MD](review-baseline/SERVER.MD) |
+| InterceptionLogger, shallow serious-defect scan | 73 | [INTERCEPT.MD](review-baseline/INTERCEPT.MD) |
+| Build controls and wrapper matrix | 260 | [BUILD.MD](review-baseline/BUILD.MD), [WRAPPER-COVERAGE.MD](review-baseline/WRAPPER-COVERAGE.MD) |
+| **Total** | **529** | **No missing or extra baseline sidecars** |
 
-- **Severity:** Medium
-- **Location:** `Source/Client/Impl/CloudStorage.cxx:214-240`, `GetFile`
-- **Description:** Read byte count is compared to capacity, so larger buffers fail and full truncated buffers succeed.
-- **Impact:** Cloud saves can silently truncate or spuriously fail.
-- **Resolution:** Compare capacity to file size before read and report buffer-too-small only when incomplete.
+## 6. Testing, build, security, performance and portability
 
-### [CLIENT-013] Streamed cloud hashing includes stale final-buffer bytes
+- **Build:** The five-version x64 Debug matrix passed for all three production components; this provides evidence of current source compatibility, not binary or behavioral equivalence with GOG. No hardcoded version-specific CMake logic was added.
+- **Tests:** Three review-only probes reproduced concrete baseline failures using real built code. They are bug reproductions, not passing fixed-behavior tests. Existing excluded test cases were not reused. Additional cancellation, peer reuse, denied/full-volume writes and multi-pending-callback regressions are proposed locally beside findings.
+- **Security:** Authentication checks occur after archive decoding; application exceptions need containment; broadcasts/logs must respect authentication and credential boundaries. No real credentials were read or emitted. Intentional shared-key LAN defaults were assessed in their context rather than treated alone as a universal compromise finding.
+- **Performance:** ENet's packet/waiting-data ceilings do not bound later application queues, archive-declared allocations or accumulated state snapshots. No benchmark, percentage improvement or measured throughput claim is made.
+- **Portability:** Windows path case, code pages, file-clock epoch and handle-sharing behavior matter directly. Non-Windows guards were inspected only; no Linux compilation or runtime assertion is offered.
+- **CI:** Workflows are excluded. The review does not assert that repository CI covers this matrix, sanitizer scenarios or failure cases.
 
-- **Severity:** Medium
-- **Location:** `Source/Client/Impl/CloudStorage.cxx:578-585`, `CalculateHash`
-- **Description:** The final chunk hashes `buffer_size`, not the actual `read_size`.
-- **Impact:** Hashes differ for the same non-aligned content.
-- **Resolution:** Hash `read_size` and validate callback bounds.
+## 7. Positive engineering practices
 
-### [CLIENT-014] SignOut leaves local authentication state unchanged
+- Centralized feature flags and reused version-independent libraries keep a broad SDK surface tractable; identical dispatcher verification and the successful representative builds support that structure.
+- Packet guards, shared message ownership and bounded string-copy helpers eliminate several basic lifetime/buffer errors in ordinary paths.
+- Several indexed accessors check bounds; file-share workers now have joining ownership and normal teardown preserves their dependencies.
+- Portable and legacy metadata decoding, canonical path checks, error-code filesystem probes and clear per-operation messages provide useful foundations, though they need transaction and trust-boundary guarantees.
+- The in-scope SystemTests model exercises observable callbacks/state, isolated processes and timeouts. Its own edge cases are reviewed rather than using test existence as proof of correctness.
 
-- **Severity:** Medium
-- **Location:** `Source/Client/Impl/User.cxx:253-259`, `SignOut`
-- **Description:** It queues callbacks but does not change state read by `SignedIn()`/`IsLoggedOn()`.
-- **Impact:** Games continue treating a signed-out user as authenticated.
-- **Resolution:** Transition state and cancel/fail pending authenticated work before notifications.
+## 8. Remediation roadmap
 
-### [CLIENT-015] Public GetError is a permanent null stub
+1. **Immediate:** unify cancellation-aware operation ownership, pin dispatch targets, defer destructive shutdown until pumps unwind; repair interceptor proxy/session retirement. Bound pre-auth decode, contain expected handler failures and handle ENet timeout retirement. Preserve old saves on every failed replacement and enforce conditional delete hashes.
+2. **Near term:** return locked snapshots from mutable caches; centralize peer/session generation and exactly-once disconnect; reconcile lobby/cache rollback and request/event identities. Make filesystem bytes/metadata/index changes transactional and propagate actual results all the way to listeners.
+3. **Compatibility/diagnostics:** correct interceptor callback/export gates, SDK error/lifecycle behavior and output trace extents; address Windows clocks/path identities and restore original exception context in diagnostics.
+4. **Validation:** convert reproduced defects into regression cases, then add targeted adversarial/fault/concurrency tests from the sidecars. Expand to x86/Release and additional SDK boundaries where the changed implementation warrants it. Keep dormant RED behavior an integration requirement when a qualifying SDK is actually added.
 
-- **Severity:** Medium
-- **Location:** `Source/Client/GalaxyDLL.cxx:180-185`, `GetError`
-- **Description:** The exported error API always returns null.
-- **Impact:** Consumers cannot distinguish invalid API calls from success.
-- **Resolution:** Maintain/reset a thread-local last error at public API boundaries.
+## 9. Open questions and final checks
 
-### [CLIENT-016] Legacy factory Init ignores contract arguments
+Native SDK allocation lifetime, nested ProcessData guarantees, exact cloud hash compatibility vectors, required mixed-SDK wire compatibility and all-version ABI/export behavior remain explicit validation questions. No unsupported answer was used to promote a speculative runtime crash to a reproduced defect.
 
-- **Severity:** Medium
-- **Location:** `Source/Client/GalaxyApiFactory.cxx:40-65`
-- **Description:** Exception mode, peer path, and supplied configuration path are ignored.
-- **Impact:** Legacy SDK consumers receive silent incompatible behavior.
-- **Resolution:** Model and honor each parameter or return an explicit unsupported error.
-
-### [CLIENT-017] Windows process-path log uses an impossible success test
-
-- **Severity:** Low
-- **Location:** `Source/Client/GalaxyDLL.cxx:26-32`
-- **Description:** `GetModuleFileName()` success is compared to zero.
-- **Impact:** Normal path diagnostics are suppressed.
-- **Resolution:** Treat nonzero as success and handle capacity-length truncation.
-
-### [SHARED-001] Default configuration publishes a universal authentication key
-
-- **Severity:** High
-- **Location:** `Source/Shared/IniData.cxx:307-315`; `Source/Shared_NoVer/DefaultConfigFiles.cxx:23-37,231-246`
-- **Description:** Every default deployment uses the same source-visible key while the server binds all interfaces.
-- **Impact:** Any peer can compute the challenge response and impersonate a user.
-- **Resolution:** Generate a cryptographically random per-installation secret and use a standard MAC challenge response.
-
-### [SHARED-002] Network decoding and received-event queue are unbounded
-
-- **Severity:** High
-- **Location:** `Source/Shared/Networking/Networking.hxx:25-64,124-125`; `Networking.cxx:165,219-226`
-- **Description:** Cereal payload collection sizes and queued events have no byte/count limits.
-- **Impact:** A peer can exhaust memory/CPU through oversized frames or flooding.
-- **Resolution:** Enforce packet/field/allocation/queue budgets and disconnect or rate-limit violations.
-
-### [SHARED-003] Connection state races between polling and callers
-
-- **Severity:** High
-- **Location:** `Source/Shared/Networking/Networking.hxx:127-135`; `Networking.cxx:152-159,177-180,229-230`
-- **Description:** `is_connected` is a plain bool read and written by different threads.
-- **Impact:** Undefined behavior and unreliable lifecycle state.
-- **Resolution:** Confine state to one thread or make synchronization and transition ownership explicit.
-
-### [SHARED-004] Linux default Galaxy IDs collide
-
-- **Severity:** High
-- **Location:** `Source/Shared_NoVer/MachineInfo.cxx:570-572`; `DefaultConfigFiles.cxx:180-199`; `IniData.cxx:589-601`
-- **Description:** Non-Windows uses a literal MAC address to derive the default identity.
-- **Impact:** Fresh Linux clients impersonate/collide with one another.
-- **Resolution:** Use real adapters or a persistent random per-user installation ID.
-
-### [SHARED-005] Escaped filesystem entries retain a dangling parent pointer
-
-- **Severity:** High
-- **Location:** `Source/Shared_NoVer/filesystem_container/filesystem_container_entry.hxx:19-31`; `filesystem_container_entry.cxx:91-113,145`
-- **Description:** Shared entry objects store a raw owning-container pointer.
-- **Impact:** Retained entries can use freed container memory.
-- **Resolution:** Move shared state behind shared/weak ownership and fail safely after destruction.
-
-### [SHARED-006] A real disconnect delivers two notifications
-
-- **Severity:** Medium
-- **Location:** `Source/Shared/Networking/Networking.cxx:158-165,186-199`
-- **Description:** Both the ENet disconnect and a synthetic disconnect are queued.
-- **Impact:** Consumers duplicate cleanup/reconnect work.
-- **Resolution:** Emit exactly one event per transition.
-
-### [SHARED-007] Concurrent file copies can duplicate index entries
-
-- **Severity:** Medium
-- **Location:** `Source/Shared_NoVer/filesystem_container/filesystem_container.cxx:257-288`
-- **Description:** The map absence check and index insertion use separate lock windows.
-- **Impact:** Concurrent copy completion makes enumeration/removal inconsistent.
-- **Resolution:** Perform check-and-insert atomically and append only on successful map insertion.
-
-### [SHARED-008] Stats synchronization excludes copies and serialization
-
-- **Severity:** Medium
-- **Location:** `Source/Shared_NoVer/AchievementsAndStatsContainer.hxx:50-54`; `AchievementsAndStatsContainer.cxx:14-19,33-43`
-- **Description:** Mutexes protect setters but not archive/copy access.
-- **Impact:** Concurrent mutations race with map traversal and archive generation.
-- **Resolution:** Lock snapshots/copies in a documented global order and expose safe snapshots.
-
-### [SHARED-009] Float stats serialize an inactive union member
-
-- **Severity:** Medium
-- **Location:** `Source/Shared_NoVer/AchievementsAndStatsContainer.hxx:12-21`
-- **Description:** Float storage activates `f`, while serialization reads `i`.
-- **Impact:** This relies on nonportable union-punning behavior.
-- **Resolution:** Preserve the wire bits with `std::bit_cast` and fixed-width storage.
-
-### [SHARED-010] One corrupt metadata sidecar prevents container startup
-
-- **Severity:** Medium
-- **Location:** `Source/Shared_NoVer/filesystem_container/filesystem_container_entry.cxx:31-53`; `filesystem_container.cxx:29-44`
-- **Description:** Metadata parse failure propagates out of startup enumeration.
-- **Impact:** A single damaged sidecar makes unrelated stored files unavailable.
-- **Resolution:** Quarantine/rebuild malformed metadata and write sidecars atomically.
-
-### [SHARED-011] INI trimming passes signed chars to isspace
-
-- **Severity:** Low
-- **Location:** `Source/Shared/IniData.cxx:36-49`
-- **Description:** Plain negative `char` values are passed to `isspace`.
-- **Impact:** Non-ASCII configuration can invoke undefined behavior.
-- **Resolution:** Cast to `unsigned char` before classification.
-
-### [SERVER-001] Lobby-addressed P2P packets lack membership authorization
-
-- **Severity:** High
-- **Location:** `Source/Server/ServerHandlers.cxx:398-424`
-- **Description:** Any authenticated peer can send a packet to a lobby owner without being a member.
-- **Impact:** Outsiders can inject application traffic into arbitrary lobby hosts.
-- **Resolution:** Require `lobby->IsMember(sender)` before forwarding.
-
-### [SERVER-002] Windows crash handler can deadlock on a recursive fault
-
-- **Severity:** High
-- **Location:** `Source/Tracer/Stacker.cxx:102-110,207-220`
-- **Description:** Nested crash handling waits for the outer handler that cannot resume.
-- **Impact:** Crashed processes hang and emit misleading dump context.
-- **Resolution:** Fail fast on recursion, never wait in the fault path, and pass supplied exception pointers to the dump writer.
-
-### [SERVER-003] Non-joinable lobbies still admit users
-
-- **Severity:** Medium
-- **Location:** `Source/Server/ServerHandlers.cxx:558-575`
-- **Description:** Join checks absence/fullness but not `IsJoinable()`.
-- **Impact:** Owners cannot close admission before a match.
-- **Resolution:** Reject non-joinable lobby entry before mutation.
-
-### [SERVER-004] Server destruction leaks connected peer state
-
-- **Severity:** Medium
-- **Location:** `Source/Server/Server.cxx:196-199`; `Source/Server/Peer.cxx:31-49`
-- **Description:** Peer data is allocated through `ENetPeer::data` and only disconnect frees it.
-- **Impact:** Graceful/in-process shutdown leaks state and skips cleanup.
-- **Resolution:** Add explicit shutdown cleanup or make mapper ownership RAII-based.
-
-### [SERVER-005] Authentication verifier is logged
-
-- **Severity:** Medium
-- **Location:** `Source/Server/Server.cxx:90-104`
-- **Description:** The verifier-equivalent authentication material is printed at startup.
-- **Impact:** Log readers can authenticate as arbitrary users.
-- **Resolution:** Remove credential/verifier output and treat the existing scheme as LAN-only until replaced.
-
-### [SERVER-006] Lobby configuration updates broadcast to unrelated peers
-
-- **Severity:** Medium
-- **Location:** `Source/Server/ServerHandlers.cxx:709-752`
-- **Description:** Lobby state update helper uses host-wide broadcast.
-- **Impact:** Outsiders receive unrelated updates and can corrupt local caches.
-- **Resolution:** Send only to current lobby members.
-
-### [BUILD-001] Resource generation dirties the source checkout
-
-- **Severity:** Medium
-- **Location:** `Source/DLLs/CMakeLists.txt:43-45,191,193-194`
-- **Description:** CMake writes generated resource files and deployed config under the source tree.
-- **Impact:** Builds are non-hermetic, fail read-only checkouts, and conflict across build trees.
-- **Resolution:** Generate under the binary tree and make deployment/install destinations configurable.
-
-### [BUILD-002] Test binary staging wrongly depends on interceptor builds
-
-- **Severity:** Medium
-- **Location:** `Source/DLLs/CMakeLists.txt:153-184`
-- **Description:** Client/server test copies are nested inside `BUILD_INTERCEPTOR`.
-- **Impact:** Normal test-only configurations lack required staged binaries.
-- **Resolution:** Move client/server copy commands outside the interceptor conditional.
-
-### [BUILD-003] Compatibility manifest has an invalid version token
-
-- **Severity:** Low
-- **Location:** `Source/DLLs/1.149.0/compat_list.txt:13`
-- **Description:** The manifest records `1.150.0?` rather than the wrapper version.
-- **Impact:** External manifest consumers may not resolve/package 1.150.0.
-- **Resolution:** Replace it with `1.150.0` or a supported comment syntax.
-
-### [INTERCEPT-001] Successful factory initialization can dereference null error
-
-- **Severity:** High
-- **Location:** `Source/InterceptionLogger/Impl/Errors.cxx:57-60`; `UniverseLANInterceptor.cxx:216-221`
-- **Description:** `HasError()` tests callback presence rather than the returned `IError*`.
-- **Impact:** Successful native initialization or `GetError()` crashes on null.
-- **Resolution:** Invoke and null-check the wrapped getter before error access.
-
-### [INTERCEPT-002] Interception shutdown omits or calls invalid native teardown
-
-- **Severity:** High
-- **Location:** `Source/InterceptionLogger/GalaxyDLL.cxx:72-76`; `UniverseGameServer.cxx:38-44`; `UniverseLANInterceptor.cxx:301-302`
-- **Description:** Client shutdown skips native shutdown; game-server shutdown clears and then invokes it.
-- **Impact:** Reinitialization leaks native state or throws from an exported API.
-- **Resolution:** Preserve the callable, invoke it once before clearing wrappers, then clear state.
-
-### [INTERCEPT-003] Authentication-success callbacks are dropped
-
-- **Severity:** High
-- **Location:** `Source/InterceptionLogger/Impl/Listeners/UserListener.cxx:27-46`
-- **Description:** Proxy success/lost callbacks only trace instead of forwarding/cleaning up.
-- **Impact:** Games wait forever for sign-in and leak proxies.
-- **Resolution:** Forward both callbacks through the correct single-shot lifecycle.
-
-### [INTERCEPT-004] Single-shot proxy map loses concurrent operations
-
-- **Severity:** High
-- **Location:** `Source/InterceptionLogger/Impl/Listeners/ProxifySingleShotListener.hxx:39-47`; `.cxx:9-14`; `ListenerRegistrar.cxx:43-52`
-- **Description:** One map key per caller listener silently drops a second proxy.
-- **Impact:** Unregister/destroy leaves a pending proxy that can call freed memory.
-- **Resolution:** Own every proxy per real listener and cancel all atomically.
-
-### [INTERCEPT-005] Rich-presence key copy calls persona-name API
-
-- **Severity:** High
-- **Location:** `Source/InterceptionLogger/Impl/Friends.cxx:738-753`
-- **Description:** It ignores key arguments and forwards `GetPersonaNameCopy`.
-- **Impact:** Rich-presence key enumeration is functionally broken.
-- **Resolution:** Forward the requested rich-presence method with all arguments.
-
-### [INTERCEPT-006] Cloud delete discards expected hash
-
-- **Severity:** High
-- **Location:** `Source/InterceptionLogger/Impl/CloudStorage.cxx:295-313`
-- **Description:** The conditional-delete `expectedHash` is logged but not forwarded.
-- **Impact:** Changed cloud files can be deleted despite compare-before-delete intent.
-- **Resolution:** Forward the hash in hashing-enabled builds.
-
-### [INTERCEPT-007] Factory error manager is a null stub
-
-- **Severity:** High
-- **Location:** `Source/InterceptionLogger/GalaxyApiFactory.cxx:155-169`
-- **Description:** `GetLastError()` always returns null despite a native manager being bound.
-- **Impact:** Enabled public error-manager API is unusable.
-- **Resolution:** Proxy the native error manager or remove the advertised path.
-
-## Recommended Order
-
-1. Fix initialization/shutdown use-after-free/crash paths: CLIENT-001 through CLIENT-007 and INTERCEPT-001 through INTERCEPT-004.
-2. Bound and authorize the network boundary: SHARED-001 through SHARED-003 and SERVER-001/003/006.
-3. Correct public API compatibility defects, then add focused regression tests for every identifier.
-4. Run Windows limited-version Debug/Release builds plus ASan/TSan-equivalent lifecycle and protocol-fuzz tests before release.
+`python .ai/review-baseline/verify_review.py` verifies the 529-file inventory, per-file baseline markers, ID/severity accounting, report links, whitespace and unchanged production inputs. Final validation reports **zero errors**. Git whitespace checks also pass. Commit/push identity is reported in the delivery response; generated binaries and temporary probes are excluded from the review commit.

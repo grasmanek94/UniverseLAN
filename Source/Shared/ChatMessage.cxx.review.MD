@@ -1,5 +1,11 @@
-# Review: `Source/Shared/ChatMessage.cxx`
+# Fresh review — ChatMessage.cxx
 
-## Review Status
+Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Read all 71 lines.
 
-No confirmed defect was assigned directly to this file during the static review. Cross-component findings and review limitations are recorded in .ai/UniverseLAN-review-summary.MD.
+## Inspection notes
+- Default deserialization state initializes every enabled scalar and string. Copy construction preserves identity; normal construction allocates a new GlobalUniqueID.
+- Message-type constructor/copy/getter branches agree with the header's feature guard. Contents are copied from caller storage, avoiding a retained caller-buffer lifetime dependency.
+- `GetContents` returns a reference valid with the message's lifetime; network and room containers hold shared ownership while consuming it.
+
+## Result
+No additional implementation-local defect established. The feature-dependent wire layout is fully reported in the header (BASE-NET-005). Static Windows review; no builds or execution.

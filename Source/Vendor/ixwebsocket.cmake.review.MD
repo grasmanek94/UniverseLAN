@@ -1,5 +1,9 @@
-# Review: `Source/Vendor/ixwebsocket.cmake`
+# Fresh baseline review: ixwebsocket.cmake
 
-## Review Status
+Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. All nine lines reviewed.
 
-No confirmed defect was assigned directly to this file during the static review. Cross-component findings and review limitations are recorded in .ai/UniverseLAN-review-summary.MD.
+## Inspection notes
+Forces static dependency builds, TLS enabled, mbedTLS backend and no dependency install. zlib and mbedTLS bridges execute before adding pinned IXWebSocket-12.0.1. Cache writes affect the vendor configuration deliberately; top-level application DLLs explicitly request SHARED and are unaffected by BUILD_SHARED_LIBS=OFF.
+
+## Findings and validation
+No independent confirmed integration defect. The Windows dependency compiled and linked. WebSocket application ownership/callback problems remain in Client/Impl/CustomNetworking, not in this manifest.
