@@ -6,6 +6,8 @@
 
 **Latest follow-up:** [Thorough review addendum](review-addendum/SUMMARY.MD), starting from review commit `48cea8c6`, re-inspected the same 529 inputs and preserves the baseline evidence. It adds **23 distinct confirmed groups (3 High, 19 Medium, 1 Low)**, clarifies existing findings and records focused local Windows ASan-enabled checks. This is ordinary C++ correctness/API/persistence review, with isolated local validation.
 
+**Single findings index:** [ALL-FINDINGS.MD](ALL-FINDINGS.MD) lists all 132 canonical groups (126 actionable and six informational/conditional investigations) and maps the eight duplicate IDs that are excluded from the group count.
+
 **Coverage: 529/529 in-scope files, with 529 new per-file reports and an architecture assessment.** The inventory includes Client, Client_NoVer, Shared, Shared_NoVer, Server, SystemTests, Tracer, Version, root/Source CMake, all DLL version dispatchers/markers/manifests, and the eleven direct Vendor build manifests. InterceptionLogger received the requested shallow scan for serious defects. Every distinct implementation was read; repetitive empty wrappers and identical dispatchers were verified by Git blob identity with individual coverage records.
 
 **Current result after reconciliation: 126 actionable finding groups — 24 High, 89 Medium, 13 Low — plus six informational/conditional investigations.** There are 134 confirmed finding records; eight whole-record aliases are counted once. The baseline contributed 103 groups and the follow-up adds 23. Partial overlaps retain separately actionable mechanisms. These totals are review findings, not a count of runtime reproductions or a claim that every possible defect has been found.

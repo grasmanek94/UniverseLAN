@@ -141,6 +141,28 @@ notebooks += sorted((ROOT / ".ai/review-addendum").glob("*.MD"))
 summary = ROOT / ".ai/UniverseLAN-review-summary.MD"
 if summary.exists():
     notebooks.append(summary)
+ledger = ROOT / ".ai/ALL-FINDINGS.MD"
+if not ledger.exists():
+    errors.append("Missing combined findings ledger")
+else:
+    ledger_text = ledger.read_text(encoding="utf-8")
+    ledger_ids = set(re.findall(r"`((?:BASE|ADD)-[A-Z]+-\d{3})`", ledger_text))
+    missing = sorted(set(records) - ledger_ids)
+    extra = sorted(ledger_ids - set(records))
+    if missing:
+        errors.append("Combined findings ledger missing IDs: " + ", ".join(missing))
+    if extra:
+        errors.append("Combined findings ledger has unknown IDs: " + ", ".join(extra))
+    ledger_headings = list(re.finditer(r"^### `((?:BASE|ADD)-[A-Z]+-\d{3})`", ledger_text, re.MULTILINE))
+    heading_ids = {match.group(1) for match in ledger_headings}
+    for finding in sorted(set(records) - heading_ids):
+        errors.append("Combined findings ledger missing detailed section: " + finding)
+    for index, match in enumerate(ledger_headings):
+        section = ledger_text[match.end():ledger_headings[index + 1].start() if index + 1 < len(ledger_headings) else len(ledger_text)]
+        for label in ("Location/function", "Issue", "Proposed solution", "Original review"):
+            if "**" + label + ":**" not in section:
+                errors.append("Combined findings ledger missing " + label + ": " + match.group(1))
+    notebooks.append(ledger)
 for path in reports + notebooks:
     text = path.read_text(encoding="utf-8")
     for target in re.findall(r"\[[^\]\n]+\]\(([^)\n]+)\)", text):
