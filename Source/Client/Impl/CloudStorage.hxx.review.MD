@@ -17,3 +17,7 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Entire file read, lines 1â
 No additional declaration-only defect is counted. Full defect sections are in the implementation sidecar, where the failing control flow resides. This is a scoped observation, not proof of correctness. Guards were read statically across the file; no claim of compiling every SDK variant or of binary/behavioral equivalence is made. The legacy comments contain outdated parameter descriptions, but no style-only defect is added.
 
 Recommended validation: cloud variants before/after metadata removal, savegame introduction, and hashing introduction; cancellation and nested callback enumeration; Windows save replacement failure paths. See the implementation sections for exact verification scenarios.
+
+## Source-first re-review addendum â€” 2026-09-24
+
+Full `1-366` reread completed before baseline comparison. Latest SDK and 1.148.6 legacy callback/metadata signatures were checked with the actual feature gates. Caller buffer lifetime through completion remains an explicit precondition, while `WriteFunc` has signed-int chunk extents. The header's bool/counter pair still needs a compound synchronized savegroup state (BASE-STORAGE-006 addendum). New implementation details are ADD-STORAGE-001 (per-invocation scratch), 002 (owning data/metadata generation), and 003 (consistent quota pair), all canonical in `CloudStorage.cxx.review.MD`. No extra declaration-only ID or claim of all-version compilation is made.

@@ -11,3 +11,9 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Read completely: lines 1�
 
 ## Result
 No confirmed independent defect in the owned manifest. No updater/build was run, so neither generated files nor source timestamps were changed by review execution.
+
+## Follow-up addendum — 2026-09-24
+
+All three owned Version inputs re-read completely. Root CMake selects C++20; `Source/CMakeLists.txt:8` creates this static target before Shared, and `Source/Shared/CMakeLists.txt:19–29` carries its dependency to the versioned server. `custom_version_updater` orders generation before compilation on the documented MSVC path. `Version.hxx` supplies external linkage for the namespace-scope const definition; no runtime initialization/lifetime issue was found.
+
+Both updater scripts were read only as context. The Windows script compares before replacing/touching and has a git-count/environment/zero fallback. Concurrent independent build trees still share source-tree output/temp names; no concurrent build or unsupported compiler path was executed. These remain BUILD handoff limits, not a new SERVER finding. The generated `.h` files lie outside the exact `.cxx/.hxx/.cmake/.txt` assignment and were not needed to verify the target wiring. No updater, build or Git write was performed.

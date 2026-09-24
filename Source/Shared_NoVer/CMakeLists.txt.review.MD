@@ -25,3 +25,9 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Entire manifest read indep
 **Recommended fix:** Keep platform loading generic and move basename selection across the versioned boundary as an explicit parameter.
 
 **Verification:** In a future mixed RED/non-RED build, inspect compile commands and resolve each expected DLL name without renaming either real DLL. Not executed.
+
+## Thorough re-review addendum — BASE-UTIL-015 retained outside defect counts (2026-09-24)
+
+The entire 30-line manifest was reread before findings. **BASE-UTIL-015 remains Informational / High confidence / Build**, shared with `SharedLibUtils.cxx.review.MD`; the current directory matrix still contains no RED-feature SDK. The root supplies C++20 and explicit MSVC x86/x64 selection (`CMakeLists.txt:7-9,46-51`), which is relevant to ADD-UTIL-005's x86 size narrowing. PRIVATE Win7 declarations in this target and the MSVC/PPL queue branch were checked; no Linux runtime assessment was performed.
+
+Testing correction/context: `Source/UnitTests/CMakeLists.txt:5-38` lists the 21 Shared_NoVer test sources; versioned message tests are globbed and registered in `Source/UnitTests/Versioned.cmake:6-22`. Root test options default OFF (`CMakeLists.txt:14-29`). Thus test source/discovery exists, but this static review cannot claim those tests were executed or enforced in a particular build. The nonzero play-time serialization assertions are specifically documented under BASE-UTIL-001. No manifest changes, configure, build or test were performed. Full-filename injection and a future mixed RED/non-RED validation remain the original options/recommendation/verification for 015.

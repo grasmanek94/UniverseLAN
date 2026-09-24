@@ -43,3 +43,25 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Entire file read independe
 **Recommended fix:** Separate persisted elapsed seconds from a local steady-clock anchor. Transmit a duration snapshot rather than a foreign wall-clock anchor, and define whether remote play time continues advancing. Version the wire representation if changed.
 
 **Verification:** Inject backwards/forwards wall-clock changes and two peers with different system clocks; elapsed play time should remain monotonic and independent of skew. Test numeric boundary handling. Not executed.
+
+## Thorough re-review addendum — retained IDs and concurrency/clock refinements (2026-09-24)
+
+### BASE-UTIL-002 — retained, High / High confidence / Concurrency
+
+**Location:** `Source/Shared_NoVer/AchievementsAndStatsContainer.cxx:14-19,25-30,33-54,57-83,109-117,138-146`; header `51-55,60-82`.
+
+**Fresh evidence / exact schedules:** T1 finishes `GetStat`'s locked callback and pauses before the caller reads `.i`; T2 `SetStat` writes the same stored scalar; T1 reads without sharing the mutex. The concrete callers remain `Client/Impl/Stats.cxx:63-84`. For user data, T1 obtains a reference at `User.cxx:356`; T2 `SetUserData` updates/reallocates that same string; T1's `safe_copy_str_n` at 357 reads it after unlock. Friends' intermediate owning string at `Friends.cxx:483` does not fix the race: constructing it reads the source after the source getter released its lock. For snapshots, `UserHelloDataMessage.hxx:27-28` invokes the unlocked copy constructor during `Stats.cxx:136` or `ClientNetworkHandlers.cxx:85-89`, while another API thread can insert/update a source map. Assignment writes BootTime under the four map locks; `GetPlayTime` reads it under none.
+
+**Counterevidence / clarification:** Assignment itself uses deadlock-avoiding eight-lock acquisition; the mutexes are recursive, so duplicate acquisition during self-assignment is not a demonstrated deadlock. `unordered_map` rehash does not itself invalidate references/pointers to elements. The demonstrated problem is concurrent value access/map copying (and erase/assignment where applicable), not a blanket "every insert invalidates pointers" claim. The SDK's pointer-returning API exclusions do not excuse scalar/Copy calls (`GalaxyApi.h:279-283`). No assertion that transport workers directly invoke these handlers is needed.
+
+**Impact, options and recommendation:** Retain the original data-race/UB assessment. Value-returning internal reads must perform the copy while locked; locked achievement updates and a complete source snapshot lock are both needed. Give BootTime a coherent ownership/locking policy. Serializing an already detached immutable snapshot is different from serializing a live container; repair snapshot creation first, rather than adding an archive-only mutex that writers never take.
+
+**Verification:** Barrier tests for the schedules above; preserve the already locked `FriendsImpl::GetRichPresenceByIndex:497-512` path as a positive comparison. Existing unit tests only exercise sequential access/copy. No concurrency test or sanitizer was run in this pass.
+
+### BASE-UTIL-003 — retained, Medium / High confidence / Correctness
+
+**Location:** `Source/Shared_NoVer/AchievementsAndStatsContainer.cxx:10,21-30,50-51`; header `31,45-54`.
+
+**Clarification:** A negative elapsed duration first converts modulo 2^32, then participates in the unsigned addition. Depending on the persisted base, the final result may decrease or wrap to a large value; it is not necessarily huge for every one-second backward adjustment. This correction narrows the symptom, not the defect. Forward jumps and a foreign serialized BootTime still count clock skew as play time independently of BASE-UTIL-001.
+
+**Options / recommendation / verification:** Keep accumulated duration separate from a local monotonic anchor and transmit a duration snapshot. Clamping is a limited compatibility workaround, not a cure for forward/remote skew. Verify both small backward deltas with a nonzero base and deltas exceeding that base, plus clock skew and normal elapsed progression. No runtime clock manipulation or test was performed.

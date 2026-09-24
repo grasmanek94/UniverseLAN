@@ -10,3 +10,7 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Read completely: lines 1â€
 
 ## Result
 No independently counted declaration defect. Global dump settings are initialized during tracing setup; unsupported concurrent reconfiguration was not presumed.
+
+## Follow-up addendum â€” 2026-09-24
+
+Re-read all 45 lines and traced the actual source-filename producer and Boost constructor. The previously noted fixed-string exception now has a complete producer-to-report-abort mechanism: **ADD-SERVER-003**, fully recorded in `Stacker.cxx.review.MD`. A dependency field can contain 1023 characters while `CallEntryFile.path` accepts 260; reporting/dumping follows the unguarded conversion. This adds no recursive-UEF or native callback-lifetime claim. One finding is counted at the implementation, not again here.

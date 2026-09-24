@@ -14,6 +14,9 @@ ALIASES = {
     "BASE-NET-008": "BASE-STORAGE-011",
     "BASE-STORAGE-012": "BASE-UTIL-002",
     "BASE-STORAGE-022": "BASE-UTIL-002",
+    "ADD-NET-001": "BASE-SERVER-019",
+    "ADD-NET-004": "BASE-SERVER-008",
+    "ADD-UTIL-002": "BASE-SERVER-007",
 }
 
 
@@ -50,7 +53,9 @@ for extra in sorted(actual - expected):
 
 records = {}
 categories = {}
-heading = re.compile(r"^#{2,4}\s+\[?(BASE-[A-Z]+-\d{3})\]?[^\n]*", re.MULTILINE)
+evidence_references = {}
+heading = re.compile(r"^#{2,6}\s+[^\n]*", re.MULTILINE)
+finding_heading = re.compile(r"^#{2,6}\s+\[?((?:BASE|ADD)-[A-Z]+-\d{3})\]?")
 severity_re = re.compile(r"\*\*Severity:\*\*\s*(?:\*\*)?(Critical|High|Medium|Low|Informational)")
 category_re = re.compile(r"\*\*Category:\*\*\s*([^\n]+)")
 reports = []
@@ -62,12 +67,20 @@ for name in sorted(expected & actual):
         errors.append("Missing baseline SHA: " + name)
     matches = list(heading.finditer(text))
     for index, match in enumerate(matches):
+        identity = finding_heading.match(match.group())
+        if not identity:
+            continue
+        finding = identity.group(1)
+        if finding.startswith("BASE-") and re.search(r"addendum|follow.up", match.group(), re.IGNORECASE):
+            continue  # Evidence refinements are not new canonical records.
         section = text[match.end():matches[index + 1].start() if index + 1 < len(matches) else len(text)]
         severity_match = severity_re.search(section)
         if not severity_match:
-            errors.append("Missing severity: " + name + " " + match.group(1))
+            if finding.startswith("BASE-"):
+                evidence_references.setdefault(finding, []).append(name)
+                continue
+            errors.append("Missing severity: " + name + " " + finding)
             continue
-        finding = match.group(1)
         severity = severity_match.group(1)
         if finding in records and records[finding] != severity:
             errors.append("Inconsistent severity: " + finding)
@@ -75,11 +88,56 @@ for name in sorted(expected & actual):
         cat = category_re.search(section)
         if cat:
             categories.setdefault(finding, cat.group(1).strip().strip("*"))
-        for label in ("Confidence", "Location"):
-            if "**" + label + ":**" not in section:
-                errors.append("Missing " + label + ": " + name + " " + finding)
+        if "**Confidence:**" not in section:
+            errors.append("Missing Confidence: " + name + " " + finding)
+        if not re.search(r"\*\*(?:Exact location|Locations?|Location\(s\)):\*\*", section):
+            errors.append("Missing Location: " + name + " " + finding)
+
+for finding, paths in evidence_references.items():
+    if finding not in records:
+        errors.append("Evidence addendum has no canonical finding: " + finding + " " + str(paths))
+
+addendum_dir = ROOT / ".ai/review-addendum"
+coverage_counts = Counter()
+if addendum_dir.exists():
+    api_names = {"Chat", "Friends", "Matchmaking", "Networking", "CustomNetworking"}
+    storage_names = {"Apps", "CloudStorage", "Stats", "Storage", "Telemetry", "User", "Utils"}
+    def owner(name):
+        parts = Path(name).parts
+        if name == "CMakeLists.txt" or (len(parts) == 2 and parts[0] == "Source"):
+            return "BUILD"
+        component = parts[1]
+        if component in {"DLLs", "Vendor"}:
+            return "BUILD"
+        if component in {"Server", "SystemTests", "Tracer", "Version"}:
+            return "SERVER"
+        if component == "Client":
+            if len(parts) > 3 and parts[2] == "Impl":
+                if Path(name).stem in api_names:
+                    return "API"
+                if Path(name).stem in storage_names:
+                    return "STORAGE"
+            return "CORE"
+        return {"Client_NoVer": "CORE", "Shared": "NET", "Shared_NoVer": "UTIL",
+                "InterceptionLogger": "INTERCEPT"}[component]
+    notebooks_by_owner = {}
+    for group in ("CORE", "API", "STORAGE", "NET", "UTIL", "SERVER", "INTERCEPT", "BUILD"):
+        path = addendum_dir / (group + ".MD")
+        if not path.exists():
+            errors.append("Missing follow-up notebook: " + group)
+            notebooks_by_owner[group] = ""
+        else:
+            notebooks_by_owner[group] = path.read_text(encoding="utf-8")
+    # BUILD explicitly incorporates the exact wrapper list after re-verifying its blobs.
+    notebooks_by_owner["BUILD"] += (ROOT / ".ai/review-baseline/WRAPPER-COVERAGE.MD").read_text(encoding="utf-8")
+    for name in inputs:
+        group = owner(name)
+        coverage_counts[group] += 1
+        if name not in notebooks_by_owner[group]:
+            errors.append("Path absent from follow-up coverage ledger: " + group + " " + name)
 
 notebooks = sorted((ROOT / ".ai/review-baseline").glob("*.MD"))
+notebooks += sorted((ROOT / ".ai/review-addendum").glob("*.MD"))
 summary = ROOT / ".ai/UniverseLAN-review-summary.MD"
 if summary.exists():
     notebooks.append(summary)
@@ -113,12 +171,14 @@ print("Canonical groups (including investigations):", len(canonical))
 print("Canonical severities:", dict(sorted(Counter(canonical.values()).items())))
 print("Canonical High IDs:", ", ".join(sorted(k for k,v in canonical.items() if v == "High")))
 def primary_category(finding):
-    value = categories.get(finding, "Unspecified")
-    return value if value == "API/ABI" else value.split(" / ", 1)[0]
+    value = categories.get(finding, "Unspecified").rstrip(".")
+    return "API/ABI" if value.startswith("API/ABI") else value.split(" / ", 1)[0]
 
 
 print("Canonical primary categories:", dict(sorted(Counter(primary_category(k) for k,v in canonical.items() if v != "Informational").items())))
 print("Checked notebook files:", len(notebooks))
+if coverage_counts:
+    print("Follow-up coverage by owner:", dict(sorted(coverage_counts.items())))
 print("Errors:", len(errors))
 for error in errors:
     print(error)

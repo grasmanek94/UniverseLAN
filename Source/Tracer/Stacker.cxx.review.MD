@@ -43,3 +43,39 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Read completely: lines 1�
 **Alternatives / recommendation.** Drive crash processing when either dumps or logging are enabled, allowing a null textual callback, or explicitly couple/validate the settings and document the dependency. Prefer independent behavior because they are separate configuration keys.
 
 **Verification.** Test all four logging/dump option combinations in isolated faulting processes. For dump-only, require a valid original-context dump and no textual exception log.
+
+## Follow-up addendum — 2026-09-24
+
+Fresh full source read: lines 1–264, plus Stacker/MiniDump/Tracer headers and implementations. Existing findings and original wording above are preserved.
+
+### [ADD-SERVER-003] A long symbol source path throws before the crash report and dump
+
+- **Severity:** Low
+- **Confidence:** High (conditional mechanism established from dependency source; no fault injected)
+- **Category:** Correctness
+- **Location:** `Source/Tracer/Stacker.cxx:64–85,161–175,207–220`; `Source/Tracer/Stacker.hxx:12–21`.
+- **Affected scope:** Windows exception diagnostics with an unfiltered frame whose symbol source-file path exceeds 260 characters; exception logging must be enabled to enter this callback.
+
+**Evidence.** `CallEntryFile.path` is `boost::static_string<260>`. `MyStackWalker::OnCallstackEntry` implicitly constructs it from the entire `entry.lineFileName`, without truncation or a catch. The actual StackWalker dependency permits a 1024-byte filename field (`Source/Vendor/StackWalker/Main/StackWalker/StackWalker.h:133–157`) and copies the DbgHelp source filename into it (`StackWalker.cpp:1134–1142`). The vendored Boost null-terminated constructor calls range assign (`Source/Vendor/boost/boost/static_string/static_string.hpp:1235–1243`), which throws `std::length_error` when size exceeds capacity (`6681–6705`). PDB source names are diagnostic strings, not filenames opened by this code; no 260-character filesystem cap is imposed on them here.
+
+**Failure mechanism.** A valid unfiltered 261–1023-character source path reaches line 85 during `ShowCallstack()`. Construction throws before the callback returns. The catch sequence at 113–159 protects only exception-type identification, not the later walk. Consequently the normal calls to textual logging (165), minidump creation (175) and saved-filter chaining (220) are not reached on that invocation. This is a direct C++ exception path; it does not require or establish recursive Windows UEF dispatch or a self-wait deadlock.
+
+**Impact.** A long debug-info path can suppress the requested diagnostic artifact for an already-faulting process. Severity is Low because diagnostics are optional and the trigger requires such symbol information. The proven result is interrupted reporting, not a claim of causing the original crash or of a particular Windows nested-exception outcome.
+
+**Possible solutions.** Bounded, explicit truncation with a marker; a larger fixed field plus a bounded conversion; or dynamically sized fields with an independent best-effort reporting fallback. Merely enlarging the field leaves other allocation/formatting failures able to skip the dump.
+
+**Recommended resolution.** Make frame conversion explicitly bounded and nonthrowing for oversize text, record truncation, and isolate stack/text collection failure from the original-context dump path. Keep original exception preservation from BASE-SERVER-009. Avoid unbounded fault-handler allocation as the sole fix.
+
+**Verification.** Proposed focused frame-conversion cases at lengths 259, 260, 261 and 1023; require bounded strings and a truncation indication without an exception. Then use an isolated Windows process/PDB with a long source path and require a report/dump even if symbolic walking fails. Check the original exception context separately. Nothing was built, executed or faulted in this pass.
+
+### [BASE-SERVER-009] Addendum — retained against native contracts
+
+Retain **Medium / High confidence / Correctness**. `ExceptionInfo` is still omitted from the callback and dump interface. The default dependency constructor selects `NonExcept` (`StackWalker.cpp:792–795`), and the no-context walk captures the handler's current context (`989–1003`). Microsoft's [MiniDumpWriteDump contract](https://learn.microsoft.com/en-us/windows/win32/api/minidumpapiset/nf-minidumpapiset-minidumpwritedump) defines `ExceptionParam` as the exception causing the dump and explicitly calls for capturing/passing the calling thread's prior state. Synthetic code zero and helper registers do not meet that purpose. Preserve the original pointers for synchronous writing or copy their records for any deferred work; do not retain borrowed native pointers beyond their established lifetime. Original proposed verification stands.
+
+### [BASE-SERVER-017] Addendum — retained dump-only reachability
+
+Retain **Low / High confidence / Correctness**. `Trace::SetUnhandledExceptionLogging(false)` still publishes a null callback; `OurCrashHandler` only calls the dump-containing helper inside `cb != nullptr`. Installing the UEF nevertheless does not make that helper reachable. Independent dump/log option handling is still required, including when textual stack collection fails (ADD-SERVER-003).
+
+### Resource/concurrency limits, without additional finding counts
+
+The singleton is process-lifetime and initialization is once per linked instance. `KeepCount` ends before its caller waits: the normal path does not wait on its own count. The [SetUnhandledExceptionFilter contract](https://learn.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-setunhandledexceptionfilter) documents fault-thread execution and previous-filter return values, not recursive reentry when this handler throws. No recursive-UEF deadlock or unload-time native use-after-free is established here. Concurrent callbacks would not be serialized by this counter; the dependency itself states it is not multithreading-enabled (`StackWalker.cpp:956–961`) and Microsoft requires DbgHelp serialization. Simultaneous-fault behavior remains proposed Windows validation, not reproduced corruption. The 128-entry check bounds collected frames, not the dependency's entire walking work. Minidump allocation/handle error paths are addressed in the companion addendum.

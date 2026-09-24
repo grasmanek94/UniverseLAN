@@ -78,3 +78,15 @@ Use RAII ownership for capture immediately after it starts, preserving the curre
 **Verification**
 
 Record the original `std::cout.rdbuf()`, force init failure, handle it, then verify buffer identity and visible output after recovery and shutdown. Repeat failed/successful initialization to detect nested capture errors. Proposed only; no execution occurred.
+
+## Full-reread addendum — BASE-CORE-005 boundary-placement correction, 2026-09-24
+
+**Disposition: retain Medium severity / High confidence / API/ABI. No new ID or changed finding count.** The baseline's DNS/rethrow example is correct; the proposed boundary must cover more than replacing the existing catch body.
+
+**Exact additional locations and evidence:** `GalaxyDLL.cxx:24,35–47,49–69,72–75`; `GalaxyApiFactory.cxx:40–65`; `UniverseGameServer.cxx:25–53`. The client SDK-to-owned-string conversion happens in `Init(InitOptionsModern{ initOptions })` **before entering** the overload containing the try block. Capture and post-construction tracing/console setup also sit outside that block. `Client::Start` at line 69 constructs `std::thread` at `Client.cxx:65–66` **after** the catch. Game-server worker startup similarly occurs after its catch, although its options conversion is inside the guarded expression.
+
+**Real trigger / mechanism:** Valid initialization arguments can encounter allocation failure while copied, or native worker creation can throw `std::system_error` after the graph is otherwise constructed. Fixing only `intf_inst.init`'s existing catch would still allow implementation exceptions through the modern or explicitly nonthrowing legacy public API, possibly leaving a published but unstarted graph. These are additional coverage cases for the same missing SDK boundary, not malformed-pointer allegations. The Start-failure path occurs after normal stdout release and must not be mislabeled as another BASE-CORE-006 capture leak.
+
+**Options / recommended correction:** Establish the exception-policy boundary before fallible normalization and retain it through worker startup, with explicit partial-state cleanup/availability. A shared policy helper or export-level adapter can do this; preserve legacy selected policy and modern thread-local GetError semantics. Offline Apps availability still requires ADD-CORE-001. Do not generalize this recommendation into blindly swallowing exceptions thrown by application callbacks in ProcessData: callback exception propagation/continuation requires a separately specified policy.
+
+**Verification:** In addition to DNS failure, inject normalizer allocation and worker-creation failures, assert the correct error channel and safe Shutdown for the partially built graph, then retry. Check stdout identity independently before/after the release boundary. No fault injection, build, or test was performed.

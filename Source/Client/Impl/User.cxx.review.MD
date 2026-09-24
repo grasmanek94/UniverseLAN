@@ -114,3 +114,67 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Entire file read, lines 1�
 **Recommended resolution:** Treat the listener solely as a delivery target, not a condition for executing an otherwise valid request. Preserve global delivery and add the supplied specific listener for failures. Use the cancellation-safe registrar mechanism rather than introducing new raw deferred captures.
 
 **Verification:** Exercise null/global-only, specific-only, and the same object globally registered plus specifically passed. Require the correct success/failure route and count for each affected API, with unrelated connection notifications drained first. Dummy argument strings suffice; no external credentials or services are needed.
+
+## Source-first re-review addendum — 2026-09-24
+
+Read all `User.cxx:1-673` and `User.hxx:1-814` before baseline comparison, including every historical auth overload. BASE-STORAGE-017/018/020/022 remain supported; 019 is expanded below. Required credential/string inputs were not treated as legally nullable. The default null authorization-code listener is legally optional, so 020 remains a real routing defect. No credential files or real credentials were accessed. Fixed token/ticket emulation is not characterized as real-service authentication.
+
+### [ADD-STORAGE-005] Older SDK remote user-data requests never notify their global completion listener
+
+- **Severity:** Medium
+- **Confidence:** High
+- **Category:** API/ABI / asynchronous correctness
+- **Location:** `Source/Client/Impl/User.cxx:297-318`, especially the preprocessor guard at 313; declarations `User.hxx:449-456`.
+- **Affected scope:** Versions where `HAS_SPECIFICUSERDATALISTENER` is true but `HAS_REQUESTUSERDATA_ISPECIFICLISTENER` is false; concrete shipped SDK example 1.125.2. The per-call-listener gate is true only for 1.134.10 and from 1.138.1 onward (`Source/galaxy_sdk_features.cmake:50,177,189`).
+
+**Evidence:** Remote requests are sent at 287-293 and responses update the cache at 305-310. The *entire* `OnSpecificUserDataUpdated` notification is guarded by availability of the newer per-operation argument, rather than availability of the global listener type. The fallback `IUserDataListener` is only called for self IDs. SDK `Source/DLLs/1.125.2/galaxy/IUser.h:161-184,380-387` defines `GlobalSpecificUserDataListener` and promises it for `RequestUserData(GalaxyID)`, despite that version lacking a listener parameter. `ServerHandlers.cxx:176-195` returns the requested remote ID and full data; `ClientNetworkHandlers.cxx:98-101` reaches this handler.
+
+**Failure mechanism:** In 1.125.2, register a global specific-user-data listener, drain unrelated events, and request a connected remote user's data. A valid server response updates the requested cache. The required notification is compiled out, and the self-only notification is skipped. The game waits indefinitely for completion even though retrieval succeeded. Live `SetUserDataMessageReceived` notifications at 568-574 use the older type gate correctly, so an unrelated later live update can misleadingly appear to complete the request.
+
+**Impact:** Supported older games cannot reliably sequence remote data retrieval. Latest-version tests and tests of live updates do not establish correctness of this version branch. This is different from BASE-STORAGE-020's latest authorization-code/PlayFab argument routing.
+
+**Possible solutions:** Guard the global notification by listener-type availability and conditionally insert only the extra listener argument; or centralize a version-independent completion helper that accepts an optional listener internally.
+
+**Recommended resolution:** Always emit the supported remote global update notification, retaining per-operation dispatch on SDKs that expose it. Preserve self-specific/current-user notifications and cancellation semantics. No protocol change or implementation of unsupported services is needed.
+
+**Verification:** Proposed 1.125.2 global-only remote request must complete without any subsequent SetUserData or stats request; compare with latest specific-only/global-only cases. `Source/SystemTests/Host/Stats.cxx:185-203` currently waits on the later stats response to bound the legacy data request and never checks this global callback, so that test masks the defect. `Host/UserData.cxx:64-79` tests the separate live-update path. Static gate evaluation only; no version build/test was run.
+
+### BASE-STORAGE-019 — ADDENDUM CORRECTION: auth admission can miss an already-delivered acceptance
+
+- **Disposition:** Retained and expanded under the existing pending-auth completion ID; no duplicate ID for the header's previously noted check-then-enqueue gap.
+- **Severity:** Medium (unchanged)
+- **Confidence:** High
+- **Category:** Concurrency / asynchronous correctness
+- **Location:** `Source/Client/Impl/User.cxx:55-77,610-628,642-651`; `User.hxx:80-88`.
+- **Affected scope:** Concurrent sign-in API calls and `ProcessData`; specific auth listeners. The ignored explicit timeout remains version-gated from 1.152.8.
+
+**Evidence:** `SignIn` checks the plain `logged_on` bool outside `mtx_waiting_auth_listeners`, then inserts under that mutex. Acceptance sets `logged_on` and separately drains the waiting set. There is no state recheck while admitting the waiter. Transport Tick only queues events: `Client.cxx:37-43,79-82`, `Source/Shared/Networking/Networking.cxx:146-165,219-226`, and `GalaxyDLL.cxx:166-173` place the state handler on the application's pump thread.
+
+**Failure mechanism:** Thread A observes not logged on and pauses before insertion. Thread B pumps acceptance, sets logged_on, drains the empty set, and delivers globals. A then inserts its specific listener after that drain; a healthy accepted connection has no reason to send another acceptance. The listener remains pending despite success already occurring. Concurrent access to the plain bool also lacks synchronization; simply making it atomic would still leave the logical lost-wakeup sequence. This does not require a second concurrent pump or a native transport callback into User.
+
+**Impact:** A specific login UI can wait indefinitely even with a working server, in addition to the existing no-timeout failure on unavailable servers. Retained raw listeners still interact with BASE-STORAGE-017.
+
+**Possible solutions:** One lock covering state inspection/admission/acceptance drain; an operation state machine with synchronized generations; or serialized auth commands plus cancellable waiter tokens.
+
+**Recommended resolution:** Atomically decide between immediate completion and pending admission with respect to every auth transition, release state locks before invoking listeners, and implement per-operation deadlines/cancellation. Narrow the original timeout observation to the SDK versions actually exposing that argument; do not infer a configured networking reconnect timeout is the same contract.
+
+**Verification:** Proposed barriers pause sign-in between its state check and insertion while another thread processes acceptance, then resume. Require exactly one specific result without another reconnect. Repeat unavailable-server explicit timeout separately. Windows ASan alone cannot prove bool race freedom; inspect complete synchronization. No concurrency experiment was run.
+
+## Targeted ABI handoff — persona gate / BASE-API-005 clarification, 2026-09-24
+
+**Disposition: confirmed undefined consumer macro; no distinct confirmed sign-in notification contract defect and no ADD-ABI-002.** BASE-API-005 remains the existing Medium / High-confidence automatic-persona-retrieval/publication finding, primary in [Friends.cxx.review.MD](Friends.cxx.review.MD). This clarification adds no finding count or severity change.
+
+**Exact evidence**
+
+- `User.cxx:67,655` tests `GALAXY_BUILD_FEATURE_HAS_IFRIENDS_ONPERSONADATACHANGED`. `Source/galaxy_sdk_features.cmake:16` defines the feature name **`IFRIENDS_ONPERSONADATACHANGED`**, and `290-305` emits `GALAXY_BUILD_FEATURE_IFRIENDS_ONPERSONADATACHANGED=0/1`. Source/build-definition searches found no definition or alias for the additional-`HAS_` spelling. Under the repository's normal definitions, both undefined `#if` expressions evaluate to zero; neither notification at `68,656` is compiled in. This is a consumer spelling mismatch, not an incorrect SDK version interval.
+- The first suppressed body follows an already-logged-on sign-in success (`55-73`); the second follows accepted connection/auth notification (`642-660`). Both would notify the **local** user with **`PERSONA_CHANGE_NONE`**. Neither path updates persona name/avatar or performs `RequestUserInformation` for remote friends/lobby members. The configured self cache already exists (`24-35`); `Friends.cxx:103-107` treats self information as available.
+- Examined SDK contracts: 1.61.0 `IFriends.h:34-63,131-138` defines change notifications and explicit-request responses; 1.73.0 `IFriends.h:32-61,207-215` does the same. 1.73.0 `IUser.h:225-263` promises sign-in responses to **IAuthListener** and operational-state notifications. 1.152.11 `IUser.h:414-443` makes the same distinction; `IFriends.h:58` explicitly defines NONE as “No information has changed.” These declarations do **not establish an unconditional self-persona notification for every successful sign-in**. The absence of a matching promise is a limit on this finding, not proof that native Galaxy never emits such an event.
+- A genuine positive contract exists in 1.152.11 `IFriends.h:645-667`: explicit user-information responses go to persona/information listeners, and requests are automatic for friends and fellow lobby members. The explicit self path uses the **correct** gate and queues its persona notification (`Friends.cxx:38-54`); the remote response path also uses the correct gate (`87-99`). Those calls are not suppressed by the User typo.
+
+**BASE-API-005 relationship / impact limit**
+
+`User.cxx:297-319` can update a remote nickname without publishing Friends availability/persona state. The existing BASE-API-005 already covers hello/user-data routing, omitted automatic friend/member retrieval, and later actual-name-change publication (see its preserved Friends addenda). Changing `User.cxx:67,655` only restores two intended **self/NONE** notifications; it does not repair that remote path. Conversely, sign-in alone with no identified persona change is not enough to prove a game is owed this extra callback, so no new behavioral-ID claim is justified by the undefined macro alone.
+
+**Resolution / proposed verification**
+
+Align the consumer feature spelling in a future implementation change and check intended self-notification semantics against a matching native SDK trace or an explicit product compatibility policy. Add a feature-reader/definition consistency check and verify the disabled boundary before 1.61.0. Keep BASE-API-005's automatic friend/member retrieval and genuine persona-change regressions under its existing ID. For the sign-in question, distinguish (a) unchanged self sign-in, (b) explicit `RequestUserInformation(self)`, and (c) a real name/avatar change; record callback order, IDs and flags instead of assuming auth implies a persona change. No builds, tests, native calls or credential reads were performed here.

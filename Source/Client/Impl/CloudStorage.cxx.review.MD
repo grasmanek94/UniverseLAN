@@ -192,3 +192,132 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Windows focus. Entire curr
 **Recommended resolution:** Centralize savegame metadata decoding for all three methods. Define absence as the SDK's undefined type when backward-compatible, validate enum range, and report actual corruption consistently without allowing conversion exceptions across the API boundary.
 
 **Verification:** Reopen files with absent fields, empty/nonnumeric/out-of-range type strings, and a valid type. Compare all download/metadata overloads and assert one terminal callback with no escaping conversion exception.
+
+## Source-first re-review addendum — 2026-09-24
+
+Read `CloudStorage.cxx:1-649` and `CloudStorage.hxx:1-366` in full before comparing the preserved baseline. Source is unchanged from `b30e83872c0006e8240c8b4f565da5351bf10080`. All evidence below is static; verification scenarios were not executed. BASE sections above remain preserved. New IDs identify different mechanisms, not additional instances of ignored results, missing hashes, or cancelled listeners.
+
+### [ADD-STORAGE-001] Reentrant upload callbacks overwrite another upload's scratch buffer
+
+- **Severity:** Informational (conditional reentrancy finding; potential Medium impact)
+- **Confidence:** Medium for supported callback reentrancy; High for scratch-buffer sharing
+- **Category:** Correctness / reentrancy
+- **Location:** `Source/Client/Impl/CloudStorage.cxx:395-409`, callback `PutFile`.
+- **Affected scope:** Every cloud-enabled version; nested callback-based uploads on the same thread, including different files/containers.
+
+**Evidence:** The upload buffer is `static thread_local char buffer[2048]`. Its address is passed into application `readFunc` at line 405, and its bytes are consumed only after that callback returns at line 407. All invocations of this function on one thread use the same array. SDK `Source/DLLs/1.152.11/galaxy/ICloudStorage.h:324-386` defines the buffer as the destination for source bytes and supplies no prohibition on other SDK calls during the callback. In contrast, `CalculateHash` uses an invocation-local `std::array` at line 610.
+
+**Failure mechanism:** Outer upload A's read callback fills the provided buffer with A's chunk, then synchronously starts a callback upload of a different file B before returning A's positive byte count. B's callback fills the same TLS address with B's chunk and returns EOF on its next call. When the outer callback returns, line 407 writes B's bytes into A. Each callback respects its extent and returns valid counts; both files can finish with success. No cross-thread race, same-file conflict, invalid pointer, failed rewind, or filesystem failure is necessary.
+
+**Impact:** A valid upload can silently contain bytes from a different upload. Severity is Medium because nested producer-side uploads are a narrower exposure than ordinary replacement failures, despite the possible save corruption.
+
+**Possible solutions:** Give each invocation its own stack array; allocate scratch storage in an owning operation object; or explicitly reject nested calls before any destination modification if the public compatibility policy permits that restriction. Merely adding a recursive mutex or retaining TLS does not isolate nested calls.
+
+**Recommended resolution:** Use per-invocation/per-operation storage for the entire interval from callback entry through consumption of its result. Preserve the existing binary/count contract. This is separate from BASE-STORAGE-003: full successful callback returns still corrupt data here.
+
+**Verification:** Proposed Windows case: A's callback writes a recognizable 32-byte pattern, performs B's complete callback upload with a different 32-byte pattern, then returns 32. Keep separate source cursors, listeners, and filenames; download both after pumping. Require A and B to retain their respective patterns and one success each. Repeat nested hashing as a control: its local buffer should already be independent.
+
+**Reconciled qualification:** The inspected SDK contract neither expressly allows nor forbids initiating another upload from its producer callback. Thread-safety is not a reentrancy guarantee. The mechanism is retained, but supported-call compatibility is unresolved and this ID is excluded from confirmed totals.
+
+### [ADD-STORAGE-002] A download can pair one generation's bytes with another generation's save metadata
+
+- **Severity:** Medium
+- **Confidence:** High
+- **Category:** Correctness / Concurrency
+- **Location:** `Source/Client/Impl/CloudStorage.cxx:152-200,244-255,499-540`, especially metadata reads after `writeFunc`.
+- **Affected scope:** Cloud reads overlapping successful replacement; savegame-enabled versions expose the mismatch directly in the completion arguments. Legacy versions expose it through tags.
+
+**Evidence:** Callback `GetFile` reads owned data at line 162, calls application code at 163, then samples the live entry's metadata at 176 and 184-188. `get_or_create` returns the existing entry for the same name (`Source/Shared_NoVer/filesystem_container/filesystem_container.cxx:123-126`). Buffered `PutFile` changes that entry's bytes and save metadata (`CloudStorage.cxx:499,528-540`). The entry's metadata getters return separately locked values, not a data-and-metadata generation snapshot (`filesystem_container_entry.cxx:316-344`). SDK `ICloudStorage.h:84-98` describes the completion type and ID as belonging to the downloaded data.
+
+**Failure mechanism:** Put A with type MANUAL and ID a. Start callback GetFile(A). Its sink copies all A bytes and, before returning the full count, performs a successful buffered replacement B of the same name with type QUICK and ID b. The data vector remains A, but GetFile resumes by reading B's metadata and calls success with A's byte count plus QUICK/b. Alternatively a second API thread can replace the file between the data read and metadata lookup in either download overload. There is no failed operation and no overwritten pending-list cache.
+
+**Impact:** The consumer can associate a save's content with another savegroup or type. Concurrent successful puts can also leave one writer's data with another writer's metadata: pause A after its data write, complete B's data/metadata, then resume A's metadata update. Individual map locks do not make this compound operation consistent.
+
+**Possible solutions:** Read a committed immutable generation; hold a per-entry transaction lock while obtaining an owning data-and-metadata snapshot; or use revision validation and retry. A lock held across game callbacks risks reentrancy deadlocks and is not the recommended solution.
+
+**Recommended resolution:** Serialize publication of complete data/metadata generations and capture the read's metadata together with its bytes before invoking application callbacks. Deliver callbacks after releasing internal transaction locks. BASE-STORAGE-001/002 address failed commits; BASE-STORAGE-007 addresses which pending result is exposed. Fixing only those callback caches does not fix this generation mismatch.
+
+**Verification:** Proposed single-thread Windows reproduction uses the sink-replacement sequence above with different payload lengths, explicit hashes, types and IDs, and no open savegroup. Require the outer result to describe A while a later read describes B. Add barriers for two successful buffered puts and for buffered get versus put; final bytes/hash/type/ID must all come from one committed generation.
+
+### [ADD-STORAGE-003] Independent quota saturation reports a healthy large volume as full
+
+- **Severity:** Medium
+- **Confidence:** High
+- **Category:** Correctness
+- **Location:** `Source/Client/Impl/CloudStorage.cxx:55-60`, `GetFileList`; dependencies `Source/Shared/SharedFileUtils.cxx:350-375` and `Source/Shared_NoVer/filesystem_container/filesystem_container.cxx:365-381`.
+- **Affected scope:** All cloud-enabled versions on ordinary Windows volumes with more than UINT32_MAX bytes both in total capacity and in use.
+
+**Evidence:** `GetFileList` supplies total disk space and used disk space as `quota` and `quotaUsed`. Each helper independently clamps to UINT32_MAX. Used space is whole-volume `capacity - available`, not container usage. SDK `Source/DLLs/1.152.11/galaxy/ICloudStorage.h:41-52` describes total quota bytes and used quota. The existing cloud SystemTest ignores both quota arguments (`Source/SystemTests/Host/CloudStorage.cxx:43`).
+
+**Failure mechanism:** A successfully queried 100-GiB volume with 20 GiB used and 80 GiB available yields `(quota, quotaUsed) = (4294967295, 4294967295)`, even for a new empty container. A game checking whether `quota - quotaUsed >= nextSaveSize` rejects every positive-sized save. This is not a full disk or an error-code/sentinel case. The local backend can still write an ordinary small file.
+
+**Impact:** False out-of-space UI or skipped saves on commonplace Windows installations. The baseline noted whole-volume quota as a limitation but did not establish this successful-query arithmetic collapse. It differs from BASE-UTIL-016, whose precondition is a failed space query.
+
+**Possible solutions:** Maintain a representable logical container quota and usage; derive a consistent capped quota/usage pair that preserves available headroom; or define an explicit supported unlimited-capacity policy. Independently clamping two correlated quantities cannot preserve their difference.
+
+**Recommended resolution:** Define local quota semantics, obtain one checked space snapshot, and calculate the public pair jointly in a wide type before narrowing. If representing a container limit, count its committed bytes rather than unrelated volume consumption. Coordinate the adapter with NET/UTIL; do not add a second owner finding for the same arithmetic.
+
+**Verification:** The coordinator ran the actual SharedFileUtils helpers with a deterministic virtual space provider reporting 100/20/80 GiB. Observed `reported_total=4294967295 reported_used=4294967295 computed_free=0 available_helper=4294967295`. This reproduces the inconsistent result pair used by GetFileList; no actual disk filling or full Cloud callback execution was involved. Other capacity/error cases remain proposed. See `.ai/review-addendum/VERIFICATION.MD`.
+
+### BASE-STORAGE-002 — ADDENDUM CORRECTION: completion must follow close; read-error scope refined
+
+- **Disposition:** Retained and expanded under the existing ID; no additional finding counted.
+- **Severity:** High (unchanged; save-integrity impact from the original finding).
+- **Confidence:** High
+- **Category:** Correctness / asynchronous completion
+- **Location:** `Source/Client/Impl/CloudStorage.cxx:386-457,162-163,244-260`; `Source/Shared_NoVer/filesystem_container/filesystem_container_entry.cxx:238-289`.
+- **Affected scope:** Streaming put with concurrent event pumping; all cloud data-read overloads on short/error reads.
+
+**Evidence:** Streaming put queues success at 454-456 while its local `fstream` is still alive; destruction/implicit close occurs at function exit. `NotifyAll` queues work without waiting (`Source/Client/Impl/ListenerRegistrar.hxx:309-322`), and another thread can run it through `GalaxyDLL.cxx:166-173`. Whole-file read sizes its vector before reading and returns that full vector even on EOF-short-read; buffered read instead returns actual `gcount()`.
+
+**Failure mechanism:** A pump thread can observe put success after enqueue but before the producer closes/flushed its small buffered write. An immediate read in that callback need not see all acknowledged bytes. Separately, a file shortened between `tellg` and read yields an old-sized vector with an unread value-initialized suffix; it is reported as full data. Refine the original wording: the buffer overload does preserve actual byte count and checks buffer capacity; its defect is reporting operation success on a failed/incomplete whole-file download, not overflowing the destination.
+
+**Impact:** Premature durability/availability promises and acceptance of incomplete content. No concurrent Shutdown or retained caller buffer beyond its promised lifetime is required.
+
+**Possible solutions:** Close/check the stream before publication; return status plus actual bytes; use a stable read snapshot. Checking only `good()` before destructor is insufficient.
+
+**Recommended resolution:** Place flush/close, byte-count validation, and metadata commit before the sole success publication point. Reconcile with ADD-STORAGE-002 for concurrent generation consistency.
+
+**Verification:** Proposed barrier immediately after queue insertion, before stream destruction, with another thread pumping a success-triggered read. Also shorten a file between size acquisition and read and distinguish a genuine empty-file success from read failure. No runtime result is asserted.
+
+### BASE-STORAGE-003 — ADDENDUM CORRECTION: callback extent must fit signed int
+
+- **Disposition:** Retained and expanded under the existing callback-contract ID.
+- **Severity:** Medium (unchanged)
+- **Confidence:** High
+- **Category:** Correctness / integer conversion
+- **Location:** `Source/Client/Impl/CloudStorage.cxx:162-169,193,395-409,609-624`; SDK `Source/DLLs/1.152.11/galaxy/ICloudStorage.h:265-273,324-353`.
+- **Affected scope:** Callback download on Windows x64 with sufficient memory for a valid file larger than INT_MAX and no larger than UINT32_MAX.
+
+**Evidence:** `WriteFunc` takes signed `int size`; line 163 passes `(uint32_t)data.size()` as one entire-file chunk. A 0x80000000-byte successful read therefore becomes a negative size on the target's 32-bit int. The upload and hash producers, by contrast, request fixed positive 2048-byte chunks. Their negative source returns are documented errors, not invalid app inputs.
+
+**Failure mechanism:** A valid streamed put can create a file in this range without any callback returning an excessive count. The download then supplies a negative extent to a conforming sink. A sink rejecting it cannot load the file; one converting it to a larger unsigned size may encounter further problems, but no unconditional application overflow is claimed. Files above UINT32_MAX additionally narrow size/count, but are not needed for this within-public-width example.
+
+**Impact:** Large valid files fail callback download or expose nonsensical extents. This strengthens the existing bounded-chunk recommendation, without inventing a separate callback-return finding.
+
+**Possible solutions:** Stream bounded positive chunks; reject a documented maximum before starting; or bridge the signed callback type with checked chunking. Changing only the explicit cast to `int` does not fix it.
+
+**Recommended resolution:** Bound every dispatched chunk by INT_MAX and handle partial progress/negative returns as already required by BASE-STORAGE-003. Oversized positive `ReadFunc` returns above the supplied buffer size are contract violations: the current clamp is not evidence of a confirmed buffer overread for compliant callers. Callback-thrown C++ exceptions likewise need a policy, not an assumption that throwing is SDK-valid.
+
+**Verification:** Proposed count-boundary checks at INT_MAX, INT_MAX+1 and UINT32_MAX, using a chunked file source on a sufficiently provisioned Windows x64 setup or a controlled I/O seam. Require all sink extents to be positive and representable, exact byte totals, and the existing short/negative/rewind-failure cases. No allocation or large-file test was performed.
+
+### BASE-STORAGE-006 — ADDENDUM CORRECTION: identity reuse also crosses instance lifetimes
+
+- **Disposition:** Retained and expanded; the original sequential group reuse remains decisive.
+- **Severity:** Medium (unchanged)
+- **Confidence:** High
+- **Category:** Correctness / Concurrency
+- **Location:** `Source/Client/Impl/CloudStorage.cxx:24-38,583-597`; `CloudStorage.hxx:57-58`; `Source/Shared_NoVer/filesystem_container/filesystem_container_utils.cxx:68-75`.
+- **Affected scope:** Savegame-enabled versions; repeated initialized instances using retained saves, and concurrent group-control/upload calls.
+
+**Evidence:** The ID counter is seeded from whole epoch seconds, not persisted high-water state; ungrouped puts increment from that seed. Group mode is a plain bool while only the counter is atomic.
+
+**Failure mechanism:** An instance seeded at second T emits T and T+1 for two ungrouped puts. Reinitialize at second T+1 and the next instance emits T+1 again. It is unnecessary to reopen in the exact same second or exhaust uint64_t. Concurrent Open/Close and Put also read/write the unprotected group flag, and atomic counter ordering cannot protect the combined group state.
+
+**Impact:** Previously distinct retained saves can acquire the same group ID after a normal restart/reinitialization; concurrent control has no coherent grouping boundary. This is the existing identity-allocation mechanism, not a new ID for another collision example.
+
+**Possible solutions:** Persist a checked sequence/high-water mark; allocate collision-resistant opaque group identities; or combine an instance nonce with a synchronized local sequence.
+
+**Recommended resolution:** Reserve a fresh identity per explicit group and per ungrouped save, persist or otherwise guarantee the required cross-instance uniqueness, and synchronize the group mode plus ID as one state. uint64_t wrap is defined arithmetic but has no credible exhaustion trigger here and is not elevated to an overflow vulnerability.
+
+**Verification:** Proposed controlled-clock sequence T then T+1 across instances with old files retained; require distinct IDs. Keep original same-group/every-boundary cases, then barrier-test Open/Close versus Put. No sleeps, clock changes, or filesystem experiments were executed in this review.

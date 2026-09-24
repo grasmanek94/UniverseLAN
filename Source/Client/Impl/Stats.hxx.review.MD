@@ -15,3 +15,7 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Entire file read, lines 1â
 ## Findings disposition and verification limits
 
 No additional declaration-only defect counted. Canonical full sections: BASE-STORAGE-010, BASE-STORAGE-011, BASE-STORAGE-012 in `Stats.cxx.review.MD`. Feature branches were inspected textually; compiler/ABI coverage of every SDK version remains unverified. Recommended validation follows those sections, plus explicit capability tests requiring leaderboard failure callbacks rather than fabricated sorted data.
+
+## Source-first re-review addendum â€” 2026-09-24
+
+Full `1-640` reread completed before baseline comparison. Explicit retrieval preconditions matter for the new playtime case: ADD-STORAGE-004 permits the getter only after the implementation has falsely delivered request success. It is not a caller skipping retrieval. The interface has no state member distinguishing identity-only remote placeholders from hydrated playtime; coordinate that state with User rather than adding another unsynchronized facade cache. All leaderboard overloads, signed scores, unsigned ranges, detail limits, listener gates and default self IDs were rechecked; no successful leaderboard state is fabricated as a review premise. Canonical new detail is in `Stats.cxx.review.MD`.

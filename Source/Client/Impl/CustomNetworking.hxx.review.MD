@@ -12,3 +12,7 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. All 166 lines read; Window
 - Traced normal interface reset ordering and IXWebSocket 12.0.1 lifecycle sections. Inspected the complete SystemTests CustomNetworking host file: its echo and orderly close cases retain listener objects and pump promptly, so those cases do not establish cancellation/delayed-cleanup safety.
 
 No independent ABI/declaration defect is added. These observations do not certify every older experimental custom-networking SDK variant, concurrent shutdown behavior or runtime resource cleanup. No build or test executed.
+
+## Thorough follow-up addendum — 2026-09-24
+
+Full reread: lines 1-166 at production baseline `b30e8387`. The registry's shared owners, worker's raw callback binding, atomic cleanup marker, and destruction order were retraced. Ordinary explicit reset/Channel stop-join is distinguished from queued callback visibility and cancellation (BASE-API-015–017), as well as implicit InterfaceInstances destruction without reset. Exception-after-start publication evidence is added under BASE-API-016; no duplicate WS ID or unsupported caller-lifetime crash is added. ConnectionID is `uint64_t`, so the Windows pointer-to-ID cast is not itself a 32-bit truncation defect; address reuse remains the existing lifecycle issue. SDK incoming storage is a byte stream and bounded peek/read/pop do not promise WebSocket frame boundaries. No builds/tests executed.

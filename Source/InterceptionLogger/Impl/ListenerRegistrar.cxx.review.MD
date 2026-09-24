@@ -42,3 +42,37 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Read completely: lines 1�
 **Recommended resolution:** Attach immutable owner identity/type to every encapsulated proxy and cancel only records belonging to the requested registrar. Retire only after unregistering with the owning real SDK; combine with BASE-INTERCEPT-002 lifetime pins.
 
 **Verification:** Register two pending CreateLobby proxies for one target against two fake registrars. Unregister only on the client; assert that the server proxy remains alive and receives its callback. Repeat with sessions reversed and with session shutdown. Proposed only.
+
+## Follow-up review addendum — 2026-09-24
+
+Reread all 54 lines and the complete proxy implementation/header.
+
+### BASE-INTERCEPT-003 — Addendum: module scope and multiple-interface counterevidence
+
+- **Severity:** High, retained
+- **Confidence:** High for same-interface cross-session deletion
+- **Category:** Memory Safety
+- **Location:** `Source/InterceptionLogger/Impl/ListenerRegistrar.cxx:43–48`; `Impl/Listeners/ProxifySingleShotListener.hxx:16–27,43–50`.
+- **Affected scope:** Client and game-server InterfaceInstances inside the same loaded interceptor module, using the same listener interface subobject.
+
+**Evidence / clarification**
+
+The baseline's term "process-wide" is too broad if interpreted as sharing across separate interceptor DLLs. `InterceptionLogger/CMakeLists.txt:8–17`, `Shared/CMakeLists.txt:8–23` and `Shared_NoVer/CMakeLists.txt:5` build static libraries, which `Source/DLLs/CMakeLists.txt:153–163` links into each interceptor DLL. The proxy singleton is shared by sessions in that DLL; separate linked DLL copies are not demonstrated to share its map.
+
+For multiple inheritance, SDK `1.152.11/galaxy/IListenerRegistrar.h:103–129` uses non-virtual IGalaxyListener inheritance for the type-aware listener bases. Encapsulation converts the supplied *typed* listener to IGalaxyListener using its actual base adjustment. A correct typed Unregister uses the corresponding adjustment. A game object implementing ILobbyCreatedListener and ILobbyEnteredListener therefore has distinct relevant IGalaxyListener subobject addresses; the map does not simply key both by the most-derived object address. SDK SelfRegisteringListener also supplies its typed `this` at lines 220–234.
+
+**Failure mechanism**
+
+The existing same-ILobbyCreatedListener client/server example still collides because both requests use the same interface subobject and the map lacks registrar ownership. Merely implementing several listener interfaces does not establish a same-session cross-type cancellation bug. Passing an IGalaxyListener pointer from the wrong interface branch with a different listenerType would violate the caller contract and is not a valid reproduction.
+
+**Impact**
+
+Retain the cross-session dangling-proxy failure and its High severity. Do not expand it to independent DLL copies or valid multi-interface cancellation without additional evidence.
+
+**Possible solutions / recommended resolution**
+
+Keep the owner-aware, pinned-record remedy from the baseline. Preserve adjusted interface identity, and record listener type explicitly rather than attempting to replace the target key with a most-derived address.
+
+**Verification**
+
+Proposed only: in addition to the retained two-registrar test, use a multiple-inheritance target with a nonzero-offset listener interface. Cancel the created-interface request while an entered-interface request remains pending in the same registrar; require independent lifetimes/delivery. Repeat the same interface across client/server to reproduce the confirmed defect. No ABI/layout probe or test ran. This is a BASE-ID scope correction, not another finding.

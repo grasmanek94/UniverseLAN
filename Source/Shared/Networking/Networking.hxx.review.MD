@@ -92,3 +92,57 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Coverage: all 236 lines; W
 **Alternatives / recommended resolution:** Track total queued bytes and events with configurable high-water limits. Define reliable-message overflow as a controlled disconnect/failure, and allow explicit dropping/coalescing only where protocol semantics permit it. Bound outbound admission too; a fixed item count alone poorly bounds variable-size packets.
 
 **Verification:** Pause the Windows application pump while delivering size-compliant traffic; assert a bounded high-water mark and deterministic overflow behavior. Resume and check order, event fairness and exactly-once destruction during overflow, reconnect and shutdown.
+
+## Second-read addendum — original findings preserved
+
+### [BASE-NET-001] Evidence/correction addendum: rejected pointer graphs can retain allocations after unwind
+
+- **Status / accounting:** Retained and strengthened; same input-decoding finding, no additional ID. Corrects the blanket statement in baseline NET.MD that decode exceptions release decoded temporaries: receive-packet cleanup is sound, but arbitrary decoded shared ownership can be cyclic.
+- **Severity:** High, unchanged.
+- **Confidence:** High, source/control-block trace; no runtime reproduction.
+- **Category:** Security / Memory Safety.
+- **Location:** `Source/Shared/Networking/Networking.hxx:37-60`; `Source/Shared/Networking/Messages/RequestChatRoomWithUserMessage.hxx:16-22`; `Source/Shared/ChatRoom.hxx:17-24,57-60`.
+- **Affected scope:** Chat-enabled Windows server builds (IChat starts at 1.104.3), including transport-connected clients that never pass the key challenge; also the configured-server input boundary on clients.
+
+**Evidence:** Vendored cereal `types/memory.hpp:326-341` registers a newly allocated shared pointer *before* loading its object. References load through `static_pointer_cast<T>(ar.getSharedPointer(id))`. `cereal.hpp:793-814` stores/retrieves `shared_ptr<void>` with no pointee-type check. `types/vector.hpp:78-83` resizes the entire message vector before reading its elements. The outer request's room graph is decoded before the Server handler's authentication check, even though that handler ignores the supplied room.
+
+**Failure mechanism:** A malformed RequestChatRoomWithUser body can define room pointer ID `0x80000001`, start that ChatRoom's message vector with a nonzero declared count, and use reference ID `1` for the first supposed ChatMessage. That vector element now shares the containing ChatRoom's control block. Truncating before the next element or later room fields throws a caught short-read exception, but the room owns a reference to itself through its vector. Destroying archive/local references cannot release that cycle. A larger vector count amplifies the retained allocation even though almost none of its elements appeared on the wire. This reasoning does not require dereferencing the incorrectly typed ChatMessage or an application handler executing.
+
+**Impact:** Parser rejection can leave persistent heap growth, beyond the baseline's transient resize/CPU-pressure example. Frame RAII, catching bad_alloc, or validation only after a complete archive load does not resolve this graph-ownership path. No code-execution claim is made.
+
+**Possible solutions:** Use value-based bounded wire records without archive pointer identity; reject graph references before constructing ownership; or implement typed, acyclic decoding with ownership rollback and cumulative budgets. Early direction/authentication admission reduces exposure but cannot make an admitted peer's graph safe.
+
+**Recommended resolution:** Remove unused response graphs from request DTOs and decode bounded, non-owning/value wire structures before building domain shared pointers. Preserve the original length-budget remediation as well.
+
+**Verification (proposed):** On Windows, feed a small self-referencing/truncated room graph with count 1 and then a moderate amplified count. Check live allocations/control blocks after every rejection, not just packet destruction or peak memory. Include null, unknown and cross-type reference IDs. Rejection must leave no retained room/vector and must occur before application dispatch.
+
+### [BASE-NET-005] Evidence addendum: schema admission and endian scope
+
+- **Status:** Retained, Medium / High confidence / API/ABI; no new count.
+- **Location:** `Networking.hxx:46-56,79-82`; `Messages/SetLobbyDataMessage.hxx:25-34`; `Messages/LeaveLobbyMessage.hxx:16-28`; `ChatMessage.hxx:43-47`.
+
+**Evidence / mechanism:** Fresh comparison with `Source/galaxy_sdk_features.cmake:94-108,156` confirms the Chat and leave-reason boundaries; the five lobby update DTOs use the explicit `>11240` gate. Actual Client/Server handshake handlers contain no schema exchange. Conversely, `Source/Server/CMakeLists.txt:8-25` builds and places matching per-version servers, so mixed-version operation is a deployment precondition, not a failure of every matching build. Cereal's endian marker and GalaxyID numeric conversion are correct for the reviewed Windows path. The challenge hashes native nonce bytes, but both Windows x86/x64 paths agree; no supported-platform endian failure was demonstrated.
+
+**Impact / possible solutions / recommendation:** Retain early schema-fingerprint rejection, or introduce version-independent DTOs if cross-version support is intended. Do not substitute endian conversion for layout compatibility, and do not market the finding as an authentication bypass.
+
+**Verification (proposed):** Pair encoders at the documented schema boundaries and check explicit rejection before operation registration. Retain a same-version Windows x86/x64 control case and a synthetic opposite-endian arithmetic fixture; no Linux execution is needed.
+
+### [ADD-NET-001] Application broadcasts reach peers that have not passed key admission
+
+- **Severity:** Medium.
+- **Confidence:** High, complete static recipient-selection trace.
+- **Category:** Security.
+- **Location:** `Source/Shared/Networking/Networking.hxx:193-231`, both typed Broadcast paths; callers `Source/Server/ServerHandlers.cxx:199-210,703-735,923-960`.
+- **Affected scope:** Reachable Windows server with at least one admitted active user; transport-connected peers awaiting or withholding authentication.
+
+**Evidence:** Shared delegates application broadcasts to ENet host broadcasts. Vendored `Enet-IPv6/src/host.c:306-321` and `Enet++/src/enetpp_helpers.cxx:8-28` select every `ENET_PEER_STATE_CONNECTED` peer (apart from the optional excluded sender); neither checks application admission. Server connect inserts the peer into `unauthenticated_peers` before sending the challenge (`ServerHandlers.cxx:36-47`). SetUserData and RichPresence require authentication of the *sender*, then broadcast its identity and payload. Lobby-property and online-status broadcasts have the same transport-only recipient selection.
+
+**Failure mechanism:** A custom ENet client connects to a reachable server, withholds its challenge response, and continues transport servicing. While it is pending admission, an admitted player changes user data or rich presence. The pending peer receives the plaintext serialized update directly from the server. The 60-second unauthenticated timeout (`Server.hxx:23`, `Server.cxx:108-135`) bounds a connection's lifetime but not broadcasts delivered before expiry; reconnecting starts another window. No key guessing, default-key knowledge, packet interception or sender spoofing is needed.
+
+**Impact:** The key gate does not protect outbound application updates: a nonmember can observe broadcast user-data keys/values, presence and lobby properties/IDs. This is a specific admission-boundary failure even with a private test key. It does not establish access to all histories/files, arbitrary state modification, or transport confidentiality against an on-path observer. Loopback-only deployment narrows exposure to local processes; a reachable LAN binding broadens it.
+
+**Possible solutions:** Select recipients from an admitted-session collection in Server; provide a Shared fan-out API accepting an explicit eligible-peer range/predicate; or separate transport-control broadcasts from admitted application broadcasts. Rejecting ordinary unauthenticated requests alone does not fix outbound selection.
+
+**Recommended resolution:** Route application fan-out only to fully admitted sessions, additionally requiring hello completion where the payload depends on initialized user data. Keep the transport challenge exchange usable before admission. Apply the rule centrally rather than relying on every message sender to remember it.
+
+**Verification (proposed):** With a newly generated fixture key, connect an observer that never answers the challenge and an admitted client. Trigger user-data, presence, lobby-property and online-status updates; the observer must receive no application payload. Then admit it and confirm eligible updates arrive. Verify expiry/reconnect and packet ownership when the eligible recipient set is empty. No network experiment or secret access was performed.

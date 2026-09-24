@@ -73,3 +73,31 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Entire file read, lines 1�
 **Recommended resolution:** Change the internal Shared helper to return meaningful status, acknowledge success only on the defined persistence boundary, and clear dirty state only for successfully committed versions. Account for mutations that occur while saving. Coordinate with NET's ownership of `IniData`; this ID covers the public caller and its end-to-end consequence.
 
 **Verification:** Inject a write-denied achievement file with persistence enabled, assert failure callback, restore access and retry without re-unlocking, then restart and verify the unlock survives. Repeat for stats and reset. Existing healthy-filesystem restart tests are not sufficient for this failure path.
+
+## Source-first re-review addendum — 2026-09-24
+
+Read all `Stats.cxx:1-504` and `Stats.hxx:1-640` before the baseline comparison. BASE-STORAGE-010/011/012 remain supported. Missing achievements are created by `GetAchievementData`, so the apparent null branch is not a new uninitialized-output defect. Negative integer stat values fit the declared API. Zero/negative/nonfinite duration policy is not needed to prove the average-rate error using positive finite deltas. Leaderboard success-only getters remain unreachable through a successful supported request; no ordering/overflow finding is manufactured from those stubs.
+
+### [ADD-STORAGE-004] A presence-only user placeholder is accepted as retrieved playtime
+
+- **Severity:** Medium
+- **Confidence:** High
+- **Category:** Correctness / asynchronous state
+- **Location:** `Source/Client/Impl/Stats.cxx:419-449`, `RequestUserTimePlayed`; dependencies `Source/Client/Impl/User.cxx:560-565,578-607`.
+- **Affected scope:** Remote-user playtime retrieval in versions with `HAS_IUSERTIMEPLAYEDRETRIEVELISTENER` (from 1.73.0), including global-only and specific-listener variants.
+
+**Evidence:** The request treats `IsGalaxyUserDataPresent(userID)` as sufficient for immediate success. That predicate tests only map membership. `OnlineUserStateChange` creates a user through `GetGalaxyUserData` and sets `online`, without filling stats. `Source/Shared/GalaxyUserData.cxx:4-6` default-constructs stats; `AchievementsAndStatsContainer.cxx:7-11,25-30` starts with local BootTime and zero PlayTime. The server announces online status at `Source/Server/ServerHandlers.cxx:93-96` before a later Hello supplies full data at 132-169. SDK `Source/DLLs/1.152.11/galaxy/IStats.h:872-890` promises retrieval followed by a seconds-played getter.
+
+**Failure mechanism:** Existing client A receives B's online announcement while B's Hello/full snapshot is still pending. The announcement creates B's placeholder and can synchronously notify the game through `Friends.cxx:665-675`. A requests B's playtime from that notification (or before the later snapshot arrives). It queues success without sending a playtime request. If full data remains delayed through the next pump, the success callback reads zero plus time since A created the placeholder, not B's retrieved playtime. Later unsolicited full data can mask the mistake, which explains why settled-cache tests need not expose it.
+
+**Impact:** The game receives a success result for fabricated, uninitialized remote data. The request itself is valid and the getter is called after its advertised success; there is no use-before-request precondition violation. The missing retrieval is separate from UTIL's known playtime serialization/wall-clock arithmetic problems and remains after those are fixed.
+
+**Possible solutions:** Track which remote data domains have been hydrated; always request remote playtime; or give each cache record explicit pending/available/stale state and coalesce requests until hydration completes.
+
+**Recommended resolution:** Distinguish an identity/presence record from a retrieved stats/playtime snapshot. Only satisfy the request locally when the required data is actually available, with a deliberate freshness policy. Preserve the fast path for the configured local user. Coordinate cache state across User/Stats/Friends rather than overloading existence.
+
+**Verification:** Proposed two-client Windows case holds B's Hello/full snapshot after its online announcement, requests playtime from A, and observes outgoing requests/completion timing. Require no cache-success before hydration; after a real response, require exactly one completion for B. Use request/availability assertions independently of numeric values so BASE-UTIL-001/003 cannot mask or confound this regression. No test was run.
+
+## Targeted ABI coordination — 2026-09-24
+
+**ADD-ABI-001 (High / High confidence), primary in [ListenerRegistrar.hxx.review.MD](ListenerRegistrar.hxx.review.MD):** SDK 1.73.0/1.74.0/1.75.0 assigns the same inherited tag to leaderboard-retrieve and time-played listeners. `Stats.cxx:419-433` can therefore turn a valid cached-self `RequestUserTimePlayed(self)` into a leaderboard **success** callback through the registrar's unchecked cast; `380-415,453-469` expose failure/reverse routing too. The full primary finding records the supported client sequence, callback vftable slots and x86/x64 argument consequences. This qualifies the earlier note that leaderboard stubs never emit success: they do not produce a legitimate successful result, but type-confused dispatch can invoke the application's success slot. It is distinct from ADD-STORAGE-004, which requires an unhydrated remote placeholder. Count this ID once under ABI; do not duplicate it as a STORAGE finding. Static verification only.

@@ -1,16 +1,20 @@
-# UniverseLAN — fresh full baseline review
+# UniverseLAN — full baseline review and thorough follow-up
 
 ## 1. Executive summary
 
 **Reviewed baseline:** `feature/fix-issues` at **`b30e83872c0006e8240c8b4f565da5351bf10080`**. Review destination: `feature/ai-review`. This assessment replaces the previous review; its findings were established afresh from the current implementation and SDK/dependency contracts.
 
+**Latest follow-up:** [Thorough review addendum](review-addendum/SUMMARY.MD), starting from review commit `48cea8c6`, re-inspected the same 529 inputs and preserves the baseline evidence. It adds **23 distinct confirmed groups (3 High, 19 Medium, 1 Low)**, clarifies existing findings and records focused local Windows ASan-enabled checks. This is ordinary C++ correctness/API/persistence review, with isolated local validation.
+
 **Coverage: 529/529 in-scope files, with 529 new per-file reports and an architecture assessment.** The inventory includes Client, Client_NoVer, Shared, Shared_NoVer, Server, SystemTests, Tracer, Version, root/Source CMake, all DLL version dispatchers/markers/manifests, and the eleven direct Vendor build manifests. InterceptionLogger received the requested shallow scan for serious defects. Every distinct implementation was read; repetitive empty wrappers and identical dispatchers were verified by Git blob identity with individual coverage records.
 
-**Result after reconciliation: 103 actionable finding groups — 21 High, 70 Medium, 12 Low — plus two informational investigations.** There are 108 confirmed per-subsystem finding records; five whole-record aliases are counted once in the consolidated result. Partial overlaps retain their separately actionable mechanisms. These are review findings, not 103 runtime reproductions or a claim that every possible defect has been found.
+**Current result after reconciliation: 126 actionable finding groups — 24 High, 89 Medium, 13 Low — plus six informational/conditional investigations.** There are 134 confirmed finding records; eight whole-record aliases are counted once. The baseline contributed 103 groups and the follow-up adds 23. Partial overlaps retain separately actionable mechanisms. These totals are review findings, not a count of runtime reproductions or a claim that every possible defect has been found.
 
 The principal risks are listener cancellation/teardown, unsafely shared cache values, loss or false acknowledgment of saved data, pre-authentication deserialization, and incomplete ENet peer retirement. The interceptor adds proxy ownership, callback-versioning and trace-buffer issues. These warrant targeted fixes before a reliability sign-off, particularly for irreplaceable saves or peers outside a trusted private LAN.
 
 **Execution evidence:** all **15 Windows x64 Debug client/server/interceptor targets** built across SDK **1.57.0, 1.124.0, 1.139.2, 1.148.3 and 1.152.11**. Three independent runtime probes against the built code reproduced lost serialized play time, the Windows timestamp epoch error and failed-delete/index divergence. Other findings remain code/contract conclusions with proposed verification.
+
+**Follow-up execution:** isolated ASan-enabled x64 probes reproduced the wrong legacy SDK 1.73.0 callback, inconsistent quota headroom and metadata-name conflict. ASan also detected the borrowed-key erase/copy use-after-free mechanism, which remains a conditional SDK-compatibility finding rather than a counted confirmed API defect. Full results and limits are in [addendum verification](review-addendum/VERIFICATION.MD).
 
 ## 2. Scope, environment and limitations
 
@@ -18,7 +22,7 @@ The principal risks are listener cancellation/teardown, unsafely shared cache va
 - Pulled the source branch and incorporated it in merge `40265aed370464569e873692ef5d53fbdb12679b`. `git diff` verifies that every reviewed source/build input matches `b30e8387` exactly. No production implementation was changed for this review.
 - Compiler environment: CMake 4.2.1, Visual Studio 18 2026, MSVC 19.51.36252.0, Windows SDK 10.0.26100.0. Exact commands/results: [VERIFICATION.MD](review-baseline/VERIFICATION.MD).
 - Excluded implementation trees: EnetTest, BehaviourTests, TestCases, TestCommon, UnitTests, nested Vendor source and the named excluded root directories/tools. Selected SDK/vendor/test declarations were consulted only as contract/dependency context where necessary.
-- Credential files were not accessed, copied or committed. Real proprietary GOG DLLs were not required for compilation and were not executed. No Linux, x86, Release, all-69-version, sanitizer, fuzzing or game-runtime test was performed.
+- Credential files were not accessed, copied or committed. Real proprietary GOG DLLs were not required for compilation and were not executed. No Linux, x86, Release, all-69-version, fuzzing or game-runtime test was performed. The initial review had no sanitizer execution; the follow-up adds the explicitly scoped local ASan probes described above.
 - Existing CI workflows are explicitly out of scope. There is no CI certification. Local passing compilation does not resolve callback timing, proprietary allocation lifetime, output truncation behavior or dynamically resolved export names.
 - Unsupported hosted-service features (for example successful leaderboard operations) and deliberate LAN configuration were not automatically classified as defects or vulnerabilities.
 
@@ -43,6 +47,8 @@ These are observable lifecycle, correctness and reliability problems, not style 
 
 ### Prioritized High groups
 
+The follow-up adds **ADD-ABI-001** (incompatible legacy listener dispatch), **ADD-UTIL-001** (stale file membership/removal can delete replacement data), and **ADD-SERVER-001** (user-file and internal-counter namespace overlap). See [the addendum](review-addendum/SUMMARY.MD) for full dispositions and proposed corrections. The table below retains the baseline High groups.
+
 | IDs | Principal failure | Detailed evidence |
 |---|---|---|
 | BASE-CORE-001, 002, 003 | Queued/snapshotted callbacks survive cancellation; callback-time shutdown destroys an active dispatcher | [CORE](review-baseline/CORE.MD) |
@@ -61,16 +67,16 @@ Canonical primary-category counts (mixed labels normalized to their primary cate
 
 | Category | Groups |
 |---|---:|
-| Correctness | 58 |
-| API/ABI | 14 |
+| Correctness | 73 |
+| API/ABI | 19 |
 | Memory Safety | 11 |
-| Concurrency | 8 |
+| Concurrency | 10 |
 | Security | 5 |
 | Performance | 2 |
 | Portability | 2 |
 | Testing | 2 |
-| Build | 1 |
-| **Total** | **103** |
+| Build | 2 |
+| **Total** | **126** |
 
 ### Reconciliation rules
 
@@ -83,7 +89,11 @@ Canonical primary-category counts (mixed labels normalized to their primary cate
 
 Other partial overlaps are explicitly preserved: nickname writes outside the stats container; unsolicited chat completions beyond ID collisions; direct cloud captures and pre-event WebSocket listener retention beyond the generic queue. Their fixes are coordinated without claiming one small change closes all paths.
 
+The follow-up's [reconciliation ledger](review-addendum/RECONCILIATION.MD) adds aliases ADD-NET-001 → BASE-SERVER-019, ADD-NET-004 → BASE-SERVER-008, and ADD-UTIL-002 → BASE-SERVER-007. These expand evidence without inflating the new-group count.
+
 **Two informational records are excluded from actionable totals:** BASE-API-018 depends on unestablished nested-pump guarantees; BASE-UTIL-015 is latent RED-prefix integration debt with no current SDK directory activating it. BASE-INTERCEPT-001 is Medium for a proven teardown-contract violation; native registrar destruction/use-after-free remains conditional, not a proven High crash.
+
+**Four further follow-up records are excluded:** ADD-API-001 borrowed-key aliasing, ADD-API-002 zero-as-self callback convention, and ADD-STORAGE-001 producer-callback reentrancy need stronger contract evidence; ADD-UTIL-004 concerns a dormant helper route. The ASan mechanism result for ADD-API-001 does not establish the missing SDK permission.
 
 ## 5. Detailed reports and complete coverage
 
@@ -101,12 +111,15 @@ Each reviewed file has a new sibling `<filename>.review.MD`. The previous report
 | Build controls and wrapper matrix | 260 | [BUILD.MD](review-baseline/BUILD.MD), [WRAPPER-COVERAGE.MD](review-baseline/WRAPPER-COVERAGE.MD) |
 | **Total** | **529** | **No missing or extra baseline sidecars** |
 
+Each owner also recorded fresh reread coverage and BASE-ID dispositions in [review-addendum](review-addendum/SUMMARY.MD). The coverage checker reconciles all eight owner sets, with verified identity for the repetitive wrapper/dispatcher files. The targeted ABI notebook is a cross-owner handoff, not an expansion of the 529-file inventory.
+
 ## 6. Testing, build, security, performance and portability
 
 **Follow-up coverage assessment:** [TEST-COVERAGE-GAPS.MD](review-baseline/TEST-COVERAGE-GAPS.MD) maps all 27 fix-branch commits to existing tests and missing regressions. It also corrects an earlier coverage statement: two existing message-serialization tests already assert nonzero play-time preservation; running/enforcing those tests is the immediate gap.
 
 - **Build:** The five-version x64 Debug matrix passed for all three production components; this provides evidence of current source compatibility, not binary or behavioral equivalence with GOG. No hardcoded version-specific CMake logic was added.
 - **Tests:** Three review-only probes reproduced concrete baseline failures using real built code. They are bug reproductions, not passing fixed-behavior tests. Existing excluded test cases were not reused. Additional cancellation, peer reuse, denied/full-volume writes and multi-pending-callback regressions are proposed locally beside findings.
+- **Follow-up local checks:** MSVC ASan-enabled helper programs exercised actual registrar and persistence code for the stated scenarios. No full sanitizer-suite pass is claimed. Instrumentation/setup failures were corrected in the external harness and documented separately from production findings.
 - **Security:** Authentication checks occur after archive decoding; application exceptions need containment; broadcasts/logs must respect authentication and credential boundaries. No real credentials were read or emitted. Intentional shared-key LAN defaults were assessed in their context rather than treated alone as a universal compromise finding.
 - **Performance:** ENet's packet/waiting-data ceilings do not bound later application queues, archive-declared allocations or accumulated state snapshots. No benchmark, percentage improvement or measured throughput claim is made.
 - **Portability:** Windows path case, code pages, file-clock epoch and handle-sharing behavior matter directly. Non-Windows guards were inspected only; no Linux compilation or runtime assertion is offered.
@@ -132,3 +145,5 @@ Each reviewed file has a new sibling `<filename>.review.MD`. The previous report
 Native SDK allocation lifetime, nested ProcessData guarantees, exact cloud hash compatibility vectors, required mixed-SDK wire compatibility and all-version ABI/export behavior remain explicit validation questions. No unsupported answer was used to promote a speculative runtime crash to a reproduced defect.
 
 `python .ai/review-baseline/verify_review.py` verifies the 529-file inventory, per-file baseline markers, ID/severity accounting, report links, whitespace and unchanged production inputs. Final validation reports **zero errors**. Git whitespace checks also pass. Commit/push identity is reported in the delivery response; generated binaries and temporary probes are excluded from the review commit.
+
+For the latest addendum, the checker also validates the expanded finding ledger and all follow-up coverage paths. The existing published baseline commit is `48cea8c6`; new addendum publication status is reported separately in the delivery response.

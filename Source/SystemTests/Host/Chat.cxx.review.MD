@@ -25,3 +25,11 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Read completely: lines 1�
 **Alternatives / recommendation.** Guard the listener/body and matching dispatch with HAS_ICHAT_MESSAGETYPE, or adapt argument lists/type assertions using the established feature macros. Prefer compatibility branches where delivery semantics can still be meaningfully tested. Do not hardcode a single SDK target.
 
 **Verification.** After remediation, configure/build the requested feature-matrix boundary targets (e.g. 1.106.0, 1.109.0, 1.112.2 and a modern SDK) with SystemTests enabled on Windows x86/x64. Confirm unsupported scenarios are omitted/rejected consistently and supported host sources compile. Not executed.
+
+## Follow-up addendum — 2026-09-24
+
+### [BASE-SERVER-014] Addendum — source/SDK boundary reconfirmed
+
+Retain **Medium / High confidence / Build**. Full reread of all 327 lines and the full SystemTests CMake manifest confirms `Host/Chat.cxx` is compiled independently of scenario registration. `Source/galaxy_sdk_features.cmake:94–108` enables chat plus typed IDs before message types; `1.109.0/galaxy/IChat.h:293` has no message-type output. The unguarded listener therefore still prevents the affected opt-in legacy host build. No compile was performed.
+
+The history listener's in-callback message read is not condemned as invalid native usage merely from the getter's short remark: SDK `1.152.11/galaxy/IChat.h:158–167` explicitly instructs `OnChatRoomMessagesRetrieveSuccess` to call `GetChatRoomMessageByIndex`. That supports the test's retrieval callback use. Unknown room ID zero remains a UniverseLAN negative-input scenario, not proof that a proprietary SDK promises the same forbidden callback for every invalid argument. The correlation test gap is specifically equal IDs in matching listener types (BASE-SERVER-008 addendum). Successful `_Exit` paths exclude graceful SDK teardown.

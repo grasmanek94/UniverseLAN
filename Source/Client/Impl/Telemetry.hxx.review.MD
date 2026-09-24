@@ -15,3 +15,7 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Entire file read, lines 1â
 ## Findings disposition
 
 No extra declaration-only defect counted. Canonical full sections are BASE-STORAGE-021 and BASE-STORAGE-023 in `Telemetry.cxx.review.MD`. Proposed verification: anonymous array elements, enabled/disabled first-use behavior, failed writes, callback correctness, and concurrent stream access. Static inspection alone does not establish durability or thread safety.
+
+## Source-first re-review addendum â€” 2026-09-24
+
+Full `1-232` reread completed before baseline comparison. All six nullable array-element name contracts, anonymous-send forwarding, sampling gate, atomic counter, and pointer/copy visit-ID forms were rechecked. BASE-STORAGE-023 now spells out the concrete failed-insertion versus pre-lock state-read interleaving. The private recursive mutex must protect state checks as well as writes; atomic IDs protect only ID allocation. No additional declaration-only finding or remote structured-event guarantee is asserted.

@@ -61,3 +61,23 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Read completely: lines 1�
 **Alternatives / recommendation.** Drain only positive results, distinguish zero from negative, and use an explicit logged restart/exit policy or bounded retry/backoff for errors. Avoid an unbounded immediate retry.
 
 **Verification.** Inject a Pull sequence of positive, zero, and persistent negative results; verify each valid event is processed once and failure exits/backoffs without spinning or starving cleanup.
+
+## Follow-up addendum — 2026-09-24
+
+Full lines 1–200 re-read before baseline comparison; all three findings retain their original severity/category and High confidence.
+
+### [BASE-SERVER-002] Addendum — generation, timeout and ownership revalidation
+
+The vendor's timeout event is explicitly different from ordinary disconnect (`Enet-IPv6/src/protocol.c:80–90,163–184`), and the shared receiver still omits it (`Shared/Networking/Networking.cxx:85–104`). Reset does not clear/free application `data`; replacement connect does. The baseline failure sequence therefore remains reachable without asynchronous server-side event processing: the server processes one timeout event, then a later connect on the same slot before its application cleanup. `Mapper::Get(oldID)` does not validate the new attachment's `id`. Before B authenticates, A's old map resolves B's null `user_data`; after B authenticates, old-ID lookup resolves B's state. The application timeout is clamped to at least 100 ms (`Shared/IniData.cxx:312–315`), but there is no upper bound that makes it always precede ENet's timeout. Neither the reset `connectID` nor event data zero is an application generation token. Keep the High integrated priority and NET handoff; original focused validation remains proposed.
+
+### [BASE-SERVER-016] Addendum — protocol-equivalent disclosure retained
+
+The number printed at 103 is the exact effective key used by `Challenge::Prepare`; XOR plus the public response hash accepts that number without knowing the original text. This is a log-reader-with-network-access condition, not passive-network cryptanalysis or an external account impersonation claim. No runtime INI, private key or credential was opened during this review.
+
+### [BASE-SERVER-018] Addendum — error return contract retained
+
+Re-read `enet_host_service`'s >0/0/<0 contract and error exits (`Enet-IPv6/src/protocol.c:1906–1982`). It clears type/peer/packet at 1924–1928 before servicing, so the confirmed persistent-negative spin still does not establish a stale-packet double-free. A bounded event-drain budget would additionally help fairness under sustained positive traffic, but no separate measured starvation finding is counted.
+
+### Startup/shutdown notes
+
+The counter consumer at 96–101 is also the sink for **ADD-SERVER-001**, fully documented in `ServerHandlers.cxx.review.MD`; no duplicate ID is assigned here. `Server::~Server` performs no peer sweep, and `Mapper` has no owning destructor. That is a cleanup limitation, but the actual executable's endless main loop and process termination do not establish repeated normal server-object teardown leaks. Server operation is single-threaded; no concurrent-map race is inferred from raw pointers alone. Network/config/source files were not modified or executed.

@@ -52,3 +52,28 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Entire file read, lines 1�
 **Recommended resolution:** Separate storage policy from stream error state, check both under the mutex, and determine completion only after the selected persistence boundary succeeds. If success means locally stored, verify write and flush. If disabled means intentionally discarded success, implement that explicitly and consistently without touching the closed stream.
 
 **Verification:** On a fresh disabled instance, send two events before/after pumping and require the same documented outcome. Repeat with enabled healthy storage, failed open, and injected write/flush failure; verify output bytes and callback result agree. Existing callback-only tests do not prove storage success.
+
+## Source-first re-review addendum — 2026-09-24
+
+Read all `Telemetry.cxx:1-211` and `Telemetry.hxx:1-232` before baseline comparison. BASE-STORAGE-021 is retained: SDK-valid null array names are distinct from an invalid null event type or null required string value. The original section appropriately avoids asserting a universal MSVC crash. BASE-STORAGE-023 is retained and expanded below. `GetVisitIDCopy`/Reset use the same lock; retaining a pointer across Reset is not promoted to an independent defect without a stronger lifetime contract. Unsigned event-counter wrap is defined, and no realistic simultaneous-ID exhaustion defect is claimed.
+
+### BASE-STORAGE-023 — ADDENDUM CORRECTION: stream-state checks are outside the sink lock
+
+- **Disposition:** Retained and expanded under the existing sink-state ID; the baseline inspection note is made concrete, not assigned a duplicate new ID.
+- **Severity:** Medium (unchanged)
+- **Confidence:** High
+- **Category:** Concurrency / Correctness
+- **Location:** `Source/Client/Impl/Telemetry.cxx:61-66,72-77,83-88,94-99,105-110,116-121,127-143,150-155,165-173`; `Telemetry.hxx:34-43`.
+- **Affected scope:** Supported concurrent telemetry API calls with an insertion setting stream failure state, including a closed disabled sink's first write or an actual I/O failure.
+
+**Evidence:** Every writer tests `!telemetry_file` before acquiring `mtx`. A different caller can be inside a locked insertion that sets that same stream's error bits. The mutex therefore does not protect all reads of the mutable stream state. SDK `Source/DLLs/1.152.11/galaxy/GalaxyApi.h:310-314` promises general thread safety; these scalar/void methods are not pointer-return exceptions. Atomic event IDs do not synchronize the ofstream.
+
+**Failure mechanism:** A begins writing under the lock and encounters a stream error; B simultaneously executes its pre-lock state test. The failed write modifies the state being read outside synchronization. Independent of that race, B can pass the check, wait for A to fail, then unconditionally queue success after its own failed insertion. This refines the original finding: not every healthy insertion is asserted to race on state; the concrete trigger is a state-changing failure.
+
+**Impact:** Undefined concurrent stream-state access and incorrect local event results. The finding remains bounded telemetry reliability, not a claim that this local trace provides remote telemetry delivery.
+
+**Possible solutions:** Put enabled/open/error checks and write/result determination inside one lock; use a serialized sink queue; or make a disabled backend a consistent explicit no-op policy independent of stream bits.
+
+**Recommended resolution:** Protect the whole sink-state transition, including preconditions and post-write/flush status, with one synchronization scheme. Preserve event ID/type correlation and dispatch listeners outside that critical section. CORE's Logger stream-state finding has an analogous pattern in a different sink; coordinate the rule without merging unrelated objects' fixes.
+
+**Verification:** Proposed barrier-controlled two-writer failure and first-use-disabled cases; inspect state synchronization and verify deterministic failure/no-op policy, bytes, and callbacks. Keep single-thread first/second-event controls. No tests, analyzer, or stream experiments were executed.

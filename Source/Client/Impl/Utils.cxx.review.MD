@@ -17,3 +17,7 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Entire file read, lines 1â
 No independent confirmed defect counted in this file under the supported stub behavior. This is not a correctness certification. Unsupported images, notification retrieval, and overlay interaction remain significant drop-in compatibility limits, and untouched outputs should be specified or explicitly rejected if these APIs become reachable with valid resources.
 
 Recommended verification: overlay-disabled invariant, successful login/disconnect/reconnect state consistency, sign-out state integration, and explicit failure/empty-output behavior for unsupported image and notification calls. No Windows overlay injection or service behavior was executed.
+
+## Source-first re-review addendum â€” 2026-09-24
+
+Full `1-97` reread completed before baseline comparison. Source still performs no RGBA write or image-size multiplication; it returns zero dimensions. `Friends.cxx:173-205` supplies no valid avatar producer. Notification registration has no producer/cache and retrieval returns zero; arbitrary image/notification IDs do not establish valid-resource output failures. Overlay URL text goes to stdout, not a shell. Transport-connected notifications and authenticated query state differ before login, but SDK `IUtils.h:251` makes that state undefined. Retain post-login/reconnect/sign-out validation as a User/CORE dependency; no new confirmed local ID.

@@ -14,3 +14,7 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Entire file read, lines 1â
 ## Findings disposition and verification
 
 No extra declaration-only defect counted. Full implementation inspection notes are in `Utils.cxx.review.MD`. Static review does not establish binary compatibility of all older SDK signatures. Validate the legacy ID/buffer variants when builds are permitted, and test connection-query/callback coherence after login, reconnect, and repaired sign-out.
+
+## Source-first re-review addendum â€” 2026-09-24
+
+Full `1-176` reread completed before baseline comparison. RGBA pointer alias, historical NotificationID, consumable-output gate, and overlay/state preconditions were rechecked against definitions and the latest SDK. The documented output-size expression is a caller precondition, not arithmetic performed by this implementation. General header pointer ownership and value-only global state notifications add no independent lifetime mechanism. No new header finding; complete disposition is recorded in `.ai/review-addendum/STORAGE.MD`.

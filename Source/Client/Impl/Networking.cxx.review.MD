@@ -45,3 +45,33 @@ The header allocates 256 channels, so channel 255 is in bounds. Packet ownership
 **Alternatives / recommended resolution.** Separate ordinary sends awaiting the next API pump from immediate transport scheduling, preserving thread-safe enqueueing and reliability flags. If transport-thread delivery is retained, an explicit release-to-transport step from ProcessData can provide the ordinary-send boundary without calling ENet from arbitrary application threads.
 
 **Verification.** Schedule an ordinary packet while the sender's background transport runs but its API pump is paused; the receiver should not observe it until the next sender ProcessData. Contrast immediate mode and both reliability levels. Not executed.
+
+## Thorough follow-up addendum — 2026-09-24
+
+All 170 implementation lines and 245 header lines reread at unchanged production baseline `b30e8387`, followed by actual Client/Server routing and versioned SDK checks. Original findings remain preserved; no execution performed.
+
+### [ADD-API-004] NEW — Legacy server packets notify the client listener class and can be discarded unseen
+
+- **Severity:** Medium
+- **Confidence:** High
+- **Category:** Correctness
+- **Location:** `Source/Client/Impl/Networking.cxx:153-168`, `AddPacket`; initialization at `UniverseLAN.cxx:56-59`; dispatch at `ClientNetworkHandlers.cxx:141-157`.
+- **Affected scope:** SDK 1.57.0 through 1.134.10 inclusive (`HAS_ISERVERNETWORKING`), ordinary peer lobby-owner `ServerNetworking()` reception; also the corresponding old GameServer server-networking listener path. This finding does not depend on dedicated-server initialization working.
+
+**Evidence.** SDK `1.124.0/galaxy/INetworking.h:43-68` defines a distinct `IServerNetworkingListener`, listener type `SERVER_NETWORKING`, and method `OnServerP2PPacketAvailable`; the 1.57.0 header also supplies that interface. The regular peer has separate client and server `NetworkingImpl` objects sharing its registrar. Server routing wraps lobby-addressed input in `P2PServerNetworkPacketMessage` (`ServerHandlers.cxx:397-423`); Client puts it into `server_networking` for those versions. Regardless of which queue owns the packet, `AddPacket` calls only `INetworkingListener::OnP2PPacketAvailable`, whose registrar type is `NETWORKING`, and uses that call's boolean result to decide auto-pop. The transport/registrar contains no compensating translation.
+
+**Failure mechanism.** With empty queues, a member sends to its lobby ID. The owner registers the documented server listener: its queue receives the packet but its listener is never invoked. If the owner also has a normal client listener, that unrelated listener is invoked instead. Its legitimate `Networking()->PeekP2PPacket` cannot see the packet in `ServerNetworking`; nevertheless, notification returns true and the server packet is popped. No polling/listener overlap on the same interface and no forbidden Read/Pop inside a callback are needed. A normal client listener can even cause loss from a separately polled server queue.
+
+**Impact.** Callback-driven legacy hosting fails outright; dual-interface consumers can silently lose lobby-directed packets. Polling-only coverage can pass, masking the listener-class error. This is independent of BASE-API-013's backlog packet-identity defect and occurs with the very first packet.
+
+**Alternatives.** Choose the proper notification interface from the receive-queue role and SDK gate, or give the two queue implementations distinct dispatch policies. Merely consulting whether any listener is registered still makes auto-pop depend on the wrong interface.
+
+**Recommended fix.** Preserve legacy `SERVER_NETWORKING` dispatch for the legacy server queue; use `NETWORKING` for ordinary client reception and the unified newer networking surface. Base automatic removal solely on delivery to listeners of that receiving interface. Do not change modern GameServer registrar selection to the peer registrar. Queue role must remain unambiguous when both objects exist.
+
+**Verification.** On an SDK such as 1.124.0, create/join a valid lobby, register both listener types, and deliver distinct payloads to the owner's user ID and lobby ID on the same channel. Each callback must Peek its own interface with matching size/sender/payload and only its own packet must auto-pop. Repeat with only server listeners, client-listener plus server-polling mode, channels 0/255, and a post-1.134.10 unified-interface control. Not executed.
+
+### Existing BASE findings and exception-path qualification
+
+- **BASE-API-013 retained (Medium):** activating a listener with pending polling data is not forbidden by the inspected registrar contract. Read/Pop/IsAvailable while employing that same listener is forbidden and remains excluded as a trigger. A callback exception skips `PopP2PPacket`, leaving another possible backlog; exception-safe callback cleanup should be specified with the same queue-identity fix, not counted as a new defect without a supported throwing-listener contract.
+- **BASE-API-014 retained (Low):** serialization/queueing preserves reliability but the independent Client tick releases both ordinary/immediate sends. No latency claim or requirement to call ENet from arbitrary API threads is inferred.
+- `IsP2PPacketAvailable(nullptr)` still has no SDK-supported null-output contract. Packet data is copied into the wire object before send returns, and `GetP2PPacket` retains a shared owner after pop; neither path requires caller storage to survive asynchronously. 1,200 bytes is a recommendation, not a hard limit. No new size/null or channel-255 finding.

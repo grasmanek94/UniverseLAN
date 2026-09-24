@@ -25,3 +25,11 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Read completely: lines 1�
 **Alternatives / recommendation.** Once exit is observed, drain all remaining complete log records and then validate terminal state. Alternatively poll exit before reading, while still doing a final drain on transition. Preserve duplicate/invalid-protocol rejection and define handling of a non-newline tail.
 
 **Verification.** Use a tiny controlled child that flushes final EVENT/PASS and exits between the runner's file-size snapshot and exit poll. Repeat with no PASS, nonzero exit, malformed final record and duplicate PASS: valid output must succeed while invalid terminal states remain failures. No child was launched in this review.
+
+## Follow-up addendum — 2026-09-24
+
+### [BASE-SERVER-012] Addendum — terminal-output ordering retained
+
+Retain **Medium / High confidence / Testing** after full reread of runner, process and all host bodies. `readLines` snapshots length before the host's final flushed PASS can appear, and `updateChild` can subsequently observe zero exit before a second read. `_Exit` is not a missing-PASS-flush mechanism: the `endl` precedes it. The concrete existing-host outcome remains false failure; a hypothetical post-PASS malformed record from a different executable is not claimed as a reproduced false success. Proposed fix/verification must drain the terminal log before applying exit/PASS/signal predicates.
+
+The persistence scheduler serializes equal group strings after PASS plus exit zero; Windows-equivalent unequal group strings are now included under **BASE-SERVER-013**, in `Model.cxx.review.MD`. Correct predecessor process exit alone is not proof the backend has retired its identity; the current reconnect behavior and timeouts require separate lifecycle validation. All scenario setup, cleanup and failure paths were re-read. No host/server was launched.

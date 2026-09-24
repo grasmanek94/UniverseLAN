@@ -154,3 +154,77 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Read completely: lines 1�
 **Alternatives / recommendation.** Centralize application broadcasts over authenticated, identity-linked recipients; retain pre-auth sends only for handshake/ping protocol needs. If the state is deliberately public, document that narrower authentication contract explicitly rather than relying on transport connection state.
 
 **Verification.** Keep one raw client in challenge-pending state while authenticated peers update data, presence and lobby properties. Require no protected notifications before admission and correct delivery afterward.
+
+## Follow-up addendum — 2026-09-24
+
+Fresh full read of lines 1–1054 preceded comparison with this preserved report. Baseline source remains `b30e83872c0006e8240c8b4f565da5351bf10080`. Verification below is proposed, not executed. The exact 43-input ledger and all baseline dispositions are in `.ai/review-addendum/SERVER.MD`.
+
+### [ADD-SERVER-001] Shared-file names overlap internal startup-counter storage
+
+- **Severity:** High
+- **Confidence:** High (mechanically traced; not runtime-reproduced)
+- **Category:** Correctness
+- **Location:** `Source/Server/ServerHandlers.cxx:455–476`; `Source/Server/Server.hxx:43–44`; `Source/Server/Server.cxx:96–101`; `Source/Server/Main.cxx:33`.
+- **Affected scope:** Authenticated uploads when server upload policy is enabled and the counter entry is absent, including the ordinary fresh-store state. The shipped server-config generator enables uploads (`Source/Shared_NoVer/DefaultConfigFiles.cxx:231–246`).
+
+**Evidence.** `FileShareMessage.filename` is client-controlled. The handler uses the same `sfu.shared` namespace both for its internal `shared-id.counter` and for `create_shared(fsrm.filename, fsrm.id)`. `SharedFileUtils::Open` uses non-creating `get` (`Source/Shared/SharedFileUtils.cxx:74–85`). `filesystem_container::create_shared` creates a missing name without reserving the counter name (`Source/Shared_NoVer/filesystem_container/filesystem_container.cxx:144–204`); `filesystem_entry::write` persists the supplied bytes (`filesystem_container_entry.cxx:291–314`). On the next construction, the server reads that entry and calls uncaught `std::stoul`.
+
+**Failure mechanism.** The user-file and administrative-counter paths resolve into one container namespace. A valid shared filename can therefore become the entry later interpreted as numeric administrative state. The preceding lookup-only counter open does not create an absent counter; subsequent ordinary file creation can occupy that path. On a later initialization, nonnumeric file contents make `std::stoul` throw through the startup boundary. This follows from path ownership and parsing behavior; no network exercise was performed.
+
+**Impact.** A collision between legitimate user-file storage and internal state can prevent backend initialization until the stored state is repaired. Later counter writes can change the outcome. Keep user content and administrative records in separate namespaces and recover invalid state explicitly.
+
+**Possible solutions.** Reserve internal names after Windows-equivalent normalization; store administrative state outside the public shared-file container; or derive a checked high-water mark from committed metadata without a user-addressable counter. Merely fixing BASE-SERVER-006's missing creation leaves the namespace trust boundary unsafe.
+
+**Recommended resolution.** Separate control state from uploaded objects, validate complete numeric parsing/range at startup, and recover a missing/corrupt counter from committed IDs. Retain authoritative success/failure handling from BASE-SERVER-007. An exact-string blacklist alone is insufficient for case/alias variants.
+
+**Verification.** Proposed local unit-level checks: administrative path resolution is disjoint from permitted user-file names; counter loading handles absent, invalid and truncated values; ID recovery preserves existing metadata. No upload, live-service probe, restart test or counter fixture was executed in this pass.
+
+### [ADD-SERVER-002] Lobby snapshot payloads do not match the recipient's API view
+
+- **Severity:** Medium
+- **Confidence:** High (wire contents and recipient selection are explicit)
+- **Category:** Correctness
+- **Location:** `Source/Server/ServerHandlers.cxx:171–173,532–540,613–630`; serialization at `Source/Shared/Lobby.hxx:49–60` and retention at `Source/Shared/Lobby.cxx:232–245`.
+- **Affected scope:** Any authenticated newcomer, outsider or former member while another lobby remains alive; hello synchronization, lobby enumeration and direct lobby-data requests.
+
+**Evidence.** Hello sends every full `Lobby`; list replies copy the entire manager map; direct data replies attach the full lobby after checking existence only. All three serialize `user_data` (the membership map) and `messages` as well as ordinary metadata. Live `SendToLobbyMessage`, in contrast, checks membership and sends only to members (lines 640–655). SDK `Source/DLLs/1.152.11/galaxy/IMatchmaking.h:620–626` restricts member enumeration to members; lines 890–903 describe member-directed messages; lines 575–586 say messages cease to be reachable after leaving. Lines 673–684 expressly permit nonmember metadata refresh: the defect is the additional member/history payload, not that refresh itself.
+
+**Failure mechanism.** A and B exchange lobby messages. Authenticated C has never joined, but its normal hello already receives the complete history and member keys. C can repeat `RequestLobbyListMessage` or `RequestLobbyDataMessage` to refresh that history. Similarly, a departed B can reacquire it while A keeps the lobby alive. Serialization exposes the data before any client-side UI/filter policy; the current client also retains full list snapshots (`Client/Impl/Matchmaking.cxx:257–259`) and reads messages from `lobby_list` (`1099–1109`). No forged owner, claimed sender or bypass of the live-send membership gate is required.
+
+**Impact.** Cross-lobby disclosure of member communication and membership within a shared-key LAN deployment. This does not establish secrecy for publicly queryable metadata, user stats or arbitrary server files. BASE-SERVER-019 concerns unauthenticated broadcast recipients; this finding persists after that fix and even for a small, public lobby. BASE-NET-006's snapshot-size problem is a separate consequence of retaining whole histories.
+
+**Possible solutions.** Introduce a bounded public lobby-summary DTO and separate authorized member/history messages, or construct recipient-specific sanitized snapshots. Client-only filtering cannot revoke bytes already delivered. Removing history from every snapshot needs an explicit decision about legitimate join/reconnect history behavior.
+
+**Recommended resolution.** Apply the same recipient policy to hello, list and direct-data paths; omit historical member messages and member-only enumeration from nonmember responses. Preserve supported nonmember metadata retrieval. Coordinate wire-schema changes with NET and client cache changes with API.
+
+**Verification.** Proposed local serialization/handler fixture: construct a lobby and compare the permitted fields in member versus nonmember response objects. Ordinary public metadata refresh must remain available, while member-specific fields follow the documented view. No wire-level or live-service test was executed.
+
+### [BASE-SERVER-003] Addendum — admission contract and discovery counterevidence
+
+- **Disposition:** Retain Medium / High confidence / Correctness; refine scope under this existing admission-policy ID.
+- **Location/evidence:** `ServerHandlers.cxx:543–578` and `Shared/Lobby.cxx:101–103` still admit solely by capacity/duplicate membership. However, `Client/Impl/Matchmaking.cxx:244–254` already excludes `!IsJoinable()` from the normal filtered API list. The baseline recommendation to align visibility must not imply the normal client currently lists nonjoinable lobbies. Raw snapshot delivery remains broader (ADD-SERVER-002).
+- **Additional contract evidence:** SDK `1.152.11/galaxy/IMatchmaking.h:22–29,453–457` defines private lobbies as invite-only and friends-only lobbies as absent from lobby search. The server's join path does not inspect type or invitations; list publication and the client's list filter do not inspect type either. `InvitationMessage` carries an opaque connection string, and the server merely forwards it at 1026–1040; it creates no lobby invitation authorization record. A joinable, non-full private lobby therefore accepts an uninvited authenticated user holding its ID. This is further unenforced admission policy under this ID, not a second count for the same join gate. It does not assume GOG account/friend services exist on the LAN backend.
+- **Mechanism/impact:** Correct client filtering cannot prevent cached-ID joins; private/type settings likewise fail to protect the advertised participant boundary. Owner/membership checks on subsequent mutations remain effective.
+- **Options/recommendation:** Centralize authoritative admission and discovery policy, including joinability and supported type/invite rules. If open-LAN compatibility intentionally overrides SDK privacy, make the policy explicit rather than acknowledging a private setting as though enforced. Keep nonmember metadata refresh supported.
+- **Verification:** In addition to the original cached-ID nonjoinable case, try a never-invited peer against a joinable private lobby and test friends-only search results. Verify that a normal client already hides nonjoinable entries, then check the server gate independently. Proposed only.
+
+### [BASE-SERVER-008] Addendum — correlation collisions are listener-type scoped
+
+- **Disposition:** Retain Medium / High confidence / Correctness; clarify the exact collision and SDK gates.
+- **Location/evidence:** The two fan-outs remain at `ServerHandlers.cxx:222–242,284–293`; client consumption is `Client/Impl/Chat.cxx:47–79,108–165`. `Client/Impl/ListenerRegistrar.hxx:334–367` indexes request helpers by `T::GetListenerType()` before request ID. Equal IDs in unrelated listener interfaces do not by themselves consume one another or prove a wrong-vtable call.
+- **Mechanism/impact:** A peer's pending **room-retrieve** request can collide with the foreign room reply; its pending **history-retrieve** request can collide with another participant's live send notification. Specific-listener loss applies where those specific APIs exist (`HAS_ICHAT_ROOMLISTENERS`, and history also `HAS_ICHATROOMMESSAGERETRIEVELISTENER`). The wrong interlocutor ID and unsolicited global completion remain separate observable symptoms on applicable legacy chat APIs. Rich-presence replies check self ID before popping a listener (`Friends.cxx:402–439`), and invitations do not pop the recipient's request map (`689–697`), so copying a numeric field into those messages is not equivalent evidence.
+- **Options/recommendation:** Retain requester-only correlated replies plus zero-ID/distinct recipient notifications. Enforce both recipient and response-kind association rather than relying only on globally increasing numbers.
+- **Verification:** Use matching IDs within the same receiving listener type for both original collision cases; add a different-listener-type control that must remain untouched. Test supported early/global and modern/specific chat interfaces separately. Proposed only.
+
+### Retained baseline evidence — BASE-SERVER-001 / 004 / 005 / 006 / 007 / 019
+
+- **001:** Re-read vendor `enet_peer_disconnect_now`'s no-local-event contract (`peer.c:506–536`) and reset body (`389–443`). Rejection leaks on pre-sweep reuse as reported; `completed=true` followed by immediate reset is not proof of accepted post-rejection traffic.
+- **004:** SDK `INetworking.h:125–144` explicitly covers same-lobby communication and lobby-addressed routing. The sender ID is overwritten at 421, but membership remains unchecked. Direct user routing at 435–447 and owner-only server routing at 339–363 are counterevidence to a blanket relay-spoofing claim.
+- **005:** The rollback lambda remains unused. Actual client failure consumers update their cached property before checking success (`Matchmaking.cxx:469–502,586–617,668–698`). SDK setter declarations do not promise that a rejected operation applies. Existing-lobby rollback and nonexistent-lobby error handling both need deliberate responses; no owner-write bypass is inferred.
+- **006:** Fresh `get` cannot create the counter, and reloaded share metadata retains IDs; retain the original restart collision. ADD-SERVER-001 concerns the distinct public/control namespace collision, not another missing-counter count.
+- **007:** Repeated names are rejected by `create_shared` when already assigned another ID, and the server still sends the new nonzero ID. The repeated-name assertion is Debug-only. Complete write/close/metadata commit checks require UTIL/STORAGE coordination; a stream's pre-close `good()` is not a durability guarantee.
+- **019:** Both vendored broadcast implementations select transport-connected recipients only. Pre-auth peers receive live broadcasts, not the authenticated hello/list snapshots in ADD-SERVER-002. Sender authentication does not authorize recipients.
+
+### Additional fresh boundary notes (not new IDs)
+
+`SetUserData`, rich presence, invitations, lobby messages and user-directed P2P overwrite sender identity; chat creates a fresh message with authenticated sender/server time/ID. Client-provided lobby/room response objects are replaced or ignored, not adopted into the authoritative graphs. Lobby-member data sets `member_id=pd->id`, then the model rejects nonmembers. Unknown rich-presence actions can retain supplied `success`, but identity is still overwritten and clients do not apply an unknown action: this is a validation gap, not proven cross-user modification. File download denial/miss echoes caller data only to that caller; successful reads replace bytes/name. The container bounds paths, with throwing rejection already covered by BASE-NET-002; this review does not claim arbitrary filesystem read/write. Shared-file downloads are not documented as owner-only. Ordinary lobby leave/removal, migration, closure and chat membership retirement preserve the graphs; stale-generation failures remain BASE-SERVER-002.

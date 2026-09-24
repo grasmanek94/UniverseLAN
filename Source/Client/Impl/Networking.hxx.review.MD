@@ -12,3 +12,7 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. All 245 lines read; Window
 - The SDK scheduling distinction for ordinary/immediate sends is BASE-API-014 beside the implementation. Stub ping/NAT/connection information was identified but no unsupported-service exploit or arbitrary performance claim was inferred.
 
 No independent declaration defect was confirmed. The SystemTests P2P source search identifies polling cases and channel-255 coverage, but that search is not a full test-file review or a passing test result. All version-conditional declarations were read; exhaustive SDK ABI comparison/build validation is incomplete. No builds/tests executed.
+
+## Thorough follow-up addendum — 2026-09-24
+
+Full reread: lines 1-245 at production baseline `b30e8387`. The earlier open integration question about legacy interface/listener routing is now resolved by actual SDK 1.57.0, 1.124.0 and 1.134.10 evidence: ADD-API-004 documents dispatch to the wrong listener class. This is not a new declaration ABI defect. BASE-API-013/014 remain; normal callback auto-pop and owned post-pop packet copying remain correct design elements. Polling and listener modes are evaluated per receiving interface, with no forbidden same-interface consuming callback used as a trigger. SystemTests `Host/P2P.cxx` was read in full this pass and is polling-oriented. No execution or all-version ABI claim.

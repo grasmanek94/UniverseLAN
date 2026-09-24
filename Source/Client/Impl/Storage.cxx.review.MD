@@ -93,3 +93,33 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Entire current file read, 
 **Recommended resolution:** Preserve read status separately from data, abort failed uploads locally, and guarantee cleanup plus one failure completion on every worker exception. Require the server to acknowledge actual persistence, coordinating its separate ownership. Avoid manufacturing success merely from a nonzero ID.
 
 **Verification:** Deny source read sharing while allowing attribute queries and assert no share request is sent and one failure arrives. Inject a post-registration worker exception and check the request is retired. Keep an empty-file success control after BASE-STORAGE-015 is fixed.
+
+## Source-first re-review addendum — 2026-09-24
+
+Read `Storage.cxx:1-340` and `Storage.hxx:1-274` completely before comparing baseline findings. BASE-STORAGE-013/014/015 remain supported. All overloads in `SharedFileUtils` and the filesystem entries, server handlers, three sharing schemas, request tracking, network dispatch, and both explicit and implicit lifetime orders were traced. Source matches `b30e8387`; no execution was performed.
+
+- Worker compaction first moves out the completed worker, then moves the final element into an empty/moved-from slot. It does not replace a still-running jthread at that slot. The captured shared completion flag remains owned by the lambda even though `Worker::finished` is destroyed before `Worker::thread`.
+- Explicit reset stops the transport, joins Storage workers while `client`, registrar and `sfu` still exist, then destroys dependencies (`UniverseLAN.cxx:91-133`). Upload workers do not take the worker-list mutex. Do not infer a deadlock merely from `clear()` under that mutex. Implicit `InterfaceInstances` member destruction destroys registrar before Storage and still requires CORE reconciliation.
+- `FileUploaded` re-reads the local source when populating its cache (`Storage.cxx:319-328`), so a changed local source can differ from the upload packet. This alone is **not** counted as a confirmed supported shared-read defect: SDK `IStorage.h:213-265` requires a successful `DownloadSharedFile` first, which normally rewrites that cache from the server. A failed convenience-cache copy likewise does not by itself refute successful server-side sharing. Server non-persistence with a success ID remains BASE-SERVER-007.
+- Buffer reads return `gcount()` and do not compute `offset + size`; zero/null guards are in Shared. Invalid IDs/indices return empty results through checked lookups. Negative values converted by the application to these unsigned parameters do not independently establish a library overflow.
+
+### BASE-STORAGE-016 — ADDENDUM CORRECTION: silent submission/drop paths also omit completion
+
+- **Disposition:** Retained and expanded under the existing source/submission failure ID; no new STORAGE finding for another lost-terminal-result path.
+- **Severity:** Medium (unchanged)
+- **Confidence:** High
+- **Category:** Correctness / asynchronous error handling
+- **Location:** `Source/Client/Impl/Storage.cxx:171-196,215-221`; `Source/Shared/Networking/Networking.hxx:143-153`; `Networking.cxx:123-131`.
+- **Affected scope:** File-share submission/allocation/transport failure, notably successfully read shared files above the transport's packet limit; analogous pending download requests.
+
+**Evidence:** `SendAsync` can return false on packet allocation failure, but its callers discard the result. Its true result means serialization and queue admission, not successful sending. Later `DispatchQueuedPackets` destroys packets when native Send returns nonzero without notifying the pending request. The actual vendor contract is a 32-MiB maximum packet (`Source/Vendor/Enet++/include/enet6/enetpp.hxx:79`; `Source/Vendor/Enet-IPv6/include/enet6/enet.h:222`); `peer.c:114-117` rejects oversized packets even before fragmentation. Shared-file bytes plus protocol fields form one serialized packet (`FileShareMessage.hxx:9-16`).
+
+**Failure mechanism:** A valid nonempty 33-MiB local file can be read and serialized successfully, and its worker can set `finished=true`. Native dispatch rejects the oversized packet; the server never receives an upload to answer. The specific request remains registered and neither success nor failure reaches the game. Ordinary connection loss after queue admission has a similar missing result path. Checking only the worker's catch blocks or `SendAsync` boolean is therefore insufficient. No unsupported >UINT32_MAX file, malformed app input, or memory exhaustion is necessary for the 33-MiB case.
+
+**Impact:** A normal sharing operation can hang with retained listener/request state. This corrects the baseline's narrower emphasis on source-read errors and exceptions. BASE-NET-006 already documents transport-cap failure for growing snapshots; the shared-file use should be coordinated rather than independently recounted in NET.
+
+**Possible solutions:** Propagate send rejection/cancellation to an operation token; preflight the actual serialized limit and fail explicitly; or introduce bounded chunked file transfer with aggregate completion and a deadline.
+
+**Recommended resolution:** Guarantee exactly one terminal result across read, serialization, queue admission, native send, connection retirement and server persistence. Register synchronously (013), roll back failed admission, and use operation IDs rather than retaining the worker's raw listener. Bounded chunking is preferable if large saves are supported; an explicit limit failure is safer than silent loss.
+
+**Verification:** Proposed healthy-server cases just below/above the serialized 32-MiB threshold, a 33-MiB source, injected `SendAsync=false`, and disconnect after admission. Require successful bytes or one failure plus no pending request; worker completion alone is not the oracle. Keep source-read denial, empty-file, and cancellation cases. No transfer or test was run.

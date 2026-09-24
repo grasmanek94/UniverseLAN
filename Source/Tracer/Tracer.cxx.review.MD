@@ -43,3 +43,19 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Read completely: lines 1�
 **Alternatives / recommendation.** Use a unique session directory (PID plus high-resolution timestamp or an atomic suffix retry) and distinguish existence from filesystem error. Merely accepting the existing directory would risk truncating/interleaving `all.trace` from two processes.
 
 **Verification.** Launch two isolated processes against one tracing root within the same second. Both must initialize into distinct directories with intact independent logs; also verify genuine permission failures remain visible.
+
+## Follow-up addendum — 2026-09-24
+
+All 419 lines re-read with the other seven Tracer inputs.
+
+### [BASE-SERVER-010] Addendum — retained synchronization boundary
+
+Retain **Medium / High confidence / Concurrency**. The relevant interleaving is emission through one thread's syncbuf versus another thread's raw wrapped-file flush at 98/400/415. TLS logging and the counter in Stacker do not serialize that shared filebuf. A scope captures `enabled`, so merely toggling tracing during a live scope does not itself unbalance Enter/Exit; that is useful counterevidence. No concurrent initialization or configuration setter was established from the inspected call path, so ordinary non-atomic setup fields are not independently counted as races. Use one emission/flush discipline and retain the proposed multithreaded Windows verification.
+
+### [BASE-SERVER-011] Addendum — retained filesystem return contract
+
+Retain **Low / High confidence / Correctness**. `create_directories` returning false for an existing directory is distinct from failure; the second-resolution path still aliases same-root same-second launches. Do not fix this by silently accepting the directory and truncating its shared `all.trace`. Proposed two-process verification remains outstanding.
+
+### Resource limits
+
+Trace's implicitly nonthrowing destructor calls allocating string/format/stream operations; initialization and lazy per-thread file setup can also throw or fail. No allocation-failure experiment or repeated initialization was run, and no new production-fatal finding is inferred solely from those possibilities. Best-effort/no-throw exit logging is appropriate when hardening diagnostics. TLS depth/file ownership and synchronous consumption of constructor path strings were checked. Crash-report truncation is now precisely demonstrated in **ADD-SERVER-003**, rather than generalized to an assumed native UEF recursion.

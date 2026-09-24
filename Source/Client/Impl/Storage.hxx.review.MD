@@ -15,3 +15,7 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Entire file read, lines 1â
 ## Findings disposition
 
 No extra declaration-only defect counted. Full file-specific failure sections are BASE-STORAGE-013 through BASE-STORAGE-016 in `Storage.cxx.review.MD`. This does not certify implementation correctness or ABI compatibility across all version targets. Recommended validation includes deterministic worker cancellation, two-user ownership, empty files, Windows denied-sharing I/O, and normal plus automatic teardown paths.
+
+## Source-first re-review addendum â€” 2026-09-24
+
+Full `1-274` reread completed before baseline comparison. Worker member ordering, default move operations, joining, and captured flag ownership were followed through compaction and reset. No independent self-join/worker-mutex cycle is established. Shared-data getter preconditions require downloading first; that narrows claims based solely on the upload's convenience-cache contents. BASE-STORAGE-016 now includes ignored queue/send failure and the actual 32-MiB packet boundary, without adding a duplicate ID. Forward-slash portable UTF-8 paths are the valid-app scope; Windows encoding/identity/time issues are NET/UTIL dependencies.

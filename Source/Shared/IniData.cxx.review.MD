@@ -93,3 +93,46 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. All 980 lines read, includ
 **Alternatives / recommended resolution:** Require both a clear error code and full input consumption, after any explicitly supported whitespace normalization. Supporting hexadecimal IDs would require a deliberate grammar rather than accidental decimal-prefix parsing.
 
 **Verification:** Valid decimal extrema, overflow, blank key, negative key, `123junk`, `123 ` and `0x123`; reject every unsupported spelling without inserting an alias.
+
+## Second-read addendum — original findings preserved
+
+### [BASE-NET-008] Correction/evidence addendum: SaveFile success is weaker than a checked disk commit
+
+- **Status / accounting:** Retained with a remediation correction and concrete concurrent-save evidence; no new finding count.
+- **Severity:** Medium, unchanged.
+- **Confidence:** High, static caller/vendor trace.
+- **Category:** Correctness.
+- **Location:** `Source/Shared/IniData.cxx:843-860,885-912`; vendored `simpleini-4.22/SimpleIni.h:389-396,2568-2600,2749`.
+- **Affected scope:** Windows local persistence, including the achievement dirty-marker path and all four SaveFile calls.
+
+**Evidence:** SimpleIni FileWriter discards `fputs`' return. Its Windows wide-path SaveFile opens with `wb`, calls Save, discards `fclose`'s result, and returns the serialization result. Save returns SI_OK after emitting content without checking the FILE error state. Thus the baseline recommendation to check SaveFile is necessary for open/conversion errors but insufficient for write/flush/close failures. Actual User SetUserData and Stats Store callers call the same Shared persistence method (`User.cxx:361-381`, `Stats.cxx:127-142`).
+
+**Failure mechanism:** A file can open successfully yet fail while writing or at close; the caller can observe SI_OK despite missing/truncated bytes. Achievement dirtiness was already cleared. Independently, saves A and B can both load the old file; A snapshots a dirty achievement and clears it, B then sees it clean. If A commits and B later saves its older INI successfully, B removes A's update. Map-level locking does not serialize this load/snapshot/write transaction. This is an extension of the same persistence-acknowledgment defect, not a separate race count.
+
+**Impact:** A return-code-only fix can still lose acknowledged data. The original read-only/ACL failure scenario remains valid; the correction adds post-open failures and successful-but-stale writes, without claiming they were reproduced.
+
+**Possible solutions:** Serialize to memory then write through a checked Windows file/stream path; alternatively own the FILE lifecycle and check write/error, flush and close results. Use a serialized/revision-aware snapshot plus temporary-file replacement. If crash durability is promised, also define the required flush/durability contract.
+
+**Recommended resolution:** Make a checked commit operation the condition for acknowledging exactly the saved revisions. Keep unsaved or concurrently modified achievements dirty. Propagate storage failure to the SDK operation rather than announcing unconditional success.
+
+**Verification (proposed):** Inject post-open short-write/flush/close failures and force A-load/B-load/A-snapshot/B-snapshot/A-save/B-save ordering. Restart from the resulting file; verify no acknowledged update disappears and a retry without another setter persists it. Include Windows sharing-denied replacement and partial-file recovery.
+
+### [ADD-NET-002] Plain INI persistence changes valid user-data strings on reload
+
+- **Severity:** Medium.
+- **Confidence:** High, complete setter/save/parser/load trace.
+- **Category:** Correctness.
+- **Location:** `Source/Shared/IniData.cxx:692-709,898-912`, UserData load/save; `Client/Impl/User.cxx:361-381`.
+- **Affected scope:** Windows clients with SaveAchievementsAndStats enabled; legitimate local user-data values containing line breaks or significant edge whitespace.
+
+**Evidence:** Save constructs default `CSimpleIniA`, calls only SetUnicode, and passes unencoded keys/values to SetValue. The default constructor has multiline disabled (`SimpleIni.h:470-474`) and quote parsing defaults false (1382). Save writes ordinary values verbatim unless those options apply (2722-2740). FindEntry ends a value at CR/LF and trims edge whitespace (1729-1755). Shared reload inserts those parsed values back into the user-data map. The actual User setter accepts the strings and immediately persists them; `AchievementsAndStatsContainer.cxx:119-128` preserves their bytes in memory. SDK 1.152.11 `IUser.h:617-628` permits a property value up to 4095 bytes and does not impose a single-line/trimmed-value precondition.
+
+**Failure mechanism:** Call SetUserData with key `note` and value `first\nsecond=2` (where `\n` denotes an actual newline). The in-memory/network value remains one string. Saved UserData.ini contains `note = first` followed by `second=2`. A fresh ClientIniData loads `note` as `first` and adds a separate `second` entry. A value such as ` padded ` also loses spaces on reload. All inputs are non-null and well below documented size limits; no I/O failure, malformed network frame or hand-edited INI is needed.
+
+**Impact:** Successful saves fail the user-data round-trip invariant and may introduce unintended properties. This is local data corruption, not a claim of credential/config-file takeover; the demonstrated path writes the dedicated UserData.ini. Similar key/section-name encoding and case-folding constraints deserve a broader persistence-format audit, but are not separately counted here.
+
+**Possible solutions:** Introduce an explicitly tagged, reversible string encoding within INI, or store API data in a format with proper string escaping. Configuring matching multiline/quote parsing on both read and write can cover common values, but fixed multiline terminators, newline normalization and arbitrary keys need collision/compatibility analysis. Simply rejecting ordinary SDK-valid strings changes API behavior.
+
+**Recommended resolution:** Use an unambiguous versioned encoding for API-owned user-data strings while accepting legacy files through a documented migration path. Preserve human-authored configuration semantics separately from byte-preserving data storage.
+
+**Verification (proposed):** Through the public setter, persist and restart with LF, CRLF, leading/trailing spaces, `=`, section-looking text, literal `END_OF_TEXT`, Unicode and near-limit values. Compare exact value bytes, keys and entry counts before/after reload. Test old files and repeat saves; no round-trip experiment was executed in this review.

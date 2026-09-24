@@ -42,3 +42,33 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Read completely: lines 1�
 **Recommended resolution:** Include immutable owner identity and listener type in the proxy control record and filter cancellation by owner. Session teardown must only retire its own records.
 
 **Verification:** Two independently recording fake registrars and one target; cancel one domain and complete the other, checking allocation lifetime and callback delivery. Proposed only; counted once with the implementation/registrar reports.
+
+## Follow-up review addendum — 2026-09-24
+
+Reread the complete 68-line header and 92-line implementation.
+
+### BASE-INTERCEPT-002 — Addendum: distinguish proven cancellation overlap from hypothetical nested dispatch
+
+- **Severity:** High, retained for the recorded concurrent cancellation sequence
+- **Confidence:** High for that sequence; SDK behavior after escaping callbacks is unverified
+- **Category:** Concurrency
+- **Location:** `Source/InterceptionLogger/Impl/Listeners/ProxifySingleShotListener.hxx:56–64`; `.cxx:18–37,55–91`; `Impl/ListenerRegistrar.cxx:43–48`.
+- **Affected scope:** Non-null operation-specific proxies, with the original target kept alive.
+
+**Evidence / failure mechanism**
+
+The original cancellation interleaving remains valid: cancellation can extract the raw proxy before making any native call, while a currently executing target returns and its epilogue deletes that proxy. Later cancellation deletes it again. This needs no unsupported reentrant ProcessData, target destruction, or concurrent invocation of the same native callback. The protection set does cover an ordinary same-thread self-unregister that returns normally.
+
+The set is not a nesting count, and a throw from `target->func` bypasses protection-disable, map-pop and deletion. A self-unregister followed by such a throw can leave a protected allocation with its mapping already removed. However, the inspected SDK contract (`1.152.11/galaxy/GalaxyApi.h:99–106`) makes specific registrations one-event registrations; it does not establish legal nested delivery of the *same proxy* or recovery semantics for an exception escaping a callback. Reusing the original target for a new request creates a different proxy and is not proof of same-proxy recursion.
+
+**Impact**
+
+The confirmed race remains a double-delete/use-after-free. Escaping-throw cleanup leaks and recursive same-proxy deletion are recorded as conditional validation concerns, not new confirmed crashes or extra IDs.
+
+**Possible solutions / recommended resolution**
+
+Use one retirement protocol with callback/cancellation pins and scope-bound cleanup. Record cancellation and dispatch depth as state rather than treating membership in an independently locked set as ownership. Establish the SDK's exception policy before deciding whether to propagate or contain application exceptions.
+
+**Verification**
+
+Proposed only: retain the barrier-controlled race test; add normal self-unregister, a second request using the same target, SDK-approved nested pumping, and throwing-target cases with and without self-unregister. Check map entries, protection entries and exact destruction counts, and distinguish native exception containment from a fake dispatcher's chosen behavior. No build, test, sanitizer or callback execution ran. BASE-INTERCEPT-003's module/address clarification is in the registrar sidecar.

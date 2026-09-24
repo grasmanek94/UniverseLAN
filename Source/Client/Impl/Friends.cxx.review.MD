@@ -81,3 +81,57 @@ Reviewed persona availability and refresh, pointer/copy getters, online-peer fri
 **Alternatives / recommended resolution.** Request persona data for a snapshot of enumerated friends and existing lobby members, outside collection locks, with deduplication. Alternatively route the already received full hello data through a common persona-cache update/notification function. Prefer shared update logic so availability and notifications cannot diverge; retain feature guards for older SDKs.
 
 **Verification.** Connect two clients, request only the friend list, and require eventual persona availability plus a persona notification without a manual information request. Repeat for a new entrant to a populated lobby and for a later member join. Not executed.
+
+## Thorough follow-up addendum — 2026-09-24
+
+All 699 implementation lines and all 644 header lines were reread before comparison with the baseline reports. Production input is still `b30e83872c0006e8240c8b4f565da5351bf10080`. The original sections above are preserved. This pass is static; all verification below is proposed, not executed.
+
+### [ADD-API-001] NEW — Deleting a presence key returned by the API reads it after erasing its storage
+
+- **Severity:** Informational (conditional compatibility finding; potential High memory-safety impact)
+- **Confidence:** Medium for SDK-permitted aliasing; High for the source mechanism, reproduced locally with ASan
+- **Category:** Memory Safety
+- **Location:** `Source/Client/Impl/Friends.cxx:363-380,558-570`, `DeleteRichPresence` / `GetRichPresenceKeyByIndex`.
+- **Affected scope:** Same-thread, signed-in presence enumeration and deletion; the direct key-getter reproducer is available from SDK 1.148.2 (`galaxy_sdk_features.cmake:208`). Windows x86/x64; no concurrency or invalid caller-owned allocation is required.
+
+**Evidence.** `GetRichPresenceKeyByIndex` returns `ref->first.c_str()` from the local presence map. `DeleteRichPresence` first calls `stats.EraseRichPresence(key)` at line 372 and only afterward constructs `RichPresenceChangeMessage{..., ACTION_DELETE, key}` at line 380. The Shared_NoVer eraser actually destroys the map node (`AchievementsAndStatsContainer.cxx:160-164`). Its `const std::string&` parameter receives a temporary copy of the incoming C string, but that copy is confined to the erase call's full expression; it does not repair the outer `const char* key`. The wire constructor then copies from that original pointer (`Shared/Networking/Messages/RichPresenceChangeMessage.hxx:39-40`). SDK `1.152.11/galaxy/IFriends.h:926-936,1005-1016` exposes both operations and only marks the pointer getter as non-thread-safe, not forbidden as input to a subsequent same-thread operation.
+
+**Failure mechanism.** With just the valid `status` property present and local presence retrieved, execute `DeleteRichPresence(GetRichPresenceKeyByIndex(0))`. The pointer is valid at the call boundary. The callee erases the exact node that owns it, then reads through it during implicit `std::string` construction for the network message. Even a short, small-string-optimized key is inside the freed map node. Request-listener bookkeeping between erasure and serialization can reuse the allocation. The application neither retains the pointer after deletion nor frees any storage itself.
+
+**Impact.** Heap use-after-free while constructing an otherwise valid request: crash, corrupted outgoing key, or local deletion that is not propagated correctly. This is distinct from BASE-API-002's concurrent Copy-getter race: adding a lock around this entire operation does not make the already erased pointer valid.
+
+**Alternatives.** Copy the key at API entry; alternatively construct an owning outgoing request before changing the cache and use that request's owned key for both operations. Documenting a new caller-side no-alias rule would change compatibility and leaves other mutation-before-serialization paths fragile.
+
+**Recommended fix.** Snapshot the normalized key before erasure, then use the snapshot for both `EraseRichPresence` and wire construction. Preserve missing-key no-op semantics and one completion. Audit other setters that mutate API-owned string storage before serializing borrowed arguments, without assuming every pointer getter already has this exact failure.
+
+**Verification.** The coordinator's Windows x64 ASan helper reproduced the exact real-container erasure followed by real-message string construction: `heap-use-after-free`, with the free at `AchievementsAndStatsContainer.cxx:162` and the read during `std::string` construction. This is a mechanism reproduction, not a full Friends API/native-SDK test. The SDK header does not explicitly settle borrowed-pointer lifetime across a mutating API call, so the original supported-input assertion is qualified and this ID is excluded from confirmed totals. An owned-key control and a native/version-specific contract check remain proposed. See `.ai/review-addendum/VERIFICATION.MD`.
+
+### [ADD-API-002] NEW — Default local rich-presence retrieval publishes the invalid input sentinel as a user identity
+
+- **Severity:** Informational (conditional callback-contract finding; potential Medium impact)
+- **Confidence:** Medium; emitted zero is established, but native zero-means-self callback convention is unresolved
+- **Category:** API/ABI
+- **Location:** `Source/Client/Impl/Friends.cxx:444-457`; default declaration `Friends.hxx:479-483`.
+- **Affected scope:** `RequestRichPresence()` using its SDK-default `GalaxyID()` argument; global presence listeners from 1.74.0, and operation-specific retrieval listeners from 1.126.0.
+
+**Evidence.** SDK `1.152.11/galaxy/IFriends.h:947-956` supplies the default `GalaxyID()`. Its presence-update and retrieval-success callbacks identify the user (`433-462`). `GalaxyID.h:63-68,143-145` explicitly defines that default object as invalid. `ClientIniData::IsSelfUserID` maps zero to the configured local user (`Shared/IniData.cxx:921-926`), and `UserImpl::GetGalaxyUserData` resolves it to local storage (`User.cxx:578-583`). Nevertheless, both deferred notifications pass the original zero `userID`, not the resolved local ID. Explicit-local-ID calls and server-originated remote updates pass concrete IDs.
+
+**Failure mechanism.** A signed-in caller invokes the defaulted API. The operation succeeds locally, then `OnRichPresenceRetrieveSuccess` and `OnRichPresenceUpdated` report an invalid ID. A globally registered listener keyed by the actual `User()->GetGalaxyID()` cannot associate the update with that user; using the invalid result as a remote target is also not equivalent to the original local-selection argument.
+
+**Impact.** Default and explicit-self requests produce different identity domains for the same cached data, causing missed self updates or a bogus user entry in application caches. This is not a complaint about an arbitrary invalid ID supplied to an API lacking a default.
+
+**Alternatives.** Resolve the local selector before notification; or retain both requested selector and resolved identity internally while publishing the latter. Changing general GalaxyID equality or treating every zero callback as self throughout an application would conceal the boundary error.
+
+**Recommended fix.** Resolve the self branch to the configured API ID before queuing both callbacks. Keep the same storage lookup semantics for defaulted getters. Do not automatically extend zero-as-self to `GetFriendPersonaState`, `IsUserInTheSameGame`, or other methods whose SDK declarations require a concrete ID.
+
+**Verification.** Register global and operation listeners, compare a default request with an explicit local-ID request after sign-in, and require valid, equal callback IDs plus equal presence content. Verify remote requests retain the remote ID. Cover the pre-1.126 global-only branch separately. A native-SDK differential check would additionally pin exact legacy callback conventions. Not executed.
+
+**Reconciled qualification.** The callback wording alone does not exclude a zero-means-self convention. The preceding mechanism and consequences are conditional until stronger SDK evidence establishes normalization. This is retained for investigation, not counted as a confirmed compatibility defect.
+
+### Existing BASE findings — retained evidence and qualified additions
+
+- **BASE-API-002 retained (High):** the map-level lock in `User.cxx:585-591` does not protect nickname/availability fields after lookup. `AchievementsAndStatsContainer::operator=` locks presence while replacing it (`33-52`), so indexed presence copies holding that same lock are useful counterevidence, not another race. `IsUserInformationAvailable` reads the plain availability flag concurrently with `RequestUserInformationProcessed`; include it in the existing per-user synchronization fix, not a new ID.
+- **BASE-API-003 retained (Medium):** only coherent LAN-peer friendship is requested; persistent GOG friendship/invitation capability is not inferred.
+- **BASE-API-004 retained (Medium):** null deletion is explicitly permitted, unlike arbitrary null arguments elsewhere. Snapshotting the key for ADD-API-001 is required if the null-as-delete fix routes borrowed keys through deletion.
+- **BASE-API-005 retained (Medium):** hello snapshots update User data, not Friends availability/persona notifications. Additionally, `RequestFriendList` has no initial-peer-snapshot completion barrier: Server acceptance is sent before existing-online-peer messages (`ServerHandlers.cxx:93-109`), while list success can be queued immediately. A request from auth success may complete before those peer events have arrived. Include that startup ordering in validation of the existing retrieval/publication path rather than count another success-without-retrieval ID. A stable multi-call friend-list snapshot under arbitrary concurrent peer churn is not explicitly promised by the inspected SDK and is not reported as a separate defect.
+- **Persona refresh qualification:** subsequent successful Friends responses can change `nickname` but emit only `PERSONA_CHANGE_NONE` because the NAME flag is conditional on first retrieval (`76-99`). Server reconnection/hello processing can also update that name through User first. Include actual-name-change/unchanged refresh cases when consolidating BASE-API-005's persona publication logic; no extra accounting for the same incomplete publication path.

@@ -26,3 +26,11 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Read completely: lines 1�
 **Alternatives / recommendation.** Build and quote the Windows command line as UTF-16 from native paths, with explicit UTF-8-to-wide conversion for textual arguments; alternatively make every narrow path producer consistently UTF-8. A complete Windows argument encoder should accompany that cleanup.
 
 **Verification.** On Windows with a non-UTF-8 active code page, run from an isolated path and TEMP containing accented characters and spaces. Confirm the child receives the exact control path and finds its release file; retain ASCII and UTF-8-code-page cases.
+
+## Follow-up addendum — 2026-09-24
+
+### [BASE-SERVER-015] Addendum — encoding and caller constraints retained
+
+Retain **Low / High confidence / Portability**, conditional on native narrow paths not being UTF-8. The current runner supplies `.string()` paths and reparses the assembled command through `u8path`, while CreateProcessW's separate native executable argument cannot repair the control-directory text. A complete fix must define both sides of the argument encoding (including the child's narrow `argv` to `u8path` conversion), not just change the API name to a W variant.
+
+Fresh resource trace confirms normal CreateProcess success/failure closes the log and thread handles and `stopChild` closes stored process handles. The local log HANDLE is not RAII-protected if command conversion/allocation throws after creation; runner process exit bounds that failure-path leak, so it is not a separate new ID. The simplistic backslash quoting is not generalized into a current-path failure: generated tokens and the fixed final `control` path component do not establish a trailing-backslash/quote trigger. POSIX branches were read only, with no Linux execution. BASE-SERVER-012 remains the caller's final-drain defect.

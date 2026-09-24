@@ -76,3 +76,47 @@ Apply the same nonthrowing modern SDK error policy to both runtimes. A client-on
 **Verification**
 
 Force game-server host-lookup failure using synthetic configuration; require no implementation exception, a runtime SDK error on the calling thread, and safe ShutdownGameServer after partial initialization. Not executed.
+
+## Full-reread addendum — 2026-09-24
+
+### [ADD-CORE-003] Client and game-server runtimes reuse one configured identity and the relay rejects the second
+
+- **Severity:** Medium
+- **Confidence:** High
+- **Category:** Correctness / runtime isolation
+- **Exact location:** `Source/Client/UniverseGameServer.cxx:25–28,53`; shared construction `Source/Client/UniverseLAN.cxx:18–25,38–49`; identity submission `Source/Client/ClientNetworkHandlers.cxx:60–71`.
+- **Affected scope:** SDK builds exposing Game Server (feature threshold 1.120.0), with the ordinary client and game-server initialized against the same UniverseLAN relay and unchanged configuration in one process. Also relevant to separate same-machine processes sharing an unchanged identity, but that broader configuration case is not the counted trigger.
+
+**Evidence**
+
+The client singleton and embedded game-server `InterfaceInstances` each construct the same parameterless `ClientIniData`. No runtime role, independent identity, or per-graph configuration root is supplied. `ClientIniData` reads the same Client/User settings (`Source/Shared/IniData.cxx:420–478`); default identity is the local adapter MAC hash and offset zero, while a fixed `@Custom` value is an equally deterministic example. `GetApiGalaxyID` always converts the configured real ID into a user ID (`777–795`). Both connection handlers submit that ID in their challenge reply, and hello uses it again (`ClientNetworkHandlers.cxx:85–89`). `GameServerUser()->SignInAnonymous` just forwards to the common SignIn (`Impl/User.cxx:135–144`); it does not assign a separate identity.
+
+The relay's challenge handler inserts the ID into `user_data` and accepts only a new insertion (`Source/Server/ServerHandlers.cxx:84–94`). An already occupied ID reaches the rejection/disconnect at `125–129`. `peer::Data::link` additionally enforces unique ID mapping (`Source/Server/Peer.cxx:71–88`). This is concrete application-level rejection, not an assumed ENet address conflict.
+
+SDK 1.152.11 `GalaxyGameServerApi.h:43–56` describes a separate anonymously authenticated Game Server object. `InitOptions.h:37` explicitly discusses an allocator shared by both Peer and Game Server, supporting their coexistence rather than treating a second graph as misuse.
+
+**Failure mechanism / real trigger**
+
+Using one unchanged, valid local configuration (for example `GalaxyIDType=@Custom`, one nonzero ID and zero offset), initialize the ordinary client and pump until relay acceptance. Initialize the game-server runtime, request anonymous sign-in, and pump both entry points. The second runtime answers its challenge with the first runtime's ID. The relay's insertion fails, so the second cannot become accepted/logged on; anonymous SignIn cannot change the ID. Reversing initialization order reverses which runtime can acquire that identity. No concurrent Init calls, malformed packet, or application-created duplicate listener is required.
+
+**Impact**
+
+A game using both public runtimes cannot establish both relay sessions with the normal shared configuration. Dedicated hosting combined with a local player can remain in a login/reconnect loop. This is not proof of identity spoofing or a security bypass. The documented requirement for unique IDs across separately configured players does not provide independent identity selection for these two graphs reading the same configuration.
+
+**Possible solutions**
+
+1. Make runtime role part of identity/configuration construction and allocate a collision-resistant separate game-server identity.
+2. Support explicit per-runtime identity overrides or a server-assigned anonymous identity, preserving the client's configured identity.
+3. If coexistence is deliberately unsupported, detect and report it explicitly rather than starting an inevitably rejected second connection; this would remain a documented SDK compatibility limit.
+
+**Recommended resolution**
+
+Propagate an explicit role into graph/configuration initialization and isolate the game-server session identity. Define persistence, concurrent-server-instance and collision behavior; an unchecked numeric increment is insufficient. Preserve relay uniqueness checks. Merely passing `true` to fix BASE-CORE-004 changes packet-envelope role at `UniverseLAN.cxx:56–58`; it does **not** change `ClientIniData` or the handshake identity, so both fixes are necessary.
+
+**Verification — proposed, not executed**
+
+Use synthetic configuration, disabled tracing to isolate setup, and a matching-version local relay. In one host process initialize client plus Game Server in each order, pump both, and assert two distinct accepted identities, both login completions, and independent shutdown. Create a server lobby and connect the local client as an integration follow-up. Include game-server-only and two explicitly distinct-configured-process controls. Exercise 1.134.10 and 1.152.11 to demonstrate independence from the old/new networking-role split. No actual connection or credentials were used.
+
+**Baseline comparison**
+
+The baseline left configuration identity/coexistence as an open architecture question. Source tracing now reaches a definite duplicate-ID rejection. BASE-CORE-004 instead concerns the sender identity of **packets after a successful session**, so this pre-acceptance failure is a distinct addition.

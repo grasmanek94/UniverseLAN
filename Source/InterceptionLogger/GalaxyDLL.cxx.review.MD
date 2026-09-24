@@ -42,3 +42,37 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Read completely: lines 1�
 **Recommended resolution:** Make initialization transactional with documented partial-success states, retain the failure for `GetError`, and make required cleanup safe after every failed stage. Use RAII for console capture so error exits restore it.
 
 **Verification:** Substitute missing DLL, missing export and failing-config cases; assert that callers observe failure and can follow SDK-mandated cleanup without a second exception or null dereference. No fault injection was run.
+
+## Follow-up review addendum — 2026-09-24
+
+Reread all 190 lines, all InterfaceInstances construction/reset code and both game-server shutdown routes.
+
+### BASE-INTERCEPT-001 — Addendum: retain the contract rating and track the actual Windows module owner
+
+- **Severity:** Medium, retained; native lifetime-dependent High impact remains conditional
+- **Confidence:** High for teardown ordering, unexecuted for native object destruction
+- **Category:** API/ABI
+- **Location:** `Source/InterceptionLogger/GalaxyDLL.cxx:72–86`; `UniverseGameServer.cxx:39–54`; loader context `Source/Shared_NoVer/SharedLibUtils.cxx:84–86,90–139`.
+- **Affected scope:** Explicit client/server shutdown and the additional, unverified process/module-teardown path.
+
+**Evidence / failure mechanism**
+
+Real shutdown still precedes observer Unregister calls through the cached registrar. The SDK's documented unregister-before-shutdown rule is unchanged. The actual Windows loader constructs a name from the optional prefix plus `RealGalaxy[64].dll`, inventories that image, calls LoadLibraryA once for its lazy singleton, and releases that HMODULE only in SharedLibUtils's destructor. Neither ordinary nor extended SDK Shutdown in this owner directly calls FreeLibrary.
+
+`Shared_NoVer` is statically linked through common-shared into each interceptor DLL (`Source/Shared_NoVer/CMakeLists.txt:5`; `Source/Shared/CMakeLists.txt:19–23`; `Source/DLLs/CMakeLists.txt:153–163`). Thus a "shared" library target name is not proof of a separate shared helper DLL or a process-wide loader singleton. Client and server within one interceptor do use the same native load. Separate copies can still load the same Windows native module, depending on paths/module resolution; their state maps are not thereby shared.
+
+**Impact**
+
+The explicit lifecycle contract violation is confirmed at Medium. Retaining an HMODULE does not establish that native Shutdown preserves registrar objects, and releasing the load handle does not by itself prove where an SDK facade's vtable lives. The native implementation, remaining Windows module references, and any vendor-internal peer module are not known from these sources. Static destruction ordering warrants validation but supplies no additional confirmed unloaded-DLL crash here.
+
+**Possible solutions / recommended resolution**
+
+Detach owned observers/proxies while their documented SDK owner is active, then invoke native shutdown and clear forwarding objects. Tie the real module reference to the complete lifetime of calls that can enter it. Diagnose the actual module containing the registrar/vtable before attributing a native crash to FreeLibrary.
+
+**Verification**
+
+Proposed only: recording native registrar asserts no calls after shutdown and zero owned registrations at shutdown entry. On an authorized native Windows lifecycle probe, identify the module containing the registrar's virtual targets and record SDK object teardown, LoadLibrary/FreeLibrary references and interceptor unload order. Test client/server shutdown independently and in both orders. No DLL was loaded, unloaded or inspected as a running process. This retains the already reconciled Medium rating and adds no finding.
+
+### BASE-INTERCEPT-008 — Addendum cross-reference
+
+The full non-throwing partial-init/error-clobber extension is appended under this same BASE ID in `UniverseLANInterceptor.cxx.review.MD`. It follows real Init through subsequent observer registrations, which reset the native error before public GetError. The existing swallowed-exception/empty-std::function mechanism remains confirmed and Medium. Missing exports throw from SharedLibUtils rather than returning null function pointers; calling an empty stored std::function is `std::bad_function_call`, not a demonstrated jump through a null native address.

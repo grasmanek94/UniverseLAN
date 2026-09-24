@@ -14,3 +14,7 @@ Baseline: `b30e83872c0006e8240c8b4f565da5351bf10080`. Entire file read, lines 1â
 ## Findings disposition
 
 No additional declaration-only defect counted. This scoped observation does not certify all SDK ABI variants or initialization-failure behavior. Verification priorities are copy-buffer boundaries, configuration lifetime, feature-matrix signatures, and a coherent auth/ownership-query lifecycle. Existing SystemTests cover the healthy configuration/copy path only.
+
+## Source-first re-review addendum â€” 2026-09-24
+
+Full `1-94` reread completed before baseline comparison. Language (1.88.0), language-code (1.151.0) and ownership (1.152.2) gates were checked in the feature map. SDK `1.152.11/galaxy/IApps.h:61-66` explicitly excepts ownership from post-Init-error availability, so the copied broad header remark is not an independent all-method availability proof. No new header finding; the full coverage and dependency disposition are in the STORAGE addendum report.
